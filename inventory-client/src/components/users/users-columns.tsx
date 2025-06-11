@@ -1,0 +1,249 @@
+"use client"
+
+import { ColumnDef } from "@tanstack/react-table"
+import { MoreHorizontal, ArrowUpDown, Shield, Eye, Trash2, Edit } from "lucide-react"
+import { format } from "date-fns"
+import { zhTW } from "date-fns/locale"
+
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+
+// 使用統一的類型定義，確保與 API 契約同步
+import { User as ApiUser, UserActions as ApiUserActions } from '@/types/user';
+
+// 重新導出類型以保持向後兼容
+export type User = ApiUser;
+export type UserActions = ApiUserActions;
+
+/**
+ * 建立用戶表格欄位定義
+ * 
+ * 根據 shadcn/ui Data Table 最佳實踐設計的欄位配置，
+ * 包含完整的用戶資訊展示和操作功能
+ * 
+ * 欄位說明：
+ * 1. 頭像 - 顯示用戶姓名首字母
+ * 2. 姓名 - 可排序的用戶姓名
+ * 3. 帳號 - 用戶登入帳號
+ * 4. 角色 - 帶圖示的角色徽章
+ * 5. 建立時間 - 格式化的建立日期
+ * 6. 更新時間 - 格式化的更新日期
+ * 7. 操作 - 下拉選單包含查看、編輯、刪除（僅管理員可見）
+ * 
+ * @param actions - 操作處理器（包含當前用戶資訊用於權限判斷）
+ * @returns 欄位定義陣列
+ */
+export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[] => [
+  {
+    id: "avatar",
+    header: "",
+    cell: ({ row }) => {
+      const user = row.original
+      const name = user.name || "未知用戶"
+      const initials = name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+
+      return (
+        <Avatar className="h-8 w-8">
+          <AvatarFallback className="text-xs font-medium">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+      )
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-medium"
+        >
+          姓名
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="font-medium">
+          {row.getValue("name") || "未知用戶"}
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: "username",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-medium"
+        >
+          帳號
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="font-mono text-sm">
+          {row.getValue("username") || "未知帳號"}
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: "role",
+    header: "角色",
+    cell: ({ row }) => {
+      const isAdmin = row.original.is_admin || false
+      
+      return (
+        <Badge 
+          variant={isAdmin ? "default" : "secondary"}
+          className="flex w-fit items-center gap-1"
+        >
+          {isAdmin ? (
+            <Shield className="h-3 w-3" />
+          ) : (
+            <Eye className="h-3 w-3" />
+          )}
+          {row.original.role_display || (isAdmin ? "管理員" : "檢視者")}
+        </Badge>
+      )
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: "created_at",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-medium"
+        >
+          建立時間
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const dateString = row.getValue("created_at") as string
+      if (!dateString) {
+        return <div className="text-sm text-muted-foreground">未知</div>
+      }
+      
+      const date = new Date(dateString)
+      return (
+        <div className="text-sm text-muted-foreground">
+          {format(date, "yyyy/MM/dd HH:mm", { locale: zhTW })}
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: "updated_at",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-medium"
+        >
+          更新時間
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const dateString = row.getValue("updated_at") as string
+      if (!dateString) {
+        return <div className="text-sm text-muted-foreground">未知</div>
+      }
+      
+      const date = new Date(dateString)
+      return (
+        <div className="text-sm text-muted-foreground">
+          {format(date, "yyyy/MM/dd HH:mm", { locale: zhTW })}
+        </div>
+      )
+    },
+  },
+  {
+    id: "actions",
+    header: "操作",
+    cell: ({ row }) => {
+      const user = row.original
+      
+      // 只有管理員才能看到操作選單
+      if (!actions.currentUser?.is_admin) {
+        return null
+      }
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">開啟選單</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>用戶操作</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            
+            {actions.onView && (
+              <DropdownMenuItem onClick={() => actions.onView!(user)}>
+                <Eye className="mr-2 h-4 w-4" />
+                查看詳情
+              </DropdownMenuItem>
+            )}
+            
+            {actions.onEdit && (
+              <DropdownMenuItem onClick={() => actions.onEdit!(user)}>
+                <Edit className="mr-2 h-4 w-4" />
+                編輯用戶
+              </DropdownMenuItem>
+            )}
+            
+            <DropdownMenuSeparator />
+            
+            {actions.onDelete && (
+              <DropdownMenuItem 
+                onClick={() => actions.onDelete!(user)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                刪除用戶
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
+] 

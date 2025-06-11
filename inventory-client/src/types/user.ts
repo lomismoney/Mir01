@@ -1,0 +1,60 @@
+/**
+ * 用戶類型定義
+ * 
+ * 統一的用戶類型系統，從 OpenAPI 契約中導出權威類型
+ * 單一事實來源（Single Source of Truth）
+ */
+
+import { paths } from './api';
+
+/**
+ * 用戶實體類型
+ * 
+ * 從 API 響應中提取的用戶資料結構
+ * 確保前後端類型完全同步
+ */
+export type User = NonNullable<
+  NonNullable<
+    paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
+  >[number]
+>;
+
+/**
+ * 登入響應中的用戶類型
+ * 
+ * 從登入 API 響應中提取的用戶類型
+ * 用於認證上下文和登入流程
+ */
+export type AuthUser = NonNullable<
+  paths['/api/user']['get']['responses'][200]['content']['application/json']['data']
+>;
+
+/**
+ * 用戶操作處理器介面
+ * 
+ * 定義表格中各種操作的回調函數
+ * 保持原有的操作介面但使用統一的User類型
+ */
+export interface UserActions {
+  /** 查看用戶詳情 */
+  onView?: (user: User) => void
+  /** 編輯用戶 */
+  onEdit?: (user: User) => void
+  /** 刪除用戶 */
+  onDelete?: (user: User) => void
+  /** 當前用戶（用於權限判斷） */
+  currentUser?: {
+    is_admin?: boolean
+    id?: number
+  }
+}
+
+/**
+ * 登入請求類型
+ * 
+ * 用於登入表單和認證流程
+ */
+export type LoginRequest = {
+  username: string;
+  password: string;
+}; 

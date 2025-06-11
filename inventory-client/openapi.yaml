@@ -1,0 +1,1443 @@
+openapi: 3.0.3
+info:
+  title: 'Laravel API Documentation'
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost'
+tags:
+  -
+    name: Authentication
+    description: ''
+  -
+    name: Endpoints
+    description: ''
+  -
+    name: 商品屬性管理
+    description: ''
+  -
+    name: 商品管理
+    description: ''
+  -
+    name: 屬性值管理
+    description: ''
+  -
+    name: 用戶管理
+    description: ''
+  -
+    name: 規格庫管理
+    description: ''
+  -
+    name: 認證管理
+    description: ''
+paths:
+  /api/user:
+    get:
+      summary: ''
+      operationId: getApiUser
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 14
+                    name: 'Lonny Ankunding'
+                    username: eloisa.harber
+                    role: viewer
+                    role_display: 檢視者
+                    is_admin: false
+                    created_at: '2025-06-11T05:51:06.000000Z'
+                    updated_at: '2025-06-11T05:51:06.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 14
+                      name:
+                        type: string
+                        example: 'Lonny Ankunding'
+                      username:
+                        type: string
+                        example: eloisa.harber
+                      role:
+                        type: string
+                        example: viewer
+                      role_display:
+                        type: string
+                        example: 檢視者
+                      is_admin:
+                        type: boolean
+                        example: false
+                      created_at:
+                        type: string
+                        example: '2025-06-11T05:51:06.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-11T05:51:06.000000Z'
+      tags:
+        - Authentication
+  /api/purchases:
+    post:
+      summary: 'Store a newly created resource in storage.'
+      operationId: storeANewlyCreatedResourceInStorage
+      description: ''
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  id: 1
+                  order_number: PO-20240101-001
+                  total_amount: 150.0
+                  status: pending
+                  purchased_at: '2024-01-01T00:00:00+08:00'
+                  items: []
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  order_number:
+                    type: string
+                    example: PO-20240101-001
+                  total_amount:
+                    type: number
+                    example: 150.0
+                  status:
+                    type: string
+                    example: pending
+                  purchased_at:
+                    type: string
+                    example: '2024-01-01T00:00:00+08:00'
+                  items:
+                    type: array
+                    example: []
+      tags:
+        - Endpoints
+      security: []
+  /api/categories:
+    get:
+      summary: 顯示分類列表
+      operationId: ''
+      description: "優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、\n高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。\n\n範例：\n- json[''] 或 json[null] 就是所有頂層分類\n- json['1'] 就是 id 為 1 的分類下的所有子分類"
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 儲存新建立的分類資源
+      operationId: ''
+      description: "使用 StoreCategoryRequest 進行數據驗證，確保：\n- 分類名稱必填且不超過255字符\n- 父分類ID必須存在於資料表中\n- 描述為可選欄位"
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: vmqeopfuudtdsufvyvddq
+                  nullable: false
+                description:
+                  type: string
+                  description: ''
+                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
+                  nullable: true
+                parent_id:
+                  type: integer
+                  description: 'The <code>id</code> of an existing record in the categories table.'
+                  example: 17
+                  nullable: true
+              required:
+                - name
+      security: []
+  '/api/categories/{id}':
+    get:
+      summary: 顯示指定的分類資源
+      operationId: ''
+      description: '返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出'
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 更新指定的分類資源
+      operationId: ''
+      description: "使用 UpdateCategoryRequest 進行數據驗證，包含：\n- 部分更新支援（sometimes 規則）\n- 防止自我循環的業務邏輯保護\n- 確保父分類存在性檢查"
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: vmqeopfuudtdsufvyvddq
+                  nullable: false
+                description:
+                  type: string
+                  description: ''
+                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
+                  nullable: true
+                parent_id:
+                  type: integer
+                  description: 'The <code>id</code> of an existing record in the categories table.'
+                  example: 17
+                  nullable: true
+              required:
+                - name
+      security: []
+    delete:
+      summary: 刪除指定的分類資源
+      operationId: ''
+      description: "執行軟刪除操作，根據資料表外鍵約束設定：\n- 當分類被刪除時，其子分類也會被級聯刪除\n- 關聯的商品 category_id 會被設為 null"
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the category.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/attributes:
+    get:
+      summary: 獲取所有屬性列表
+      operationId: ''
+      description: "返回系統中所有的商品屬性，包含其相關的屬性值\n使用 Eager Loading 避免 N+1 查詢問題"
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: App\Http\Resources\Api\V1\AttributeResource
+      tags:
+        - 商品屬性管理
+    post:
+      summary: 創建新屬性
+      operationId: ''
+      description: 創建一個新的商品屬性，屬性名稱必須唯一
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: App\Http\Resources\Api\V1\AttributeResource
+      tags:
+        - 商品屬性管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 屬性名稱，例如：顏色、尺寸、材質
+                  example: 顏色
+                  nullable: false
+              required:
+                - name
+  '/api/attributes/{id}':
+    get:
+      summary: 獲取指定屬性
+      operationId: ''
+      description: 返回指定的商品屬性詳細資訊，包含其所有屬性值
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: App\Http\Resources\Api\V1\AttributeResource
+      tags:
+        - 商品屬性管理
+    put:
+      summary: 更新指定屬性
+      operationId: ''
+      description: 更新指定的商品屬性，屬性名稱必須唯一（忽略當前屬性）
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: App\Http\Resources\Api\V1\AttributeResource
+      tags:
+        - 商品屬性管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 屬性名稱
+                  example: 顏色
+                  nullable: false
+              required:
+                - name
+    delete:
+      summary: 刪除指定屬性
+      operationId: ''
+      description: "刪除指定的商品屬性及其所有相關的屬性值\n注意：如果有商品變體正在使用此屬性的值，刪除操作可能會失敗"
+      parameters: []
+      responses:
+        204:
+          description: ''
+      tags:
+        - 商品屬性管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the attribute.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: attribute
+        description: '屬性 ID'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/products/batch-delete:
+    post:
+      summary: 批量刪除商品
+      operationId: ''
+      description: '根據提供的商品 ID 陣列批量刪除商品。'
+      parameters: []
+      responses:
+        204:
+          description: ''
+      tags:
+        - 商品管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  description: '要刪除的商品 ID 陣列。'
+                  example:
+                    - 1
+                    - 2
+                    - 3
+                  items:
+                    type: integer
+              required:
+                - ids
+  /api/products:
+    get:
+      summary: 顯示所有商品列表，支援分頁、排序和篩選功能
+      operationId: ''
+      description: ''
+      parameters:
+        -
+          in: query
+          name: page
+          description: '頁碼，預設為 1。'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: '頁碼，預設為 1。'
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: per_page
+          description: '每頁項目數，預設為 15。'
+          example: 15
+          required: false
+          schema:
+            type: integer
+            description: '每頁項目數，預設為 15。'
+            example: 15
+            nullable: false
+        -
+          in: query
+          name: search
+          description: '搜尋商品名稱或 SKU。'
+          example: 椅子
+          required: false
+          schema:
+            type: string
+            description: '搜尋商品名稱或 SKU。'
+            example: 椅子
+            nullable: false
+        -
+          in: query
+          name: sort_by
+          description: '排序欄位 (name, sku, selling_price, cost_price, created_at)。'
+          example: selling_price
+          required: false
+          schema:
+            type: string
+            description: '排序欄位 (name, sku, selling_price, cost_price, created_at)。'
+            example: selling_price
+            nullable: false
+        -
+          in: query
+          name: sort_order
+          description: '排序方向 (asc, desc)，預設為 asc。'
+          example: desc
+          required: false
+          schema:
+            type: string
+            description: '排序方向 (asc, desc)，預設為 asc。'
+            example: desc
+            nullable: false
+      responses:
+        200:
+          description: 商品列表
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      name: 高階人體工學辦公椅
+                      sku: CHAIR-ERG-001
+                      description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                      selling_price: 399.99
+                      cost_price: 150.0
+                      category_id: 1
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                    -
+                      id: 2
+                      name: 無線藍牙滑鼠
+                      sku: MOUSE-BT-002
+                      description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                      selling_price: 79.99
+                      cost_price: 25.0
+                      category_id: null
+                      created_at: '2024-01-01T11:30:00.000000Z'
+                      updated_at: '2024-01-01T11:30:00.000000Z'
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 3
+                    per_page: 15
+                    to: 2
+                    total: 45
+                  links:
+                    first: 'http://localhost:8000/api/products?page=1'
+                    last: 'http://localhost:8000/api/products?page=3'
+                    prev: null
+                    next: 'http://localhost:8000/api/products?page=2'
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 高階人體工學辦公椅
+                        sku: CHAIR-ERG-001
+                        description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                        selling_price: 399.99
+                        cost_price: 150
+                        category_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                      -
+                        id: 2
+                        name: 無線藍牙滑鼠
+                        sku: MOUSE-BT-002
+                        description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                        selling_price: 79.99
+                        cost_price: 25
+                        category_id: null
+                        created_at: '2024-01-01T11:30:00.000000Z'
+                        updated_at: '2024-01-01T11:30:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 高階人體工學辦公椅
+                        sku:
+                          type: string
+                          example: CHAIR-ERG-001
+                        description:
+                          type: string
+                          example: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                        selling_price:
+                          type: number
+                          example: 399.99
+                        cost_price:
+                          type: number
+                          example: 150.0
+                        category_id:
+                          type: integer
+                          example: 1
+                        created_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 3
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 2
+                      total:
+                        type: integer
+                        example: 45
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost:8000/api/products?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost:8000/api/products?page=3'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: 'http://localhost:8000/api/products?page=2'
+      tags:
+        - 商品管理
+      security: []
+  '/api/products/{id}':
+    get:
+      summary: 顯示指定的商品
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: 商品詳細資料
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: 高階人體工學辦公椅
+                    sku: CHAIR-ERG-001
+                    description: '具備可調節腰靠和 4D 扶手。'
+                    selling_price: 399.99
+                    cost_price: 150.0
+                    category_id: 1
+                    created_at: '2024-01-01T10:00:00.000000Z'
+                    updated_at: '2024-01-01T10:00:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 高階人體工學辦公椅
+                      sku:
+                        type: string
+                        example: CHAIR-ERG-001
+                      description:
+                        type: string
+                        example: '具備可調節腰靠和 4D 扶手。'
+                      selling_price:
+                        type: number
+                        example: 399.99
+                      cost_price:
+                        type: number
+                        example: 150.0
+                      category_id:
+                        type: integer
+                        example: 1
+                      created_at:
+                        type: string
+                        example: '2024-01-01T10:00:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2024-01-01T10:00:00.000000Z'
+      tags:
+        - 商品管理
+      security: []
+    put:
+      summary: 更新指定的商品
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: 商品更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: 高階人體工學辦公椅
+                    sku: CHAIR-ERG-001
+                    description: '具備可調節腰靠和 4D 扶手。'
+                    selling_price: 399.99
+                    cost_price: 150.0
+                    category_id: 1
+                    created_at: '2024-01-01T10:00:00.000000Z'
+                    updated_at: '2024-01-01T10:00:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 高階人體工學辦公椅
+                      sku:
+                        type: string
+                        example: CHAIR-ERG-001
+                      description:
+                        type: string
+                        example: '具備可調節腰靠和 4D 扶手。'
+                      selling_price:
+                        type: number
+                        example: 399.99
+                      cost_price:
+                        type: number
+                        example: 150.0
+                      category_id:
+                        type: integer
+                        example: 1
+                      created_at:
+                        type: string
+                        example: '2024-01-01T10:00:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2024-01-01T10:00:00.000000Z'
+      tags:
+        - 商品管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 商品的完整名稱。
+                  example: 高階人體工學辦公椅
+                  nullable: false
+                sku:
+                  type: string
+                  description: '商品的唯一庫存單位編號 (SKU)。'
+                  example: CHAIR-ERG-001
+                  nullable: false
+                description:
+                  type: string
+                  description: 商品的詳細描述。
+                  example: '具備可調節腰靠和 4D 扶手。'
+                  nullable: true
+                selling_price:
+                  type: number
+                  description: 商品的銷售價格。
+                  example: 399.99
+                  nullable: false
+                cost_price:
+                  type: number
+                  description: 商品的成本價格。
+                  example: 150.0
+                  nullable: false
+                category_id:
+                  type: integer
+                  description: '商品所屬分類的 ID。可為空值表示不屬於任何分類。'
+                  example: 1
+                  nullable: true
+              required:
+                - name
+                - sku
+                - selling_price
+                - cost_price
+      security: []
+    delete:
+      summary: 刪除指定的商品
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        204:
+          description: 商品刪除成功
+      tags:
+        - 商品管理
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: '商品的 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/attributes/{attribute_id}/values':
+    get:
+      summary: 獲取指定屬性的所有值
+      operationId: ''
+      description: 返回指定屬性下的所有屬性值列表
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: App\Http\Resources\Api\V1\AttributeValueResource
+      tags:
+        - 屬性值管理
+    post:
+      summary: 為指定屬性創建新值
+      operationId: ''
+      description: "在指定屬性下創建一個新的屬性值\n屬性值在同一屬性下必須唯一"
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: App\Http\Resources\Api\V1\AttributeValueResource
+      tags:
+        - 屬性值管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  description: 屬性值，例如：紅色、藍色、S、M、L
+                  example: 紅色
+                  nullable: false
+              required:
+                - value
+    parameters:
+      -
+        in: path
+        name: attribute_id
+        description: 'The ID of the attribute.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: attribute
+        description: '屬性 ID'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/values/{id}':
+    get:
+      summary: 獲取指定屬性值
+      operationId: ''
+      description: 返回指定的屬性值詳細資訊
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: App\Http\Resources\Api\V1\AttributeValueResource
+      tags:
+        - 屬性值管理
+    delete:
+      summary: 刪除指定屬性值
+      operationId: ''
+      description: "刪除指定的屬性值\n注意：如果有商品變體正在使用此屬性值，刪除操作可能會失敗"
+      parameters: []
+      responses:
+        204:
+          description: ''
+      tags:
+        - 屬性值管理
+    put:
+      summary: 更新指定的屬性值
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    value: 紅色
+                    attribute_id: 1
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      value:
+                        type: string
+                        example: 紅色
+                      attribute_id:
+                        type: integer
+                        example: 1
+      tags:
+        - 規格庫管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  description: 新的屬性值。
+                  example: '"深藍色"'
+                  nullable: false
+              required:
+                - value
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the value.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: value
+        description: '屬性值 ID'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/users:
+    get:
+      summary: 顯示用戶列表
+      operationId: ''
+      description: '支援對 name 和 username 欄位進行部分匹配篩選。'
+      parameters:
+        -
+          in: query
+          name: 'filter[name]'
+          description: 對用戶名稱進行模糊搜尋。
+          example: admin
+          required: false
+          schema:
+            type: string
+            description: 對用戶名稱進行模糊搜尋。
+            example: admin
+            nullable: false
+        -
+          in: query
+          name: 'filter[username]'
+          description: 對用戶帳號進行模糊搜尋。
+          example: superadmin
+          required: false
+          schema:
+            type: string
+            description: 對用戶帳號進行模糊搜尋。
+            example: superadmin
+            nullable: false
+        -
+          in: query
+          name: 'filter[search]'
+          description: 對名稱或帳號進行全域模糊搜尋。
+          example: admin
+          required: false
+          schema:
+            type: string
+            description: 對名稱或帳號進行全域模糊搜尋。
+            example: admin
+            nullable: false
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      name: 'Super Admin'
+                      username: superadmin
+                      role: admin
+                      role_display: 管理員
+                      is_admin: true
+                      created_at: '2025-06-11T10:00:00.000000Z'
+                      updated_at: '2025-06-11T10:00:00.000000Z'
+                  links:
+                    first: 'http://localhost/api/v1/users?page=1'
+                    last: 'http://localhost/api/v1/users?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    path: 'http://localhost/api/v1/users'
+                    per_page: 15
+                    to: 1
+                    total: 1
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 'Super Admin'
+                        username: superadmin
+                        role: admin
+                        role_display: 管理員
+                        is_admin: true
+                        created_at: '2025-06-11T10:00:00.000000Z'
+                        updated_at: '2025-06-11T10:00:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 'Super Admin'
+                        username:
+                          type: string
+                          example: superadmin
+                        role:
+                          type: string
+                          example: admin
+                        role_display:
+                          type: string
+                          example: 管理員
+                        is_admin:
+                          type: boolean
+                          example: true
+                        created_at:
+                          type: string
+                          example: '2025-06-11T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2025-06-11T10:00:00.000000Z'
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/v1/users?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/v1/users?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      path:
+                        type: string
+                        example: 'http://localhost/api/v1/users'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 1
+                      total:
+                        type: integer
+                        example: 1
+      tags:
+        - 用戶管理
+    post:
+      summary: 建立新用戶
+      operationId: ''
+      description: "接收用戶創建請求，進行驗證後建立新用戶帳號。\n自動將密碼進行 bcrypt 雜湊處理確保安全性。\n權限檢查：需要通過 UserPolicy::create() 方法（僅管理員可執行）"
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: 'Super Admin'
+                    username: superadmin
+                    role: admin
+                    role_display: 管理員
+                    is_admin: true
+                    created_at: '2025-06-11T10:00:00.000000Z'
+                    updated_at: '2025-06-11T10:00:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'Super Admin'
+                      username:
+                        type: string
+                        example: superadmin
+                      role:
+                        type: string
+                        example: admin
+                      role_display:
+                        type: string
+                        example: 管理員
+                      is_admin:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        example: '2025-06-11T10:00:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-11T10:00:00.000000Z'
+      tags:
+        - 用戶管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: vmqeopfuudtdsufvyvddq
+                  nullable: false
+                username:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: amniihfqcoynlazghdtqt
+                  nullable: false
+                password:
+                  type: string
+                  description: 'Must be at least 8 characters.'
+                  example: "t(!Cs'YAKYLk4>S"
+                  nullable: false
+                role:
+                  type: string
+                  description: ''
+                  example: admin
+                  nullable: false
+                  enum:
+                    - admin
+                    - viewer
+              required:
+                - name
+                - username
+                - password
+                - role
+  '/api/users/{id}':
+    get:
+      summary: 顯示指定用戶
+      operationId: ''
+      description: "根據用戶 ID 返回特定用戶的完整資料。\n權限檢查：需要通過 UserPolicy::view() 方法（僅管理員可存取）"
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: 'Super Admin'
+                    username: superadmin
+                    role: admin
+                    role_display: 管理員
+                    is_admin: true
+                    created_at: '2025-06-11T10:00:00.000000Z'
+                    updated_at: '2025-06-11T10:00:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'Super Admin'
+                      username:
+                        type: string
+                        example: superadmin
+                      role:
+                        type: string
+                        example: admin
+                      role_display:
+                        type: string
+                        example: 管理員
+                      is_admin:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        example: '2025-06-11T10:00:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-11T10:00:00.000000Z'
+      tags:
+        - 用戶管理
+    put:
+      summary: 更新指定用戶
+      operationId: ''
+      description: "接收用戶更新請求，進行驗證後更新用戶資料。\n支援部分更新（只更新提供的欄位）。\n如果請求中包含密碼，會自動進行 bcrypt 雜湊處理。\n權限檢查：需要通過 UserPolicy::update() 方法（僅管理員可執行）"
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: 'Super Admin'
+                    username: superadmin
+                    role: admin
+                    role_display: 管理員
+                    is_admin: true
+                    created_at: '2025-06-11T10:00:00.000000Z'
+                    updated_at: '2025-06-11T10:00:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'Super Admin'
+                      username:
+                        type: string
+                        example: superadmin
+                      role:
+                        type: string
+                        example: admin
+                      role_display:
+                        type: string
+                        example: 管理員
+                      is_admin:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        example: '2025-06-11T10:00:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-11T10:00:00.000000Z'
+      tags:
+        - 用戶管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: '用戶姓名（可選更新）. Must not be greater than 255 characters.'
+                  example: 'John Doe'
+                  nullable: false
+                username:
+                  type: string
+                  description: '用戶帳號（可選更新）. Must not be greater than 255 characters.'
+                  example: johndoe
+                  nullable: false
+                password:
+                  type: string
+                  description: '用戶密碼（可選更新，如不提供則保持原密碼）. Must be at least 8 characters.'
+                  example: newpassword123
+                  nullable: false
+                role:
+                  type: string
+                  description: 用戶角色（可選更新）.
+                  example: admin
+                  nullable: false
+                  enum:
+                    - admin
+                    - viewer
+              required:
+                - name
+                - username
+                - role
+    delete:
+      summary: 刪除指定用戶
+      operationId: ''
+      description: "執行用戶刪除操作，成功後返回 204 No Content 回應。\n權限檢查：需要通過 UserPolicy::delete() 方法\n\n安全機制：\n- 只有管理員可以刪除用戶\n- 管理員不能刪除自己的帳號（在 UserPolicy 中檢查）\n- 檢視者無法執行刪除操作"
+      parameters: []
+      responses:
+        204:
+          description: ''
+      tags:
+        - 用戶管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the user.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: user
+        description: '用戶的 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/login:
+    post:
+      summary: 處理使用者登入請求
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  user:
+                    id: 1
+                    name: 'Super Admin'
+                    username: superadmin
+                    role: admin
+                    role_display: 管理員
+                    is_admin: true
+                    created_at: '2024-01-01T00:00:00.000000Z'
+                    updated_at: '2024-01-01T00:00:00.000000Z'
+                  token: 1|abcdefghijklmnopqrstuvwxyz
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'Super Admin'
+                      username:
+                        type: string
+                        example: superadmin
+                      role:
+                        type: string
+                        example: admin
+                      role_display:
+                        type: string
+                        example: 管理員
+                      is_admin:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        example: '2024-01-01T00:00:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2024-01-01T00:00:00.000000Z'
+                  token:
+                    type: string
+                    example: 1|abcdefghijklmnopqrstuvwxyz
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'The given data was invalid.'
+                  errors:
+                    username:
+                      - 您提供的憑證不正確。
+                properties:
+                  message:
+                    type: string
+                    example: 'The given data was invalid.'
+                  errors:
+                    type: object
+                    properties:
+                      username:
+                        type: array
+                        example:
+                          - 您提供的憑證不正確。
+                        items:
+                          type: string
+      tags:
+        - 認證管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: 使用者名稱
+                  example: superadmin
+                  nullable: false
+                password:
+                  type: string
+                  description: 密碼
+                  example: password
+                  nullable: false
+              required:
+                - username
+                - password
+      security: []
+  /api/logout:
+    post:
+      summary: 處理使用者登出請求
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        204:
+          description: 成功登出
+      tags:
+        - 認證管理
