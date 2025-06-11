@@ -1,0 +1,421 @@
+name: 商品管理
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/products/batch-delete
+    metadata:
+      groupName: 商品管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 批量刪除商品
+      description: '根據提供的商品 ID 陣列批量刪除商品。'
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      ids:
+        name: ids
+        description: '要刪除的商品 ID 陣列。'
+        required: true
+        example:
+          - 1
+          - 2
+          - 3
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      ids:
+        - 1
+        - 2
+        - 3
+    fileParameters: []
+    responses:
+      -
+        status: 204
+        content: '{}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/products
+    metadata:
+      groupName: 商品管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 顯示所有商品列表，支援分頁、排序和篩選功能
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      page:
+        name: page
+        description: '頁碼，預設為 1。'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      per_page:
+        name: per_page
+        description: '每頁項目數，預設為 15。'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      search:
+        name: search
+        description: '搜尋商品名稱或 SKU。'
+        required: false
+        example: 椅子
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      sort_by:
+        name: sort_by
+        description: '排序欄位 (name, sku, selling_price, cost_price, created_at)。'
+        required: false
+        example: selling_price
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      sort_order:
+        name: sort_order
+        description: '排序方向 (asc, desc)，預設為 asc。'
+        required: false
+        example: desc
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      page: 1
+      per_page: 15
+      search: 椅子
+      sort_by: selling_price
+      sort_order: desc
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "data": [
+              {
+                "id": 1,
+                "name": "高階人體工學辦公椅",
+                "sku": "CHAIR-ERG-001",
+                "description": "具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。",
+                "selling_price": 399.99,
+                "cost_price": 150.00,
+                "category_id": 1,
+                "created_at": "2024-01-01T10:00:00.000000Z",
+                "updated_at": "2024-01-01T10:00:00.000000Z"
+              },
+              {
+                "id": 2,
+                "name": "無線藍牙滑鼠",
+                "sku": "MOUSE-BT-002",
+                "description": "2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。",
+                "selling_price": 79.99,
+                "cost_price": 25.00,
+                "category_id": null,
+                "created_at": "2024-01-01T11:30:00.000000Z",
+                "updated_at": "2024-01-01T11:30:00.000000Z"
+              }
+            ],
+            "meta": {
+              "current_page": 1,
+              "from": 1,
+              "last_page": 3,
+              "per_page": 15,
+              "to": 2,
+              "total": 45
+            },
+            "links": {
+              "first": "http://localhost:8000/api/products?page=1",
+              "last": "http://localhost:8000/api/products?page=3",
+              "prev": null,
+              "next": "http://localhost:8000/api/products?page=2"
+            }
+          }
+        headers: []
+        description: 商品列表
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/products/{id}'
+    metadata:
+      groupName: 商品管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 顯示指定的商品
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: '商品的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "data": {
+              "id": 1,
+              "name": "高階人體工學辦公椅",
+              "sku": "CHAIR-ERG-001",
+              "description": "具備可調節腰靠和 4D 扶手。",
+              "selling_price": 399.99,
+              "cost_price": 150.00,
+              "category_id": 1,
+              "created_at": "2024-01-01T10:00:00.000000Z",
+              "updated_at": "2024-01-01T10:00:00.000000Z"
+            }
+          }
+        headers: []
+        description: 商品詳細資料
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/products/{id}'
+    metadata:
+      groupName: 商品管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 更新指定的商品
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: '商品的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 商品的完整名稱。
+        required: true
+        example: 高階人體工學辦公椅
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      sku:
+        name: sku
+        description: '商品的唯一庫存單位編號 (SKU)。'
+        required: true
+        example: CHAIR-ERG-001
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      description:
+        name: description
+        description: 商品的詳細描述。
+        required: false
+        example: '具備可調節腰靠和 4D 扶手。'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      selling_price:
+        name: selling_price
+        description: 商品的銷售價格。
+        required: true
+        example: 399.99
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      cost_price:
+        name: cost_price
+        description: 商品的成本價格。
+        required: true
+        example: 150.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      category_id:
+        name: category_id
+        description: '商品所屬分類的 ID。可為空值表示不屬於任何分類。'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+    cleanBodyParameters:
+      name: 高階人體工學辦公椅
+      sku: CHAIR-ERG-001
+      description: '具備可調節腰靠和 4D 扶手。'
+      selling_price: 399.99
+      cost_price: 150.0
+      category_id: 1
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "data": {
+              "id": 1,
+              "name": "高階人體工學辦公椅",
+              "sku": "CHAIR-ERG-001",
+              "description": "具備可調節腰靠和 4D 扶手。",
+              "selling_price": 399.99,
+              "cost_price": 150.00,
+              "category_id": 1,
+              "created_at": "2024-01-01T10:00:00.000000Z",
+              "updated_at": "2024-01-01T10:00:00.000000Z"
+            }
+          }
+        headers: []
+        description: 商品更新成功
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/products/{id}'
+    metadata:
+      groupName: 商品管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 刪除指定的商品
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: '商品的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 204
+        content: ''
+        headers: []
+        description: 商品刪除成功
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []

@@ -1,0 +1,173 @@
+# =================================
+# Mir01 專案 - 全端庫存管理系統
+# =================================
+
+# ========== 系統通用 ==========
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# ========== 編輯器和 IDE ==========
+/.idea/
+/.vscode/
+/.fleet/
+/.nova/
+/.zed/
+*.sublime-project
+*.sublime-workspace
+.phpactor.json
+
+# ========== Node.js (通用) ==========
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.yarn-integrity
+
+# ========== 環境變數和機密 ==========
+.env
+.env.*
+!.env.example
+!.env.local.example
+!inventory-api/.env.example
+!inventory-client/.env.example
+.env.backup
+.env.production
+/auth.json
+*.pem
+*.key
+*.crt
+*.csr
+
+# ========== Laravel 後端 (inventory-api/) ==========
+inventory-api/.env
+inventory-api/.env.*
+inventory-api/.phpunit.result.cache
+inventory-api/.phpunit.cache/
+inventory-api/vendor/
+inventory-api/node_modules/
+inventory-api/public/build/
+inventory-api/public/hot
+inventory-api/public/storage
+inventory-api/storage/*.key
+inventory-api/storage/pail/
+inventory-api/bootstrap/cache/*
+!inventory-api/bootstrap/cache/.gitignore
+inventory-api/Homestead.json
+inventory-api/Homestead.yaml
+inventory-api/auth.json
+
+# ========== Next.js 前端 (inventory-client/) ==========
+inventory-client/.next/
+inventory-client/out/
+inventory-client/build/
+inventory-client/dist/
+inventory-client/node_modules/
+inventory-client/.env*
+!inventory-client/.env.example
+!inventory-client/.env.local.example
+inventory-client/*.tsbuildinfo
+inventory-client/next-env.d.ts
+
+# ========== 測試和覆蓋率 ==========
+coverage/
+.nyc_output/
+*.lcov
+.coverage/
+
+# ========== 快取和暫存 ==========
+.cache/
+*.cache
+.temp/
+tmp/
+temp/
+
+# ========== 建置產物 ==========
+dist/
+build/
+out/
+
+# ========== 部署相關 ==========
+.vercel
+.netlify/
+
+# ========== 文檔生成 ==========
+docs/_build/
+docs/.doctrees/
+
+# ========== 除錯和測試檔案 ==========
+debug-*
+test-*
+*.test.backup
+*.spec.backup
+
+# ========== 包管理器 ==========
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/versions
+!.yarn/patches
+
+# ========== 作業系統 ==========
+# Windows
+desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ========== Git 相關 ==========
+*.orig
+*.rej
+
+# ========== 本專案特定 ==========
+# 技術文檔的備份檔案
+*.md.bak
+*.md.tmp
+
+# 開發時的實驗檔案
+experimental/
+playground/
+sandbox/
+
+# 日誌檔案
+logs/
+*.log.*
+
+# 個人設定檔案
+.personal
+.config.local
+
+# 備份檔案
+backup/
+backups/
+*.backup 

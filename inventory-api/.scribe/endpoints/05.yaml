@@ -1,0 +1,276 @@
+name: 商品屬性管理
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - GET
+    uri: api/attributes
+    metadata:
+      groupName: 商品屬性管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 獲取所有屬性列表
+      description: |-
+        返回系統中所有的商品屬性，包含其相關的屬性值
+        使用 Eager Loading 避免 N+1 查詢問題
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: App\Http\Resources\Api\V1\AttributeResource
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/attributes
+    metadata:
+      groupName: 商品屬性管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 創建新屬性
+      description: 創建一個新的商品屬性，屬性名稱必須唯一
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 屬性名稱，例如：顏色、尺寸、材質
+        required: true
+        example: 顏色
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      name: 顏色
+    fileParameters: []
+    responses:
+      -
+        status: 201
+        content: App\Http\Resources\Api\V1\AttributeResource
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/attributes/{id}'
+    metadata:
+      groupName: 商品屬性管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 獲取指定屬性
+      description: 返回指定的商品屬性詳細資訊，包含其所有屬性值
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the attribute.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      attribute:
+        name: attribute
+        description: '屬性 ID'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+      attribute: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: App\Http\Resources\Api\V1\AttributeResource
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/attributes/{id}'
+    metadata:
+      groupName: 商品屬性管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 更新指定屬性
+      description: 更新指定的商品屬性，屬性名稱必須唯一（忽略當前屬性）
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the attribute.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      attribute:
+        name: attribute
+        description: '屬性 ID'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+      attribute: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 屬性名稱
+        required: true
+        example: 顏色
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      name: 顏色
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: App\Http\Resources\Api\V1\AttributeResource
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/attributes/{id}'
+    metadata:
+      groupName: 商品屬性管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 刪除指定屬性
+      description: |-
+        刪除指定的商品屬性及其所有相關的屬性值
+        注意：如果有商品變體正在使用此屬性的值，刪除操作可能會失敗
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the attribute.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      attribute:
+        name: attribute
+        description: '屬性 ID'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+      attribute: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 204
+        content: '{}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []

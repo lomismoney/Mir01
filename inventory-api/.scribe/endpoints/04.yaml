@@ -1,0 +1,456 @@
+name: 用戶管理
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - GET
+    uri: api/users
+    metadata:
+      groupName: 用戶管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 顯示用戶列表
+      description: '支援對 name 和 username 欄位進行部分匹配篩選。'
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      'filter[name]':
+        name: 'filter[name]'
+        description: 對用戶名稱進行模糊搜尋。
+        required: false
+        example: admin
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      'filter[username]':
+        name: 'filter[username]'
+        description: 對用戶帳號進行模糊搜尋。
+        required: false
+        example: superadmin
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      'filter[search]':
+        name: 'filter[search]'
+        description: 對名稱或帳號進行全域模糊搜尋。
+        required: false
+        example: admin
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      'filter[name]': admin
+      'filter[username]': superadmin
+      'filter[search]': admin
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "data": [
+              {
+                "id": 1,
+                "name": "Super Admin",
+                "username": "superadmin",
+                "role": "admin",
+                "role_display": "管理員",
+                "is_admin": true,
+                "created_at": "2025-06-11T10:00:00.000000Z",
+                "updated_at": "2025-06-11T10:00:00.000000Z"
+              }
+            ],
+            "links": {
+              "first": "http://localhost/api/v1/users?page=1",
+              "last": "http://localhost/api/v1/users?page=1",
+              "prev": null,
+              "next": null
+            },
+            "meta": {
+              "current_page": 1,
+              "from": 1,
+              "last_page": 1,
+              "path": "http://localhost/api/v1/users",
+              "per_page": 15,
+              "to": 1,
+              "total": 1
+            }
+          } 
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/users
+    metadata:
+      groupName: 用戶管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 建立新用戶
+      description: |-
+        接收用戶創建請求，進行驗證後建立新用戶帳號。
+        自動將密碼進行 bcrypt 雜湊處理確保安全性。
+        權限檢查：需要通過 UserPolicy::create() 方法（僅管理員可執行）
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      username:
+        name: username
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: amniihfqcoynlazghdtqt
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      password:
+        name: password
+        description: 'Must be at least 8 characters.'
+        required: true
+        example: "t(!Cs'YAKYLk4>S"
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      role:
+        name: role
+        description: ''
+        required: true
+        example: admin
+        type: string
+        enumValues:
+          - admin
+          - viewer
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      username: amniihfqcoynlazghdtqt
+      password: "t(!Cs'YAKYLk4>S"
+      role: admin
+    fileParameters: []
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+            "data": {
+              "id": 1,
+              "name": "Super Admin",
+              "username": "superadmin",
+              "role": "admin",
+              "role_display": "管理員",
+              "is_admin": true,
+              "created_at": "2025-06-11T10:00:00.000000Z",
+              "updated_at": "2025-06-11T10:00:00.000000Z"
+            }
+          } 
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/users/{id}'
+    metadata:
+      groupName: 用戶管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 顯示指定用戶
+      description: |-
+        根據用戶 ID 返回特定用戶的完整資料。
+        權限檢查：需要通過 UserPolicy::view() 方法（僅管理員可存取）
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the user.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      user:
+        name: user
+        description: '用戶的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+      user: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "data": {
+              "id": 1,
+              "name": "Super Admin",
+              "username": "superadmin",
+              "role": "admin",
+              "role_display": "管理員",
+              "is_admin": true,
+              "created_at": "2025-06-11T10:00:00.000000Z",
+              "updated_at": "2025-06-11T10:00:00.000000Z"
+            }
+          } 
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/users/{id}'
+    metadata:
+      groupName: 用戶管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 更新指定用戶
+      description: |-
+        接收用戶更新請求，進行驗證後更新用戶資料。
+        支援部分更新（只更新提供的欄位）。
+        如果請求中包含密碼，會自動進行 bcrypt 雜湊處理。
+        權限檢查：需要通過 UserPolicy::update() 方法（僅管理員可執行）
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the user.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      user:
+        name: user
+        description: '用戶的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+      user: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: '用戶姓名（可選更新）. Must not be greater than 255 characters.'
+        required: true
+        example: 'John Doe'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      username:
+        name: username
+        description: '用戶帳號（可選更新）. Must not be greater than 255 characters.'
+        required: true
+        example: johndoe
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      password:
+        name: password
+        description: '用戶密碼（可選更新，如不提供則保持原密碼）. Must be at least 8 characters.'
+        required: false
+        example: newpassword123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      role:
+        name: role
+        description: 用戶角色（可選更新）.
+        required: true
+        example: admin
+        type: string
+        enumValues:
+          - admin
+          - viewer
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      name: 'John Doe'
+      username: johndoe
+      password: newpassword123
+      role: admin
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "data": {
+              "id": 1,
+              "name": "Super Admin",
+              "username": "superadmin",
+              "role": "admin",
+              "role_display": "管理員",
+              "is_admin": true,
+              "created_at": "2025-06-11T10:00:00.000000Z",
+              "updated_at": "2025-06-11T10:00:00.000000Z"
+            }
+          } 
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/users/{id}'
+    metadata:
+      groupName: 用戶管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 刪除指定用戶
+      description: |-
+        執行用戶刪除操作，成功後返回 204 No Content 回應。
+        權限檢查：需要通過 UserPolicy::delete() 方法
+
+        安全機制：
+        - 只有管理員可以刪除用戶
+        - 管理員不能刪除自己的帳號（在 UserPolicy 中檢查）
+        - 檢視者無法執行刪除操作
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the user.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      user:
+        name: user
+        description: '用戶的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+      user: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 204
+        content: '{}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
