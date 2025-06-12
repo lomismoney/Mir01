@@ -72,10 +72,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         
         // 如果有 token，呼叫 /api/user 驗證並獲取用戶資訊
-        const { data, error } = await apiClient.GET('/api/user');
+        const { data, error } = await (apiClient as any).GET('/api/user');
         
         if (data && !error) {
-          setUser(data.data || null);
+          // 根據 API 回應結構解析用戶數據
+          const userData = data.data || data;
+          setUser(userData as User);
         } else {
           // Token 無效，清除它並顯示提示
           removeToken();
@@ -111,10 +113,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         onSuccess: (data) => {
           // 確保用戶和token都存在再設置狀態
           if (data.user && data.token) {
-            setUser(data.user);
-            saveToken(data.token);
-            toast.success('登入成功！');
-            resolve();
+            // 確保 data.user 符合 User 類型
+            if (typeof data.user.id === 'number') {
+              setUser(data.user as User);
+              saveToken(data.token);
+              toast.success('登入成功！');
+              resolve();
+            } else {
+              toast.error('無效的用戶數據');
+              reject(new Error('無效的用戶數據'));
+            }
           } else {
             toast.error('登入響應數據不完整');
             reject(new Error('登入響應數據不完整'));

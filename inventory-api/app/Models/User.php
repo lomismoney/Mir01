@@ -48,6 +48,16 @@ class User extends Authenticatable
     ];
 
     /**
+     * 獲取用戶所屬的分店
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function stores()
+    {
+        return $this->belongsToMany(Store::class);
+    }
+
+    /**
      * 檢查用戶是否為管理員
      *
      * @return bool

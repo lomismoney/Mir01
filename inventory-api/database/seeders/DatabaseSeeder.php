@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            StoreSeeder::class,
+            UserStoreSeeder::class,
             // 未來可以加入 ProductSeeder 等...
         ]);
     }

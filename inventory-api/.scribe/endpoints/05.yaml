@@ -1,46 +1,24 @@
-name: 屬性值管理
+name: 'Store Management'
 description: ''
 endpoints:
   -
     httpMethods:
       - GET
-    uri: 'api/attributes/{attribute_id}/values'
+    uri: api/stores
     metadata:
-      groupName: 屬性值管理
+      groupName: 'Store Management'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 獲取指定屬性的所有值
-      description: 返回指定屬性下的所有屬性值列表
+      title: ''
+      description: ''
       authenticated: true
       custom: []
     headers:
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      attribute_id:
-        name: attribute_id
-        description: 'The ID of the attribute.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      attribute:
-        name: attribute
-        description: '屬性 ID'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-    cleanUrlParameters:
-      attribute_id: 16
-      attribute: 1
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -49,7 +27,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: App\Http\Resources\Api\V1\AttributeValueResource
+        content: '{"data":{"id":8,"name":"Bailey Inc","address":"7432 Dach Lakes\nEast Cecil, FL 06748","created_at":"2025-06-12T11:13:05.000000Z","updated_at":"2025-06-12T11:13:05.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -62,65 +40,52 @@ endpoints:
   -
     httpMethods:
       - POST
-    uri: 'api/attributes/{attribute_id}/values'
+    uri: api/stores
     metadata:
-      groupName: 屬性值管理
+      groupName: 'Store Management'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 為指定屬性創建新值
-      description: |-
-        在指定屬性下創建一個新的屬性值
-        屬性值在同一屬性下必須唯一
+      title: ''
+      description: ''
       authenticated: true
       custom: []
     headers:
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      attribute_id:
-        name: attribute_id
-        description: 'The ID of the attribute.'
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 分店名稱（唯一）。例如：台北總店
         required: true
-        example: 16
-        type: integer
+        example: architecto
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-      attribute:
-        name: attribute
-        description: '屬性 ID'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-    cleanUrlParameters:
-      attribute_id: 16
-      attribute: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      value:
-        name: value
-        description: 屬性值，例如：紅色、藍色、S、M、L
-        required: true
-        example: 紅色
+      address:
+        name: address
+        description: 分店地址。例如：台北市信義區信義路五段7號
+        required: false
+        example: architecto
         type: string
         enumValues: []
-        exampleWasSpecified: true
-        nullable: false
+        exampleWasSpecified: false
+        nullable: true
         custom: []
     cleanBodyParameters:
-      value: 紅色
+      name: architecto
+      address: architecto
     fileParameters: []
     responses:
       -
-        status: 201
-        content: App\Http\Resources\Api\V1\AttributeValueResource
+        status: 200
+        content: '{"data":{"id":9,"name":"Bailey Ltd","address":"85625 Gaylord Knolls\nCecilburgh, WI 02042","created_at":"2025-06-12T11:13:06.000000Z","updated_at":"2025-06-12T11:13:06.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -133,14 +98,14 @@ endpoints:
   -
     httpMethods:
       - GET
-    uri: 'api/values/{id}'
+    uri: 'api/stores/{id}'
     metadata:
-      groupName: 屬性值管理
+      groupName: 'Store Management'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 獲取指定屬性值
-      description: 返回指定的屬性值詳細資訊
+      title: ''
+      description: ''
       authenticated: true
       custom: []
     headers:
@@ -149,27 +114,16 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the value.'
+        description: 'The ID of the store.'
         required: true
-        example: 16
+        example: 6
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-      value:
-        name: value
-        description: '屬性值 ID'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
     cleanUrlParameters:
-      id: 16
-      value: 1
+      id: 6
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -178,7 +132,77 @@ endpoints:
     responses:
       -
         status: 200
-        content: App\Http\Resources\Api\V1\AttributeValueResource
+        content: '{"data":{"id":10,"name":"Cruickshank Inc","address":"532 Leuschke Causeway\nMcLaughlinstad, MI 07365","created_at":"2025-06-12T11:13:06.000000Z","updated_at":"2025-06-12T11:13:06.000000Z"}}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/stores/{id}'
+    metadata:
+      groupName: 'Store Management'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the store.'
+        required: true
+        example: 6
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 6
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 分店名稱（唯一，會排除當前分店）。例如：台北信義店
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      address:
+        name: address
+        description: 分店地址。例如：台北市信義區信義路五段7號
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+    cleanBodyParameters:
+      name: architecto
+      address: architecto
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: '{"data":{"id":11,"name":"Rempel, Gulgowski and O''Kon","address":"80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432","created_at":"2025-06-12T11:13:06.000000Z","updated_at":"2025-06-12T11:13:06.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -191,16 +215,14 @@ endpoints:
   -
     httpMethods:
       - DELETE
-    uri: 'api/values/{id}'
+    uri: 'api/stores/{id}'
     metadata:
-      groupName: 屬性值管理
+      groupName: 'Store Management'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 刪除指定屬性值
-      description: |-
-        刪除指定的屬性值
-        注意：如果有商品變體正在使用此屬性值，刪除操作可能會失敗
+      title: ''
+      description: ''
       authenticated: true
       custom: []
     headers:
@@ -209,39 +231,22 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the value.'
+        description: 'The ID of the store.'
         required: true
-        example: 16
+        example: 6
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-      value:
-        name: value
-        description: '屬性值 ID'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
     cleanUrlParameters:
-      id: 16
-      value: 1
+      id: 6
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses:
-      -
-        status: 204
-        content: '{}'
-        headers: []
-        description: ''
-        custom: []
+    responses: []
     responseFields: []
     auth: []
     controller: null

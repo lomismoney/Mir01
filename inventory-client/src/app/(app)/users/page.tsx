@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import { UsersDataTable } from '@/components/users/users-data-table';
 import { createUsersColumns } from '@/components/users/users-columns';
 import { User, UserActions } from '@/types/user';
+import { UserStoresDialog } from "@/components/users/user-stores-dialog";
 
 /**
  * 用戶管理主頁面組件
@@ -89,6 +90,10 @@ export default function UsersPage() {
 
   // 使用 useUpdateUser hook（重構版，不需要預先提供 userId）
   const updateUserMutation = useUpdateUser();
+
+  // 用戶分店管理狀態
+  const [isStoresDialogOpen, setIsStoresDialogOpen] = useState(false);
+  const [selectedUserForStores, setSelectedUserForStores] = useState<User | null>(null);
 
   /**
    * 處理創建新用戶的函式
@@ -265,25 +270,48 @@ export default function UsersPage() {
   };
 
   /**
+   * 處理管理用戶分店按鈕點擊
+   */
+  const handleManageUserStores = (user: User) => {
+    setSelectedUserForStores(user);
+    setIsStoresDialogOpen(true);
+  };
+
+  /**
    * 用戶操作處理器
    * 定義表格中各種操作的回調函數
    */
   const userActions: UserActions = {
-    currentUser: user ? { is_admin: user.is_admin, id: user.id } : undefined, // 傳入當前用戶用於權限判斷
+    currentUser: user ? { is_admin: user.is_admin, id: user.id } : undefined,
     onView: (user: User) => {
       toast.info(`查看用戶：${user.name}`);
     },
     onEdit: handleEditUser,
     onDelete: (userToDelete: User) => {
-      setUserToDelete(userToDelete); // 設置待刪除用戶，觸發 AlertDialog
+      setUserToDelete(userToDelete);
     },
+    onManageStores: handleManageUserStores,
   };
 
   // 創建表格欄位定義
   const columns = createUsersColumns(userActions);
 
   // 處理用戶資料，確保類型正確
-  const users: User[] = usersResponse?.data || [];
+  const users = (usersResponse?.data || []).map((userData: any) => {
+    // 使用明確的類型定義解決 TypeScript 錯誤
+    const user: User = {
+      id: userData.id || 0,
+      name: userData.name || '',
+      username: userData.username || '',
+      role: userData.role || '',
+      role_display: userData.role_display || '',
+      is_admin: userData.is_admin || false,
+      created_at: userData.created_at || '',
+      updated_at: userData.updated_at || '',
+      stores: Array.isArray(userData.stores) ? userData.stores : []
+    };
+    return user;
+  });
 
   // 錯誤狀態處理
   if (error) {
@@ -591,6 +619,16 @@ export default function UsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* 用戶分店管理對話框 */}
+      {selectedUserForStores && (
+        <UserStoresDialog
+          userId={selectedUserForStores.id as number} 
+          userName={selectedUserForStores.name as string}
+          open={isStoresDialogOpen}
+          onOpenChange={setIsStoresDialogOpen}
+        />
+      )}
     </div>
   );
 } 

@@ -256,10 +256,19 @@ export function useUsers(filters?: UserQueryParams) {
     
     queryFn: async ({ queryKey }) => {
       const [, queryFilters] = queryKey;
+      // 添加 include=stores 參數，確保獲取用戶的分店關係
+      const queryParams = { 
+        ...queryFilters as UserQueryParams,
+        include: 'stores' 
+      };
+      
       const { data, error } = await apiClient.GET('/api/users', {
-        params: { query: queryFilters as UserQueryParams },
+        params: { query: queryParams },
       });
       if (error) { throw new Error('獲取用戶列表失敗'); }
+      
+      // 確保返回資料結構統一，處理 Laravel 分頁結構
+      // 分頁響應結構: { data: [...用戶列表], meta: {...分頁資訊} }
       return data;
     },
   });
@@ -344,12 +353,12 @@ export function useCategories() {
   return useQuery({
     queryKey: QUERY_KEYS.CATEGORIES,
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/categories');
+      const { data, error } = await (apiClient as any).GET('/api/categories');
       if (error) {
         throw new Error('獲取分類列表失敗');
       }
       // 後端回傳的已是按 parent_id 分組的結構
-      return data as Record<string, unknown[]>; 
+      return data?.data || data || []; 
     },
     staleTime: 1000 * 60 * 5, // 5 分鐘內不重新請求
   });

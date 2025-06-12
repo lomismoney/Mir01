@@ -4,22 +4,6 @@
  */
 
 export interface paths {
-    "/api/user": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getApiUser"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/purchases": {
         parameters: {
             query?: never;
@@ -44,37 +28,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * 顯示分類列表
-         * @description 優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、
-         *     高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。
-         *
-         *     範例：
-         *     - json[''] 或 json[null] 就是所有頂層分類
-         *     - json['1'] 就是 id 為 1 的分類下的所有子分類
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @example Unauthenticated. */
-                            message?: string;
-                        };
-                    };
-                };
-            };
-        };
+        get?: never;
         put?: never;
         /**
          * 儲存新建立的分類資源
@@ -123,44 +77,13 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the category.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
             };
             cookie?: never;
         };
-        /**
-         * 顯示指定的分類資源
-         * @description 返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /**
-                     * @description The ID of the category.
-                     * @example 1
-                     */
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @example Unauthenticated. */
-                            message?: string;
-                        };
-                    };
-                };
-            };
-        };
+        get?: never;
         /**
          * 更新指定的分類資源
          * @description 使用 UpdateCategoryRequest 進行數據驗證，包含：
@@ -175,7 +98,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                 };
@@ -215,7 +138,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                 };
@@ -224,6 +147,28 @@ export interface paths {
             requestBody?: never;
             responses: never;
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stores/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the store.
+                 * @example 17
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteApiStoresId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -307,7 +252,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
                 /**
@@ -329,7 +274,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -363,7 +308,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -409,7 +354,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -594,13 +539,13 @@ export interface paths {
                                 total?: number;
                             };
                             links?: {
-                                /** @example http://localhost:8000/api/products?page=1 */
+                                /** @example http://localhost/api/products?page=1 */
                                 first?: string;
-                                /** @example http://localhost:8000/api/products?page=3 */
+                                /** @example http://localhost/api/products?page=3 */
                                 last?: string;
                                 /** @example null */
                                 prev?: string;
-                                /** @example http://localhost:8000/api/products?page=2 */
+                                /** @example http://localhost/api/products?page=2 */
                                 next?: string;
                             };
                         };
@@ -609,7 +554,8 @@ export interface paths {
             };
         };
         put?: never;
-        post?: never;
+        /** 建立新商品 (SPU/SKU) */
+        post: operations["SPUSKU"];
         delete?: never;
         options?: never;
         head?: never;
@@ -798,7 +744,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 1
+                 * @example 17
                  */
                 attribute_id: number;
                 /**
@@ -820,7 +766,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     attribute_id: number;
                     /**
@@ -856,7 +802,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     attribute_id: number;
                     /**
@@ -902,7 +848,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the value.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
                 /**
@@ -924,7 +870,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -955,7 +901,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -1010,7 +956,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -1109,9 +1055,9 @@ export interface paths {
                                 updated_at?: string;
                             }[];
                             links?: {
-                                /** @example http://localhost/api/v1/users?page=1 */
+                                /** @example http://localhost/api/users?page=1 */
                                 first?: string;
-                                /** @example http://localhost/api/v1/users?page=1 */
+                                /** @example http://localhost/api/users?page=1 */
                                 last?: string;
                                 /** @example null */
                                 prev?: string;
@@ -1125,7 +1071,7 @@ export interface paths {
                                 from?: number;
                                 /** @example 1 */
                                 last_page?: number;
-                                /** @example http://localhost/api/v1/users */
+                                /** @example http://localhost/api/users */
                                 path?: string;
                                 /** @example 15 */
                                 per_page?: number;
@@ -1222,7 +1168,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
                 /**
@@ -1245,7 +1191,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -1301,7 +1247,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -1387,7 +1333,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -1547,44 +1493,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getApiUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: {
-                            /** @example 14 */
-                            id?: number;
-                            /** @example Lonny Ankunding */
-                            name?: string;
-                            /** @example eloisa.harber */
-                            username?: string;
-                            /** @example viewer */
-                            role?: string;
-                            /** @example 檢視者 */
-                            role_display?: string;
-                            /** @example false */
-                            is_admin?: boolean;
-                            /** @example 2025-06-11T05:51:06.000000Z */
-                            created_at?: string;
-                            /** @example 2025-06-11T05:51:06.000000Z */
-                            updated_at?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
     storeANewlyCreatedResourceInStorage: {
         parameters: {
             query?: never;
@@ -1612,6 +1520,172 @@ export interface operations {
                         purchased_at?: string;
                         /** @example [] */
                         items?: unknown[];
+                    };
+                };
+            };
+        };
+    };
+    deleteApiStoresId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the store.
+                 * @example 17
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    SPUSKU: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description SPU 的名稱。
+                     * @example "經典棉質T-shirt"
+                     */
+                    name: string;
+                    /**
+                     * @description SPU 的描述。
+                     * @example "100% 純棉"
+                     */
+                    description?: string | null;
+                    /**
+                     * @description 分類ID。
+                     * @example 1
+                     */
+                    category_id?: number | null;
+                    /**
+                     * @description 該 SPU 擁有的屬性 ID 陣列。
+                     * @example [
+                     *       1,
+                     *       2
+                     *     ]
+                     */
+                    attributes: number[];
+                    /**
+                     * @description SKU 變體陣列，至少需要一項。
+                     * @example [
+                     *       []
+                     *     ]
+                     */
+                    variants: {
+                        /**
+                         * @description 單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters.
+                         * @example HEADPHONE-BT-RED-L
+                         */
+                        sku: string;
+                        /**
+                         * @description 單一 SKU 變體的價格。. Must be at least 0.
+                         * @example 199.99
+                         */
+                        price: number;
+                        /**
+                         * @description The <code>id</code> of an existing record in the attribute_values table.
+                         * @example [
+                         *       17
+                         *     ]
+                         */
+                        attribute_value_ids?: number[];
+                        /** @example {
+                         *       "sku": "\"TSHIRT-RED-S\""
+                         *     } */
+                        "*"?: {
+                            /**
+                             * @description SKU 的唯一編號。
+                             * @example "TSHIRT-RED-S"
+                             */
+                            sku: string;
+                            /**
+                             * @description SKU 的價格。
+                             * @example 299.99
+                             */
+                            price: number;
+                            /**
+                             * @description 組成此 SKU 的屬性值 ID 陣列。
+                             * @example [
+                             *       10,
+                             *       25
+                             *     ]
+                             */
+                            attribute_value_ids: number[];
+                        };
+                    }[];
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 測試產品 */
+                            name?: string;
+                            /** @example 這是一個測試產品的描述 */
+                            description?: string;
+                            /** @example TEST-SKU-001 */
+                            sku?: string;
+                            /** @example 199.99 */
+                            price?: number;
+                            /** @example 99.99 */
+                            cost?: number;
+                            /** @example 50 */
+                            quantity?: number;
+                            /** @example 1 */
+                            category_id?: number;
+                            /** @example 2023-10-15T08:30:45.000000Z */
+                            created_at?: string;
+                            /** @example 2023-10-15T08:30:45.000000Z */
+                            updated_at?: string;
+                            category?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 電子產品 */
+                                name?: string;
+                                /** @example 各類電子產品 */
+                                description?: string;
+                                /** @example 2023-10-15T08:30:45.000000Z */
+                                created_at?: string;
+                                /** @example 2023-10-15T08:30:45.000000Z */
+                                updated_at?: string;
+                            };
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "name": "顏色",
+                             *         "value": "黑色"
+                             *       },
+                             *       {
+                             *         "id": 2,
+                             *         "name": "尺寸",
+                             *         "value": "中號"
+                             *       }
+                             *     ] */
+                            attributes?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 顏色 */
+                                name?: string;
+                                /** @example 黑色 */
+                                value?: string;
+                            }[];
+                        };
                     };
                 };
             };

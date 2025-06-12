@@ -42,7 +42,19 @@ const ERROR_MESSAGES = {
   // 網絡錯誤
   NETWORK_ERROR: '網絡連接失敗，請檢查網絡設置',
   TIMEOUT: '請求超時，請重試',
+  HTML_RESPONSE: '系統返回了非預期的響應格式，請確認 API 設定是否正確',
 } as const;
+
+/**
+ * 檢查字符串是否為 HTML
+ */
+function isHtmlString(text: string): boolean {
+  if (!text) return false;
+  const trimmedText = text.trim();
+  return trimmedText.startsWith('<!DOCTYPE') || 
+         trimmedText.startsWith('<html') || 
+         (trimmedText.startsWith('<') && trimmedText.includes('</html>'));
+}
 
 /**
  * 解析 API 錯誤
@@ -58,6 +70,11 @@ export function parseApiError(error: UnknownError): string {
 
   const errorObj = error as Record<string, unknown>;
 
+  // 檢查是否為 HTML 響應
+  if (typeof errorObj.message === 'string' && isHtmlString(errorObj.message)) {
+    return ERROR_MESSAGES.HTML_RESPONSE;
+  }
+  
   // 如果是自定義的 ApiError
   if (typeof errorObj.message === 'string') {
     return errorObj.message;
@@ -87,16 +104,48 @@ export function parseApiError(error: UnknownError): string {
  * 
  * @param error - 錯誤對象
  * @param fallbackMessage - 備用錯誤訊息
+ * @returns 錯誤訊息字串
  */
-export function handleApiError(error: UnknownError, fallbackMessage?: string): void {
+export function handleApiError(error: UnknownError, fallbackMessage?: string): string {
   const message = fallbackMessage || parseApiError(error);
   
   toast.error(message);
   
   // 在開發環境下記錄詳細錯誤
   if (process.env.NODE_ENV === 'development') {
-    console.error('API Error:', error);
+    // 記錄錯誤，但避免輸出可能過大的 HTML 內容
+    if (error && typeof error === 'object') {
+      let errorInfo: Record<string, any> = {};
+      
+      try {
+        const { message, status, code, ...rest } = error as any;
+        
+        // 不輸出長 HTML 內容
+        errorInfo = {
+          message: typeof message === 'string' && isHtmlString(message) ? 
+            'HTML Response (content omitted)' : message,
+          status,
+          code
+        };
+        
+        // 添加其他有用但不是 HTML 的信息
+        Object.entries(rest).forEach(([key, value]) => {
+          // 篩選掉可能的長 HTML 字串
+          if (typeof value !== 'string' || !isHtmlString(value)) {
+            errorInfo[key] = value;
+          }
+        });
+      } catch {
+        errorInfo = { error: 'Error object could not be safely processed' };
+      }
+      
+      console.error('API Error:', errorInfo);
+    } else {
+      console.error('API Error:', String(error));
+    }
   }
+  
+  return message;
 }
 
 /**

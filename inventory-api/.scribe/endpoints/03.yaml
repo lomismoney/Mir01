@@ -1,17 +1,17 @@
-name: 用戶管理
+name: 商品管理
 description: ''
 endpoints:
   -
     httpMethods:
-      - GET
-    uri: api/users
+      - POST
+    uri: api/products/batch-delete
     metadata:
-      groupName: 用戶管理
+      groupName: 商品管理
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 顯示用戶列表
-      description: '支援對 name 和 username 欄位進行部分匹配篩選。'
+      title: 批量刪除商品
+      description: '根據提供的商品 ID 陣列批量刪除商品。'
       authenticated: true
       custom: []
     headers:
@@ -19,41 +19,122 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      ids:
+        name: ids
+        description: '要刪除的商品 ID 列表。例如：[1, 2, 3]'
+        required: true
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'ids.*':
+        name: 'ids.*'
+        description: '商品 ID，必須存在於資料庫中。例如：1'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      ids:
+        - architecto
+    fileParameters: []
+    responses:
+      -
+        status: 204
+        content: '{}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/products
+    metadata:
+      groupName: 商品管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 顯示所有商品列表，支援分頁、排序和篩選功能
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters:
-      'filter[name]':
-        name: 'filter[name]'
-        description: 對用戶名稱進行模糊搜尋。
+      page:
+        name: page
+        description: '頁碼，預設為 1。'
         required: false
-        example: admin
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      per_page:
+        name: per_page
+        description: '每頁項目數，預設為 15。'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      search:
+        name: search
+        description: '搜尋商品名稱或 SKU。'
+        required: false
+        example: 椅子
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         custom: []
-      'filter[username]':
-        name: 'filter[username]'
-        description: 對用戶帳號進行模糊搜尋。
+      sort_by:
+        name: sort_by
+        description: '排序欄位 (name, sku, selling_price, cost_price, created_at)。'
         required: false
-        example: superadmin
+        example: selling_price
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         custom: []
-      'filter[search]':
-        name: 'filter[search]'
-        description: 對名稱或帳號進行全域模糊搜尋。
+      sort_order:
+        name: sort_order
+        description: '排序方向 (asc, desc)，預設為 asc。'
         required: false
-        example: admin
+        example: desc
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         custom: []
     cleanQueryParameters:
-      'filter[name]': admin
-      'filter[username]': superadmin
-      'filter[search]': admin
+      page: 1
+      per_page: 15
+      search: 椅子
+      sort_by: selling_price
+      sort_order: desc
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
@@ -65,33 +146,44 @@ endpoints:
             "data": [
               {
                 "id": 1,
-                "name": "Super Admin",
-                "username": "superadmin",
-                "role": "admin",
-                "role_display": "管理員",
-                "is_admin": true,
-                "created_at": "2025-06-11T10:00:00.000000Z",
-                "updated_at": "2025-06-11T10:00:00.000000Z"
+                "name": "高階人體工學辦公椅",
+                "sku": "CHAIR-ERG-001",
+                "description": "具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。",
+                "selling_price": 399.99,
+                "cost_price": 150.00,
+                "category_id": 1,
+                "created_at": "2024-01-01T10:00:00.000000Z",
+                "updated_at": "2024-01-01T10:00:00.000000Z"
+              },
+              {
+                "id": 2,
+                "name": "無線藍牙滑鼠",
+                "sku": "MOUSE-BT-002",
+                "description": "2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。",
+                "selling_price": 79.99,
+                "cost_price": 25.00,
+                "category_id": null,
+                "created_at": "2024-01-01T11:30:00.000000Z",
+                "updated_at": "2024-01-01T11:30:00.000000Z"
               }
             ],
-            "links": {
-              "first": "http://localhost/api/v1/users?page=1",
-              "last": "http://localhost/api/v1/users?page=1",
-              "prev": null,
-              "next": null
-            },
             "meta": {
               "current_page": 1,
               "from": 1,
-              "last_page": 1,
-              "path": "http://localhost/api/v1/users",
+              "last_page": 3,
               "per_page": 15,
-              "to": 1,
-              "total": 1
+              "to": 2,
+              "total": 45
+            },
+            "links": {
+              "first": "http://localhost/api/products?page=1",
+              "last": "http://localhost/api/products?page=3",
+              "prev": null,
+              "next": "http://localhost/api/products?page=2"
             }
-          } 
+          }
         headers: []
-        description: ''
+        description: 商品列表
         custom: []
     responseFields: []
     auth: []
@@ -102,17 +194,14 @@ endpoints:
   -
     httpMethods:
       - POST
-    uri: api/users
+    uri: api/products
     metadata:
-      groupName: 用戶管理
+      groupName: 商品管理
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 建立新用戶
-      description: |-
-        接收用戶創建請求，進行驗證後建立新用戶帳號。
-        自動將密碼進行 bcrypt 雜湊處理確保安全性。
-        權限檢查：需要通過 UserPolicy::create() 方法（僅管理員可執行）
+      title: '建立新商品 (SPU/SKU)'
+      description: ''
       authenticated: true
       custom: []
     headers:
@@ -125,51 +214,133 @@ endpoints:
     bodyParameters:
       name:
         name: name
-        description: 'Must not be greater than 255 characters.'
+        description: 'SPU 的名稱。'
         required: true
-        example: b
+        example: '"經典棉質T-shirt"'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      description:
+        name: description
+        description: 'SPU 的描述。'
+        required: false
+        example: '"100% 純棉"'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      category_id:
+        name: category_id
+        description: 分類ID。
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      attributes:
+        name: attributes
+        description: '該 SPU 擁有的屬性 ID 陣列。'
+        required: true
+        example:
+          - 1
+          - 2
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      variants:
+        name: variants
+        description: 'SKU 變體陣列，至少需要一項。'
+        required: true
+        example:
+          - []
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'variants[].sku':
+        name: 'variants[].sku'
+        description: '單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters.'
+        required: true
+        example: HEADPHONE-BT-RED-L
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-      username:
-        name: username
-        description: 'Must not be greater than 255 characters.'
+      'variants[].price':
+        name: 'variants[].price'
+        description: '單一 SKU 變體的價格。. Must be at least 0.'
         required: true
-        example: 'n'
-        type: string
+        example: 199.99
+        type: number
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-      password:
-        name: password
-        description: 'Must be at least 8 characters.'
-        required: true
-        example: '|{+-0pBNvYgx'
-        type: string
+      'variants[].attribute_value_ids':
+        name: 'variants[].attribute_value_ids'
+        description: 'The <code>id</code> of an existing record in the attribute_values table.'
+        required: false
+        example:
+          - 16
+        type: 'integer[]'
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-      role:
-        name: role
-        description: ''
+      'variants.*.sku':
+        name: 'variants.*.sku'
+        description: 'SKU 的唯一編號。'
         required: true
-        example: admin
+        example: '"TSHIRT-RED-S"'
         type: string
-        enumValues:
-          - admin
-          - viewer
-        exampleWasSpecified: false
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      'variants.*.price':
+        name: 'variants.*.price'
+        description: 'SKU 的價格。'
+        required: true
+        example: 299.99
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      'variants.*.attribute_value_ids':
+        name: 'variants.*.attribute_value_ids'
+        description: '組成此 SKU 的屬性值 ID 陣列。'
+        required: true
+        example:
+          - 10
+          - 25
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanBodyParameters:
-      name: b
-      username: 'n'
-      password: '|{+-0pBNvYgx'
-      role: admin
+      name: '"經典棉質T-shirt"'
+      description: '"100% 純棉"'
+      category_id: 1
+      attributes:
+        - 1
+        - 2
+      variants:
+        -
+          sku: HEADPHONE-BT-RED-L
+          price: 199.99
+          attribute_value_ids:
+            - 16
     fileParameters: []
     responses:
       -
@@ -178,13 +349,34 @@ endpoints:
           {
             "data": {
               "id": 1,
-              "name": "Super Admin",
-              "username": "superadmin",
-              "role": "admin",
-              "role_display": "管理員",
-              "is_admin": true,
-              "created_at": "2025-06-11T10:00:00.000000Z",
-              "updated_at": "2025-06-11T10:00:00.000000Z"
+              "name": "測試產品",
+              "description": "這是一個測試產品的描述",
+              "sku": "TEST-SKU-001",
+              "price": 199.99,
+              "cost": 99.99,
+              "quantity": 50,
+              "category_id": 1,
+              "created_at": "2023-10-15T08:30:45.000000Z",
+              "updated_at": "2023-10-15T08:30:45.000000Z",
+              "category": {
+                "id": 1,
+                "name": "電子產品",
+                "description": "各類電子產品",
+                "created_at": "2023-10-15T08:30:45.000000Z",
+                "updated_at": "2023-10-15T08:30:45.000000Z"
+              },
+              "attributes": [
+                {
+                  "id": 1,
+                  "name": "顏色",
+                  "value": "黑色"
+                },
+                {
+                  "id": 2,
+                  "name": "尺寸",
+                  "value": "中號"
+                }
+              ]
             }
           } 
         headers: []
@@ -199,17 +391,15 @@ endpoints:
   -
     httpMethods:
       - GET
-    uri: 'api/users/{id}'
+    uri: 'api/products/{id}'
     metadata:
-      groupName: 用戶管理
+      groupName: 商品管理
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 顯示指定用戶
-      description: |-
-        根據用戶 ID 返回特定用戶的完整資料。
-        權限檢查：需要通過 UserPolicy::view() 方法（僅管理員可存取）
-      authenticated: true
+      title: 顯示指定的商品
+      description: ''
+      authenticated: false
       custom: []
     headers:
       Content-Type: application/json
@@ -217,17 +407,7 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the user.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      user:
-        name: user
-        description: '用戶的 ID。'
+        description: '商品的 ID。'
         required: true
         example: 1
         type: integer
@@ -236,8 +416,7 @@ endpoints:
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
-      user: 1
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -250,17 +429,18 @@ endpoints:
           {
             "data": {
               "id": 1,
-              "name": "Super Admin",
-              "username": "superadmin",
-              "role": "admin",
-              "role_display": "管理員",
-              "is_admin": true,
-              "created_at": "2025-06-11T10:00:00.000000Z",
-              "updated_at": "2025-06-11T10:00:00.000000Z"
+              "name": "高階人體工學辦公椅",
+              "sku": "CHAIR-ERG-001",
+              "description": "具備可調節腰靠和 4D 扶手。",
+              "selling_price": 399.99,
+              "cost_price": 150.00,
+              "category_id": 1,
+              "created_at": "2024-01-01T10:00:00.000000Z",
+              "updated_at": "2024-01-01T10:00:00.000000Z"
             }
-          } 
+          }
         headers: []
-        description: ''
+        description: 商品詳細資料
         custom: []
     responseFields: []
     auth: []
@@ -272,19 +452,15 @@ endpoints:
     httpMethods:
       - PUT
       - PATCH
-    uri: 'api/users/{id}'
+    uri: 'api/products/{id}'
     metadata:
-      groupName: 用戶管理
+      groupName: 商品管理
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 更新指定用戶
-      description: |-
-        接收用戶更新請求，進行驗證後更新用戶資料。
-        支援部分更新（只更新提供的欄位）。
-        如果請求中包含密碼，會自動進行 bcrypt 雜湊處理。
-        權限檢查：需要通過 UserPolicy::update() 方法（僅管理員可執行）
-      authenticated: true
+      title: 更新指定的商品
+      description: ''
+      authenticated: false
       custom: []
     headers:
       Content-Type: application/json
@@ -292,17 +468,7 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the user.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      user:
-        name: user
-        description: '用戶的 ID。'
+        description: '商品的 ID。'
         required: true
         example: 1
         type: integer
@@ -311,58 +477,77 @@ endpoints:
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
-      user: 1
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
       name:
         name: name
-        description: '用戶姓名（可選更新）. Must not be greater than 255 characters.'
+        description: 商品的完整名稱。
         required: true
-        example: 'John Doe'
+        example: 高階人體工學辦公椅
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
-      username:
-        name: username
-        description: '用戶帳號（可選更新）. Must not be greater than 255 characters.'
+      sku:
+        name: sku
+        description: '商品的唯一庫存單位編號 (SKU)。'
         required: true
-        example: johndoe
+        example: CHAIR-ERG-001
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
-      password:
-        name: password
-        description: '用戶密碼（可選更新，如不提供則保持原密碼）. Must be at least 8 characters.'
+      description:
+        name: description
+        description: 商品的詳細描述。
         required: false
-        example: newpassword123
+        example: '具備可調節腰靠和 4D 扶手。'
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      selling_price:
+        name: selling_price
+        description: 商品的銷售價格。
+        required: true
+        example: 399.99
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
         nullable: false
         custom: []
-      role:
-        name: role
-        description: 用戶角色（可選更新）.
+      cost_price:
+        name: cost_price
+        description: 商品的成本價格。
         required: true
-        example: admin
-        type: string
-        enumValues:
-          - admin
-          - viewer
-        exampleWasSpecified: false
+        example: 150.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
         nullable: false
+        custom: []
+      category_id:
+        name: category_id
+        description: '商品所屬分類的 ID。可為空值表示不屬於任何分類。'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
         custom: []
     cleanBodyParameters:
-      name: 'John Doe'
-      username: johndoe
-      password: newpassword123
-      role: admin
+      name: 高階人體工學辦公椅
+      sku: CHAIR-ERG-001
+      description: '具備可調節腰靠和 4D 扶手。'
+      selling_price: 399.99
+      cost_price: 150.0
+      category_id: 1
     fileParameters: []
     responses:
       -
@@ -371,17 +556,18 @@ endpoints:
           {
             "data": {
               "id": 1,
-              "name": "Super Admin",
-              "username": "superadmin",
-              "role": "admin",
-              "role_display": "管理員",
-              "is_admin": true,
-              "created_at": "2025-06-11T10:00:00.000000Z",
-              "updated_at": "2025-06-11T10:00:00.000000Z"
+              "name": "高階人體工學辦公椅",
+              "sku": "CHAIR-ERG-001",
+              "description": "具備可調節腰靠和 4D 扶手。",
+              "selling_price": 399.99,
+              "cost_price": 150.00,
+              "category_id": 1,
+              "created_at": "2024-01-01T10:00:00.000000Z",
+              "updated_at": "2024-01-01T10:00:00.000000Z"
             }
-          } 
+          }
         headers: []
-        description: ''
+        description: 商品更新成功
         custom: []
     responseFields: []
     auth: []
@@ -392,22 +578,15 @@ endpoints:
   -
     httpMethods:
       - DELETE
-    uri: 'api/users/{id}'
+    uri: 'api/products/{id}'
     metadata:
-      groupName: 用戶管理
+      groupName: 商品管理
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 刪除指定用戶
-      description: |-
-        執行用戶刪除操作，成功後返回 204 No Content 回應。
-        權限檢查：需要通過 UserPolicy::delete() 方法
-
-        安全機制：
-        - 只有管理員可以刪除用戶
-        - 管理員不能刪除自己的帳號（在 UserPolicy 中檢查）
-        - 檢視者無法執行刪除操作
-      authenticated: true
+      title: 刪除指定的商品
+      description: ''
+      authenticated: false
       custom: []
     headers:
       Content-Type: application/json
@@ -415,17 +594,7 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the user.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      user:
-        name: user
-        description: '用戶的 ID。'
+        description: '商品的 ID。'
         required: true
         example: 1
         type: integer
@@ -434,8 +603,7 @@ endpoints:
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
-      user: 1
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -444,9 +612,9 @@ endpoints:
     responses:
       -
         status: 204
-        content: '{}'
+        content: ''
         headers: []
-        description: ''
+        description: 商品刪除成功
         custom: []
     responseFields: []
     auth: []
