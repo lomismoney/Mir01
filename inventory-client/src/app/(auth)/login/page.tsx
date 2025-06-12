@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
  * 登入頁面元件
@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
  * 3. 整合 AuthContext 的統一認證邏輯
  * 4. 自動重導向功能
  * 5. 無障礙支援 (Label 關聯、鍵盤導航)
+ * 6. 支援 redirect 參數，登入後跳轉到原始請求頁面
  */
 export default function LoginPage() {
   // 表單狀態管理
@@ -31,8 +32,19 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // 認證和路由 Hooks
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // 獲取 redirect 參數
+  const redirectPath = searchParams.get('redirect') || '/dashboard';
+  
+  // 已登入用戶自動重定向
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, redirectPath, router]);
 
   /**
    * 處理登入表單提交
@@ -43,7 +55,7 @@ export default function LoginPage() {
    * 1. 防止表單預設提交行為
    * 2. 設定提交中狀態
    * 3. 呼叫 AuthContext 的 login 方法
-   * 4. 成功時重導向到儀表板
+   * 4. 成功時重導向到原始請求頁面或儀表板
    * 5. 錯誤處理由 AuthContext 統一管理
    */
   const handleLogin = async (e: React.FormEvent) => {
@@ -54,8 +66,8 @@ export default function LoginPage() {
       // 使用 AuthContext 的統一登入方法
       await login({ username, password });
       
-      // 登入成功，重導向到儀表板
-      router.push('/dashboard');
+      // 登入成功，重導向到原始請求頁面或儀表板
+      router.push(redirectPath);
     } catch {
       // 錯誤處理已在 AuthContext 中統一管理
       // 錯誤已透過 toast 顯示給用戶，此處不需要額外處理
