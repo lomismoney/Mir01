@@ -15,6 +15,7 @@ alwaysApply: true
 IF 一項任務需要前端程式碼與一個新的或已修改的後端 API 端點互動，
 THEN 你必須暫停前端的實作，並首先引導我完成後端的開發與契約同步流程。
 嚴禁在前端 api.ts 類型定義更新之前，撰寫任何消費該 API 的前端邏輯。
+
 原則 2：先偵察，後行動 (Recon First, Act Second)
 IF 一項任務要求你新增檔案或大段的程式碼，
 THEN 你必須先請求讀取（Read）或搜索（Search）專案中的現有相關檔案，以充分理解當前上下文。
@@ -23,6 +24,28 @@ THEN 你必須先請求讀取（Read）或搜索（Search）專案中的現有�
 新增 UI 元件前 -> 檢查 src/components/
 新增 Hook 前 -> 檢查 src/hooks/
 新增工具函式前 -> 檢查 src/lib/
+
+原則 3：目錄和路徑檢查 (Path Verification Rule)
+IF 任何檔案操作（讀取、編輯、新增）或命令執行，
+THEN 你必須首先驗證以下事項：
+1. 當前的工作目錄是什麼（使用 pwd 指令或相關資訊檢查）
+2. 目標檔案的完整路徑是否正確
+3. 命令是否應在特定目錄下執行
+
+關鍵路徑檢查:
+- 後端檔案必須確認是在 inventory-api/ 目錄下操作
+- 前端檔案必須確認是在 inventory-client/ 目錄下操作
+- API 檔案路徑必須完整 (inventory-api/routes/api.php 而非 routes/api.php)
+- 不要在 Mir01/ 根目錄直接執行 npm 或 artisan 命令
+
+原則 4：環境配置檢查 (Environment Configuration Check)
+IF 涉及到環境配置或服務運行，
+THEN 必須確認：
+1. Laravel Sail (Docker) 環境中 DB_HOST 必須設為 mysql
+2. 不要在 Sail 環境中額外執行 artisan serve 命令
+3. 前端 API URL 配置為 http://localhost 而非 http://localhost:8000
+4. 所有命令和腳本在正確的環境和目錄下執行
+
 ## 第二章：技術規範（不可違背）
 
 後端規範 (Laravel)

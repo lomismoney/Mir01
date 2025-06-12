@@ -1,6 +1,9 @@
+'use client';
+
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import withAuth from '@/components/auth/withAuth';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -18,7 +21,7 @@ interface AppLayoutProps {
  * 
  * @param children - 子頁面內容
  */
-export default function AppLayout({ children }: AppLayoutProps) {
+function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider
       style={
@@ -35,4 +38,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </SidebarInset>
     </SidebarProvider>
   );
-} 
+}
+
+// 使用 withAuth HOC 進行權限保護，確保整個 (app) 路由組都受到保護
+export default withAuth(AppLayout); 

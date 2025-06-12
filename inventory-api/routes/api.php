@@ -12,6 +12,14 @@ use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Resources\Api\V1\UserResource;
 
 /**
+ * 健康檢查端點
+ * 用於確認 API 服務正常運行
+ */
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok', 'message' => 'API is running']);
+});
+
+/**
  * @group Authentication
  * 
  * 使用者登入
