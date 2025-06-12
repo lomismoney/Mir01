@@ -10,16 +10,11 @@ interface AppLayoutProps {
 }
 
 /**
- * 受保護應用區域的佈局組件
- * 
- * 提供完整的儀表板介面，包含：
- * 1. 側邊欄導覽 (AppSidebar)
- * 2. 頂部標題列 (SiteHeader)
- * 3. 主要內容區域
- * 
- * 此佈局僅應用於需要認證的應用功能頁面
- * 
- * @param children - 子頁面內容
+ * Provides the protected application layout with sidebar navigation, header, and main content area.
+ *
+ * Wraps authenticated pages in a dashboard interface, including an inset sidebar, a top header, and a content section.
+ *
+ * @param children - The main content to display within the layout.
  */
 function AppLayout({ children }: AppLayoutProps) {
   return (

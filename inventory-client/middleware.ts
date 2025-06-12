@@ -2,10 +2,12 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 /**
- * 中間件配置
- * 
- * 處理路由重定向和認證檢查
- * 提供基本的路由保護機制
+ * Handles authentication and route protection for incoming requests.
+ *
+ * Redirects users based on authentication status: unauthenticated users are sent to the login page, authenticated users are redirected away from the login page and root path to the dashboard, and all other requests proceed as normal.
+ *
+ * @param request - The incoming Next.js request object.
+ * @returns A {@link NextResponse} that either redirects the user or allows the request to continue.
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

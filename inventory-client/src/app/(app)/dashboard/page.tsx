@@ -5,9 +5,11 @@ import { SectionCards } from "@/components/section-cards"
 import withAuth from '@/components/auth/withAuth';
 
 /**
- * 儀表板頁面組件
- * 提供庫存管理系統的主要儀表板內容
- * 佈局結構由 (app)/layout.tsx 提供
+ * Renders the main dashboard page for the inventory management system.
+ *
+ * Displays dashboard summary cards and an interactive chart area within a structured layout.
+ *
+ * @remark This component is intended to be used within the layout provided by `(app)/layout.tsx` and is protected by authentication via a higher-order component.
  */
 function DashboardPage() {
   return (
