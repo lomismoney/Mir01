@@ -1,60 +1,55 @@
 'use client';
 
-import { ProductForm } from '@/components/products';
 import withAuth from '@/components/auth/withAuth';
-import { Package } from 'lucide-react';
-import { toast } from 'sonner';
-
-/**
- * 商品表單資料介面
- */
-interface ProductFormData {
-  name: string;
-  description?: string;
-  category_id?: number | null;
-}
+import { ProductForm } from '@/components/products/ProductForm';
+import { useRouter } from 'next/navigation';
 
 /**
  * 新增商品頁面
  * 
- * 提供完整的商品創建功能，包含：
- * - SPU 基本資訊設定
- * - 規格屬性選擇
- * - SKU 變體配置
+ * 此頁面作為 ProductForm 元件的容器，提供：
+ * - 頁面標題和描述
+ * - 表單成功提交後的導航處理
+ * - 取消操作的返回處理
  */
-function NewProductPage() {
+function CreateProductPage() {
+  const router = useRouter();
+
   /**
-   * 處理表單提交
+   * 表單成功提交後的回呼函式
+   * 成功後跳轉回商品列表頁面
    */
-  const handleSubmit = (formData: ProductFormData) => {
-    console.log('提交的表單資料：', formData);
-    console.log('當前 variants 狀態將在下一步開發中可用');
-    toast.success('商品資料已接收，開發中...');
-    // TODO: 整合後端 API 呼叫
+  const handleFormSubmit = () => {
+    // 成功後，可以跳轉回商品列表頁
+    router.push('/products');
+  };
+
+  /**
+   * 取消操作處理函式
+   * 返回商品列表頁面
+   */
+  const handleCancel = () => {
+    router.back();
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* 頁面標題 */}
-      <div className="flex items-center gap-3">
-        <Package className="h-6 w-6" />
-        <div>
-          <h1 className="text-2xl font-bold">新增商品</h1>
-          <p className="text-muted-foreground">
-            建立新的商品，支援單規格和多規格商品類型
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      {/* 頁面標題區域 */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">新增商品</h1>
+        <p className="text-muted-foreground mt-2">
+          建立新的商品，支援單規格和多規格商品類型。
+        </p>
       </div>
-
-      {/* 商品表單 */}
-      <ProductForm
-        title="新增商品"
-        description="請填寫商品的基本資訊和規格定義"
-        onSubmit={handleSubmit}
-        isLoading={false}
+      
+      {/* 商品表單元件 */}
+      <ProductForm 
+        onSubmitSuccess={handleFormSubmit}
+        onCancel={handleCancel}
       />
     </div>
   );
 }
 
-export default withAuth(NewProductPage); 
+// 使用 withAuth 保護此頁面
+export default withAuth(CreateProductPage); 

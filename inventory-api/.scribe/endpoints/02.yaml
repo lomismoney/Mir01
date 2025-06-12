@@ -1,18 +1,18 @@
-name: Endpoints
+name: Authentication
 description: ''
 endpoints:
   -
     httpMethods:
-      - POST
-    uri: api/purchases
+      - GET
+    uri: api/user
     metadata:
-      groupName: Endpoints
+      groupName: Authentication
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Store a newly created resource in storage.'
+      title: ''
       description: ''
-      authenticated: false
+      authenticated: true
       custom: []
     headers:
       Content-Type: application/json
@@ -26,209 +26,11 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 201
-        content: |-
-          {
-           "id": 1,
-           "order_number": "PO-20240101-001",
-           "total_amount": 150.00,
-           "status": "pending",
-           "purchased_at": "2024-01-01T00:00:00+08:00",
-           "items": []
-          }
+        status: 200
+        content: '{"data":{"id":17,"name":"Lonny Ankunding","username":"eloisa.harber","role":"viewer","role_display":"\u6aa2\u8996\u8005","is_admin":false,"created_at":"2025-06-12T08:33:30.000000Z","updated_at":"2025-06-12T08:33:30.000000Z"}}'
         headers: []
         description: ''
         custom: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - POST
-    uri: api/categories
-    metadata:
-      groupName: Endpoints
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 儲存新建立的分類資源
-      description: |-
-        使用 StoreCategoryRequest 進行數據驗證，確保：
-        - 分類名稱必填且不超過255字符
-        - 父分類ID必須存在於資料表中
-        - 描述為可選欄位
-      authenticated: false
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      name:
-        name: name
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      description:
-        name: description
-        description: ''
-        required: false
-        example: 'Eius et animi quos velit et.'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-      parent_id:
-        name: parent_id
-        description: 'The <code>id</code> of an existing record in the categories table.'
-        required: false
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-    cleanBodyParameters:
-      name: b
-      description: 'Eius et animi quos velit et.'
-      parent_id: 16
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - PUT
-      - PATCH
-    uri: 'api/categories/{id}'
-    metadata:
-      groupName: Endpoints
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 更新指定的分類資源
-      description: |-
-        使用 UpdateCategoryRequest 進行數據驗證，包含：
-        - 部分更新支援（sometimes 規則）
-        - 防止自我循環的業務邏輯保護
-        - 確保父分類存在性檢查
-      authenticated: false
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
-        name: id
-        description: 'The ID of the category.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-    cleanUrlParameters:
-      id: 16
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      name:
-        name: name
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      description:
-        name: description
-        description: ''
-        required: false
-        example: 'Eius et animi quos velit et.'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-      parent_id:
-        name: parent_id
-        description: 'The <code>id</code> of an existing record in the categories table.'
-        required: false
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-    cleanBodyParameters:
-      name: b
-      description: 'Eius et animi quos velit et.'
-      parent_id: 16
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - DELETE
-    uri: 'api/categories/{id}'
-    metadata:
-      groupName: Endpoints
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 刪除指定的分類資源
-      description: |-
-        執行軟刪除操作，根據資料表外鍵約束設定：
-        - 當分類被刪除時，其子分類也會被級聯刪除
-        - 關聯的商品 category_id 會被設為 null
-      authenticated: false
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
-        name: id
-        description: 'The ID of the category.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-    cleanUrlParameters:
-      id: 16
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
     responseFields: []
     auth: []
     controller: null

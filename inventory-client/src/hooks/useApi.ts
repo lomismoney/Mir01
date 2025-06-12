@@ -145,32 +145,27 @@ export function useDeleteProduct() {
 }
 
 // 導入由 openapi-typescript 生成的精確類型
-// 舊的批量刪除類型定義已移除，將在 API 契約同步後重新生成
+type BatchDeleteProductsRequestBody = import('@/types/api').paths["/api/products/batch-delete"]["post"]["requestBody"]["content"]["application/json"];
 
 /**
- * 批量刪除商品的 Mutation (戰術升級版 - 使用 POST 方法)
- * 
- * 功能說明：
- * 1. 使用語義更明確的 POST /api/products/batch-delete 端點
- * 2. 統一參數名為 ids，提供更直觀的 API 介面
- * 3. 返回 204 No Content，符合 RESTful 設計標準
- * 4. 自動失效相關查詢緩存，確保資料一致性
+ * 批量刪除商品的 Mutation (最終版)
  */
 export function useDeleteMultipleProducts() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { ids: number[] }) => {
-      // 呼叫新的 POST 端點
+    mutationFn: async (body: BatchDeleteProductsRequestBody) => {
+      // 注意：我們之前已將此路由重構為 POST
       const { error } = await apiClient.POST('/api/products/batch-delete', {
         body,
       });
 
       if (error) {
-        const errorMessage = (error as { detail?: string[] })?.detail?.[0] || '刪除商品失敗';
+        const errorMessage = (error as any)?.detail?.[0] || '刪除商品失敗';
         throw new Error(errorMessage);
       }
     },
     onSuccess: () => {
+      // 讓 'products' 相關的所有查詢都失效
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });

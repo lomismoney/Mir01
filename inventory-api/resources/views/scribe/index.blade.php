@@ -81,7 +81,11 @@
                     <a href="#endpoints">Endpoints</a>
                 </li>
                                     <ul id="tocify-subheader-endpoints" class="tocify-subheader">
-                                                    <li class="tocify-item level-2" data-unique="endpoints-POSTapi-purchases">
+                                                    <li class="tocify-item level-2" data-unique="endpoints-GETapi-health">
+                                <a href="#endpoints-GETapi-health">健康檢查端點
+用於確認 API 服務正常運行</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="endpoints-POSTapi-purchases">
                                 <a href="#endpoints-POSTapi-purchases">Store a newly created resource in storage.</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="endpoints-GETapi-categories">
@@ -133,6 +137,9 @@
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="-GETapi-products">
                                 <a href="#-GETapi-products">顯示所有商品列表，支援分頁、排序和篩選功能</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="-POSTapi-products">
+                                <a href="#-POSTapi-products">建立新商品 (SPU/SKU)</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="-GETapi-products--id-">
                                 <a href="#-GETapi-products--id-">顯示指定的商品</a>
@@ -218,7 +225,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: June 11, 2025</li>
+        <li>Last updated: June 12, 2025</li>
     </ul>
 </div>
 
@@ -285,14 +292,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 14,
+        &quot;id&quot;: 17,
         &quot;name&quot;: &quot;Lonny Ankunding&quot;,
         &quot;username&quot;: &quot;eloisa.harber&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-11T05:51:06.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-11T05:51:06.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-12T08:33:30.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-12T08:33:30.000000Z&quot;
     }
 }</code>
  </pre>
@@ -372,7 +379,133 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
     
 
-                                <h2 id="endpoints-POSTapi-purchases">Store a newly created resource in storage.</h2>
+                                <h2 id="endpoints-GETapi-health">健康檢查端點
+用於確認 API 服務正常運行</h2>
+
+<p>
+</p>
+
+
+
+<span id="example-requests-GETapi-health">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/health" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/health"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-health">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: *
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;message&quot;: &quot;API is running&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-health" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-health"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-health"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-health" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-health">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-health" data-method="GET"
+      data-path="api/health"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-health', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-health"
+                    onclick="tryItOut('GETapi-health');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-health"
+                    onclick="cancelTryOut('GETapi-health');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-health"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/health</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-health"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-health"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="endpoints-POSTapi-purchases">Store a newly created resource in storage.</h2>
 
 <p>
 </p>
@@ -2290,6 +2423,332 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                 </form>
 
+                    <h2 id="-POSTapi-products">建立新商品 (SPU/SKU)</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-POSTapi-products">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/products" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"name\": \"\\\"經典棉質T-shirt\\\"\",
+    \"description\": \"\\\"100% 純棉\\\"\",
+    \"category_id\": 1,
+    \"attributes\": [
+        1,
+        2
+    ],
+    \"variants\": [
+        {
+            \"sku\": \"HEADPHONE-BT-RED-L\",
+            \"price\": 199.99,
+            \"attribute_value_ids\": [
+                17
+            ]
+        }
+    ]
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/products"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "name": "\"經典棉質T-shirt\"",
+    "description": "\"100% 純棉\"",
+    "category_id": 1,
+    "attributes": [
+        1,
+        2
+    ],
+    "variants": [
+        {
+            "sku": "HEADPHONE-BT-RED-L",
+            "price": 199.99,
+            "attribute_value_ids": [
+                17
+            ]
+        }
+    ]
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-products">
+            <blockquote>
+            <p>Example response (201):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;測試產品&quot;,
+        &quot;description&quot;: &quot;這是一個測試產品的描述&quot;,
+        &quot;sku&quot;: &quot;TEST-SKU-001&quot;,
+        &quot;price&quot;: 199.99,
+        &quot;cost&quot;: 99.99,
+        &quot;quantity&quot;: 50,
+        &quot;category_id&quot;: 1,
+        &quot;created_at&quot;: &quot;2023-10-15T08:30:45.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2023-10-15T08:30:45.000000Z&quot;,
+        &quot;category&quot;: {
+            &quot;id&quot;: 1,
+            &quot;name&quot;: &quot;電子產品&quot;,
+            &quot;description&quot;: &quot;各類電子產品&quot;,
+            &quot;created_at&quot;: &quot;2023-10-15T08:30:45.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2023-10-15T08:30:45.000000Z&quot;
+        },
+        &quot;attributes&quot;: [
+            {
+                &quot;id&quot;: 1,
+                &quot;name&quot;: &quot;顏色&quot;,
+                &quot;value&quot;: &quot;黑色&quot;
+            },
+            {
+                &quot;id&quot;: 2,
+                &quot;name&quot;: &quot;尺寸&quot;,
+                &quot;value&quot;: &quot;中號&quot;
+            }
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-products" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-products"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-products"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-products" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-products">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-products" data-method="POST"
+      data-path="api/products"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-products', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-products"
+                    onclick="tryItOut('POSTapi-products');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-products"
+                    onclick="cancelTryOut('POSTapi-products');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-products"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/products</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-products"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-products"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>name</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="name"                data-endpoint="POSTapi-products"
+               value=""經典棉質T-shirt""
+               data-component="body">
+    <br>
+<p>SPU 的名稱。 Example: <code>"經典棉質T-shirt"</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="description"                data-endpoint="POSTapi-products"
+               value=""100% 純棉""
+               data-component="body">
+    <br>
+<p>SPU 的描述。 Example: <code>"100% 純棉"</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>category_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="category_id"                data-endpoint="POSTapi-products"
+               value="1"
+               data-component="body">
+    <br>
+<p>分類ID。 Example: <code>1</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>integer[]</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="attributes[0]"                data-endpoint="POSTapi-products"
+               data-component="body">
+        <input type="number" style="display: none"
+               name="attributes[1]"                data-endpoint="POSTapi-products"
+               data-component="body">
+    <br>
+<p>該 SPU 擁有的屬性 ID 陣列。</p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>variants</code></b>&nbsp;&nbsp;
+<small>object[]</small>&nbsp;
+ &nbsp;
+<br>
+<p>SKU 變體陣列，至少需要一項。</p>
+            </summary>
+                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>sku</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="variants.0.sku"                data-endpoint="POSTapi-products"
+               value="HEADPHONE-BT-RED-L"
+               data-component="body">
+    <br>
+<p>單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters. Example: <code>HEADPHONE-BT-RED-L</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>price</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.0.price"                data-endpoint="POSTapi-products"
+               value="199.99"
+               data-component="body">
+    <br>
+<p>單一 SKU 變體的價格。. Must be at least 0. Example: <code>199.99</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>attribute_value_ids</code></b>&nbsp;&nbsp;
+<small>integer[]</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.0.attribute_value_ids[0]"                data-endpoint="POSTapi-products"
+               data-component="body">
+        <input type="number" style="display: none"
+               name="variants.0.attribute_value_ids[1]"                data-endpoint="POSTapi-products"
+               data-component="body">
+    <br>
+<p>The <code>id</code> of an existing record in the attribute_values table.</p>
+                    </div>
+                                                                <div style=" margin-left: 14px; clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>*</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+<br>
+
+            </summary>
+                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>sku</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="variants.*.sku"                data-endpoint="POSTapi-products"
+               value=""TSHIRT-RED-S""
+               data-component="body">
+    <br>
+<p>SKU 的唯一編號。 Example: <code>"TSHIRT-RED-S"</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>price</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.*.price"                data-endpoint="POSTapi-products"
+               value="299.99"
+               data-component="body">
+    <br>
+<p>SKU 的價格。 Example: <code>299.99</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>attribute_value_ids</code></b>&nbsp;&nbsp;
+<small>integer[]</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.*.attribute_value_ids[0]"                data-endpoint="POSTapi-products"
+               data-component="body">
+        <input type="number" style="display: none"
+               name="variants.*.attribute_value_ids[1]"                data-endpoint="POSTapi-products"
+               data-component="body">
+    <br>
+<p>組成此 SKU 的屬性值 ID 陣列。</p>
+                    </div>
+                                    </details>
+        </div>
+                                        </details>
+        </div>
+        </form>
+
                     <h2 id="-GETapi-products--id-">顯示指定的商品</h2>
 
 <p>
@@ -3579,7 +4038,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"name\": \"vmqeopfuudtdsufvyvddq\",
     \"username\": \"amniihfqcoynlazghdtqt\",
     \"password\": \"t(!Cs\'YAKYLk4&gt;S\",
-    \"role\": \"admin\"
+    \"role\": \"viewer\"
 }"
 </code></pre></div>
 
@@ -3598,7 +4057,7 @@ let body = {
     "name": "vmqeopfuudtdsufvyvddq",
     "username": "amniihfqcoynlazghdtqt",
     "password": "t(!Cs'YAKYLk4&gt;S",
-    "role": "admin"
+    "role": "viewer"
 };
 
 fetch(url, {
@@ -3738,10 +4197,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="role"                data-endpoint="POSTapi-users"
-               value="admin"
+               value="viewer"
                data-component="body">
     <br>
-<p>Example: <code>admin</code></p>
+<p>Example: <code>viewer</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>admin</code></li> <li><code>viewer</code></li></ul>
         </div>

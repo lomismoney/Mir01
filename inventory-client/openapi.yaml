@@ -47,21 +47,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 14
+                    id: 17
                     name: 'Lonny Ankunding'
                     username: eloisa.harber
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-11T05:51:06.000000Z'
-                    updated_at: '2025-06-11T05:51:06.000000Z'
+                    created_at: '2025-06-12T08:33:30.000000Z'
+                    updated_at: '2025-06-12T08:33:30.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 14
+                        example: 17
                       name:
                         type: string
                         example: 'Lonny Ankunding'
@@ -79,12 +79,38 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-11T05:51:06.000000Z'
+                        example: '2025-06-12T08:33:30.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-11T05:51:06.000000Z'
+                        example: '2025-06-12T08:33:30.000000Z'
       tags:
         - Authentication
+  /api/health:
+    get:
+      summary: "健康檢查端點\n用於確認 API 服務正常運行"
+      operationId: API
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: ok
+                  message: 'API is running'
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  message:
+                    type: string
+                    example: 'API is running'
+      tags:
+        - Endpoints
+      security: []
   /api/purchases:
     post:
       summary: 'Store a newly created resource in storage.'
@@ -596,6 +622,213 @@ paths:
       tags:
         - 商品管理
       security: []
+    post:
+      summary: '建立新商品 (SPU/SKU)'
+      operationId: SPUSKU
+      description: ''
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: 測試產品
+                    description: 這是一個測試產品的描述
+                    sku: TEST-SKU-001
+                    price: 199.99
+                    cost: 99.99
+                    quantity: 50
+                    category_id: 1
+                    created_at: '2023-10-15T08:30:45.000000Z'
+                    updated_at: '2023-10-15T08:30:45.000000Z'
+                    category:
+                      id: 1
+                      name: 電子產品
+                      description: 各類電子產品
+                      created_at: '2023-10-15T08:30:45.000000Z'
+                      updated_at: '2023-10-15T08:30:45.000000Z'
+                    attributes:
+                      -
+                        id: 1
+                        name: 顏色
+                        value: 黑色
+                      -
+                        id: 2
+                        name: 尺寸
+                        value: 中號
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 測試產品
+                      description:
+                        type: string
+                        example: 這是一個測試產品的描述
+                      sku:
+                        type: string
+                        example: TEST-SKU-001
+                      price:
+                        type: number
+                        example: 199.99
+                      cost:
+                        type: number
+                        example: 99.99
+                      quantity:
+                        type: integer
+                        example: 50
+                      category_id:
+                        type: integer
+                        example: 1
+                      created_at:
+                        type: string
+                        example: '2023-10-15T08:30:45.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2023-10-15T08:30:45.000000Z'
+                      category:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 電子產品
+                          description:
+                            type: string
+                            example: 各類電子產品
+                          created_at:
+                            type: string
+                            example: '2023-10-15T08:30:45.000000Z'
+                          updated_at:
+                            type: string
+                            example: '2023-10-15T08:30:45.000000Z'
+                      attributes:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            name: 顏色
+                            value: 黑色
+                          -
+                            id: 2
+                            name: 尺寸
+                            value: 中號
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 顏色
+                            value:
+                              type: string
+                              example: 黑色
+      tags:
+        - 商品管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'SPU 的名稱。'
+                  example: '"經典棉質T-shirt"'
+                  nullable: false
+                description:
+                  type: string
+                  description: 'SPU 的描述。'
+                  example: '"100% 純棉"'
+                  nullable: true
+                category_id:
+                  type: integer
+                  description: 分類ID。
+                  example: 1
+                  nullable: true
+                attributes:
+                  type: array
+                  description: '該 SPU 擁有的屬性 ID 陣列。'
+                  example:
+                    - 1
+                    - 2
+                  items:
+                    type: integer
+                variants:
+                  type: array
+                  description: 'SKU 變體陣列，至少需要一項。'
+                  example:
+                    - []
+                  items:
+                    type: object
+                    properties:
+                      sku:
+                        type: string
+                        description: '單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters.'
+                        example: HEADPHONE-BT-RED-L
+                        nullable: false
+                      price:
+                        type: number
+                        description: '單一 SKU 變體的價格。. Must be at least 0.'
+                        example: 199.99
+                        nullable: false
+                      attribute_value_ids:
+                        type: array
+                        description: 'The <code>id</code> of an existing record in the attribute_values table.'
+                        example:
+                          - 17
+                        items:
+                          type: integer
+                      '*':
+                        type: object
+                        description: ''
+                        example:
+                          sku: '"TSHIRT-RED-S"'
+                        nullable: false
+                        properties:
+                          sku:
+                            type: string
+                            description: 'SKU 的唯一編號。'
+                            example: '"TSHIRT-RED-S"'
+                            nullable: false
+                          price:
+                            type: number
+                            description: 'SKU 的價格。'
+                            example: 299.99
+                            nullable: false
+                          attribute_value_ids:
+                            type: array
+                            description: '組成此 SKU 的屬性值 ID 陣列。'
+                            example:
+                              - 10
+                              - 25
+                            items:
+                              type: integer
+                        required:
+                          - sku
+                          - price
+                          - attribute_value_ids
+                    required:
+                      - sku
+                      - price
+              required:
+                - name
+                - attributes
+                - variants
   '/api/products/{id}':
     get:
       summary: 顯示指定的商品
@@ -1152,7 +1385,7 @@ paths:
                 role:
                   type: string
                   description: ''
-                  example: admin
+                  example: viewer
                   nullable: false
                   enum:
                     - admin

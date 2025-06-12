@@ -1,101 +1,20 @@
-name: 認證管理
+name: Endpoints
 description: ''
 endpoints:
   -
     httpMethods:
-      - POST
-    uri: api/login
+      - GET
+    uri: api/health
     metadata:
-      groupName: 認證管理
+      groupName: Endpoints
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 處理使用者登入請求
+      title: |-
+        健康檢查端點
+        用於確認 API 服務正常運行
       description: ''
       authenticated: false
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      username:
-        name: username
-        description: 使用者名稱
-        required: true
-        example: superadmin
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      password:
-        name: password
-        description: 密碼
-        required: true
-        example: password
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-    cleanBodyParameters:
-      username: superadmin
-      password: password
-    fileParameters: []
-    responses:
-      -
-        status: 200
-        content: |-
-          {
-            "user": {
-              "id": 1,
-              "name": "Super Admin",
-              "username": "superadmin",
-              "role": "admin",
-              "role_display": "管理員",
-              "is_admin": true,
-              "created_at": "2024-01-01T00:00:00.000000Z",
-              "updated_at": "2024-01-01T00:00:00.000000Z"
-            },
-            "token": "1|abcdefghijklmnopqrstuvwxyz"
-          }
-        headers: []
-        description: ''
-        custom: []
-      -
-        status: 422
-        content: |-
-          {
-            "message": "The given data was invalid.",
-            "errors": {
-              "username": ["您提供的憑證不正確。"]
-            }
-          }
-        headers: []
-        description: ''
-        custom: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - POST
-    uri: api/logout
-    metadata:
-      groupName: 認證管理
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 處理使用者登出請求
-      description: ''
-      authenticated: true
       custom: []
     headers:
       Content-Type: application/json
@@ -109,11 +28,343 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 204
-        content: ''
-        headers: []
-        description: 成功登出
+        status: 200
+        content: '{"status":"ok","message":"API is running"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
         custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/purchases
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Store a newly created resource in storage.'
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+           "id": 1,
+           "order_number": "PO-20240101-001",
+           "total_amount": 150.00,
+           "status": "pending",
+           "purchased_at": "2024-01-01T00:00:00+08:00",
+           "items": []
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/categories
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 顯示分類列表
+      description: |-
+        優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、
+        高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。
+
+        範例：
+        - json[''] 或 json[null] 就是所有頂層分類
+        - json['1'] 就是 id 為 1 的分類下的所有子分類
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/categories
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 儲存新建立的分類資源
+      description: |-
+        使用 StoreCategoryRequest 進行數據驗證，確保：
+        - 分類名稱必填且不超過255字符
+        - 父分類ID必須存在於資料表中
+        - 描述為可選欄位
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      description:
+        name: description
+        description: ''
+        required: false
+        example: 'Dolores dolorum amet iste laborum eius est dolor.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      parent_id:
+        name: parent_id
+        description: 'The <code>id</code> of an existing record in the categories table.'
+        required: false
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      description: 'Dolores dolorum amet iste laborum eius est dolor.'
+      parent_id: 17
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/categories/{id}'
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 顯示指定的分類資源
+      description: '返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出'
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the category.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/categories/{id}'
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 更新指定的分類資源
+      description: |-
+        使用 UpdateCategoryRequest 進行數據驗證，包含：
+        - 部分更新支援（sometimes 規則）
+        - 防止自我循環的業務邏輯保護
+        - 確保父分類存在性檢查
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the category.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      description:
+        name: description
+        description: ''
+        required: false
+        example: 'Dolores dolorum amet iste laborum eius est dolor.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      parent_id:
+        name: parent_id
+        description: 'The <code>id</code> of an existing record in the categories table.'
+        required: false
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      description: 'Dolores dolorum amet iste laborum eius est dolor.'
+      parent_id: 17
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/categories/{id}'
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 刪除指定的分類資源
+      description: |-
+        執行軟刪除操作，根據資料表外鍵約束設定：
+        - 當分類被刪除時，其子分類也會被級聯刪除
+        - 關聯的商品 category_id 會被設為 null
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the category.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
     responseFields: []
     auth: []
     controller: null

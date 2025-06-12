@@ -20,6 +20,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 健康檢查端點
+         *     用於確認 API 服務正常運行 */
+        get: operations["API"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/purchases": {
         parameters: {
             query?: never;
@@ -609,7 +627,8 @@ export interface paths {
             };
         };
         put?: never;
-        post?: never;
+        /** 建立新商品 (SPU/SKU) */
+        post: operations["SPUSKU"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1172,7 +1191,7 @@ export interface paths {
                          */
                         password: string;
                         /**
-                         * @example admin
+                         * @example viewer
                          * @enum {string}
                          */
                         role: "admin" | "viewer";
@@ -1563,7 +1582,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 14 */
+                            /** @example 17 */
                             id?: number;
                             /** @example Lonny Ankunding */
                             name?: string;
@@ -1575,11 +1594,35 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-11T05:51:06.000000Z */
+                            /** @example 2025-06-12T08:33:30.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-11T05:51:06.000000Z */
+                            /** @example 2025-06-12T08:33:30.000000Z */
                             updated_at?: string;
                         };
+                    };
+                };
+            };
+        };
+    };
+    API: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example ok */
+                        status?: string;
+                        /** @example API is running */
+                        message?: string;
                     };
                 };
             };
@@ -1612,6 +1655,156 @@ export interface operations {
                         purchased_at?: string;
                         /** @example [] */
                         items?: unknown[];
+                    };
+                };
+            };
+        };
+    };
+    SPUSKU: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description SPU 的名稱。
+                     * @example "經典棉質T-shirt"
+                     */
+                    name: string;
+                    /**
+                     * @description SPU 的描述。
+                     * @example "100% 純棉"
+                     */
+                    description?: string | null;
+                    /**
+                     * @description 分類ID。
+                     * @example 1
+                     */
+                    category_id?: number | null;
+                    /**
+                     * @description 該 SPU 擁有的屬性 ID 陣列。
+                     * @example [
+                     *       1,
+                     *       2
+                     *     ]
+                     */
+                    attributes: number[];
+                    /**
+                     * @description SKU 變體陣列，至少需要一項。
+                     * @example [
+                     *       []
+                     *     ]
+                     */
+                    variants: {
+                        /**
+                         * @description 單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters.
+                         * @example HEADPHONE-BT-RED-L
+                         */
+                        sku: string;
+                        /**
+                         * @description 單一 SKU 變體的價格。. Must be at least 0.
+                         * @example 199.99
+                         */
+                        price: number;
+                        /**
+                         * @description The <code>id</code> of an existing record in the attribute_values table.
+                         * @example [
+                         *       17
+                         *     ]
+                         */
+                        attribute_value_ids?: number[];
+                        /** @example {
+                         *       "sku": "\"TSHIRT-RED-S\""
+                         *     } */
+                        "*"?: {
+                            /**
+                             * @description SKU 的唯一編號。
+                             * @example "TSHIRT-RED-S"
+                             */
+                            sku: string;
+                            /**
+                             * @description SKU 的價格。
+                             * @example 299.99
+                             */
+                            price: number;
+                            /**
+                             * @description 組成此 SKU 的屬性值 ID 陣列。
+                             * @example [
+                             *       10,
+                             *       25
+                             *     ]
+                             */
+                            attribute_value_ids: number[];
+                        };
+                    }[];
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 測試產品 */
+                            name?: string;
+                            /** @example 這是一個測試產品的描述 */
+                            description?: string;
+                            /** @example TEST-SKU-001 */
+                            sku?: string;
+                            /** @example 199.99 */
+                            price?: number;
+                            /** @example 99.99 */
+                            cost?: number;
+                            /** @example 50 */
+                            quantity?: number;
+                            /** @example 1 */
+                            category_id?: number;
+                            /** @example 2023-10-15T08:30:45.000000Z */
+                            created_at?: string;
+                            /** @example 2023-10-15T08:30:45.000000Z */
+                            updated_at?: string;
+                            category?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 電子產品 */
+                                name?: string;
+                                /** @example 各類電子產品 */
+                                description?: string;
+                                /** @example 2023-10-15T08:30:45.000000Z */
+                                created_at?: string;
+                                /** @example 2023-10-15T08:30:45.000000Z */
+                                updated_at?: string;
+                            };
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "name": "顏色",
+                             *         "value": "黑色"
+                             *       },
+                             *       {
+                             *         "id": 2,
+                             *         "name": "尺寸",
+                             *         "value": "中號"
+                             *       }
+                             *     ] */
+                            attributes?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 顏色 */
+                                name?: string;
+                                /** @example 黑色 */
+                                value?: string;
+                            }[];
+                        };
                     };
                 };
             };

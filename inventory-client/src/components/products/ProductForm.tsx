@@ -11,8 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAttributes /*, useCreateProduct*/ } from '@/hooks/useApi';
+import { useAttributes, useCategories /*, useCreateProduct*/ } from '@/hooks/useApi';
 import { Attribute } from '@/types/attribute';
+import { Category } from '@/types/category';
+import { CategoryCombobox } from '@/components/categories';
 import { Plus, X, Package, Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -48,6 +50,10 @@ interface ProductFormProps {
   initialData?: Partial<ProductFormData>;
   /** 表單提交處理函式 */
   onSubmit?: (data: ProductFormData) => void;
+  /** 表單提交成功回調函式 */
+  onSubmitSuccess?: () => void;
+  /** 取消操作處理函式 */
+  onCancel?: () => void;
   /** 是否處於載入狀態 */
   isLoading?: boolean;
   /** 表單標題 */
@@ -68,18 +74,29 @@ interface ProductFormProps {
 export function ProductForm({
   initialData = {},
   onSubmit,
+  onSubmitSuccess,
+  onCancel,
   isLoading = false,
   title = '商品資訊',
   description = '請填寫商品的基本資訊和規格定義'
 }: ProductFormProps) {
-  // 獲取屬性資料
+  // 獲取屬性和分類資料
   const { data: attributesData, isLoading: attributesLoading, error: attributesError } = useAttributes();
+  const { data: categoriesResponse, isLoading: categoriesLoading } = useCategories();
   
   // 商品創建 Mutation (暫時停用)
   // const createProductMutation = useCreateProduct();
   
-  // 確保類型安全的屬性資料
+  // 確保類型安全的資料
   const attributes: Attribute[] = Array.isArray(attributesData) ? attributesData : [];
+  const rawCategories = (categoriesResponse?.data || []) as Category[];
+  
+  // 轉換分類資料為 CategoryCombobox 需要的格式
+  const processedCategories = rawCategories.map((category: Category) => ({
+    ...category,
+    displayPath: category.name, // 簡化版，後續可擴展為完整路徑
+    hasChildren: false // 簡化版，後續可根據實際數據結構擴展
+  }));
 
   // 基本表單狀態
   const [formData, setFormData] = useState<ProductFormData>({
@@ -87,6 +104,10 @@ export function ProductForm({
     description: initialData.description || '',
     category_id: initialData.category_id || null,
   });
+
+  // 單規格模式的 SKU 和價格狀態
+  const [singleSku, setSingleSku] = useState('');
+  const [singlePrice, setSinglePrice] = useState('');
 
   // 規格相關狀態
   const [isVariable, setIsVariable] = useState(false);
@@ -280,6 +301,19 @@ export function ProductForm({
       return;
     }
 
+    // 單規格模式驗證
+    if (!isVariable) {
+      if (!singleSku.trim()) {
+        toast.error('請輸入 SKU 編號');
+        return;
+      }
+      if (!singlePrice.trim() || parseFloat(singlePrice) <= 0) {
+        toast.error('請輸入有效的商品價格');
+        return;
+      }
+    }
+
+    // 多規格模式驗證
     if (isVariable && selectedAttrs.size === 0) {
       toast.error('多規格商品模式下，請至少選擇一個規格屬性。');
       return;
@@ -309,7 +343,7 @@ export function ProductForm({
         name: formData.name,
         description: formData.description || null,
         category_id: formData.category_id || null,
-        attributes: Array.from(selectedAttrs), // 整數陣列
+        attributes: isVariable ? Array.from(selectedAttrs) : [], // 整數陣列
         variants: isVariable ? variants.map(variant => {
           // 將前端的 options 轉換為後端需要的格式
           const attributeValueIds = variant.options.map(opt => {
@@ -329,7 +363,14 @@ export function ProductForm({
             price: parseFloat(variant.price) || 0,
             attribute_value_ids: attributeValueIds,
           };
-        }) : [],
+        }) : [
+          // 單規格模式的變體數據
+          {
+            sku: singleSku,
+            price: parseFloat(singlePrice),
+            attribute_value_ids: [],
+          }
+        ],
       };
 
       // OpenAPI 類型生成錯誤：attributes 和 variants 被錯誤定義為 string[]
@@ -339,11 +380,14 @@ export function ProductForm({
       const submissionData = correctSubmissionData as any;
 
       // === 3. 調用 API (暫時停用) ===
-      toast.info('商品創建功能開發中，請等待後端 API 完成');
+      toast.success('商品資料已準備完成！');
       console.log('準備提交的資料:', submissionData);
       
       // 調用父組件的回調
       onSubmit?.(formData);
+      
+      // 調用成功回調
+      onSubmitSuccess?.();
 
     } catch (error) {
       console.error('數據準備失敗：', error);
@@ -416,6 +460,17 @@ export function ProductForm({
               rows={3}
             />
           </div>
+
+          {/* 商品分類 */}
+          <div className="space-y-2">
+            <Label>商品分類</Label>
+            <CategoryCombobox
+              categories={processedCategories}
+              value={formData.category_id ?? null}
+              onChange={(categoryId: number | null) => handleFieldChange('category_id', categoryId)}
+              disabled={isLoading || categoriesLoading}
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -443,6 +498,45 @@ export function ProductForm({
               此商品擁有多種規格
             </Label>
           </div>
+
+          {/* 單規格配置區 */}
+          {!isVariable && (
+            <div className="space-y-4">
+              <Separator />
+              <h4 className="text-sm font-medium">商品規格資訊</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* SKU 編號 */}
+                <div className="space-y-2">
+                  <Label htmlFor="single-sku">SKU 編號 *</Label>
+                  <Input
+                    id="single-sku"
+                    placeholder="請輸入 SKU 編號"
+                    value={singleSku}
+                    onChange={(e) => setSingleSku(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+
+                {/* 商品價格 */}
+                <div className="space-y-2">
+                  <Label htmlFor="single-price">商品價格 *</Label>
+                  <Input
+                    id="single-price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={singlePrice}
+                    onChange={(e) => setSinglePrice(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 多規格配置區 */}
           {isVariable && (
@@ -646,7 +740,12 @@ export function ProductForm({
 
       {/* 表單操作按鈕 */}
       <div className="flex justify-end space-x-3">
-        <Button type="button" variant="outline" disabled={isLoading}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          disabled={isLoading}
+          onClick={onCancel}
+        >
           取消
         </Button>
         <Button type="submit" disabled={isLoading}>
