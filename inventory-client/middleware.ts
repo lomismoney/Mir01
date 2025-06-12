@@ -2,10 +2,12 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 /**
- * 中間件配置
- * 
- * 處理路由重定向和認證檢查
- * 提供基本的路由保護機制
+ * Handles authentication and route protection for incoming requests.
+ *
+ * Redirects users based on authentication status: unauthenticated users are sent to the login page, authenticated users are redirected away from the login page and root path to the dashboard, and all other requests proceed as normal.
+ *
+ * @param request - The incoming Next.js request object.
+ * @returns A {@link NextResponse} that either redirects the user or allows the request to continue.
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -16,21 +18,31 @@ export function middleware(request: NextRequest) {
   // 檢查是否為公開路由
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
   
-  // 如果訪問根路徑，重定向到 dashboard
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
+  // 獲取認證 token
+  const token = request.cookies.get('authToken')?.value || 
+                request.headers.get('authorization')
   
-  // 對於受保護的路由，檢查是否有 token
-  // 注意：這是基本檢查，真正的認證驗證在客戶端進行
-  if (!isPublicRoute && pathname.startsWith('/dashboard')) {
-    const token = request.cookies.get('authToken')?.value || 
-                  request.headers.get('authorization')
-    
-    // 如果沒有 token 且不是登入頁面，重定向到登入頁
-    if (!token) {
+  // 如果訪問根路徑，根據是否有 token 決定重定向目標
+  if (pathname === '/') {
+    if (token) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    } else {
       return NextResponse.redirect(new URL('/login', request.url))
     }
+  }
+  
+  // 對於非公開路由，檢查是否有 token
+  if (!isPublicRoute) {
+    // 如果沒有 token，重定向到登入頁
+    if (!token) {
+      const loginUrl = new URL('/login', request.url)
+      // 保存原始請求路徑作為重定向參數，方便登入後跳轉回來
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+  } else if (pathname.startsWith('/login') && token) {
+    // 如果已登入但嘗試訪問登入頁，重定向到儀表板
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // 允許其他請求繼續
