@@ -28,3 +28,25 @@ yarn-error.log
 # temp/test files
 test-*.php
 debug-*.php
+
+# 額外 Laravel 相關檔案
+_ide_helper*.php
+.phpstorm.meta.php
+*.code-workspace
+
+# 測試相關
+.php-cs-fixer.cache
+.php_cs.cache
+/tests/Browser/screenshots/
+/tests/Browser/console/
+
+# 本地資料庫
+*.sqlite
+*.sqlite3
+
+# 快取目錄
+/bootstrap/cache/*
+!bootstrap/cache/.gitkeep
+
+# Laravel Telescope（如果有使用）
+/storage/app/telescope/

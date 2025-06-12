@@ -15,12 +15,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
- * Renders the login page, providing a form for users to authenticate and supporting post-login redirection.
- *
- * The component automatically redirects authenticated users to the path specified by the `redirect` query parameter, or to `/dashboard` by default. All authentication logic and error handling are managed by the authentication context.
- *
- * @remark
- * If a `redirect` query parameter is present in the URL, users will be redirected to that path after successful login or if already authenticated.
+ * 登入頁面元件
+ * 
+ * 功能特色：
+ * 1. 響應式登入表單設計
+ * 2. 即時表單驗證
+ * 3. 整合 AuthContext 的統一認證邏輯
+ * 4. 自動重導向功能
+ * 5. 無障礙支援 (Label 關聯、鍵盤導航)
+ * 6. 支援 redirect 參數，登入後跳轉到原始請求頁面
  */
 export default function LoginPage() {
   // 表單狀態管理

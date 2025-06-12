@@ -51,3 +51,28 @@ test-*.tsx
 debug-*.js
 debug-*.ts
 debug-*.tsx
+
+# 編輯器/IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# 快取目錄
+.swc/
+
+# PWA 相關檔案（如果有使用）
+**/public/workbox-*.js
+**/public/sw.js
+**/public/fallback-*.js
+
+# 分析報告
+/analyze/
+
+# storybook（如果有使用）
+/storybook-static/
+
+# 覆蓋率報告
+.nyc_output/
+
+# 本地快取
+.eslintcache

@@ -63,22 +63,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
    */
   useEffect(() => {
     const validateToken = async () => {
-      const token = getToken();
-      if (token) {
-        try {
-          // 如果有 token，呼叫 /api/user 驗證並獲取用戶資訊
-          // Authorization 標頭會由 apiClient 自動注入
-          const { data, error } = await apiClient.GET('/api/user');
-          if (data && !error) {
-            setUser(data.data || null);
-          } else {
-            removeToken(); // Token 無效，清除它
-          }
-        } catch {
-          removeToken(); // 發生錯誤，清除 Token
+      setIsLoading(true);
+      try {
+        const token = getToken();
+        if (!token) {
+          setIsLoading(false);
+          return;
         }
+        
+        // 如果有 token，呼叫 /api/user 驗證並獲取用戶資訊
+        const { data, error } = await apiClient.GET('/api/user');
+        
+        if (data && !error) {
+          setUser(data.data || null);
+        } else {
+          // Token 無效，清除它並顯示提示
+          removeToken();
+          console.warn('無效的認證 token，已自動登出');
+        }
+      } catch (error) {
+        // 發生錯誤，清除 Token
+        removeToken();
+        console.error('驗證 token 時發生錯誤', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     validateToken();
@@ -151,8 +160,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
   
-  // 計算認證狀態
-  const isAuthenticated = !!user;
+  // 計算認證狀態 - 如果有使用者資料且不在載入中，則已認證
+  const isAuthenticated = Boolean(user) && !isLoading;
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
