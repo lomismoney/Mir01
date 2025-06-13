@@ -262,16 +262,17 @@ export function useUsers(filters?: UserQueryParams) {
         include: 'stores',
       };
       
-      // …rest of the function
-    }
-      const { data, error } = await apiClient.GET('/api/users', {
+      const response = await apiClient.GET('/api/users', {
         params: { query: queryParams },
       });
-      if (error) { throw new Error('獲取用戶列表失敗'); }
+      
+      if (response.error) { 
+        throw new Error('獲取用戶列表失敗'); 
+      }
       
       // 確保返回資料結構統一，處理 Laravel 分頁結構
       // 分頁響應結構: { data: [...用戶列表], meta: {...分頁資訊} }
-      return data;
+      return response.data;
     },
   });
 }
