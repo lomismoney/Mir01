@@ -35,8 +35,10 @@ class StoreController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $stores = Store::all();
-        return StoreResource::collection($stores);
+-        $stores = Store::all();
+-        return StoreResource::collection($stores);
++        $stores = Store::paginate(15);
++        return StoreResource::collection($stores);
     }
 
     /**
