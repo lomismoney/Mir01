@@ -31,8 +31,9 @@ abstract class TestCase extends BaseTestCase
      */
     protected function createStandardUser(): User
     {
+
         $user = User::factory()->create([
-            'role' => 'staff'
+            'role' => User::ROLE_VIEWER
         ]);
         
         return $user;
