@@ -123,9 +123,8 @@ export function UserStoresDialog({
       toast.success('分店分配成功');
       onOpenChange(false);
     } catch (error: any) {
-      // 錯誤已經在 useMutation 中被 handleApiError 處理
-      // 這裡只關閉對話框
-      // toast.error(`操作失敗: ${error.message}`);
+      // handleApiError 只做 logging；仍應讓使用者看到失敗訊息
+      toast.error(error.message ?? '操作失敗，請稍後再試');
     }
   };
   
