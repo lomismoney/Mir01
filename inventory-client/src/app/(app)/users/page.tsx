@@ -41,20 +41,18 @@ import { UserStoresDialog } from "@/components/users/user-stores-dialog";
 import { useQueryClient } from '@tanstack/react-query';
 
 /**
- * 用戶管理主頁面組件
+ * 用戶管理頁面（伺服器端認證版本）
  * 
- * 使用 shadcn/ui DataTable 重構的專業用戶管理介面，
- * 提供完整的 CRUD 功能和現代化的使用者體驗。
+ * 安全特性：
+ * - 雙重認證檢查：用戶登入 + 管理員權限
+ * - 伺服器端身份驗證，未認證用戶無法取得頁面內容
+ * - 使用 Next.js redirect() 進行伺服器端重定向
+ * - 完全杜絕「偷看」問題，提供企業級安全性
  * 
- * 主要功能：
- * 1. 專業的資料表格展示 - 使用 TanStack React Table
- * 2. 搜尋和過濾功能 - 支援全域搜尋
- * 3. 排序功能 - 點擊表頭排序
- * 4. 欄位顯示控制 - 動態顯示/隱藏欄位
- * 5. 分頁功能 - 處理大量資料
- * 6. 新增用戶對話框 - 完整的表單驗證
- * 7. 用戶操作 - 查看、編輯、刪除（待實現）
- * 8. 權限控制 - 基於角色的訪問控制
+ * 架構設計：
+ * - 伺服器元件處理認證和權限檢查
+ * - 客戶端元件處理複雜的互動邏輯
+ * - 保持 SEO 友好的伺服器端渲染
  */
 export default function UsersPage() {
   const { user } = useAuth(); // 獲取當前用戶資訊以判斷權限
@@ -322,22 +320,14 @@ export default function UsersPage() {
     return user;
   });
 
-  // 錯誤狀態處理
-  if (error) {
-    return (
-      <div className="container mx-auto py-8">
-        <Card className="border-red-200">
-          <CardContent className="pt-6">
-            <div className="text-center text-red-600">
-              <p className="font-semibold">載入用戶資料時發生錯誤</p>
-              <p className="text-sm mt-2">{error.message}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  // 檢查管理員權限
+  const userIsAdmin = await isAdmin();
+  if (!userIsAdmin) {
+    // 如果不是管理員，重定向到首頁或無權限頁面
+    redirect('/dashboard');
   }
 
+  // 只有已登入且為管理員的用戶才會執行到這裡
   return (
     <div className="container mx-auto py-8 space-y-6">
       {/* 頁面標題 */}

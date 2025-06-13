@@ -38,9 +38,6 @@ Route::post('/login', [AuthController::class, 'login']);
  */
 Route::middleware('auth:sanctum')->group(function () {
     /**
-     * @group Authentication
-     * @authenticated
-     *
      * 獲取當前已認證的使用者資訊
      * 
      * @apiResource App\Http\Resources\Api\UserResource

@@ -5,4 +5,5 @@
  * 提供統一的導入介面
  */
 
-export { ProductForm } from './ProductForm'; 
+export { ProductForm } from './ProductForm';
+export { ProductClientComponent } from './ProductClientComponent'; 

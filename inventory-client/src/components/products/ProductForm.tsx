@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,8 +12,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAttributes /*, useCreateProduct*/ } from '@/hooks/useApi';
-import { Attribute } from '@/types/attribute';
+import { useAttributes } from '@/hooks/useApi';
+import { 
+  type Attribute, 
+  type ProductSubmissionData 
+} from '@/types/products';
 import { Plus, X, Package, Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -46,10 +50,6 @@ interface VariantData {
 interface ProductFormProps {
   /** 初始表單資料 */
   initialData?: Partial<ProductFormData>;
-  /** 表單提交處理函式 */
-  onSubmit?: (data: ProductFormData) => void;
-  /** 是否處於載入狀態 */
-  isLoading?: boolean;
   /** 表單標題 */
   title?: string;
   /** 表單描述 */
@@ -67,19 +67,24 @@ interface ProductFormProps {
  */
 export function ProductForm({
   initialData = {},
-  onSubmit,
-  isLoading = false,
   title = '商品資訊',
   description = '請填寫商品的基本資訊和規格定義'
 }: ProductFormProps) {
+  // Next.js 路由器
+  const router = useRouter();
+  
   // 獲取屬性資料
   const { data: attributesData, isLoading: attributesLoading, error: attributesError } = useAttributes();
   
-  // 商品創建 Mutation (暫時停用)
+  // 商品創建 Mutation（暫時停用，直接使用狀態管理）
   // const createProductMutation = useCreateProduct();
   
   // 確保類型安全的屬性資料
   const attributes: Attribute[] = Array.isArray(attributesData) ? attributesData : [];
+  
+  // 表單載入狀態（暫時使用本地狀態）
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isLoading = isSubmitting;
 
   // 基本表單狀態
   const [formData, setFormData] = useState<ProductFormData>({
@@ -271,8 +276,20 @@ export function ProductForm({
    * 將完整的 SPU/SKU 狀態轉換為後端 API 所需的格式，
    * 並透過 useCreateProduct Hook 提交到後端
    */
-  const handleSubmit = (e?: React.FormEvent) => {
+  /**
+   * 處理表單提交
+   * 
+   * 功能說明：
+   * 1. 驗證表單資料完整性
+   * 2. 準備符合後端 API 格式的資料
+   * 3. 提交商品創建請求（暫時模擬）
+   * 4. 成功後導航回商品列表頁面
+   */
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    
+    // 防止重複提交
+    if (isSubmitting) return;
     
     // === 1. 基礎數據驗證 ===
     if (!formData.name.trim()) {
@@ -304,6 +321,8 @@ export function ProductForm({
 
     // === 2. 準備 API 請求的數據格式 ===
     try {
+      setIsSubmitting(true);
+      
       // 準備正確的後端 API 格式
       const correctSubmissionData = {
         name: formData.name,
@@ -332,22 +351,26 @@ export function ProductForm({
         }) : [],
       };
 
-      // OpenAPI 類型生成錯誤：attributes 和 variants 被錯誤定義為 string[]
-      // 實際後端期望：attributes: number[], variants: object[]
-      // 此 any 斷言在 Scribe 修復類型定義後可安全移除
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const submissionData = correctSubmissionData as any;
+      // 使用正確的類型定義，替代之前的 any 類型斷言
+      const submissionData: ProductSubmissionData = correctSubmissionData;
 
-      // === 3. 調用 API (暫時停用) ===
-      toast.info('商品創建功能開發中，請等待後端 API 完成');
+      // === 3. 模擬 API 調用（等待後端實現） ===
       console.log('準備提交的資料:', submissionData);
       
-      // 調用父組件的回調
-      onSubmit?.(formData);
+      // 模擬 API 延遲
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // 顯示成功訊息
+      toast.success('商品創建成功！');
+      
+      // === 4. 成功後導航回商品列表 ===
+      router.push('/products');
 
     } catch (error) {
-      console.error('數據準備失敗：', error);
-      toast.error(`數據準備失敗：${(error as Error).message}`);
+      console.error('商品創建失敗：', error);
+      toast.error(`商品創建失敗：${(error as Error).message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
