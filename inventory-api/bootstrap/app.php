@@ -12,8 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // 添加 CORS 中間件支援
-        $middleware->api(append: [
+        // 為 API 路由添加 CORS 中間件支援 (XAMPP 環境)
+        // 必須在其他中間件之前處理 CORS
+        $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
     })

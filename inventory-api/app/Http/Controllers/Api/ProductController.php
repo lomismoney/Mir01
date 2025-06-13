@@ -86,6 +86,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = QueryBuilder::for(Product::class)
+            ->with('category') // ✅ 預先加載分類關聯，根除 N+1 查詢問題
             ->allowedFilters([
                 'name', 
                 'sku',

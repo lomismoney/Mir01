@@ -13,9 +13,11 @@ import { getToken } from "./tokenManager";
  * 3. 統一的請求攔截處理
  * 4. 與後端 API 規範同步
  * 5. 環境變數配置支援
+ * 6. CORS 和 credentials 支援
  */
 const apiClient = createClient<paths>({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost",
+    credentials: "include", // 支援 cookies 和認證資訊
 });
 
 /**
@@ -39,6 +41,8 @@ apiClient.use({
         }
         // 確保我們期望接收 JSON 響應
         request.headers.set("Accept", "application/json");
+        // 添加 CORS 相關標頭
+        request.headers.set("Content-Type", "application/json");
         return request;
     },
     onResponse({ response }) {

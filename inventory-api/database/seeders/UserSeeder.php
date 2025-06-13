@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class UserSeeder extends Seeder
 {
@@ -13,8 +14,14 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // 禁用外鍵檢查以避免 truncate 問題
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        
         // 為了避免重複執行 seeder 時出錯，先清空資料表是個好習慣
         User::truncate();
+        
+        // 重新啟用外鍵檢查
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // 建立一個指定的超級管理員
         User::create([
