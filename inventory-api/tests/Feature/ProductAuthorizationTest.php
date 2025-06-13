@@ -4,6 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Category;
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,6 +23,10 @@ class ProductAuthorizationTest extends TestCase
     private User $adminUser;
     private User $viewerUser;
     private Product $product;
+    private Attribute $colorAttribute;
+    private Attribute $sizeAttribute;
+    private AttributeValue $redColor;
+    private AttributeValue $sizeM;
 
     /**
      * 測試前設置
@@ -28,10 +35,30 @@ class ProductAuthorizationTest extends TestCase
     {
         parent::setUp();
         
-        // 建立測試用戶和商品
+        // 建立測試用戶
         $this->adminUser = User::factory()->admin()->create();
         $this->viewerUser = User::factory()->viewer()->create();
-        $this->product = Product::factory()->create();
+        
+        // 建立測試屬性
+        $this->colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $this->sizeAttribute = Attribute::factory()->create(['name' => '尺寸']);
+        
+        // 建立屬性值
+        $this->redColor = AttributeValue::factory()->create([
+            'attribute_id' => $this->colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        
+        $this->sizeM = AttributeValue::factory()->create([
+            'attribute_id' => $this->sizeAttribute->id,
+            'value' => 'M'
+        ]);
+        
+        // 建立測試商品
+        $this->product = Product::factory()->create([
+            'name' => '測試商品',
+            'description' => '測試商品描述'
+        ]);
     }
 
     /**
@@ -62,11 +89,23 @@ class ProductAuthorizationTest extends TestCase
     public function test_admin_can_create_product(): void
     {
         $productData = [
-            'name' => '測試商品',
-            'sku' => 'TEST-001',
+            'name' => '授權測試商品',
             'description' => '測試商品描述',
-            'selling_price' => 100.00,
-            'cost_price' => 50.00,
+            'category_id' => null,
+            'attributes' => [
+                $this->colorAttribute->id,
+                $this->sizeAttribute->id
+            ],
+            'variants' => [
+                [
+                    'sku' => 'AUTH-TEST-001',
+                    'price' => 100.00,
+                    'attribute_value_ids' => [
+                        $this->redColor->id,
+                        $this->sizeM->id
+                    ]
+                ]
+            ]
         ];
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -81,11 +120,23 @@ class ProductAuthorizationTest extends TestCase
     public function test_viewer_cannot_create_product(): void
     {
         $productData = [
-            'name' => '測試商品',
-            'sku' => 'TEST-001',
+            'name' => '授權測試商品',
             'description' => '測試商品描述',
-            'selling_price' => 100.00,
-            'cost_price' => 50.00,
+            'category_id' => null,
+            'attributes' => [
+                $this->colorAttribute->id,
+                $this->sizeAttribute->id
+            ],
+            'variants' => [
+                [
+                    'sku' => 'AUTH-TEST-002',
+                    'price' => 100.00,
+                    'attribute_value_ids' => [
+                        $this->redColor->id,
+                        $this->sizeM->id
+                    ]
+                ]
+            ]
         ];
 
         $response = $this->actingAs($this->viewerUser, 'sanctum')
@@ -101,10 +152,8 @@ class ProductAuthorizationTest extends TestCase
     {
         $updateData = [
             'name' => '更新的商品名稱',
-            'sku' => $this->product->sku,
             'description' => '更新的描述',
-            'selling_price' => 150.00,
-            'cost_price' => 75.00,
+            'category_id' => null
         ];
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -120,10 +169,8 @@ class ProductAuthorizationTest extends TestCase
     {
         $updateData = [
             'name' => '更新的商品名稱',
-            'sku' => $this->product->sku,
             'description' => '更新的描述',
-            'selling_price' => 150.00,
-            'cost_price' => 75.00,
+            'category_id' => null
         ];
 
         $response = $this->actingAs($this->viewerUser, 'sanctum')
@@ -163,12 +210,11 @@ class ProductAuthorizationTest extends TestCase
         $productIds = $products->pluck('id')->toArray();
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
-                         ->deleteJson('/api/products', [
-                             'product_ids' => $productIds
+                         ->postJson('/api/products/batch-delete', [
+                             'ids' => $productIds
                          ]);
 
-        $response->assertStatus(200);
-        $response->assertJsonFragment(['deleted_count' => 3]);
+        $response->assertStatus(204);
     }
 
     /**
@@ -180,8 +226,8 @@ class ProductAuthorizationTest extends TestCase
         $productIds = $products->pluck('id')->toArray();
 
         $response = $this->actingAs($this->viewerUser, 'sanctum')
-                         ->deleteJson('/api/products', [
-                             'product_ids' => $productIds
+                         ->postJson('/api/products/batch-delete', [
+                             'ids' => $productIds
                          ]);
 
         $response->assertStatus(403); // 禁止存取

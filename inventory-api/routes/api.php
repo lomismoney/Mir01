@@ -2,14 +2,17 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\AttributeController;
-use App\Http\Controllers\Api\V1\AttributeValueController;
-use App\Http\Controllers\Api\V1\CategoryController;
-use App\Http\Controllers\Api\V1\ProductController;
-use App\Http\Controllers\Api\V1\PurchaseController;
-use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\Api\V1\UserController;
-use App\Http\Resources\Api\V1\UserResource;
+use App\Http\Controllers\Api\AttributeController;
+use App\Http\Controllers\Api\AttributeValueController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductVariantController;
+use App\Http\Controllers\Api\PurchaseController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\StoreController;
+use App\Http\Controllers\Api\UserStoreController;
+use App\Http\Resources\Api\UserResource;
 
 /**
  * 健康檢查端點
@@ -37,15 +40,11 @@ Route::middleware('auth:sanctum')->group(function () {
     /**
      * 獲取當前已認證的使用者資訊
      * 
-     * 此端點返回當前已認證使用者的完整資訊，包括基本資料、角色信息和權限狀態。
-     * 前端認證服務將使用此端點驗證 Token 有效性並獲取用戶身份資訊。
-     * 
-     * @group Authentication
-     * @authenticated
-     * @responseFile storage/responses/user.show.json
+     * @apiResource App\Http\Resources\Api\UserResource
+     * @apiResourceModel App\Models\User
      */
     Route::get('/user', function (Request $request) {
-        return new UserResource($request->user());
+        return new UserResource($request->user()->load('stores'));
     });
 
     /**
@@ -72,6 +71,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('products', ProductController::class);
 
     /**
+     * 商品變體管理路由
+     * 提供商品變體的查詢功能
+     * 
+     * 路由列表：
+     * GET    /api/products/variants        - 獲取所有商品變體列表
+     * GET    /api/products/variants/{id}   - 獲取指定商品變體
+     */
+    Route::get('/products/variants', [ProductVariantController::class, 'index']);
+    Route::get('/products/variants/{id}', [ProductVariantController::class, 'show']);
+
+    /**
      * 進貨單管理路由
      * POST /api/purchases - 創建新的進貨單
      */
@@ -83,6 +93,31 @@ Route::middleware('auth:sanctum')->group(function () {
      * 只有管理員可以管理用戶，且不能刪除自己
      */
     Route::apiResource('users', UserController::class);
+    
+    /**
+     * 分店管理路由
+     * 提供完整的分店 CRUD 操作，受 StorePolicy 權限保護
+     * 只有管理員可以管理分店
+     * 
+     * 路由列表：
+     * GET    /api/stores        - 獲取所有分店列表
+     * POST   /api/stores        - 創建新分店
+     * GET    /api/stores/{id}   - 獲取指定分店
+     * PUT    /api/stores/{id}   - 更新指定分店
+     * DELETE /api/stores/{id}   - 刪除指定分店
+     */
+    Route::apiResource('stores', StoreController::class);
+    
+    /**
+     * 用戶分店管理路由
+     * 提供用戶與分店關聯管理，受權限保護
+     * 只有管理員可以管理用戶的分店關聯
+     * 
+     * 路由列表：
+     * GET    /api/users/{user}/stores         - 獲取指定用戶的所有分店
+     * POST   /api/users/{user}/stores         - 分配分店給指定用戶
+     */
+    Route::apiResource('users.stores', UserStoreController::class)->only(['index', 'store']);
 
     /**
      * 商品分類管理路由
@@ -124,5 +159,19 @@ Route::middleware('auth:sanctum')->group(function () {
      * DELETE /api/values/{value}                    - 刪除指定屬性值
      */
     Route::apiResource('attributes.values', AttributeValueController::class)->shallow();
+
+    // 庫存轉移 - 必須放在前面，避免和庫存管理的路由衝突
+    Route::get('/inventory/transfers', [App\Http\Controllers\Api\InventoryTransferController::class, 'index']);
+    Route::get('/inventory/transfers/{id}', [App\Http\Controllers\Api\InventoryTransferController::class, 'show']);
+    Route::post('/inventory/transfers', [App\Http\Controllers\Api\InventoryTransferController::class, 'store']);
+    Route::patch('/inventory/transfers/{id}/status', [App\Http\Controllers\Api\InventoryTransferController::class, 'updateStatus']);
+    Route::patch('/inventory/transfers/{id}/cancel', [App\Http\Controllers\Api\InventoryTransferController::class, 'cancel']);
+    
+    // 庫存管理
+    Route::get('/inventory', [App\Http\Controllers\Api\InventoryManagementController::class, 'index']);
+    Route::get('/inventory/{id}', [App\Http\Controllers\Api\InventoryManagementController::class, 'show']);
+    Route::post('/inventory/adjust', [App\Http\Controllers\Api\InventoryManagementController::class, 'adjust']);
+    Route::get('/inventory/{id}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'history']);
+    Route::post('/inventory/batch-check', [App\Http\Controllers\Api\InventoryManagementController::class, 'batchCheck']);
 });
  

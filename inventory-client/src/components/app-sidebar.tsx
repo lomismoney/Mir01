@@ -18,6 +18,7 @@ import {
   IconTruck,
   IconUsers,
   IconBuilding,
+  IconBuildingStore,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -47,8 +48,11 @@ const data = {
     },
     {
       title: "庫存管理",
-      url: "/inventory",
       icon: IconBuilding,
+      children: [
+        { title: "庫存清單", url: "/inventory/management" },
+        { title: "庫存轉移", url: "/inventory/transfers" },
+      ]
     },
     {
       title: "商品管理",
@@ -68,6 +72,11 @@ const data = {
       title: "供應商管理",
       url: "/suppliers",
       icon: IconTruck,
+    },
+    {
+      title: "分店管理",
+      url: "/stores",
+      icon: IconBuildingStore,
     },
     {
       title: "用戶管理",

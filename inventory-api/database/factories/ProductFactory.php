@@ -18,21 +18,18 @@ class ProductFactory extends Factory
     {
         return [
             'name' => fake()->sentence(3, false), // 生成 3 個詞的商品名稱
-            'sku' => fake()->unique()->bothify('##??##??'), // 生成類似 "12AB34CD" 的 SKU
             'description' => fake()->optional(0.8)->paragraph(), // 80% 機率有描述
-            'selling_price' => fake()->randomFloat(2, 10, 1000), // 售價 10-1000
-            'cost_price' => fake()->randomFloat(2, 5, 500), // 成本價 5-500
+            'category_id' => null, // 預設無分類
         ];
     }
 
     /**
-     * 生成高價商品狀態
+     * 生成有分類的商品狀態
      */
-    public function expensive(): static
+    public function withCategory($categoryId): static
     {
         return $this->state(fn (array $attributes) => [
-            'selling_price' => fake()->randomFloat(2, 500, 2000),
-            'cost_price' => fake()->randomFloat(2, 200, 1000),
+            'category_id' => $categoryId,
         ]);
     }
 

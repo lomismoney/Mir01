@@ -5,7 +5,7 @@
  * 單一事實來源（Single Source of Truth）
  */
 
-import { paths } from './api';
+import { Store } from '@/hooks/useStores';
 
 /**
  * 用戶實體類型
@@ -13,11 +13,17 @@ import { paths } from './api';
  * 從 API 響應中提取的用戶資料結構
  * 確保前後端類型完全同步
  */
-export type User = NonNullable<
-  NonNullable<
-    paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
-  >[number]
->;
+export interface User {
+  id: number;
+  name: string;
+  username: string;
+  role: string;
+  role_display: string;
+  is_admin: boolean;
+  created_at: string;
+  updated_at: string;
+  stores?: Store[];
+}
 
 /**
  * 登入響應中的用戶類型
@@ -25,9 +31,7 @@ export type User = NonNullable<
  * 從登入 API 響應中提取的用戶類型
  * 用於認證上下文和登入流程
  */
-export type AuthUser = NonNullable<
-  paths['/api/user']['get']['responses'][200]['content']['application/json']['data']
->;
+export type AuthUser = User;
 
 /**
  * 用戶操作處理器介面
@@ -42,6 +46,8 @@ export interface UserActions {
   onEdit?: (user: User) => void
   /** 刪除用戶 */
   onDelete?: (user: User) => void
+  /** 分配分店 */
+  onManageStores?: (user: User) => void
   /** 當前用戶（用於權限判斷） */
   currentUser?: {
     is_admin?: boolean

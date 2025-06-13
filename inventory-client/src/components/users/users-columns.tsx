@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, ArrowUpDown, Shield, Eye, Trash2, Edit } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Shield, Eye, Trash2, Edit, Store } from "lucide-react"
 import { format } from "date-fns"
 import { zhTW } from "date-fns/locale"
 
@@ -19,10 +19,18 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 // 使用統一的類型定義，確保與 API 契約同步
 import { User as ApiUser, UserActions as ApiUserActions } from '@/types/user';
+// 導入 Store 類型定義
+import { Store as StoreType } from '@/hooks/useStores';
 
-// 重新導出類型以保持向後兼容
-export type User = ApiUser;
-export type UserActions = ApiUserActions;
+// 擴展 User 類型，加入 stores 屬性
+export interface User extends ApiUser {
+  stores?: StoreType[];
+}
+
+export interface UserActions extends ApiUserActions {
+  // 新增分配分店功能
+  onManageStores?: (user: User) => void;
+}
 
 /**
  * 建立用戶表格欄位定義
@@ -37,7 +45,7 @@ export type UserActions = ApiUserActions;
  * 4. 角色 - 帶圖示的角色徽章
  * 5. 建立時間 - 格式化的建立日期
  * 6. 更新時間 - 格式化的更新日期
- * 7. 操作 - 下拉選單包含查看、編輯、刪除（僅管理員可見）
+ * 7. 操作 - 下拉選單包含查看、編輯、分配分店、刪除（僅管理員可見）
  * 
  * @param actions - 操作處理器（包含當前用戶資訊用於權限判斷）
  * @returns 欄位定義陣列
@@ -136,6 +144,45 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[]
     },
   },
   {
+    id: "stores",
+    header: "所屬分店",
+    cell: ({ row }) => {
+      const user = row.original
+      const stores = user.stores || []
+      
+      if (!stores.length) {
+        return <div className="text-sm text-muted-foreground">未分配分店</div>
+      }
+      
+      // 如果分店超過 3 個，只顯示前 2 個並顯示剩餘數量
+      if (stores.length > 3) {
+        return (
+          <div className="flex flex-wrap gap-1">
+            {stores.slice(0, 2).map((store: StoreType) => (
+              <Badge key={store.id} variant="outline" className="text-xs">
+                {store.name}
+              </Badge>
+            ))}
+            <Badge variant="secondary" className="text-xs">
+              +{stores.length - 2} 間
+            </Badge>
+          </div>
+        )
+      }
+      
+      // 顯示所有分店
+      return (
+        <div className="flex flex-wrap gap-1">
+          {stores.map((store: StoreType) => (
+            <Badge key={store.id} variant="outline" className="text-xs">
+              {store.name}
+            </Badge>
+          ))}
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: "created_at",
     header: ({ column }) => {
       return (
@@ -225,6 +272,13 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[]
               <DropdownMenuItem onClick={() => actions.onEdit!(user)}>
                 <Edit className="mr-2 h-4 w-4" />
                 編輯用戶
+              </DropdownMenuItem>
+            )}
+            
+            {actions.onManageStores && (
+              <DropdownMenuItem onClick={() => actions.onManageStores!(user)}>
+                <Store className="mr-2 h-4 w-4" />
+                分配分店
               </DropdownMenuItem>
             )}
             

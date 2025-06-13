@@ -14,17 +14,9 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-/**
- * 登入表單元件（內部元件）
- */
-function LoginForm() {
-  // 表單狀態管理
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // 認證和路由 Hooks
-  const { login, isAuthenticated } = useAuth();
+// 提取處理重定向邏輯的組件，包含 useSearchParams 的使用
+function RedirectHandler() {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -37,6 +29,22 @@ function LoginForm() {
       router.push(redirectPath);
     }
   }, [isAuthenticated, redirectPath, router]);
+  
+  return null;
+}
+
+/**
+ * 登入表單元件（內部元件）
+ */
+function LoginForm() {
+  // 表單狀態管理
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 認證和路由 Hooks
+  const { login } = useAuth();
+  const router = useRouter();
 
   /**
    * 處理登入表單提交
@@ -58,6 +66,10 @@ function LoginForm() {
       // 使用 AuthContext 的統一登入方法
       await login({ username, password });
       
+      // 獲取重定向路徑
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectPath = searchParams.get('redirect') || '/dashboard';
+      
       // 登入成功，重導向到原始請求頁面或儀表板
       router.push(redirectPath);
     } catch {
@@ -70,6 +82,11 @@ function LoginForm() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-muted/40">
+      {/* 使用 Suspense 包裝處理 useSearchParams 的組件 */}
+      <Suspense fallback={null}>
+        <RedirectHandler />
+      </Suspense>
+      
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">登入</CardTitle>

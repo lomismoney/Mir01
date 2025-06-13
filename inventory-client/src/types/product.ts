@@ -72,4 +72,42 @@ export interface ProductDisplay {
   cost_price: string;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * 產品基本資訊，用於庫存管理系統
+ */
+export interface ProductBasic {
+  id: number;
+  name: string;
+  description: string | null;
+  category_id: number | null;
+  created_at: string;
+  updated_at: string;
+  category?: {
+    id: number;
+    name: string;
+  };
+}
+
+/**
+ * 產品變體，用於庫存管理系統
+ */
+export interface ProductVariant {
+  id: number;
+  product_id: number;
+  sku: string;
+  price: number;
+  created_at: string;
+  updated_at: string;
+  product?: ProductBasic;
+  attributeValues?: {
+    id: number;
+    attribute_id: number;
+    value: string;
+    attribute?: {
+      id: number;
+      name: string;
+    };
+  }[];
 } 

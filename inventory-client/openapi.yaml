@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: 'Laravel API Documentation'
+  title: '庫存管理系統 API Documentation'
   description: ''
   version: 1.0.0
 servers:
@@ -8,10 +8,10 @@ servers:
     url: 'http://localhost'
 tags:
   -
-    name: Authentication
+    name: Endpoints
     description: ''
   -
-    name: Endpoints
+    name: 'Store Management'
     description: ''
   -
     name: 商品屬性管理
@@ -32,59 +32,6 @@ tags:
     name: 認證管理
     description: ''
 paths:
-  /api/user:
-    get:
-      summary: ''
-      operationId: getApiUser
-      description: ''
-      parameters: []
-      responses:
-        200:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  data:
-                    id: 14
-                    name: 'Lonny Ankunding'
-                    username: eloisa.harber
-                    role: viewer
-                    role_display: 檢視者
-                    is_admin: false
-                    created_at: '2025-06-11T05:51:06.000000Z'
-                    updated_at: '2025-06-11T05:51:06.000000Z'
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 14
-                      name:
-                        type: string
-                        example: 'Lonny Ankunding'
-                      username:
-                        type: string
-                        example: eloisa.harber
-                      role:
-                        type: string
-                        example: viewer
-                      role_display:
-                        type: string
-                        example: 檢視者
-                      is_admin:
-                        type: boolean
-                        example: false
-                      created_at:
-                        type: string
-                        example: '2025-06-11T05:51:06.000000Z'
-                      updated_at:
-                        type: string
-                        example: '2025-06-11T05:51:06.000000Z'
-      tags:
-        - Authentication
   /api/purchases:
     post:
       summary: 'Store a newly created resource in storage.'
@@ -128,27 +75,6 @@ paths:
         - Endpoints
       security: []
   /api/categories:
-    get:
-      summary: 顯示分類列表
-      operationId: ''
-      description: "優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、\n高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。\n\n範例：\n- json[''] 或 json[null] 就是所有頂層分類\n- json['1'] 就是 id 為 1 的分類下的所有子分類"
-      parameters: []
-      responses:
-        401:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  message: Unauthenticated.
-                properties:
-                  message:
-                    type: string
-                    example: Unauthenticated.
-      tags:
-        - Endpoints
-      security: []
     post:
       summary: 儲存新建立的分類資源
       operationId: ''
@@ -183,27 +109,6 @@ paths:
                 - name
       security: []
   '/api/categories/{id}':
-    get:
-      summary: 顯示指定的分類資源
-      operationId: ''
-      description: '返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出'
-      parameters: []
-      responses:
-        401:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  message: Unauthenticated.
-                properties:
-                  message:
-                    type: string
-                    example: Unauthenticated.
-      tags:
-        - Endpoints
-      security: []
     put:
       summary: 更新指定的分類資源
       operationId: ''
@@ -251,7 +156,25 @@ paths:
         in: path
         name: id
         description: 'The ID of the category.'
-        example: 1
+        example: 17
+        required: true
+        schema:
+          type: integer
+  '/api/stores/{id}':
+    delete:
+      summary: ''
+      operationId: deleteApiStoresId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 'Store Management'
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the store.'
+        example: 17
         required: true
         schema:
           type: integer
@@ -268,7 +191,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\V1\AttributeResource
+                example: App\Http\Resources\Api\AttributeResource
       tags:
         - 商品屬性管理
     post:
@@ -283,7 +206,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\V1\AttributeResource
+                example: App\Http\Resources\Api\AttributeResource
       tags:
         - 商品屬性管理
       requestBody:
@@ -313,7 +236,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\V1\AttributeResource
+                example: App\Http\Resources\Api\AttributeResource
       tags:
         - 商品屬性管理
     put:
@@ -328,7 +251,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\V1\AttributeResource
+                example: App\Http\Resources\Api\AttributeResource
       tags:
         - 商品屬性管理
       requestBody:
@@ -360,7 +283,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the attribute.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -499,10 +422,10 @@ paths:
                     to: 2
                     total: 45
                   links:
-                    first: 'http://localhost:8000/api/products?page=1'
-                    last: 'http://localhost:8000/api/products?page=3'
+                    first: 'http://localhost/api/products?page=1'
+                    last: 'http://localhost/api/products?page=3'
                     prev: null
-                    next: 'http://localhost:8000/api/products?page=2'
+                    next: 'http://localhost/api/products?page=2'
                 properties:
                   data:
                     type: array
@@ -583,19 +506,226 @@ paths:
                     properties:
                       first:
                         type: string
-                        example: 'http://localhost:8000/api/products?page=1'
+                        example: 'http://localhost/api/products?page=1'
                       last:
                         type: string
-                        example: 'http://localhost:8000/api/products?page=3'
+                        example: 'http://localhost/api/products?page=3'
                       prev:
                         type: string
                         example: null
                       next:
                         type: string
-                        example: 'http://localhost:8000/api/products?page=2'
+                        example: 'http://localhost/api/products?page=2'
       tags:
         - 商品管理
       security: []
+    post:
+      summary: '建立新商品 (SPU/SKU)'
+      operationId: SPUSKU
+      description: ''
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: 測試產品
+                    description: 這是一個測試產品的描述
+                    sku: TEST-SKU-001
+                    price: 199.99
+                    cost: 99.99
+                    quantity: 50
+                    category_id: 1
+                    created_at: '2023-10-15T08:30:45.000000Z'
+                    updated_at: '2023-10-15T08:30:45.000000Z'
+                    category:
+                      id: 1
+                      name: 電子產品
+                      description: 各類電子產品
+                      created_at: '2023-10-15T08:30:45.000000Z'
+                      updated_at: '2023-10-15T08:30:45.000000Z'
+                    attributes:
+                      -
+                        id: 1
+                        name: 顏色
+                        value: 黑色
+                      -
+                        id: 2
+                        name: 尺寸
+                        value: 中號
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 測試產品
+                      description:
+                        type: string
+                        example: 這是一個測試產品的描述
+                      sku:
+                        type: string
+                        example: TEST-SKU-001
+                      price:
+                        type: number
+                        example: 199.99
+                      cost:
+                        type: number
+                        example: 99.99
+                      quantity:
+                        type: integer
+                        example: 50
+                      category_id:
+                        type: integer
+                        example: 1
+                      created_at:
+                        type: string
+                        example: '2023-10-15T08:30:45.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2023-10-15T08:30:45.000000Z'
+                      category:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 電子產品
+                          description:
+                            type: string
+                            example: 各類電子產品
+                          created_at:
+                            type: string
+                            example: '2023-10-15T08:30:45.000000Z'
+                          updated_at:
+                            type: string
+                            example: '2023-10-15T08:30:45.000000Z'
+                      attributes:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            name: 顏色
+                            value: 黑色
+                          -
+                            id: 2
+                            name: 尺寸
+                            value: 中號
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 顏色
+                            value:
+                              type: string
+                              example: 黑色
+      tags:
+        - 商品管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'SPU 的名稱。'
+                  example: '"經典棉質T-shirt"'
+                  nullable: false
+                description:
+                  type: string
+                  description: 'SPU 的描述。'
+                  example: '"100% 純棉"'
+                  nullable: true
+                category_id:
+                  type: integer
+                  description: 分類ID。
+                  example: 1
+                  nullable: true
+                attributes:
+                  type: array
+                  description: '該 SPU 擁有的屬性 ID 陣列。'
+                  example:
+                    - 1
+                    - 2
+                  items:
+                    type: integer
+                variants:
+                  type: array
+                  description: 'SKU 變體陣列，至少需要一項。'
+                  example:
+                    - []
+                  items:
+                    type: object
+                    properties:
+                      sku:
+                        type: string
+                        description: '單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters.'
+                        example: HEADPHONE-BT-RED-L
+                        nullable: false
+                      price:
+                        type: number
+                        description: '單一 SKU 變體的價格。. Must be at least 0.'
+                        example: 199.99
+                        nullable: false
+                      attribute_value_ids:
+                        type: array
+                        description: 'The <code>id</code> of an existing record in the attribute_values table.'
+                        example:
+                          - 17
+                        items:
+                          type: integer
+                      '*':
+                        type: object
+                        description: ''
+                        example:
+                          sku: '"TSHIRT-RED-S"'
+                        nullable: false
+                        properties:
+                          sku:
+                            type: string
+                            description: 'SKU 的唯一編號。'
+                            example: '"TSHIRT-RED-S"'
+                            nullable: false
+                          price:
+                            type: number
+                            description: 'SKU 的價格。'
+                            example: 299.99
+                            nullable: false
+                          attribute_value_ids:
+                            type: array
+                            description: '組成此 SKU 的屬性值 ID 陣列。'
+                            example:
+                              - 10
+                              - 25
+                            items:
+                              type: integer
+                        required:
+                          - sku
+                          - price
+                          - attribute_value_ids
+                    required:
+                      - sku
+                      - price
+              required:
+                - name
+                - attributes
+                - variants
   '/api/products/{id}':
     get:
       summary: 顯示指定的商品
@@ -786,7 +916,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\V1\AttributeValueResource
+                example: App\Http\Resources\Api\AttributeValueResource
       tags:
         - 屬性值管理
     post:
@@ -801,7 +931,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\V1\AttributeValueResource
+                example: App\Http\Resources\Api\AttributeValueResource
       tags:
         - 屬性值管理
       requestBody:
@@ -823,7 +953,7 @@ paths:
         in: path
         name: attribute_id
         description: 'The ID of the attribute.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -848,7 +978,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\V1\AttributeValueResource
+                example: App\Http\Resources\Api\AttributeValueResource
       tags:
         - 屬性值管理
     delete:
@@ -912,7 +1042,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the value.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -982,15 +1112,15 @@ paths:
                       created_at: '2025-06-11T10:00:00.000000Z'
                       updated_at: '2025-06-11T10:00:00.000000Z'
                   links:
-                    first: 'http://localhost/api/v1/users?page=1'
-                    last: 'http://localhost/api/v1/users?page=1'
+                    first: 'http://localhost/api/users?page=1'
+                    last: 'http://localhost/api/users?page=1'
                     prev: null
                     next: null
                   meta:
                     current_page: 1
                     from: 1
                     last_page: 1
-                    path: 'http://localhost/api/v1/users'
+                    path: 'http://localhost/api/users'
                     per_page: 15
                     to: 1
                     total: 1
@@ -1039,10 +1169,10 @@ paths:
                     properties:
                       first:
                         type: string
-                        example: 'http://localhost/api/v1/users?page=1'
+                        example: 'http://localhost/api/users?page=1'
                       last:
                         type: string
-                        example: 'http://localhost/api/v1/users?page=1'
+                        example: 'http://localhost/api/users?page=1'
                       prev:
                         type: string
                         example: null
@@ -1063,7 +1193,7 @@ paths:
                         example: 1
                       path:
                         type: string
-                        example: 'http://localhost/api/v1/users'
+                        example: 'http://localhost/api/users'
                       per_page:
                         type: integer
                         example: 15
@@ -1316,7 +1446,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the user.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
