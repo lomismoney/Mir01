@@ -38,6 +38,7 @@ import { UsersDataTable } from '@/components/users/users-data-table';
 import { createUsersColumns } from '@/components/users/users-columns';
 import { User, UserActions } from '@/types/user';
 import { UserStoresDialog } from "@/components/users/user-stores-dialog";
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * 用戶管理主頁面組件
@@ -94,6 +95,8 @@ export default function UsersPage() {
   // 用戶分店管理狀態
   const [isStoresDialogOpen, setIsStoresDialogOpen] = useState(false);
   const [selectedUserForStores, setSelectedUserForStores] = useState<User | null>(null);
+
+  const queryClient = useQueryClient();
 
   // 處理分店管理按鈕點擊
   const handleManageUserStores = (user: User) => {
@@ -340,8 +343,8 @@ export default function UsersPage() {
       {/* 頁面標題 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">用戶管理</h1>
-          <p className="text-gray-600 mt-2">管理系統中的所有用戶帳號</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">用戶管理</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">管理系統中的所有用戶帳號</p>
         </div>
       </div>
 
