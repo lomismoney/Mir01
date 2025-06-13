@@ -1,0 +1,80 @@
+name: 規格庫管理
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/values/{id}'
+    metadata:
+      groupName: 規格庫管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 更新指定的屬性值
+      description: ''
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the value.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      value:
+        name: value
+        description: '要更新的屬性值的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 16
+      value: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      value:
+        name: value
+        description: 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      value: architecto
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "data": {
+              "id": 1,
+              "value": "紅色",
+              "attribute_id": 1
+            }
+          } 
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []

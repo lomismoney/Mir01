@@ -2,14 +2,16 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\AttributeController;
-use App\Http\Controllers\Api\V1\AttributeValueController;
-use App\Http\Controllers\Api\V1\CategoryController;
-use App\Http\Controllers\Api\V1\ProductController;
-use App\Http\Controllers\Api\V1\PurchaseController;
-use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\Api\V1\UserController;
-use App\Http\Resources\Api\V1\UserResource;
+use App\Http\Controllers\Api\AttributeController;
+use App\Http\Controllers\Api\AttributeValueController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\PurchaseController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\StoreController;
+use App\Http\Controllers\Api\UserStoreController;
+use App\Http\Resources\Api\UserResource;
 
 /**
  * 健康檢查端點
@@ -40,11 +42,11 @@ Route::middleware('auth:sanctum')->group(function () {
      *
      * 獲取當前已認證的使用者資訊
      * 
-     * @apiResource App\Http\Resources\Api\V1\UserResource
+     * @apiResource App\Http\Resources\Api\UserResource
      * @apiResourceModel App\Models\User
      */
     Route::get('/user', function (Request $request) {
-        return new UserResource($request->user());
+        return new UserResource($request->user()->load('stores'));
     });
 
     /**
@@ -82,6 +84,31 @@ Route::middleware('auth:sanctum')->group(function () {
      * 只有管理員可以管理用戶，且不能刪除自己
      */
     Route::apiResource('users', UserController::class);
+    
+    /**
+     * 分店管理路由
+     * 提供完整的分店 CRUD 操作，受 StorePolicy 權限保護
+     * 只有管理員可以管理分店
+     * 
+     * 路由列表：
+     * GET    /api/stores        - 獲取所有分店列表
+     * POST   /api/stores        - 創建新分店
+     * GET    /api/stores/{id}   - 獲取指定分店
+     * PUT    /api/stores/{id}   - 更新指定分店
+     * DELETE /api/stores/{id}   - 刪除指定分店
+     */
+    Route::apiResource('stores', StoreController::class);
+    
+    /**
+     * 用戶分店管理路由
+     * 提供用戶與分店關聯管理，受權限保護
+     * 只有管理員可以管理用戶的分店關聯
+     * 
+     * 路由列表：
+     * GET    /api/users/{user}/stores         - 獲取指定用戶的所有分店
+     * POST   /api/users/{user}/stores         - 分配分店給指定用戶
+     */
+    Route::apiResource('users.stores', UserStoreController::class)->only(['index', 'store']);
 
     /**
      * 商品分類管理路由

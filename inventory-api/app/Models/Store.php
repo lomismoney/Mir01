@@ -3,13 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Store extends Model
 {
+    use HasFactory;
+
     /**
      * 允許大量賦值的屬性設定
      */
     protected $guarded = [];
+
+    /**
+     * 獲取該門市的所有用戶
+     */
+    public function users()
+    {
+-        return $this->belongsToMany(User::class);
++        return $this->belongsToMany(User::class, 'store_user')
++            ->withTimestamps();   // if pivot tracks created_at/updated_at
+    }
 
     /**
      * 獲取該門市的所有庫存記錄

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class ProductVariant extends Model
 {
+    use HasFactory;
+
     /**
      * 允許大量賦值的屬性設定
      * 保護 id 和時間戳不被意外修改
