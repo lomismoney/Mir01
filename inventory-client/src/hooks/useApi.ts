@@ -257,11 +257,13 @@ export function useUsers(filters?: UserQueryParams) {
     queryFn: async ({ queryKey }) => {
       const [, queryFilters] = queryKey;
       // 添加 include=stores 參數，確保獲取用戶的分店關係
-      const queryParams = { 
-        ...queryFilters as UserQueryParams,
-        include: 'stores' 
+      const queryParams: UserQueryParams & { include?: string } = {
+        ...(queryFilters as UserQueryParams),
+        include: 'stores',
       };
       
+      // …rest of the function
+    }
       const { data, error } = await apiClient.GET('/api/users', {
         params: { query: queryParams },
       });
