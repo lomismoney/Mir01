@@ -1,0 +1,36 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "電子產品",
+      "description": "各種電子設備及配件",
+      "parent_id": null,
+      "created_at": "2024-01-01T00:00:00.000000Z",
+      "updated_at": "2024-01-01T00:00:00.000000Z"
+    },
+    {
+      "id": 2,
+      "name": "手機",
+      "description": "智慧型手機及配件",
+      "parent_id": 1,
+      "created_at": "2024-01-01T00:00:00.000000Z",
+      "updated_at": "2024-01-01T00:00:00.000000Z"
+    },
+    {
+      "id": 3,
+      "name": "筆記型電腦",
+      "description": "筆記型電腦及相關產品",
+      "parent_id": 1,
+      "created_at": "2024-01-01T00:00:00.000000Z",
+      "updated_at": "2024-01-01T00:00:00.000000Z"
+    },
+    {
+      "id": 4,
+      "name": "服飾",
+      "description": "各類服裝及配件",
+      "parent_id": null,
+      "created_at": "2024-01-01T00:00:00.000000Z",
+      "updated_at": "2024-01-01T00:00:00.000000Z"
+    }
+  ]
+} 

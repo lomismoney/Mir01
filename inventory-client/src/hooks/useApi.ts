@@ -76,12 +76,31 @@ export function useProduct(id: number) {
 
 // 商品創建端點暫時未定義 - 等待後端實現
 
+// 導入由 openapi-typescript 生成的精確類型
+type CreateProductRequestBody = import('@/types/api').paths["/api/products"]["post"]["requestBody"]["content"]["application/json"];
+
 /**
- * 創建商品的 Hook (暫時停用 - 等待後端端點實現)
- * TODO: 需要後端實現 POST /api/products 端點
+ * 創建商品的 Hook
+ * 
+ * @returns React Query 變更結果
  */
 export function useCreateProduct() {
-  throw new Error('創建商品功能暫時停用 - 等待後端端點實現');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: CreateProductRequestBody) => {
+      const { data, error } = await apiClient.POST('/api/products', { body });
+      if (error) {
+        // 使用我們統一的錯誤處理格式
+        throw new Error(Object.values(error).flat().join('\n') || '建立商品失敗');
+      }
+      return data;
+    },
+    onSuccess: () => {
+      // 成功後無效化產品列表快取
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
 }
 
 // 導入由 openapi-typescript 生成的精確類型
@@ -160,7 +179,8 @@ export function useDeleteMultipleProducts() {
       });
 
       if (error) {
-        const errorMessage = (error as any)?.detail?.[0] || '刪除商品失敗';
+        // 修復 any 類型警告：使用類型保護
+        const errorMessage = (error as { detail?: string[] })?.detail?.[0] || '刪除商品失敗';
         throw new Error(errorMessage);
       }
     },
@@ -343,8 +363,8 @@ export function useCategories() {
       if (error) {
         throw new Error('獲取分類列表失敗');
       }
-      // 後端回傳的已是按 parent_id 分組的結構
-      return data as Record<string, unknown[]>; 
+      // ✅ 後端現在返回扁平化的分類列表
+      return data;
     },
     staleTime: 1000 * 60 * 5, // 5 分鐘內不重新請求
   });
@@ -448,36 +468,18 @@ export function useDeleteCategory() {
 
 /**
  * 獲取所有商品屬性及其值
- * 
- * 從後端獲取商品屬性（規格庫），例如「顏色」、「尺寸」等屬性，
- * 同時包含每個屬性下的所有可用值。這些資料用於：
- * 1. 建立新商品時選擇可用屬性
- * 2. 建立商品變體 (SKU) 時組合屬性值
- * 3. 前端篩選介面的動態生成
- * 
- * @returns React Query 查詢結果，包含屬性及其值的完整列表
  */
 export function useAttributes() {
   return useQuery({
     queryKey: QUERY_KEYS.ATTRIBUTES,
     queryFn: async () => {
-      // 暫時使用 fetch 直接調用，直到 API 文檔修復
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/attributes`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
+      const { data, error } = await apiClient.GET('/api/attributes');
+      if (error) {
         throw new Error('獲取屬性列表失敗');
       }
-      
-      const result = await response.json();
-      return result.data || result; // 適應不同的響應格式
+      return data;
     },
-    staleTime: 1000 * 60 * 10, // 10 分鐘內不重新請求（屬性變更較少）
+    staleTime: 1000 * 60 * 10, // 屬性變更較少，10 分鐘快取
   });
 }
 

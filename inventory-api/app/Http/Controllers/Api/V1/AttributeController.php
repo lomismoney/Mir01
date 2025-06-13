@@ -35,7 +35,9 @@ class AttributeController extends Controller
      * 返回系統中所有的商品屬性，包含其相關的屬性值
      * 使用 Eager Loading 避免 N+1 查詢問題
      * 
-     * @response App\Http\Resources\Api\V1\AttributeResource
+     * @group 規格庫管理
+     * @authenticated
+     * @responseFile storage/responses/attributes.index.json
      */
     public function index()
     {
@@ -63,9 +65,8 @@ class AttributeController extends Controller
      * 
      * 返回指定的商品屬性詳細資訊，包含其所有屬性值
      * 
-     * @urlParam attribute int required 屬性 ID Example: 1
-     * 
-     * @response App\Http\Resources\Api\V1\AttributeResource
+     * @urlParam attribute integer required 屬性的 ID。 Example: 1
+     * @responseFile storage/responses/attribute.show.json
      */
     public function show(Attribute $attribute)
     {

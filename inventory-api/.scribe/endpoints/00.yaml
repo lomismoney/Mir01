@@ -88,51 +88,6 @@ endpoints:
     custom: []
   -
     httpMethods:
-      - GET
-    uri: api/categories
-    metadata:
-      groupName: Endpoints
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 顯示分類列表
-      description: |-
-        優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、
-        高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。
-
-        範例：
-        - json[''] 或 json[null] 就是所有頂層分類
-        - json['1'] 就是 id 為 1 的分類下的所有子分類
-      authenticated: false
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
-        custom: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
       - POST
     uri: api/categories
     metadata:
@@ -225,8 +180,19 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         custom: []
+      category:
+        name: category
+        description: '分類的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
     cleanUrlParameters:
       id: 1
+      category: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -234,13 +200,10 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
+        status: 200
+        content: "{\r\n  \"data\": {\r\n    \"id\": 1,\r\n    \"name\": \"電子產品\",\r\n    \"description\": \"各種電子設備及配件\",\r\n    \"parent_id\": null,\r\n    \"created_at\": \"2024-01-01T00:00:00.000000Z\",\r\n    \"updated_at\": \"2024-01-01T00:00:00.000000Z\"\r\n  }\r\n} "
+        headers: []
+        description: ''
         custom: []
     responseFields: []
     auth: []

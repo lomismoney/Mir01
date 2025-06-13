@@ -376,12 +376,12 @@ export function ProductForm({
       // OpenAPI 類型生成錯誤：attributes 和 variants 被錯誤定義為 string[]
       // 實際後端期望：attributes: number[], variants: object[]
       // 此 any 斷言在 Scribe 修復類型定義後可安全移除
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
       const submissionData = correctSubmissionData as any;
 
       // === 3. 調用 API (暫時停用) ===
       toast.success('商品資料已準備完成！');
-      console.log('準備提交的資料:', submissionData);
+  
       
       // 調用父組件的回調
       onSubmit?.(formData);

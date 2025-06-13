@@ -31,20 +31,19 @@ class CategoryController extends Controller
     /**
      * 顯示分類列表
      * 
-     * 優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、
-     * 高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。
-     * 
-     * 範例：
-     * - json[''] 或 json[null] 就是所有頂層分類
-     * - json['1'] 就是 id 為 1 的分類下的所有子分類
-     * 
-     * @return \Illuminate\Http\JsonResponse
+     * 返回所有分類的扁平化列表，並進行排序以維持層級關係。
+     * @group 分類管理
+     * @authenticated
+     * @responseFile storage/responses/categories.index.json
      */
     public function index()
     {
-        // 為了方便前端處理，我們返回一個以 parent_id 分組的集合
-        $categories = Category::all()->groupBy('parent_id');
-        return response()->json($categories);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
+        
+        // 返回一個扁平但有序的列表，讓前端可以輕易地自行建構樹狀結構
+        $categories = Category::orderBy('parent_id')->orderBy('id')->get();
+        
+        return CategoryResource::collection($categories);
     }
 
     /**
@@ -69,6 +68,8 @@ class CategoryController extends Controller
      * 
      * 返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出
      * 
+     * @urlParam category integer required 分類的 ID。 Example: 1
+     * @responseFile storage/responses/category.show.json
      * @param \App\Models\Category $category
      * @return \App\Http\Resources\Api\V1\CategoryResource
      */

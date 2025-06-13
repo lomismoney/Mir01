@@ -1,9 +1,22 @@
 import type { paths } from './api';
 
-// 從 API 類型中提取產品資料類型
-export type Product = NonNullable<
-  paths['/api/products']['get']['responses'][200]['content']['application/json']['data']
->[0];
+// 產品類型定義（與 API 契約轉換層完全匹配）
+export interface Product {
+  id: number;
+  name: string;
+  sku: string;
+  description?: string | null;  // ✅ 匹配後端 API 的 null 值序列化
+  selling_price: number;
+  cost_price: number;
+  category_id?: number | null;
+  created_at?: string;
+  updated_at?: string;
+  category?: {
+    id: number;
+    name: string;
+    description?: string | null;
+  } | null;
+}
 
 // 商品列表響應類型
 export type ProductListResponse = paths['/api/products']['get']['responses'][200]['content']['application/json'];

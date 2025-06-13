@@ -64,12 +64,7 @@ export interface paths {
         };
         /**
          * 顯示分類列表
-         * @description 優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、
-         *     高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。
-         *
-         *     範例：
-         *     - json[''] 或 json[null] 就是所有頂層分類
-         *     - json['1'] 就是 id 為 1 的分類下的所有子分類
+         * @description 返回所有分類的扁平化列表，並進行排序以維持層級關係。
          */
         get: {
             parameters: {
@@ -80,14 +75,60 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                401: {
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": {
-                            /** @example Unauthenticated. */
-                            message?: string;
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "name": "電子產品",
+                             *         "description": "各種電子設備及配件",
+                             *         "parent_id": null,
+                             *         "created_at": "2024-01-01T00:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *       },
+                             *       {
+                             *         "id": 2,
+                             *         "name": "手機",
+                             *         "description": "智慧型手機及配件",
+                             *         "parent_id": 1,
+                             *         "created_at": "2024-01-01T00:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *       },
+                             *       {
+                             *         "id": 3,
+                             *         "name": "筆記型電腦",
+                             *         "description": "筆記型電腦及相關產品",
+                             *         "parent_id": 1,
+                             *         "created_at": "2024-01-01T00:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *       },
+                             *       {
+                             *         "id": 4,
+                             *         "name": "服飾",
+                             *         "description": "各類服裝及配件",
+                             *         "parent_id": null,
+                             *         "created_at": "2024-01-01T00:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *       }
+                             *     ] */
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 電子產品 */
+                                name?: string;
+                                /** @example 各種電子設備及配件 */
+                                description?: string;
+                                /** @example null */
+                                parent_id?: string;
+                                /** @example 2024-01-01T00:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2024-01-01T00:00:00.000000Z */
+                                updated_at?: string;
+                            }[];
                         };
                     };
                 };
@@ -144,6 +185,11 @@ export interface paths {
                  * @example 1
                  */
                 id: number;
+                /**
+                 * @description 分類的 ID。
+                 * @example 1
+                 */
+                category: number;
             };
             cookie?: never;
         };
@@ -161,19 +207,36 @@ export interface paths {
                      * @example 1
                      */
                     id: number;
+                    /**
+                     * @description 分類的 ID。
+                     * @example 1
+                     */
+                    category: number;
                 };
                 cookie?: never;
             };
             requestBody?: never;
             responses: {
-                401: {
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": {
-                            /** @example Unauthenticated. */
-                            message?: string;
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 電子產品 */
+                                name?: string;
+                                /** @example 各種電子設備及配件 */
+                                description?: string;
+                                /** @example null */
+                                parent_id?: string;
+                                /** @example 2024-01-01T00:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2024-01-01T00:00:00.000000Z */
+                                updated_at?: string;
+                            };
                         };
                     };
                 };
@@ -196,6 +259,11 @@ export interface paths {
                      * @example 1
                      */
                     id: number;
+                    /**
+                     * @description 分類的 ID。
+                     * @example 1
+                     */
+                    category: number;
                 };
                 cookie?: never;
             };
@@ -236,6 +304,11 @@ export interface paths {
                      * @example 1
                      */
                     id: number;
+                    /**
+                     * @description 分類的 ID。
+                     * @example 1
+                     */
+                    category: number;
                 };
                 cookie?: never;
             };
@@ -273,7 +346,99 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": string;
+                        "application/json": {
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "name": "顏色",
+                             *         "created_at": "2024-01-01T00:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T00:00:00.000000Z",
+                             *         "values": [
+                             *           {
+                             *             "id": 1,
+                             *             "value": "紅色",
+                             *             "attribute_id": 1,
+                             *             "created_at": "2024-01-01T00:00:00.000000Z",
+                             *             "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *           },
+                             *           {
+                             *             "id": 2,
+                             *             "value": "藍色",
+                             *             "attribute_id": 1,
+                             *             "created_at": "2024-01-01T00:00:00.000000Z",
+                             *             "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *           }
+                             *         ]
+                             *       },
+                             *       {
+                             *         "id": 2,
+                             *         "name": "尺寸",
+                             *         "created_at": "2024-01-01T00:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T00:00:00.000000Z",
+                             *         "values": [
+                             *           {
+                             *             "id": 3,
+                             *             "value": "S",
+                             *             "attribute_id": 2,
+                             *             "created_at": "2024-01-01T00:00:00.000000Z",
+                             *             "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *           },
+                             *           {
+                             *             "id": 4,
+                             *             "value": "M",
+                             *             "attribute_id": 2,
+                             *             "created_at": "2024-01-01T00:00:00.000000Z",
+                             *             "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *           },
+                             *           {
+                             *             "id": 5,
+                             *             "value": "L",
+                             *             "attribute_id": 2,
+                             *             "created_at": "2024-01-01T00:00:00.000000Z",
+                             *             "updated_at": "2024-01-01T00:00:00.000000Z"
+                             *           }
+                             *         ]
+                             *       }
+                             *     ] */
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 顏色 */
+                                name?: string;
+                                /** @example 2024-01-01T00:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2024-01-01T00:00:00.000000Z */
+                                updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "value": "紅色",
+                                 *         "attribute_id": 1,
+                                 *         "created_at": "2024-01-01T00:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T00:00:00.000000Z"
+                                 *       },
+                                 *       {
+                                 *         "id": 2,
+                                 *         "value": "藍色",
+                                 *         "attribute_id": 1,
+                                 *         "created_at": "2024-01-01T00:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T00:00:00.000000Z"
+                                 *       }
+                                 *     ] */
+                                values?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 紅色 */
+                                    value?: string;
+                                    /** @example 1 */
+                                    attribute_id?: number;
+                                    /** @example 2024-01-01T00:00:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2024-01-01T00:00:00.000000Z */
+                                    updated_at?: string;
+                                }[];
+                            }[];
+                        };
                     };
                 };
             };
@@ -329,7 +494,7 @@ export interface paths {
                  */
                 id: number;
                 /**
-                 * @description 屬性 ID
+                 * @description 屬性的 ID。
                  * @example 1
                  */
                 attribute: number;
@@ -351,7 +516,7 @@ export interface paths {
                      */
                     id: number;
                     /**
-                     * @description 屬性 ID
+                     * @description 屬性的 ID。
                      * @example 1
                      */
                     attribute: number;
@@ -365,7 +530,46 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": string;
+                        "application/json": {
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 顏色 */
+                                name?: string;
+                                /** @example 2024-01-01T00:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2024-01-01T00:00:00.000000Z */
+                                updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "value": "紅色",
+                                 *         "attribute_id": 1,
+                                 *         "created_at": "2024-01-01T00:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T00:00:00.000000Z"
+                                 *       },
+                                 *       {
+                                 *         "id": 2,
+                                 *         "value": "藍色",
+                                 *         "attribute_id": 1,
+                                 *         "created_at": "2024-01-01T00:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T00:00:00.000000Z"
+                                 *       }
+                                 *     ] */
+                                values?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 紅色 */
+                                    value?: string;
+                                    /** @example 1 */
+                                    attribute_id?: number;
+                                    /** @example 2024-01-01T00:00:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2024-01-01T00:00:00.000000Z */
+                                    updated_at?: string;
+                                }[];
+                            };
+                        };
                     };
                 };
             };
@@ -385,7 +589,7 @@ export interface paths {
                      */
                     id: number;
                     /**
-                     * @description 屬性 ID
+                     * @description 屬性的 ID。
                      * @example 1
                      */
                     attribute: number;
@@ -431,7 +635,7 @@ export interface paths {
                      */
                     id: number;
                     /**
-                     * @description 屬性 ID
+                     * @description 屬性的 ID。
                      * @example 1
                      */
                     attribute: number;
@@ -1191,7 +1395,7 @@ export interface paths {
                          */
                         password: string;
                         /**
-                         * @example viewer
+                         * @example admin
                          * @enum {string}
                          */
                         role: "admin" | "viewer";
@@ -1582,7 +1786,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 17 */
+                            /** @example 21 */
                             id?: number;
                             /** @example Lonny Ankunding */
                             name?: string;
@@ -1594,9 +1798,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-12T08:33:30.000000Z */
+                            /** @example 2025-06-12T15:49:22.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-12T08:33:30.000000Z */
+                            /** @example 2025-06-12T15:49:22.000000Z */
                             updated_at?: string;
                         };
                     };

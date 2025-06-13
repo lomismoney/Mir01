@@ -157,7 +157,7 @@ endpoints:
         name: role
         description: ''
         required: true
-        example: viewer
+        example: admin
         type: string
         enumValues:
           - admin
@@ -169,7 +169,7 @@ endpoints:
       name: vmqeopfuudtdsufvyvddq
       username: amniihfqcoynlazghdtqt
       password: "t(!Cs'YAKYLk4>S"
-      role: viewer
+      role: admin
     fileParameters: []
     responses:
       -
