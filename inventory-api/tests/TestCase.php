@@ -18,7 +18,7 @@ abstract class TestCase extends BaseTestCase
     protected function createAdminUser(): User
     {
         $user = User::factory()->create([
-            'role' => 'admin'
+            'role' => User::ROLE_ADMIN
         ]);
         
         return $user;
