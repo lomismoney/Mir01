@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
-import { adjustInventory } from "@/lib/api/inventory"
-import { getProductVariants } from "@/lib/api/products"
-import { getStores } from "@/lib/api/stores"
+import { useInventoryAdjustment, useStores, useProductVariants } from "@/hooks/useApi"
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -52,17 +50,10 @@ export function InventoryAdjustmentForm({
   const isNewProduct = productVariantId === 0
 
   // 獲取門市列表
-  const { data: storesData, isLoading: isLoadingStores } = useQuery({
-    queryKey: ["stores"],
-    queryFn: () => getStores(),
-  })
+  const { data: storesData, isLoading: isLoadingStores } = useStores()
 
   // 獲取商品變體列表，當需要選擇產品時
-  const { data: productsData, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ["product-variants"],
-    queryFn: () => getProductVariants(),
-    enabled: isNewProduct
-  })
+  const { data: productsData, isLoading: isLoadingProducts } = useProductVariants({})
 
   const form = useForm<AdjustmentFormValues>({
     defaultValues: {
@@ -81,27 +72,7 @@ export function InventoryAdjustmentForm({
     }
   }, [productVariantId])
 
-  const adjustmentMutation = useMutation({
-    mutationFn: adjustInventory,
-    onSuccess: () => {
-      toast({
-        title: "成功",
-        description: isNewProduct ? "新增庫存成功" : "庫存調整已完成",
-      })
-      queryClient.invalidateQueries({ queryKey: ["inventory"] })
-      form.reset()
-      setIsSubmitting(false)
-      if (onSuccess) onSuccess()
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "錯誤",
-        description: `庫存調整失敗: ${error instanceof Error ? error.message : "未知錯誤"}`,
-      })
-      setIsSubmitting(false)
-    },
-  })
+  const adjustmentMutation = useInventoryAdjustment()
 
   const onSubmit = (data: AdjustmentFormValues) => {
     setIsSubmitting(true)
@@ -139,6 +110,25 @@ export function InventoryAdjustmentForm({
       action: data.action,
       quantity: parseInt(data.quantity),
       notes: data.notes,
+    }, {
+      onSuccess: () => {
+        toast({
+          title: "成功",
+          description: isNewProduct ? "新增庫存成功" : "庫存調整已完成",
+        })
+        queryClient.invalidateQueries({ queryKey: ["inventory"] })
+        form.reset()
+        setIsSubmitting(false)
+        if (onSuccess) onSuccess()
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "錯誤",
+          description: `庫存調整失敗: ${error instanceof Error ? error.message : "未知錯誤"}`,
+        })
+        setIsSubmitting(false)
+      },
     })
   }
 
@@ -170,8 +160,8 @@ export function InventoryAdjustmentForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {storesData?.data.map((store) => (
-                        <SelectItem key={store.id} value={store.id.toString()}>
+                      {storesData?.data?.map((store) => (
+                        <SelectItem key={store.id} value={store.id?.toString() || ''}>
                           {store.name}
                         </SelectItem>
                       ))}
@@ -203,8 +193,8 @@ export function InventoryAdjustmentForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {productsData?.data.map((variant) => (
-                          <SelectItem key={variant.id} value={variant.id.toString()}>
+                        {productsData?.data?.map((variant) => (
+                          <SelectItem key={variant.id} value={variant.id?.toString() || ''}>
                             {variant.product?.name} - {variant.sku}
                           </SelectItem>
                         ))}

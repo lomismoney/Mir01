@@ -53,4 +53,34 @@ export function transformCategoriesGroupedResponse(
   }
   
   return transformed;
-} 
+}
+
+/**
+ * 庫存管理相關型別別名
+ * 從 API 類型中提取常用的庫存相關型別
+ */
+
+// 庫存列表項目型別
+export type InventoryItem = NonNullable<
+  import('@/types/api').paths['/api/inventory']['get']['responses'][200]['content']['application/json']['data']
+>[number];
+
+// 庫存轉移項目型別
+export type InventoryTransferItem = NonNullable<
+  import('@/types/api').paths['/api/inventory/transfers']['get']['responses'][200]['content']['application/json']['data']
+>[number];
+
+// 門市項目型別
+export type StoreItem = NonNullable<
+  import('@/types/api').operations['getApiStores']['responses'][200]['content']['application/json']['data']
+>[number];
+
+// 商品變體項目型別
+export type ProductVariantItem = NonNullable<
+  import('@/types/api').paths['/api/products/variants']['get']['responses'][200]['content']['application/json']['data']
+>[number];
+
+// 用戶項目型別
+export type UserItem = NonNullable<
+  import('@/types/api').paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
+>[number]; 

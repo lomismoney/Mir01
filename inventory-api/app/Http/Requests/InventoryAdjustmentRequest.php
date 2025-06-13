@@ -50,4 +50,41 @@ class InventoryAdjustmentRequest extends FormRequest
             'quantity.min' => '數量必須大於0',
         ];
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'product_variant_id' => [
+                'description' => '商品變體ID',
+                'example' => 1,
+            ],
+            'store_id' => [
+                'description' => '門市ID',
+                'example' => 1,
+            ],
+            'action' => [
+                'description' => '操作類型（add: 添加, reduce: 減少, set: 設定）',
+                'example' => 'add',
+            ],
+            'quantity' => [
+                'description' => '數量',
+                'example' => 10,
+            ],
+            'notes' => [
+                'description' => '備註（可選）',
+                'example' => '週末促銷活動增加庫存',
+            ],
+            'metadata' => [
+                'description' => '額外的元數據（可選）',
+                'example' => ['reason' => 'restock'],
+            ],
+        ];
+    }
 }

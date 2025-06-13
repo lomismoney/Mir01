@@ -28,8 +28,7 @@ class StoreController extends Controller
      * 
      * 獲取系統中的所有分店列表。
      * 
-     * @apiResource App\Http\Resources\Api\StoreResource
-     * @apiResourceModel App\Models\Store
+     * @responseFile storage/responses/stores.index.json
      * 
      * @return AnonymousResourceCollection
      */

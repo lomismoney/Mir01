@@ -18,18 +18,14 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 // 使用統一的類型定義，確保與 API 契約同步
-import { User as ApiUser, UserActions as ApiUserActions } from '@/types/user';
-// 導入 Store 類型定義
-import { Store as StoreType } from '@/hooks/useStores';
+import { UserItem, StoreItem } from '@/types/api-helpers';
 
-// 擴展 User 類型，加入 stores 屬性
-export interface User extends ApiUser {
-  stores?: StoreType[];
-}
-
-export interface UserActions extends ApiUserActions {
-  // 新增分配分店功能
-  onManageStores?: (user: User) => void;
+// 定義用戶操作介面
+export interface UserActions {
+  onView?: (user: UserItem) => void;
+  onEdit?: (user: UserItem) => void;
+  onDelete?: (user: UserItem) => void;
+  onManageStores?: (user: UserItem) => void;
 }
 
 /**
@@ -47,10 +43,10 @@ export interface UserActions extends ApiUserActions {
  * 6. 更新時間 - 格式化的更新日期
  * 7. 操作 - 下拉選單包含查看、編輯、分配分店、刪除（僅管理員可見）
  * 
- * @param actions - 操作處理器（包含當前用戶資訊用於權限判斷）
+ * @param actions - 操作處理器
  * @returns 欄位定義陣列
  */
-export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[] => [
+export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserItem>[] => [
   {
     id: "avatar",
     header: "",
@@ -144,45 +140,6 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[]
     },
   },
   {
-    id: "stores",
-    header: "所屬分店",
-    cell: ({ row }) => {
-      const user = row.original
-      const stores = user.stores || []
-      
-      if (!stores.length) {
-        return <div className="text-sm text-muted-foreground">未分配分店</div>
-      }
-      
-      // 如果分店超過 3 個，只顯示前 2 個並顯示剩餘數量
-      if (stores.length > 3) {
-        return (
-          <div className="flex flex-wrap gap-1">
-            {stores.slice(0, 2).map((store: StoreType) => (
-              <Badge key={store.id} variant="outline" className="text-xs">
-                {store.name}
-              </Badge>
-            ))}
-            <Badge variant="secondary" className="text-xs">
-              +{stores.length - 2} 間
-            </Badge>
-          </div>
-        )
-      }
-      
-      // 顯示所有分店
-      return (
-        <div className="flex flex-wrap gap-1">
-          {stores.map((store: StoreType) => (
-            <Badge key={store.id} variant="outline" className="text-xs">
-              {store.name}
-            </Badge>
-          ))}
-        </div>
-      )
-    },
-  },
-  {
     accessorKey: "created_at",
     header: ({ column }) => {
       return (
@@ -198,16 +155,17 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[]
     },
     cell: ({ row }) => {
       const dateString = row.getValue("created_at") as string
-      if (!dateString) {
-        return <div className="text-sm text-muted-foreground">未知</div>
-      }
+      if (!dateString) return <div className="text-muted-foreground">-</div>
       
-      const date = new Date(dateString)
-      return (
-        <div className="text-sm text-muted-foreground">
-          {format(date, "yyyy/MM/dd HH:mm", { locale: zhTW })}
-        </div>
-      )
+      try {
+        return (
+          <div className="text-sm">
+            {format(new Date(dateString), "yyyy-MM-dd HH:mm", { locale: zhTW })}
+          </div>
+        )
+      } catch {
+        return <div className="text-muted-foreground">格式錯誤</div>
+      }
     },
   },
   {
@@ -226,16 +184,17 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[]
     },
     cell: ({ row }) => {
       const dateString = row.getValue("updated_at") as string
-      if (!dateString) {
-        return <div className="text-sm text-muted-foreground">未知</div>
-      }
+      if (!dateString) return <div className="text-muted-foreground">-</div>
       
-      const date = new Date(dateString)
-      return (
-        <div className="text-sm text-muted-foreground">
-          {format(date, "yyyy/MM/dd HH:mm", { locale: zhTW })}
-        </div>
-      )
+      try {
+        return (
+          <div className="text-sm">
+            {format(new Date(dateString), "yyyy-MM-dd HH:mm", { locale: zhTW })}
+          </div>
+        )
+      } catch {
+        return <div className="text-muted-foreground">格式錯誤</div>
+      }
     },
   },
   {
@@ -243,11 +202,6 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[]
     header: "操作",
     cell: ({ row }) => {
       const user = row.original
-      
-      // 只有管理員才能看到操作選單
-      if (!actions.currentUser?.is_admin) {
-        return null
-      }
 
       return (
         <DropdownMenu>
@@ -258,25 +212,34 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[]
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>用戶操作</DropdownMenuLabel>
+            <DropdownMenuLabel>操作</DropdownMenuLabel>
             <DropdownMenuSeparator />
             
             {actions.onView && (
-              <DropdownMenuItem onClick={() => actions.onView!(user)}>
+              <DropdownMenuItem
+                onClick={() => actions.onView?.(user)}
+                className="cursor-pointer"
+              >
                 <Eye className="mr-2 h-4 w-4" />
                 查看詳情
               </DropdownMenuItem>
             )}
             
             {actions.onEdit && (
-              <DropdownMenuItem onClick={() => actions.onEdit!(user)}>
+              <DropdownMenuItem
+                onClick={() => actions.onEdit?.(user)}
+                className="cursor-pointer"
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 編輯用戶
               </DropdownMenuItem>
             )}
             
             {actions.onManageStores && (
-              <DropdownMenuItem onClick={() => actions.onManageStores!(user)}>
+              <DropdownMenuItem
+                onClick={() => actions.onManageStores?.(user)}
+                className="cursor-pointer"
+              >
                 <Store className="mr-2 h-4 w-4" />
                 分配分店
               </DropdownMenuItem>
@@ -285,9 +248,9 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<User>[]
             <DropdownMenuSeparator />
             
             {actions.onDelete && (
-              <DropdownMenuItem 
-                onClick={() => actions.onDelete!(user)}
-                className="text-destructive focus:text-destructive"
+              <DropdownMenuItem
+                onClick={() => actions.onDelete?.(user)}
+                className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 刪除用戶

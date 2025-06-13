@@ -161,9 +161,9 @@ export function useDeleteMultipleProducts() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (body: { ids: number[] }) => {
-      // 呼叫新的 POST 端點
+      // 轉換數字陣列為字串陣列（根據 API 規格要求）
       const { error } = await apiClient.POST('/api/products/batch-delete', {
-        body,
+        body: { ids: body.ids.map(id => id.toString()) },
       });
 
       if (error) {
@@ -370,7 +370,7 @@ export function useCategories() {
 
 // 導入由 openapi-typescript 自動生成的精確分類管理類型
 type CreateCategoryRequestBody = import('@/types/api').paths["/api/categories"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateCategoryRequestBody = import('@/types/api').paths["/api/categories/{id}"]["put"]["requestBody"]["content"]["application/json"];
+type UpdateCategoryRequestBody = NonNullable<import('@/types/api').paths["/api/categories/{id}"]["put"]["requestBody"]>["content"]["application/json"];
 type CategoryPathParams = import('@/types/api').paths["/api/categories/{id}"]["put"]["parameters"]["path"];
 
 /**
@@ -519,9 +519,23 @@ export function useCreateAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (body: CreateAttributeRequestBody) => {
+      console.log('Creating attribute with body:', body);
       const { data, error } = await apiClient.POST('/api/attributes', { body });
-      if (error) { 
-        throw new Error(Object.values(error).flat().join('\n') || '建立屬性失敗'); 
+      
+      if (error) {
+        console.error('API Error:', error);
+        // 處理不同的錯誤格式
+        let errorMessage = '建立屬性失敗';
+        if (typeof error === 'object' && error !== null) {
+          if ('message' in error) {
+            errorMessage = (error as any).message;
+          } else if ('errors' in error) {
+            errorMessage = Object.values((error as any).errors).flat().join('\n');
+          } else {
+            errorMessage = Object.values(error).flat().join('\n');
+          }
+        }
+        throw new Error(errorMessage);
       }
       return data;
     },
@@ -594,29 +608,23 @@ export function useDeleteAttribute() {
   });
 }
 
+// 導入屬性值管理的精確類型定義
+type CreateAttributeValueRequestBody = import('@/types/api').paths["/api/attributes/{attribute_id}/values"]["post"]["requestBody"]["content"]["application/json"];
+type UpdateAttributeValueRequestBody = import('@/types/api').paths["/api/values/{id}"]["put"]["requestBody"]["content"]["application/json"];
+type AttributeValuePathParams = import('@/types/api').paths["/api/values/{id}"]["get"]["parameters"]["path"];
+
 /**
- * 為指定屬性建立新屬性值的 Mutation (標準版)
+ * 為指定屬性建立新屬性值的 Mutation
  */
 export function useCreateAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (variables: { 
-      attributeId: number; 
-      body: { value: string; } 
-    }) => {
+    mutationFn: async (variables: { attributeId: number; body: CreateAttributeValueRequestBody }) => {
       const { data, error } = await apiClient.POST('/api/attributes/{attribute_id}/values', {
-        params: {
-          path: {
-            attribute_id: variables.attributeId,
-            attribute: variables.attributeId
-          }
-        },
+        params: { path: { attribute_id: variables.attributeId, attribute: variables.attributeId } },
         body: variables.body,
       });
-
-      if (error) {
-        throw new Error(Object.values(error).flat().join('\n') || '新增選項失敗');
-      }
+      if (error) { throw new Error(Object.values(error).flat().join('\n') || '新增選項失敗'); }
       return data;
     },
     onSuccess: () => {
@@ -626,28 +634,17 @@ export function useCreateAttributeValue() {
 }
 
 /**
- * 更新屬性值的 Mutation (標準版)
+ * 更新屬性值的 Mutation
  */
 export function useUpdateAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (variables: { 
-      valueId: number; 
-      body: { value: string; } 
-    }) => {
+    mutationFn: async (variables: { valueId: number; body: UpdateAttributeValueRequestBody }) => {
       const { data, error } = await apiClient.PUT('/api/values/{id}', {
-        params: {
-          path: {
-            id: variables.valueId,
-            value: variables.valueId
-          }
-        },
+        params: { path: { id: variables.valueId, value: variables.valueId } },
         body: variables.body,
       });
-
-      if (error) {
-        throw new Error(Object.values(error).flat().join('\n') || '更新選項失敗');
-      }
+      if (error) { throw new Error(Object.values(error).flat().join('\n') || '更新選項失敗'); }
       return data;
     },
     onSuccess: () => {
@@ -657,27 +654,422 @@ export function useUpdateAttributeValue() {
 }
 
 /**
- * 刪除屬性值的 Mutation (標準版)
+ * 刪除屬性值的 Mutation
  */
 export function useDeleteAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (valueId: number) => {
-                    const { error } = await apiClient.DELETE('/api/values/{id}', {
-         params: {
-           path: {
-             id: valueId,
-             value: valueId
-           }
-         },
+      const { error } = await apiClient.DELETE('/api/values/{id}', {
+        params: { path: { id: valueId, value: valueId } },
       });
-
-      if (error) {
-        throw new Error('刪除選項失敗');
-      }
+      if (error) { throw new Error('刪除選項失敗'); }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTRIBUTES });
     },
+  });
+}
+
+// ==================== 庫存管理系統 (INVENTORY MANAGEMENT) ====================
+
+/**
+ * 獲取庫存列表查詢
+ * 
+ * 支援多種篩選條件：
+ * - 門市篩選
+ * - 低庫存警示
+ * - 缺貨狀態
+ * - 商品名稱搜尋
+ * - 分頁控制
+ */
+export function useInventoryList(params: {
+  store_id?: number;
+  low_stock?: boolean;
+  out_of_stock?: boolean;
+  product_name?: string;
+  page?: number;
+  per_page?: number;
+} = {}) {
+  return useQuery({
+    queryKey: ['inventory', 'list', params],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/inventory', {
+        params: { query: params },
+      });
+      if (error) {
+        throw new Error('獲取庫存列表失敗');
+      }
+      return data;
+    },
+    staleTime: 1000 * 60 * 2, // 2 分鐘內保持新鮮（庫存變化較頻繁）
+  });
+}
+
+/**
+ * 獲取單個庫存詳情
+ */
+export function useInventoryDetail(id: number) {
+  return useQuery({
+    queryKey: ['inventory', 'detail', id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/inventory/{id}', {
+        params: { path: { id: id.toString() } },
+      });
+      if (error) {
+        throw new Error('獲取庫存詳情失敗');
+      }
+      return data;
+    },
+    enabled: !!id,
+  });
+}
+
+/**
+ * 庫存調整 Mutation
+ * 
+ * 支援三種調整模式：
+ * - add: 增加庫存
+ * - reduce: 減少庫存
+ * - set: 設定庫存為指定數量
+ */
+export function useInventoryAdjustment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (adjustment: {
+      product_variant_id: number;
+      store_id: number;
+      action: 'add' | 'reduce' | 'set';
+      quantity: number;
+      notes?: string;
+      metadata?: Record<string, never> | null;
+    }) => {
+      const { data, error } = await apiClient.POST('/api/inventory/adjust', {
+        body: adjustment,
+      });
+      if (error) {
+        throw new Error('庫存調整失敗');
+      }
+      return data;
+    },
+    onSuccess: () => {
+      // 無效化所有庫存相關的快取
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+    },
+  });
+}
+
+/**
+ * 獲取庫存交易歷史
+ */
+export function useInventoryHistory(params: {
+  id: number;
+  start_date?: string;
+  end_date?: string;
+  type?: string;
+  per_page?: number;
+  page?: number;
+}) {
+  return useQuery({
+    queryKey: ['inventory', 'history', params],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/inventory/{id}/history', {
+        params: { 
+          path: { id: params.id },
+          query: {
+            start_date: params.start_date,
+            end_date: params.end_date,
+            type: params.type,
+            per_page: params.per_page,
+            page: params.page,
+          }
+        },
+      });
+      if (error) {
+        throw new Error('獲取庫存歷史失敗');
+      }
+      return data;
+    },
+    enabled: !!params.id,
+  });
+}
+
+// ==================== 庫存轉移管理 (INVENTORY TRANSFERS) ====================
+
+/**
+ * 獲取庫存轉移列表
+ */
+export function useInventoryTransfers(params: {
+  from_store_id?: number;
+  to_store_id?: number;
+  status?: string;
+  start_date?: string;
+  end_date?: string;
+  product_name?: string;
+  per_page?: number;
+  page?: number;
+} = {}) {
+  return useQuery({
+    queryKey: ['inventory', 'transfers', params],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/inventory/transfers', {
+        params: { query: params },
+      });
+      if (error) {
+        throw new Error('獲取庫存轉移列表失敗');
+      }
+      return data;
+    },
+  });
+}
+
+/**
+ * 獲取單個庫存轉移詳情
+ */
+export function useInventoryTransferDetail(id: number) {
+  return useQuery({
+    queryKey: ['inventory', 'transfer', id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/inventory/transfers/{id}', {
+        params: { path: { id: id.toString() } },
+      });
+      if (error) {
+        throw new Error('獲取庫存轉移詳情失敗');
+      }
+      return data;
+    },
+    enabled: !!id,
+  });
+}
+
+/**
+ * 創建庫存轉移
+ */
+export function useCreateInventoryTransfer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (transfer: {
+      from_store_id: number;
+      to_store_id: number;
+      product_variant_id: number;
+      quantity: number;
+      notes?: string;
+      status?: string;
+    }) => {
+      const { data, error } = await apiClient.POST('/api/inventory/transfers', {
+        body: transfer,
+      });
+      if (error) {
+        throw new Error('創建庫存轉移失敗');
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'list'] });
+    },
+  });
+}
+
+/**
+ * 更新庫存轉移狀態
+ */
+export function useUpdateInventoryTransferStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: {
+      id: number;
+      status: string;
+      notes?: string;
+    }) => {
+      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{id}/status', {
+        params: { path: { id: params.id } },
+        body: { status: params.status, notes: params.notes },
+      });
+      if (error) {
+        throw new Error('更新轉移狀態失敗');
+      }
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfer', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'list'] });
+    },
+  });
+}
+
+/**
+ * 取消庫存轉移
+ */
+export function useCancelInventoryTransfer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { id: number; reason: string }) => {
+      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{id}/cancel', {
+        params: { path: { id: params.id } },
+        body: { reason: params.reason },
+      });
+      if (error) {
+        throw new Error('取消庫存轉移失敗');
+      }
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfer', variables.id] });
+    },
+  });
+}
+
+// ==================== 門市管理系統 (STORE MANAGEMENT) ====================
+
+/**
+ * 獲取門市列表
+ */
+export function useStores(params: {
+  name?: string;
+  status?: string;
+  page?: number;
+  per_page?: number;
+} = {}) {
+  return useQuery({
+    queryKey: ['stores', params],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/stores');
+      if (error) {
+        throw new Error('獲取門市列表失敗');
+      }
+      return data;
+    },
+    staleTime: 1000 * 60 * 10, // 10 分鐘內保持新鮮（門市資訊變化較少）
+  });
+}
+
+/**
+ * 獲取單個門市詳情
+ */
+export function useStore(id: number) {
+  return useQuery({
+    queryKey: ['stores', id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/stores/{id}', {
+        params: { path: { id } },
+      });
+      if (error) {
+        throw new Error('獲取門市詳情失敗');
+      }
+      return data;
+    },
+    enabled: !!id,
+  });
+}
+
+/**
+ * 創建門市
+ */
+export function useCreateStore() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (store: any) => { // 類型待 API 文檔完善後補充
+      const { data, error } = await apiClient.POST('/api/stores', {
+        body: store,
+      });
+      if (error) {
+        throw new Error('創建門市失敗');
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stores'] });
+    },
+  });
+}
+
+/**
+ * 更新門市
+ */
+export function useUpdateStore() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { id: number; data: any }) => {
+      const { data, error } = await apiClient.PUT('/api/stores/{id}', {
+        params: { path: { id: params.id } },
+        body: params.data,
+      });
+      if (error) {
+        throw new Error('更新門市失敗');
+      }
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['stores'] });
+      queryClient.invalidateQueries({ queryKey: ['stores', variables.id] });
+    },
+  });
+}
+
+/**
+ * 刪除門市
+ */
+export function useDeleteStore() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await apiClient.DELETE('/api/stores/{id}', {
+        params: { path: { id } },
+      });
+      if (error) {
+        throw new Error('刪除門市失敗');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stores'] });
+    },
+  });
+}
+
+// ==================== 商品變體管理 (PRODUCT VARIANTS) ====================
+
+/**
+ * 獲取商品變體列表
+ */
+export function useProductVariants(params: {
+  product_id?: number;
+  product_name?: string;
+  sku?: string;
+  page?: number;
+  per_page?: number;
+} = {}) {
+  return useQuery({
+    queryKey: ['product-variants', params],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/products/variants', {
+        params: { query: params },
+      });
+      if (error) {
+        throw new Error('獲取商品變體列表失敗');
+      }
+      return data;
+    },
+  });
+}
+
+/**
+ * 獲取單個商品變體詳情
+ */
+export function useProductVariantDetail(id: number) {
+  return useQuery({
+    queryKey: ['product-variants', id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/products/variants/{id}', {
+        params: { path: { id: id.toString() } },
+      });
+      if (error) {
+        throw new Error('獲取商品變體詳情失敗');
+      }
+      return data;
+    },
+    enabled: !!id,
   });
 }

@@ -35,7 +35,8 @@ class AttributeController extends Controller
      * 返回系統中所有的商品屬性，包含其相關的屬性值
      * 使用 Eager Loading 避免 N+1 查詢問題
      * 
-     * @response App\Http\Resources\Api\V1\AttributeResource
+     * @authenticated
+     * @responseFile storage/responses/attributes.index.json
      */
     public function index()
     {

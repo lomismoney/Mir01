@@ -1,0 +1,39 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "台北旗艦店",
+      "address": "台北市信義區信義路四段101號",
+      "phone": "02-2345-6789",
+      "email": "taipei@example.com",
+      "manager": "張經理",
+      "created_at": "2024-01-01T10:00:00.000000Z",
+      "updated_at": "2024-01-01T10:00:00.000000Z"
+    },
+    {
+      "id": 2,
+      "name": "台中中區店",
+      "address": "台中市中區中山路123號",
+      "phone": "04-2345-6789",
+      "email": "taichung@example.com",
+      "manager": "李經理",
+      "created_at": "2024-01-02T10:00:00.000000Z",
+      "updated_at": "2024-01-02T10:00:00.000000Z"
+    }
+  ],
+  "links": {
+    "first": "http://localhost/api/stores?page=1",
+    "last": "http://localhost/api/stores?page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "path": "http://localhost/api/stores",
+    "per_page": 15,
+    "to": 2,
+    "total": 2
+  }
+} 

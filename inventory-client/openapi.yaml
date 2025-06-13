@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: '庫存管理系統 API Documentation'
+  title: 'Laravel API Documentation'
   description: ''
   version: 1.0.0
 servers:
@@ -14,14 +14,29 @@ tags:
     name: 'Store Management'
     description: ''
   -
+    name: 'User Store Management'
+    description: ''
+  -
+    name: 分類管理
+    description: ''
+  -
     name: 商品屬性管理
     description: ''
   -
     name: 商品管理
     description: ''
   -
+    name: 商品變體管理
+    description: "\n商品變體 API 端點，用於管理商品的各種變體（SKU）"
+  -
     name: 屬性值管理
     description: ''
+  -
+    name: 庫存管理
+    description: "\n庫存管理 API 端點，用於管理商品庫存"
+  -
+    name: 庫存轉移
+    description: "\n庫存轉移 API 端點，用於在不同門市之間轉移庫存"
   -
     name: 用戶管理
     description: ''
@@ -32,6 +47,86 @@ tags:
     name: 認證管理
     description: ''
 paths:
+  /api/health:
+    get:
+      summary: "健康檢查端點\n用於確認 API 服務正常運行"
+      operationId: API
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: ok
+                  message: 'API is running'
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  message:
+                    type: string
+                    example: 'API is running'
+      tags:
+        - Endpoints
+      security: []
+  /api/user:
+    get:
+      summary: 獲取當前已認證的使用者資訊
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 18
+                    name: 'Mrs. Justina Gaylord'
+                    username: lafayette.considine
+                    role: viewer
+                    role_display: 檢視者
+                    is_admin: false
+                    created_at: '2025-06-13T20:52:33.000000Z'
+                    updated_at: '2025-06-13T20:52:33.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 18
+                      name:
+                        type: string
+                        example: 'Mrs. Justina Gaylord'
+                      username:
+                        type: string
+                        example: lafayette.considine
+                      role:
+                        type: string
+                        example: viewer
+                      role_display:
+                        type: string
+                        example: 檢視者
+                      is_admin:
+                        type: boolean
+                        example: false
+                      created_at:
+                        type: string
+                        example: '2025-06-13T20:52:33.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-13T20:52:33.000000Z'
+      tags:
+        - Endpoints
+      security: []
   /api/purchases:
     post:
       summary: 'Store a newly created resource in storage.'
@@ -92,23 +187,179 @@ paths:
               properties:
                 name:
                   type: string
-                  description: 'Must not be greater than 255 characters.'
-                  example: vmqeopfuudtdsufvyvddq
+                  description: 分類名稱。例如：電子產品
+                  example: architecto
                   nullable: false
                 description:
                   type: string
-                  description: ''
-                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
+                  description: 分類描述。例如：包含所有電子相關產品
+                  example: 'Eius et animi quos velit et.'
                   nullable: true
                 parent_id:
                   type: integer
-                  description: 'The <code>id</code> of an existing record in the categories table.'
-                  example: 17
+                  description: 父分類ID，必須是存在的分類ID。例如：1
+                  example: 16
                   nullable: true
               required:
                 - name
       security: []
+    get:
+      summary: 顯示分類列表
+      operationId: ''
+      description: "優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、\n高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。\n\n範例：\n- json[''] 或 json[null] 就是所有頂層分類\n- json['1'] 就是 id 為 1 的分類下的所有子分類"
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      name: 辦公用品
+                      description: 各種辦公室所需用品
+                      parent_id: null
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                    -
+                      id: 2
+                      name: 辦公椅
+                      description: 各式辦公椅系列
+                      parent_id: 1
+                      created_at: '2024-01-02T10:00:00.000000Z'
+                      updated_at: '2024-01-02T10:00:00.000000Z'
+                    -
+                      id: 3
+                      name: 電腦周邊
+                      description: 電腦相關配件
+                      parent_id: null
+                      created_at: '2024-01-03T10:00:00.000000Z'
+                      updated_at: '2024-01-03T10:00:00.000000Z'
+                  links:
+                    first: 'http://localhost/api/categories?page=1'
+                    last: 'http://localhost/api/categories?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    path: 'http://localhost/api/categories'
+                    per_page: 15
+                    to: 3
+                    total: 3
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 辦公用品
+                        description: 各種辦公室所需用品
+                        parent_id: null
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                      -
+                        id: 2
+                        name: 辦公椅
+                        description: 各式辦公椅系列
+                        parent_id: 1
+                        created_at: '2024-01-02T10:00:00.000000Z'
+                        updated_at: '2024-01-02T10:00:00.000000Z'
+                      -
+                        id: 3
+                        name: 電腦周邊
+                        description: 電腦相關配件
+                        parent_id: null
+                        created_at: '2024-01-03T10:00:00.000000Z'
+                        updated_at: '2024-01-03T10:00:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 辦公用品
+                        description:
+                          type: string
+                          example: 各種辦公室所需用品
+                        parent_id:
+                          type: string
+                          example: null
+                        created_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/categories?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/categories?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      path:
+                        type: string
+                        example: 'http://localhost/api/categories'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 3
+                      total:
+                        type: integer
+                        example: 3
+      tags:
+        - 分類管理
   '/api/categories/{id}':
+    get:
+      summary: 顯示指定的分類資源
+      operationId: ''
+      description: '返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出'
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
     put:
       summary: 更新指定的分類資源
       operationId: ''
@@ -118,7 +369,7 @@ paths:
       tags:
         - Endpoints
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -126,21 +377,19 @@ paths:
               properties:
                 name:
                   type: string
-                  description: 'Must not be greater than 255 characters.'
-                  example: vmqeopfuudtdsufvyvddq
+                  description: 分類名稱。例如：電子產品
+                  example: architecto
                   nullable: false
                 description:
                   type: string
-                  description: ''
-                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
+                  description: 分類描述。例如：包含所有電子相關產品
+                  example: 'Eius et animi quos velit et.'
                   nullable: true
                 parent_id:
                   type: integer
-                  description: 'The <code>id</code> of an existing record in the categories table.'
-                  example: 17
+                  description: 父分類ID，必須是存在的分類ID且不能是自己。例如：1
+                  example: 16
                   nullable: true
-              required:
-                - name
       security: []
     delete:
       summary: 刪除指定的分類資源
@@ -156,11 +405,305 @@ paths:
         in: path
         name: id
         description: 'The ID of the category.'
-        example: 17
+        example: 16
         required: true
         schema:
           type: integer
+  /api/stores:
+    get:
+      summary: ''
+      operationId: getApiStores
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      name: 台北旗艦店
+                      address: 台北市信義區信義路四段101號
+                      phone: 02-2345-6789
+                      email: taipei@example.com
+                      manager: 張經理
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                    -
+                      id: 2
+                      name: 台中中區店
+                      address: 台中市中區中山路123號
+                      phone: 04-2345-6789
+                      email: taichung@example.com
+                      manager: 李經理
+                      created_at: '2024-01-02T10:00:00.000000Z'
+                      updated_at: '2024-01-02T10:00:00.000000Z'
+                  links:
+                    first: 'http://localhost/api/stores?page=1'
+                    last: 'http://localhost/api/stores?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    path: 'http://localhost/api/stores'
+                    per_page: 15
+                    to: 2
+                    total: 2
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 台北旗艦店
+                        address: 台北市信義區信義路四段101號
+                        phone: 02-2345-6789
+                        email: taipei@example.com
+                        manager: 張經理
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                      -
+                        id: 2
+                        name: 台中中區店
+                        address: 台中市中區中山路123號
+                        phone: 04-2345-6789
+                        email: taichung@example.com
+                        manager: 李經理
+                        created_at: '2024-01-02T10:00:00.000000Z'
+                        updated_at: '2024-01-02T10:00:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 台北旗艦店
+                        address:
+                          type: string
+                          example: 台北市信義區信義路四段101號
+                        phone:
+                          type: string
+                          example: 02-2345-6789
+                        email:
+                          type: string
+                          example: taipei@example.com
+                        manager:
+                          type: string
+                          example: 張經理
+                        created_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/stores?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/stores?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      path:
+                        type: string
+                        example: 'http://localhost/api/stores'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 2
+                      total:
+                        type: integer
+                        example: 2
+      tags:
+        - 'Store Management'
+    post:
+      summary: ''
+      operationId: postApiStores
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 18
+                    name: 'Bailey Ltd'
+                    address: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
+                    created_at: '2025-06-13T20:52:34.000000Z'
+                    updated_at: '2025-06-13T20:52:34.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 18
+                      name:
+                        type: string
+                        example: 'Bailey Ltd'
+                      address:
+                        type: string
+                        example: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
+                      created_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+      tags:
+        - 'Store Management'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 分店名稱（唯一）。例如：台北總店
+                  example: architecto
+                  nullable: false
+                address:
+                  type: string
+                  description: 分店地址。例如：台北市信義區信義路五段7號
+                  example: architecto
+                  nullable: true
+              required:
+                - name
   '/api/stores/{id}':
+    get:
+      summary: ''
+      operationId: getApiStoresId
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 19
+                    name: 'Cruickshank Inc'
+                    address: "532 Leuschke Causeway\nMcLaughlinstad, MI 07365"
+                    created_at: '2025-06-13T20:52:34.000000Z'
+                    updated_at: '2025-06-13T20:52:34.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 19
+                      name:
+                        type: string
+                        example: 'Cruickshank Inc'
+                      address:
+                        type: string
+                        example: "532 Leuschke Causeway\nMcLaughlinstad, MI 07365"
+                      created_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+      tags:
+        - 'Store Management'
+    put:
+      summary: ''
+      operationId: putApiStoresId
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 20
+                    name: "Rempel, Gulgowski and O'Kon"
+                    address: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
+                    created_at: '2025-06-13T20:52:34.000000Z'
+                    updated_at: '2025-06-13T20:52:34.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 20
+                      name:
+                        type: string
+                        example: "Rempel, Gulgowski and O'Kon"
+                      address:
+                        type: string
+                        example: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
+                      created_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+      tags:
+        - 'Store Management'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 分店名稱（唯一，會排除當前分店）。例如：台北信義店
+                  example: architecto
+                  nullable: false
+                address:
+                  type: string
+                  description: 分店地址。例如：台北市信義區信義路五段7號
+                  example: architecto
+                  nullable: true
+              required:
+                - name
     delete:
       summary: ''
       operationId: deleteApiStoresId
@@ -174,7 +717,125 @@ paths:
         in: path
         name: id
         description: 'The ID of the store.'
-        example: 17
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/users/{user_id}/stores':
+    get:
+      summary: ''
+      operationId: getApiUsersUser_idStores
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 21
+                    name: 'Hilpert Group'
+                    address: "88663 Abbie Spurs Suite 700\nSouth Dasiashire, VT 00917-1756"
+                    created_at: '2025-06-13T20:52:34.000000Z'
+                    updated_at: '2025-06-13T20:52:34.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 21
+                      name:
+                        type: string
+                        example: 'Hilpert Group'
+                      address:
+                        type: string
+                        example: "88663 Abbie Spurs Suite 700\nSouth Dasiashire, VT 00917-1756"
+                      created_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+      tags:
+        - 'User Store Management'
+    post:
+      summary: ''
+      operationId: postApiUsersUser_idStores
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 19
+                    name: 'Ms. Elisabeth Okuneva'
+                    username: gulgowski.asia
+                    role: viewer
+                    role_display: 檢視者
+                    is_admin: false
+                    created_at: '2025-06-13T20:52:34.000000Z'
+                    updated_at: '2025-06-13T20:52:34.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 19
+                      name:
+                        type: string
+                        example: 'Ms. Elisabeth Okuneva'
+                      username:
+                        type: string
+                        example: gulgowski.asia
+                      role:
+                        type: string
+                        example: viewer
+                      role_display:
+                        type: string
+                        example: 檢視者
+                      is_admin:
+                        type: boolean
+                        example: false
+                      created_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-13T20:52:34.000000Z'
+      tags:
+        - 'User Store Management'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                store_ids:
+                  type: array
+                  description: '要分配給用戶的分店ID列表。例如：[1, 2, 3]'
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - store_ids
+    parameters:
+      -
+        in: path
+        name: user_id
+        description: 'The ID of the user.'
+        example: 1
         required: true
         schema:
           type: integer
@@ -188,10 +849,187 @@ paths:
         200:
           description: ''
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: App\Http\Resources\Api\AttributeResource
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      name: 顏色
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                      values:
+                        -
+                          id: 1
+                          value: 紅色
+                          attribute_id: 1
+                          created_at: '2024-01-01T10:00:00.000000Z'
+                          updated_at: '2024-01-01T10:00:00.000000Z'
+                        -
+                          id: 2
+                          value: 藍色
+                          attribute_id: 1
+                          created_at: '2024-01-01T10:00:00.000000Z'
+                          updated_at: '2024-01-01T10:00:00.000000Z'
+                    -
+                      id: 2
+                      name: 尺寸
+                      created_at: '2024-01-02T10:00:00.000000Z'
+                      updated_at: '2024-01-02T10:00:00.000000Z'
+                      values:
+                        -
+                          id: 3
+                          value: S
+                          attribute_id: 2
+                          created_at: '2024-01-02T10:00:00.000000Z'
+                          updated_at: '2024-01-02T10:00:00.000000Z'
+                        -
+                          id: 4
+                          value: M
+                          attribute_id: 2
+                          created_at: '2024-01-02T10:00:00.000000Z'
+                          updated_at: '2024-01-02T10:00:00.000000Z'
+                  links:
+                    first: 'http://localhost/api/attributes?page=1'
+                    last: 'http://localhost/api/attributes?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    path: 'http://localhost/api/attributes'
+                    per_page: 15
+                    to: 2
+                    total: 2
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 顏色
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                        values:
+                          -
+                            id: 1
+                            value: 紅色
+                            attribute_id: 1
+                            created_at: '2024-01-01T10:00:00.000000Z'
+                            updated_at: '2024-01-01T10:00:00.000000Z'
+                          -
+                            id: 2
+                            value: 藍色
+                            attribute_id: 1
+                            created_at: '2024-01-01T10:00:00.000000Z'
+                            updated_at: '2024-01-01T10:00:00.000000Z'
+                      -
+                        id: 2
+                        name: 尺寸
+                        created_at: '2024-01-02T10:00:00.000000Z'
+                        updated_at: '2024-01-02T10:00:00.000000Z'
+                        values:
+                          -
+                            id: 3
+                            value: S
+                            attribute_id: 2
+                            created_at: '2024-01-02T10:00:00.000000Z'
+                            updated_at: '2024-01-02T10:00:00.000000Z'
+                          -
+                            id: 4
+                            value: M
+                            attribute_id: 2
+                            created_at: '2024-01-02T10:00:00.000000Z'
+                            updated_at: '2024-01-02T10:00:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 顏色
+                        created_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        values:
+                          type: array
+                          example:
+                            -
+                              id: 1
+                              value: 紅色
+                              attribute_id: 1
+                              created_at: '2024-01-01T10:00:00.000000Z'
+                              updated_at: '2024-01-01T10:00:00.000000Z'
+                            -
+                              id: 2
+                              value: 藍色
+                              attribute_id: 1
+                              created_at: '2024-01-01T10:00:00.000000Z'
+                              updated_at: '2024-01-01T10:00:00.000000Z'
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 1
+                              value:
+                                type: string
+                                example: 紅色
+                              attribute_id:
+                                type: integer
+                                example: 1
+                              created_at:
+                                type: string
+                                example: '2024-01-01T10:00:00.000000Z'
+                              updated_at:
+                                type: string
+                                example: '2024-01-01T10:00:00.000000Z'
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/attributes?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/attributes?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      path:
+                        type: string
+                        example: 'http://localhost/api/attributes'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 2
+                      total:
+                        type: integer
+                        example: 2
       tags:
         - 商品屬性管理
     post:
@@ -206,7 +1044,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\AttributeResource
+                example: App\Http\Resources\Api\V1\AttributeResource
       tags:
         - 商品屬性管理
       requestBody:
@@ -218,8 +1056,8 @@ paths:
               properties:
                 name:
                   type: string
-                  description: 屬性名稱，例如：顏色、尺寸、材質
-                  example: 顏色
+                  description: 屬性名稱（唯一）。例如：顏色
+                  example: architecto
                   nullable: false
               required:
                 - name
@@ -236,7 +1074,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\AttributeResource
+                example: App\Http\Resources\Api\V1\AttributeResource
       tags:
         - 商品屬性管理
     put:
@@ -251,7 +1089,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\AttributeResource
+                example: App\Http\Resources\Api\V1\AttributeResource
       tags:
         - 商品屬性管理
       requestBody:
@@ -263,8 +1101,8 @@ paths:
               properties:
                 name:
                   type: string
-                  description: 屬性名稱
-                  example: 顏色
+                  description: 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
+                  example: architecto
                   nullable: false
               required:
                 - name
@@ -283,7 +1121,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the attribute.'
-        example: 17
+        example: 16
         required: true
         schema:
           type: integer
@@ -315,13 +1153,11 @@ paths:
               properties:
                 ids:
                   type: array
-                  description: '要刪除的商品 ID 陣列。'
+                  description: '要刪除的商品 ID 列表。例如：[1, 2, 3]'
                   example:
-                    - 1
-                    - 2
-                    - 3
+                    - architecto
                   items:
-                    type: integer
+                    type: string
               required:
                 - ids
   /api/products:
@@ -387,138 +1223,260 @@ paths:
             nullable: false
       responses:
         200:
-          description: 商品列表
+          description: ''
           content:
             application/json:
               schema:
-                type: object
-                example:
-                  data:
-                    -
-                      id: 1
-                      name: 高階人體工學辦公椅
-                      sku: CHAIR-ERG-001
-                      description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
-                      selling_price: 399.99
-                      cost_price: 150.0
-                      category_id: 1
-                      created_at: '2024-01-01T10:00:00.000000Z'
-                      updated_at: '2024-01-01T10:00:00.000000Z'
-                    -
-                      id: 2
-                      name: 無線藍牙滑鼠
-                      sku: MOUSE-BT-002
-                      description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
-                      selling_price: 79.99
-                      cost_price: 25.0
-                      category_id: null
-                      created_at: '2024-01-01T11:30:00.000000Z'
-                      updated_at: '2024-01-01T11:30:00.000000Z'
-                  meta:
-                    current_page: 1
-                    from: 1
-                    last_page: 3
-                    per_page: 15
-                    to: 2
-                    total: 45
-                  links:
-                    first: 'http://localhost/api/products?page=1'
-                    last: 'http://localhost/api/products?page=3'
-                    prev: null
-                    next: 'http://localhost/api/products?page=2'
-                properties:
-                  data:
-                    type: array
+                oneOf:
+                  -
+                    description: 商品列表
+                    type: object
                     example:
-                      -
-                        id: 1
-                        name: 高階人體工學辦公椅
-                        sku: CHAIR-ERG-001
-                        description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
-                        selling_price: 399.99
-                        cost_price: 150
-                        category_id: 1
-                        created_at: '2024-01-01T10:00:00.000000Z'
-                        updated_at: '2024-01-01T10:00:00.000000Z'
-                      -
-                        id: 2
-                        name: 無線藍牙滑鼠
-                        sku: MOUSE-BT-002
-                        description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
-                        selling_price: 79.99
-                        cost_price: 25
-                        category_id: null
-                        created_at: '2024-01-01T11:30:00.000000Z'
-                        updated_at: '2024-01-01T11:30:00.000000Z'
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 1
-                        name:
-                          type: string
-                          example: 高階人體工學辦公椅
-                        sku:
-                          type: string
-                          example: CHAIR-ERG-001
-                        description:
-                          type: string
-                          example: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
-                        selling_price:
-                          type: number
-                          example: 399.99
-                        cost_price:
-                          type: number
-                          example: 150.0
-                        category_id:
-                          type: integer
-                          example: 1
-                        created_at:
-                          type: string
-                          example: '2024-01-01T10:00:00.000000Z'
-                        updated_at:
-                          type: string
-                          example: '2024-01-01T10:00:00.000000Z'
-                  meta:
-                    type: object
+                      data:
+                        -
+                          id: 1
+                          name: 高階人體工學辦公椅
+                          sku: CHAIR-ERG-001
+                          description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                          selling_price: 399.99
+                          cost_price: 150.0
+                          category_id: 1
+                          created_at: '2024-01-01T10:00:00.000000Z'
+                          updated_at: '2024-01-01T10:00:00.000000Z'
+                        -
+                          id: 2
+                          name: 無線藍牙滑鼠
+                          sku: MOUSE-BT-002
+                          description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                          selling_price: 79.99
+                          cost_price: 25.0
+                          category_id: null
+                          created_at: '2024-01-01T11:30:00.000000Z'
+                          updated_at: '2024-01-01T11:30:00.000000Z'
+                      meta:
+                        current_page: 1
+                        from: 1
+                        last_page: 3
+                        per_page: 15
+                        to: 2
+                        total: 45
+                      links:
+                        first: 'http://localhost/api/products?page=1'
+                        last: 'http://localhost/api/products?page=3'
+                        prev: null
+                        next: 'http://localhost/api/products?page=2'
                     properties:
-                      current_page:
-                        type: integer
-                        example: 1
-                      from:
-                        type: integer
-                        example: 1
-                      last_page:
-                        type: integer
-                        example: 3
-                      per_page:
-                        type: integer
-                        example: 15
-                      to:
-                        type: integer
-                        example: 2
-                      total:
-                        type: integer
-                        example: 45
-                  links:
+                      data:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            name: 高階人體工學辦公椅
+                            sku: CHAIR-ERG-001
+                            description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                            selling_price: 399.99
+                            cost_price: 150
+                            category_id: 1
+                            created_at: '2024-01-01T10:00:00.000000Z'
+                            updated_at: '2024-01-01T10:00:00.000000Z'
+                          -
+                            id: 2
+                            name: 無線藍牙滑鼠
+                            sku: MOUSE-BT-002
+                            description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                            selling_price: 79.99
+                            cost_price: 25
+                            category_id: null
+                            created_at: '2024-01-01T11:30:00.000000Z'
+                            updated_at: '2024-01-01T11:30:00.000000Z'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 高階人體工學辦公椅
+                            sku:
+                              type: string
+                              example: CHAIR-ERG-001
+                            description:
+                              type: string
+                              example: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                            selling_price:
+                              type: number
+                              example: 399.99
+                            cost_price:
+                              type: number
+                              example: 150.0
+                            category_id:
+                              type: integer
+                              example: 1
+                            created_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                      meta:
+                        type: object
+                        properties:
+                          current_page:
+                            type: integer
+                            example: 1
+                          from:
+                            type: integer
+                            example: 1
+                          last_page:
+                            type: integer
+                            example: 3
+                          per_page:
+                            type: integer
+                            example: 15
+                          to:
+                            type: integer
+                            example: 2
+                          total:
+                            type: integer
+                            example: 45
+                      links:
+                        type: object
+                        properties:
+                          first:
+                            type: string
+                            example: 'http://localhost/api/products?page=1'
+                          last:
+                            type: string
+                            example: 'http://localhost/api/products?page=3'
+                          prev:
+                            type: string
+                            example: null
+                          next:
+                            type: string
+                            example: 'http://localhost/api/products?page=2'
+                  -
+                    description: ''
                     type: object
+                    example:
+                      data:
+                        -
+                          id: 1
+                          name: 高階人體工學辦公椅
+                          sku: CHAIR-ERG-001
+                          description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                          selling_price: '399.99'
+                          cost_price: '150.00'
+                          created_at: '2024-01-01T10:00:00.000000Z'
+                          updated_at: '2024-01-01T10:00:00.000000Z'
+                        -
+                          id: 2
+                          name: 無線藍牙滑鼠
+                          sku: MOUSE-BT-002
+                          description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                          selling_price: '79.99'
+                          cost_price: '25.00'
+                          created_at: '2024-01-01T11:30:00.000000Z'
+                          updated_at: '2024-01-01T11:30:00.000000Z'
+                      meta:
+                        current_page: 1
+                        from: 1
+                        last_page: 3
+                        per_page: 15
+                        to: 2
+                        total: 45
+                      links:
+                        first: 'http://localhost/api/products?page=1'
+                        last: 'http://localhost/api/products?page=3'
+                        prev: null
+                        next: 'http://localhost/api/products?page=2'
                     properties:
-                      first:
-                        type: string
-                        example: 'http://localhost/api/products?page=1'
-                      last:
-                        type: string
-                        example: 'http://localhost/api/products?page=3'
-                      prev:
-                        type: string
-                        example: null
-                      next:
-                        type: string
-                        example: 'http://localhost/api/products?page=2'
+                      data:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            name: 高階人體工學辦公椅
+                            sku: CHAIR-ERG-001
+                            description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                            selling_price: '399.99'
+                            cost_price: '150.00'
+                            created_at: '2024-01-01T10:00:00.000000Z'
+                            updated_at: '2024-01-01T10:00:00.000000Z'
+                          -
+                            id: 2
+                            name: 無線藍牙滑鼠
+                            sku: MOUSE-BT-002
+                            description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                            selling_price: '79.99'
+                            cost_price: '25.00'
+                            created_at: '2024-01-01T11:30:00.000000Z'
+                            updated_at: '2024-01-01T11:30:00.000000Z'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 高階人體工學辦公椅
+                            sku:
+                              type: string
+                              example: CHAIR-ERG-001
+                            description:
+                              type: string
+                              example: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
+                            selling_price:
+                              type: string
+                              example: '399.99'
+                            cost_price:
+                              type: string
+                              example: '150.00'
+                            created_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                      meta:
+                        type: object
+                        properties:
+                          current_page:
+                            type: integer
+                            example: 1
+                          from:
+                            type: integer
+                            example: 1
+                          last_page:
+                            type: integer
+                            example: 3
+                          per_page:
+                            type: integer
+                            example: 15
+                          to:
+                            type: integer
+                            example: 2
+                          total:
+                            type: integer
+                            example: 45
+                      links:
+                        type: object
+                        properties:
+                          first:
+                            type: string
+                            example: 'http://localhost/api/products?page=1'
+                          last:
+                            type: string
+                            example: 'http://localhost/api/products?page=3'
+                          prev:
+                            type: string
+                            example: null
+                          next:
+                            type: string
+                            example: 'http://localhost/api/products?page=2'
       tags:
         - 商品管理
-      security: []
     post:
       summary: '建立新商品 (SPU/SKU)'
       operationId: SPUSKU
@@ -687,7 +1645,7 @@ paths:
                         type: array
                         description: 'The <code>id</code> of an existing record in the attribute_values table.'
                         example:
-                          - 17
+                          - 16
                         items:
                           type: integer
                       '*':
@@ -903,6 +1861,444 @@ paths:
         required: true
         schema:
           type: integer
+  /api/products/variants:
+    get:
+      summary: 獲取商品變體列表
+      operationId: ''
+      description: ''
+      parameters:
+        -
+          in: query
+          name: product_id
+          description: 按商品ID篩選變體.
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 按商品ID篩選變體.
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: product_name
+          description: 按商品名稱搜尋變體.
+          example: T恤
+          required: false
+          schema:
+            type: string
+            description: 按商品名稱搜尋變體.
+            example: T恤
+            nullable: false
+        -
+          in: query
+          name: sku
+          description: 按SKU搜尋變體.
+          example: TSHIRT-RED-S
+          required: false
+          schema:
+            type: string
+            description: 按SKU搜尋變體.
+            example: TSHIRT-RED-S
+            nullable: false
+        -
+          in: query
+          name: page
+          description: '頁碼，預設為 1.'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: '頁碼，預設為 1.'
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: per_page
+          description: '每頁項目數，預設為 15.'
+          example: 15
+          required: false
+          schema:
+            type: integer
+            description: '每頁項目數，預設為 15.'
+            example: 15
+            nullable: false
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      sku: TSHIRT-RED-S
+                      price: '299.99'
+                      product_id: 1
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                      product:
+                        id: 1
+                        name: 經典棉質T-shirt
+                        description: '100% 純棉'
+                        category_id: 1
+                      attribute_values:
+                        -
+                          id: 1
+                          value: 紅色
+                          attribute_id: 1
+                          attribute:
+                            id: 1
+                            name: 顏色
+                        -
+                          id: 3
+                          value: S
+                          attribute_id: 2
+                          attribute:
+                            id: 2
+                            name: 尺寸
+                      inventory:
+                        -
+                          id: 1
+                          quantity: 50
+                          low_stock_threshold: 10
+                          store:
+                            id: 1
+                            name: 台北旗艦店
+                        -
+                          id: 2
+                          quantity: 30
+                          low_stock_threshold: 10
+                          store:
+                            id: 2
+                            name: 台中中區店
+                    -
+                      id: 2
+                      sku: TSHIRT-BLUE-M
+                      price: '299.99'
+                      product_id: 1
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                      product:
+                        id: 1
+                        name: 經典棉質T-shirt
+                        description: '100% 純棉'
+                        category_id: 1
+                      attribute_values:
+                        -
+                          id: 2
+                          value: 藍色
+                          attribute_id: 1
+                          attribute:
+                            id: 1
+                            name: 顏色
+                        -
+                          id: 4
+                          value: M
+                          attribute_id: 2
+                          attribute:
+                            id: 2
+                            name: 尺寸
+                      inventory:
+                        -
+                          id: 3
+                          quantity: 25
+                          low_stock_threshold: 10
+                          store:
+                            id: 1
+                            name: 台北旗艦店
+                        -
+                          id: 4
+                          quantity: 15
+                          low_stock_threshold: 10
+                          store:
+                            id: 2
+                            name: 台中中區店
+                  links:
+                    first: 'http://localhost/api/product-variants?page=1'
+                    last: 'http://localhost/api/product-variants?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    path: 'http://localhost/api/product-variants'
+                    per_page: 15
+                    to: 2
+                    total: 2
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        sku: TSHIRT-RED-S
+                        price: '299.99'
+                        product_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                        product:
+                          id: 1
+                          name: 經典棉質T-shirt
+                          description: '100% 純棉'
+                          category_id: 1
+                        attribute_values:
+                          -
+                            id: 1
+                            value: 紅色
+                            attribute_id: 1
+                            attribute:
+                              id: 1
+                              name: 顏色
+                          -
+                            id: 3
+                            value: S
+                            attribute_id: 2
+                            attribute:
+                              id: 2
+                              name: 尺寸
+                        inventory:
+                          -
+                            id: 1
+                            quantity: 50
+                            low_stock_threshold: 10
+                            store:
+                              id: 1
+                              name: 台北旗艦店
+                          -
+                            id: 2
+                            quantity: 30
+                            low_stock_threshold: 10
+                            store:
+                              id: 2
+                              name: 台中中區店
+                      -
+                        id: 2
+                        sku: TSHIRT-BLUE-M
+                        price: '299.99'
+                        product_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                        product:
+                          id: 1
+                          name: 經典棉質T-shirt
+                          description: '100% 純棉'
+                          category_id: 1
+                        attribute_values:
+                          -
+                            id: 2
+                            value: 藍色
+                            attribute_id: 1
+                            attribute:
+                              id: 1
+                              name: 顏色
+                          -
+                            id: 4
+                            value: M
+                            attribute_id: 2
+                            attribute:
+                              id: 2
+                              name: 尺寸
+                        inventory:
+                          -
+                            id: 3
+                            quantity: 25
+                            low_stock_threshold: 10
+                            store:
+                              id: 1
+                              name: 台北旗艦店
+                          -
+                            id: 4
+                            quantity: 15
+                            low_stock_threshold: 10
+                            store:
+                              id: 2
+                              name: 台中中區店
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        sku:
+                          type: string
+                          example: TSHIRT-RED-S
+                        price:
+                          type: string
+                          example: '299.99'
+                        product_id:
+                          type: integer
+                          example: 1
+                        created_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        product:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 經典棉質T-shirt
+                            description:
+                              type: string
+                              example: '100% 純棉'
+                            category_id:
+                              type: integer
+                              example: 1
+                        attribute_values:
+                          type: array
+                          example:
+                            -
+                              id: 1
+                              value: 紅色
+                              attribute_id: 1
+                              attribute:
+                                id: 1
+                                name: 顏色
+                            -
+                              id: 3
+                              value: S
+                              attribute_id: 2
+                              attribute:
+                                id: 2
+                                name: 尺寸
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 1
+                              value:
+                                type: string
+                                example: 紅色
+                              attribute_id:
+                                type: integer
+                                example: 1
+                              attribute:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  name:
+                                    type: string
+                                    example: 顏色
+                        inventory:
+                          type: array
+                          example:
+                            -
+                              id: 1
+                              quantity: 50
+                              low_stock_threshold: 10
+                              store:
+                                id: 1
+                                name: 台北旗艦店
+                            -
+                              id: 2
+                              quantity: 30
+                              low_stock_threshold: 10
+                              store:
+                                id: 2
+                                name: 台中中區店
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 1
+                              quantity:
+                                type: integer
+                                example: 50
+                              low_stock_threshold:
+                                type: integer
+                                example: 10
+                              store:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  name:
+                                    type: string
+                                    example: 台北旗艦店
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/product-variants?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/product-variants?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      path:
+                        type: string
+                        example: 'http://localhost/api/product-variants'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 2
+                      total:
+                        type: integer
+                        example: 2
+      tags:
+        - 商品變體管理
+  '/api/products/variants/{id}':
+    get:
+      summary: 獲取單個商品變體詳情
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - 商品變體管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the variant.'
+        example: architecto
+        required: true
+        schema:
+          type: string
   '/api/attributes/{attribute_id}/values':
     get:
       summary: 獲取指定屬性的所有值
@@ -913,10 +2309,121 @@ paths:
         200:
           description: ''
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: App\Http\Resources\Api\AttributeValueResource
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      value: 紅色
+                      attribute_id: 1
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                    -
+                      id: 2
+                      value: 藍色
+                      attribute_id: 1
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                    -
+                      id: 3
+                      value: 綠色
+                      attribute_id: 1
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                  links:
+                    first: 'http://localhost/api/attributes/1/values?page=1'
+                    last: 'http://localhost/api/attributes/1/values?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    path: 'http://localhost/api/attributes/1/values'
+                    per_page: 15
+                    to: 3
+                    total: 3
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        value: 紅色
+                        attribute_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                      -
+                        id: 2
+                        value: 藍色
+                        attribute_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                      -
+                        id: 3
+                        value: 綠色
+                        attribute_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        value:
+                          type: string
+                          example: 紅色
+                        attribute_id:
+                          type: integer
+                          example: 1
+                        created_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/attributes/1/values?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/attributes/1/values?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      path:
+                        type: string
+                        example: 'http://localhost/api/attributes/1/values'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 3
+                      total:
+                        type: integer
+                        example: 3
       tags:
         - 屬性值管理
     post:
@@ -931,7 +2438,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\AttributeValueResource
+                example: App\Http\Resources\Api\V1\AttributeValueResource
       tags:
         - 屬性值管理
       requestBody:
@@ -943,8 +2450,8 @@ paths:
               properties:
                 value:
                   type: string
-                  description: 屬性值，例如：紅色、藍色、S、M、L
-                  example: 紅色
+                  description: 屬性值（在同一屬性下必須唯一）。例如：紅色
+                  example: architecto
                   nullable: false
               required:
                 - value
@@ -953,7 +2460,7 @@ paths:
         in: path
         name: attribute_id
         description: 'The ID of the attribute.'
-        example: 17
+        example: 16
         required: true
         schema:
           type: integer
@@ -978,7 +2485,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: App\Http\Resources\Api\AttributeValueResource
+                example: App\Http\Resources\Api\V1\AttributeValueResource
       tags:
         - 屬性值管理
     delete:
@@ -1032,8 +2539,8 @@ paths:
               properties:
                 value:
                   type: string
-                  description: 新的屬性值。
-                  example: '"深藍色"'
+                  description: 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
+                  example: architecto
                   nullable: false
               required:
                 - value
@@ -1042,7 +2549,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the value.'
-        example: 17
+        example: 16
         required: true
         schema:
           type: integer
@@ -1050,6 +2557,1152 @@ paths:
         in: path
         name: value
         description: '屬性值 ID'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/inventory:
+    get:
+      summary: 獲取庫存列表
+      operationId: ''
+      description: ''
+      parameters:
+        -
+          in: query
+          name: store_id
+          description: 門市ID，用於篩選特定門市的庫存.
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 門市ID，用於篩選特定門市的庫存.
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: low_stock
+          description: 是否只顯示低庫存商品.
+          example: true
+          required: false
+          schema:
+            type: boolean
+            description: 是否只顯示低庫存商品.
+            example: true
+            nullable: false
+        -
+          in: query
+          name: out_of_stock
+          description: 是否只顯示無庫存商品.
+          example: false
+          required: false
+          schema:
+            type: boolean
+            description: 是否只顯示無庫存商品.
+            example: false
+            nullable: false
+        -
+          in: query
+          name: product_name
+          description: 按商品名稱搜尋.
+          example: T恤
+          required: false
+          schema:
+            type: string
+            description: 按商品名稱搜尋.
+            example: T恤
+            nullable: false
+        -
+          in: query
+          name: paginate
+          description: 是否分頁.
+          example: true
+          required: false
+          schema:
+            type: boolean
+            description: 是否分頁.
+            example: true
+            nullable: false
+        -
+          in: query
+          name: per_page
+          description: 每頁顯示數量，預設15.
+          example: 25
+          required: false
+          schema:
+            type: integer
+            description: 每頁顯示數量，預設15.
+            example: 25
+            nullable: false
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      product_variant_id: 1
+                      store_id: 1
+                      quantity: 50
+                      low_stock_threshold: 10
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-15T14:30:00.000000Z'
+                      product_variant:
+                        id: 1
+                        sku: TSHIRT-RED-S
+                        price: '299.99'
+                        product:
+                          id: 1
+                          name: 經典棉質T-shirt
+                          description: '100% 純棉'
+                        attribute_values:
+                          -
+                            id: 1
+                            value: 紅色
+                            attribute:
+                              id: 1
+                              name: 顏色
+                          -
+                            id: 3
+                            value: S
+                            attribute:
+                              id: 2
+                              name: 尺寸
+                      store:
+                        id: 1
+                        name: 台北旗艦店
+                        address: 台北市信義區信義路四段101號
+                    -
+                      id: 2
+                      product_variant_id: 2
+                      store_id: 1
+                      quantity: 3
+                      low_stock_threshold: 5
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-20T09:15:00.000000Z'
+                      product_variant:
+                        id: 2
+                        sku: TSHIRT-BLUE-M
+                        price: '299.99'
+                        product:
+                          id: 1
+                          name: 經典棉質T-shirt
+                          description: '100% 純棉'
+                        attribute_values:
+                          -
+                            id: 2
+                            value: 藍色
+                            attribute:
+                              id: 1
+                              name: 顏色
+                          -
+                            id: 4
+                            value: M
+                            attribute:
+                              id: 2
+                              name: 尺寸
+                      store:
+                        id: 1
+                        name: 台北旗艦店
+                        address: 台北市信義區信義路四段101號
+                  links:
+                    first: 'http://localhost/api/inventory?page=1'
+                    last: 'http://localhost/api/inventory?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    path: 'http://localhost/api/inventory'
+                    per_page: 15
+                    to: 2
+                    total: 2
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        product_variant_id: 1
+                        store_id: 1
+                        quantity: 50
+                        low_stock_threshold: 10
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-15T14:30:00.000000Z'
+                        product_variant:
+                          id: 1
+                          sku: TSHIRT-RED-S
+                          price: '299.99'
+                          product:
+                            id: 1
+                            name: 經典棉質T-shirt
+                            description: '100% 純棉'
+                          attribute_values:
+                            -
+                              id: 1
+                              value: 紅色
+                              attribute:
+                                id: 1
+                                name: 顏色
+                            -
+                              id: 3
+                              value: S
+                              attribute:
+                                id: 2
+                                name: 尺寸
+                        store:
+                          id: 1
+                          name: 台北旗艦店
+                          address: 台北市信義區信義路四段101號
+                      -
+                        id: 2
+                        product_variant_id: 2
+                        store_id: 1
+                        quantity: 3
+                        low_stock_threshold: 5
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-20T09:15:00.000000Z'
+                        product_variant:
+                          id: 2
+                          sku: TSHIRT-BLUE-M
+                          price: '299.99'
+                          product:
+                            id: 1
+                            name: 經典棉質T-shirt
+                            description: '100% 純棉'
+                          attribute_values:
+                            -
+                              id: 2
+                              value: 藍色
+                              attribute:
+                                id: 1
+                                name: 顏色
+                            -
+                              id: 4
+                              value: M
+                              attribute:
+                                id: 2
+                                name: 尺寸
+                        store:
+                          id: 1
+                          name: 台北旗艦店
+                          address: 台北市信義區信義路四段101號
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        product_variant_id:
+                          type: integer
+                          example: 1
+                        store_id:
+                          type: integer
+                          example: 1
+                        quantity:
+                          type: integer
+                          example: 50
+                        low_stock_threshold:
+                          type: integer
+                          example: 10
+                        created_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-15T14:30:00.000000Z'
+                        product_variant:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            sku:
+                              type: string
+                              example: TSHIRT-RED-S
+                            price:
+                              type: string
+                              example: '299.99'
+                            product:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  example: 1
+                                name:
+                                  type: string
+                                  example: 經典棉質T-shirt
+                                description:
+                                  type: string
+                                  example: '100% 純棉'
+                            attribute_values:
+                              type: array
+                              example:
+                                -
+                                  id: 1
+                                  value: 紅色
+                                  attribute:
+                                    id: 1
+                                    name: 顏色
+                                -
+                                  id: 3
+                                  value: S
+                                  attribute:
+                                    id: 2
+                                    name: 尺寸
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  value:
+                                    type: string
+                                    example: 紅色
+                                  attribute:
+                                    type: object
+                                    properties:
+                                      id: { type: integer, example: 1 }
+                                      name: { type: string, example: 顏色 }
+                        store:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 台北旗艦店
+                            address:
+                              type: string
+                              example: 台北市信義區信義路四段101號
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/inventory?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/inventory?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      path:
+                        type: string
+                        example: 'http://localhost/api/inventory'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 2
+                      total:
+                        type: integer
+                        example: 2
+      tags:
+        - 庫存管理
+  '/api/inventory/{id}':
+    get:
+      summary: 獲取單條庫存記錄詳情
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - 庫存管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the inventory.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/inventory/adjust:
+    post:
+      summary: 調整庫存
+      operationId: ''
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 庫存管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_variant_id:
+                  type: integer
+                  description: 商品變體ID.
+                  example: 1
+                  nullable: false
+                store_id:
+                  type: integer
+                  description: 門市ID.
+                  example: 1
+                  nullable: false
+                action:
+                  type: string
+                  description: '操作類型 (add: 添加, reduce: 減少, set: 設定).'
+                  example: add
+                  nullable: false
+                quantity:
+                  type: integer
+                  description: 數量.
+                  example: 10
+                  nullable: false
+                notes:
+                  type: string
+                  description: 備註.
+                  example: 週末促銷活動增加庫存
+                  nullable: true
+                metadata:
+                  type: object
+                  description: 額外的元數據（可選）.
+                  example:
+                    reason: restock
+                  nullable: true
+                  properties: {  }
+              required:
+                - product_variant_id
+                - store_id
+                - action
+                - quantity
+  '/api/inventory/{id}/history':
+    get:
+      summary: 獲取庫存交易歷史
+      operationId: ''
+      description: ''
+      parameters:
+        -
+          in: query
+          name: start_date
+          description: 'date 起始日期.'
+          example: '2023-01-01'
+          required: false
+          schema:
+            type: string
+            description: 'date 起始日期.'
+            example: '2023-01-01'
+            nullable: false
+        -
+          in: query
+          name: end_date
+          description: 'date 結束日期.'
+          example: '2023-12-31'
+          required: false
+          schema:
+            type: string
+            description: 'date 結束日期.'
+            example: '2023-12-31'
+            nullable: false
+        -
+          in: query
+          name: type
+          description: 交易類型.
+          example: addition
+          required: false
+          schema:
+            type: string
+            description: 交易類型.
+            example: addition
+            nullable: false
+        -
+          in: query
+          name: per_page
+          description: 每頁顯示數量，預設15.
+          example: 20
+          required: false
+          schema:
+            type: integer
+            description: 每頁顯示數量，預設15.
+            example: 20
+            nullable: false
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - 庫存管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: 庫存ID.
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/inventory/batch-check:
+    post:
+      summary: 批量獲取多個商品變體的庫存情況
+      operationId: ''
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 庫存管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_variant_ids:
+                  type: array
+                  description: 要查詢的商品變體ID數組.
+                  example:
+                    - 1
+                    - 2
+                    - 3
+                  items:
+                    type: string
+                store_id:
+                  type: integer
+                  description: 門市ID，如果提供則只返回該門市的庫存.
+                  example: 1
+                  nullable: false
+              required:
+                - product_variant_ids
+  /api/inventory/transfers:
+    get:
+      summary: 獲取庫存轉移記錄列表
+      operationId: ''
+      description: ''
+      parameters:
+        -
+          in: query
+          name: from_store_id
+          description: 來源門市ID.
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 來源門市ID.
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: to_store_id
+          description: 目標門市ID.
+          example: 2
+          required: false
+          schema:
+            type: integer
+            description: 目標門市ID.
+            example: 2
+            nullable: false
+        -
+          in: query
+          name: status
+          description: 轉移狀態.
+          example: completed
+          required: false
+          schema:
+            type: string
+            description: 轉移狀態.
+            example: completed
+            nullable: false
+        -
+          in: query
+          name: start_date
+          description: 'date 起始日期.'
+          example: '2023-01-01'
+          required: false
+          schema:
+            type: string
+            description: 'date 起始日期.'
+            example: '2023-01-01'
+            nullable: false
+        -
+          in: query
+          name: end_date
+          description: 'date 結束日期.'
+          example: '2023-12-31'
+          required: false
+          schema:
+            type: string
+            description: 'date 結束日期.'
+            example: '2023-12-31'
+            nullable: false
+        -
+          in: query
+          name: product_name
+          description: 按商品名稱搜尋.
+          example: T恤
+          required: false
+          schema:
+            type: string
+            description: 按商品名稱搜尋.
+            example: T恤
+            nullable: false
+        -
+          in: query
+          name: per_page
+          description: 每頁顯示數量，預設15.
+          example: 20
+          required: false
+          schema:
+            type: integer
+            description: 每頁顯示數量，預設15.
+            example: 20
+            nullable: false
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      from_store_id: 1
+                      to_store_id: 2
+                      user_id: 1
+                      product_variant_id: 1
+                      quantity: 10
+                      status: completed
+                      notes: 調配門市庫存
+                      created_at: '2024-01-15T10:00:00.000000Z'
+                      updated_at: '2024-01-15T10:00:00.000000Z'
+                      from_store:
+                        id: 1
+                        name: 台北旗艦店
+                        address: 台北市信義區信義路四段101號
+                      to_store:
+                        id: 2
+                        name: 台中中區店
+                        address: 台中市中區中山路123號
+                      user:
+                        id: 1
+                        name: 管理員
+                        username: admin
+                      product_variant:
+                        id: 1
+                        sku: TSHIRT-RED-S
+                        price: '299.99'
+                        product:
+                          id: 1
+                          name: 經典棉質T-shirt
+                          description: '100% 純棉'
+                        attribute_values:
+                          -
+                            id: 1
+                            value: 紅色
+                            attribute:
+                              id: 1
+                              name: 顏色
+                          -
+                            id: 3
+                            value: S
+                            attribute:
+                              id: 2
+                              name: 尺寸
+                    -
+                      id: 2
+                      from_store_id: 2
+                      to_store_id: 1
+                      user_id: 1
+                      product_variant_id: 2
+                      quantity: 5
+                      status: in_transit
+                      notes: 回調庫存
+                      created_at: '2024-01-20T14:30:00.000000Z'
+                      updated_at: '2024-01-20T14:30:00.000000Z'
+                      from_store:
+                        id: 2
+                        name: 台中中區店
+                        address: 台中市中區中山路123號
+                      to_store:
+                        id: 1
+                        name: 台北旗艦店
+                        address: 台北市信義區信義路四段101號
+                      user:
+                        id: 1
+                        name: 管理員
+                        username: admin
+                      product_variant:
+                        id: 2
+                        sku: TSHIRT-BLUE-M
+                        price: '299.99'
+                        product:
+                          id: 1
+                          name: 經典棉質T-shirt
+                          description: '100% 純棉'
+                        attribute_values:
+                          -
+                            id: 2
+                            value: 藍色
+                            attribute:
+                              id: 1
+                              name: 顏色
+                          -
+                            id: 4
+                            value: M
+                            attribute:
+                              id: 2
+                              name: 尺寸
+                  links:
+                    first: 'http://localhost/api/inventory-transfers?page=1'
+                    last: 'http://localhost/api/inventory-transfers?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    path: 'http://localhost/api/inventory-transfers'
+                    per_page: 15
+                    to: 2
+                    total: 2
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        from_store_id: 1
+                        to_store_id: 2
+                        user_id: 1
+                        product_variant_id: 1
+                        quantity: 10
+                        status: completed
+                        notes: 調配門市庫存
+                        created_at: '2024-01-15T10:00:00.000000Z'
+                        updated_at: '2024-01-15T10:00:00.000000Z'
+                        from_store:
+                          id: 1
+                          name: 台北旗艦店
+                          address: 台北市信義區信義路四段101號
+                        to_store:
+                          id: 2
+                          name: 台中中區店
+                          address: 台中市中區中山路123號
+                        user:
+                          id: 1
+                          name: 管理員
+                          username: admin
+                        product_variant:
+                          id: 1
+                          sku: TSHIRT-RED-S
+                          price: '299.99'
+                          product:
+                            id: 1
+                            name: 經典棉質T-shirt
+                            description: '100% 純棉'
+                          attribute_values:
+                            -
+                              id: 1
+                              value: 紅色
+                              attribute:
+                                id: 1
+                                name: 顏色
+                            -
+                              id: 3
+                              value: S
+                              attribute:
+                                id: 2
+                                name: 尺寸
+                      -
+                        id: 2
+                        from_store_id: 2
+                        to_store_id: 1
+                        user_id: 1
+                        product_variant_id: 2
+                        quantity: 5
+                        status: in_transit
+                        notes: 回調庫存
+                        created_at: '2024-01-20T14:30:00.000000Z'
+                        updated_at: '2024-01-20T14:30:00.000000Z'
+                        from_store:
+                          id: 2
+                          name: 台中中區店
+                          address: 台中市中區中山路123號
+                        to_store:
+                          id: 1
+                          name: 台北旗艦店
+                          address: 台北市信義區信義路四段101號
+                        user:
+                          id: 1
+                          name: 管理員
+                          username: admin
+                        product_variant:
+                          id: 2
+                          sku: TSHIRT-BLUE-M
+                          price: '299.99'
+                          product:
+                            id: 1
+                            name: 經典棉質T-shirt
+                            description: '100% 純棉'
+                          attribute_values:
+                            -
+                              id: 2
+                              value: 藍色
+                              attribute:
+                                id: 1
+                                name: 顏色
+                            -
+                              id: 4
+                              value: M
+                              attribute:
+                                id: 2
+                                name: 尺寸
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        from_store_id:
+                          type: integer
+                          example: 1
+                        to_store_id:
+                          type: integer
+                          example: 2
+                        user_id:
+                          type: integer
+                          example: 1
+                        product_variant_id:
+                          type: integer
+                          example: 1
+                        quantity:
+                          type: integer
+                          example: 10
+                        status:
+                          type: string
+                          example: completed
+                        notes:
+                          type: string
+                          example: 調配門市庫存
+                        created_at:
+                          type: string
+                          example: '2024-01-15T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-15T10:00:00.000000Z'
+                        from_store:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 台北旗艦店
+                            address:
+                              type: string
+                              example: 台北市信義區信義路四段101號
+                        to_store:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 2
+                            name:
+                              type: string
+                              example: 台中中區店
+                            address:
+                              type: string
+                              example: 台中市中區中山路123號
+                        user:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 管理員
+                            username:
+                              type: string
+                              example: admin
+                        product_variant:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            sku:
+                              type: string
+                              example: TSHIRT-RED-S
+                            price:
+                              type: string
+                              example: '299.99'
+                            product:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  example: 1
+                                name:
+                                  type: string
+                                  example: 經典棉質T-shirt
+                                description:
+                                  type: string
+                                  example: '100% 純棉'
+                            attribute_values:
+                              type: array
+                              example:
+                                -
+                                  id: 1
+                                  value: 紅色
+                                  attribute:
+                                    id: 1
+                                    name: 顏色
+                                -
+                                  id: 3
+                                  value: S
+                                  attribute:
+                                    id: 2
+                                    name: 尺寸
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  value:
+                                    type: string
+                                    example: 紅色
+                                  attribute:
+                                    type: object
+                                    properties:
+                                      id: { type: integer, example: 1 }
+                                      name: { type: string, example: 顏色 }
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/inventory-transfers?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/inventory-transfers?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      path:
+                        type: string
+                        example: 'http://localhost/api/inventory-transfers'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 2
+                      total:
+                        type: integer
+                        example: 2
+      tags:
+        - 庫存轉移
+    post:
+      summary: 創建庫存轉移記錄並執行轉移
+      operationId: ''
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 庫存轉移
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from_store_id:
+                  type: integer
+                  description: 來源門市ID.
+                  example: 1
+                  nullable: false
+                to_store_id:
+                  type: integer
+                  description: 目標門市ID.
+                  example: 2
+                  nullable: false
+                product_variant_id:
+                  type: integer
+                  description: 商品變體ID.
+                  example: 1
+                  nullable: false
+                quantity:
+                  type: integer
+                  description: 轉移數量.
+                  example: 5
+                  nullable: false
+                notes:
+                  type: string
+                  description: 備註.
+                  example: 調配門市庫存
+                  nullable: true
+                status:
+                  type: string
+                  description: '狀態，預設為 completed.'
+                  example: completed
+                  nullable: false
+              required:
+                - from_store_id
+                - to_store_id
+                - product_variant_id
+                - quantity
+  '/api/inventory/transfers/{id}':
+    get:
+      summary: 獲取單筆庫存轉移記錄
+      operationId: ''
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - 庫存轉移
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the transfer.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/inventory/transfers/{id}/status':
+    patch:
+      summary: 更新庫存轉移記錄狀態
+      operationId: ''
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 庫存轉移
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: 新狀態.
+                  example: completed
+                  nullable: false
+                notes:
+                  type: string
+                  description: 備註.
+                  example: 已確認收到貨品
+                  nullable: true
+              required:
+                - status
+    parameters:
+      -
+        in: path
+        name: id
+        description: 轉移記錄ID.
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/inventory/transfers/{id}/cancel':
+    patch:
+      summary: 取消庫存轉移
+      operationId: ''
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 庫存轉移
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: 取消原因.
+                  example: 商品損壞，不需要轉移
+                  nullable: false
+              required:
+                - reason
+    parameters:
+      -
+        in: path
+        name: id
+        description: 轉移記錄ID.
         example: 1
         required: true
         schema:
@@ -1266,27 +3919,24 @@ paths:
               properties:
                 name:
                   type: string
-                  description: 'Must not be greater than 255 characters.'
-                  example: vmqeopfuudtdsufvyvddq
+                  description: 用戶姓名。例如：張三
+                  example: architecto
                   nullable: false
                 username:
                   type: string
-                  description: 'Must not be greater than 255 characters.'
-                  example: amniihfqcoynlazghdtqt
+                  description: 用戶名（唯一）。例如：zhangsan
+                  example: architecto
                   nullable: false
                 password:
                   type: string
-                  description: 'Must be at least 8 characters.'
-                  example: "t(!Cs'YAKYLk4>S"
+                  description: 用戶密碼（至少8個字元）。例如：password123
+                  example: '|]|{+-'
                   nullable: false
                 role:
                   type: string
-                  description: ''
-                  example: admin
+                  description: '用戶角色，必須是 admin 或 viewer。例如：admin'
+                  example: architecto
                   nullable: false
-                  enum:
-                    - admin
-                    - viewer
               required:
                 - name
                 - username
@@ -1446,7 +4096,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the user.'
-        example: 17
+        example: 1
         required: true
         schema:
           type: integer

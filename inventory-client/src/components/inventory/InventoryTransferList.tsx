@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
 import { InventoryTransfer, PaginatedResponse } from "@/types/inventory"
-import { getInventoryTransfers } from "@/lib/api/inventory"
+import { useInventoryTransfers } from "@/hooks/useApi"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -18,10 +17,7 @@ export const InventoryTransferList = () => {
   const [page, setPage] = useState(1)
   const [perPage] = useState(10)
 
-  const { data, isLoading, error, refetch } = useQuery<PaginatedResponse<InventoryTransfer>, Error>({
-    queryKey: ["inventory-transfers", page, perPage],
-    queryFn: () => getInventoryTransfers({ page, per_page: perPage }),
-  })
+  const { data, isLoading, error, refetch } = useInventoryTransfers({ page, per_page: perPage })
 
   if (error) {
     toast({
@@ -87,15 +83,15 @@ export const InventoryTransferList = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : data?.data.map((transfer: InventoryTransfer) => (
+                ) : data?.data?.map((transfer) => (
                   <TableRow key={transfer.id}>
                     <TableCell>{transfer.id}</TableCell>
                     <TableCell>{formatDate(transfer.created_at)}</TableCell>
-                    <TableCell>{transfer.fromStore?.name || `門市 #${transfer.from_store_id}`}</TableCell>
-                    <TableCell>{transfer.toStore?.name || `門市 #${transfer.to_store_id}`}</TableCell>
-                    <TableCell>{transfer.productVariant?.product?.name || `產品 #${transfer.product_variant_id}`}</TableCell>
+                    <TableCell>{transfer.from_store?.name || `門市 #${transfer.from_store_id}`}</TableCell>
+                    <TableCell>{transfer.to_store?.name || `門市 #${transfer.to_store_id}`}</TableCell>
+                    <TableCell>{transfer.product_variant?.product?.name || `產品 #${transfer.product_variant_id}`}</TableCell>
                     <TableCell>{transfer.quantity}</TableCell>
-                    <TableCell>{getStatusBadge(transfer.status)}</TableCell>
+                    <TableCell>{getStatusBadge(transfer.status || 'unknown')}</TableCell>
                     <TableCell>{transfer.notes || "-"}</TableCell>
                   </TableRow>
                 ))}
@@ -114,7 +110,7 @@ export const InventoryTransferList = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setPage((prev) => prev + 1)}
-                disabled={!data || data.data.length < perPage}
+                disabled={!data || !data.data || data.data.length < perPage}
               >
                 下一頁
               </Button>

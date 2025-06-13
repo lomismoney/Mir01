@@ -38,13 +38,17 @@ class CategoryController extends Controller
      * - json[''] 或 json[null] 就是所有頂層分類
      * - json['1'] 就是 id 為 1 的分類下的所有子分類
      * 
-     * @return \Illuminate\Http\JsonResponse
+     * @group 分類管理
+     * @authenticated
+     * @responseFile storage/responses/categories.index.json
+     * 
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        // 為了方便前端處理，我們返回一個以 parent_id 分組的集合
-        $categories = Category::all()->groupBy('parent_id');
-        return response()->json($categories);
+        // 獲取所有分類並使用 CategoryResource 格式化輸出
+        $categories = Category::paginate(15);
+        return CategoryResource::collection($categories);
     }
 
     /**

@@ -1,0 +1,103 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "product_variant_id": 1,
+      "store_id": 1,
+      "quantity": 50,
+      "low_stock_threshold": 10,
+      "created_at": "2024-01-01T10:00:00.000000Z",
+      "updated_at": "2024-01-15T14:30:00.000000Z",
+      "product_variant": {
+        "id": 1,
+        "sku": "TSHIRT-RED-S",
+        "price": "299.99",
+        "product": {
+          "id": 1,
+          "name": "經典棉質T-shirt",
+          "description": "100% 純棉"
+        },
+        "attribute_values": [
+          {
+            "id": 1,
+            "value": "紅色",
+            "attribute": {
+              "id": 1,
+              "name": "顏色"
+            }
+          },
+          {
+            "id": 3,
+            "value": "S",
+            "attribute": {
+              "id": 2,
+              "name": "尺寸"
+            }
+          }
+        ]
+      },
+      "store": {
+        "id": 1,
+        "name": "台北旗艦店",
+        "address": "台北市信義區信義路四段101號"
+      }
+    },
+    {
+      "id": 2,
+      "product_variant_id": 2,
+      "store_id": 1,
+      "quantity": 3,
+      "low_stock_threshold": 5,
+      "created_at": "2024-01-01T10:00:00.000000Z",
+      "updated_at": "2024-01-20T09:15:00.000000Z",
+      "product_variant": {
+        "id": 2,
+        "sku": "TSHIRT-BLUE-M",
+        "price": "299.99",
+        "product": {
+          "id": 1,
+          "name": "經典棉質T-shirt",
+          "description": "100% 純棉"
+        },
+        "attribute_values": [
+          {
+            "id": 2,
+            "value": "藍色",
+            "attribute": {
+              "id": 1,
+              "name": "顏色"
+            }
+          },
+          {
+            "id": 4,
+            "value": "M",
+            "attribute": {
+              "id": 2,
+              "name": "尺寸"
+            }
+          }
+        ]
+      },
+      "store": {
+        "id": 1,
+        "name": "台北旗艦店",
+        "address": "台北市信義區信義路四段101號"
+      }
+    }
+  ],
+  "links": {
+    "first": "http://localhost/api/inventory?page=1",
+    "last": "http://localhost/api/inventory?page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "path": "http://localhost/api/inventory",
+    "per_page": 15,
+    "to": 2,
+    "total": 2
+  }
+} 

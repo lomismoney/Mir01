@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\ProductVariantResource;
 use App\Models\ProductVariant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 
@@ -26,11 +28,12 @@ class ProductVariantController extends Controller
      * @queryParam per_page integer 每頁項目數，預設為 15. Example: 15
      * 
      * @authenticated
+     * @responseFile storage/responses/product_variants.index.json
      * 
      * @param Request $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
         $query = QueryBuilder::for(ProductVariant::class)
             ->with([
@@ -49,7 +52,7 @@ class ProductVariantController extends Controller
         $perPage = $request->input('per_page', 15);
         $variants = $query->paginate($perPage);
 
-        return response()->json($variants);
+        return ProductVariantResource::collection($variants);
     }
 
     /**

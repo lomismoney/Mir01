@@ -27,7 +27,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":8,"name":"Bailey Inc","address":"7432 Dach Lakes\nEast Cecil, FL 06748","created_at":"2025-06-12T11:13:05.000000Z","updated_at":"2025-06-12T11:13:05.000000Z"}}'
+        content: "{\r\n  \"data\": [\r\n    {\r\n      \"id\": 1,\r\n      \"name\": \"台北旗艦店\",\r\n      \"address\": \"台北市信義區信義路四段101號\",\r\n      \"phone\": \"02-2345-6789\",\r\n      \"email\": \"taipei@example.com\",\r\n      \"manager\": \"張經理\",\r\n      \"created_at\": \"2024-01-01T10:00:00.000000Z\",\r\n      \"updated_at\": \"2024-01-01T10:00:00.000000Z\"\r\n    },\r\n    {\r\n      \"id\": 2,\r\n      \"name\": \"台中中區店\",\r\n      \"address\": \"台中市中區中山路123號\",\r\n      \"phone\": \"04-2345-6789\",\r\n      \"email\": \"taichung@example.com\",\r\n      \"manager\": \"李經理\",\r\n      \"created_at\": \"2024-01-02T10:00:00.000000Z\",\r\n      \"updated_at\": \"2024-01-02T10:00:00.000000Z\"\r\n    }\r\n  ],\r\n  \"links\": {\r\n    \"first\": \"http://localhost/api/stores?page=1\",\r\n    \"last\": \"http://localhost/api/stores?page=1\",\r\n    \"prev\": null,\r\n    \"next\": null\r\n  },\r\n  \"meta\": {\r\n    \"current_page\": 1,\r\n    \"from\": 1,\r\n    \"last_page\": 1,\r\n    \"path\": \"http://localhost/api/stores\",\r\n    \"per_page\": 15,\r\n    \"to\": 2,\r\n    \"total\": 2\r\n  }\r\n} "
         headers: []
         description: ''
         custom: []
@@ -85,7 +85,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":9,"name":"Bailey Ltd","address":"85625 Gaylord Knolls\nCecilburgh, WI 02042","created_at":"2025-06-12T11:13:06.000000Z","updated_at":"2025-06-12T11:13:06.000000Z"}}'
+        content: '{"data":{"id":18,"name":"Bailey Ltd","address":"85625 Gaylord Knolls\nCecilburgh, WI 02042","created_at":"2025-06-13T20:52:34.000000Z","updated_at":"2025-06-13T20:52:34.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -116,14 +116,14 @@ endpoints:
         name: id
         description: 'The ID of the store.'
         required: true
-        example: 6
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 6
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -132,7 +132,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":10,"name":"Cruickshank Inc","address":"532 Leuschke Causeway\nMcLaughlinstad, MI 07365","created_at":"2025-06-12T11:13:06.000000Z","updated_at":"2025-06-12T11:13:06.000000Z"}}'
+        content: '{"data":{"id":19,"name":"Cruickshank Inc","address":"532 Leuschke Causeway\nMcLaughlinstad, MI 07365","created_at":"2025-06-13T20:52:34.000000Z","updated_at":"2025-06-13T20:52:34.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -164,14 +164,14 @@ endpoints:
         name: id
         description: 'The ID of the store.'
         required: true
-        example: 6
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 6
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -202,7 +202,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":11,"name":"Rempel, Gulgowski and O''Kon","address":"80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432","created_at":"2025-06-12T11:13:06.000000Z","updated_at":"2025-06-12T11:13:06.000000Z"}}'
+        content: '{"data":{"id":20,"name":"Rempel, Gulgowski and O''Kon","address":"80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432","created_at":"2025-06-13T20:52:34.000000Z","updated_at":"2025-06-13T20:52:34.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -233,14 +233,14 @@ endpoints:
         name: id
         description: 'The ID of the store.'
         required: true
-        example: 6
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 6
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

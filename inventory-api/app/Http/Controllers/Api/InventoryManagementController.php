@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InventoryAdjustmentRequest;
+use App\Http\Resources\Api\InventoryResource;
 use App\Models\Inventory;
 use App\Models\ProductVariant;
 use App\Models\Store;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -30,11 +32,12 @@ class InventoryManagementController extends Controller
      * @queryParam per_page integer 每頁顯示數量，預設15. Example: 25
      * 
      * @authenticated
+     * @responseFile storage/responses/inventory_management.index.json
      * 
      * @param Request $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
         $query = Inventory::with([
             'productVariant.product',
@@ -72,7 +75,7 @@ class InventoryManagementController extends Controller
             $inventories = $query->get();
         }
         
-        return response()->json($inventories);
+        return InventoryResource::collection($inventories);
     }
 
     /**

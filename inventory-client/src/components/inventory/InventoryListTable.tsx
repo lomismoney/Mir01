@@ -9,13 +9,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Inventory } from '@/types/inventory';
+import { InventoryItem } from '@/types/api-helpers';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowUpDown } from "lucide-react";
 
 interface InventoryListTableProps {
-  data: Inventory[];
+  data: InventoryItem[];
   isLoading: boolean;
   onSelectInventory: (inventoryId: number, productVariantId: number, quantity: number) => void;
 }
@@ -26,10 +26,13 @@ export function InventoryListTable({
   onSelectInventory,
 }: InventoryListTableProps) {
   // 根據庫存狀態返回適當的 Badge
-  const getStockStatusBadge = (inventory: Inventory) => {
-    if (inventory.quantity <= 0) {
+  const getStockStatusBadge = (inventory: InventoryItem) => {
+    const quantity = inventory.quantity || 0;
+    const threshold = inventory.low_stock_threshold || 0;
+    
+    if (quantity <= 0) {
       return <Badge variant="destructive">缺貨</Badge>
-    } else if (inventory.quantity <= inventory.low_stock_threshold) {
+    } else if (quantity <= threshold) {
       return <Badge variant="outline">低庫存</Badge>
     } else {
       return <Badge variant="default">正常</Badge>
@@ -74,14 +77,14 @@ export function InventoryListTable({
             data.map((inventory) => (
               <TableRow key={inventory.id}>
                 <TableCell className="font-medium">
-                  {inventory.productVariant?.sku || "N/A"}
+                  {inventory.product_variant?.sku || "N/A"}
                 </TableCell>
                 <TableCell>
-                  {inventory.productVariant?.product?.name || "未知產品"}
+                  {inventory.product_variant?.product?.name || "未知產品"}
                 </TableCell>
-                <TableCell className="text-center">{inventory.quantity}</TableCell>
+                <TableCell className="text-center">{inventory.quantity || 0}</TableCell>
                 <TableCell className="text-center">
-                  {inventory.low_stock_threshold}
+                  {inventory.low_stock_threshold || 0}
                 </TableCell>
                 <TableCell className="text-center">
                   {getStockStatusBadge(inventory)}
@@ -92,9 +95,9 @@ export function InventoryListTable({
                       variant="outline"
                       size="icon"
                       onClick={() => onSelectInventory(
-                        inventory.id, 
-                        inventory.product_variant_id,
-                        inventory.quantity
+                        inventory.id || 0, 
+                        inventory.product_variant_id || 0,
+                        inventory.quantity || 0
                       )}
                     >
                       <ArrowUpDown className="h-4 w-4" />

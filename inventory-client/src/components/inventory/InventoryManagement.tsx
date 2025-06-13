@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { getInventoryList } from "@/lib/api/inventory"
-import { getStores } from "@/lib/api/stores"
+import { useInventoryList, useStores } from "@/hooks/useApi"
 import { useToast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -23,32 +22,18 @@ export function InventoryManagement() {
   const [showOutOfStock, setShowOutOfStock] = useState(false)
 
   // 獲取門市列表
-  const { data: storesData, isLoading: isLoadingStores } = useQuery({
-    queryKey: ["stores"],
-    queryFn: () => getStores(),
-  })
+  const { data: storesData, isLoading: isLoadingStores } = useStores()
 
   // 獲取庫存列表
   const {
     data: inventoryData,
     isLoading: isLoadingInventory,
     refetch: refetchInventory,
-  } = useQuery({
-    queryKey: [
-      "inventory",
-      selectedStoreId,
-      showLowStock,
-      showOutOfStock,
-      searchTerm,
-    ],
-    queryFn: () =>
-      getInventoryList({
-        store_id: selectedStoreId,
-        low_stock: showLowStock,
-        out_of_stock: showOutOfStock,
-        product_name: searchTerm || undefined,
-      }),
-    // 移除 enabled 條件，讓庫存列表預設就載入所有店鋪的資料
+  } = useInventoryList({
+    store_id: selectedStoreId,
+    low_stock: showLowStock,
+    out_of_stock: showOutOfStock,
+    product_name: searchTerm || undefined,
   })
 
   const handleRefresh = () => {
@@ -87,8 +72,8 @@ export function InventoryManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">所有分店</SelectItem>
-                  {storesData?.data.map((store) => (
-                    <SelectItem key={store.id} value={store.id.toString()}>
+                  {storesData?.data?.map((store) => (
+                    <SelectItem key={store.id} value={store.id?.toString() || ''}>
                       {store.name}
                     </SelectItem>
                   ))}

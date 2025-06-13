@@ -36,7 +36,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "sonner";
 import { UsersDataTable } from '@/components/users/users-data-table';
 import { createUsersColumns } from '@/components/users/users-columns';
-import { User, UserActions } from '@/types/user';
+import { UserItem } from '@/types/api-helpers';
+import { UserActions } from '@/components/users/users-columns';
 import type { AuthUser } from '@/lib/auth';
 
 /**
@@ -94,14 +95,14 @@ export function UsersClientPage({ serverUser }: UsersClientPageProps) {
   const [newRole, setNewRole] = useState<'admin' | 'viewer'>('viewer'); // 預設角色
 
   // 編輯用戶狀態
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [editUserName, setEditUserName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editPassword, setEditPassword] = useState('');
   const [editRole, setEditRole] = useState<'admin' | 'viewer'>('viewer');
 
   // 刪除確認對話框狀態
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserItem | null>(null);
 
   // 使用 useUpdateUser hook（重構版，不需要預先提供 userId）
   const updateUserMutation = useUpdateUser();
@@ -143,7 +144,7 @@ export function UsersClientPage({ serverUser }: UsersClientPageProps) {
   /**
    * 處理編輯用戶
    */
-  const handleEditUser = (userToEdit: User) => {
+  const handleEditUser = (userToEdit: UserItem) => {
     setEditingUser(userToEdit);
     setEditUserName(userToEdit.name || '');
     setEditUsername(userToEdit.username || '');
@@ -199,26 +200,24 @@ export function UsersClientPage({ serverUser }: UsersClientPageProps) {
   /**
    * 處理刪除用戶
    */
-  const handleDeleteUser = (userToDelete: User) => {
+  const handleDeleteUser = (userToDelete: UserItem) => {
     if (!userToDelete.id) {
       toast.error('無效的用戶 ID');
-      setUserToDelete(null);
       return;
     }
 
-    deleteUserMutation.mutate(
-      { id: userToDelete.id, user: userToDelete.id },
-      {
-        onSuccess: () => {
-          toast.success('用戶刪除成功！');
-          setUserToDelete(null);
-        },
-        onError: (error) => {
-          toast.error(`刪除失敗：${error.message}`);
-          setUserToDelete(null);
-        }
+    deleteUserMutation.mutate({
+      id: userToDelete.id, 
+      user: userToDelete.id
+    }, {
+      onSuccess: () => {
+        toast.success('用戶刪除成功！');
+        setUserToDelete(null);
+      },
+      onError: (error) => {
+        toast.error(`刪除失敗：${error.message}`);
       }
-    );
+    });
   };
 
   /**

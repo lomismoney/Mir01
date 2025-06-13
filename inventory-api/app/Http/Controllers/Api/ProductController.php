@@ -36,11 +36,13 @@ class ProductController extends Controller
      * 顯示所有商品列表，支援分頁、排序和篩選功能
      * 
      * @group 商品管理
+     * @authenticated
      * @queryParam page integer 頁碼，預設為 1。 Example: 1
      * @queryParam per_page integer 每頁項目數，預設為 15。 Example: 15
      * @queryParam search string 搜尋商品名稱或 SKU。 Example: 椅子
      * @queryParam sort_by string 排序欄位 (name, sku, selling_price, cost_price, created_at)。 Example: selling_price
      * @queryParam sort_order string 排序方向 (asc, desc)，預設為 asc。 Example: desc
+     * @responseFile storage/responses/products_index.json
      * 
      * @response scenario="商品列表" {
      *   "data": [

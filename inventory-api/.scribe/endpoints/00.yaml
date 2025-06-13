@@ -33,8 +33,44 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: '*'
+          vary: Origin
         description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/user
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 獲取當前已認證的使用者資訊
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: '{"data":{"id":18,"name":"Mrs. Justina Gaylord","username":"lafayette.considine","role":"viewer","role_display":"\u6aa2\u8996\u8005","is_admin":false,"created_at":"2025-06-13T20:52:33.000000Z","updated_at":"2025-06-13T20:52:33.000000Z"}}'
+        headers: []
+        description: ''
         custom: []
     responseFields: []
     auth: []
@@ -79,51 +115,6 @@ endpoints:
           }
         headers: []
         description: ''
-        custom: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - GET
-    uri: api/categories
-    metadata:
-      groupName: Endpoints
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 顯示分類列表
-      description: |-
-        優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、
-        高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。
-
-        範例：
-        - json[''] 或 json[null] 就是所有頂層分類
-        - json['1'] 就是 id 為 1 的分類下的所有子分類
-      authenticated: false
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
         custom: []
     responseFields: []
     auth: []
@@ -239,7 +230,7 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: '*'
+          vary: Origin
         description: null
         custom: []
     responseFields: []

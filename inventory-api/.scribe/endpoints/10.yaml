@@ -1,138 +1,17 @@
-name: 庫存轉移
-description: |-
-
-  庫存轉移 API 端點，用於在不同門市之間轉移庫存
+name: 規格庫管理
+description: ''
 endpoints:
   -
     httpMethods:
-      - GET
-    uri: api/inventory/transfers
+      - PUT
+      - PATCH
+    uri: 'api/values/{id}'
     metadata:
-      groupName: 庫存轉移
-      groupDescription: |-
-
-        庫存轉移 API 端點，用於在不同門市之間轉移庫存
+      groupName: 規格庫管理
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 獲取庫存轉移記錄列表
-      description: ''
-      authenticated: true
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters:
-      from_store_id:
-        name: from_store_id
-        description: 來源門市ID.
-        required: false
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      to_store_id:
-        name: to_store_id
-        description: 目標門市ID.
-        required: false
-        example: 2
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      status:
-        name: status
-        description: 轉移狀態.
-        required: false
-        example: completed
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      start_date:
-        name: start_date
-        description: 'date 起始日期.'
-        required: false
-        example: '2023-01-01'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      end_date:
-        name: end_date
-        description: 'date 結束日期.'
-        required: false
-        example: '2023-12-31'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      product_name:
-        name: product_name
-        description: 按商品名稱搜尋.
-        required: false
-        example: T恤
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      per_page:
-        name: per_page
-        description: 每頁顯示數量，預設15.
-        required: false
-        example: 20
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-    cleanQueryParameters:
-      from_store_id: 1
-      to_store_id: 2
-      status: completed
-      start_date: '2023-01-01'
-      end_date: '2023-12-31'
-      product_name: T恤
-      per_page: 20
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
-        custom: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - GET
-    uri: 'api/inventory/transfers/{id}'
-    metadata:
-      groupName: 庫存轉移
-      groupDescription: |-
-
-        庫存轉移 API 端點，用於在不同門市之間轉移庫存
-      subgroup: ''
-      subgroupDescription: ''
-      title: 獲取單筆庫存轉移記錄
+      title: 更新指定的屬性值
       description: ''
       authenticated: true
       custom: []
@@ -142,7 +21,33 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the transfer.'
+        description: 'The ID of the value.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      value:
+        name: value
+        description: '要更新的屬性值的 ID。'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 16
+      value: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      value:
+        name: value
+        description: 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
         required: true
         example: architecto
         type: string
@@ -150,240 +55,16 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         custom: []
-    cleanUrlParameters:
-      id: architecto
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    cleanBodyParameters:
+      value: architecto
     fileParameters: []
     responses:
       -
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
+        status: 200
+        content: "{\r\n  \"data\": {\r\n    \"id\": 1,\r\n    \"value\": \"紅色\",\r\n    \"attribute_id\": 1\r\n  }\r\n} "
+        headers: []
+        description: ''
         custom: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - POST
-    uri: api/inventory/transfers
-    metadata:
-      groupName: 庫存轉移
-      groupDescription: |-
-
-        庫存轉移 API 端點，用於在不同門市之間轉移庫存
-      subgroup: ''
-      subgroupDescription: ''
-      title: 創建庫存轉移記錄並執行轉移
-      description: ''
-      authenticated: true
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      from_store_id:
-        name: from_store_id
-        description: 來源門市ID.
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      to_store_id:
-        name: to_store_id
-        description: 目標門市ID.
-        required: true
-        example: 2
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      product_variant_id:
-        name: product_variant_id
-        description: 商品變體ID.
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      quantity:
-        name: quantity
-        description: 轉移數量.
-        required: true
-        example: 5
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      notes:
-        name: notes
-        description: 備註.
-        required: false
-        example: 調配門市庫存
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: true
-        custom: []
-      status:
-        name: status
-        description: '狀態，預設為 completed.'
-        required: false
-        example: completed
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-    cleanBodyParameters:
-      from_store_id: 1
-      to_store_id: 2
-      product_variant_id: 1
-      quantity: 5
-      notes: 調配門市庫存
-      status: completed
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - PATCH
-    uri: 'api/inventory/transfers/{id}/status'
-    metadata:
-      groupName: 庫存轉移
-      groupDescription: |-
-
-        庫存轉移 API 端點，用於在不同門市之間轉移庫存
-      subgroup: ''
-      subgroupDescription: ''
-      title: 更新庫存轉移記錄狀態
-      description: ''
-      authenticated: true
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
-        name: id
-        description: 轉移記錄ID.
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-    cleanUrlParameters:
-      id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      status:
-        name: status
-        description: 新狀態.
-        required: true
-        example: completed
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-      notes:
-        name: notes
-        description: 備註.
-        required: false
-        example: 已確認收到貨品
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: true
-        custom: []
-    cleanBodyParameters:
-      status: completed
-      notes: 已確認收到貨品
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - PATCH
-    uri: 'api/inventory/transfers/{id}/cancel'
-    metadata:
-      groupName: 庫存轉移
-      groupDescription: |-
-
-        庫存轉移 API 端點，用於在不同門市之間轉移庫存
-      subgroup: ''
-      subgroupDescription: ''
-      title: 取消庫存轉移
-      description: ''
-      authenticated: true
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
-        name: id
-        description: 轉移記錄ID.
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-    cleanUrlParameters:
-      id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      reason:
-        name: reason
-        description: 取消原因.
-        required: true
-        example: 商品損壞，不需要轉移
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        custom: []
-    cleanBodyParameters:
-      reason: 商品損壞，不需要轉移
-    fileParameters: []
-    responses: []
     responseFields: []
     auth: []
     controller: null

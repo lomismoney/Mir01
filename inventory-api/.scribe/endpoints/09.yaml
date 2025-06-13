@@ -1,18 +1,146 @@
-name: 規格庫管理
+name: 屬性值管理
 description: ''
 endpoints:
   -
     httpMethods:
-      - PUT
-      - PATCH
-    uri: 'api/values/{id}'
+      - GET
+    uri: 'api/attributes/{attribute_id}/values'
     metadata:
-      groupName: 規格庫管理
+      groupName: 屬性值管理
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 更新指定的屬性值
-      description: ''
+      title: 獲取指定屬性的所有值
+      description: 返回指定屬性下的所有屬性值列表
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      attribute_id:
+        name: attribute_id
+        description: 'The ID of the attribute.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      attribute:
+        name: attribute
+        description: '屬性 ID'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      attribute_id: 16
+      attribute: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: "{\r\n  \"data\": [\r\n    {\r\n      \"id\": 1,\r\n      \"value\": \"紅色\",\r\n      \"attribute_id\": 1,\r\n      \"created_at\": \"2024-01-01T10:00:00.000000Z\",\r\n      \"updated_at\": \"2024-01-01T10:00:00.000000Z\"\r\n    },\r\n    {\r\n      \"id\": 2,\r\n      \"value\": \"藍色\",\r\n      \"attribute_id\": 1,\r\n      \"created_at\": \"2024-01-01T10:00:00.000000Z\",\r\n      \"updated_at\": \"2024-01-01T10:00:00.000000Z\"\r\n    },\r\n    {\r\n      \"id\": 3,\r\n      \"value\": \"綠色\",\r\n      \"attribute_id\": 1,\r\n      \"created_at\": \"2024-01-01T10:00:00.000000Z\",\r\n      \"updated_at\": \"2024-01-01T10:00:00.000000Z\"\r\n    }\r\n  ],\r\n  \"links\": {\r\n    \"first\": \"http://localhost/api/attributes/1/values?page=1\",\r\n    \"last\": \"http://localhost/api/attributes/1/values?page=1\",\r\n    \"prev\": null,\r\n    \"next\": null\r\n  },\r\n  \"meta\": {\r\n    \"current_page\": 1,\r\n    \"from\": 1,\r\n    \"last_page\": 1,\r\n    \"path\": \"http://localhost/api/attributes/1/values\",\r\n    \"per_page\": 15,\r\n    \"to\": 3,\r\n    \"total\": 3\r\n  }\r\n} "
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: 'api/attributes/{attribute_id}/values'
+    metadata:
+      groupName: 屬性值管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 為指定屬性創建新值
+      description: |-
+        在指定屬性下創建一個新的屬性值
+        屬性值在同一屬性下必須唯一
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      attribute_id:
+        name: attribute_id
+        description: 'The ID of the attribute.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      attribute:
+        name: attribute
+        description: '屬性 ID'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      attribute_id: 16
+      attribute: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      value:
+        name: value
+        description: 屬性值（在同一屬性下必須唯一）。例如：紅色
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      value: architecto
+    fileParameters: []
+    responses:
+      -
+        status: 201
+        content: App\Http\Resources\Api\V1\AttributeValueResource
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/values/{id}'
+    metadata:
+      groupName: 屬性值管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 獲取指定屬性值
+      description: 返回指定的屬性值詳細資訊
       authenticated: true
       custom: []
     headers:
@@ -31,7 +159,7 @@ endpoints:
         custom: []
       value:
         name: value
-        description: '要更新的屬性值的 ID。'
+        description: '屬性值 ID'
         required: true
         example: 1
         type: integer
@@ -44,31 +172,73 @@ endpoints:
       value: 1
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters:
-      value:
-        name: value
-        description: 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-    cleanBodyParameters:
-      value: architecto
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses:
       -
         status: 200
-        content: |-
-          {
-            "data": {
-              "id": 1,
-              "value": "紅色",
-              "attribute_id": 1
-            }
-          } 
+        content: App\Http\Resources\Api\V1\AttributeValueResource
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/values/{id}'
+    metadata:
+      groupName: 屬性值管理
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 刪除指定屬性值
+      description: |-
+        刪除指定的屬性值
+        注意：如果有商品變體正在使用此屬性值，刪除操作可能會失敗
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the value.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      value:
+        name: value
+        description: '屬性值 ID'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 16
+      value: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 204
+        content: '{}'
         headers: []
         description: ''
         custom: []

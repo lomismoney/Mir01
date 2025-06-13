@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InventoryTransferRequest;
+use App\Http\Resources\Api\InventoryTransferResource;
 use App\Models\Inventory;
 use App\Models\InventoryTransaction;
 use App\Models\InventoryTransfer;
 use App\Models\ProductVariant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -36,11 +38,12 @@ class InventoryTransferController extends Controller
      * @queryParam per_page integer 每頁顯示數量，預設15. Example: 20
      * 
      * @authenticated
+     * @responseFile storage/responses/inventory_transfers.index.json
      * 
      * @param Request $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
         $this->authorize('viewAny', InventoryTransfer::class);
         
@@ -82,7 +85,7 @@ class InventoryTransferController extends Controller
         $perPage = $request->input('per_page', 15);
         $transfers = $query->latest()->paginate($perPage);
         
-        return response()->json($transfers);
+        return InventoryTransferResource::collection($transfers);
     }
 
     /**

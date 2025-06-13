@@ -1,0 +1,127 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "sku": "TSHIRT-RED-S",
+      "price": "299.99",
+      "product_id": 1,
+      "created_at": "2024-01-01T10:00:00.000000Z",
+      "updated_at": "2024-01-01T10:00:00.000000Z",
+      "product": {
+        "id": 1,
+        "name": "經典棉質T-shirt",
+        "description": "100% 純棉",
+        "category_id": 1
+      },
+      "attribute_values": [
+        {
+          "id": 1,
+          "value": "紅色",
+          "attribute_id": 1,
+          "attribute": {
+            "id": 1,
+            "name": "顏色"
+          }
+        },
+        {
+          "id": 3,
+          "value": "S",
+          "attribute_id": 2,
+          "attribute": {
+            "id": 2,
+            "name": "尺寸"
+          }
+        }
+      ],
+      "inventory": [
+        {
+          "id": 1,
+          "quantity": 50,
+          "low_stock_threshold": 10,
+          "store": {
+            "id": 1,
+            "name": "台北旗艦店"
+          }
+        },
+        {
+          "id": 2,
+          "quantity": 30,
+          "low_stock_threshold": 10,
+          "store": {
+            "id": 2,
+            "name": "台中中區店"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "sku": "TSHIRT-BLUE-M",
+      "price": "299.99",
+      "product_id": 1,
+      "created_at": "2024-01-01T10:00:00.000000Z",
+      "updated_at": "2024-01-01T10:00:00.000000Z",
+      "product": {
+        "id": 1,
+        "name": "經典棉質T-shirt",
+        "description": "100% 純棉",
+        "category_id": 1
+      },
+      "attribute_values": [
+        {
+          "id": 2,
+          "value": "藍色",
+          "attribute_id": 1,
+          "attribute": {
+            "id": 1,
+            "name": "顏色"
+          }
+        },
+        {
+          "id": 4,
+          "value": "M",
+          "attribute_id": 2,
+          "attribute": {
+            "id": 2,
+            "name": "尺寸"
+          }
+        }
+      ],
+      "inventory": [
+        {
+          "id": 3,
+          "quantity": 25,
+          "low_stock_threshold": 10,
+          "store": {
+            "id": 1,
+            "name": "台北旗艦店"
+          }
+        },
+        {
+          "id": 4,
+          "quantity": 15,
+          "low_stock_threshold": 10,
+          "store": {
+            "id": 2,
+            "name": "台中中區店"
+          }
+        }
+      ]
+    }
+  ],
+  "links": {
+    "first": "http://localhost/api/product-variants?page=1",
+    "last": "http://localhost/api/product-variants?page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "path": "http://localhost/api/product-variants",
+    "per_page": 15,
+    "to": 2,
+    "total": 2
+  }
+} 

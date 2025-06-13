@@ -62,4 +62,41 @@ class InventoryTransferRequest extends FormRequest
             'status.in' => '狀態值無效',
         ];
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'from_store_id' => [
+                'description' => '來源門市ID',
+                'example' => 1,
+            ],
+            'to_store_id' => [
+                'description' => '目標門市ID（不能與來源門市相同）',
+                'example' => 2,
+            ],
+            'product_variant_id' => [
+                'description' => '商品變體ID',
+                'example' => 1,
+            ],
+            'quantity' => [
+                'description' => '轉移數量',
+                'example' => 10,
+            ],
+            'notes' => [
+                'description' => '備註（可選）',
+                'example' => '調配門市庫存',
+            ],
+            'status' => [
+                'description' => '轉移狀態（可選，預設為 completed）',
+                'example' => 'completed',
+            ],
+        ];
+    }
 }

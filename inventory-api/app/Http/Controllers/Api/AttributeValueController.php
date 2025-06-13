@@ -30,7 +30,8 @@ class AttributeValueController extends Controller
      * 
      * @urlParam attribute int required 屬性 ID Example: 1
      * 
-     * @response App\Http\Resources\Api\V1\AttributeValueResource
+     * @authenticated
+     * @responseFile storage/responses/attribute_values.index.json
      */
     public function index(Attribute $attribute)
     {

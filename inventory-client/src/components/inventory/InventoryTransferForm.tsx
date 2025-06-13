@@ -2,10 +2,8 @@
 
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createInventoryTransfer } from "@/lib/api/inventory"
-import { getProductVariants } from "@/lib/api/products"
-import { getStores } from "@/lib/api/stores"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useCreateInventoryTransfer, useStores, useProductVariants } from "@/hooks/useApi"
 import { Store } from "@/types/store"
 import { ProductVariant } from "@/types/product"
 import { PaginatedResponse } from "@/types/inventory"
@@ -52,37 +50,10 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
     },
   })
 
-  const { data: storesData, isLoading: isLoadingStores } = useQuery<PaginatedResponse<Store>>({
-    queryKey: ["stores"],
-    queryFn: () => getStores(),
-  })
+  const { data: storesData, isLoading: isLoadingStores } = useStores()
+  const { data: productsData, isLoading: isLoadingProducts } = useProductVariants()
 
-  const { data: productsData, isLoading: isLoadingProducts } = useQuery<PaginatedResponse<ProductVariant>>({
-    queryKey: ["product-variants"],
-    queryFn: () => getProductVariants(),
-  })
-
-  const transferMutation = useMutation({
-    mutationFn: createInventoryTransfer,
-    onSuccess: () => {
-      toast({
-        title: "成功",
-        description: "庫存轉移已創建",
-      })
-      queryClient.invalidateQueries({ queryKey: ["inventory-transfers"] })
-      form.reset()
-      setIsSubmitting(false)
-      onSuccess?.()
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "錯誤",
-        description: `創建庫存轉移失敗: ${error instanceof Error ? error.message : "未知錯誤"}`,
-      })
-      setIsSubmitting(false)
-    },
-  })
+  const transferMutation = useCreateInventoryTransfer()
 
   const onSubmit = (data: TransferFormValues) => {
     setIsSubmitting(true)
@@ -94,6 +65,25 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
       product_variant_id: parseInt(data.product_variant_id),
       quantity: parseInt(data.quantity),
       notes: data.notes,
+    }, {
+      onSuccess: () => {
+        toast({
+          title: "成功",
+          description: "庫存轉移已創建",
+        })
+        queryClient.invalidateQueries({ queryKey: ["inventory-transfers"] })
+        form.reset()
+        setIsSubmitting(false)
+        onSuccess?.()
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "錯誤",
+          description: `創建庫存轉移失敗: ${error instanceof Error ? error.message : "未知錯誤"}`,
+        })
+        setIsSubmitting(false)
+      },
     })
   }
 
@@ -118,8 +108,8 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {storesData?.data.map((store: Store) => (
-                          <SelectItem key={store.id} value={store.id.toString()}>
+                        {storesData?.data?.map((store) => (
+                          <SelectItem key={store.id} value={store.id?.toString() || ''}>
                             {store.name}
                           </SelectItem>
                         ))}
@@ -151,8 +141,8 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {storesData?.data.map((store: Store) => (
-                          <SelectItem key={store.id} value={store.id.toString()}>
+                        {storesData?.data?.map((store) => (
+                          <SelectItem key={store.id} value={store.id?.toString() || ''}>
                             {store.name}
                           </SelectItem>
                         ))}
@@ -181,8 +171,8 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {productsData?.data.map((variant: ProductVariant) => (
-                        <SelectItem key={variant.id} value={variant.id.toString()}>
+                      {productsData?.data?.map((variant) => (
+                        <SelectItem key={variant.id} value={variant.id?.toString() || ''}>
                           {variant.product?.name} - {variant.sku}
                         </SelectItem>
                       ))}

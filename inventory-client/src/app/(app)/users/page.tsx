@@ -36,7 +36,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "sonner";
 import { UsersDataTable } from '@/components/users/users-data-table';
 import { createUsersColumns } from '@/components/users/users-columns';
-import { User, UserActions } from '@/types/user';
+import { UserItem } from '@/types/api-helpers';
+import { UserActions } from '@/components/users/users-columns';
 import { UserStoresDialog } from "@/components/users/user-stores-dialog";
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -78,26 +79,26 @@ export default function UsersPage() {
   const [newRole, setNewRole] = useState<'admin' | 'viewer'>('viewer'); // 預設角色
 
   // 編輯用戶狀態
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [editUserName, setEditUserName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editPassword, setEditPassword] = useState('');
   const [editRole, setEditRole] = useState<'admin' | 'viewer'>('viewer');
 
   // 刪除確認對話框狀態
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserItem | null>(null);
 
   // 使用 useUpdateUser hook（重構版，不需要預先提供 userId）
   const updateUserMutation = useUpdateUser();
 
   // 用戶分店管理狀態
   const [isStoresDialogOpen, setIsStoresDialogOpen] = useState(false);
-  const [selectedUserForStores, setSelectedUserForStores] = useState<User | null>(null);
+  const [selectedUserForStores, setSelectedUserForStores] = useState<UserItem | null>(null);
 
   const queryClient = useQueryClient();
 
   // 處理分店管理按鈕點擊
-  const handleManageUserStores = (user: User) => {
+  const handleManageUserStores = (user: UserItem) => {
     setSelectedUserForStores(user);
     setIsStoresDialogOpen(true);
   };
@@ -154,7 +155,7 @@ export default function UsersPage() {
   /**
    * 處理編輯用戶
    */
-  const handleEditUser = (userToEdit: User) => {
+  const handleEditUser = (userToEdit: UserItem) => {
     setEditingUser(userToEdit);
     setEditUserName(userToEdit.name || '');
     setEditUsername(userToEdit.username || '');
@@ -211,36 +212,27 @@ export default function UsersPage() {
   };
 
   /**
-   * 處理刪除用戶（升級版 - 使用 AlertDialog）
+   * 處理刪除用戶
    */
-  const handleDeleteUser = (userToDelete: User) => {
+  const handleDeleteUser = (userToDelete: UserItem) => {
     if (!userToDelete.id) {
       toast.error('無效的用戶 ID');
-      setUserToDelete(null); // 關閉對話框
       return;
     }
 
-    // 防止管理員刪除自己
-    if (user?.id === userToDelete.id) {
-      toast.error('您無法刪除自己的帳號');
-      setUserToDelete(null); // 關閉對話框
-      return;
-    }
-
-    // 執行刪除操作（移除了 window.confirm）
-    deleteUserMutation.mutate(
-      { id: userToDelete.id, user: userToDelete.id },
-      {
-        onSuccess: () => {
-          toast.success(`用戶「${userToDelete.name}」已刪除。`);
-          setUserToDelete(null); // 關閉對話框
-        },
-        onError: (error) => {
-          toast.error(`刪除失敗：${error.message}`);
-          setUserToDelete(null); // 關閉對話框
-        }
+    deleteUserMutation.mutate({
+      id: userToDelete.id,
+      user: userToDelete.id
+    }, {
+      onSuccess: () => {
+        toast.success('用戶刪除成功！');
+        setUserToDelete(null); // 清除狀態
+      },
+      onError: (error) => {
+        toast.error(`刪除失敗：${error.message}`);
+        setUserToDelete(null); // 清除狀態
       }
-    );
+    });
   };
 
   /**
@@ -284,19 +276,13 @@ export default function UsersPage() {
     }
   };
 
-  /**
-   * 用戶操作處理器
-   * 定義表格中各種操作的回調函數
-   */
+  // 用戶動作定義（符合新的 UserActions 介面）
   const userActions: UserActions = {
-    currentUser: user ? { is_admin: user.is_admin, id: user.id } : undefined,
-    onView: (user: User) => {
+    onView: (user: UserItem) => {
       toast.info(`查看用戶：${user.name}`);
     },
     onEdit: handleEditUser,
-    onDelete: (userToDelete: User) => {
-      setUserToDelete(userToDelete);
-    },
+    onDelete: handleDeleteUser,
     onManageStores: handleManageUserStores,
   };
 
@@ -306,16 +292,15 @@ export default function UsersPage() {
   // 處理用戶資料，確保類型正確
   const users = (usersResponse?.data || []).map((userData: any) => {
     // 使用明確的類型定義解決 TypeScript 錯誤
-    const user: User = {
-      id: userData.id || 0,
-      name: userData.name || '',
-      username: userData.username || '',
-      role: userData.role || '',
-      role_display: userData.role_display || '',
-      is_admin: userData.is_admin || false,
-      created_at: userData.created_at || '',
-      updated_at: userData.updated_at || '',
-      stores: Array.isArray(userData.stores) ? userData.stores : []
+    const user: UserItem = {
+      id: userData.id,
+      name: userData.name,
+      username: userData.username,
+      role: userData.role,
+      role_display: userData.role_display,
+      is_admin: userData.is_admin,
+      created_at: userData.created_at,
+      updated_at: userData.updated_at
     };
     return user;
   });
