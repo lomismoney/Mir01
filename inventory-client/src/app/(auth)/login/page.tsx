@@ -23,10 +23,15 @@ function RedirectHandler() {
   // 獲取 redirect 參數
   const redirectPath = searchParams.get('redirect') || '/dashboard';
   
-  // 已登入用戶自動重定向
+  // 已登入用戶自動重定向，加上短暫延遲確保 cookie 設定完成
   useEffect(() => {
     if (isAuthenticated) {
-      router.push(redirectPath);
+      // 給一個短暫的延遲確保 cookie 被正確設定
+      const timeoutId = setTimeout(() => {
+        router.push(redirectPath);
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [isAuthenticated, redirectPath, router]);
   
@@ -70,8 +75,10 @@ function LoginForm() {
       const searchParams = new URLSearchParams(window.location.search);
       const redirectPath = searchParams.get('redirect') || '/dashboard';
       
-      // 登入成功，重導向到原始請求頁面或儀表板
-      router.push(redirectPath);
+      // 登入成功，給一個短暫延遲確保 cookie 被正確設定後再重導向
+      setTimeout(() => {
+        router.push(redirectPath);
+      }, 200);
     } catch {
       // 錯誤處理已在 AuthContext 中統一管理
       // 錯誤已透過 toast 顯示給用戶，此處不需要額外處理

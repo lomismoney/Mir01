@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLogin, useLogout } from '@/hooks/useApi';
-import { getToken, removeToken, saveToken } from '@/lib/tokenManager';
+import { getToken, removeToken, setToken } from '@/lib/tokenManager';
 import apiClient from '@/lib/apiClient';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // 確保 data.user 符合 User 類型
             if (typeof data.user.id === 'number') {
               setUser(data.user as User);
-              saveToken(data.token);
+              setToken(data.token);
               toast.success('登入成功！');
               resolve();
             } else {
