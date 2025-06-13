@@ -95,6 +95,28 @@ export default function UsersPage() {
   const [isStoresDialogOpen, setIsStoresDialogOpen] = useState(false);
   const [selectedUserForStores, setSelectedUserForStores] = useState<User | null>(null);
 
+  const handleManageUserStores = (user: User) => {
+    setSelectedUserForStores(user);
+    setIsStoresDialogOpen(true);
+  };
+
+  // helper: clear selected user when dialog closes
+  const handleStoresDialogOpenChange = (open: boolean) => {
+    setIsStoresDialogOpen(open);
+    if (!open) {
+      setSelectedUserForStores(null);
+    }
+  };
+
+  // … later in your render …
+  {selectedUserForStores && (
+    <UserStoresDialog
+      open={isStoresDialogOpen}
+      user={selectedUserForStores}
+      onOpenChange={handleStoresDialogOpenChange}
+      /* …other props… */
+    />
+  )}
   /**
    * 處理創建新用戶的函式
    * 
