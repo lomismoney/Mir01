@@ -29,7 +29,14 @@ class UserStoreSeeder extends Seeder
         
         foreach ($otherUsers as $user) {
             // 隨機選擇0-2間分店
-            $randomStores = $stores->random(rand(0, min(2, $stores->count())));
+            $count = rand(0, min(2, $stores->count()));
+            // Skip when no stores are requested to avoid InvalidArgumentException
+            if ($count === 0) {
+                $user->stores()->sync([]);   // detach all
+                continue;
+            }
+
+            $randomStores = $stores->random($count);
             
             // 分配分店給用戶
             $user->stores()->sync($randomStores->pluck('id'));
