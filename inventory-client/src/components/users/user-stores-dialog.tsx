@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Store as StoreIcon, Check, ChevronsUpDown } from "lucide-react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import * as React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useStores, Store } from "@/hooks/useStores";
 import { useUserStores, useAssignUserStores } from "@/hooks/useUserStores";
@@ -83,6 +84,9 @@ export function UserStoresDialog({
   // 分配分店到用戶的 mutation
   const assignStoresMutation = useAssignUserStores();
   
+  // 獲取 React Query 客戶端實例，用於手動使緩存失效
+  const queryClient = useQueryClient();
+  
   // 選擇的分店 ID 列表
   const [selectedStoreIds, setSelectedStoreIds] = useState<number[]>([]);
   
@@ -121,6 +125,10 @@ export function UserStoresDialog({
       });
       
       toast.success('分店分配成功');
+      
+      // 使用戶列表查詢緩存失效，強制重新獲取最新數據
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      
       onOpenChange(false);
     } catch (error: any) {
       // handleApiError 只做 logging；仍應讓使用者看到失敗訊息

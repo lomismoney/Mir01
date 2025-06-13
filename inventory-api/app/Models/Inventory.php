@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Inventory 模型 - 庫存管理
  * 
- * 用於管理 SKU 級別的庫存，每個 SKU 變體都有獨立的庫存記錄
- * 與 ProductVariant（SKU）是一對一關係
- * 在新架構中，庫存直接關聯到具體的 SKU，而非 SPU
+ * 用於管理 SKU 級別的庫存，每個 SKU 變體在每個門市都有獨立的庫存記錄
+ * 與 ProductVariant（SKU）和 Store（門市）是多對多關係
+ * 在新架構中，庫存直接關聯到具體的 SKU 和門市
  */
 class Inventory extends Model
 {
@@ -23,6 +23,7 @@ class Inventory extends Model
      */
     protected $fillable = [
         'product_variant_id',    // 所屬 SKU 變體的 ID
+        'store_id',              // 所屬門市的 ID
         'quantity',              // 當前庫存數量
         'low_stock_threshold',   // 低庫存預警閾值
     ];
@@ -32,6 +33,7 @@ class Inventory extends Model
      */
     protected $casts = [
         'product_variant_id' => 'integer',
+        'store_id' => 'integer',
         'quantity' => 'integer',
         'low_stock_threshold' => 'integer',
         'created_at' => 'datetime',
@@ -40,13 +42,32 @@ class Inventory extends Model
 
     /**
      * 獲取該庫存記錄所屬的 SKU 變體
-     * 庫存與 SKU 是一對一關係
      * 
      * @return BelongsTo<ProductVariant, Inventory>
      */
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
+    }
+    
+    /**
+     * 獲取該庫存記錄所屬的門市
+     * 
+     * @return BelongsTo<Store, Inventory>
+     */
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    /**
+     * 獲取該庫存的所有交易記錄
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions()
+    {
+        return $this->hasMany(InventoryTransaction::class);
     }
 
     /**
@@ -124,42 +145,112 @@ class Inventory extends Model
     }
 
     /**
-     * 增加庫存
+     * 增加庫存並記錄交易
      * 
      * @param int $amount 增加數量
+     * @param int $userId 操作用戶ID
+     * @param string $notes 備註
+     * @param array $metadata 其他元數據
      * @return bool
      */
-    public function addStock(int $amount): bool
+    public function addStock(int $amount, int $userId, string $notes = null, array $metadata = []): bool
     {
-        $this->quantity += $amount;
-        return $this->save();
-    }
-
-    /**
-     * 減少庫存
-     * 
-     * @param int $amount 減少數量
-     * @return bool
-     */
-    public function reduceStock(int $amount): bool
-    {
-        if ($this->quantity < $amount) {
-            return false; // 庫存不足
+        if ($amount <= 0) {
+            return false;
         }
         
-        $this->quantity -= $amount;
-        return $this->save();
+        $beforeQuantity = $this->quantity;
+        $this->quantity += $amount;
+        $result = $this->save();
+        
+        if ($result) {
+            // 記錄交易
+            $this->transactions()->create([
+                'user_id' => $userId,
+                'type' => 'addition',
+                'quantity' => $amount,
+                'before_quantity' => $beforeQuantity,
+                'after_quantity' => $this->quantity,
+                'notes' => $notes,
+                'metadata' => !empty($metadata) ? json_encode($metadata) : null
+            ]);
+        }
+        
+        return $result;
     }
 
     /**
-     * 設定庫存數量
+     * 減少庫存並記錄交易
      * 
-     * @param int $quantity 新的庫存數量
+     * @param int $amount 減少數量
+     * @param int $userId 操作用戶ID
+     * @param string $notes 備註
+     * @param array $metadata 其他元數據
      * @return bool
      */
-    public function setStock(int $quantity): bool
+    public function reduceStock(int $amount, int $userId, string $notes = null, array $metadata = []): bool
     {
+        if ($amount <= 0 || $this->quantity < $amount) {
+            return false; // 庫存不足或數量無效
+        }
+        
+        $beforeQuantity = $this->quantity;
+        $this->quantity -= $amount;
+        $result = $this->save();
+        
+        if ($result) {
+            // 記錄交易
+            $this->transactions()->create([
+                'user_id' => $userId,
+                'type' => 'reduction',
+                'quantity' => -$amount, // 負數表示減少
+                'before_quantity' => $beforeQuantity,
+                'after_quantity' => $this->quantity,
+                'notes' => $notes,
+                'metadata' => !empty($metadata) ? json_encode($metadata) : null
+            ]);
+        }
+        
+        return $result;
+    }
+
+    /**
+     * 設定庫存數量並記錄交易
+     * 
+     * @param int $quantity 新的庫存數量
+     * @param int $userId 操作用戶ID
+     * @param string $notes 備註
+     * @param array $metadata 其他元數據
+     * @return bool
+     */
+    public function setStock(int $quantity, int $userId, string $notes = null, array $metadata = []): bool
+    {
+        if ($quantity < 0) {
+            return false; // 庫存不能為負數
+        }
+        
+        if ($quantity === $this->quantity) {
+            return true; // 數量沒有變化，無需操作
+        }
+        
+        $beforeQuantity = $this->quantity;
+        $change = $quantity - $beforeQuantity;
         $this->quantity = $quantity;
-        return $this->save();
+        $result = $this->save();
+        
+        if ($result) {
+            // 記錄交易
+            $this->transactions()->create([
+                'user_id' => $userId,
+                'type' => 'adjustment',
+                'quantity' => $change,
+                'before_quantity' => $beforeQuantity,
+                'after_quantity' => $this->quantity,
+                'notes' => $notes,
+                'metadata' => !empty($metadata) ? json_encode($metadata) : null
+            ]);
+        }
+        
+        return $result;
     }
 }

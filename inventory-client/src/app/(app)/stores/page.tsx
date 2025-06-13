@@ -178,8 +178,8 @@ export default function StoresPage() {
       {/* 頁面標題 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">分店管理</h1>
-          <p className="text-gray-600 mt-2">管理系統中的分店資料</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">分店管理</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">管理系統中的分店資料</p>
         </div>
         
         {isAdmin && (

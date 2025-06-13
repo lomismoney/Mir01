@@ -19,6 +19,7 @@ class InventoryFactory extends Factory
     {
         return [
             'product_variant_id' => ProductVariant::factory(),
+            'store_id' => \App\Models\Store::factory(),
             'quantity' => fake()->numberBetween(0, 100),
             'low_stock_threshold' => fake()->numberBetween(5, 20),
         ];

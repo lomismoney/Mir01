@@ -46,4 +46,20 @@ class Store extends Model
     {
         return $this->hasMany(Sale::class);
     }
+
+    /**
+     * 獲取該門市的所有轉出庫存記錄
+     */
+    public function transfersOut()
+    {
+        return $this->hasMany(InventoryTransfer::class, 'from_store_id');
+    }
+
+    /**
+     * 獲取該門市的所有轉入庫存記錄
+     */
+    public function transfersIn()
+    {
+        return $this->hasMany(InventoryTransfer::class, 'to_store_id');
+    }
 }
