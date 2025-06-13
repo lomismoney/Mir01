@@ -95,6 +95,7 @@ export default function UsersPage() {
   const [isStoresDialogOpen, setIsStoresDialogOpen] = useState(false);
   const [selectedUserForStores, setSelectedUserForStores] = useState<User | null>(null);
 
+  // 處理分店管理按鈕點擊
   const handleManageUserStores = (user: User) => {
     setSelectedUserForStores(user);
     setIsStoresDialogOpen(true);
@@ -108,15 +109,6 @@ export default function UsersPage() {
     }
   };
 
-  // … later in your render …
-  {selectedUserForStores && (
-    <UserStoresDialog
-      open={isStoresDialogOpen}
-      user={selectedUserForStores}
-      onOpenChange={handleStoresDialogOpenChange}
-      /* …other props… */
-    />
-  )}
   /**
    * 處理創建新用戶的函式
    * 
@@ -289,14 +281,6 @@ export default function UsersPage() {
     if (!open) {
       resetEditForm(); // 關閉時重置編輯表單
     }
-  };
-
-  /**
-   * 處理管理用戶分店按鈕點擊
-   */
-  const handleManageUserStores = (user: User) => {
-    setSelectedUserForStores(user);
-    setIsStoresDialogOpen(true);
   };
 
   /**
