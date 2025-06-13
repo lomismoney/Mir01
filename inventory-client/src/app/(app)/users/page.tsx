@@ -320,11 +320,23 @@ export default function UsersPage() {
     return user;
   });
 
-  // 檢查管理員權限
-  const userIsAdmin = await isAdmin();
-  if (!userIsAdmin) {
-    // 如果不是管理員，重定向到首頁或無權限頁面
-    redirect('/dashboard');
+  // 檢查管理員權限 - 使用 useAuth hook 來檢查權限
+  if (!user?.is_admin) {
+    return (
+      <div className="container mx-auto py-8">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <Shield className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">權限不足</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                您沒有權限訪問用戶管理功能
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // 只有已登入且為管理員的用戶才會執行到這裡
