@@ -55,7 +55,7 @@ class UserStoreController extends Controller
     {
         try {
             // 獲取驗證後的 store_ids
-            $storeIds = $request->store_ids;
+            $storeIds = $request->validated('store_ids');
             
             // 確保所有 ID 都是整數
             $storeIds = array_map(function($id) {
