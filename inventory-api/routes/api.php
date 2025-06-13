@@ -35,13 +35,14 @@ Route::post('/login', [AuthController::class, 'login']);
  */
 Route::middleware('auth:sanctum')->group(function () {
     /**
-     * @group Authentication
-     * @authenticated
-     *
      * 獲取當前已認證的使用者資訊
      * 
-     * @apiResource App\Http\Resources\Api\V1\UserResource
-     * @apiResourceModel App\Models\User
+     * 此端點返回當前已認證使用者的完整資訊，包括基本資料、角色信息和權限狀態。
+     * 前端認證服務將使用此端點驗證 Token 有效性並獲取用戶身份資訊。
+     * 
+     * @group Authentication
+     * @authenticated
+     * @responseFile storage/responses/user.show.json
      */
     Route::get('/user', function (Request $request) {
         return new UserResource($request->user());

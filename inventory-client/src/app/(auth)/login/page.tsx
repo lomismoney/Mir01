@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,17 +15,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
- * 登入頁面元件
- * 
- * 功能特色：
- * 1. 響應式登入表單設計
- * 2. 即時表單驗證
- * 3. 整合 AuthContext 的統一認證邏輯
- * 4. 自動重導向功能
- * 5. 無障礙支援 (Label 關聯、鍵盤導航)
- * 6. 支援 redirect 參數，登入後跳轉到原始請求頁面
+ * 登入表單元件（內部元件）
  */
-export default function LoginPage() {
+function LoginForm() {
   // 表單狀態管理
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -128,5 +120,33 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+/**
+ * 登入頁面元件
+ * 
+ * 功能特色：
+ * 1. 響應式登入表單設計
+ * 2. 即時表單驗證
+ * 3. 整合 AuthContext 的統一認證邏輯
+ * 4. 自動重導向功能
+ * 5. 無障礙支援 (Label 關聯、鍵盤導航)
+ * 6. 支援 redirect 參數，登入後跳轉到原始請求頁面
+ * 7. 使用 Suspense 邊界包裝 useSearchParams
+ */
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-muted/40">
+        <Card className="w-full max-w-sm">
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="text-center">載入中...</div>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 } 
