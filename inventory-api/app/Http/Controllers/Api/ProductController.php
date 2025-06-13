@@ -141,11 +141,16 @@ class ProductController extends Controller
                     // 4. 關聯 SKU 與其對應的屬性值 (attribute_values)
                     $variant->attributeValues()->attach($variantData['attribute_value_ids']);
 
-                    // 5. 為每一個 SKU 建立初始庫存記錄
-                    $variant->inventory()->create([
-                        'quantity' => 0, // 初始庫存預設為 0
-                        'low_stock_threshold' => 0,
-                    ]);
+                    // 5. 為每一個 SKU 在所有門市建立初始庫存記錄
+                    $stores = \App\Models\Store::all();
+                    foreach ($stores as $store) {
+                        \App\Models\Inventory::create([
+                            'product_variant_id' => $variant->id,
+                            'store_id' => $store->id,
+                            'quantity' => 0, // 初始庫存預設為 0
+                            'low_stock_threshold' => 0,
+                        ]);
+                    }
                 }
                 
                 return $product;

@@ -5,7 +5,6 @@
  * 單一事實來源（Single Source of Truth）
  */
 
-import { paths } from './api';
 import { Store } from '@/hooks/useStores';
 
 /**
@@ -14,7 +13,7 @@ import { Store } from '@/hooks/useStores';
  * 從 API 響應中提取的用戶資料結構
  * 確保前後端類型完全同步
  */
-export type User = {
+export interface User {
   id: number;
   name: string;
   username: string;
@@ -23,8 +22,8 @@ export type User = {
   is_admin: boolean;
   created_at: string;
   updated_at: string;
-  stores?: Store[]; // 添加 stores 屬性，可選的分店陣列
-};
+  stores?: Store[];
+}
 
 /**
  * 登入響應中的用戶類型

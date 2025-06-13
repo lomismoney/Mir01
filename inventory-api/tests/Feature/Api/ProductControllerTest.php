@@ -206,8 +206,11 @@ class ProductControllerTest extends TestCase
         // 關聯變體與屬性值
         $variant->attributeValues()->attach($redValue->id);
         
-        // 為變體創建庫存記錄
-        $variant->inventory()->create([
+        // 為變體創建庫存記錄（需要指定門市）
+        $store = \App\Models\Store::factory()->create();
+        \App\Models\Inventory::create([
+            'product_variant_id' => $variant->id,
+            'store_id' => $store->id,
             'quantity' => 25,
             'low_stock_threshold' => 5,
         ]);

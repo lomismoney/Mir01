@@ -9,8 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * ProductPolicy 權限測試
- * 
  * 測試不同用戶角色對商品操作的權限控制
  */
 class ProductPolicyTest extends TestCase

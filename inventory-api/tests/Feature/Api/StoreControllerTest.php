@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Models\Store;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
-
+use PHPUnitFrameworkAttributesTest;
 class StoreControllerTest extends TestCase
 {
     use WithFaker;

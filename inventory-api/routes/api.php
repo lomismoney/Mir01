@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AttributeController;
 use App\Http\Controllers\Api\AttributeValueController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductVariantController;
 use App\Http\Controllers\Api\PurchaseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
@@ -71,6 +72,17 @@ Route::middleware('auth:sanctum')->group(function () {
      * 提供完整的 CRUD 操作 (index, store, show, update, destroy)
      */
     Route::apiResource('products', ProductController::class);
+
+    /**
+     * 商品變體管理路由
+     * 提供商品變體的查詢功能
+     * 
+     * 路由列表：
+     * GET    /api/products/variants        - 獲取所有商品變體列表
+     * GET    /api/products/variants/{id}   - 獲取指定商品變體
+     */
+    Route::get('/products/variants', [ProductVariantController::class, 'index']);
+    Route::get('/products/variants/{id}', [ProductVariantController::class, 'show']);
 
     /**
      * 進貨單管理路由
@@ -150,5 +162,19 @@ Route::middleware('auth:sanctum')->group(function () {
      * DELETE /api/values/{value}                    - 刪除指定屬性值
      */
     Route::apiResource('attributes.values', AttributeValueController::class)->shallow();
+
+    // 庫存轉移 - 必須放在前面，避免和庫存管理的路由衝突
+    Route::get('/inventory/transfers', [App\Http\Controllers\Api\InventoryTransferController::class, 'index']);
+    Route::get('/inventory/transfers/{id}', [App\Http\Controllers\Api\InventoryTransferController::class, 'show']);
+    Route::post('/inventory/transfers', [App\Http\Controllers\Api\InventoryTransferController::class, 'store']);
+    Route::patch('/inventory/transfers/{id}/status', [App\Http\Controllers\Api\InventoryTransferController::class, 'updateStatus']);
+    Route::patch('/inventory/transfers/{id}/cancel', [App\Http\Controllers\Api\InventoryTransferController::class, 'cancel']);
+    
+    // 庫存管理
+    Route::get('/inventory', [App\Http\Controllers\Api\InventoryManagementController::class, 'index']);
+    Route::get('/inventory/{id}', [App\Http\Controllers\Api\InventoryManagementController::class, 'show']);
+    Route::post('/inventory/adjust', [App\Http\Controllers\Api\InventoryManagementController::class, 'adjust']);
+    Route::get('/inventory/{id}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'history']);
+    Route::post('/inventory/batch-check', [App\Http\Controllers\Api\InventoryManagementController::class, 'batchCheck']);
 });
  

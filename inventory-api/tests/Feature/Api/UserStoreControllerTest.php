@@ -209,8 +209,11 @@ class UserStoreControllerTest extends TestCase
     /** @test */
     public function staff_can_view_own_stores()
     {
-        // 創建員工用戶
-        $user = $this->createStandardUser();
+        // 創建員工用戶（使用 staff 角色）
+        /** @var User $user */
+        $user = User::factory()->create([
+            'role' => 'staff'
+        ]);
         
         // 手動創建商店並關聯到用戶
         $stores = [];

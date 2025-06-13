@@ -1,4 +1,50 @@
-const TOKEN_KEY = 'authToken';
+/**
+ * Token Manager - 管理 API 令牌
+ * 在客戶端環境中，負責處理令牌的存儲和檢索
+ */
+
+// Token 存儲的鍵
+const TOKEN_KEY = 'auth_token';
+
+/**
+ * 獲取令牌
+ * @returns 從本地存儲中檢索的令牌，如果不存在則返回 null
+ */
+export function getToken(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+/**
+ * 存儲令牌
+ * @param token 要存儲的令牌
+ */
+export function setToken(token: string): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+/**
+ * 清除令牌
+ */
+export function clearToken(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+/**
+ * 檢查是否已登錄
+ * @returns 如果存在令牌，則返回 true
+ */
+export function isLoggedIn(): boolean {
+  return !!getToken();
+}
 
 /**
  * Token 管理器
@@ -46,7 +92,7 @@ export const saveToken = (token: string): void => {
  * - API 請求前獲取認證 Token
  * - 自動登入功能
  */
-export const getToken = (): string | null => {
+export const getTokenFromManager = (): string | null => {
   if (typeof window !== 'undefined') {
     // 優先從 localStorage 獲取
     const localToken = localStorage.getItem(TOKEN_KEY);

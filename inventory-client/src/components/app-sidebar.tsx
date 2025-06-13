@@ -48,8 +48,11 @@ const data = {
     },
     {
       title: "庫存管理",
-      url: "/inventory",
       icon: IconBuilding,
+      children: [
+        { title: "庫存清單", url: "/inventory/management" },
+        { title: "庫存轉移", url: "/inventory/transfers" },
+      ]
     },
     {
       title: "商品管理",

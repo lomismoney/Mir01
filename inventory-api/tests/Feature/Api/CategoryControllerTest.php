@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
-
+use PHPUnitFrameworkAttributesTest;
 class CategoryControllerTest extends TestCase
 {
     use WithFaker;
