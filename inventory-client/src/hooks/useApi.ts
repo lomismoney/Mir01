@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/apiClient';
+import { getToken } from '@/lib/tokenManager';
 
 /**
  * API Hooks - 商品管理
@@ -481,7 +482,7 @@ export function useAttributes() {
       // 暫時使用 fetch 直接調用，直到 API 文檔修復
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/attributes`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+          'Authorization': `Bearer ${getToken() || ''}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
