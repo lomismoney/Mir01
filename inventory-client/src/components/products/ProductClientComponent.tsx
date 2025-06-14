@@ -26,18 +26,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { AuthUser } from '@/lib/auth';
+import { useSession } from 'next-auth/react';
 
 /**
- * 商品管理客戶端元件屬性
- */
-interface ProductClientComponentProps {
-  /** 從伺服器端傳入的已認證用戶資訊 */
-  user: AuthUser;
-}
-
-/**
- * 商品管理客戶端頁面組件
+ * 商品管理客戶端頁面組件（Auth.js 版本）
  * 
  * 使用 shadcn/ui DataTable 重構的專業商品管理介面，
  * 提供完整的 CRUD 功能和現代化的使用者體驗。
@@ -52,10 +44,12 @@ interface ProductClientComponentProps {
  * 7. 商品操作 - 查看、編輯、刪除
  * 
  * 安全特性：
- * - 接收來自伺服器端驗證的用戶資訊
+ * - 使用 Auth.js useSession Hook 獲取用戶資訊
  * - 保持客戶端的互動功能
  */
-export function ProductClientComponent({ }: ProductClientComponentProps) {
+export function ProductClientComponent() {
+  const { data: session } = useSession();
+  const user = session?.user;
   
   // 搜索狀態管理
   const [searchQuery, setSearchQuery] = useState('');

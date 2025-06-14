@@ -44,7 +44,7 @@ export function NavDocuments({
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <Link href={item.url}>
+              <Link href={item.url} prefetch={true}>
                 <item.icon />
                 <span>{item.name}</span>
               </Link>

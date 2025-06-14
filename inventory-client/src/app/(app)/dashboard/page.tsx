@@ -1,17 +1,24 @@
 'use client';
 
-import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { SectionCards } from "@/components/section-cards"
-import withAuth from '@/components/auth/withAuth';
+import { SectionCards } from "@/components/section-cards";
+import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 
 /**
- * Renders the main dashboard page for the inventory management system.
- *
- * Displays dashboard summary cards and an interactive chart area within a structured layout.
- *
- * @remark This component is intended to be used within the layout provided by `(app)/layout.tsx` and is protected by authentication via a higher-order component.
+ * 儀表板頁面（Auth.js 中間件保護版本）
+ * 
+ * 安全特性：
+ * - 由 Auth.js 中間件統一保護，無需 HOC 包裹
+ * - 在 Edge Runtime 中執行認證，效能更佳
+ * - 自動重導向機制，用戶體驗更流暢
+ * 
+ * 功能概述：
+ * - 顯示系統統計卡片（SectionCards）
+ * - 提供互動式圖表分析（ChartAreaInteractive）
+ * - 展示重要的業務數據摘要
+ * - 支持響應式佈局設計
  */
-function DashboardPage() {
+export default function DashboardPage() {
+  // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
@@ -24,8 +31,5 @@ function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-// 使用 withAuth HOC 進行權限保護，確保只有已登入用戶可以存取
-export default withAuth(DashboardPage);

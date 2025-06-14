@@ -63,6 +63,33 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+    # phpMyAdmin 服務配置
+    phpmyadmin:
+        image: 'phpmyadmin:latest'
+        container_name: 'inventory-phpmyadmin'
+        restart: unless-stopped
+        ports:
+            - '${PHPMYADMIN_PORT:-8080}:80'
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+            PMA_USER: '${DB_USERNAME}'
+            PMA_PASSWORD: '${DB_PASSWORD}'
+            PMA_ARBITRARY: 1
+            PMA_ABSOLUTE_URI: 'http://localhost:${PHPMYADMIN_PORT:-8080}/'
+            UPLOAD_LIMIT: 300M
+            MEMORY_LIMIT: 1024M
+            MAX_EXECUTION_TIME: 600
+            TZ: 'Asia/Taipei'
+            HIDE_PHP_VERSION: true
+        volumes:
+            - 'phpmyadmin-sessions:/sessions'
+            - './phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro'
+        networks:
+            - sail
+        depends_on:
+            mysql:
+                condition: service_healthy
 networks:
     sail:
         driver: bridge
@@ -70,4 +97,7 @@ volumes:
     sail-mysql:
         driver: local
     sail-redis:
+        driver: local
+    # phpMyAdmin sessions 持久化存儲
+    phpmyadmin-sessions:
         driver: local

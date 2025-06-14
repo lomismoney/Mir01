@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Plus, UserCheck, Shield } from "lucide-react";
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/hooks/useApi';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSession } from 'next-auth/react';
 import { toast } from "sonner";
 import { UsersDataTable } from '@/components/users/users-data-table';
 import { createUsersColumns } from '@/components/users/users-columns';
@@ -69,10 +69,11 @@ interface UsersClientPageProps {
  * - 保持客戶端的互動功能
  */
 export function UsersClientPage({ serverUser }: UsersClientPageProps) {
-  const { user } = useAuth(); // 獲取當前用戶資訊以判斷權限
+  const { data: session } = useSession();
+  const user = session?.user; // 獲取當前用戶資訊以判斷權限
   
-  // 使用伺服器端傳入的用戶資訊作為 fallback
-  const currentUser = user || serverUser;
+  // 使用客戶端 Auth.js session 中的用戶資訊
+  const currentUser = user;
   
   // 搜索狀態管理
   const [searchQuery, setSearchQuery] = useState('');
@@ -266,7 +267,7 @@ export function UsersClientPage({ serverUser }: UsersClientPageProps) {
   };
 
   // 只有管理員才能存取用戶管理頁面
-  if (!currentUser?.is_admin) {
+      if (!currentUser?.isAdmin) {
     return (
       <div className="flex items-center justify-center h-64">
         <Card>

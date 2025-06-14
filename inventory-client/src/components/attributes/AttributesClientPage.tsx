@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAttributes, useCreateAttribute, useUpdateAttribute, useDeleteAttribute, useCreateAttributeValue, useUpdateAttributeValue, useDeleteAttributeValue } from '@/hooks/useApi';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSession } from 'next-auth/react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +37,8 @@ interface Attribute {
  * - 整合權限控制，只有管理員可執行管理操作
  */
 export function AttributesClientPage() {
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user;
   const { data: attributesResponse, isLoading, error } = useAttributes();
   
   // API Mutation Hooks - 屬性管理
@@ -175,7 +176,7 @@ export function AttributesClientPage() {
     <div>
       {/* 操作工具列：新增屬性按鈕 */}
       <div className="flex justify-end mb-4">
-        {user?.is_admin && (
+        {user?.isAdmin && (
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -225,7 +226,7 @@ export function AttributesClientPage() {
               {/* 卡片標題區：屬性名稱 + 更多操作按鈕 */}
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>{attribute.name}</CardTitle>
-                {user?.is_admin && (
+                {user?.isAdmin && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -261,7 +262,7 @@ export function AttributesClientPage() {
               
               {/* 卡片底部：管理選項按鈕 */}
               <CardFooter>
-                {user?.is_admin && (
+                {user?.isAdmin && (
                   <Button 
                     variant="outline" 
                     size="sm" 

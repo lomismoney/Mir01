@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '@/lib/apiClient';
-import { getToken } from '@/lib/tokenManager';
+import { apiClient } from '@/lib/apiClient';
 
 /**
  * API Hooks - 商品管理
@@ -177,74 +176,11 @@ export function useDeleteMultipleProducts() {
   });
 }
 
-/**
- * API 登入認證類型定義
- * 從 OpenAPI 規格中提取的登入請求資料結構
- */
-type LoginCredentials = NonNullable<
-  import('@/types/api').paths['/api/login']['post']['requestBody']
->['content']['application/json'];
-
 // 這些類型現在將由 api.ts 精確提供
 type UserQueryParams = import('@/types/api').paths["/api/users"]["get"]["parameters"]["query"];
 type CreateUserRequestBody = import('@/types/api').paths["/api/users"]["post"]["requestBody"]["content"]["application/json"];
 type UpdateUserRequestBody = import('@/types/api').paths["/api/users/{id}"]["put"]["requestBody"]["content"]["application/json"];
 type UserPathParams = import('@/types/api').paths["/api/users/{id}"]["get"]["parameters"]["path"];
-
-/**
- * 使用者登入的 Mutation
- * 
- * @returns React Query 變更結果
- * 
- * 功能說明：
- * 1. 接收使用者名稱和密碼憑證
- * 2. 發送登入請求到後端 API
- * 3. 處理登入錯誤並提供友善的錯誤訊息
- * 4. 成功時回傳使用者資訊和 API Token
- */
-export function useLogin() {
-    return useMutation({
-        mutationFn: async (credentials: LoginCredentials) => {
-            const { data, error } = await apiClient.POST('/api/login', {
-                body: credentials,
-            });
-
-            if (error) {
-                // 嘗試解析後端更詳細的錯誤訊息
-                const errorMessage = (error as { username?: string[] }).username?.[0] || '登入失敗';
-                throw new Error(errorMessage);
-            }
-            
-            return data; // 回傳 { user, token }
-        },
-    });
-}
-
-/**
- * 使用者登出的 Mutation
- * 
- * @returns React Query 變更結果
- * 
- * 功能說明：
- * 1. 調用後端 /api/logout 端點
- * 2. 在伺服器端銷毀使用者的 API Token
- * 3. 確保完整的登出流程，防止 'zombie token' 安全漏洞
- */
-export function useLogout() {
-    return useMutation({
-        mutationFn: async () => {
-            const { error } = await apiClient.POST('/api/logout');
-
-            if (error) {
-                // 登出錯誤通常不是致命的，記錄但不阻止流程
-                console.warn('後端登出請求失敗:', error);
-            }
-            
-            // 無論後端請求是否成功，都繼續前端登出流程
-            return null;
-        },
-    });
-}
 
 /**
  * 獲取用戶列表 (最終版 - 標準化查詢鍵)
@@ -357,12 +293,29 @@ export function useCategories() {
   return useQuery({
     queryKey: QUERY_KEYS.CATEGORIES,
     queryFn: async () => {
-      const { data, error } = await (apiClient as any).GET('/api/categories');
+      // 類型系統知道 data 的結構是 { data?: Category[] } 或類似結構
+      const { data: responseData, error } = await apiClient.GET('/api/categories');
+
       if (error) {
         throw new Error('獲取分類列表失敗');
       }
-      // 後端回傳的已是按 parent_id 分組的結構
-      return data?.data || data || []; 
+      
+      const categories = responseData?.data || [];
+      
+      // 使用 Array.prototype.reduce 建立一個類型安全的 Record
+      const grouped = categories.reduce((acc, category) => {
+        // 使用空字串 '' 作為頂層分類的鍵
+        const parentIdKey = category.parent_id?.toString() || '';
+        
+        if (!acc[parentIdKey]) {
+          acc[parentIdKey] = [];
+        }
+        acc[parentIdKey].push(category);
+        
+        return acc;
+      }, {} as Record<string, typeof categories>); // 明確指定 accumulator 的初始類型
+
+      return grouped;
     },
     staleTime: 1000 * 60 * 5, // 5 分鐘內不重新請求
   });
@@ -479,21 +432,11 @@ export function useAttributes() {
   return useQuery({
     queryKey: QUERY_KEYS.ATTRIBUTES,
     queryFn: async () => {
-      // 暫時使用 fetch 直接調用，直到 API 文檔修復
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/attributes`, {
-        headers: {
-          'Authorization': `Bearer ${getToken() || ''}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
+      const { data, error } = await apiClient.GET('/api/attributes');
+      if (error) {
         throw new Error('獲取屬性列表失敗');
       }
-      
-      const result = await response.json();
-      return result.data || result; // 適應不同的響應格式
+      return data;
     },
     staleTime: 1000 * 60 * 10, // 10 分鐘內不重新請求（屬性變更較少）
   });

@@ -3,20 +3,25 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import withAuth from '@/components/auth/withAuth';
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 /**
- * Provides the protected application layout with sidebar navigation, header, and main content area.
+ * 受保護的應用程式佈局（Auth.js 中間件保護版本）
  *
- * Wraps authenticated pages in a dashboard interface, including an inset sidebar, a top header, and a content section.
+ * 提供包含側邊欄導航、標題列和主要內容區域的儀表板介面
+ * 由 Auth.js 中間件統一保護，無需 HOC 包裹
  *
- * @param children - The main content to display within the layout.
+ * 安全特性：
+ * - Auth.js 中間件已確保只有已登入用戶才能訪問 (app) 路由群組
+ * - 移除 withAuth HOC，簡化元件結構
+ * - 提升效能，減少不必要的重新渲染
+ *
+ * @param children - 要在佈局中顯示的主要內容
  */
-function AppLayout({ children }: AppLayoutProps) {
+export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider
       style={
@@ -33,7 +38,4 @@ function AppLayout({ children }: AppLayoutProps) {
       </SidebarInset>
     </SidebarProvider>
   );
-}
-
-// 使用 withAuth HOC 進行權限保護，確保整個 (app) 路由組都受到保護
-export default withAuth(AppLayout); 
+} 

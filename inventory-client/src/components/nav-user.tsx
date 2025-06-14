@@ -28,23 +28,28 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAuth } from "@/contexts/AuthContext"
+import { useSession, signOut } from "next-auth/react"
 
 /**
- * 用戶導覽元件
+ * 用戶導覽元件（Auth.js 版本）
  * 顯示當前登入用戶的資訊和選單選項
- * 支援載入狀態和動態用戶資料
+ * 使用 Auth.js useSession Hook 獲取用戶狀態
  */
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { user, logout, isLoading } = useAuth()
+  const { data: session, status } = useSession()
+
+  // 從 Auth.js session 中提取用戶資訊和狀態
+  const user = session?.user
+  const isAuthenticated = status === 'authenticated'
+  const isLoading = status === 'loading'
 
   /**
    * 處理登出點擊事件
-   * 調用 AuthContext 中的 logout 方法
+   * 使用 Auth.js signOut 方法
    */
   const handleLogout = () => {
-    logout()
+    signOut({ callbackUrl: '/login' })
   }
 
   // 載入狀態顯示骨架屏

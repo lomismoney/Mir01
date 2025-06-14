@@ -4,17 +4,21 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
-import { useAuth } from "@/contexts/AuthContext"
+import { useSession } from "next-auth/react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * 網站頭部組件
+ * 網站頭部組件（Auth.js 版本）
  * 提供側邊欄觸發器、頁面標題、用戶資訊和操作按鈕
- * 支援動態用戶資料和載入狀態
+ * 使用 Auth.js useSession Hook 獲取用戶狀態
  */
 export function SiteHeader() {
-  const { user, isLoading } = useAuth()
+  const { data: session, status } = useSession()
+  
+  // 從 Auth.js session 中提取用戶資訊和狀態
+  const user = session?.user
+  const isLoading = status === 'loading'
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">

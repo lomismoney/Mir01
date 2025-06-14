@@ -11,7 +11,7 @@ import {
   Trash
 } from "lucide-react";
 import { useStore, useStores, useCreateStore, useUpdateStore, useDeleteStore, Store } from "@/hooks/useStores";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSession } from "next-auth/react";
 
 import {
   Table,
@@ -33,8 +33,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
  * 分店管理頁面
  */
 export default function StoresPage() {
-  const { user } = useAuth();
-  const isAdmin = user?.is_admin || false;
+  const { data: session } = useSession();
+  const user = session?.user;
+  const isAdmin = user?.isAdmin || false;
   
   // API Hooks
   const { data: storesData, isLoading } = useStores();

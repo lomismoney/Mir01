@@ -4,7 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/providers/QueryProvider";
-import { AuthProvider } from "@/contexts/AuthContext";
+
+import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/toaster";
 
 const fontSans = FontSans({
@@ -18,12 +19,12 @@ export const metadata: Metadata = {
 };
 
 /**
- * 根佈局組件
+ * 根佈局組件（Auth.js 完整版本）
  * 
  * 提供全局的應用程式架構，包含：
  * 1. 主題管理 (ThemeProvider)
- * 2. React Query 狀態管理 (QueryProvider)
- * 3. 認證狀態管理 (AuthProvider)
+ * 2. Auth.js Session 管理 (SessionProvider)
+ * 3. React Query 狀態管理 (QueryProvider)
  * 4. Toast 通知系統 (Toaster)
  * 
  * @param children - 子頁面內容
@@ -46,12 +47,12 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
         >
-          <QueryProvider>
-            <AuthProvider>
+          <SessionProvider>
+            <QueryProvider>
               {children}
               <Toaster />
-            </AuthProvider>
-          </QueryProvider>
+            </QueryProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

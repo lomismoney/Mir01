@@ -93,6 +93,7 @@ export function NavMain({
                       <Link
                         key={child.title}
                         href={child.url}
+                        prefetch={true}
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-accent-foreground",
                           { "text-sidebar-accent-foreground bg-sidebar-accent": pathname === child.url }
@@ -109,6 +110,7 @@ export function NavMain({
               <SidebarMenuItem key={item.title}>
                 <Link
                   href={item.url!}
+                  prefetch={true}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-accent-foreground",
                     { "text-sidebar-accent-foreground bg-sidebar-accent": pathname === item.url }

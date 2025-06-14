@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useActionState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,166 +11,90 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter, useSearchParams } from 'next/navigation';
-
-// 提取處理重定向邏輯的組件，包含 useSearchParams 的使用
-function RedirectHandler() {
-  const { isAuthenticated } = useAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // 獲取 redirect 參數
-  const redirectPath = searchParams.get('redirect') || '/dashboard';
-  
-  // 已登入用戶自動重定向，加上短暫延遲確保 cookie 設定完成
-  useEffect(() => {
-    if (isAuthenticated) {
-      // 給一個短暫的延遲確保 cookie 被正確設定
-      const timeoutId = setTimeout(() => {
-        router.push(redirectPath);
-      }, 100);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [isAuthenticated, redirectPath, router]);
-  
-  return null;
-}
+import { loginAction } from '@/actions/auth';
+import { toast } from 'sonner';
 
 /**
- * 登入表單元件（內部元件）
+ * 登入頁面元件 (Auth.js + React 19 現代化版本)
+ * 
+ * 使用 Auth.js 和 Server Actions 重構的登入頁面
+ * 
+ * 核心特色：
+ * 1. Server Actions - 伺服器端表單處理
+ * 2. useActionState - React 19 現代化表單狀態管理
+ * 3. Auth.js 整合 - 統一認證流程
+ * 4. 自動重導向 - 登入成功後自動跳轉
+ * 5. 錯誤處理 - 友善的錯誤訊息顯示
+ * 6. 內建 Pending 狀態 - 自動載入中狀態管理
+ * 
+ * 技術優勢：
+ * - 內建 isPending 狀態，無需手動管理
+ * - 無需 useState 儲存表單資料
+ * - 伺服器端驗證，安全性更高
+ * - 與 Auth.js 生態系統完美整合
+ * - 符合 React 19 最佳實踐
  */
-function LoginForm() {
-  // 表單狀態管理
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // 認證和路由 Hooks
-  const { login } = useAuth();
-  const router = useRouter();
+export default function LoginPage() {
+  // 使用 useActionState Hook 處理 Server Action 的狀態 (React 19+)
+  // state 包含從 Server Action 回傳的資料（如錯誤訊息）
+  // formAction 是包裝後的 action 函式，會自動處理表單提交
+  // isPending 提供內建的載入中狀態，無需手動管理
+  const [state, formAction, isPending] = useActionState(loginAction, undefined);
 
-  /**
-   * 處理登入表單提交
-   * 
-   * @param e - 表單提交事件
-   * 
-   * 功能流程：
-   * 1. 防止表單預設提交行為
-   * 2. 設定提交中狀態
-   * 3. 呼叫 AuthContext 的 login 方法
-   * 4. 成功時重導向到原始請求頁面或儀表板
-   * 5. 錯誤處理由 AuthContext 統一管理
-   */
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      // 使用 AuthContext 的統一登入方法
-      await login({ username, password });
-      
-      // 獲取重定向路徑
-      const searchParams = new URLSearchParams(window.location.search);
-      const redirectPath = searchParams.get('redirect') || '/dashboard';
-      
-      // 登入成功，給一個短暫延遲確保 cookie 被正確設定後再重導向
-      setTimeout(() => {
-        router.push(redirectPath);
-      }, 200);
-    } catch {
-      // 錯誤處理已在 AuthContext 中統一管理
-      // 錯誤已透過 toast 顯示給用戶，此處不需要額外處理
-    } finally {
-      setIsSubmitting(false);
+  // 監聽 Server Action 的回傳狀態，顯示錯誤訊息
+  useEffect(() => {
+    if (state?.error) {
+      toast.error(state.error);
     }
-  };
+  }, [state]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-muted/40">
-      {/* 使用 Suspense 包裝處理 useSearchParams 的組件 */}
-      <Suspense fallback={null}>
-        <RedirectHandler />
-      </Suspense>
-      
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">登入</CardTitle>
-          <CardDescription>
-            請輸入您的帳號密碼以登入系統。
-          </CardDescription>
+          <CardDescription>請輸入您的帳號密碼以登入系統。</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          {/* 
+            使用 Server Action 的表單
+            - action={formAction}: 將 Server Action 直接綁定到表單
+            - Next.js 會自動處理表單提交和資料傳遞
+            - 無需 onSubmit 事件處理器
+          */}
+          <form action={formAction}>
             <div className="grid gap-4">
               {/* 使用者名稱輸入欄位 */}
               <div className="grid gap-2">
                 <Label htmlFor="username">帳號</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="superadmin"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isSubmitting}
+                <Input 
+                  id="username" 
+                  type="text" 
+                  name="username" 
+                  placeholder="superadmin" 
+                  required 
                 />
               </div>
               
               {/* 密碼輸入欄位 */}
               <div className="grid gap-2">
                 <Label htmlFor="password">密碼</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isSubmitting}
+                <Input 
+                  id="password" 
+                  type="password" 
+                  name="password" 
+                  required 
                 />
               </div>
               
-              {/* 登入按鈕 - 根據提交狀態顯示不同文字和停用狀態 */}
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? '登入中...' : '登入'}
+              {/* 登入按鈕 - 使用 isPending 狀態控制載入中顯示 */}
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? '登入中...' : '登入'}
               </Button>
             </div>
           </form>
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-/**
- * 登入頁面元件
- * 
- * 功能特色：
- * 1. 響應式登入表單設計
- * 2. 即時表單驗證
- * 3. 整合 AuthContext 的統一認證邏輯
- * 4. 自動重導向功能
- * 5. 無障礙支援 (Label 關聯、鍵盤導航)
- * 6. 支援 redirect 參數，登入後跳轉到原始請求頁面
- * 7. 使用 Suspense 邊界包裝 useSearchParams
- */
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-muted/40">
-        <Card className="w-full max-w-sm">
-          <CardContent className="flex items-center justify-center py-8">
-            <div className="text-center">載入中...</div>
-          </CardContent>
-        </Card>
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
   );
 } 

@@ -165,7 +165,7 @@ export function CategoriesClientPage({ }: CategoriesClientPageProps) {
       const createData = {
         name: data.name,
         description: data.description || null,
-        parent_id: data.parent_id === 'null' ? null : Number(data.parent_id),
+        parent_id: data.parent_id ? Number(data.parent_id) : null,
       };
 
       await createMutation.mutateAsync(createData);

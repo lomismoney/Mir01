@@ -1,34 +1,25 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
 import { DataTableSkeleton } from '@/components/ui/data-table-skeleton';
 import { ProductClientComponent } from '@/components/products/ProductClientComponent';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
 /**
- * 商品管理頁面（伺服器端認證版本）
+ * 商品管理頁面（Auth.js 中間件保護版本）
  * 
  * 安全特性：
- * - 伺服器端身份驗證，未認證用戶無法取得頁面內容
- * - 使用 Next.js redirect() 進行伺服器端重定向
- * - 完全杜絕「偷看」問題，提供企業級安全性
+ * - 由 Auth.js 中間件統一保護，無需頁面級認證檢查
+ * - 在 Edge Runtime 中執行認證，效能更佳
+ * - 自動重導向機制，用戶體驗更流暢
  * 
  * 效能優化：
- * - 父層保持為伺服器元件，可快速渲染和緩存
+ * - 移除伺服器端認證檢查，減少頁面載入時間
  * - 動態內容包裹在 Suspense 中，實現串流渲染
  * - 提供良好的載入體驗和 SEO 優化
  */
-export default async function ProductsPage() {
-  // 在伺服器端直接進行身份驗證
-  const session = await auth(); 
-  if (!session?.user) {
-    // 如果未登入，直接在伺服器端重定向，不會向瀏覽器發送任何頁面內容
-    redirect('/login');
-  }
-
-  // 只有已登入用戶才會執行到這裡
+export default function ProductsPage() {
+  // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
     <div className="p-4 md:p-8">
       {/* 頁面標題區 - 伺服器端立即渲染 */}
@@ -51,7 +42,7 @@ export default async function ProductsPage() {
       
       {/* 動態內容區 - 使用 Suspense 包裹客戶端元件 */}
       <Suspense fallback={<DataTableSkeleton />}>
-        <ProductClientComponent user={session.user} />
+        <ProductClientComponent />
       </Suspense>
     </div>
   );

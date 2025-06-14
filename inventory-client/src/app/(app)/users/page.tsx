@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Plus, UserCheck, Shield, Eye } from "lucide-react";
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/hooks/useApi';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSession } from 'next-auth/react';
 import { toast } from "sonner";
 import { UsersDataTable } from '@/components/users/users-data-table';
 import { createUsersColumns } from '@/components/users/users-columns';
@@ -56,7 +56,8 @@ import { useQueryClient } from '@tanstack/react-query';
  * - 保持 SEO 友好的伺服器端渲染
  */
 export default function UsersPage() {
-  const { user } = useAuth(); // 獲取當前用戶資訊以判斷權限
+  const { data: session } = useSession();
+  const user = session?.user; // 獲取當前用戶資訊以判斷權限
   
   // 搜索狀態管理
   const [searchQuery, setSearchQuery] = useState('');
@@ -306,7 +307,7 @@ export default function UsersPage() {
   });
 
   // 檢查管理員權限 - 使用 useAuth hook 來檢查權限
-  if (!user?.is_admin) {
+      if (!user?.isAdmin) {
     return (
       <div className="container mx-auto py-8">
         <Card>
@@ -341,7 +342,7 @@ export default function UsersPage() {
           columns={columns}
           data={users}
           isLoading={isLoading}
-          showAddButton={user?.is_admin}
+          showAddButton={user?.isAdmin}
           onAddUser={handleAddUser}
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
