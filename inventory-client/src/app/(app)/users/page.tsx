@@ -128,6 +128,12 @@ export default function UsersPage() {
       return;
     }
 
+    // 密碼長度驗證
+    if (newPassword.length < 8) {
+      toast.error('密碼至少需要 8 個字元');
+      return;
+    }
+
     createUserMutation.mutate({
       name: newUserName,
       username: newUsername,
@@ -141,7 +147,18 @@ export default function UsersPage() {
         resetForm();
       },
       onError: (error) => {
-        toast.error(`建立失敗：${error.message}`);
+        // 改進錯誤顯示：提供更詳細的錯誤信息
+        const errorMessage = error.message;
+        
+        if (errorMessage.includes('用戶名已被使用') || errorMessage.includes('username')) {
+          toast.error(`用戶名重複：${newUsername} 已被使用，請選擇其他用戶名`);
+        } else if (errorMessage.includes('密碼')) {
+          toast.error(`密碼錯誤：${errorMessage}`);
+        } else if (errorMessage.includes('角色')) {
+          toast.error(`角色錯誤：${errorMessage}`);
+        } else {
+          toast.error(`建立失敗：${errorMessage}`);
+        }
       }
     });
   };
@@ -398,15 +415,17 @@ export default function UsersPage() {
               <Label htmlFor="password" className="text-right font-medium">
                 密碼 <span className="text-red-500">*</span>
               </Label>
-              <Input 
-                id="password" 
-                type="password"
-                placeholder="輸入密碼"
-                value={newPassword} 
-                onChange={(e) => setNewPassword(e.target.value)} 
-                className="col-span-3" 
-                disabled={createUserMutation.isPending}
-              />
+              <div className="col-span-3 space-y-1">
+                <Input 
+                  id="password" 
+                  type="password"
+                  placeholder="輸入密碼"
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  disabled={createUserMutation.isPending}
+                />
+                <p className="text-xs text-gray-500">密碼至少需要 8 個字元</p>
+              </div>
             </div>
             
             {/* 角色選擇 */}

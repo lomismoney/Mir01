@@ -68,7 +68,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":14,"name":"Mrs. Justina Gaylord","username":"lafayette.considine","role":"viewer","role_display":"\u6aa2\u8996\u8005","is_admin":false,"created_at":"2025-06-14T22:23:03.000000Z","updated_at":"2025-06-14T22:23:03.000000Z"}}'
+        content: '{"data":{"id":12,"name":"Mrs. Justina Gaylord","username":"lafayette.considine","role":"viewer","role_display":"\u6aa2\u8996\u8005","is_admin":false,"created_at":"2025-06-15T13:40:20.000000Z","updated_at":"2025-06-15T13:40:20.000000Z"}}'
         headers: []
         description: ''
         custom: []

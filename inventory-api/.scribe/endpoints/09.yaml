@@ -22,7 +22,7 @@ endpoints:
         name: attribute_id
         description: 'The ID of the attribute.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -39,7 +39,7 @@ endpoints:
         nullable: false
         custom: []
     cleanUrlParameters:
-      attribute_id: 16
+      attribute_id: 1
       attribute: 1
     queryParameters: []
     cleanQueryParameters: []
@@ -82,7 +82,7 @@ endpoints:
         name: attribute_id
         description: 'The ID of the attribute.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -99,7 +99,7 @@ endpoints:
         nullable: false
         custom: []
     cleanUrlParameters:
-      attribute_id: 16
+      attribute_id: 1
       attribute: 1
     queryParameters: []
     cleanQueryParameters: []

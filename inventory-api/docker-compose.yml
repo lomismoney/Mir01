@@ -24,6 +24,7 @@ services:
             mysql:
                 condition: service_healthy
             redis:
+                condition: service_healthy
         # 🔥 增加重啟策略
         restart: unless-stopped
             

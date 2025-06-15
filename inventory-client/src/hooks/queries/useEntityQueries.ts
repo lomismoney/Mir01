@@ -242,13 +242,43 @@ export function useCreateUser() {
   return useMutation({
     mutationFn: async (body: CreateUserRequestBody) => {
       const { data, error } = await apiClient.POST('/api/users', { body });
-      if (error) { throw new Error(Object.values(error).flat().join('\n') || '建立用戶失敗'); }
+      if (error) { 
+        // 改進錯誤處理：更好地處理 Laravel 驗證錯誤
+        let errorMessage = '建立用戶失敗';
+        
+        // 使用 any 類型來處理動態錯誤結構
+        const errorObj = error as any;
+        
+        if (errorObj && typeof errorObj === 'object') {
+          // 處理 Laravel 驗證錯誤格式
+          if (errorObj.errors && typeof errorObj.errors === 'object') {
+            // Laravel 驗證錯誤格式：{ errors: { field: [messages] } }
+            const validationErrors = Object.values(errorObj.errors as Record<string, string[]>)
+              .flat()
+              .join('\n');
+            if (validationErrors) {
+              errorMessage = validationErrors;
+            }
+          } else if (errorObj.message && typeof errorObj.message === 'string') {
+            // Laravel 一般錯誤格式：{ message: "error message" }
+            errorMessage = errorObj.message;
+          } else {
+            // 其他錯誤格式
+            const allErrors = Object.values(errorObj).flat().join('\n');
+            if (allErrors) {
+              errorMessage = allErrors;
+            }
+          }
+        }
+        
+        throw new Error(errorMessage);
+      }
       return data;
     },
     onSuccess: () => {
-      // 這個指令會將所有以 ['users'] 為開頭的查詢鍵都標記為"過時"
-      // 這將成功匹配到 ['users', filters] 並觸發資料重新整理
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      // 強制重新獲取用戶列表數據，確保新創建的用戶立即顯示
+      // 使用 refetchQueries 而不是 invalidateQueries 來立即觸發重新獲取
+      queryClient.refetchQueries({ queryKey: ['users'] });
     },
   });
 }
@@ -264,13 +294,42 @@ export function useUpdateUser() {
         params: { path: variables.path },
         body: variables.body,
       });
-      if (error) { throw new Error(Object.values(error).flat().join('\n') || '更新用戶失敗');}
+      if (error) { 
+        // 改進錯誤處理：更好地處理 Laravel 驗證錯誤
+        let errorMessage = '更新用戶失敗';
+        
+        // 使用 any 類型來處理動態錯誤結構
+        const errorObj = error as any;
+        
+        if (errorObj && typeof errorObj === 'object') {
+          // 處理 Laravel 驗證錯誤格式
+          if (errorObj.errors && typeof errorObj.errors === 'object') {
+            // Laravel 驗證錯誤格式：{ errors: { field: [messages] } }
+            const validationErrors = Object.values(errorObj.errors as Record<string, string[]>)
+              .flat()
+              .join('\n');
+            if (validationErrors) {
+              errorMessage = validationErrors;
+            }
+          } else if (errorObj.message && typeof errorObj.message === 'string') {
+            // Laravel 一般錯誤格式：{ message: "error message" }
+            errorMessage = errorObj.message;
+          } else {
+            // 其他錯誤格式
+            const allErrors = Object.values(errorObj).flat().join('\n');
+            if (allErrors) {
+              errorMessage = allErrors;
+            }
+          }
+        }
+        
+        throw new Error(errorMessage);
+      }
       return data;
     },
     onSuccess: (_, variables) => {
-      // 這個指令會將所有以 ['users'] 為開頭的查詢鍵都標記為"過時"
-      // 這將成功匹配到 ['users', filters] 並觸發資料重新整理
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      // 強制重新獲取用戶列表數據，確保更新的用戶立即顯示
+      queryClient.refetchQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['user', variables.path.user] }); 
     },
   });
@@ -289,9 +348,8 @@ export function useDeleteUser() {
       if (error) { throw new Error('刪除用戶失敗'); }
     },
     onSuccess: (_, pathParams) => {
-      // 這個指令會將所有以 ['users'] 為開頭的查詢鍵都標記為"過時"
-      // 這將成功匹配到 ['users', filters] 並觸發資料重新整理
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      // 強制重新獲取用戶列表數據，確保刪除的用戶立即從列表中移除
+      queryClient.refetchQueries({ queryKey: ['users'] });
       queryClient.removeQueries({ queryKey: ['user', pathParams.user] });
     },
   });
