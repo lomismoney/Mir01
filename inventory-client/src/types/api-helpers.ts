@@ -83,4 +83,62 @@ export type ProductVariantItem = NonNullable<
 // 用戶項目型別
 export type UserItem = NonNullable<
   import('@/types/api').paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
->[number]; 
+>[number];
+
+/**
+ * 商品變體 (SKU) 類型定義
+ * 
+ * 代表單一商品變體的完整資訊，包含價格、屬性值、庫存等
+ */
+export type ProductVariant = {
+  id?: number;
+  sku?: string;
+  price?: number;
+  product_id?: number;
+  created_at?: string;
+  updated_at?: string;
+  attribute_values?: {
+    id?: number;
+    value?: string;
+    attribute_id?: number;
+    attribute?: {
+      id?: number;
+      name?: string;
+    };
+  }[];
+  inventory?: {
+    id?: number;
+    quantity?: number;
+    low_stock_threshold?: number;
+    store?: {
+      id?: number;
+      name?: string;
+    };
+  }[];
+};
+
+/**
+ * 商品項目型別 (SPU) - 統一的 Product 類型定義
+ * 
+ * 採用 SPU (Standard Product Unit) 架構，包含其下所有 SKU 變體
+ * 這個統一類型確保了前端代碼的類型安全性，並提供價格範圍統計
+ */
+export type ProductItem = {
+  id?: number;
+  name?: string;
+  description?: string;
+  category_id?: number;
+  created_at?: string;
+  updated_at?: string;
+  variants?: ProductVariant[];
+  price_range?: {
+    min?: number;
+    max?: number;
+    count?: number;
+  };
+  category?: {
+    id?: number;
+    name?: string;
+    description?: string;
+  };
+}; 

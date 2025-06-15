@@ -19,11 +19,11 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
-        networks:
-            - sail
+        # 🚀 移除 networks 配置，使用預設網絡以獲得最佳性能
         depends_on:
             - mysql
             - redis
+            
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
@@ -38,8 +38,7 @@ services:
         volumes:
             - 'sail-mysql:/var/lib/mysql'
             - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
-        networks:
-            - sail
+        # 🚀 移除 networks 配置
         healthcheck:
             test:
                 - CMD
@@ -48,14 +47,14 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+            
     redis:
         image: 'redis:alpine'
         ports:
             - '${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
             - 'sail-redis:/data'
-        networks:
-            - sail
+        # 🚀 移除 networks 配置
         healthcheck:
             test:
                 - CMD
@@ -63,7 +62,8 @@ services:
                 - ping
             retries: 3
             timeout: 5s
-    # phpMyAdmin 服務配置
+            
+    # phpMyAdmin 服務配置 (性能優化版)
     phpmyadmin:
         image: 'phpmyadmin:latest'
         container_name: 'inventory-phpmyadmin'
@@ -85,14 +85,16 @@ services:
         volumes:
             - 'phpmyadmin-sessions:/sessions'
             - './phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro'
-        networks:
-            - sail
+        # 🚀 移除 networks 配置
         depends_on:
             mysql:
                 condition: service_healthy
-networks:
-    sail:
-        driver: bridge
+
+# 🚀 完全移除 networks 配置，讓 Docker 使用預設網絡
+# networks:
+#     sail:
+#         driver: bridge
+
 volumes:
     sail-mysql:
         driver: local
@@ -100,4 +102,4 @@ volumes:
         driver: local
     # phpMyAdmin sessions 持久化存儲
     phpmyadmin-sessions:
-        driver: local
+        driver: local 

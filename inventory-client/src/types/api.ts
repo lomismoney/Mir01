@@ -46,7 +46,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 18 */
+                                /** @example 14 */
                                 id?: number;
                                 /** @example Mrs. Justina Gaylord */
                                 name?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-13T20:52:33.000000Z */
+                                /** @example 2025-06-14T22:23:03.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-13T20:52:33.000000Z */
+                                /** @example 2025-06-14T22:23:03.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -246,7 +246,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the category.
-                 * @example 16
+                 * @example 1
                  */
                 id: number;
             };
@@ -263,7 +263,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                 };
@@ -298,7 +298,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                 };
@@ -341,7 +341,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                 };
@@ -807,8 +807,8 @@ export interface paths {
                      */
                     search?: string;
                     /**
-                     * @description 排序欄位 (name, sku, selling_price, cost_price, created_at)。
-                     * @example selling_price
+                     * @description 排序欄位 (name, created_at)。
+                     * @example name
                      */
                     sort_by?: string;
                     /**
@@ -902,22 +902,84 @@ export interface paths {
                              *       {
                              *         "id": 1,
                              *         "name": "高階人體工學辦公椅",
-                             *         "sku": "CHAIR-ERG-001",
                              *         "description": "具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。",
-                             *         "selling_price": "399.99",
-                             *         "cost_price": "150.00",
+                             *         "category_id": 1,
                              *         "created_at": "2024-01-01T10:00:00.000000Z",
-                             *         "updated_at": "2024-01-01T10:00:00.000000Z"
+                             *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                             *         "variants": [
+                             *           {
+                             *             "id": 1,
+                             *             "sku": "CHAIR-ERG-001-BLACK",
+                             *             "price": 399.99,
+                             *             "product_id": 1,
+                             *             "created_at": "2024-01-01T10:00:00.000000Z",
+                             *             "updated_at": "2024-01-01T10:00:00.000000Z",
+                             *             "attribute_values": [
+                             *               {
+                             *                 "id": 1,
+                             *                 "value": "黑色",
+                             *                 "attribute_id": 1,
+                             *                 "attribute": {
+                             *                   "id": 1,
+                             *                   "name": "顏色"
+                             *                 }
+                             *               }
+                             *             ]
+                             *           },
+                             *           {
+                             *             "id": 2,
+                             *             "sku": "CHAIR-ERG-001-WHITE",
+                             *             "price": 429.99,
+                             *             "product_id": 1,
+                             *             "created_at": "2024-01-01T10:00:00.000000Z",
+                             *             "updated_at": "2024-01-01T10:00:00.000000Z",
+                             *             "attribute_values": [
+                             *               {
+                             *                 "id": 2,
+                             *                 "value": "白色",
+                             *                 "attribute_id": 1,
+                             *                 "attribute": {
+                             *                   "id": 1,
+                             *                   "name": "顏色"
+                             *                 }
+                             *               }
+                             *             ]
+                             *           }
+                             *         ],
+                             *         "price_range": {
+                             *           "min": 399.99,
+                             *           "max": 429.99,
+                             *           "count": 2
+                             *         },
+                             *         "category": {
+                             *           "id": 1,
+                             *           "name": "辦公用品",
+                             *           "description": "各種辦公室所需用品"
+                             *         }
                              *       },
                              *       {
                              *         "id": 2,
                              *         "name": "無線藍牙滑鼠",
-                             *         "sku": "MOUSE-BT-002",
                              *         "description": "2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。",
-                             *         "selling_price": "79.99",
-                             *         "cost_price": "25.00",
+                             *         "category_id": null,
                              *         "created_at": "2024-01-01T11:30:00.000000Z",
-                             *         "updated_at": "2024-01-01T11:30:00.000000Z"
+                             *         "updated_at": "2024-01-01T11:30:00.000000Z",
+                             *         "variants": [
+                             *           {
+                             *             "id": 3,
+                             *             "sku": "MOUSE-BT-002",
+                             *             "price": 79.99,
+                             *             "product_id": 2,
+                             *             "created_at": "2024-01-01T11:30:00.000000Z",
+                             *             "updated_at": "2024-01-01T11:30:00.000000Z",
+                             *             "attribute_values": []
+                             *           }
+                             *         ],
+                             *         "price_range": {
+                             *           "min": 79.99,
+                             *           "max": 79.99,
+                             *           "count": 1
+                             *         }
                              *       }
                              *     ] */
                             data?: {
@@ -925,18 +987,109 @@ export interface paths {
                                 id?: number;
                                 /** @example 高階人體工學辦公椅 */
                                 name?: string;
-                                /** @example CHAIR-ERG-001 */
-                                sku?: string;
                                 /** @example 具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。 */
                                 description?: string;
-                                /** @example 399.99 */
-                                selling_price?: string;
-                                /** @example 150.00 */
-                                cost_price?: string;
+                                /** @example 1 */
+                                category_id?: number;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 created_at?: string;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "sku": "CHAIR-ERG-001-BLACK",
+                                 *         "price": 399.99,
+                                 *         "product_id": 1,
+                                 *         "created_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "attribute_values": [
+                                 *           {
+                                 *             "id": 1,
+                                 *             "value": "黑色",
+                                 *             "attribute_id": 1,
+                                 *             "attribute": {
+                                 *               "id": 1,
+                                 *               "name": "顏色"
+                                 *             }
+                                 *           }
+                                 *         ]
+                                 *       },
+                                 *       {
+                                 *         "id": 2,
+                                 *         "sku": "CHAIR-ERG-001-WHITE",
+                                 *         "price": 429.99,
+                                 *         "product_id": 1,
+                                 *         "created_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "attribute_values": [
+                                 *           {
+                                 *             "id": 2,
+                                 *             "value": "白色",
+                                 *             "attribute_id": 1,
+                                 *             "attribute": {
+                                 *               "id": 1,
+                                 *               "name": "顏色"
+                                 *             }
+                                 *           }
+                                 *         ]
+                                 *       }
+                                 *     ] */
+                                variants?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example CHAIR-ERG-001-BLACK */
+                                    sku?: string;
+                                    /** @example 399.99 */
+                                    price?: number;
+                                    /** @example 1 */
+                                    product_id?: number;
+                                    /** @example 2024-01-01T10:00:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2024-01-01T10:00:00.000000Z */
+                                    updated_at?: string;
+                                    /** @example [
+                                     *       {
+                                     *         "id": 1,
+                                     *         "value": "黑色",
+                                     *         "attribute_id": 1,
+                                     *         "attribute": {
+                                     *           "id": 1,
+                                     *           "name": "顏色"
+                                     *         }
+                                     *       }
+                                     *     ] */
+                                    attribute_values?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 黑色 */
+                                        value?: string;
+                                        /** @example 1 */
+                                        attribute_id?: number;
+                                        attribute?: {
+                                            /** @example 1 */
+                                            id?: number;
+                                            /** @example 顏色 */
+                                            name?: string;
+                                        };
+                                    }[];
+                                }[];
+                                price_range?: {
+                                    /** @example 399.99 */
+                                    min?: number;
+                                    /** @example 429.99 */
+                                    max?: number;
+                                    /** @example 2 */
+                                    count?: number;
+                                };
+                                category?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 辦公用品 */
+                                    name?: string;
+                                    /** @example 各種辦公室所需用品 */
+                                    description?: string;
+                                };
                             }[];
                             meta?: {
                                 /** @example 1 */
@@ -3458,16 +3611,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 18 */
+                            /** @example 7 */
                             id?: number;
                             /** @example Bailey Ltd */
                             name?: string;
                             /** @example 85625 Gaylord Knolls
                              *     Cecilburgh, WI 02042 */
                             address?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3497,16 +3650,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 19 */
+                            /** @example 8 */
                             id?: number;
                             /** @example Cruickshank Inc */
                             name?: string;
                             /** @example 532 Leuschke Causeway
                              *     McLaughlinstad, MI 07365 */
                             address?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3551,16 +3704,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 20 */
+                            /** @example 9 */
                             id?: number;
                             /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
                             /** @example 80841 Mya Lane Apt. 042
                              *     Lyricberg, MO 42170-0432 */
                             address?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3606,16 +3759,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 21 */
+                            /** @example 10 */
                             id?: number;
-                            /** @example Hilpert Group */
+                            /** @example Jenkins Group */
                             name?: string;
-                            /** @example 88663 Abbie Spurs Suite 700
-                             *     South Dasiashire, VT 00917-1756 */
+                            /** @example 885 Koelpin Wells Suite 038
+                             *     New Allenfurt, CT 41106-9708 */
                             address?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3657,7 +3810,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 19 */
+                            /** @example 15 */
                             id?: number;
                             /** @example Ms. Elisabeth Okuneva */
                             name?: string;
@@ -3669,9 +3822,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-13T20:52:34.000000Z */
+                            /** @example 2025-06-14T22:23:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3773,56 +3926,158 @@ export interface operations {
                         data?: {
                             /** @example 1 */
                             id?: number;
-                            /** @example 測試產品 */
+                            /** @example 高階人體工學辦公椅 */
                             name?: string;
-                            /** @example 這是一個測試產品的描述 */
+                            /** @example 具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。 */
                             description?: string;
-                            /** @example TEST-SKU-001 */
-                            sku?: string;
-                            /** @example 199.99 */
-                            price?: number;
-                            /** @example 99.99 */
-                            cost?: number;
-                            /** @example 50 */
-                            quantity?: number;
                             /** @example 1 */
                             category_id?: number;
-                            /** @example 2023-10-15T08:30:45.000000Z */
+                            /** @example 2024-01-01T10:00:00.000000Z */
                             created_at?: string;
-                            /** @example 2023-10-15T08:30:45.000000Z */
+                            /** @example 2024-01-01T10:00:00.000000Z */
                             updated_at?: string;
-                            category?: {
-                                /** @example 1 */
-                                id?: number;
-                                /** @example 電子產品 */
-                                name?: string;
-                                /** @example 各類電子產品 */
-                                description?: string;
-                                /** @example 2023-10-15T08:30:45.000000Z */
-                                created_at?: string;
-                                /** @example 2023-10-15T08:30:45.000000Z */
-                                updated_at?: string;
-                            };
                             /** @example [
                              *       {
                              *         "id": 1,
-                             *         "name": "顏色",
-                             *         "value": "黑色"
+                             *         "sku": "CHAIR-ERG-001-BLACK",
+                             *         "price": 399.99,
+                             *         "product_id": 1,
+                             *         "created_at": "2024-01-01T10:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                             *         "attribute_values": [
+                             *           {
+                             *             "id": 1,
+                             *             "value": "黑色",
+                             *             "attribute_id": 1,
+                             *             "attribute": {
+                             *               "id": 1,
+                             *               "name": "顏色"
+                             *             }
+                             *           }
+                             *         ],
+                             *         "inventory": [
+                             *           {
+                             *             "id": 1,
+                             *             "quantity": 50,
+                             *             "low_stock_threshold": 10,
+                             *             "store": {
+                             *               "id": 1,
+                             *               "name": "台北旗艦店"
+                             *             }
+                             *           }
+                             *         ]
                              *       },
                              *       {
                              *         "id": 2,
-                             *         "name": "尺寸",
-                             *         "value": "中號"
+                             *         "sku": "CHAIR-ERG-001-WHITE",
+                             *         "price": 429.99,
+                             *         "product_id": 1,
+                             *         "created_at": "2024-01-01T10:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                             *         "attribute_values": [
+                             *           {
+                             *             "id": 2,
+                             *             "value": "白色",
+                             *             "attribute_id": 1,
+                             *             "attribute": {
+                             *               "id": 1,
+                             *               "name": "顏色"
+                             *             }
+                             *           }
+                             *         ],
+                             *         "inventory": [
+                             *           {
+                             *             "id": 2,
+                             *             "quantity": 25,
+                             *             "low_stock_threshold": 5,
+                             *             "store": {
+                             *               "id": 1,
+                             *               "name": "台北旗艦店"
+                             *             }
+                             *           }
+                             *         ]
                              *       }
                              *     ] */
-                            attributes?: {
+                            variants?: {
                                 /** @example 1 */
                                 id?: number;
-                                /** @example 顏色 */
-                                name?: string;
-                                /** @example 黑色 */
-                                value?: string;
+                                /** @example CHAIR-ERG-001-BLACK */
+                                sku?: string;
+                                /** @example 399.99 */
+                                price?: number;
+                                /** @example 1 */
+                                product_id?: number;
+                                /** @example 2024-01-01T10:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2024-01-01T10:00:00.000000Z */
+                                updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "value": "黑色",
+                                 *         "attribute_id": 1,
+                                 *         "attribute": {
+                                 *           "id": 1,
+                                 *           "name": "顏色"
+                                 *         }
+                                 *       }
+                                 *     ] */
+                                attribute_values?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 黑色 */
+                                    value?: string;
+                                    /** @example 1 */
+                                    attribute_id?: number;
+                                    attribute?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 顏色 */
+                                        name?: string;
+                                    };
+                                }[];
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "quantity": 50,
+                                 *         "low_stock_threshold": 10,
+                                 *         "store": {
+                                 *           "id": 1,
+                                 *           "name": "台北旗艦店"
+                                 *         }
+                                 *       }
+                                 *     ] */
+                                inventory?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 50 */
+                                    quantity?: number;
+                                    /** @example 10 */
+                                    low_stock_threshold?: number;
+                                    store?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 台北旗艦店 */
+                                        name?: string;
+                                    };
+                                }[];
                             }[];
+                            price_range?: {
+                                /** @example 399.99 */
+                                min?: number;
+                                /** @example 429.99 */
+                                max?: number;
+                                /** @example 2 */
+                                count?: number;
+                            };
+                            category?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 辦公用品 */
+                                name?: string;
+                                /** @example 各種辦公室所需用品 */
+                                description?: string;
+                            };
                         };
                     };
                 };

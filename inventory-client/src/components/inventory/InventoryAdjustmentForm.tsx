@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
-import { useInventoryAdjustment, useStores, useProductVariants } from "@/hooks/useApi"
+import { useInventoryAdjustment, useStores, useProductVariants } from "@/hooks/queries/useEntityQueries"
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

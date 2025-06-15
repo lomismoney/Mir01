@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Plus, UserCheck, Shield, Eye } from "lucide-react";
-import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/hooks/useApi';
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/hooks/queries/useEntityQueries';
 import { useSession } from 'next-auth/react';
 import { toast } from "sonner";
 import { UsersDataTable } from '@/components/users/users-data-table';

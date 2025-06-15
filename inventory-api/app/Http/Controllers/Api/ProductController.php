@@ -40,7 +40,7 @@ class ProductController extends Controller
      * @queryParam page integer 頁碼，預設為 1。 Example: 1
      * @queryParam per_page integer 每頁項目數，預設為 15。 Example: 15
      * @queryParam search string 搜尋商品名稱或 SKU。 Example: 椅子
-     * @queryParam sort_by string 排序欄位 (name, sku, selling_price, cost_price, created_at)。 Example: selling_price
+     * @queryParam sort_by string 排序欄位 (name, created_at)。 Example: name
      * @queryParam sort_order string 排序方向 (asc, desc)，預設為 asc。 Example: desc
      * @responseFile storage/responses/products_index.json
      * 
@@ -88,14 +88,18 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = QueryBuilder::for(Product::class)
-            ->with('category') // ✅ 預先加載分類關聯，根除 N+1 查詢問題
+            ->with([
+                'category', // ✅ 預先加載分類關聯，根除 N+1 查詢問題
+                'variants.attributeValues.attribute', // ✅ 預先加載 SKU 變體及其屬性
+                'variants.inventory.store' // ✅ 預先加載庫存資訊
+            ])
             ->allowedFilters([
                 'name', 
-                'sku',
+                // 移除 sku 篩選，因為 sku 屬於 variants
                 // 使用自訂篩選器處理多欄位搜尋
                 AllowedFilter::custom('search', new SearchFilter()),
             ])
-            ->allowedSorts(['name', 'selling_price', 'created_at']);
+            ->allowedSorts(['name', 'created_at']); // 移除 selling_price 排序
 
         $paginatedProducts = $query->paginate(15);
         
@@ -190,7 +194,11 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return new ProductResource($product->load(['variants.attributeValues.attribute', 'variants.inventory']));
+        return new ProductResource($product->load([
+            'category',
+            'variants.attributeValues.attribute', 
+            'variants.inventory.store'
+        ]));
     }
 
     /**

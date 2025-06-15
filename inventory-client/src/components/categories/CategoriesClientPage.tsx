@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/hooks/useApi';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/hooks/queries/useEntityQueries';
+import { useAdminAuth } from '@/hooks/use-admin-auth';
 import {
   useReactTable,
   getCoreRowModel,
@@ -72,7 +73,7 @@ function flattenCategories(groupedCategories: Record<string, Category[]>): Categ
 }
 
 /**
- * 分類管理客戶端頁面組件
+ * 分類管理客戶端頁面組件（已優化版本）
  * 
  * 提供完整的分類管理功能，包括：
  * 1. 樹狀結構展示所有分類
@@ -80,14 +81,17 @@ function flattenCategories(groupedCategories: Record<string, Category[]>): Categ
  * 3. 層級關係管理（父子分類）
  * 4. 權限控制（僅管理員可存取）
  * 
- * 安全特性：
- * - 接收來自伺服器端驗證的用戶資訊
- * - 保持客戶端的互動功能
+ * 安全與效能特性：
+ * - 統一的權限驗證機制 (useAdminAuth)
+ * - React.memo 防止不必要的重渲染
  * - 基於角色的存取控制
  */
-export function CategoriesClientPage({ }: CategoriesClientPageProps) {
+const CategoriesClientPage = ({ }: CategoriesClientPageProps) => {
+  // === 權限驗證 ===
+  const { user, isLoading, isAuthorized } = useAdminAuth();
+  
   // === 資料獲取 ===
-  const { data: groupedCategories, isLoading, error } = useCategories();
+  const { data: groupedCategories, isLoading: isCategoriesLoading, error } = useCategories();
   
   // === 效能優化：使用 useMemo 快取運算結果 ===
   const transformedCategories = useMemo(() => {
@@ -257,10 +261,27 @@ export function CategoriesClientPage({ }: CategoriesClientPageProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
+    autoResetPageIndex: false, // 🎯 斬斷循環：禁用分頁自動重設
   });
 
-  // 載入狀態
+  // 使用統一的權限守衛
   if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+          <p className="mt-4">正在驗證權限...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null; // useAdminAuth 會處理重新導向
+  }
+
+  // 載入分類資料狀態
+  if (isCategoriesLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -456,4 +477,14 @@ export function CategoriesClientPage({ }: CategoriesClientPageProps) {
       </AlertDialog>
     </div>
   );
-} 
+};
+
+/**
+ * 使用 React.memo 優化的分類管理頁面元件
+ * 
+ * 效能優化：
+ * - 防止父元件重渲染時的不必要重繪
+ * - 僅當 props 發生變化時才重新渲染
+ * - 配合 useAdminAuth 統一權限管理
+ */
+export default memo(CategoriesClientPage); 

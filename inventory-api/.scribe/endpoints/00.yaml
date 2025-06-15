@@ -68,7 +68,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":18,"name":"Mrs. Justina Gaylord","username":"lafayette.considine","role":"viewer","role_display":"\u6aa2\u8996\u8005","is_admin":false,"created_at":"2025-06-13T20:52:33.000000Z","updated_at":"2025-06-13T20:52:33.000000Z"}}'
+        content: '{"data":{"id":14,"name":"Mrs. Justina Gaylord","username":"lafayette.considine","role":"viewer","role_display":"\u6aa2\u8996\u8005","is_admin":false,"created_at":"2025-06-14T22:23:03.000000Z","updated_at":"2025-06-14T22:23:03.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -210,14 +210,14 @@ endpoints:
         name: id
         description: 'The ID of the category.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -265,14 +265,14 @@ endpoints:
         name: id
         description: 'The ID of the category.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -342,14 +342,14 @@ endpoints:
         name: id
         description: 'The ID of the category.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

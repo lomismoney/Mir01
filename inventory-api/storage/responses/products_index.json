@@ -3,22 +3,84 @@
     {
       "id": 1,
       "name": "高階人體工學辦公椅",
-      "sku": "CHAIR-ERG-001",
       "description": "具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。",
-      "selling_price": "399.99",
-      "cost_price": "150.00",
+      "category_id": 1,
       "created_at": "2024-01-01T10:00:00.000000Z",
-      "updated_at": "2024-01-01T10:00:00.000000Z"
+      "updated_at": "2024-01-01T10:00:00.000000Z",
+      "variants": [
+        {
+          "id": 1,
+          "sku": "CHAIR-ERG-001-BLACK",
+          "price": 399.99,
+          "product_id": 1,
+          "created_at": "2024-01-01T10:00:00.000000Z",
+          "updated_at": "2024-01-01T10:00:00.000000Z",
+          "attribute_values": [
+            {
+              "id": 1,
+              "value": "黑色",
+              "attribute_id": 1,
+              "attribute": {
+                "id": 1,
+                "name": "顏色"
+              }
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "sku": "CHAIR-ERG-001-WHITE",
+          "price": 429.99,
+          "product_id": 1,
+          "created_at": "2024-01-01T10:00:00.000000Z",
+          "updated_at": "2024-01-01T10:00:00.000000Z",
+          "attribute_values": [
+            {
+              "id": 2,
+              "value": "白色",
+              "attribute_id": 1,
+              "attribute": {
+                "id": 1,
+                "name": "顏色"
+              }
+            }
+          ]
+        }
+      ],
+      "price_range": {
+        "min": 399.99,
+        "max": 429.99,
+        "count": 2
+      },
+      "category": {
+        "id": 1,
+        "name": "辦公用品",
+        "description": "各種辦公室所需用品"
+      }
     },
     {
       "id": 2,
       "name": "無線藍牙滑鼠",
-      "sku": "MOUSE-BT-002",
       "description": "2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。",
-      "selling_price": "79.99",
-      "cost_price": "25.00",
+      "category_id": null,
       "created_at": "2024-01-01T11:30:00.000000Z",
-      "updated_at": "2024-01-01T11:30:00.000000Z"
+      "updated_at": "2024-01-01T11:30:00.000000Z",
+      "variants": [
+        {
+          "id": 3,
+          "sku": "MOUSE-BT-002",
+          "price": 79.99,
+          "product_id": 2,
+          "created_at": "2024-01-01T11:30:00.000000Z",
+          "updated_at": "2024-01-01T11:30:00.000000Z",
+          "attribute_values": []
+        }
+      ],
+      "price_range": {
+        "min": 79.99,
+        "max": 79.99,
+        "count": 1
+      }
     }
   ],
   "meta": {

@@ -317,7 +317,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: June 13, 2025</li>
+        <li>Last updated: June 14, 2025</li>
     </ul>
 </div>
 
@@ -509,14 +509,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 18,
+        &quot;id&quot;: 14,
         &quot;name&quot;: &quot;Mrs. Justina Gaylord&quot;,
         &quot;username&quot;: &quot;lafayette.considine&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-13T20:52:33.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-13T20:52:33.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-14T22:23:03.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-14T22:23:03.000000Z&quot;
     }
 }</code>
  </pre>
@@ -887,14 +887,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/categories/16" \
+    --get "http://localhost/api/categories/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/16"
+    "http://localhost/api/categories/1"
 );
 
 const headers = {
@@ -1003,10 +1003,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-categories--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>16</code></p>
+<p>The ID of the category. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -1028,7 +1028,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/categories/16" \
+    "http://localhost/api/categories/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1041,7 +1041,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/16"
+    "http://localhost/api/categories/1"
 );
 
 const headers = {
@@ -1145,10 +1145,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-categories--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>16</code></p>
+<p>The ID of the category. Example: <code>1</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -1203,14 +1203,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/categories/16" \
+    "http://localhost/api/categories/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/16"
+    "http://localhost/api/categories/1"
 );
 
 const headers = {
@@ -1303,10 +1303,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-categories--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>16</code></p>
+<p>The ID of the category. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -1523,11 +1523,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 18,
+        &quot;id&quot;: 7,
         &quot;name&quot;: &quot;Bailey Ltd&quot;,
         &quot;address&quot;: &quot;85625 Gaylord Knolls\nCecilburgh, WI 02042&quot;,
-        &quot;created_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1670,11 +1670,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 19,
+        &quot;id&quot;: 8,
         &quot;name&quot;: &quot;Cruickshank Inc&quot;,
         &quot;address&quot;: &quot;532 Leuschke Causeway\nMcLaughlinstad, MI 07365&quot;,
-        &quot;created_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1817,11 +1817,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 20,
+        &quot;id&quot;: 9,
         &quot;name&quot;: &quot;Rempel, Gulgowski and O&#039;Kon&quot;,
         &quot;address&quot;: &quot;80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432&quot;,
-        &quot;created_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2105,11 +2105,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 21,
-        &quot;name&quot;: &quot;Hilpert Group&quot;,
-        &quot;address&quot;: &quot;88663 Abbie Spurs Suite 700\nSouth Dasiashire, VT 00917-1756&quot;,
-        &quot;created_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;
+        &quot;id&quot;: 10,
+        &quot;name&quot;: &quot;Jenkins Group&quot;,
+        &quot;address&quot;: &quot;885 Koelpin Wells Suite 038\nNew Allenfurt, CT 41106-9708&quot;,
+        &quot;created_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2254,14 +2254,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 19,
+        &quot;id&quot;: 15,
         &quot;name&quot;: &quot;Ms. Elisabeth Okuneva&quot;,
         &quot;username&quot;: &quot;gulgowski.asia&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-13T20:52:34.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-14T22:23:04.000000Z&quot;
     }
 }</code>
  </pre>
@@ -3471,7 +3471,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/products?page=1&amp;per_page=15&amp;search=%E6%A4%85%E5%AD%90&amp;sort_by=selling_price&amp;sort_order=desc" \
+    --get "http://localhost/api/products?page=1&amp;per_page=15&amp;search=%E6%A4%85%E5%AD%90&amp;sort_by=name&amp;sort_order=desc" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
@@ -3485,7 +3485,7 @@ const params = {
     "page": "1",
     "per_page": "15",
     "search": "椅子",
-    "sort_by": "selling_price",
+    "sort_by": "name",
     "sort_order": "desc",
 };
 Object.keys(params)
@@ -3560,22 +3560,84 @@ fetch(url, {
         {
             &quot;id&quot;: 1,
             &quot;name&quot;: &quot;高階人體工學辦公椅&quot;,
-            &quot;sku&quot;: &quot;CHAIR-ERG-001&quot;,
             &quot;description&quot;: &quot;具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。&quot;,
-            &quot;selling_price&quot;: &quot;399.99&quot;,
-            &quot;cost_price&quot;: &quot;150.00&quot;,
+            &quot;category_id&quot;: 1,
             &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;
+            &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+            &quot;variants&quot;: [
+                {
+                    &quot;id&quot;: 1,
+                    &quot;sku&quot;: &quot;CHAIR-ERG-001-BLACK&quot;,
+                    &quot;price&quot;: 399.99,
+                    &quot;product_id&quot;: 1,
+                    &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                    &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                    &quot;attribute_values&quot;: [
+                        {
+                            &quot;id&quot;: 1,
+                            &quot;value&quot;: &quot;黑色&quot;,
+                            &quot;attribute_id&quot;: 1,
+                            &quot;attribute&quot;: {
+                                &quot;id&quot;: 1,
+                                &quot;name&quot;: &quot;顏色&quot;
+                            }
+                        }
+                    ]
+                },
+                {
+                    &quot;id&quot;: 2,
+                    &quot;sku&quot;: &quot;CHAIR-ERG-001-WHITE&quot;,
+                    &quot;price&quot;: 429.99,
+                    &quot;product_id&quot;: 1,
+                    &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                    &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                    &quot;attribute_values&quot;: [
+                        {
+                            &quot;id&quot;: 2,
+                            &quot;value&quot;: &quot;白色&quot;,
+                            &quot;attribute_id&quot;: 1,
+                            &quot;attribute&quot;: {
+                                &quot;id&quot;: 1,
+                                &quot;name&quot;: &quot;顏色&quot;
+                            }
+                        }
+                    ]
+                }
+            ],
+            &quot;price_range&quot;: {
+                &quot;min&quot;: 399.99,
+                &quot;max&quot;: 429.99,
+                &quot;count&quot;: 2
+            },
+            &quot;category&quot;: {
+                &quot;id&quot;: 1,
+                &quot;name&quot;: &quot;辦公用品&quot;,
+                &quot;description&quot;: &quot;各種辦公室所需用品&quot;
+            }
         },
         {
             &quot;id&quot;: 2,
             &quot;name&quot;: &quot;無線藍牙滑鼠&quot;,
-            &quot;sku&quot;: &quot;MOUSE-BT-002&quot;,
             &quot;description&quot;: &quot;2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。&quot;,
-            &quot;selling_price&quot;: &quot;79.99&quot;,
-            &quot;cost_price&quot;: &quot;25.00&quot;,
+            &quot;category_id&quot;: null,
             &quot;created_at&quot;: &quot;2024-01-01T11:30:00.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2024-01-01T11:30:00.000000Z&quot;
+            &quot;updated_at&quot;: &quot;2024-01-01T11:30:00.000000Z&quot;,
+            &quot;variants&quot;: [
+                {
+                    &quot;id&quot;: 3,
+                    &quot;sku&quot;: &quot;MOUSE-BT-002&quot;,
+                    &quot;price&quot;: 79.99,
+                    &quot;product_id&quot;: 2,
+                    &quot;created_at&quot;: &quot;2024-01-01T11:30:00.000000Z&quot;,
+                    &quot;updated_at&quot;: &quot;2024-01-01T11:30:00.000000Z&quot;,
+                    &quot;attribute_values&quot;: []
+                }
+            ],
+            &quot;price_range&quot;: {
+                &quot;min&quot;: 79.99,
+                &quot;max&quot;: 79.99,
+                &quot;count&quot;: 1
+            }
         }
     ],
     &quot;meta&quot;: {
@@ -3704,10 +3766,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="sort_by"                data-endpoint="GETapi-products"
-               value="selling_price"
+               value="name"
                data-component="query">
     <br>
-<p>排序欄位 (name, sku, selling_price, cost_price, created_at)。 Example: <code>selling_price</code></p>
+<p>排序欄位 (name, created_at)。 Example: <code>name</code></p>
             </div>
                                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>sort_order</code></b>&nbsp;&nbsp;
@@ -3806,34 +3868,83 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
         &quot;id&quot;: 1,
-        &quot;name&quot;: &quot;測試產品&quot;,
-        &quot;description&quot;: &quot;這是一個測試產品的描述&quot;,
-        &quot;sku&quot;: &quot;TEST-SKU-001&quot;,
-        &quot;price&quot;: 199.99,
-        &quot;cost&quot;: 99.99,
-        &quot;quantity&quot;: 50,
+        &quot;name&quot;: &quot;高階人體工學辦公椅&quot;,
+        &quot;description&quot;: &quot;具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。&quot;,
         &quot;category_id&quot;: 1,
-        &quot;created_at&quot;: &quot;2023-10-15T08:30:45.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2023-10-15T08:30:45.000000Z&quot;,
-        &quot;category&quot;: {
-            &quot;id&quot;: 1,
-            &quot;name&quot;: &quot;電子產品&quot;,
-            &quot;description&quot;: &quot;各類電子產品&quot;,
-            &quot;created_at&quot;: &quot;2023-10-15T08:30:45.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2023-10-15T08:30:45.000000Z&quot;
-        },
-        &quot;attributes&quot;: [
+        &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+        &quot;variants&quot;: [
             {
                 &quot;id&quot;: 1,
-                &quot;name&quot;: &quot;顏色&quot;,
-                &quot;value&quot;: &quot;黑色&quot;
+                &quot;sku&quot;: &quot;CHAIR-ERG-001-BLACK&quot;,
+                &quot;price&quot;: 399.99,
+                &quot;product_id&quot;: 1,
+                &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;attribute_values&quot;: [
+                    {
+                        &quot;id&quot;: 1,
+                        &quot;value&quot;: &quot;黑色&quot;,
+                        &quot;attribute_id&quot;: 1,
+                        &quot;attribute&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;顏色&quot;
+                        }
+                    }
+                ],
+                &quot;inventory&quot;: [
+                    {
+                        &quot;id&quot;: 1,
+                        &quot;quantity&quot;: 50,
+                        &quot;low_stock_threshold&quot;: 10,
+                        &quot;store&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;台北旗艦店&quot;
+                        }
+                    }
+                ]
             },
             {
                 &quot;id&quot;: 2,
-                &quot;name&quot;: &quot;尺寸&quot;,
-                &quot;value&quot;: &quot;中號&quot;
+                &quot;sku&quot;: &quot;CHAIR-ERG-001-WHITE&quot;,
+                &quot;price&quot;: 429.99,
+                &quot;product_id&quot;: 1,
+                &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;attribute_values&quot;: [
+                    {
+                        &quot;id&quot;: 2,
+                        &quot;value&quot;: &quot;白色&quot;,
+                        &quot;attribute_id&quot;: 1,
+                        &quot;attribute&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;顏色&quot;
+                        }
+                    }
+                ],
+                &quot;inventory&quot;: [
+                    {
+                        &quot;id&quot;: 2,
+                        &quot;quantity&quot;: 25,
+                        &quot;low_stock_threshold&quot;: 5,
+                        &quot;store&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;台北旗艦店&quot;
+                        }
+                    }
+                ]
             }
-        ]
+        ],
+        &quot;price_range&quot;: {
+            &quot;min&quot;: 399.99,
+            &quot;max&quot;: 429.99,
+            &quot;count&quot;: 2
+        },
+        &quot;category&quot;: {
+            &quot;id&quot;: 1,
+            &quot;name&quot;: &quot;辦公用品&quot;,
+            &quot;description&quot;: &quot;各種辦公室所需用品&quot;
+        }
     }
 }</code>
  </pre>

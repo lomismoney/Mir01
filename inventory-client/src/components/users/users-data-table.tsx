@@ -121,6 +121,7 @@ export function UsersDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    autoResetPageIndex: false, // 🎯 斬斷循環：禁用分頁自動重設
     state: {
       sorting,
       columnVisibility,

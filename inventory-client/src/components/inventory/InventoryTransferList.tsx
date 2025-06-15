@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { InventoryTransfer, PaginatedResponse } from "@/types/inventory"
-import { useInventoryTransfers } from "@/hooks/useApi"
+import { useInventoryTransfers } from "@/hooks/queries/useEntityQueries"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"

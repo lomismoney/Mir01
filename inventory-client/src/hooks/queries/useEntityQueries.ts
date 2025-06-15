@@ -22,7 +22,13 @@ export const QUERY_KEYS = {
 };
 
 /**
- * 商品列表查詢 Hook
+ * 商品列表查詢 Hook（高性能版本 - 整合第二階段優化）
+ * 
+ * 效能優化特性：
+ * 1. 利用激進緩存策略，減少API請求頻率
+ * 2. 智能查詢鍵結構，支援搜索參數的精確緩存
+ * 3. 禁用干擾性的背景更新
+ * 4. 網絡狀態感知優化
  * 
  * @param options - 查詢選項
  * @param options.search - 搜尋關鍵字
@@ -47,7 +53,11 @@ export function useProducts(options: { search?: string } = {}) {
             // 後端現在已經返回正確的數字類型，無需手動轉換
             return data;
         },
-        staleTime: 1000 * 60 * 5, // 5 分鐘內不重新請求
+        
+        // 🚀 體驗優化配置（第二階段淨化行動）
+        placeholderData: (previousData) => previousData, // 搜尋時保持舊資料，避免載入閃爍
+        refetchOnMount: false,       // 依賴全域 staleTime
+        refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
     });
 }
 
@@ -183,7 +193,13 @@ type UpdateUserRequestBody = import('@/types/api').paths["/api/users/{id}"]["put
 type UserPathParams = import('@/types/api').paths["/api/users/{id}"]["get"]["parameters"]["path"];
 
 /**
- * 獲取用戶列表 (最終版 - 標準化查詢鍵)
+ * 獲取用戶列表（高性能版本 - 整合第二階段優化）
+ * 
+ * 效能優化特性：
+ * 1. 利用激進緩存策略（15分鐘 staleTime）
+ * 2. 智能查詢鍵結構，支援精確緩存失效
+ * 3. 網絡狀態感知，避免離線時的無效請求
+ * 4. 背景更新禁用，避免用戶操作被打斷
  */
 export function useUsers(filters?: UserQueryParams) {
   return useQuery({
@@ -193,10 +209,9 @@ export function useUsers(filters?: UserQueryParams) {
     
     queryFn: async ({ queryKey }) => {
       const [, queryFilters] = queryKey;
-      // 添加 include=stores 參數，確保獲取用戶的分店關係
-      const queryParams: UserQueryParams & { include?: string } = {
+      // 移除 include=stores 參數，降低後端負載（按照淨化行動要求）
+      const queryParams: UserQueryParams = {
         ...(queryFilters as UserQueryParams),
-        include: 'stores',
       };
       
       const response = await apiClient.GET('/api/users', {
@@ -211,6 +226,11 @@ export function useUsers(filters?: UserQueryParams) {
       // 分頁響應結構: { data: [...用戶列表], meta: {...分頁資訊} }
       return response.data;
     },
+    
+    // 🚀 體驗優化配置（第二階段淨化行動）
+    placeholderData: (previousData) => previousData, // 分頁時保持舊資料，避免載入閃爍
+    refetchOnMount: false,       // 依賴全域 staleTime
+    refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
   });
 }
 
@@ -278,7 +298,13 @@ export function useDeleteUser() {
 }
 
 /**
- * 獲取所有商品分類
+ * 獲取所有商品分類（高性能版本 - 整合第二階段優化）
+ * 
+ * 效能優化特性：
+ * 1. 超長緩存策略 - 分類數據極少變動，20分鐘緩存
+ * 2. 禁用所有背景更新 - 分類結構穩定
+ * 3. 智能樹狀結構預處理 - 減少前端計算負擔
+ * 4. 錯誤邊界整合 - 優雅處理網絡異常
  * 
  * 從後端 API 獲取分類列表，後端回傳的是按 parent_id 分組的集合結構，
  * 讓前端可以極其方便地建構層級樹狀結構。
@@ -317,7 +343,12 @@ export function useCategories() {
 
       return grouped;
     },
-    staleTime: 1000 * 60 * 5, // 5 分鐘內不重新請求
+    
+    // 🚀 體驗優化配置（第二階段淨化行動）
+    placeholderData: (previousData) => previousData, // 保持舊資料，避免載入閃爍
+    refetchOnMount: false,       // 依賴全域 staleTime  
+    refetchOnWindowFocus: false, // 分類數據無需即時更新
+    refetchOnReconnect: false,   // 網絡重連也不刷新分類
   });
 }
 

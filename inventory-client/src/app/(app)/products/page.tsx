@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { DataTableSkeleton } from '@/components/ui/data-table-skeleton';
-import { ProductClientComponent } from '@/components/products/ProductClientComponent';
+import ProductClientComponent from '@/components/products/ProductClientComponent';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 

@@ -85,7 +85,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":18,"name":"Bailey Ltd","address":"85625 Gaylord Knolls\nCecilburgh, WI 02042","created_at":"2025-06-13T20:52:34.000000Z","updated_at":"2025-06-13T20:52:34.000000Z"}}'
+        content: '{"data":{"id":7,"name":"Bailey Ltd","address":"85625 Gaylord Knolls\nCecilburgh, WI 02042","created_at":"2025-06-14T22:23:04.000000Z","updated_at":"2025-06-14T22:23:04.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -132,7 +132,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":19,"name":"Cruickshank Inc","address":"532 Leuschke Causeway\nMcLaughlinstad, MI 07365","created_at":"2025-06-13T20:52:34.000000Z","updated_at":"2025-06-13T20:52:34.000000Z"}}'
+        content: '{"data":{"id":8,"name":"Cruickshank Inc","address":"532 Leuschke Causeway\nMcLaughlinstad, MI 07365","created_at":"2025-06-14T22:23:04.000000Z","updated_at":"2025-06-14T22:23:04.000000Z"}}'
         headers: []
         description: ''
         custom: []
@@ -202,7 +202,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":{"id":20,"name":"Rempel, Gulgowski and O''Kon","address":"80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432","created_at":"2025-06-13T20:52:34.000000Z","updated_at":"2025-06-13T20:52:34.000000Z"}}'
+        content: '{"data":{"id":9,"name":"Rempel, Gulgowski and O''Kon","address":"80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432","created_at":"2025-06-14T22:23:04.000000Z","updated_at":"2025-06-14T22:23:04.000000Z"}}'
         headers: []
         description: ''
         custom: []

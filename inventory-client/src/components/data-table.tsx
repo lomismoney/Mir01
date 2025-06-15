@@ -388,6 +388,7 @@ export function DataTable({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    autoResetPageIndex: false, // 🎯 斬斷循環：禁用分頁自動重設
   })
 
   function handleDragEnd(event: DragEndEvent) {

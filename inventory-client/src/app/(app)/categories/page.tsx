@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { DataTableSkeleton } from '@/components/ui/data-table-skeleton';
-import { CategoriesClientPage } from '@/components/categories/CategoriesClientPage';
+import CategoriesClientPage from '@/components/categories/CategoriesClientPage';
 
 /**
  * 分類管理頁面（Auth.js 中間件保護版本）

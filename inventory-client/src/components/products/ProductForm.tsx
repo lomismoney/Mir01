@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAttributes } from '@/hooks/useApi';
+import { useAttributes } from '@/hooks/queries/useEntityQueries';
 import { 
   type Attribute, 
   type ProductSubmissionData 

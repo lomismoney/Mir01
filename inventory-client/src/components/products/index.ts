@@ -6,4 +6,4 @@
  */
 
 export { ProductForm } from './ProductForm';
-export { ProductClientComponent } from './ProductClientComponent'; 
+export { default as ProductClientComponent } from './ProductClientComponent'; 

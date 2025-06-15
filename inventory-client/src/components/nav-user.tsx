@@ -29,11 +29,16 @@ import {
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession, signOut } from "next-auth/react"
+import { clearTokenCache } from "@/lib/apiClient"
 
 /**
- * 用戶導覽元件（Auth.js 版本）
- * 顯示當前登入用戶的資訊和選單選項
- * 使用 Auth.js useSession Hook 獲取用戶狀態
+ * 用戶導覽元件（Auth.js + 高性能緩存整合版本）
+ * 
+ * 功能特色：
+ * - 顯示當前登入用戶的資訊和選單選項
+ * - 使用 Auth.js useSession Hook 獲取用戶狀態
+ * - 整合智能 token 緩存管理，登出時自動清理
+ * - 確保系統性能優化的完整性
  */
 export function NavUser() {
   const { isMobile } = useSidebar()
@@ -45,10 +50,18 @@ export function NavUser() {
   const isLoading = status === 'loading'
 
   /**
-   * 處理登出點擊事件
-   * 使用 Auth.js signOut 方法
+   * 處理登出點擊事件（高性能版本）
+   * 
+   * 優化特性：
+   * 1. 清理 API 客戶端的 token 緩存
+   * 2. 確保下次登入時重新獲取 token
+   * 3. 完整的登出流程整合
    */
   const handleLogout = () => {
+    // 🧹 清理 token 緩存，確保安全登出
+    clearTokenCache()
+    
+    // 🚪 執行 Auth.js 登出流程
     signOut({ callbackUrl: '/login' })
   }
 

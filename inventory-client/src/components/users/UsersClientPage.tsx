@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,8 +31,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Plus, UserCheck, Shield } from "lucide-react";
-import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/hooks/useApi';
-import { useSession } from 'next-auth/react';
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/hooks/queries/useEntityQueries';
+import { useAdminAuth } from '@/hooks/use-admin-auth';
 import { toast } from "sonner";
 import { UsersDataTable } from '@/components/users/users-data-table';
 import { createUsersColumns } from '@/components/users/users-columns';
@@ -49,7 +49,7 @@ interface UsersClientPageProps {
 }
 
 /**
- * 用戶管理客戶端頁面組件
+ * 用戶管理客戶端頁面組件（已優化版本）
  * 
  * 使用 shadcn/ui DataTable 重構的專業用戶管理介面，
  * 提供完整的 CRUD 功能和現代化的使用者體驗。
@@ -64,22 +64,19 @@ interface UsersClientPageProps {
  * 7. 用戶操作 - 查看、編輯、刪除
  * 8. 權限控制 - 基於角色的訪問控制
  * 
- * 安全特性：
- * - 接收來自伺服器端驗證的用戶資訊
- * - 保持客戶端的互動功能
+ * 安全與效能特性：
+ * - 統一的權限驗證機制 (useAdminAuth)
+ * - React.memo 防止不必要的重渲染
+ * - 職責分離的架構設計
  */
-export function UsersClientPage({ serverUser }: UsersClientPageProps) {
-  const { data: session } = useSession();
-  const user = session?.user; // 獲取當前用戶資訊以判斷權限
-  
-  // 使用客戶端 Auth.js session 中的用戶資訊
-  const currentUser = user;
+const UsersClientPage = ({ serverUser }: UsersClientPageProps) => {
+  const { user, isLoading, isAuthorized } = useAdminAuth();
   
   // 搜索狀態管理
   const [searchQuery, setSearchQuery] = useState('');
   
-  // 使用搜索功能的 useUsers hook（類型安全版本）
-  const { data: usersResponse, isLoading, error } = useUsers(
+  // 使用搜索功能的 useUsers hook（第三階段契約修正 - 確認使用正確的 filter 格式）
+  const { data: usersResponse, isLoading: isUsersLoading, error } = useUsers(
     searchQuery ? { "filter[search]": searchQuery } : undefined
   );
   const createUserMutation = useCreateUser();
@@ -266,31 +263,26 @@ export function UsersClientPage({ serverUser }: UsersClientPageProps) {
     }
   };
 
-  // 只有管理員才能存取用戶管理頁面
-      if (!currentUser?.isAdmin) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center space-y-2">
-              <Shield className="h-12 w-12 text-muted-foreground mx-auto" />
-              <h3 className="text-lg font-semibold">權限不足</h3>
-              <p className="text-muted-foreground">
-                只有管理員才能存取用戶管理功能
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // 載入狀態
+  // 使用統一的權限守衛
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">載入中...</span>
+        <span className="ml-2">正在驗證權限...</span>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null; // useAdminAuth 會處理重新導向
+  }
+
+  // 載入用戶資料狀態
+  if (isUsersLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">載入用戶資料中...</span>
       </div>
     );
   }
@@ -533,4 +525,14 @@ export function UsersClientPage({ serverUser }: UsersClientPageProps) {
       </AlertDialog>
     </div>
   );
-} 
+};
+
+/**
+ * 使用 React.memo 優化的用戶管理頁面元件
+ * 
+ * 效能優化：
+ * - 防止父元件重渲染時的不必要重繪
+ * - 僅當 props 發生變化時才重新渲染
+ * - 配合 useAdminAuth 統一權限管理
+ */
+export default memo(UsersClientPage); 

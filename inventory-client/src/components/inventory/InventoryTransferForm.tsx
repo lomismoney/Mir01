@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useCreateInventoryTransfer, useStores, useProductVariants } from "@/hooks/useApi"
+import { useCreateInventoryTransfer, useStores, useProductVariants } from "@/hooks/queries/useEntityQueries"
 import { Store } from "@/types/store"
 import { ProductVariant } from "@/types/product"
 import { PaginatedResponse } from "@/types/inventory"

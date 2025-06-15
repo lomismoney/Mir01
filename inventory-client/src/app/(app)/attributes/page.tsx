@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { DataTableSkeleton } from '@/components/ui/data-table-skeleton';
-import { AttributesClientPage } from '@/components/attributes/AttributesClientPage';
+import AttributesClientPage from '@/components/attributes/AttributesClientPage';
 
 /**
  * 屬性管理頁面（Auth.js 中間件保護版本）
