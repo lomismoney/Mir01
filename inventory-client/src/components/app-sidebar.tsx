@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/sidebar"
 import { memo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQueryClient } from '@tanstack/react-query'
 
 /**
  * 智能預加載導航鏈接組件（第三階段核心組件）
@@ -217,73 +216,17 @@ const data = {
 }
 
 /**
- * 高性能應用程式側邊欄（第三階段：智能預加載版本）
+ * 高性能應用程式側邊欄（修復 Hydration 錯誤版本）
  * 
  * 🚀 核心性能優化：
  * 1. React.memo 包裹，防止不必要重渲染
- * 2. 智能預加載系統 - 鼠標懸停即預載
- * 3. 數據預取策略 - 常用頁面數據提前載入
- * 4. 優化的事件處理 - useCallback 防止函數重創建
- * 
- * 🎯 專為解決導航延遲問題設計：
- * - 用戶管理：預載用戶列表
- * - 商品管理：預載商品和分類
- * - 庫存管理：預載庫存數據
- * - 即時回饋：鼠標懸停即開始預載
+ * 2. 修復 Next.js Hydration 錯誤
+ * 3. 統一導航系統，避免重複項目
  * 
  * @param props - Sidebar 組件的屬性
  */
 const AppSidebar = memo(function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const queryClient = useQueryClient();
-
-  // 🎯 智能預加載函數庫
-  const prefetchUsers = useCallback(() => {
-    queryClient.prefetchQuery({
-      queryKey: ['users'],
-      queryFn: async () => {
-        const { apiClient } = await import('@/lib/apiClient');
-        const { data } = await apiClient.GET('/api/users');
-        return data;
-      },
-      staleTime: 1000 * 60 * 10, // 與 useUsers 的配置保持一致
-    });
-  }, [queryClient]);
-
-  const prefetchProducts = useCallback(() => {
-    queryClient.prefetchQuery({
-      queryKey: ['products', {}],
-      queryFn: async () => {
-        const { apiClient } = await import('@/lib/apiClient');
-        const { data } = await apiClient.GET('/api/products');
-        return data;
-      },
-      staleTime: 1000 * 60 * 8, // 與 useProducts 的配置保持一致
-    });
-  }, [queryClient]);
-
-  const prefetchCategories = useCallback(() => {
-    queryClient.prefetchQuery({
-      queryKey: ['categories'],
-      queryFn: async () => {
-        const { apiClient } = await import('@/lib/apiClient');
-        const { data } = await apiClient.GET('/api/categories');
-        return data;
-      },
-      staleTime: 1000 * 60 * 20, // 與 useCategories 的配置保持一致
-    });
-  }, [queryClient]);
-
-  const prefetchAttributes = useCallback(() => {
-    queryClient.prefetchQuery({
-      queryKey: ['attributes'],
-      queryFn: async () => {
-        const { apiClient } = await import('@/lib/apiClient');
-        const { data } = await apiClient.GET('/api/attributes');
-        return data;
-      },
-      staleTime: 1000 * 60 * 15, // 屬性數據中等穩定性
-    });
-  }, [queryClient]);
+  // 移除未使用的 queryClient 和 prefetch 函數以通過 ESLint 檢查
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

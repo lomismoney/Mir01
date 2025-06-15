@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -39,14 +40,21 @@ import { clearTokenCache } from "@/lib/apiClient"
  * - 使用 Auth.js useSession Hook 獲取用戶狀態
  * - 整合智能 token 緩存管理，登出時自動清理
  * - 確保系統性能優化的完整性
+ * - 修復 Next.js Hydration 錯誤
  */
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { data: session, status } = useSession()
+  
+  // 🚀 修復 Hydration 錯誤：延遲獲取狀態
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // 從 Auth.js session 中提取用戶資訊和狀態
   const user = session?.user
-  const isAuthenticated = status === 'authenticated'
   const isLoading = status === 'loading'
 
   /**
@@ -65,12 +73,12 @@ export function NavUser() {
     signOut({ callbackUrl: '/login' })
   }
 
-  // 載入狀態顯示骨架屏
-  if (isLoading) {
+  // 🎯 在客戶端 hydration 完成前，顯示骨架屏避免不一致
+  if (!mounted || isLoading) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" disabled>
+          <SidebarMenuButton size="lg" disabled suppressHydrationWarning>
             <Skeleton className="h-8 w-8 rounded-lg" />
             <div className="grid flex-1 text-left text-sm leading-tight">
               <Skeleton className="h-4 w-20 mb-1" />
@@ -88,7 +96,7 @@ export function NavUser() {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" disabled>
+          <SidebarMenuButton size="lg" disabled suppressHydrationWarning>
             <Avatar className="h-8 w-8 rounded-lg grayscale">
               <AvatarFallback className="rounded-lg">?</AvatarFallback>
             </Avatar>
@@ -110,6 +118,7 @@ export function NavUser() {
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              suppressHydrationWarning
             >
                           <Avatar className="h-8 w-8 rounded-lg grayscale">
               <AvatarFallback className="rounded-lg">
@@ -127,9 +136,11 @@ export function NavUser() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            // 🎯 只在客戶端 mounted 後使用 isMobile，避免 hydration 錯誤
+            side={mounted && isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
+            suppressHydrationWarning
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">

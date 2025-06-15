@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import {
   IconDots,
   IconFolder,
@@ -36,6 +37,13 @@ export function NavDocuments({
   }[]
 }) {
   const { isMobile } = useSidebar()
+  
+  // 🚀 修復 Hydration 錯誤：延遲獲取 mobile 狀態
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -61,8 +69,10 @@ export function NavDocuments({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-24 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
+                // 🎯 只在客戶端 mounted 後使用 isMobile，避免 hydration 錯誤
+                side={mounted && isMobile ? "bottom" : "right"}
+                align={mounted && isMobile ? "end" : "start"}
+                suppressHydrationWarning
               >
                 <DropdownMenuItem>
                   <IconFolder />
