@@ -21,11 +21,15 @@ services:
             - '.:/var/www/html'
         # 🚀 移除 networks 配置，使用預設網絡以獲得最佳性能
         depends_on:
-            - mysql
-            - redis
+            mysql:
+                condition: service_healthy
+            redis:
+        # 🔥 增加重啟策略
+        restart: unless-stopped
             
     mysql:
         image: 'mysql/mysql-server:8.0'
+        container_name: 'inventory-mysql'
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
@@ -35,33 +39,51 @@ services:
             MYSQL_USER: '${DB_USERNAME}'
             MYSQL_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ALLOW_EMPTY_PASSWORD: 1
+            # 🔥 MySQL 8.0 性能和穩定性優化
+            MYSQL_INITDB_SKIP_TZINFO: 1
         volumes:
             - 'sail-mysql:/var/lib/mysql'
             - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+            # 🔥 添加 MySQL 配置文件掛載
+            - './mysql-config/my.cnf:/etc/mysql/conf.d/mysql-custom.cnf:ro'
+            # 🔥 添加日誌目錄掛載以便調試
+            - 'mysql-logs:/var/log/mysql'
         # 🚀 移除 networks 配置
+        # 🔥 增加重啟策略 - 關鍵！
+        restart: unless-stopped
+        # 🔥 增加資源限制，防止內存溢出被殺死
+        deploy:
+            resources:
+                limits:
+                    memory: 2G
+                    cpus: '1.0'
+                reservations:
+                    memory: 512M
+                    cpus: '0.5'
+        # 🔥 優化健康檢查，減少失敗率
         healthcheck:
-            test:
-                - CMD
-                - mysqladmin
-                - ping
-                - '-p${DB_PASSWORD}'
-            retries: 3
-            timeout: 5s
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 60s
             
     redis:
         image: 'redis:alpine'
+        container_name: 'inventory-redis'
         ports:
             - '${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
             - 'sail-redis:/data'
         # 🚀 移除 networks 配置
+        # 🔥 增加重啟策略
+        restart: unless-stopped
         healthcheck:
-            test:
-                - CMD
-                - redis-cli
-                - ping
-            retries: 3
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 30s
             timeout: 5s
+            retries: 3
+            start_period: 10s
             
     # phpMyAdmin 服務配置 (性能優化版)
     phpmyadmin:
@@ -96,9 +118,13 @@ services:
 #         driver: bridge
 
 volumes:
+    # 🔥 增強 MySQL 數據持久化配置
     sail-mysql:
         driver: local
     sail-redis:
+        driver: local
+    # 🔥 MySQL 日誌持久化存儲
+    mysql-logs:
         driver: local
     # phpMyAdmin sessions 持久化存儲
     phpmyadmin-sessions:

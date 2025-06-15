@@ -8,7 +8,7 @@ import { Command, CommandInput, CommandList, CommandItem, CommandSeparator, Comm
 import { ChevronsUpDown, Check } from "lucide-react";
 import { Category } from "@/types/category";
 import { useForm, Controller } from 'react-hook-form';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { cn } from "@/lib/utils";
 
 /**
@@ -29,9 +29,7 @@ interface CategoryFormProps {
 }
 
 /**
- * 表單資料結構
- * 
- * 定義分類表單的資料格式，對應後端 API 的請求結構
+ * 表單欄位值類型定義
  */
 export type FormValues = {
   /** 分類名稱（必填） */
@@ -53,10 +51,54 @@ interface CategoryOption {
   children: Category[]; // 子分類列表，用於判斷是否為父分類
 }
 
+// =====================================================
+// === 優化後的輔助函數（位於元件外部）===
+// =====================================================
+
 /**
- * 建立帶有層級資訊的扁平化分類選項列表
+ * 遞迴檢查指定分類是否為目標分類的後代
+ * 使用查詢表優化性能，避免重複的 filter 操作
  * 
- * 將分層的分類結構轉換為扁平化列表，並為每個分類添加層級資訊和顯示名稱。
+ * @param parentId - 父分類 ID
+ * @param targetId - 目標分類 ID 
+ * @param childrenMap - 子分類查詢表
+ * @returns 如果是後代關係則返回 true
+ */
+function isDescendant(parentId: number, targetId: number, childrenMap: Map<number, Category[]>): boolean {
+  const children = childrenMap.get(parentId) || [];
+  
+  for (const child of children) {
+    if (child.id === targetId) return true; // 直接子分類
+    if (isDescendant(child.id, targetId, childrenMap)) return true; // 間接子分類（孫分類等）
+  }
+  
+  return false;
+}
+
+/**
+ * 智能循環檢查函數（優化版）
+ * 判斷選擇指定分類作為父分類是否會造成循環關係
+ * 
+ * @param optionId - 想要設定為父分類的選項 ID
+ * @param currentCategoryId - 當前正在編輯的分類 ID (新增模式時為 null)
+ * @param childrenMap - 子分類查詢表
+ * @returns 如果應該禁用此選項則返回 true
+ */
+function shouldDisableOption(optionId: number, currentCategoryId: number | null, childrenMap: Map<number, Category[]>): boolean {
+  // 新增模式：不禁用任何選項
+  if (!currentCategoryId) return false;
+  
+  // 編輯模式：禁用自己（避免自我循環）
+  if (optionId === currentCategoryId) return true;
+  
+  // 禁用所有後代分類（避免循環關係）
+  return isDescendant(currentCategoryId, optionId, childrenMap);
+}
+
+/**
+ * 建立具有層級結構的分類選項列表
+ * 
+ * 此函數會遞迴處理分類結構，為每個分類添加深度和顯示名稱資訊，
  * 用於在 Combobox 中顯示具有視覺層級的分類選項。
  * 
  * @param categories - 原始分類列表
@@ -98,7 +140,7 @@ function buildCategoryOptions(categories: Category[]): CategoryOption[] {
 }
 
 /**
- * 可重用的分類表單元件
+ * 可重用的分類表單元件（性能優化版）
  * 
  * 支援新增和編輯兩種模式，提供完整的表單驗證和用戶體驗。
  * 
@@ -108,6 +150,7 @@ function buildCategoryOptions(categories: Category[]): CategoryOption[] {
  * 3. 完整表單驗證：必填欄位驗證、錯誤訊息顯示
  * 4. 無障礙設計：正確的 Label 關聯、鍵盤導航支援
  * 5. 載入狀態管理：提交時的 UI 回饋
+ * 6. 性能優化：使用查詢表和 useMemo 減少重複計算
  * 
  * 使用範例：
  * ```tsx
@@ -145,18 +188,36 @@ function buildCategoryOptions(categories: Category[]): CategoryOption[] {
 export function CategoryForm({ onSubmit, isLoading, initialData, categories, parentId }: CategoryFormProps) {
   const [open, setOpen] = useState(false);
   
+  // 🚀 性能優化：創建子分類的快速查詢表
+  const childrenMap = useMemo(() => {
+    const map = new Map<number, Category[]>();
+    categories.forEach(cat => {
+      if (cat.parent_id) {
+        const children = map.get(cat.parent_id) || [];
+        children.push(cat);
+        map.set(cat.parent_id, children);
+      }
+    });
+    return map;
+  }, [categories]);
+  
   const { register, handleSubmit, control, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
-      parent_id: initialData ? String(initialData.parent_id) : (parentId ? String(parentId) : null),
+      // 🔧 修復：正確處理 null 值，避免將 null 轉換為 "null" 字符串
+      parent_id: initialData 
+        ? (initialData.parent_id === null ? null : String(initialData.parent_id))
+        : (parentId ? String(parentId) : null),
     }
   });
 
   // 建立分類選項並排除當前編輯的分類（避免自我循環）
-  const categoryOptions = buildCategoryOptions(
-    categories.filter(cat => cat.id !== initialData?.id)
-  );
+  const categoryOptions = useMemo(() => {
+    return buildCategoryOptions(
+      categories.filter(cat => cat.id !== initialData?.id)
+    );
+  }, [categories, initialData?.id]);
   
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
@@ -193,7 +254,10 @@ export function CategoryForm({ onSubmit, isLoading, initialData, categories, par
           name="parent_id"
           control={control}
           render={({ field }) => {
-            const selectedOption = categoryOptions.find(opt => opt.id === Number(field.value));
+            // 🔧 修復：正確處理 selectedOption 查找邏輯
+            const selectedOption = field.value && field.value !== 'null' 
+              ? categoryOptions.find(opt => opt.id === Number(field.value))
+              : null;
             
             return (
               <Popover open={open} onOpenChange={setOpen}>
@@ -225,7 +289,7 @@ export function CategoryForm({ onSubmit, isLoading, initialData, categories, par
                       <CommandItem
                         value="頂層分類"
                         onSelect={() => {
-                          field.onChange('null');
+                          field.onChange(null); // 🔧 修復：直接使用 null 而不是 'null' 字符串
                           setOpen(false);
                         }}
                       >
@@ -241,36 +305,50 @@ export function CategoryForm({ onSubmit, isLoading, initialData, categories, par
                       <CommandSeparator />
                       
                       {/* 分類選項 */}
-                      {categoryOptions.map((option) => (
-                        <CommandItem
-                          key={option.id}
-                          value={option.displayName}
-                          disabled={option.children && option.children.length > 0}
-                          onSelect={() => {
-                            field.onChange(String(option.id));
-                            setOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              field.value === String(option.id) ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "truncate",
-                              option.depth === 0 && "font-medium",
-                              option.depth === 1 && "pl-4",
-                              option.depth === 2 && "pl-8",
-                              option.depth === 3 && "pl-12",
-                              option.depth >= 4 && "pl-16"
-                            )}
+                      {categoryOptions.map((option) => {
+                        // 🚀 使用優化後的查詢函數
+                        const isDisabled = shouldDisableOption(option.id, initialData?.id ?? null, childrenMap);
+                        
+                        // 決定禁用原因的顯示文字
+                        const getDisabledReason = () => {
+                          if (!initialData?.id) return ""; // 新增模式不會有禁用選項
+                          if (option.id === initialData.id) return " (自己)";
+                          return " (會造成循環關係)";
+                        };
+                        
+                        return (
+                          <CommandItem
+                            key={option.id}
+                            value={option.displayName}
+                            disabled={isDisabled}
+                            onSelect={() => {
+                              field.onChange(String(option.id));
+                              setOpen(false);
+                            }}
                           >
-                            {option.name}
-                          </span>
-                        </CommandItem>
-                      ))}
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                field.value === String(option.id) ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                "truncate",
+                                option.depth === 0 && "font-medium",
+                                option.depth === 1 && "pl-4",
+                                option.depth === 2 && "pl-8",
+                                option.depth === 3 && "pl-12",
+                                option.depth >= 4 && "pl-16",
+                                isDisabled && "opacity-50 text-muted-foreground"
+                              )}
+                            >
+                              {option.name}
+                              {isDisabled && getDisabledReason()}
+                            </span>
+                          </CommandItem>
+                        );
+                      })}
                     </CommandList>
                   </Command>
                 </PopoverContent>

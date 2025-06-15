@@ -34,7 +34,7 @@ import { CategoryForm, FormValues } from '@/components/categories/CategoryForm';
 import { Category } from '@/types/category';
 import { transformCategoriesGroupedResponse } from '@/types/api-helpers';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
@@ -188,7 +188,7 @@ const CategoriesClientPage = ({ }: CategoriesClientPageProps) => {
       const updateData = {
         name: data.name,
         description: data.description || null,
-        parent_id: data.parent_id === 'null' ? null : Number(data.parent_id),
+        parent_id: data.parent_id === null || data.parent_id === 'null' ? null : Number(data.parent_id),
       };
 
       await updateMutation.mutateAsync({
@@ -427,13 +427,19 @@ const CategoriesClientPage = ({ }: CategoriesClientPageProps) => {
             <DialogTitle>
               {parentIdForNewCategory ? '新增子分類' : '新增頂層分類'}
             </DialogTitle>
+            <DialogDescription>
+              {parentIdForNewCategory 
+                ? '建立一個新的子分類，您可以設定分類名稱和描述。' 
+                : '建立一個新的頂層分類，您可以設定分類名稱和描述。'
+              }
+            </DialogDescription>
           </DialogHeader>
-                      <CategoryForm
-              categories={allCategories}
-              parentId={parentIdForNewCategory}
-              onSubmit={handleCreate}
-              isLoading={createMutation.isPending}
-            />
+          <CategoryForm
+            categories={allCategories}
+            parentId={parentIdForNewCategory}
+            onSubmit={handleCreate}
+            isLoading={createMutation.isPending}
+          />
         </DialogContent>
       </Dialog>
 
@@ -442,6 +448,9 @@ const CategoriesClientPage = ({ }: CategoriesClientPageProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>編輯分類</DialogTitle>
+            <DialogDescription>
+              修改分類「{editingCategory?.name}」的資訊，包括名稱、描述和父分類設定。
+            </DialogDescription>
           </DialogHeader>
           {editingCategory && (
             <CategoryForm
