@@ -148,3 +148,261 @@ endpoints:
     method: null
     route: null
     custom: []
+  -
+    httpMethods:
+      - PATCH
+    uri: 'api/products/variants/{id}'
+    metadata:
+      groupName: 商品變體管理
+      groupDescription: |-
+
+        商品變體 API 端點，用於管理商品的各種變體（SKU）
+      subgroup: ''
+      subgroupDescription: ''
+      title: 更新商品變體資訊
+      description: ''
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the variant.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      sku:
+        name: sku
+        description: '變體的 SKU 編碼，必須是唯一的.'
+        required: false
+        example: TSHIRT-RED-L
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      price:
+        name: price
+        description: 變體的售價，最多兩位小數.
+        required: true
+        example: '299.99'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      cost:
+        name: cost
+        description: 變體的成本價，最多兩位小數.
+        required: false
+        example: '150.00'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      stock_alert_threshold:
+        name: stock_alert_threshold
+        description: 庫存預警數量.
+        required: false
+        example: 10
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      is_active:
+        name: is_active
+        description: 變體是否啟用.
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      weight:
+        name: weight
+        description: 重量（公克）.
+        required: false
+        example: '250'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      length:
+        name: length
+        description: 長度（公分）.
+        required: false
+        example: '30'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      width:
+        name: width
+        description: 寬度（公分）.
+        required: false
+        example: '20'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      height:
+        name: height
+        description: 高度（公分）.
+        required: false
+        example: '5'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+    cleanBodyParameters:
+      sku: TSHIRT-RED-L
+      price: '299.99'
+      cost: '150.00'
+      stock_alert_threshold: 10
+      is_active: true
+      weight: '250'
+      length: '30'
+      width: '20'
+      height: '5'
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "id": 1,
+            "product_id": 1,
+            "sku": "TSHIRT-RED-L",
+            "price": "299.99",
+            "cost": "150.00",
+            "stock_alert_threshold": 10,
+            "is_active": true,
+            "weight": 250,
+            "length": 30,
+            "width": 20,
+            "height": 5,
+            "created_at": "2024-01-15T10:30:00.000000Z",
+            "updated_at": "2024-01-15T14:45:00.000000Z",
+            "product": {...},
+            "attribute_values": [...],
+            "inventory": [...]
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "message": "No query results for model [App\\Models\\ProductVariant] 999"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "message": "The given data was invalid.",
+            "errors": {
+              "sku": ["此 SKU 編碼已被使用"],
+              "price": ["價格為必填欄位"]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/products/variants/{id}'
+    metadata:
+      groupName: 商品變體管理
+      groupDescription: |-
+
+        商品變體 API 端點，用於管理商品的各種變體（SKU）
+      subgroup: ''
+      subgroupDescription: ''
+      title: 刪除商品變體
+      description: ''
+      authenticated: true
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the variant.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "message": "變體已成功刪除"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+            "message": "This action is unauthorized."
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "message": "No query results for model [App\\Models\\ProductVariant] 999"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []

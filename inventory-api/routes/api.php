@@ -72,14 +72,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /**
      * 商品變體管理路由
-     * 提供商品變體的查詢功能
+     * 提供商品變體的完整 CRUD 操作
      * 
      * 路由列表：
      * GET    /api/products/variants        - 獲取所有商品變體列表
      * GET    /api/products/variants/{id}   - 獲取指定商品變體
+     * PATCH  /api/products/variants/{id}   - 更新指定商品變體
+     * DELETE /api/products/variants/{id}   - 刪除指定商品變體
      */
     Route::get('/products/variants', [ProductVariantController::class, 'index']);
     Route::get('/products/variants/{id}', [ProductVariantController::class, 'show']);
+    Route::patch('/products/variants/{id}', [ProductVariantController::class, 'update']);
+    Route::delete('/products/variants/{id}', [ProductVariantController::class, 'destroy']);
 
     /**
      * 進貨單管理路由

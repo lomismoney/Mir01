@@ -39,9 +39,9 @@ THEN 你必須首先驗證以下事項：
 原則 4：環境配置檢查 (Environment Configuration Check)
 IF 涉及到環境配置或服務運行，
 THEN 必須確認：
-1. Laravel Sail (Docker) 環境中 DB_HOST 必須設為 mysql
-2. 不要在 Sail 環境中額外執行 artisan serve 命令
-3. 前端 API URL 配置為 http://localhost 而非 http://localhost:8000
+1. Laragon 本地開發環境中 DB_HOST 必須設為 127.0.0.1
+2. 使用 php artisan serve 啟動 Laravel 開發服務器
+3. 前端 API URL 配置為 http://localhost:8000 (Laragon 環境)
 4. 所有命令和腳本在正確的環境和目錄下執行
 
 ## 第二章：技術規範（不可違背）

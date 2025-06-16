@@ -19,9 +19,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -34,10 +46,22 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Package, Search } from "lucide-react";
+import { 
+  MoreHorizontal, 
+  Edit, 
+  Package, 
+  Search, 
+  Trash2, 
+  Power,
+  PowerOff,
+  Loader2 
+} from "lucide-react";
 import { ProductItem, ProductVariant } from "@/types/api-helpers";
+import { useUpdateProductVariant, useDeleteProductVariant } from "@/hooks/queries/useEntityQueries";
+import { toast } from "sonner";
 
 /**
  * 商品規格詳細資訊模態框元件
@@ -60,6 +84,296 @@ interface VariantDetailsModalProps {
   onClose: () => void;
   product: ProductItem | null;
 }
+
+/**
+ * 變體編輯表單介面
+ */
+interface VariantEditFormData {
+  sku: string;
+  price: number;
+  cost?: number;
+  is_active: boolean;
+}
+
+/**
+ * 變體編輯模態框元件
+ * 
+ * @description
+ * 小型的編輯表單，用於修改單個變體的資訊
+ */
+interface VariantEditModalProps {
+  variant: ProductVariant | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: VariantEditFormData) => void;
+  isSaving: boolean;
+}
+
+const VariantEditModal = ({ variant, isOpen, onClose, onSave, isSaving }: VariantEditModalProps) => {
+  const [formData, setFormData] = useState<VariantEditFormData>({
+    sku: variant?.sku || '',
+    price: variant?.price || 0,
+    cost: (variant as any)?.cost || 0,
+    is_active: (variant as any)?.is_active ?? true,
+  });
+
+  // 當 variant 改變時重置表單
+  useState(() => {
+    if (variant) {
+      setFormData({
+        sku: variant.sku || '',
+        price: variant.price || 0,
+        cost: (variant as any)?.cost || 0,
+        is_active: (variant as any)?.is_active ?? true,
+      });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>編輯變體</DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="sku">SKU 編碼</Label>
+            <Input
+              id="sku"
+              value={formData.sku}
+              onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
+              disabled={isSaving}
+              required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="price">價格</Label>
+            <Input
+              id="price"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.price}
+              onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+              disabled={isSaving}
+              required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="cost">成本</Label>
+            <Input
+              id="cost"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.cost}
+              onChange={(e) => setFormData(prev => ({ ...prev, cost: parseFloat(e.target.value) || 0 }))}
+              disabled={isSaving}
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="is_active"
+              checked={formData.is_active}
+              onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
+              disabled={isSaving}
+            />
+            <Label htmlFor="is_active">啟用</Label>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>
+              取消
+            </Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              儲存
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+/**
+ * 變體操作下拉選單元件
+ * 
+ * @description
+ * 第二階段：精準調校 - 完整的變體管理功能
+ * 提供編輯、狀態切換、刪除等操作
+ */
+interface VariantActionsDropdownProps {
+  variant: ProductVariant;
+}
+
+const VariantActionsDropdown = ({ variant }: VariantActionsDropdownProps) => {
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  
+  const updateVariantMutation = useUpdateProductVariant();
+  const deleteVariantMutation = useDeleteProductVariant();
+  
+  const handleEdit = (data: VariantEditFormData) => {
+    if (!variant.id) {
+      toast.error('變體 ID 無效');
+      return;
+    }
+    
+    updateVariantMutation.mutate({
+      id: variant.id,
+      data: {
+        sku: data.sku,
+        price: data.price,
+        cost: data.cost,
+        is_active: data.is_active,
+      }
+    }, {
+      onSuccess: () => {
+        toast.success('變體已成功更新');
+        setEditModalOpen(false);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      }
+    });
+  };
+  
+  const handleToggleStatus = () => {
+    if (!variant.id) {
+      toast.error('變體 ID 無效');
+      return;
+    }
+    
+    const currentStatus = (variant as any)?.is_active ?? true;
+    updateVariantMutation.mutate({
+      id: variant.id,
+      data: { is_active: !currentStatus }
+    }, {
+      onSuccess: () => {
+        toast.success(`變體已${!currentStatus ? '啟用' : '停用'}`);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      }
+    });
+  };
+  
+  const handleDelete = () => {
+    if (!variant.id) {
+      toast.error('變體 ID 無效');
+      return;
+    }
+    
+    deleteVariantMutation.mutate(variant.id, {
+      onSuccess: () => {
+        toast.success('變體已成功刪除');
+        setDeleteDialogOpen(false);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      }
+    });
+  };
+  
+  const isActive = (variant as any)?.is_active ?? true;
+  const isLoading = updateVariantMutation.isPending || deleteVariantMutation.isPending;
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0" disabled={isLoading}>
+            <span className="sr-only">開啟選單</span>
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <MoreHorizontal className="h-4 w-4" />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
+            <Edit className="mr-2 h-4 w-4" />
+            編輯規格
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={handleToggleStatus}>
+            {isActive ? (
+              <>
+                <PowerOff className="mr-2 h-4 w-4" />
+                停用規格
+              </>
+            ) : (
+              <>
+                <Power className="mr-2 h-4 w-4" />
+                啟用規格
+              </>
+            )}
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem 
+            onClick={() => setDeleteDialogOpen(true)}
+            className="text-destructive"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            刪除規格
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      {/* 編輯模態框 */}
+      <VariantEditModal
+        variant={variant}
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSave={handleEdit}
+        isSaving={updateVariantMutation.isPending}
+      />
+      
+      {/* 刪除確認對話框 */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認刪除規格</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要刪除 SKU「{variant.sku}」嗎？
+              <br />
+              此操作無法復原，且會影響相關的庫存記錄。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteVariantMutation.isPending}>
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={deleteVariantMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteVariantMutation.isPending && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
+              確認刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
 
 /**
  * 安全的價格格式化函數
@@ -204,33 +518,15 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
     },
   },
 
-  // 操作欄位
+  // 操作欄位（第二階段：精準調校 - 完整的變體管理功能）
   {
     id: "actions",
     header: "操作",
     cell: ({ row }) => {
       const variant = row.original;
 
-      const handleEditVariant = () => {
-        // TODO: 實現 SKU 編輯功能
-        console.log('編輯 SKU:', variant);
-      };
-
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">開啟選單</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleEditVariant}>
-              <Edit className="mr-2 h-4 w-4" />
-              編輯 SKU
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <VariantActionsDropdown variant={variant} />
       );
     },
     enableSorting: false,

@@ -235,7 +235,12 @@ export function useUsers(filters?: UserQueryParams) {
 }
 
 /**
- * 建立新用戶的 Mutation (最終版 - 標準化無效化)
+ * 建立新用戶的 Mutation - 樂觀更新版本 🚀
+ * 
+ * 風暴引擎特性：
+ * - 樂觀更新：在請求發送前預測性地更新 UI
+ * - 智能回滾：失敗時自動恢復到操作前狀態
+ * - 最終同步：確保前端資料與伺服器最終一致
  */
 export function useCreateUser() {
   const queryClient = useQueryClient();
@@ -275,16 +280,82 @@ export function useCreateUser() {
       }
       return data;
     },
-    onSuccess: () => {
-      // 強制重新獲取用戶列表數據，確保新創建的用戶立即顯示
-      // 使用 refetchQueries 而不是 invalidateQueries 來立即觸發重新獲取
-      queryClient.refetchQueries({ queryKey: ['users'] });
+    
+    /**
+     * 樂觀更新階段：預測性 UI 更新
+     * 
+     * 在 API 請求發送前立即執行，讓使用者看到即時反應
+     * 回傳 context 物件用於錯誤回滾
+     */
+    onMutate: async (newUser) => {
+      // 🛡️ 防護措施：取消任何正在進行的用戶列表查詢
+      // 避免競態條件覆蓋我們的樂觀更新
+      await queryClient.cancelQueries({ queryKey: ['users'] });
+
+      // 📸 建立資料快照：保存當前狀態用於失敗回滾
+      const previousUsers = queryClient.getQueryData(['users']);
+      
+      // 🚀 預測性更新：立即將新用戶添加到列表中
+      queryClient.setQueryData(['users'], (oldData: any) => {
+        if (!oldData?.data) return oldData;
+        
+        // 建立樂觀用戶物件 (使用臨時 ID)
+        const optimisticUser = {
+          id: Date.now(), // 臨時 ID，伺服器會回傳真實 ID
+          name: newUser.name,
+          username: newUser.username,
+          role: newUser.role,
+          role_display: newUser.role === 'admin' ? '管理員' : '檢視者',
+          is_admin: newUser.role === 'admin',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          stores: []
+        };
+        
+        // 將新用戶插入到列表頂部 (最新項目在前)
+        return {
+          ...oldData,
+          data: [optimisticUser, ...oldData.data]
+        };
+      });
+      
+      // 回傳 context 給 onError 使用
+      return { previousUsers };
+    },
+    
+    /**
+     * 錯誤回滾階段：失敗時恢復原狀
+     * 
+     * 當 API 請求失敗時，將 UI 恢復到操作前的狀態
+     */
+    onError: (err, newUser, context) => {
+      // 🔄 智能回滾：恢復到操作前的資料狀態
+      if (context?.previousUsers) {
+        queryClient.setQueryData(['users'], context.previousUsers);
+      }
+    },
+    
+    /**
+     * 最終同步階段：確保資料一致性
+     * 
+     * 無論成功或失敗，都進行最終的資料同步
+     * 確保前端資料與伺服器狀態完全一致
+     */
+    onSettled: () => {
+      // 🔄 強制同步：重新獲取伺服器最新資料
+      // 這會用真實的伺服器資料替換樂觀更新的資料
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 }
 
 /**
- * 更新用戶的 Mutation (最終版 - 標準化無效化)
+ * 更新用戶的 Mutation - 樂觀更新版本 🚀
+ * 
+ * 風暴引擎特性：
+ * - 樂觀更新：使用 .map() 立即更新目標用戶
+ * - 智能回滾：失敗時自動恢復到操作前狀態
+ * - 雙重同步：同時更新列表和詳細資料快取
  */
 export function useUpdateUser() {
   const queryClient = useQueryClient();
@@ -327,16 +398,110 @@ export function useUpdateUser() {
       }
       return data;
     },
-    onSuccess: (_, variables) => {
-      // 強制重新獲取用戶列表數據，確保更新的用戶立即顯示
-      queryClient.refetchQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['user', variables.path.user] }); 
+    
+    /**
+     * 樂觀更新階段：預測性用戶更新
+     * 
+     * 使用 .map() 找到目標用戶並立即更新其資料
+     */
+    onMutate: async (variables) => {
+      const userId = variables.path.user;
+      const updateData = variables.body;
+      
+      // 🛡️ 防護措施：取消相關查詢避免競態條件
+      await queryClient.cancelQueries({ queryKey: ['users'] });
+      await queryClient.cancelQueries({ queryKey: ['user', userId] });
+
+      // 📸 建立資料快照：保存當前狀態用於失敗回滾
+      const previousUsers = queryClient.getQueryData(['users']);
+      const previousUser = queryClient.getQueryData(['user', userId]);
+      
+      // 🚀 預測性更新：使用 .map() 更新目標用戶
+      queryClient.setQueryData(['users'], (oldData: any) => {
+        if (!oldData?.data) return oldData;
+        
+        return {
+          ...oldData,
+          data: oldData.data.map((user: any) => {
+            if (user.id === userId) {
+              // 更新目標用戶的資料
+              return {
+                ...user,
+                name: updateData.name ?? user.name,
+                username: updateData.username ?? user.username,
+                role: updateData.role ?? user.role,
+                role_display: updateData.role ? 
+                  (updateData.role === 'admin' ? '管理員' : '檢視者') : 
+                  user.role_display,
+                is_admin: updateData.role ? 
+                  (updateData.role === 'admin') : 
+                  user.is_admin,
+                updated_at: new Date().toISOString(),
+              };
+            }
+            return user;
+          })
+        };
+      });
+      
+      // 同時更新用戶詳細資料快取（如果存在）
+      queryClient.setQueryData(['user', userId], (oldUser: any) => {
+        if (!oldUser) return oldUser;
+        
+        return {
+          ...oldUser,
+          name: updateData.name ?? oldUser.name,
+          username: updateData.username ?? oldUser.username,
+          role: updateData.role ?? oldUser.role,
+          role_display: updateData.role ? 
+            (updateData.role === 'admin' ? '管理員' : '檢視者') : 
+            oldUser.role_display,
+          is_admin: updateData.role ? 
+            (updateData.role === 'admin') : 
+            oldUser.is_admin,
+          updated_at: new Date().toISOString(),
+        };
+      });
+      
+      // 回傳 context 給 onError 使用
+      return { previousUsers, previousUser, userId };
+    },
+    
+    /**
+     * 錯誤回滾階段：失敗時恢復原狀
+     * 
+     * 當 API 請求失敗時，將 UI 恢復到操作前的狀態
+     */
+    onError: (err, variables, context) => {
+      // 🔄 智能回滾：恢復到操作前的資料狀態
+      if (context?.previousUsers) {
+        queryClient.setQueryData(['users'], context.previousUsers);
+      }
+      if (context?.previousUser && context?.userId) {
+        queryClient.setQueryData(['user', context.userId], context.previousUser);
+      }
+    },
+    
+    /**
+     * 最終同步階段：雙重快取失效
+     * 
+     * 確保用戶列表和詳細資料都與伺服器同步
+     */
+    onSettled: (_, __, variables) => {
+      // 🔄 雙重同步：讓列表和詳細資料快取失效
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['user', variables.path.user] });
     },
   });
 }
 
 /**
- * 刪除單一用戶的 Mutation (最終版 - 標準化無效化)
+ * 刪除單一用戶的 Mutation - 樂觀更新版本 🚀
+ * 
+ * 風暴引擎特性：
+ * - 樂觀刪除：使用 .filter() 立即從列表中移除用戶
+ * - 智能回滾：失敗時自動恢復到操作前狀態
+ * - 快取清理：成功後移除用戶詳細資料快取
  */
 export function useDeleteUser() {
   const queryClient = useQueryClient();
@@ -347,9 +512,61 @@ export function useDeleteUser() {
       });
       if (error) { throw new Error('刪除用戶失敗'); }
     },
-    onSuccess: (_, pathParams) => {
-      // 強制重新獲取用戶列表數據，確保刪除的用戶立即從列表中移除
-      queryClient.refetchQueries({ queryKey: ['users'] });
+    
+    /**
+     * 樂觀刪除階段：預測性用戶移除
+     * 
+     * 使用 .filter() 立即將目標用戶從列表中移除
+     */
+    onMutate: async (pathParams) => {
+      const userId = pathParams.user;
+      
+      // 🛡️ 防護措施：取消相關查詢避免競態條件
+      await queryClient.cancelQueries({ queryKey: ['users'] });
+      await queryClient.cancelQueries({ queryKey: ['user', userId] });
+
+      // 📸 建立資料快照：保存當前狀態用於失敗回滾
+      const previousUsers = queryClient.getQueryData(['users']);
+      const previousUser = queryClient.getQueryData(['user', userId]);
+      
+      // 🚀 預測性刪除：使用 .filter() 移除目標用戶
+      queryClient.setQueryData(['users'], (oldData: any) => {
+        if (!oldData?.data) return oldData;
+        
+        return {
+          ...oldData,
+          data: oldData.data.filter((user: any) => user.id !== userId)
+        };
+      });
+      
+      // 回傳 context 給 onError 使用
+      return { previousUsers, previousUser, userId };
+    },
+    
+    /**
+     * 錯誤回滾階段：失敗時恢復原狀
+     * 
+     * 當 API 請求失敗時，將被刪除的用戶恢復到列表中
+     */
+    onError: (err, pathParams, context) => {
+      // 🔄 智能回滾：恢復到操作前的資料狀態
+      if (context?.previousUsers) {
+        queryClient.setQueryData(['users'], context.previousUsers);
+      }
+      if (context?.previousUser && context?.userId) {
+        queryClient.setQueryData(['user', context.userId], context.previousUser);
+      }
+    },
+    
+    /**
+     * 最終同步階段：快取清理與同步
+     * 
+     * 讓用戶列表快取失效，並移除用戶詳細資料快取
+     */
+    onSettled: (_, __, pathParams) => {
+      // 🔄 列表同步：讓用戶列表快取失效
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      // 🗑️ 快取清理：移除該用戶的詳細資料快取
       queryClient.removeQueries({ queryKey: ['user', pathParams.user] });
     },
   });
@@ -1103,5 +1320,94 @@ export function useProductVariantDetail(id: number) {
       return data;
     },
     enabled: !!id,
+  });
+}
+
+/**
+ * 更新商品變體的 Hook
+ * 
+ * @description
+ * 用於更新商品變體的資訊，包含 SKU 編碼、價格、成本、啟用狀態等
+ * 支援部分更新（PATCH），只更新提供的欄位
+ * 
+ * @returns React Query 變更結果
+ */
+export function useUpdateProductVariant() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: {
+      id: number;
+      data: {
+        sku?: string;
+        price?: number;
+        cost?: number;
+        stock_alert_threshold?: number;
+        is_active?: boolean;
+        weight?: number;
+        length?: number;
+        width?: number;
+        height?: number;
+      };
+    }) => {
+      // 暫時使用類型斷言，等待 API 類型定義更新
+      const { data, error } = await (apiClient as any).PATCH('/api/products/variants/{id}', {
+        params: { path: { id: params.id } },
+        body: params.data,
+      });
+      
+      if (error) {
+        // 處理驗證錯誤
+        if (error?.errors) {
+          const errorMessages = Object.values(error.errors).flat().join('\n');
+          throw new Error(errorMessages);
+        }
+        throw new Error('更新變體失敗');
+      }
+      
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      // 成功後更新快取
+      queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+      queryClient.invalidateQueries({ queryKey: ['product-variants', variables.id] });
+      
+      // 如果變體是通過產品詳情頁來的，也要更新產品快取
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+}
+
+/**
+ * 刪除商品變體的 Hook
+ * 
+ * @description
+ * 用於刪除指定的商品變體
+ * 注意：這是敏感操作，會影響庫存記錄和歷史訂單
+ * 
+ * @returns React Query 變更結果
+ */
+export function useDeleteProductVariant() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      // 暫時使用類型斷言，等待 API 類型定義更新
+      const { error } = await (apiClient as any).DELETE('/api/products/variants/{id}', {
+        params: { path: { id } },
+      });
+      
+      if (error) {
+        throw new Error('刪除變體失敗');
+      }
+    },
+    onSuccess: (data, id) => {
+      // 成功後更新快取
+      queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+      queryClient.removeQueries({ queryKey: ['product-variants', id] });
+      
+      // 也要更新產品快取
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
   });
 }

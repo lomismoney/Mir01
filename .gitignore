@@ -170,4 +170,68 @@ logs/
 # 備份檔案
 backup/
 backups/
-*.backup 
+*.backup
+
+# ========== TailwindCSS 全專案性能優化 ==========
+# 根據 Panga Games 發現的性能問題進行優化
+# TailwindCSS 會掃描所有非二進位檔案，大型檔案會嚴重影響編譯速度
+
+# 大型 API 規格和配置檔案
+inventory-client/openapi.yaml
+inventory-api/storage/api-docs/
+*.openapi.yaml
+*.swagger.json
+api-spec.json
+
+# 大型資料檔案和模擬資料
+data/
+mock-data/
+fixtures/
+simulations/
+translations/
+*.mock.json
+*.fixture.json
+*.test-data.json
+*.csv
+*.xml
+*.xlsx
+
+# 建置快取和臨時檔案
+*.tsbuildinfo
+.swc/
+.turbo/
+.cache/
+
+# 文檔和說明（保留重要檔案）
+docs/
+documentation/
+*.md.backup
+*.md.tmp
+!README.md
+!CHANGELOG.md
+!SECURITY.md
+!部署指南.md
+!技術架構文檔.md
+!架構規則.md
+
+# 開發和測試產生的大型檔案
+test-results/
+screenshots/
+videos/
+coverage-reports/
+performance-logs/
+*.perf.json
+*.benchmark.json
+
+# 第三方和外部資源
+vendor/
+external/
+third-party/
+legacy/
+
+# 分析和報告檔案
+analyze/
+reports/
+metrics/
+*.analysis.json
+*.report.html 

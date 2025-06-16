@@ -76,3 +76,71 @@ debug-*.tsx
 
 # 本地快取
 .eslintcache
+
+# ========== TailwindCSS 性能優化 ==========
+# 排除大型檔案和資料夾，避免 TailwindCSS 掃描影響編譯性能
+# 參考：https://github.com/tailwindlabs/tailwindcss.com 性能優化最佳實踐
+
+# 大型 API 規格檔案
+openapi.yaml
+*.openapi.yaml
+api-spec.json
+swagger.json
+
+# TypeScript 建置快取檔案
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# 資料和模擬檔案
+/src/data/
+/src/mock/
+/src/fixtures/
+/data/
+/mock/
+/fixtures/
+*.mock.json
+*.fixture.json
+*.test-data.json
+
+# 文檔和說明檔案
+/docs/
+/documentation/
+*.md
+!README.md
+!CHANGELOG.md
+!SECURITY.md
+
+# 日誌和臨時檔案
+/logs/
+/temp/
+/tmp/
+*.log
+*.log.*
+*.tmp
+*.temp
+*.backup
+
+# 測試相關大型檔案
+/test-results/
+/coverage/
+/screenshots/
+/videos/
+*.spec.backup
+*.test.backup
+
+# 開發工具產生的檔案
+.vscode/settings.json
+.vscode/launch.json
+.idea/workspace.xml
+.idea/tasks.xml
+
+# 第三方庫和依賴（如果有本地副本）
+/vendor/
+/lib/external/
+/third-party/
+
+# 建置和分析報告
+/analyze/
+/bundle-analyzer/
+*.bundle-report.html
+*.webpack-bundle-analyzer.json

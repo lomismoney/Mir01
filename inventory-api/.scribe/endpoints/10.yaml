@@ -23,7 +23,7 @@ endpoints:
         name: id
         description: 'The ID of the value.'
         required: true
-        example: 16
+        example: 2
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -40,7 +40,7 @@ endpoints:
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
+      id: 2
       value: 1
     queryParameters: []
     cleanQueryParameters: []

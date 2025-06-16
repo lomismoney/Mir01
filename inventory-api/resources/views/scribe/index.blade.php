@@ -198,6 +198,12 @@
                                                                                 <li class="tocify-item level-2" data-unique="-GETapi-products-variants--id-">
                                 <a href="#-GETapi-products-variants--id-">獲取單個商品變體詳情</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="-PATCHapi-products-variants--id-">
+                                <a href="#-PATCHapi-products-variants--id-">更新商品變體資訊</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="-DELETEapi-products-variants--id-">
+                                <a href="#-DELETEapi-products-variants--id-">刪除商品變體</a>
+                            </li>
                                                                         </ul>
                             </ul>
                     <ul id="tocify-header-" class="tocify-header">
@@ -317,7 +323,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: June 15, 2025</li>
+        <li>Last updated: June 16, 2025</li>
     </ul>
 </div>
 
@@ -509,14 +515,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 12,
+        &quot;id&quot;: 16,
         &quot;name&quot;: &quot;Mrs. Justina Gaylord&quot;,
         &quot;username&quot;: &quot;lafayette.considine&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:20.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T18:21:59.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T18:21:59.000000Z&quot;
     }
 }</code>
  </pre>
@@ -887,14 +893,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/categories/1" \
+    --get "http://localhost/api/categories/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/1"
+    "http://localhost/api/categories/2"
 );
 
 const headers = {
@@ -1003,10 +1009,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-categories--id-"
-               value="1"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>1</code></p>
+<p>The ID of the category. Example: <code>2</code></p>
             </div>
                     </form>
 
@@ -1028,7 +1034,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/categories/1" \
+    "http://localhost/api/categories/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1041,7 +1047,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/1"
+    "http://localhost/api/categories/2"
 );
 
 const headers = {
@@ -1145,10 +1151,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-categories--id-"
-               value="1"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>1</code></p>
+<p>The ID of the category. Example: <code>2</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -1203,14 +1209,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/categories/1" \
+    "http://localhost/api/categories/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/1"
+    "http://localhost/api/categories/2"
 );
 
 const headers = {
@@ -1303,10 +1309,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-categories--id-"
-               value="1"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>1</code></p>
+<p>The ID of the category. Example: <code>2</code></p>
             </div>
                     </form>
 
@@ -1523,11 +1529,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 3,
+        &quot;id&quot;: 11,
         &quot;name&quot;: &quot;Bailey Ltd&quot;,
         &quot;address&quot;: &quot;85625 Gaylord Knolls\nCecilburgh, WI 02042&quot;,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1670,11 +1676,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 4,
+        &quot;id&quot;: 12,
         &quot;name&quot;: &quot;Cruickshank Inc&quot;,
         &quot;address&quot;: &quot;532 Leuschke Causeway\nMcLaughlinstad, MI 07365&quot;,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1817,11 +1823,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 5,
+        &quot;id&quot;: 13,
         &quot;name&quot;: &quot;Rempel, Gulgowski and O&#039;Kon&quot;,
         &quot;address&quot;: &quot;80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432&quot;,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2105,11 +2111,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 6,
-        &quot;name&quot;: &quot;Kohler, Wunsch and Bergnaum&quot;,
-        &quot;address&quot;: &quot;728 Timmy Island Suite 979\nPort Allisonport, PA 18406&quot;,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;id&quot;: 14,
+        &quot;name&quot;: &quot;Homenick-Schuster&quot;,
+        &quot;address&quot;: &quot;20584 Lauretta Courts Suite 594\nPowlowskimouth, ID 63832&quot;,
+        &quot;created_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2254,14 +2260,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 13,
+        &quot;id&quot;: 17,
         &quot;name&quot;: &quot;Ms. Elisabeth Okuneva&quot;,
         &quot;username&quot;: &quot;gulgowski.asia&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T18:22:00.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2874,14 +2880,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/attributes/1" \
+    --get "http://localhost/api/attributes/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1"
+    "http://localhost/api/attributes/2"
 );
 
 const headers = {
@@ -2981,10 +2987,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-attributes--id-"
-               value="1"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>2</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -3013,7 +3019,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/attributes/1" \
+    "http://localhost/api/attributes/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -3024,7 +3030,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1"
+    "http://localhost/api/attributes/2"
 );
 
 const headers = {
@@ -3133,10 +3139,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-attributes--id-"
-               value="1"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>2</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -3178,14 +3184,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/attributes/1" \
+    "http://localhost/api/attributes/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1"
+    "http://localhost/api/attributes/2"
 );
 
 const headers = {
@@ -3284,10 +3290,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-attributes--id-"
-               value="1"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>2</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -5102,6 +5108,460 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
+                    <h2 id="-PATCHapi-products-variants--id-">更新商品變體資訊</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-PATCHapi-products-variants--id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PATCH \
+    "http://localhost/api/products/variants/architecto" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"sku\": \"TSHIRT-RED-L\",
+    \"price\": \"299.99\",
+    \"cost\": \"150.00\",
+    \"stock_alert_threshold\": 10,
+    \"is_active\": true,
+    \"weight\": \"250\",
+    \"length\": \"30\",
+    \"width\": \"20\",
+    \"height\": \"5\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/products/variants/architecto"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "sku": "TSHIRT-RED-L",
+    "price": "299.99",
+    "cost": "150.00",
+    "stock_alert_threshold": 10,
+    "is_active": true,
+    "weight": "250",
+    "length": "30",
+    "width": "20",
+    "height": "5"
+};
+
+fetch(url, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PATCHapi-products-variants--id-">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+  &quot;id&quot;: 1,
+  &quot;product_id&quot;: 1,
+  &quot;sku&quot;: &quot;TSHIRT-RED-L&quot;,
+  &quot;price&quot;: &quot;299.99&quot;,
+  &quot;cost&quot;: &quot;150.00&quot;,
+  &quot;stock_alert_threshold&quot;: 10,
+  &quot;is_active&quot;: true,
+  &quot;weight&quot;: 250,
+  &quot;length&quot;: 30,
+  &quot;width&quot;: 20,
+  &quot;height&quot;: 5,
+  &quot;created_at&quot;: &quot;2024-01-15T10:30:00.000000Z&quot;,
+  &quot;updated_at&quot;: &quot;2024-01-15T14:45:00.000000Z&quot;,
+  &quot;product&quot;: {...},
+  &quot;attribute_values&quot;: [...],
+  &quot;inventory&quot;: [...]
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (404):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;No query results for model [App\\Models\\ProductVariant] 999&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (422):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;The given data was invalid.&quot;,
+    &quot;errors&quot;: {
+        &quot;sku&quot;: [
+            &quot;此 SKU 編碼已被使用&quot;
+        ],
+        &quot;price&quot;: [
+            &quot;價格為必填欄位&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-PATCHapi-products-variants--id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PATCHapi-products-variants--id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PATCHapi-products-variants--id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PATCHapi-products-variants--id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PATCHapi-products-variants--id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PATCHapi-products-variants--id-" data-method="PATCH"
+      data-path="api/products/variants/{id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PATCHapi-products-variants--id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PATCHapi-products-variants--id-"
+                    onclick="tryItOut('PATCHapi-products-variants--id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PATCHapi-products-variants--id-"
+                    onclick="cancelTryOut('PATCHapi-products-variants--id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PATCHapi-products-variants--id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-purple">PATCH</small>
+            <b><code>api/products/variants/{id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PATCHapi-products-variants--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PATCHapi-products-variants--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="id"                data-endpoint="PATCHapi-products-variants--id-"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the variant. Example: <code>architecto</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>sku</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="sku"                data-endpoint="PATCHapi-products-variants--id-"
+               value="TSHIRT-RED-L"
+               data-component="body">
+    <br>
+<p>變體的 SKU 編碼，必須是唯一的. Example: <code>TSHIRT-RED-L</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>price</code></b>&nbsp;&nbsp;
+<small>numeric</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="price"                data-endpoint="PATCHapi-products-variants--id-"
+               value="299.99"
+               data-component="body">
+    <br>
+<p>變體的售價，最多兩位小數. Example: <code>299.99</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>cost</code></b>&nbsp;&nbsp;
+<small>numeric</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="cost"                data-endpoint="PATCHapi-products-variants--id-"
+               value="150.00"
+               data-component="body">
+    <br>
+<p>變體的成本價，最多兩位小數. Example: <code>150.00</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>stock_alert_threshold</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="stock_alert_threshold"                data-endpoint="PATCHapi-products-variants--id-"
+               value="10"
+               data-component="body">
+    <br>
+<p>庫存預警數量. Example: <code>10</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>is_active</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+                <label data-endpoint="PATCHapi-products-variants--id-" style="display: none">
+            <input type="radio" name="is_active"
+                   value="true"
+                   data-endpoint="PATCHapi-products-variants--id-"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="PATCHapi-products-variants--id-" style="display: none">
+            <input type="radio" name="is_active"
+                   value="false"
+                   data-endpoint="PATCHapi-products-variants--id-"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>變體是否啟用. Example: <code>true</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>weight</code></b>&nbsp;&nbsp;
+<small>numeric</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="weight"                data-endpoint="PATCHapi-products-variants--id-"
+               value="250"
+               data-component="body">
+    <br>
+<p>重量（公克）. Example: <code>250</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>length</code></b>&nbsp;&nbsp;
+<small>numeric</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="length"                data-endpoint="PATCHapi-products-variants--id-"
+               value="30"
+               data-component="body">
+    <br>
+<p>長度（公分）. Example: <code>30</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>width</code></b>&nbsp;&nbsp;
+<small>numeric</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="width"                data-endpoint="PATCHapi-products-variants--id-"
+               value="20"
+               data-component="body">
+    <br>
+<p>寬度（公分）. Example: <code>20</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>height</code></b>&nbsp;&nbsp;
+<small>numeric</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="height"                data-endpoint="PATCHapi-products-variants--id-"
+               value="5"
+               data-component="body">
+    <br>
+<p>高度（公分）. Example: <code>5</code></p>
+        </div>
+        </form>
+
+                    <h2 id="-DELETEapi-products-variants--id-">刪除商品變體</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-DELETEapi-products-variants--id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://localhost/api/products/variants/architecto" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/products/variants/architecto"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+fetch(url, {
+    method: "DELETE",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-DELETEapi-products-variants--id-">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;變體已成功刪除&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (403):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;This action is unauthorized.&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (404):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;No query results for model [App\\Models\\ProductVariant] 999&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-DELETEapi-products-variants--id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-DELETEapi-products-variants--id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-products-variants--id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-products-variants--id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-products-variants--id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-DELETEapi-products-variants--id-" data-method="DELETE"
+      data-path="api/products/variants/{id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-products-variants--id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-products-variants--id-"
+                    onclick="tryItOut('DELETEapi-products-variants--id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-products-variants--id-"
+                    onclick="cancelTryOut('DELETEapi-products-variants--id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-products-variants--id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/products/variants/{id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-products-variants--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-products-variants--id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="id"                data-endpoint="DELETEapi-products-variants--id-"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the variant. Example: <code>architecto</code></p>
+            </div>
+                    </form>
+
                 <h1 id="">屬性值管理</h1>
 
     
@@ -5120,14 +5580,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/attributes/1/values" \
+    --get "http://localhost/api/attributes/2/values" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1/values"
+    "http://localhost/api/attributes/2/values"
 );
 
 const headers = {
@@ -5266,10 +5726,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="attribute_id"                data-endpoint="GETapi-attributes--attribute_id--values"
-               value="1"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>2</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -5299,7 +5759,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/attributes/1/values" \
+    "http://localhost/api/attributes/2/values" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -5310,7 +5770,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1/values"
+    "http://localhost/api/attributes/2/values"
 );
 
 const headers = {
@@ -5415,10 +5875,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="attribute_id"                data-endpoint="POSTapi-attributes--attribute_id--values"
-               value="1"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>2</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -5459,14 +5919,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/values/16" \
+    --get "http://localhost/api/values/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/values/16"
+    "http://localhost/api/values/2"
 );
 
 const headers = {
@@ -5566,10 +6026,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-values--id-"
-               value="16"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the value. Example: <code>16</code></p>
+<p>The ID of the value. Example: <code>2</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>value</code></b>&nbsp;&nbsp;
@@ -5599,14 +6059,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/values/16" \
+    "http://localhost/api/values/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/values/16"
+    "http://localhost/api/values/2"
 );
 
 const headers = {
@@ -5705,10 +6165,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-values--id-"
-               value="16"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the value. Example: <code>16</code></p>
+<p>The ID of the value. Example: <code>2</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>value</code></b>&nbsp;&nbsp;
@@ -8612,7 +9072,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/values/16" \
+    "http://localhost/api/values/2" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -8623,7 +9083,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/values/16"
+    "http://localhost/api/values/2"
 );
 
 const headers = {
@@ -8738,10 +9198,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-values--id-"
-               value="16"
+               value="2"
                data-component="url">
     <br>
-<p>The ID of the value. Example: <code>16</code></p>
+<p>The ID of the value. Example: <code>2</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>value</code></b>&nbsp;&nbsp;

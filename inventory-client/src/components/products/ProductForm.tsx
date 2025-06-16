@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAttributes } from '@/hooks/queries/useEntityQueries';
+import { useAttributes, useCreateAttributeValue } from '@/hooks/queries/useEntityQueries';
 import { 
   type Attribute, 
   type ProductSubmissionData 
@@ -75,6 +75,9 @@ export function ProductForm({
   
   // 獲取屬性資料
   const { data: attributesData, isLoading: attributesLoading, error: attributesError } = useAttributes();
+  
+  // 屬性值創建 Mutation
+  const createAttributeValueMutation = useCreateAttributeValue();
   
   // 商品創建 Mutation（暫時停用，直接使用狀態管理）
   // const createProductMutation = useCreateProduct();
@@ -162,9 +165,17 @@ export function ProductForm({
   };
 
   /**
-   * 添加屬性值
+   * 添加屬性值（第一階段：即時鑄造 - 支援即時創建新的屬性值）
+   * 
+   * @description
+   * 升級版的屬性值添加功能，具備以下特性：
+   * 1. 自動檢查現有屬性值，避免重複創建
+   * 2. 即時調用後端 API 創建新的屬性值
+   * 3. 自動更新 React Query 快取，確保數據同步
+   * 4. 提供明確的載入狀態和錯誤處理
+   * 5. 成功後立即更新本地狀態，無需重新獲取數據
    */
-  const handleAddAttributeValue = (attributeId: number) => {
+  const handleAddAttributeValue = async (attributeId: number) => {
     const inputValue = inputValues[attributeId]?.trim();
     
     if (!inputValue) {
@@ -172,27 +183,47 @@ export function ProductForm({
       return;
     }
 
-    const currentValues = optionsMap[attributeId] || [];
+    // 從後端數據檢查是否重複（更準確）
+    const attribute = attributes.find(attr => attr.id === attributeId);
+    const existingValues = attribute?.values || [];
+    const isExistingValue = existingValues.some(val => val.value === inputValue);
     
-    // 檢查是否重複
-    if (currentValues.includes(inputValue)) {
+    // 也檢查本地狀態中是否重複
+    const currentLocalValues = optionsMap[attributeId] || [];
+    const isLocalDuplicate = currentLocalValues.includes(inputValue);
+    
+    if (isExistingValue || isLocalDuplicate) {
       toast.error('該屬性值已存在');
       return;
     }
 
-    // 添加新值
-    setOptionsMap(prev => ({
-      ...prev,
-      [attributeId]: [...currentValues, inputValue]
-    }));
+    try {
+      // 調用後端 API 創建新的屬性值
+      await createAttributeValueMutation.mutateAsync({
+        attributeId: attributeId,
+        body: { value: inputValue }
+      });
+      
+      // API 成功後，React Query 會自動更新屬性列表的快取
+      // 同時更新本地狀態，讓用戶立即看到新值
+      setOptionsMap(prev => ({
+        ...prev,
+        [attributeId]: [...currentLocalValues, inputValue]
+      }));
 
-    // 清空輸入框
-    setInputValues(prev => ({
-      ...prev,
-      [attributeId]: ''
-    }));
+      // 清空輸入框
+      setInputValues(prev => ({
+        ...prev,
+        [attributeId]: ''
+      }));
 
-    toast.success(`已添加屬性值：${inputValue}`);
+      toast.success(`已成功創建並添加屬性值：${inputValue}`);
+      
+    } catch (error) {
+      // 處理錯誤
+      const errorMessage = error instanceof Error ? error.message : '創建屬性值失敗';
+      toast.error(errorMessage);
+    }
   };
 
   /**
@@ -535,9 +566,17 @@ export function ProductForm({
                               variant="outline"
                               size="sm"
                               onClick={() => handleAddAttributeValue(attributeId)}
-                              disabled={isLoading || !inputValue.trim()}
+                              disabled={
+                                isLoading || 
+                                !inputValue.trim() || 
+                                createAttributeValueMutation.isPending
+                              }
                             >
-                              <Plus className="h-4 w-4" />
+                              {createAttributeValueMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Plus className="h-4 w-4" />
+                              )}
                             </Button>
                           </div>
 

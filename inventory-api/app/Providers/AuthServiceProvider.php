@@ -7,12 +7,14 @@ use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\InventoryTransfer;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\Policies\AttributePolicy;
 use App\Policies\AttributeValuePolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\InventoryTransferPolicy;
 use App\Policies\ProductPolicy;
+use App\Policies\ProductVariantPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -33,6 +35,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Product::class => ProductPolicy::class,
+        ProductVariant::class => ProductVariantPolicy::class,
         User::class => UserPolicy::class,
         Category::class => CategoryPolicy::class,
         Attribute::class => AttributePolicy::class,
