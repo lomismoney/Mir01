@@ -29,17 +29,19 @@ class AttributePolicy
 
     /**
      * 檢查使用者是否可以查看屬性列表
+     * 所有認證用戶都可以查看屬性列表（用於建立商品變體）
      * 
      * @param User $user
      * @return bool
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true; // 所有認證用戶都可以查看屬性列表
     }
 
     /**
      * 檢查使用者是否可以查看特定屬性
+     * 所有認證用戶都可以查看屬性詳情
      * 
      * @param User $user
      * @param Attribute $attribute
@@ -47,7 +49,7 @@ class AttributePolicy
      */
     public function view(User $user, Attribute $attribute): bool
     {
-        return false;
+        return true; // 所有認證用戶都可以查看屬性詳情
     }
 
     /**

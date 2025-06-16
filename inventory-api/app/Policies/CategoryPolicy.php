@@ -31,19 +31,19 @@ class CategoryPolicy
     
     /**
      * 檢視所有分類列表的權限
-     * 由於 before 會攔截所有 admin 的請求，此方法主要用於拒絕非 admin 用戶
+     * 所有認證用戶都可以查看分類列表（用於商品分類選擇）
      * 
      * @param User $user 當前用戶
      * @return bool
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true; // 所有認證用戶都可以查看分類列表
     }
 
     /**
      * 檢視單一分類的權限
-     * 由於 before 會攔截所有 admin 的請求，此方法主要用於拒絕非 admin 用戶
+     * 所有認證用戶都可以查看分類詳情
      * 
      * @param User $user 當前用戶
      * @param Category $category 分類實例
@@ -51,7 +51,7 @@ class CategoryPolicy
      */
     public function view(User $user, Category $category): bool
     {
-        return false;
+        return true; // 所有認證用戶都可以查看分類詳情
     }
 
     /**

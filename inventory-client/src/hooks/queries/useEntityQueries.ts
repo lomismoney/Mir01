@@ -88,12 +88,58 @@ export function useProduct(id: number) {
 
 // 商品創建端點暫時未定義 - 等待後端實現
 
+// 導入由 openapi-typescript 生成的精確類型
+type CreateProductRequestBody = import('@/types/api').paths["/api/products"]["post"]["requestBody"]["content"]["application/json"];
+
 /**
- * 創建商品的 Hook (暫時停用 - 等待後端端點實現)
- * TODO: 需要後端實現 POST /api/products 端點
+ * 創建商品的 Hook (SPU/SKU 架構)
+ * 
+ * 支援完整的 SPU/SKU 商品創建流程：
+ * 1. 創建 SPU (Standard Product Unit) - 標準商品單位
+ * 2. 關聯商品屬性 (attributes)
+ * 3. 創建 SKU 變體 (variants) - 庫存保管單位
+ * 4. 自動初始化所有門市的庫存記錄
+ * 
+ * @returns React Query 變更結果
  */
 export function useCreateProduct() {
-  throw new Error('創建商品功能暫時停用 - 等待後端端點實現');
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (productData: CreateProductRequestBody) => {
+            const { data, error } = await apiClient.POST('/api/products', {
+                body: productData
+            });
+            
+            if (error) {
+                const errorMessage = parseApiErrorMessage(error);
+                throw new Error(errorMessage);
+            }
+            
+            return data;
+        },
+        onSuccess: (data) => {
+            // 成功後更新快取並顯示成功訊息
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            
+            // 使用 toast 顯示成功訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.success('商品創建成功！', {
+                    description: `商品「${data?.data?.name}」已成功創建，包含 ${data?.data?.variants?.length || 0} 個 SKU 變體。`
+                });
+            }
+        },
+        onError: (error) => {
+            // 錯誤處理並顯示錯誤訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.error('商品創建失敗', {
+                    description: error.message || '請檢查輸入資料並重試。'
+                });
+            }
+        },
+    });
 }
 
 // 導入由 openapi-typescript 生成的精確類型
