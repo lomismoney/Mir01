@@ -80,10 +80,12 @@ export type ProductVariantItem = NonNullable<
   import('@/types/api').paths['/api/products/variants']['get']['responses'][200]['content']['application/json']['data']
 >[number];
 
-// 用戶項目型別
+// 用戶項目型別（擴展版本，包含 stores 欄位）
 export type UserItem = NonNullable<
   import('@/types/api').paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
->[number];
+>[number] & {
+  stores?: StoreItem[];
+};
 
 /**
  * 商品變體 (SKU) 類型定義

@@ -318,7 +318,8 @@ export default function UsersPage() {
       role_display: userData.role_display,
       is_admin: userData.is_admin,
       created_at: userData.created_at,
-      updated_at: userData.updated_at
+      updated_at: userData.updated_at,
+      stores: userData.stores || []
     };
     return user;
   });
