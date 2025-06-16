@@ -1,4 +1,5 @@
 import { Category } from '@/types/category';
+import { operations } from '@/types/api';
 
 /**
  * 將 API 回傳的分組分類資料轉換為正確的類型
@@ -80,23 +81,32 @@ export type ProductVariantItem = NonNullable<
   import('@/types/api').paths['/api/products/variants']['get']['responses'][200]['content']['application/json']['data']
 >[number];
 
-// 用戶項目型別
+// 用戶項目型別（擴展版本，包含 stores 欄位）
 export type UserItem = NonNullable<
   import('@/types/api').paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
->[number];
+>[number] & {
+  stores?: StoreItem[];
+};
 
 /**
  * 商品變體 (SKU) 類型定義
  * 
  * 代表單一商品變體的完整資訊，包含價格、屬性值、庫存等
+ * 注意：price 字段在 API 中是字符串格式
  */
 export type ProductVariant = {
   id?: number;
   sku?: string;
-  price?: number;
+  price?: string;  // API 回傳字符串格式的價格
   product_id?: number;
   created_at?: string;
   updated_at?: string;
+  product?: {
+    id?: number;
+    name?: string;
+    description?: string;
+    category_id?: number;
+  };
   attribute_values?: {
     id?: number;
     value?: string;
@@ -141,4 +151,14 @@ export type ProductItem = {
     name?: string;
     description?: string;
   };
-}; 
+};
+
+// 從 API 類型中提取 Store 相關類型
+export type CreateStoreRequest = operations['postApiStores']['requestBody']['content']['application/json'];
+export type UpdateStoreRequest = operations['putApiStoresId']['requestBody']['content']['application/json'];
+export type StoreResponse = operations['postApiStores']['responses'][200]['content']['application/json']['data'];
+export type StoresListResponse = operations['getApiStores']['responses'][200]['content']['application/json'];
+
+// User Stores 相關類型
+export type UserStoresResponse = operations['getApiUsersUser_idStores']['responses'][200]['content']['application/json'];
+export type AssignUserStoresRequest = operations['postApiUsersUser_idStores']['requestBody']['content']['application/json'];

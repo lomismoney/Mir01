@@ -36,14 +36,14 @@ class InventoryResource extends JsonResource
                     'id' => $this->productVariant->id,
                     'sku' => $this->productVariant->sku,
                     'price' => $this->productVariant->price,
-                    'product' => $this->whenLoaded('productVariant.product', function () {
-                        return [
+                    'product' => $this->whenLoaded('productVariant', function () {
+                        return $this->productVariant->product ? [
                             'id' => $this->productVariant->product->id,
                             'name' => $this->productVariant->product->name,
                             'description' => $this->productVariant->product->description,
-                        ];
+                        ] : null;
                     }),
-                    'attribute_values' => $this->whenLoaded('productVariant.attributeValues', function () {
+                    'attribute_values' => $this->whenLoaded('productVariant', function () {
                         return $this->productVariant->attributeValues->map(function ($value) {
                             return [
                                 'id' => $value->id,

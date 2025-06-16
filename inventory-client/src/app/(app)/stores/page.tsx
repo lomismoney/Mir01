@@ -10,7 +10,7 @@ import {
   Edit, 
   Trash
 } from "lucide-react";
-import { useStore, useStores, useCreateStore, useUpdateStore, useDeleteStore, Store } from "@/hooks/useStores";
+import { useStores, useCreateStore, useUpdateStore, useDeleteStore, Store } from "@/hooks/useStores";
 import { useSession } from "next-auth/react";
 
 import {
@@ -81,8 +81,9 @@ export default function StoresPage() {
       toast.success('分店新增成功');
       setIsCreateDialogOpen(false);
       resetCreateForm();
-    } catch (error: any) {
-      toast.error(`新增失敗: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '新增失敗';
+      toast.error(`新增失敗: ${errorMessage}`);
     }
   };
   
@@ -115,8 +116,9 @@ export default function StoresPage() {
       toast.success('分店更新成功');
       setIsEditDialogOpen(false);
       resetEditForm();
-    } catch (error: any) {
-      toast.error(`更新失敗: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '更新失敗';
+      toast.error(`更新失敗: ${errorMessage}`);
     }
   };
   
@@ -138,8 +140,9 @@ export default function StoresPage() {
       await deleteStoreMutation.mutateAsync(storeToDelete.id);
       toast.success('分店刪除成功');
       setIsDeleteDialogOpen(false);
-    } catch (error: any) {
-      toast.error(`刪除失敗: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '刪除失敗';
+      toast.error(`刪除失敗: ${errorMessage}`);
     }
   };
   
@@ -212,7 +215,9 @@ export default function StoresPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                Array.isArray(stores) && stores.map((store: Store) => (
+                Array.isArray(stores) && stores.map((storeData) => {
+                  const store = storeData as Store;
+                  return (
                   <TableRow key={store.id}>
                     <TableCell>{store.id}</TableCell>
                     <TableCell className="font-medium">{store.name}</TableCell>
@@ -242,7 +247,8 @@ export default function StoresPage() {
                       </TableCell>
                     )}
                   </TableRow>
-                ))
+                  );
+                })
               )}
             </TableBody>
           </Table>

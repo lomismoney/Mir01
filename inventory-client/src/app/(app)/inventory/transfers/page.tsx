@@ -1,5 +1,7 @@
 'use client';
 
+import InventoryTransfer from '@/components/inventory/InventoryTransfer';
+
 /**
  * 庫存轉移頁面（Auth.js 中間件保護版本）
  * 
@@ -16,10 +18,15 @@
 export default function InventoryTransferPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
-    <div className="p-4 md:p-8">
-      <h1 className="text-2xl font-bold mb-4">庫存轉移</h1>
-      <p className="text-muted-foreground">管理不同倉庫間的庫存轉移作業</p>
-      {/* 庫存轉移功能將在此實作 */}
+    <div className="container mx-auto p-4 md:p-8 space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">庫存轉移</h1>
+        <p className="text-muted-foreground">
+          管理不同門市間的庫存轉移作業，包括轉移申請、狀態追蹤等功能
+        </p>
+      </div>
+      
+      <InventoryTransfer />
     </div>
   );
 } 

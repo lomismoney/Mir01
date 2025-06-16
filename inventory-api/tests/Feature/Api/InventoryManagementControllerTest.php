@@ -228,7 +228,7 @@ class InventoryManagementControllerTest extends TestCase
             
         $response->assertStatus(200);
         
-        $inventories = $response->json();
+        $inventories = $response->json('data');
         
         $this->assertCount(1, $inventories, '應該找到一個包含"Special"的庫存記錄');
         $this->assertStringContainsString('Special', $inventories[0]['product_variant']['product']['name']);

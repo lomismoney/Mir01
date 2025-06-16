@@ -36,7 +36,7 @@ import { useSession } from 'next-auth/react';
 import { toast } from "sonner";
 import { UsersDataTable } from '@/components/users/users-data-table';
 import { createUsersColumns } from '@/components/users/users-columns';
-import { UserItem } from '@/types/api-helpers';
+import { UserItem, StoreItem } from '@/types/api-helpers';
 import { UserActions } from '@/components/users/users-columns';
 import { UserStoresDialog } from "@/components/users/user-stores-dialog";
 import { useQueryClient } from '@tanstack/react-query';
@@ -308,19 +308,15 @@ export default function UsersPage() {
   const columns = createUsersColumns(userActions);
 
   // 處理用戶資料，確保類型正確
-  const users = (usersResponse?.data || []).map((userData: any) => {
-    // 使用明確的類型定義解決 TypeScript 錯誤
-    const user: UserItem = {
-      id: userData.id,
-      name: userData.name,
-      username: userData.username,
-      role: userData.role,
-      role_display: userData.role_display,
-      is_admin: userData.is_admin,
-      created_at: userData.created_at,
-      updated_at: userData.updated_at
+  const users = (usersResponse?.data || []).map((userData): UserItem => {
+    // 使用明確的類型定義和擴展屬性
+    const baseUser = userData;
+    const stores = (userData as UserItem & { stores?: StoreItem[] }).stores || [];
+    
+    return {
+      ...baseUser,
+      stores
     };
-    return user;
   });
 
   // 檢查管理員權限 - 使用 useAuth hook 來檢查權限

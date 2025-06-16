@@ -53,25 +53,39 @@ export function InventoryManagement() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>庫存管理</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="w-full md:w-1/3">
-              <Label htmlFor="store-select">選擇門市</Label>
+    <div className="space-y-6">
+      {/* 標題區塊 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">庫存管理</h2>
+          <p className="text-muted-foreground">管理和監控商品庫存狀況</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshIcon className="h-4 w-4 mr-2" />
+            重新整理
+          </Button>
+          <InventoryAdjustmentDialog onSuccess={handleInventoryUpdateSuccess} />
+        </div>
+      </div>
+
+      {/* 篩選控制區塊 */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            {/* 門市選擇 */}
+            <div className="space-y-2">
+              <Label htmlFor="store-select">門市</Label>
               <Select
                 disabled={isLoadingStores}
                 value={selectedStoreId?.toString() || "all"}
                 onValueChange={(value) => setSelectedStoreId(value === "all" ? undefined : Number(value))}
               >
                 <SelectTrigger id="store-select">
-                  <SelectValue placeholder="所有分店" />
+                  <SelectValue placeholder="所有門市" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">所有分店</SelectItem>
+                  <SelectItem value="all">所有門市</SelectItem>
                   {storesData?.data?.map((store) => (
                     <SelectItem key={store.id} value={store.id?.toString() || ''}>
                       {store.name}
@@ -81,7 +95,8 @@ export function InventoryManagement() {
               </Select>
             </div>
 
-            <div className="w-full md:w-2/3">
+            {/* 產品搜尋 */}
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="search">搜尋產品</Label>
               <div className="flex w-full items-center space-x-2">
                 <Input
@@ -90,69 +105,55 @@ export function InventoryManagement() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Button
-                  type="submit"
-                  size="icon"
-                  onClick={() => refetchInventory()}
-                >
-                  <Search className="h-4 w-4" />
-                  <span className="sr-only">搜尋</span>
+                <Button size="sm" onClick={() => refetchInventory()}>
+                  <Search className="h-4 w-4 mr-2" />
+                  搜尋
                 </Button>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleRefresh}
-                  >
-                    <RefreshIcon className="h-4 w-4" />
-                    <span className="sr-only">重新整理</span>
-                  </Button>
-                  <InventoryAdjustmentDialog
-                    onSuccess={handleInventoryUpdateSuccess}
-                  />
-                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          {/* 篩選選項 */}
+          <div className="flex items-center gap-6 pt-4 border-t">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="low-stock"
                 checked={showLowStock}
-                onCheckedChange={(checked) =>
-                  setShowLowStock(checked === true)
-                }
+                onCheckedChange={(checked) => setShowLowStock(checked === true)}
               />
-              <Label htmlFor="low-stock">顯示低庫存</Label>
+              <Label htmlFor="low-stock" className="text-sm font-normal">
+                只顯示低庫存商品
+              </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="out-of-stock"
                 checked={showOutOfStock}
-                onCheckedChange={(checked) =>
-                  setShowOutOfStock(checked === true)
-                }
+                onCheckedChange={(checked) => setShowOutOfStock(checked === true)}
               />
-              <Label htmlFor="out-of-stock">顯示缺貨</Label>
+              <Label htmlFor="out-of-stock" className="text-sm font-normal">
+                只顯示缺貨商品
+              </Label>
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="mt-6">
+      {/* 庫存列表 */}
+      <Card>
+        <CardContent className="p-0">
           <InventoryListTable
             data={inventoryData?.data || []}
             isLoading={isLoadingInventory}
             onSelectInventory={(inventoryId, productVariantId, quantity) => {
-              // 保留原有的調整庫存功能，這裡可以擴展為另一個對話框
               toast({
                 title: "功能提示",
-                description: "庫存調整功能可以透過新增入庫來實現",
+                description: "庫存調整功能可以透過右上角的「新增入庫」來實現",
               })
             }}
           />
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 } 

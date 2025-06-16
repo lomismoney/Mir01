@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useCreateInventoryTransfer, useStores, useProductVariants } from "@/hooks/queries/useEntityQueries"
 import { Store } from "@/types/store"
-import { ProductVariant } from "@/types/product"
+import { ProductVariant } from "@/types/api-helpers"
 import { PaginatedResponse } from "@/types/inventory"
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
@@ -171,7 +171,7 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {productsData?.data?.map((variant) => (
+                      {productsData?.data?.map((variant: ProductVariant) => (
                         <SelectItem key={variant.id} value={variant.id?.toString() || ''}>
                           {variant.product?.name} - {variant.sku}
                         </SelectItem>

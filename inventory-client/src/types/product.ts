@@ -97,7 +97,7 @@ export interface ProductVariant {
   id: number;
   product_id: number;
   sku: string;
-  price: number;
+  price: string;  // API 回傳字符串格式的價格
   created_at: string;
   updated_at: string;
   product?: ProductBasic;

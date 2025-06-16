@@ -115,24 +115,31 @@ export function handleApiError(error: UnknownError, fallbackMessage?: string): s
   if (process.env.NODE_ENV === 'development') {
     // 記錄錯誤，但避免輸出可能過大的 HTML 內容
     if (error && typeof error === 'object') {
-      let errorInfo: Record<string, any> = {};
+      let errorInfo: Record<string, unknown> = {};
       
       try {
-        const { message, status, code, ...rest } = error as any;
+        // 使用類型安全的錯誤處理
+        if ('message' in error) {
+          const message = error.message;
+          errorInfo.message = typeof message === 'string' && isHtmlString(message) ? 
+            'HTML Response (content omitted)' : message;
+        }
         
-        // 不輸出長 HTML 內容
-        errorInfo = {
-          message: typeof message === 'string' && isHtmlString(message) ? 
-            'HTML Response (content omitted)' : message,
-          status,
-          code
-        };
+        if ('status' in error) {
+          errorInfo.status = error.status;
+        }
+        
+        if ('code' in error) {
+          errorInfo.code = error.code;
+        }
         
         // 添加其他有用但不是 HTML 的信息
-        Object.entries(rest).forEach(([key, value]) => {
-          // 篩選掉可能的長 HTML 字串
-          if (typeof value !== 'string' || !isHtmlString(value)) {
-            errorInfo[key] = value;
+        Object.entries(error).forEach(([key, value]) => {
+          if (key !== 'message' && key !== 'status' && key !== 'code') {
+            // 篩選掉可能的長 HTML 字串
+            if (typeof value !== 'string' || !isHtmlString(value)) {
+              errorInfo[key] = value;
+            }
           }
         });
       } catch {

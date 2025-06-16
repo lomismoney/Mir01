@@ -140,6 +140,29 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
     },
   },
   {
+    id: "stores",
+    header: "所屬分店",
+    cell: ({ row }) => {
+      const user = row.original
+      const stores = user.stores || []
+      return (
+        <div className="flex flex-wrap gap-1">
+          {stores.map((store) => (
+            <Badge 
+              key={store.id} 
+              variant="outline" 
+              className="text-xs"
+            >
+              <Store className="mr-1 h-3 w-3" />
+              {store.name}
+            </Badge>
+          ))}
+        </div>
+      )
+    },
+    enableSorting: false,
+  },
+  {
     accessorKey: "created_at",
     header: ({ column }) => {
       return (

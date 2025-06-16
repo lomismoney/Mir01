@@ -36,8 +36,8 @@ export function useStores() {
   return useQuery({
     queryKey: ['stores'],
     queryFn: async () => {
-      // 使用 any 類型繞過 TypeScript 檢查
-      const { data, error } = await (apiClient as any).GET("/api/stores");
+      // 使用正確的 API 類型
+      const { data, error } = await apiClient.GET("/api/stores");
 
       if (error) {
         throw handleApiError(error);
@@ -53,12 +53,14 @@ export function useStores() {
  * 獲取單個分店的 Hook
  * @param id - 分店 ID
  */
-export function useStore(id: number) {
+export function useStoreDetail(id: number) {
   return useQuery({
     queryKey: ['stores', id],
     queryFn: async () => {
-      // 使用 any 類型繞過 TypeScript 檢查
-      const { data, error } = await (apiClient as any).GET(`/api/stores/${id}`);
+      // 使用正確的 API 類型
+      const { data, error } = await apiClient.GET(`/api/stores/{id}`, {
+        params: { path: { id } }
+      });
 
       if (error) {
         throw handleApiError(error);
@@ -79,8 +81,8 @@ export function useCreateStore() {
 
   return useMutation({
     mutationFn: async (storeData: CreateStoreBody) => {
-      // 使用 any 類型繞過 TypeScript 檢查
-      const { data, error } = await (apiClient as any).POST("/api/stores", {
+      // 使用正確的 API 類型
+      const { data, error } = await apiClient.POST("/api/stores", {
         body: storeData
       });
 
@@ -105,8 +107,9 @@ export function useUpdateStore() {
 
   return useMutation({
     mutationFn: async ({ id, ...storeData }: UpdateStoreBody & { id: number }) => {
-      // 使用 any 類型繞過 TypeScript 檢查
-      const { data, error } = await (apiClient as any).PUT(`/api/stores/${id}`, {
+      // 使用正確的 API 類型
+      const { data, error } = await apiClient.PUT(`/api/stores/{id}`, {
+        params: { path: { id } },
         body: storeData
       });
 
@@ -132,8 +135,10 @@ export function useDeleteStore() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      // 使用 any 類型繞過 TypeScript 檢查
-      const { error } = await (apiClient as any).DELETE(`/api/stores/${id}`);
+      // 使用正確的 API 類型
+      const { error } = await apiClient.DELETE(`/api/stores/{id}`, {
+        params: { path: { id } }
+      });
 
       if (error) {
         throw handleApiError(error);

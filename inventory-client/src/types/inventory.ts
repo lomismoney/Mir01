@@ -8,7 +8,7 @@ export interface ProductVariant {
   id: number;
   product_id: number;
   sku: string;
-  price: number;
+  price: string;  // API 回傳字符串格式的價格
   product?: ProductBasic;
   attributeValues?: AttributeValue[];
 }
@@ -45,7 +45,7 @@ export interface InventoryTransaction {
   before_quantity: number;
   after_quantity: number;
   notes: string | null;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;  // 使用 unknown 替代 any
   created_at: string;
   updated_at: string;
   user?: User;

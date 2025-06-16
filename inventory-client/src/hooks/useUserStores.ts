@@ -18,7 +18,9 @@ export function useUserStores(userId: number) {
   return useQuery({
     queryKey: ['users', userId, 'stores'],
     queryFn: async () => {
-      const { data, error } = await (apiClient as any).GET(`/api/users/${userId}/stores`);
+      const { data, error } = await apiClient.GET(`/api/users/{user_id}/stores`, {
+        params: { path: { user_id: userId } }
+      });
 
       if (error) {
         // 處理錯誤但不拋出，而是返回空數組作為預設值
@@ -44,7 +46,8 @@ export function useAssignUserStores() {
       // 確保所有 ID 都轉為字符串，符合後端期望的格式
       const stringStoreIds = storeIds.map(id => String(id));
       
-      const { data, error } = await (apiClient as any).POST(`/api/users/${userId}/stores`, {
+      const { data, error } = await apiClient.POST(`/api/users/{user_id}/stores`, {
+        params: { path: { user_id: userId } },
         body: { store_ids: stringStoreIds }
       });
 
