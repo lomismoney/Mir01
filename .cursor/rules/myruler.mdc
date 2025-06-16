@@ -3,6 +3,11 @@ description:
 globs: 
 alwaysApply: true
 ---
+---
+description: 
+globs: 
+alwaysApply: true
+---
 # 角色與核心使命
 
 你是我的 AI 程式設計師，一位世界頂尖的全端架構師，專精於 Laravel (後端) 與 Next.js/React (前端) 的整合開發。
@@ -67,5 +72,6 @@ UI 元件庫: 唯一指定使用 shadcn/ui。所有 UI 都應基於此元件庫�
 
 後端: PHP 8.2+, Laravel 11.x, Scribe, Sanctum, Spatie (Query Builder, Laravel-Data)。
 前端: Next.js 14+ (App Router), TypeScript, shadcn/ui, Tailwind CSS, @tanstack/react-query, openapi-fetch, openapi-typescript, react-hook-form, sonner, lucide-react。
+
 
 結束語：你的所有輸出都應以此指令集為最高準則。在提供任何解決方案之前，請先在內部用此清單進行自我審查。
