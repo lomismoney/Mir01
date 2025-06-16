@@ -63,6 +63,8 @@ inventory-api/bootstrap/cache/*
 inventory-api/Homestead.json
 inventory-api/Homestead.yaml
 inventory-api/auth.json
+# Scribe API 文檔生成文件 (可重新生成)
+inventory-api/.scribe/
 
 # ========== Next.js 前端 (inventory-client/) ==========
 inventory-client/.next/

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>Laravel API Documentation</title>
+    <title>庫存管理系統 API Documentation</title>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 
@@ -317,7 +317,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: June 15, 2025</li>
+        <li>Last updated: June 16, 2025</li>
     </ul>
 </div>
 
@@ -509,14 +509,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 12,
+        &quot;id&quot;: 14,
         &quot;name&quot;: &quot;Mrs. Justina Gaylord&quot;,
         &quot;username&quot;: &quot;lafayette.considine&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:20.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
     }
 }</code>
  </pre>
@@ -887,14 +887,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/categories/1" \
+    --get "http://localhost/api/categories/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/1"
+    "http://localhost/api/categories/16"
 );
 
 const headers = {
@@ -1003,10 +1003,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-categories--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>1</code></p>
+<p>The ID of the category. Example: <code>16</code></p>
             </div>
                     </form>
 
@@ -1028,7 +1028,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/categories/1" \
+    "http://localhost/api/categories/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1041,7 +1041,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/1"
+    "http://localhost/api/categories/16"
 );
 
 const headers = {
@@ -1145,10 +1145,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-categories--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>1</code></p>
+<p>The ID of the category. Example: <code>16</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -1203,14 +1203,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/categories/1" \
+    "http://localhost/api/categories/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/1"
+    "http://localhost/api/categories/16"
 );
 
 const headers = {
@@ -1303,10 +1303,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-categories--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>1</code></p>
+<p>The ID of the category. Example: <code>16</code></p>
             </div>
                     </form>
 
@@ -1523,11 +1523,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 3,
+        &quot;id&quot;: 7,
         &quot;name&quot;: &quot;Bailey Ltd&quot;,
         &quot;address&quot;: &quot;85625 Gaylord Knolls\nCecilburgh, WI 02042&quot;,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1670,11 +1670,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 4,
+        &quot;id&quot;: 8,
         &quot;name&quot;: &quot;Cruickshank Inc&quot;,
         &quot;address&quot;: &quot;532 Leuschke Causeway\nMcLaughlinstad, MI 07365&quot;,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1817,11 +1817,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 5,
+        &quot;id&quot;: 9,
         &quot;name&quot;: &quot;Rempel, Gulgowski and O&#039;Kon&quot;,
         &quot;address&quot;: &quot;80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432&quot;,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2105,11 +2105,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 6,
-        &quot;name&quot;: &quot;Kohler, Wunsch and Bergnaum&quot;,
-        &quot;address&quot;: &quot;728 Timmy Island Suite 979\nPort Allisonport, PA 18406&quot;,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;id&quot;: 10,
+        &quot;name&quot;: &quot;Williamson, Boyle and Hane&quot;,
+        &quot;address&quot;: &quot;963 Kemmer Divide Suite 369\nWest Vernice, GA 89877&quot;,
+        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2254,14 +2254,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 13,
+        &quot;id&quot;: 15,
         &quot;name&quot;: &quot;Ms. Elisabeth Okuneva&quot;,
         &quot;username&quot;: &quot;gulgowski.asia&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-15T13:40:21.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2874,14 +2874,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/attributes/1" \
+    --get "http://localhost/api/attributes/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1"
+    "http://localhost/api/attributes/16"
 );
 
 const headers = {
@@ -2981,10 +2981,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-attributes--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>16</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -3013,7 +3013,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/attributes/1" \
+    "http://localhost/api/attributes/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -3024,7 +3024,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1"
+    "http://localhost/api/attributes/16"
 );
 
 const headers = {
@@ -3133,10 +3133,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-attributes--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>16</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -3178,14 +3178,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/attributes/1" \
+    "http://localhost/api/attributes/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1"
+    "http://localhost/api/attributes/16"
 );
 
 const headers = {
@@ -3284,10 +3284,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-attributes--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>16</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -5120,14 +5120,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/attributes/1/values" \
+    --get "http://localhost/api/attributes/16/values" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1/values"
+    "http://localhost/api/attributes/16/values"
 );
 
 const headers = {
@@ -5266,10 +5266,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="attribute_id"                data-endpoint="GETapi-attributes--attribute_id--values"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>16</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -5299,7 +5299,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/attributes/1/values" \
+    "http://localhost/api/attributes/16/values" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -5310,7 +5310,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/1/values"
+    "http://localhost/api/attributes/16/values"
 );
 
 const headers = {
@@ -5415,10 +5415,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="attribute_id"                data-endpoint="POSTapi-attributes--attribute_id--values"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>1</code></p>
+<p>The ID of the attribute. Example: <code>16</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
