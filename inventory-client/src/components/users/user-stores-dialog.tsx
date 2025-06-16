@@ -130,9 +130,10 @@ export function UserStoresDialog({
       queryClient.invalidateQueries({ queryKey: ['users'] });
       
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // handleApiError 只做 logging；仍應讓使用者看到失敗訊息
-      toast.error(error.message ?? '操作失敗，請稍後再試');
+      const errorMessage = error instanceof Error ? error.message : '操作失敗，請稍後再試';
+      toast.error(errorMessage);
     }
   };
   

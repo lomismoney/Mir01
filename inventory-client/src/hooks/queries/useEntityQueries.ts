@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
+import { parseApiErrorMessage } from '@/types/error';
+import { CreateStoreRequest, UpdateStoreRequest } from '@/types/api-helpers';
 
 /**
  * API Hooks - 商品管理
@@ -243,33 +245,8 @@ export function useCreateUser() {
     mutationFn: async (body: CreateUserRequestBody) => {
       const { data, error } = await apiClient.POST('/api/users', { body });
       if (error) { 
-        // 改進錯誤處理：更好地處理 Laravel 驗證錯誤
-        let errorMessage = '建立用戶失敗';
-        
-        // 使用 any 類型來處理動態錯誤結構
-        const errorObj = error as any;
-        
-        if (errorObj && typeof errorObj === 'object') {
-          // 處理 Laravel 驗證錯誤格式
-          if (errorObj.errors && typeof errorObj.errors === 'object') {
-            // Laravel 驗證錯誤格式：{ errors: { field: [messages] } }
-            const validationErrors = Object.values(errorObj.errors as Record<string, string[]>)
-              .flat()
-              .join('\n');
-            if (validationErrors) {
-              errorMessage = validationErrors;
-            }
-          } else if (errorObj.message && typeof errorObj.message === 'string') {
-            // Laravel 一般錯誤格式：{ message: "error message" }
-            errorMessage = errorObj.message;
-          } else {
-            // 其他錯誤格式
-            const allErrors = Object.values(errorObj).flat().join('\n');
-            if (allErrors) {
-              errorMessage = allErrors;
-            }
-          }
-        }
+        // 使用類型安全的錯誤處理
+        const errorMessage = parseApiErrorMessage(error) || '建立用戶失敗';
         
         throw new Error(errorMessage);
       }
@@ -295,34 +272,8 @@ export function useUpdateUser() {
         body: variables.body,
       });
       if (error) { 
-        // 改進錯誤處理：更好地處理 Laravel 驗證錯誤
-        let errorMessage = '更新用戶失敗';
-        
-        // 使用 any 類型來處理動態錯誤結構
-        const errorObj = error as any;
-        
-        if (errorObj && typeof errorObj === 'object') {
-          // 處理 Laravel 驗證錯誤格式
-          if (errorObj.errors && typeof errorObj.errors === 'object') {
-            // Laravel 驗證錯誤格式：{ errors: { field: [messages] } }
-            const validationErrors = Object.values(errorObj.errors as Record<string, string[]>)
-              .flat()
-              .join('\n');
-            if (validationErrors) {
-              errorMessage = validationErrors;
-            }
-          } else if (errorObj.message && typeof errorObj.message === 'string') {
-            // Laravel 一般錯誤格式：{ message: "error message" }
-            errorMessage = errorObj.message;
-          } else {
-            // 其他錯誤格式
-            const allErrors = Object.values(errorObj).flat().join('\n');
-            if (allErrors) {
-              errorMessage = allErrors;
-            }
-          }
-        }
-        
+        // 使用類型安全的錯誤處理
+        const errorMessage = parseApiErrorMessage(error) || '更新用戶失敗';
         throw new Error(errorMessage);
       }
       return data;
@@ -556,17 +507,8 @@ export function useCreateAttribute() {
       
       if (error) {
         console.error('API Error:', error);
-        // 處理不同的錯誤格式
-        let errorMessage = '建立屬性失敗';
-        if (typeof error === 'object' && error !== null) {
-          if ('message' in error) {
-            errorMessage = (error as any).message;
-          } else if ('errors' in error) {
-            errorMessage = Object.values((error as any).errors).flat().join('\n');
-          } else {
-            errorMessage = Object.values(error).flat().join('\n');
-          }
-        }
+        // 使用類型安全的錯誤處理
+        const errorMessage = parseApiErrorMessage(error) || '建立屬性失敗';
         throw new Error(errorMessage);
       }
       return data;
@@ -1003,7 +945,7 @@ export function useStore(id: number) {
 export function useCreateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (store: any) => { // 類型待 API 文檔完善後補充
+    mutationFn: async (store: CreateStoreRequest) => {
       const { data, error } = await apiClient.POST('/api/stores', {
         body: store,
       });
@@ -1024,7 +966,7 @@ export function useCreateStore() {
 export function useUpdateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { id: number; data: any }) => {
+    mutationFn: async (params: { id: number; data: UpdateStoreRequest }) => {
       const { data, error } = await apiClient.PUT('/api/stores/{id}', {
         params: { path: { id: params.id } },
         body: params.data,
@@ -1081,25 +1023,15 @@ export function useProductVariants(params: {
           params: { query: params },
         });
         
-        // 使用類型斷言來處理 openapi-fetch 的嚴格類型推斷
-        const { data, error } = response as { 
-          data?: any; 
-          error?: { status?: number; message?: string } 
-        };
+        // 直接使用響應，不需要類型斷言
+        const { data, error } = response;
         
         if (error) {
           console.error('Product variants API error:', error);
           
-          // 如果是 404 或空結果，返回空數組而不是拋出錯誤
-          if (error.status === 404 || error.status === 422) {
-            console.log('No product variants found, returning empty array');
-            return { data: [], meta: { total: 0 } };
-          }
-          
-          // 其他錯誤才拋出
-          const errorMessage = error.message || '未知錯誤';
-          const statusCode = error.status || '未知狀態碼';
-          throw new Error(`獲取商品變體列表失敗: ${statusCode} - ${errorMessage}`);
+          // 使用類型安全的錯誤處理
+          const errorMessage = parseApiErrorMessage(error) || '獲取商品變體列表失敗';
+          throw new Error(errorMessage);
         }
         
         return data;
