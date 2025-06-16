@@ -46,6 +46,7 @@ export function InventoryListTable({
           <TableRow>
             <TableHead className="w-[100px]">SKU</TableHead>
             <TableHead>產品名稱</TableHead>
+            <TableHead className="w-[120px]">所在分店</TableHead>
             <TableHead className="text-center">數量</TableHead>
             <TableHead className="text-center">低庫存閾值</TableHead>
             <TableHead className="text-center">狀態</TableHead>
@@ -57,7 +58,7 @@ export function InventoryListTable({
             // 載入中顯示骨架屏
             Array.from({ length: 5 }).map((_, index) => (
               <TableRow key={`skeleton-${index}`}>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={7}>
                   <Skeleton className="h-12 w-full" />
                 </TableCell>
               </TableRow>
@@ -65,7 +66,7 @@ export function InventoryListTable({
           ) : data.length === 0 ? (
             // 無資料顯示
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={7} className="h-24 text-center">
                 <div className="flex flex-col items-center justify-center space-y-3 py-6">
                   <p className="text-lg font-medium text-muted-foreground">沒有庫存資料</p>
                   <p className="text-sm text-muted-foreground">選擇一個門市並添加庫存</p>
@@ -81,6 +82,9 @@ export function InventoryListTable({
                 </TableCell>
                 <TableCell>
                   {inventory.product_variant?.product?.name || "未知產品"}
+                </TableCell>
+                <TableCell className="font-medium">
+                  {inventory.store?.name || "未知分店"}
                 </TableCell>
                 <TableCell className="text-center">{inventory.quantity || 0}</TableCell>
                 <TableCell className="text-center">

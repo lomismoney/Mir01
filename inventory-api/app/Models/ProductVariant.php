@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * ProductVariant 模型 - 商品變體 (SKU)
@@ -68,14 +68,14 @@ class ProductVariant extends Model
     }
 
     /**
-     * 獲取該變體的庫存記錄
-     * SKU 與庫存是一對一關係
+     * 獲取該變體的所有庫存記錄
+     * 一個 SKU 在不同門市可能都有庫存記錄
      * 
-     * @return HasOne<Inventory>
+     * @return HasMany<Inventory>
      */
-    public function inventory(): HasOne
+    public function inventory(): HasMany
     {
-        return $this->hasOne(Inventory::class);
+        return $this->hasMany(Inventory::class);
     }
 
     /**

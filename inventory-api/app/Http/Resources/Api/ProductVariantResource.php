@@ -54,15 +54,18 @@ class ProductVariantResource extends JsonResource
             }),
             
             'inventory' => $this->whenLoaded('inventory', function () {
-                return [
-                    'id' => $this->inventory->id,
-                    'quantity' => $this->inventory->quantity,
-                    'low_stock_threshold' => $this->inventory->low_stock_threshold,
-                    'store' => [
-                        'id' => $this->inventory->store->id,
-                        'name' => $this->inventory->store->name,
-                    ],
-                ];
+                return $this->inventory->map(function ($inventory) {
+                    return [
+                        'id' => $inventory->id,
+                        'quantity' => $inventory->quantity,
+                        'low_stock_threshold' => $inventory->low_stock_threshold,
+                        'store_id' => $inventory->store_id,
+                        'store' => [
+                            'id' => $inventory->store->id,
+                            'name' => $inventory->store->name,
+                        ],
+                    ];
+                });
             }),
         ];
     }
