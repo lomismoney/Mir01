@@ -35,6 +35,7 @@ interface InventoryAdjustmentFormProps {
   storeId?: number;
   currentQuantity: number;
   onSuccess?: () => void;
+  dialogOpen?: boolean; // 新增：控制是否啟用資料載入
 }
 
 export function InventoryAdjustmentForm({
@@ -42,6 +43,7 @@ export function InventoryAdjustmentForm({
   storeId,
   currentQuantity,
   onSuccess,
+  dialogOpen = true, // 預設為 true，保持向後相容
 }: InventoryAdjustmentFormProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -50,10 +52,38 @@ export function InventoryAdjustmentForm({
   const isNewProduct = productVariantId === 0
 
   // 獲取門市列表
-  const { data: storesData, isLoading: isLoadingStores } = useStores()
+  const { data: storesData, isLoading: isLoadingStores, error: storesError } = useStores()
 
   // 獲取商品變體列表，當需要選擇產品時
-  const { data: productsData, isLoading: isLoadingProducts } = useProductVariants({})
+  const { 
+    data: productsData, 
+    isLoading: isLoadingProducts, 
+    error: productsError 
+  } = useProductVariants({}, { enabled: dialogOpen && isNewProduct })
+
+  // 處理商品變體獲取錯誤
+  useEffect(() => {
+    if (productsError) {
+      console.error('Products error:', productsError);
+      toast({
+        variant: "destructive",
+        title: "載入商品失敗",
+        description: "無法載入商品列表，請檢查網路連線或稍後再試",
+      })
+    }
+  }, [productsError, toast])
+
+  // 處理門市獲取錯誤
+  useEffect(() => {
+    if (storesError) {
+      console.error('Stores error:', storesError);
+      toast({
+        variant: "destructive",
+        title: "載入門市失敗",
+        description: "無法載入門市列表，請檢查網路連線或稍後再試",
+      })
+    }
+  }, [storesError, toast])
 
   const form = useForm<AdjustmentFormValues>({
     defaultValues: {
@@ -193,11 +223,21 @@ export function InventoryAdjustmentForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {productsData?.data?.map((variant) => (
-                          <SelectItem key={variant.id} value={variant.id?.toString() || ''}>
-                            {variant.product?.name} - {variant.sku}
+                        {isLoadingProducts ? (
+                          <SelectItem value="loading" disabled>
+                            載入商品中...
                           </SelectItem>
-                        ))}
+                        ) : productsData?.data && productsData.data.length > 0 ? (
+                          productsData.data.map((variant: import("@/types/api-helpers").ProductVariant) => (
+                            <SelectItem key={variant.id} value={variant.id?.toString() || ''}>
+                              {variant.product?.name} - {variant.sku}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-products" disabled>
+                            目前沒有可用的商品，請先新增商品
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

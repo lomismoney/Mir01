@@ -99,6 +99,12 @@ export type ProductVariant = {
   product_id?: number;
   created_at?: string;
   updated_at?: string;
+  product?: {
+    id?: number;
+    name?: string;
+    description?: string;
+    category_id?: number;
+  };
   attribute_values?: {
     id?: number;
     value?: string;

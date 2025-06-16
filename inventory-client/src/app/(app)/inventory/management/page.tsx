@@ -1,5 +1,7 @@
 'use client';
 
+import { InventoryManagement } from '@/components/inventory/InventoryManagement';
+
 /**
  * 庫存管理頁面（Auth.js 中間件保護版本）
  * 
@@ -16,10 +18,8 @@
 export default function InventoryManagementPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
-    <div className="p-4 md:p-8">
-      <h1 className="text-2xl font-bold mb-4">庫存管理</h1>
-      <p className="text-muted-foreground">管理和監控商品庫存狀況</p>
-      {/* 庫存管理功能將在此實作 */}
+    <div className="container mx-auto p-4 md:p-8">
+      <InventoryManagement />
     </div>
   );
 } 

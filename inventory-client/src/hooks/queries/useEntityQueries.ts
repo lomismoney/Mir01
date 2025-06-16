@@ -1072,18 +1072,52 @@ export function useProductVariants(params: {
   sku?: string;
   page?: number;
   per_page?: number;
-} = {}) {
+} = {}, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['product-variants', params],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/products/variants', {
-        params: { query: params },
-      });
-      if (error) {
-        throw new Error('獲取商品變體列表失敗');
+      try {
+        const response = await apiClient.GET('/api/products/variants', {
+          params: { query: params },
+        });
+        
+        // 使用類型斷言來處理 openapi-fetch 的嚴格類型推斷
+        const { data, error } = response as { 
+          data?: any; 
+          error?: { status?: number; message?: string } 
+        };
+        
+        if (error) {
+          console.error('Product variants API error:', error);
+          
+          // 如果是 404 或空結果，返回空數組而不是拋出錯誤
+          if (error.status === 404 || error.status === 422) {
+            console.log('No product variants found, returning empty array');
+            return { data: [], meta: { total: 0 } };
+          }
+          
+          // 其他錯誤才拋出
+          const errorMessage = error.message || '未知錯誤';
+          const statusCode = error.status || '未知狀態碼';
+          throw new Error(`獲取商品變體列表失敗: ${statusCode} - ${errorMessage}`);
+        }
+        
+        return data;
+      } catch (err: unknown) {
+        console.error('Product variants fetch error:', err);
+        
+        // 如果是網路錯誤等，也嘗試返回空結果而不是拋出錯誤
+        if (err instanceof TypeError || (err instanceof Error && err.message.includes('fetch'))) {
+          console.log('Network error, returning empty array');
+          return { data: [], meta: { total: 0 } };
+        }
+        
+        throw err;
       }
-      return data;
     },
+    retry: 2, // 重試 2 次
+    retryDelay: 1000, // 1 秒後重試
+    enabled: options?.enabled ?? true, // 預設啟用
   });
 }
 

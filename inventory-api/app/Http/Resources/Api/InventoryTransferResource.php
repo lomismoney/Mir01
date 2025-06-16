@@ -63,27 +63,23 @@ class InventoryTransferResource extends JsonResource
                     'id' => $this->productVariant->id,
                     'sku' => $this->productVariant->sku,
                     'price' => $this->productVariant->price,
-                    'product' => $this->whenLoaded('productVariant.product', function () {
+                    'product' => $this->productVariant->product ? [
+                        'id' => $this->productVariant->product->id,
+                        'name' => $this->productVariant->product->name,
+                        'description' => $this->productVariant->product->description,
+                    ] : null,
+                    'attribute_values' => $this->productVariant->attributeValues ? $this->productVariant->attributeValues->map(function ($value) {
                         return [
-                            'id' => $this->productVariant->product->id,
-                            'name' => $this->productVariant->product->name,
-                            'description' => $this->productVariant->product->description,
+                            'id' => $value->id,
+                            'value' => $value->value,
+                            'attribute' => [
+                                'id' => $value->attribute->id,
+                                'name' => $value->attribute->name,
+                            ],
                         ];
-                    }),
-                    'attribute_values' => $this->whenLoaded('productVariant.attributeValues', function () {
-                        return $this->productVariant->attributeValues->map(function ($value) {
-                            return [
-                                'id' => $value->id,
-                                'value' => $value->value,
-                                'attribute' => [
-                                    'id' => $value->attribute->id,
-                                    'name' => $value->attribute->name,
-                                ],
-                            ];
-                        });
-                    }),
+                    }) : null,
                 ];
             }),
         ];
     }
-} 
+}

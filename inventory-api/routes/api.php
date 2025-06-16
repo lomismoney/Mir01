@@ -65,14 +65,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products/batch-delete', [ProductController::class, 'destroyMultiple']);
     
     /**
-     * 商品資源路由
-     * 提供完整的 CRUD 操作 (index, store, show, update, destroy)
-     */
-    Route::apiResource('products', ProductController::class);
-
-    /**
      * 商品變體管理路由
      * 提供商品變體的查詢功能
+     * 
+     * 注意：這些路由必須在 products resource 路由之前定義，
+     * 避免 /api/products/{id} 路由將 'variants' 誤解為產品 ID
      * 
      * 路由列表：
      * GET    /api/products/variants        - 獲取所有商品變體列表
@@ -80,6 +77,12 @@ Route::middleware('auth:sanctum')->group(function () {
      */
     Route::get('/products/variants', [ProductVariantController::class, 'index']);
     Route::get('/products/variants/{id}', [ProductVariantController::class, 'show']);
+    
+    /**
+     * 商品資源路由
+     * 提供完整的 CRUD 操作 (index, store, show, update, destroy)
+     */
+    Route::apiResource('products', ProductController::class);
 
     /**
      * 進貨單管理路由

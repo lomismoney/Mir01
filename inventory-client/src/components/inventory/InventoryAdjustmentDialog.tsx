@@ -46,6 +46,7 @@ export function InventoryAdjustmentDialog({
           productVariantId={0}
           currentQuantity={0}
           onSuccess={handleSuccess}
+          dialogOpen={open}
         />
       </DialogContent>
     </Dialog>
