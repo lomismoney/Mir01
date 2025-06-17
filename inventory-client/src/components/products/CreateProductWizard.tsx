@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, Circle, Loader2 } from 'lucide-reac
 import { toast } from 'sonner';
 
 // 導入 API Hooks
-import { useCreateProduct, useAttributes } from '@/hooks/queries/useEntityQueries';
+import { useCreateProduct, useUpdateProduct, useProductDetail, useAttributes } from '@/hooks/queries/useEntityQueries';
 
 // 導入步驟組件
 import { 
@@ -147,22 +147,44 @@ function transformWizardDataToApiPayload(
 }
 
 /**
- * 商品創建嚮導主組件
+ * 商品創建/編輯嚮導主組件 Props
+ */
+interface CreateProductWizardProps {
+  /** 商品 ID - 如果提供則為編輯模式，否則為創建模式 */
+  productId?: string | number;
+}
+
+/**
+ * 商品創建/編輯嚮導主組件
  * 
  * 功能特色：
  * - 多步驟流程管理
- * - 進度視覺化指示器
+ * - 進度視覺化指示器  
+ * - 支持創建與編輯兩種模式
  * - 步驟間資料傳遞
  * - 表單驗證與導航控制
  * - 統一的用戶體驗流程
  * - 真實 API 整合
+ * 
+ * @param productId - 商品 ID（編輯模式時使用）
  */
-export function CreateProductWizard() {
+export function CreateProductWizard({ productId }: CreateProductWizardProps = {}) {
   const router = useRouter();
+  
+  // 判斷是否為編輯模式
+  const isEditMode = !!productId;
   
   // API Hooks
   const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
   const { data: attributesData } = useAttributes();
+  
+  // 編輯模式：獲取商品詳情
+  const { 
+    data: productDetail, 
+    isLoading: isLoadingProduct,
+    error: productError 
+  } = useProductDetail(productId);
   
   // 核心狀態：當前步驟
   const [step, setStep] = useState(1);
@@ -188,7 +210,96 @@ export function CreateProductWizard() {
   });
   
   // 提交狀態（使用 mutation 的 isPending 狀態）
-  const isSubmitting = createProductMutation.isPending;
+  const isSubmitting = createProductMutation.isPending || updateProductMutation.isPending;
+
+  /**
+   * 編輯模式：當商品數據加載完成後，預填表單數據
+   */
+  useEffect(() => {
+    if (isEditMode && productDetail?.data) {
+      const product = productDetail.data;
+      
+      // 判斷是否為多規格商品（有屬性或有多個變體）
+      const hasAttributes = product.attributes && product.attributes.length > 0;
+      const hasMultipleVariants = product.variants && product.variants.length > 1;
+      const hasAttributeValues = product.variants?.some(variant => 
+        variant.attribute_values && variant.attribute_values.length > 0
+      ) || false;
+      const isVariable = hasAttributes || hasMultipleVariants || hasAttributeValues;
+      
+      // 建構屬性值映射（用於變體配置）
+      const attributeValues: Record<number, string[]> = {};
+      
+      if (hasAttributes && product.variants && product.attributes) {
+        // 遍歷每個屬性，收集所有可能的屬性值
+        product.attributes.forEach((attr: any) => {
+          const values = new Set<string>();
+          
+          // 從現有變體中提取屬性值
+          product.variants?.forEach((variant: any) => {
+            if (variant.attribute_values) {
+              variant.attribute_values.forEach((attrVal: any) => {
+                if (attrVal.attribute_id === attr.id) {
+                  values.add(attrVal.value);
+                }
+              });
+            }
+          });
+          
+          attributeValues[attr.id] = Array.from(values);
+        });
+      }
+      
+      // 建構變體配置數據
+      const variantItems = product.variants?.map((variant: any, index: number) => {
+        // 從屬性值中建構選項
+        const options = variant.attribute_values?.map((attrVal: any) => ({
+          attributeId: attrVal.attribute_id,
+          value: attrVal.value
+        })) || [];
+        
+        // 確保價格正確轉換：如果有價格就使用實際價格，否則為空字符串
+        const priceValue = variant.price !== null && variant.price !== undefined 
+          ? variant.price.toString() 
+          : '';
+        
+        return {
+          key: `variant-${index}`,
+          options,
+          sku: variant.sku || '',
+          price: priceValue
+        };
+      }) || [];
+      
+      // 轉換商品數據為嚮導表單格式
+      const transformedData: WizardFormData = {
+        basicInfo: {
+          name: product.name || '',
+          description: product.description || '',
+          category_id: product.category_id || null,
+        },
+        specifications: {
+          isVariable: isVariable,
+          selectedAttributes: hasAttributes && product.attributes ? product.attributes.map((attr: any) => attr.id) : [],
+          attributeValues: attributeValues,
+        },
+        variants: {
+          items: variantItems,
+        },
+        confirmation: {
+          reviewed: false,
+        },
+      };
+
+      // 調試信息：檢查轉換後的變體數據
+      console.log('編輯模式 - 原始產品數據:', product);
+      console.log('編輯模式 - 轉換後的變體數據:', variantItems);
+      console.log('編輯模式 - 完整轉換數據:', transformedData);
+      
+      // 預填表單數據
+      setFormData(transformedData);
+    }
+  }, [isEditMode, productDetail]);
 
   /**
    * 更新表單資料的通用函數
@@ -272,20 +383,47 @@ export function CreateProductWizard() {
     }
 
     try {
-      // 步驟 1: 數據格式轉換
-      const apiPayload = transformWizardDataToApiPayload(formData, attributesData);
+      if (isEditMode && productId) {
+        // 編輯模式：暫時只支持基本商品信息更新（使用舊的 API 格式）
+        const basicUpdatePayload = {
+          name: formData.basicInfo.name,
+          sku: formData.basicInfo.name.replace(/\s+/g, '-').toUpperCase() + '-001', // 臨時 SKU
+          description: formData.basicInfo.description || null,
+          selling_price: 0, // 默認值，需要後續完善
+          cost_price: 0,   // 默認值，需要後續完善
+          category_id: formData.basicInfo.category_id,
+        };
+        
+        console.log('編輯模式 - 基本信息更新：', basicUpdatePayload);
+        
+        // 調用更新 API（使用舊的格式）
+        await updateProductMutation.mutateAsync({ 
+          id: Number(productId), 
+          ...basicUpdatePayload 
+        });
+        
+        toast.success('商品基本信息更新成功！');
+      } else {
+        // 創建模式：新增商品（使用新的 SPU/SKU 格式）
+        const apiPayload = transformWizardDataToApiPayload(formData, attributesData);
+        
+        console.log('創建模式 - 轉換後的 API 請求資料：', apiPayload);
+        
+        // 調用創建 API (mutateAsync 會返回一個 Promise)
+        await createProductMutation.mutateAsync(apiPayload);
+        
+        // 成功訊息在 useCreateProduct 的 onSuccess 中處理
+      }
       
-      console.log('轉換後的 API 請求資料：', apiPayload);
-      
-      // 步驟 2: 調用 API (mutateAsync 會返回一個 Promise)
-      await createProductMutation.mutateAsync(apiPayload);
-      
-      // 步驟 3: 成功後跳轉 (onSuccess 中已處理 toast)
+      // 成功後跳轉
       router.push('/products');
 
     } catch (error) {
       // onError 中已處理 toast，此處只需記錄詳細錯誤
-      console.error("商品創建提交失敗:", error);
+      console.error(`商品${isEditMode ? '更新' : '創建'}提交失敗:`, error);
+      
+      // 額外的錯誤處理
+      toast.error(`商品${isEditMode ? '更新' : '創建'}失敗，請稍後重試`);
     }
   };
 
@@ -323,9 +461,14 @@ export function CreateProductWizard() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">新增商品</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+              {isEditMode ? '編輯商品' : '新增商品'}
+            </h1>
             <p className="text-sm text-gray-600">
-              透過嚮導式流程，輕鬆創建您的商品資訊
+              {isEditMode 
+                ? '透過嚮導式流程，輕鬆更新您的商品資訊' 
+                : '透過嚮導式流程，輕鬆創建您的商品資訊'
+              }
             </p>
           </div>
         </div>

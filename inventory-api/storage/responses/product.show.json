@@ -73,6 +73,14 @@
       "max": 429.99,
       "count": 2
     },
+    "attributes": [
+      {
+        "id": 1,
+        "name": "顏色",
+        "type": "string",
+        "description": "商品顏色選項"
+      }
+    ],
     "category": {
       "id": 1,
       "name": "辦公用品",

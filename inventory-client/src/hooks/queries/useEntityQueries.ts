@@ -86,6 +86,46 @@ export function useProduct(id: number) {
     });
 }
 
+/**
+ * 商品詳情查詢 Hook - 專為編輯功能設計
+ * 
+ * 此 Hook 專門用於商品編輯嚮導，提供完整的商品資訊：
+ * 1. SPU 基本資訊 (name, description, category)
+ * 2. 商品屬性列表 (attributes)
+ * 3. 所有 SKU 變體詳情 (variants with attribute values)
+ * 4. 庫存資訊 (inventory per store)
+ * 
+ * @param productId - 商品 ID
+ * @returns React Query 查詢結果，包含完整的商品結構
+ */
+export function useProductDetail(productId: number | string | undefined) {
+    // 確保 productId 是有效的數字
+    const numericId = productId ? Number(productId) : undefined;
+    
+    return useQuery({
+        queryKey: [...QUERY_KEYS.PRODUCT(numericId!), 'detail'],
+        queryFn: async () => {
+            if (!numericId) {
+                throw new Error('商品 ID 無效');
+            }
+
+            const { data, error } = await apiClient.GET('/api/products/{id}', {
+                params: { path: { id: numericId } }
+            });
+            
+            if (error) {
+                const errorMessage = parseApiErrorMessage(error);
+                throw new Error(errorMessage || '獲取商品詳情失敗');
+            }
+
+            return data;
+        },
+        enabled: !!numericId, // 只有當有效的 ID 存在時才執行查詢
+        staleTime: 5 * 60 * 1000, // 5 分鐘緩存時間，編輯期間避免重複請求
+        retry: 2, // 失敗時重試 2 次
+    });
+}
+
 // 商品創建端點暫時未定義 - 等待後端實現
 
 // 導入由 openapi-typescript 生成的精確類型

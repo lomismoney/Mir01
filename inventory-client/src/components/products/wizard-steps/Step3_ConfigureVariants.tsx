@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -52,6 +52,9 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
   // 本地狀態：批量價格設定
   const [bulkPrice, setBulkPrice] = useState('');
   const [autoSku, setAutoSku] = useState(true);
+  
+  // 用於追蹤是否已經初始化過變體數據
+  const isInitialized = useRef(false);
 
   /**
    * 生成笛卡爾積組合
@@ -94,8 +97,9 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
     // 生成組合
     const combinations = generateCartesianProduct(attributeValueArrays);
     
-    return combinations.map(combination => {
-      const key = combination.map(({ attributeId, value }) => `${attributeId}-${value}`).join('_');
+    return combinations.map((combination, index) => {
+      // 修復：使用與 CreateProductWizard 一致的 key 格式
+      const key = `variant-${index}`;
       return {
         key,
         options: combination,
@@ -107,18 +111,54 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
 
   /**
    * 初始化或更新變體資料
+   * 修復：避免在編輯模式下覆蓋已有的變體數據
    */
   useEffect(() => {
     const currentVariants = formData.variants.items;
     const newVariants = generateVariants;
     
-    // 合併現有資料與新生成的變體
-    const mergedVariants = newVariants.map(newVariant => {
-      const existing = currentVariants.find(v => v.key === newVariant.key);
-      return existing || newVariant;
+    // 調試信息
+    console.log('Step3 useEffect 觸發');
+    console.log('當前變體數據:', currentVariants);
+    console.log('新生成的變體:', newVariants);
+    console.log('已初始化狀態:', isInitialized.current);
+    
+    // 如果已有變體數據且包含價格信息，說明是編輯模式，不要覆蓋
+    const hasExistingPriceData = currentVariants.some(v => v.price && v.price !== '');
+    console.log('是否有現有價格數據:', hasExistingPriceData);
+    
+    // 如果已經初始化過且存在價格數據，跳過自動更新
+    if (isInitialized.current && hasExistingPriceData) {
+      console.log('跳過自動更新，保留現有價格數據');
+      return;
+    }
+    
+    // 改進的合併邏輯：優先保留現有變體的所有數據
+    const mergedVariants = newVariants.map((newVariant, index) => {
+      // 嘗試通過 key 匹配
+      let existing = currentVariants.find(v => v.key === newVariant.key);
+      
+      // 如果通過 key 找不到，嘗試通過索引匹配（向後兼容）
+      if (!existing && currentVariants[index]) {
+        existing = currentVariants[index];
+      }
+      
+      // 如果找到現有變體，保留其所有數據，只更新 options（如果需要）
+      if (existing) {
+        return {
+          ...existing,
+          key: newVariant.key, // 確保 key 是最新的格式
+          options: newVariant.options, // 更新 options 以反映最新的屬性配置
+        };
+      }
+      
+      // 如果沒有找到現有變體，使用新生成的
+      return newVariant;
     });
 
-    // 如果啟用自動 SKU，生成 SKU
+    console.log('合併後的變體數據:', mergedVariants);
+
+    // 如果啟用自動 SKU，生成 SKU（但不覆蓋已有的 SKU）
     if (autoSku) {
       mergedVariants.forEach((variant, index) => {
         if (!variant.sku) {
@@ -127,10 +167,20 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
       });
     }
 
-    updateFormData('variants', {
-      items: mergedVariants,
-    });
-  }, [generateVariants, autoSku]);
+    // 只有在數據真的需要更新時才更新
+    const needsUpdate = JSON.stringify(mergedVariants) !== JSON.stringify(currentVariants);
+    console.log('是否需要更新:', needsUpdate);
+    
+    if (needsUpdate) {
+      console.log('更新變體數據:', mergedVariants);
+      updateFormData('variants', {
+        items: mergedVariants,
+      });
+    }
+    
+    // 標記為已初始化
+    isInitialized.current = true;
+  }, [generateVariants, autoSku, formData.variants.items]);
 
   /**
    * 自動生成 SKU

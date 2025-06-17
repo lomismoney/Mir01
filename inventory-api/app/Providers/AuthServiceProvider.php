@@ -7,12 +7,14 @@ use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\InventoryTransfer;
 use App\Models\Product;
+use App\Models\Store;
 use App\Models\User;
 use App\Policies\AttributePolicy;
 use App\Policies\AttributeValuePolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\InventoryTransferPolicy;
 use App\Policies\ProductPolicy;
+use App\Policies\StorePolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -38,6 +40,7 @@ class AuthServiceProvider extends ServiceProvider
         Attribute::class => AttributePolicy::class,
         AttributeValue::class => AttributeValuePolicy::class,
         InventoryTransfer::class => InventoryTransferPolicy::class,
+        Store::class => StorePolicy::class,
     ];
 
     /**

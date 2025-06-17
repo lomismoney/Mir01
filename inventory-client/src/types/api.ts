@@ -48,9 +48,9 @@ export interface paths {
                             data?: {
                                 /** @example 14 */
                                 id?: number;
-                                /** @example Mrs. Justina Gaylord */
+                                /** @example Lonny Ankunding */
                                 name?: string;
-                                /** @example lafayette.considine */
+                                /** @example eloisa.harber */
                                 username?: string;
                                 /** @example viewer */
                                 role?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-14T22:23:03.000000Z */
+                                /** @example 2025-06-17T01:37:45.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-14T22:23:03.000000Z */
+                                /** @example 2025-06-17T01:37:45.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -215,17 +215,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example architecto
+                         * @example consequatur
                          */
                         name: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Eius et animi quos velit et.
+                         * @example Dolores dolorum amet iste laborum eius est dolor.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID。例如：1
-                         * @example 16
+                         * @example 17
                          */
                         parent_id?: number | null;
                     };
@@ -309,17 +309,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example architecto
+                         * @example consequatur
                          */
                         name?: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Eius et animi quos velit et.
+                         * @example Dolores dolorum amet iste laborum eius est dolor.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID且不能是自己。例如：1
-                         * @example 16
+                         * @example 17
                          */
                         parent_id?: number | null;
                     };
@@ -574,7 +574,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一）。例如：顏色
-                         * @example architecto
+                         * @example consequatur
                          */
                         name: string;
                     };
@@ -604,7 +604,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 16
+                 * @example 1
                  */
                 id: number;
                 /**
@@ -626,7 +626,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -660,7 +660,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -676,7 +676,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
-                         * @example architecto
+                         * @example consequatur
                          */
                         name: string;
                     };
@@ -706,7 +706,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -758,7 +758,7 @@ export interface paths {
                         /**
                          * @description 要刪除的商品 ID 列表。例如：[1, 2, 3]
                          * @example [
-                         *       "architecto"
+                         *       "consequatur"
                          *     ]
                          */
                         ids: string[];
@@ -1158,7 +1158,6 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description 商品詳細資料 */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1170,27 +1169,181 @@ export interface paths {
                                 id?: number;
                                 /** @example 高階人體工學辦公椅 */
                                 name?: string;
-                                /** @example CHAIR-ERG-001 */
-                                sku?: string;
-                                /** @example 具備可調節腰靠和 4D 扶手。 */
+                                /** @example 具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。 */
                                 description?: string;
-                                /** @example 399.99 */
-                                selling_price?: number;
-                                /** @example 150 */
-                                cost_price?: number;
                                 /** @example 1 */
                                 category_id?: number;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 created_at?: string;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "sku": "CHAIR-ERG-001-BLACK",
+                                 *         "price": 399.99,
+                                 *         "product_id": 1,
+                                 *         "created_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "attribute_values": [
+                                 *           {
+                                 *             "id": 1,
+                                 *             "value": "黑色",
+                                 *             "attribute_id": 1,
+                                 *             "attribute": {
+                                 *               "id": 1,
+                                 *               "name": "顏色"
+                                 *             }
+                                 *           }
+                                 *         ],
+                                 *         "inventory": [
+                                 *           {
+                                 *             "id": 1,
+                                 *             "quantity": 50,
+                                 *             "low_stock_threshold": 10,
+                                 *             "store": {
+                                 *               "id": 1,
+                                 *               "name": "台北旗艦店"
+                                 *             }
+                                 *           }
+                                 *         ]
+                                 *       },
+                                 *       {
+                                 *         "id": 2,
+                                 *         "sku": "CHAIR-ERG-001-WHITE",
+                                 *         "price": 429.99,
+                                 *         "product_id": 1,
+                                 *         "created_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "attribute_values": [
+                                 *           {
+                                 *             "id": 2,
+                                 *             "value": "白色",
+                                 *             "attribute_id": 1,
+                                 *             "attribute": {
+                                 *               "id": 1,
+                                 *               "name": "顏色"
+                                 *             }
+                                 *           }
+                                 *         ],
+                                 *         "inventory": [
+                                 *           {
+                                 *             "id": 2,
+                                 *             "quantity": 25,
+                                 *             "low_stock_threshold": 5,
+                                 *             "store": {
+                                 *               "id": 1,
+                                 *               "name": "台北旗艦店"
+                                 *             }
+                                 *           }
+                                 *         ]
+                                 *       }
+                                 *     ] */
+                                variants?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example CHAIR-ERG-001-BLACK */
+                                    sku?: string;
+                                    /** @example 399.99 */
+                                    price?: number;
+                                    /** @example 1 */
+                                    product_id?: number;
+                                    /** @example 2024-01-01T10:00:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2024-01-01T10:00:00.000000Z */
+                                    updated_at?: string;
+                                    /** @example [
+                                     *       {
+                                     *         "id": 1,
+                                     *         "value": "黑色",
+                                     *         "attribute_id": 1,
+                                     *         "attribute": {
+                                     *           "id": 1,
+                                     *           "name": "顏色"
+                                     *         }
+                                     *       }
+                                     *     ] */
+                                    attribute_values?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 黑色 */
+                                        value?: string;
+                                        /** @example 1 */
+                                        attribute_id?: number;
+                                        attribute?: {
+                                            /** @example 1 */
+                                            id?: number;
+                                            /** @example 顏色 */
+                                            name?: string;
+                                        };
+                                    }[];
+                                    /** @example [
+                                     *       {
+                                     *         "id": 1,
+                                     *         "quantity": 50,
+                                     *         "low_stock_threshold": 10,
+                                     *         "store": {
+                                     *           "id": 1,
+                                     *           "name": "台北旗艦店"
+                                     *         }
+                                     *       }
+                                     *     ] */
+                                    inventory?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 50 */
+                                        quantity?: number;
+                                        /** @example 10 */
+                                        low_stock_threshold?: number;
+                                        store?: {
+                                            /** @example 1 */
+                                            id?: number;
+                                            /** @example 台北旗艦店 */
+                                            name?: string;
+                                        };
+                                    }[];
+                                }[];
+                                price_range?: {
+                                    /** @example 399.99 */
+                                    min?: number;
+                                    /** @example 429.99 */
+                                    max?: number;
+                                    /** @example 2 */
+                                    count?: number;
+                                };
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "name": "顏色",
+                                 *         "type": "string",
+                                 *         "description": "商品顏色選項"
+                                 *       }
+                                 *     ] */
+                                attributes?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 顏色 */
+                                    name?: string;
+                                    /** @example string */
+                                    type?: string;
+                                    /** @example 商品顏色選項 */
+                                    description?: string;
+                                }[];
+                                category?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 辦公用品 */
+                                    name?: string;
+                                    /** @example 各種辦公室所需用品 */
+                                    description?: string;
+                                };
                             };
                         };
                     };
                 };
             };
         };
-        /** 更新指定的商品 */
+        /** 更新指定的商品及其變體 */
         put: {
             parameters: {
                 query?: never;
@@ -1208,40 +1361,90 @@ export interface paths {
                 content: {
                     "application/json": {
                         /**
-                         * @description 商品的完整名稱。
-                         * @example 高階人體工學辦公椅
+                         * @description SPU 的名稱。
+                         * @example "經典棉質T-shirt"
                          */
                         name: string;
                         /**
-                         * @description 商品的唯一庫存單位編號 (SKU)。
-                         * @example CHAIR-ERG-001
-                         */
-                        sku: string;
-                        /**
-                         * @description 商品的詳細描述。
-                         * @example 具備可調節腰靠和 4D 扶手。
+                         * @description SPU 的描述。
+                         * @example "100% 純棉"
                          */
                         description?: string | null;
                         /**
-                         * @description 商品的銷售價格。
-                         * @example 399.99
-                         */
-                        selling_price: number;
-                        /**
-                         * @description 商品的成本價格。
-                         * @example 150
-                         */
-                        cost_price: number;
-                        /**
-                         * @description 商品所屬分類的 ID。可為空值表示不屬於任何分類。
+                         * @description 分類ID。
                          * @example 1
                          */
                         category_id?: number | null;
+                        /**
+                         * @description 該 SPU 擁有的屬性 ID 陣列。
+                         * @example [
+                         *       1,
+                         *       2
+                         *     ]
+                         */
+                        attributes?: number[];
+                        /**
+                         * @description SKU 變體陣列。
+                         * @example [
+                         *       []
+                         *     ]
+                         */
+                        variants?: {
+                            /**
+                             * @description The <code>id</code> of an existing record in the product_variants table.
+                             * @example 17
+                             */
+                            id?: number;
+                            /**
+                             * @description Must not be greater than 100 characters.
+                             * @example mqeopfuudtdsufvyvddqa
+                             */
+                            sku: string;
+                            /**
+                             * @description Must be at least 0.
+                             * @example 45
+                             */
+                            price: number;
+                            /**
+                             * @description The <code>id</code> of an existing record in the attribute_values table.
+                             * @example [
+                             *       17
+                             *     ]
+                             */
+                            attribute_value_ids?: number[];
+                            /** @example {
+                             *       "id": 1
+                             *     } */
+                            "*"?: {
+                                /**
+                                 * @description 變體的 ID（用於更新現有變體）。
+                                 * @example 1
+                                 */
+                                id?: number;
+                                /**
+                                 * @description SKU 的唯一編號。
+                                 * @example "TSHIRT-RED-S"
+                                 */
+                                sku: string;
+                                /**
+                                 * @description SKU 的價格。
+                                 * @example 299.99
+                                 */
+                                price: number;
+                                /**
+                                 * @description 組成此 SKU 的屬性值 ID 陣列。
+                                 * @example [
+                                 *       10,
+                                 *       25
+                                 *     ]
+                                 */
+                                attribute_value_ids: number[];
+                            };
+                        }[];
                     };
                 };
             };
             responses: {
-                /** @description 商品更新成功 */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1253,20 +1456,174 @@ export interface paths {
                                 id?: number;
                                 /** @example 高階人體工學辦公椅 */
                                 name?: string;
-                                /** @example CHAIR-ERG-001 */
-                                sku?: string;
-                                /** @example 具備可調節腰靠和 4D 扶手。 */
+                                /** @example 具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。 */
                                 description?: string;
-                                /** @example 399.99 */
-                                selling_price?: number;
-                                /** @example 150 */
-                                cost_price?: number;
                                 /** @example 1 */
                                 category_id?: number;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 created_at?: string;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "sku": "CHAIR-ERG-001-BLACK",
+                                 *         "price": 399.99,
+                                 *         "product_id": 1,
+                                 *         "created_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "attribute_values": [
+                                 *           {
+                                 *             "id": 1,
+                                 *             "value": "黑色",
+                                 *             "attribute_id": 1,
+                                 *             "attribute": {
+                                 *               "id": 1,
+                                 *               "name": "顏色"
+                                 *             }
+                                 *           }
+                                 *         ],
+                                 *         "inventory": [
+                                 *           {
+                                 *             "id": 1,
+                                 *             "quantity": 50,
+                                 *             "low_stock_threshold": 10,
+                                 *             "store": {
+                                 *               "id": 1,
+                                 *               "name": "台北旗艦店"
+                                 *             }
+                                 *           }
+                                 *         ]
+                                 *       },
+                                 *       {
+                                 *         "id": 2,
+                                 *         "sku": "CHAIR-ERG-001-WHITE",
+                                 *         "price": 429.99,
+                                 *         "product_id": 1,
+                                 *         "created_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                                 *         "attribute_values": [
+                                 *           {
+                                 *             "id": 2,
+                                 *             "value": "白色",
+                                 *             "attribute_id": 1,
+                                 *             "attribute": {
+                                 *               "id": 1,
+                                 *               "name": "顏色"
+                                 *             }
+                                 *           }
+                                 *         ],
+                                 *         "inventory": [
+                                 *           {
+                                 *             "id": 2,
+                                 *             "quantity": 25,
+                                 *             "low_stock_threshold": 5,
+                                 *             "store": {
+                                 *               "id": 1,
+                                 *               "name": "台北旗艦店"
+                                 *             }
+                                 *           }
+                                 *         ]
+                                 *       }
+                                 *     ] */
+                                variants?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example CHAIR-ERG-001-BLACK */
+                                    sku?: string;
+                                    /** @example 399.99 */
+                                    price?: number;
+                                    /** @example 1 */
+                                    product_id?: number;
+                                    /** @example 2024-01-01T10:00:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2024-01-01T10:00:00.000000Z */
+                                    updated_at?: string;
+                                    /** @example [
+                                     *       {
+                                     *         "id": 1,
+                                     *         "value": "黑色",
+                                     *         "attribute_id": 1,
+                                     *         "attribute": {
+                                     *           "id": 1,
+                                     *           "name": "顏色"
+                                     *         }
+                                     *       }
+                                     *     ] */
+                                    attribute_values?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 黑色 */
+                                        value?: string;
+                                        /** @example 1 */
+                                        attribute_id?: number;
+                                        attribute?: {
+                                            /** @example 1 */
+                                            id?: number;
+                                            /** @example 顏色 */
+                                            name?: string;
+                                        };
+                                    }[];
+                                    /** @example [
+                                     *       {
+                                     *         "id": 1,
+                                     *         "quantity": 50,
+                                     *         "low_stock_threshold": 10,
+                                     *         "store": {
+                                     *           "id": 1,
+                                     *           "name": "台北旗艦店"
+                                     *         }
+                                     *       }
+                                     *     ] */
+                                    inventory?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 50 */
+                                        quantity?: number;
+                                        /** @example 10 */
+                                        low_stock_threshold?: number;
+                                        store?: {
+                                            /** @example 1 */
+                                            id?: number;
+                                            /** @example 台北旗艦店 */
+                                            name?: string;
+                                        };
+                                    }[];
+                                }[];
+                                price_range?: {
+                                    /** @example 399.99 */
+                                    min?: number;
+                                    /** @example 429.99 */
+                                    max?: number;
+                                    /** @example 2 */
+                                    count?: number;
+                                };
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "name": "顏色",
+                                 *         "type": "string",
+                                 *         "description": "商品顏色選項"
+                                 *       }
+                                 *     ] */
+                                attributes?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 顏色 */
+                                    name?: string;
+                                    /** @example string */
+                                    type?: string;
+                                    /** @example 商品顏色選項 */
+                                    description?: string;
+                                }[];
+                                category?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 辦公用品 */
+                                    name?: string;
+                                    /** @example 各種辦公室所需用品 */
+                                    description?: string;
+                                };
                             };
                         };
                     };
@@ -1601,7 +1958,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the variant.
-                 * @example architecto
+                 * @example consequatur
                  */
                 id: string;
             };
@@ -1615,7 +1972,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the variant.
-                     * @example architecto
+                     * @example consequatur
                      */
                     id: string;
                 };
@@ -1651,7 +2008,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 16
+                 * @example 1
                  */
                 attribute_id: number;
                 /**
@@ -1673,7 +2030,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 16
+                     * @example 1
                      */
                     attribute_id: number;
                     /**
@@ -1771,7 +2128,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 16
+                     * @example 1
                      */
                     attribute_id: number;
                     /**
@@ -1787,7 +2144,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一）。例如：紅色
-                         * @example architecto
+                         * @example consequatur
                          */
                         value: string;
                     };
@@ -1817,7 +2174,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the value.
-                 * @example 16
+                 * @example 1
                  */
                 id: number;
                 /**
@@ -1839,7 +2196,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -1870,7 +2227,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -1886,7 +2243,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-                         * @example architecto
+                         * @example consequatur
                          */
                         value: string;
                     };
@@ -1925,7 +2282,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -2207,7 +2564,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the inventory.
-                 * @example architecto
+                 * @example consequatur
                  */
                 id: string;
             };
@@ -2221,7 +2578,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the inventory.
-                     * @example architecto
+                     * @example consequatur
                      */
                     id: string;
                 };
@@ -2783,7 +3140,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the transfer.
-                 * @example architecto
+                 * @example consequatur
                  */
                 id: string;
             };
@@ -2797,7 +3154,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the transfer.
-                     * @example architecto
+                     * @example consequatur
                      */
                     id: string;
                 };
@@ -3049,22 +3406,22 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 用戶姓名。例如：張三
-                         * @example architecto
+                         * @example consequatur
                          */
                         name: string;
                         /**
                          * @description 用戶名（唯一）。例如：zhangsan
-                         * @example architecto
+                         * @example consequatur
                          */
                         username: string;
                         /**
                          * @description 用戶密碼（至少8個字元）。例如：password123
-                         * @example |]|{+-
+                         * @example O[2UZ5ij-e/dl4m{o,
                          */
                         password: string;
                         /**
                          * @description 用戶角色，必須是 admin 或 viewer。例如：admin
-                         * @example architecto
+                         * @example consequatur
                          */
                         role: string;
                     };
@@ -3592,12 +3949,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一）。例如：台北總店
-                     * @example architecto
+                     * @example consequatur
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example architecto
+                     * @example consequatur
                      */
                     address?: string | null;
                 };
@@ -3613,14 +3970,14 @@ export interface operations {
                         data?: {
                             /** @example 7 */
                             id?: number;
-                            /** @example Bailey Ltd */
+                            /** @example Mueller-Dibbert */
                             name?: string;
-                            /** @example 85625 Gaylord Knolls
-                             *     Cecilburgh, WI 02042 */
+                            /** @example 87713 Brandy Roads Suite 202
+                             *     Williamsonfort, CT 64474 */
                             address?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3652,14 +4009,14 @@ export interface operations {
                         data?: {
                             /** @example 8 */
                             id?: number;
-                            /** @example Cruickshank Inc */
+                            /** @example Kunde Group */
                             name?: string;
-                            /** @example 532 Leuschke Causeway
-                             *     McLaughlinstad, MI 07365 */
+                            /** @example 62028 Trudie Mills
+                             *     North Cordie, IL 75592 */
                             address?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3685,12 +4042,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一，會排除當前分店）。例如：台北信義店
-                     * @example architecto
+                     * @example consequatur
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example architecto
+                     * @example consequatur
                      */
                     address?: string | null;
                 };
@@ -3706,14 +4063,14 @@ export interface operations {
                         data?: {
                             /** @example 9 */
                             id?: number;
-                            /** @example Rempel, Gulgowski and O'Kon */
+                            /** @example Moore-Emard */
                             name?: string;
-                            /** @example 80841 Mya Lane Apt. 042
-                             *     Lyricberg, MO 42170-0432 */
+                            /** @example 27319 Schmeler Fall Suite 958
+                             *     Carterland, NM 49546 */
                             address?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3761,14 +4118,14 @@ export interface operations {
                         data?: {
                             /** @example 10 */
                             id?: number;
-                            /** @example Jenkins Group */
+                            /** @example Maggio, Lakin and Durgan */
                             name?: string;
-                            /** @example 885 Koelpin Wells Suite 038
-                             *     New Allenfurt, CT 41106-9708 */
+                            /** @example 45898 Hammes Courts
+                             *     Haagshire, MN 43438-3224 */
                             address?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3795,7 +4152,7 @@ export interface operations {
                     /**
                      * @description 要分配給用戶的分店ID列表。例如：[1, 2, 3]
                      * @example [
-                     *       "architecto"
+                     *       "consequatur"
                      *     ]
                      */
                     store_ids: string[];
@@ -3812,9 +4169,9 @@ export interface operations {
                         data?: {
                             /** @example 15 */
                             id?: number;
-                            /** @example Ms. Elisabeth Okuneva */
+                            /** @example Dr. Cornelius Luettgen V */
                             name?: string;
-                            /** @example gulgowski.asia */
+                            /** @example russel.bert */
                             username?: string;
                             /** @example viewer */
                             role?: string;
@@ -3822,9 +4179,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-14T22:23:04.000000Z */
+                            /** @example 2025-06-17T01:37:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -3885,7 +4242,7 @@ export interface operations {
                         /**
                          * @description The <code>id</code> of an existing record in the attribute_values table.
                          * @example [
-                         *       16
+                         *       17
                          *     ]
                          */
                         attribute_value_ids?: number[];
@@ -4070,6 +4427,24 @@ export interface operations {
                                 /** @example 2 */
                                 count?: number;
                             };
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "name": "顏色",
+                             *         "type": "string",
+                             *         "description": "商品顏色選項"
+                             *       }
+                             *     ] */
+                            attributes?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 顏色 */
+                                name?: string;
+                                /** @example string */
+                                type?: string;
+                                /** @example 商品顏色選項 */
+                                description?: string;
+                            }[];
                             category?: {
                                 /** @example 1 */
                                 id?: number;

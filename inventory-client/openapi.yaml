@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 servers:
   -
-    url: 'http://localhost'
+    url: 'http://localhost:8000'
 tags:
   -
     name: Endpoints
@@ -89,13 +89,13 @@ paths:
                 example:
                   data:
                     id: 14
-                    name: 'Mrs. Justina Gaylord'
-                    username: lafayette.considine
+                    name: 'Lonny Ankunding'
+                    username: eloisa.harber
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-14T22:23:03.000000Z'
-                    updated_at: '2025-06-14T22:23:03.000000Z'
+                    created_at: '2025-06-17T01:37:45.000000Z'
+                    updated_at: '2025-06-17T01:37:45.000000Z'
                 properties:
                   data:
                     type: object
@@ -105,10 +105,10 @@ paths:
                         example: 14
                       name:
                         type: string
-                        example: 'Mrs. Justina Gaylord'
+                        example: 'Lonny Ankunding'
                       username:
                         type: string
-                        example: lafayette.considine
+                        example: eloisa.harber
                       role:
                         type: string
                         example: viewer
@@ -120,10 +120,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:03.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:03.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
       tags:
         - Endpoints
       security: []
@@ -188,17 +188,17 @@ paths:
                 name:
                   type: string
                   description: 分類名稱。例如：電子產品
-                  example: architecto
+                  example: consequatur
                   nullable: false
                 description:
                   type: string
                   description: 分類描述。例如：包含所有電子相關產品
-                  example: 'Eius et animi quos velit et.'
+                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
                   nullable: true
                 parent_id:
                   type: integer
                   description: 父分類ID，必須是存在的分類ID。例如：1
-                  example: 16
+                  example: 17
                   nullable: true
               required:
                 - name
@@ -378,17 +378,17 @@ paths:
                 name:
                   type: string
                   description: 分類名稱。例如：電子產品
-                  example: architecto
+                  example: consequatur
                   nullable: false
                 description:
                   type: string
                   description: 分類描述。例如：包含所有電子相關產品
-                  example: 'Eius et animi quos velit et.'
+                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
                   nullable: true
                 parent_id:
                   type: integer
                   description: 父分類ID，必須是存在的分類ID且不能是自己。例如：1
-                  example: 16
+                  example: 17
                   nullable: true
       security: []
     delete:
@@ -560,10 +560,10 @@ paths:
                 example:
                   data:
                     id: 7
-                    name: 'Bailey Ltd'
-                    address: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    name: Mueller-Dibbert
+                    address: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
+                    created_at: '2025-06-17T01:37:45.000000Z'
+                    updated_at: '2025-06-17T01:37:45.000000Z'
                 properties:
                   data:
                     type: object
@@ -573,16 +573,16 @@ paths:
                         example: 7
                       name:
                         type: string
-                        example: 'Bailey Ltd'
+                        example: Mueller-Dibbert
                       address:
                         type: string
-                        example: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
+                        example: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -595,12 +595,12 @@ paths:
                 name:
                   type: string
                   description: 分店名稱（唯一）。例如：台北總店
-                  example: architecto
+                  example: consequatur
                   nullable: false
                 address:
                   type: string
                   description: 分店地址。例如：台北市信義區信義路五段7號
-                  example: architecto
+                  example: consequatur
                   nullable: true
               required:
                 - name
@@ -620,10 +620,10 @@ paths:
                 example:
                   data:
                     id: 8
-                    name: 'Cruickshank Inc'
-                    address: "532 Leuschke Causeway\nMcLaughlinstad, MI 07365"
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    name: 'Kunde Group'
+                    address: "62028 Trudie Mills\nNorth Cordie, IL 75592"
+                    created_at: '2025-06-17T01:37:45.000000Z'
+                    updated_at: '2025-06-17T01:37:45.000000Z'
                 properties:
                   data:
                     type: object
@@ -633,16 +633,16 @@ paths:
                         example: 8
                       name:
                         type: string
-                        example: 'Cruickshank Inc'
+                        example: 'Kunde Group'
                       address:
                         type: string
-                        example: "532 Leuschke Causeway\nMcLaughlinstad, MI 07365"
+                        example: "62028 Trudie Mills\nNorth Cordie, IL 75592"
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -660,10 +660,10 @@ paths:
                 example:
                   data:
                     id: 9
-                    name: "Rempel, Gulgowski and O'Kon"
-                    address: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    name: Moore-Emard
+                    address: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
+                    created_at: '2025-06-17T01:37:45.000000Z'
+                    updated_at: '2025-06-17T01:37:45.000000Z'
                 properties:
                   data:
                     type: object
@@ -673,16 +673,16 @@ paths:
                         example: 9
                       name:
                         type: string
-                        example: "Rempel, Gulgowski and O'Kon"
+                        example: Moore-Emard
                       address:
                         type: string
-                        example: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
+                        example: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -695,12 +695,12 @@ paths:
                 name:
                   type: string
                   description: 分店名稱（唯一，會排除當前分店）。例如：台北信義店
-                  example: architecto
+                  example: consequatur
                   nullable: false
                 address:
                   type: string
                   description: 分店地址。例如：台北市信義區信義路五段7號
-                  example: architecto
+                  example: consequatur
                   nullable: true
               required:
                 - name
@@ -737,10 +737,10 @@ paths:
                 example:
                   data:
                     id: 10
-                    name: 'Jenkins Group'
-                    address: "885 Koelpin Wells Suite 038\nNew Allenfurt, CT 41106-9708"
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    name: 'Maggio, Lakin and Durgan'
+                    address: "45898 Hammes Courts\nHaagshire, MN 43438-3224"
+                    created_at: '2025-06-17T01:37:45.000000Z'
+                    updated_at: '2025-06-17T01:37:45.000000Z'
                 properties:
                   data:
                     type: object
@@ -750,16 +750,16 @@ paths:
                         example: 10
                       name:
                         type: string
-                        example: 'Jenkins Group'
+                        example: 'Maggio, Lakin and Durgan'
                       address:
                         type: string
-                        example: "885 Koelpin Wells Suite 038\nNew Allenfurt, CT 41106-9708"
+                        example: "45898 Hammes Courts\nHaagshire, MN 43438-3224"
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -777,13 +777,13 @@ paths:
                 example:
                   data:
                     id: 15
-                    name: 'Ms. Elisabeth Okuneva'
-                    username: gulgowski.asia
+                    name: 'Dr. Cornelius Luettgen V'
+                    username: russel.bert
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    created_at: '2025-06-17T01:37:45.000000Z'
+                    updated_at: '2025-06-17T01:37:45.000000Z'
                 properties:
                   data:
                     type: object
@@ -793,10 +793,10 @@ paths:
                         example: 15
                       name:
                         type: string
-                        example: 'Ms. Elisabeth Okuneva'
+                        example: 'Dr. Cornelius Luettgen V'
                       username:
                         type: string
-                        example: gulgowski.asia
+                        example: russel.bert
                       role:
                         type: string
                         example: viewer
@@ -808,10 +808,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-17T01:37:45.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -825,7 +825,7 @@ paths:
                   type: array
                   description: '要分配給用戶的分店ID列表。例如：[1, 2, 3]'
                   example:
-                    - architecto
+                    - consequatur
                   items:
                     type: string
               required:
@@ -1057,7 +1057,7 @@ paths:
                 name:
                   type: string
                   description: 屬性名稱（唯一）。例如：顏色
-                  example: architecto
+                  example: consequatur
                   nullable: false
               required:
                 - name
@@ -1102,7 +1102,7 @@ paths:
                 name:
                   type: string
                   description: 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
-                  example: architecto
+                  example: consequatur
                   nullable: false
               required:
                 - name
@@ -1121,7 +1121,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the attribute.'
-        example: 16
+        example: 1
         required: true
         schema:
           type: integer
@@ -1155,7 +1155,7 @@ paths:
                   type: array
                   description: '要刪除的商品 ID 列表。例如：[1, 2, 3]'
                   example:
-                    - architecto
+                    - consequatur
                   items:
                     type: string
               required:
@@ -1719,6 +1719,12 @@ paths:
                       min: 399.99
                       max: 429.99
                       count: 2
+                    attributes:
+                      -
+                        id: 1
+                        name: 顏色
+                        type: string
+                        description: 商品顏色選項
                     category:
                       id: 1
                       name: 辦公用品
@@ -1881,6 +1887,29 @@ paths:
                           count:
                             type: integer
                             example: 2
+                      attributes:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            name: 顏色
+                            type: string
+                            description: 商品顏色選項
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 顏色
+                            type:
+                              type: string
+                              example: string
+                            description:
+                              type: string
+                              example: 商品顏色選項
                       category:
                         type: object
                         properties:
@@ -1947,7 +1976,7 @@ paths:
                         type: array
                         description: 'The <code>id</code> of an existing record in the attribute_values table.'
                         example:
-                          - 16
+                          - 17
                         items:
                           type: integer
                       '*':
@@ -1994,7 +2023,7 @@ paths:
       parameters: []
       responses:
         200:
-          description: 商品詳細資料
+          description: ''
           content:
             application/json:
               schema:
@@ -2003,13 +2032,71 @@ paths:
                   data:
                     id: 1
                     name: 高階人體工學辦公椅
-                    sku: CHAIR-ERG-001
-                    description: '具備可調節腰靠和 4D 扶手。'
-                    selling_price: 399.99
-                    cost_price: 150.0
+                    description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
                     category_id: 1
                     created_at: '2024-01-01T10:00:00.000000Z'
                     updated_at: '2024-01-01T10:00:00.000000Z'
+                    variants:
+                      -
+                        id: 1
+                        sku: CHAIR-ERG-001-BLACK
+                        price: 399.99
+                        product_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                        attribute_values:
+                          -
+                            id: 1
+                            value: 黑色
+                            attribute_id: 1
+                            attribute:
+                              id: 1
+                              name: 顏色
+                        inventory:
+                          -
+                            id: 1
+                            quantity: 50
+                            low_stock_threshold: 10
+                            store:
+                              id: 1
+                              name: 台北旗艦店
+                      -
+                        id: 2
+                        sku: CHAIR-ERG-001-WHITE
+                        price: 429.99
+                        product_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                        attribute_values:
+                          -
+                            id: 2
+                            value: 白色
+                            attribute_id: 1
+                            attribute:
+                              id: 1
+                              name: 顏色
+                        inventory:
+                          -
+                            id: 2
+                            quantity: 25
+                            low_stock_threshold: 5
+                            store:
+                              id: 1
+                              name: 台北旗艦店
+                    price_range:
+                      min: 399.99
+                      max: 429.99
+                      count: 2
+                    attributes:
+                      -
+                        id: 1
+                        name: 顏色
+                        type: string
+                        description: 商品顏色選項
+                    category:
+                      id: 1
+                      name: 辦公用品
+                      description: 各種辦公室所需用品
                 properties:
                   data:
                     type: object
@@ -2020,18 +2107,9 @@ paths:
                       name:
                         type: string
                         example: 高階人體工學辦公椅
-                      sku:
-                        type: string
-                        example: CHAIR-ERG-001
                       description:
                         type: string
-                        example: '具備可調節腰靠和 4D 扶手。'
-                      selling_price:
-                        type: number
-                        example: 399.99
-                      cost_price:
-                        type: number
-                        example: 150.0
+                        example: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
                       category_id:
                         type: integer
                         example: 1
@@ -2041,17 +2119,188 @@ paths:
                       updated_at:
                         type: string
                         example: '2024-01-01T10:00:00.000000Z'
+                      variants:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            sku: CHAIR-ERG-001-BLACK
+                            price: 399.99
+                            product_id: 1
+                            created_at: '2024-01-01T10:00:00.000000Z'
+                            updated_at: '2024-01-01T10:00:00.000000Z'
+                            attribute_values:
+                              -
+                                id: 1
+                                value: 黑色
+                                attribute_id: 1
+                                attribute:
+                                  id: 1
+                                  name: 顏色
+                            inventory:
+                              -
+                                id: 1
+                                quantity: 50
+                                low_stock_threshold: 10
+                                store:
+                                  id: 1
+                                  name: 台北旗艦店
+                          -
+                            id: 2
+                            sku: CHAIR-ERG-001-WHITE
+                            price: 429.99
+                            product_id: 1
+                            created_at: '2024-01-01T10:00:00.000000Z'
+                            updated_at: '2024-01-01T10:00:00.000000Z'
+                            attribute_values:
+                              -
+                                id: 2
+                                value: 白色
+                                attribute_id: 1
+                                attribute:
+                                  id: 1
+                                  name: 顏色
+                            inventory:
+                              -
+                                id: 2
+                                quantity: 25
+                                low_stock_threshold: 5
+                                store:
+                                  id: 1
+                                  name: 台北旗艦店
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            sku:
+                              type: string
+                              example: CHAIR-ERG-001-BLACK
+                            price:
+                              type: number
+                              example: 399.99
+                            product_id:
+                              type: integer
+                              example: 1
+                            created_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                            attribute_values:
+                              type: array
+                              example:
+                                -
+                                  id: 1
+                                  value: 黑色
+                                  attribute_id: 1
+                                  attribute:
+                                    id: 1
+                                    name: 顏色
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  value:
+                                    type: string
+                                    example: 黑色
+                                  attribute_id:
+                                    type: integer
+                                    example: 1
+                                  attribute:
+                                    type: object
+                                    properties:
+                                      id: { type: integer, example: 1 }
+                                      name: { type: string, example: 顏色 }
+                            inventory:
+                              type: array
+                              example:
+                                -
+                                  id: 1
+                                  quantity: 50
+                                  low_stock_threshold: 10
+                                  store:
+                                    id: 1
+                                    name: 台北旗艦店
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  quantity:
+                                    type: integer
+                                    example: 50
+                                  low_stock_threshold:
+                                    type: integer
+                                    example: 10
+                                  store:
+                                    type: object
+                                    properties:
+                                      id: { type: integer, example: 1 }
+                                      name: { type: string, example: 台北旗艦店 }
+                      price_range:
+                        type: object
+                        properties:
+                          min:
+                            type: number
+                            example: 399.99
+                          max:
+                            type: number
+                            example: 429.99
+                          count:
+                            type: integer
+                            example: 2
+                      attributes:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            name: 顏色
+                            type: string
+                            description: 商品顏色選項
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 顏色
+                            type:
+                              type: string
+                              example: string
+                            description:
+                              type: string
+                              example: 商品顏色選項
+                      category:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 辦公用品
+                          description:
+                            type: string
+                            example: 各種辦公室所需用品
       tags:
         - 商品管理
       security: []
     put:
-      summary: 更新指定的商品
+      summary: 更新指定的商品及其變體
       operationId: ''
       description: ''
       parameters: []
       responses:
         200:
-          description: 商品更新成功
+          description: ''
           content:
             application/json:
               schema:
@@ -2060,13 +2309,71 @@ paths:
                   data:
                     id: 1
                     name: 高階人體工學辦公椅
-                    sku: CHAIR-ERG-001
-                    description: '具備可調節腰靠和 4D 扶手。'
-                    selling_price: 399.99
-                    cost_price: 150.0
+                    description: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
                     category_id: 1
                     created_at: '2024-01-01T10:00:00.000000Z'
                     updated_at: '2024-01-01T10:00:00.000000Z'
+                    variants:
+                      -
+                        id: 1
+                        sku: CHAIR-ERG-001-BLACK
+                        price: 399.99
+                        product_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                        attribute_values:
+                          -
+                            id: 1
+                            value: 黑色
+                            attribute_id: 1
+                            attribute:
+                              id: 1
+                              name: 顏色
+                        inventory:
+                          -
+                            id: 1
+                            quantity: 50
+                            low_stock_threshold: 10
+                            store:
+                              id: 1
+                              name: 台北旗艦店
+                      -
+                        id: 2
+                        sku: CHAIR-ERG-001-WHITE
+                        price: 429.99
+                        product_id: 1
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                        attribute_values:
+                          -
+                            id: 2
+                            value: 白色
+                            attribute_id: 1
+                            attribute:
+                              id: 1
+                              name: 顏色
+                        inventory:
+                          -
+                            id: 2
+                            quantity: 25
+                            low_stock_threshold: 5
+                            store:
+                              id: 1
+                              name: 台北旗艦店
+                    price_range:
+                      min: 399.99
+                      max: 429.99
+                      count: 2
+                    attributes:
+                      -
+                        id: 1
+                        name: 顏色
+                        type: string
+                        description: 商品顏色選項
+                    category:
+                      id: 1
+                      name: 辦公用品
+                      description: 各種辦公室所需用品
                 properties:
                   data:
                     type: object
@@ -2077,18 +2384,9 @@ paths:
                       name:
                         type: string
                         example: 高階人體工學辦公椅
-                      sku:
-                        type: string
-                        example: CHAIR-ERG-001
                       description:
                         type: string
-                        example: '具備可調節腰靠和 4D 扶手。'
-                      selling_price:
-                        type: number
-                        example: 399.99
-                      cost_price:
-                        type: number
-                        example: 150.0
+                        example: '具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。'
                       category_id:
                         type: integer
                         example: 1
@@ -2098,6 +2396,177 @@ paths:
                       updated_at:
                         type: string
                         example: '2024-01-01T10:00:00.000000Z'
+                      variants:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            sku: CHAIR-ERG-001-BLACK
+                            price: 399.99
+                            product_id: 1
+                            created_at: '2024-01-01T10:00:00.000000Z'
+                            updated_at: '2024-01-01T10:00:00.000000Z'
+                            attribute_values:
+                              -
+                                id: 1
+                                value: 黑色
+                                attribute_id: 1
+                                attribute:
+                                  id: 1
+                                  name: 顏色
+                            inventory:
+                              -
+                                id: 1
+                                quantity: 50
+                                low_stock_threshold: 10
+                                store:
+                                  id: 1
+                                  name: 台北旗艦店
+                          -
+                            id: 2
+                            sku: CHAIR-ERG-001-WHITE
+                            price: 429.99
+                            product_id: 1
+                            created_at: '2024-01-01T10:00:00.000000Z'
+                            updated_at: '2024-01-01T10:00:00.000000Z'
+                            attribute_values:
+                              -
+                                id: 2
+                                value: 白色
+                                attribute_id: 1
+                                attribute:
+                                  id: 1
+                                  name: 顏色
+                            inventory:
+                              -
+                                id: 2
+                                quantity: 25
+                                low_stock_threshold: 5
+                                store:
+                                  id: 1
+                                  name: 台北旗艦店
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            sku:
+                              type: string
+                              example: CHAIR-ERG-001-BLACK
+                            price:
+                              type: number
+                              example: 399.99
+                            product_id:
+                              type: integer
+                              example: 1
+                            created_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                            attribute_values:
+                              type: array
+                              example:
+                                -
+                                  id: 1
+                                  value: 黑色
+                                  attribute_id: 1
+                                  attribute:
+                                    id: 1
+                                    name: 顏色
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  value:
+                                    type: string
+                                    example: 黑色
+                                  attribute_id:
+                                    type: integer
+                                    example: 1
+                                  attribute:
+                                    type: object
+                                    properties:
+                                      id: { type: integer, example: 1 }
+                                      name: { type: string, example: 顏色 }
+                            inventory:
+                              type: array
+                              example:
+                                -
+                                  id: 1
+                                  quantity: 50
+                                  low_stock_threshold: 10
+                                  store:
+                                    id: 1
+                                    name: 台北旗艦店
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  quantity:
+                                    type: integer
+                                    example: 50
+                                  low_stock_threshold:
+                                    type: integer
+                                    example: 10
+                                  store:
+                                    type: object
+                                    properties:
+                                      id: { type: integer, example: 1 }
+                                      name: { type: string, example: 台北旗艦店 }
+                      price_range:
+                        type: object
+                        properties:
+                          min:
+                            type: number
+                            example: 399.99
+                          max:
+                            type: number
+                            example: 429.99
+                          count:
+                            type: integer
+                            example: 2
+                      attributes:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            name: 顏色
+                            type: string
+                            description: 商品顏色選項
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 顏色
+                            type:
+                              type: string
+                              example: string
+                            description:
+                              type: string
+                              example: 商品顏色選項
+                      category:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 辦公用品
+                          description:
+                            type: string
+                            example: 各種辦公室所需用品
       tags:
         - 商品管理
       requestBody:
@@ -2109,40 +2578,96 @@ paths:
               properties:
                 name:
                   type: string
-                  description: 商品的完整名稱。
-                  example: 高階人體工學辦公椅
-                  nullable: false
-                sku:
-                  type: string
-                  description: '商品的唯一庫存單位編號 (SKU)。'
-                  example: CHAIR-ERG-001
+                  description: 'SPU 的名稱。'
+                  example: '"經典棉質T-shirt"'
                   nullable: false
                 description:
                   type: string
-                  description: 商品的詳細描述。
-                  example: '具備可調節腰靠和 4D 扶手。'
+                  description: 'SPU 的描述。'
+                  example: '"100% 純棉"'
                   nullable: true
-                selling_price:
-                  type: number
-                  description: 商品的銷售價格。
-                  example: 399.99
-                  nullable: false
-                cost_price:
-                  type: number
-                  description: 商品的成本價格。
-                  example: 150.0
-                  nullable: false
                 category_id:
                   type: integer
-                  description: '商品所屬分類的 ID。可為空值表示不屬於任何分類。'
+                  description: 分類ID。
                   example: 1
                   nullable: true
+                attributes:
+                  type: array
+                  description: '該 SPU 擁有的屬性 ID 陣列。'
+                  example:
+                    - 1
+                    - 2
+                  items:
+                    type: integer
+                variants:
+                  type: array
+                  description: 'SKU 變體陣列。'
+                  example:
+                    - []
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: 'The <code>id</code> of an existing record in the product_variants table.'
+                        example: 17
+                        nullable: false
+                      sku:
+                        type: string
+                        description: 'Must not be greater than 100 characters.'
+                        example: mqeopfuudtdsufvyvddqa
+                        nullable: false
+                      price:
+                        type: number
+                        description: 'Must be at least 0.'
+                        example: 45
+                        nullable: false
+                      attribute_value_ids:
+                        type: array
+                        description: 'The <code>id</code> of an existing record in the attribute_values table.'
+                        example:
+                          - 17
+                        items:
+                          type: integer
+                      '*':
+                        type: object
+                        description: ''
+                        example:
+                          id: 1
+                        nullable: false
+                        properties:
+                          id:
+                            type: integer
+                            description: '變體的 ID（用於更新現有變體）。'
+                            example: 1
+                            nullable: false
+                          sku:
+                            type: string
+                            description: 'SKU 的唯一編號。'
+                            example: '"TSHIRT-RED-S"'
+                            nullable: false
+                          price:
+                            type: number
+                            description: 'SKU 的價格。'
+                            example: 299.99
+                            nullable: false
+                          attribute_value_ids:
+                            type: array
+                            description: '組成此 SKU 的屬性值 ID 陣列。'
+                            example:
+                              - 10
+                              - 25
+                            items:
+                              type: integer
+                        required:
+                          - sku
+                          - price
+                          - attribute_value_ids
+                    required:
+                      - sku
+                      - price
               required:
                 - name
-                - sku
-                - selling_price
-                - cost_price
-      security: []
     delete:
       summary: 刪除指定的商品
       operationId: ''
@@ -2597,7 +3122,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the variant.'
-        example: architecto
+        example: consequatur
         required: true
         schema:
           type: string
@@ -2753,7 +3278,7 @@ paths:
                 value:
                   type: string
                   description: 屬性值（在同一屬性下必須唯一）。例如：紅色
-                  example: architecto
+                  example: consequatur
                   nullable: false
               required:
                 - value
@@ -2762,7 +3287,7 @@ paths:
         in: path
         name: attribute_id
         description: 'The ID of the attribute.'
-        example: 16
+        example: 1
         required: true
         schema:
           type: integer
@@ -2842,7 +3367,7 @@ paths:
                 value:
                   type: string
                   description: 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-                  example: architecto
+                  example: consequatur
                   nullable: false
               required:
                 - value
@@ -2851,7 +3376,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the value.'
-        example: 16
+        example: 1
         required: true
         schema:
           type: integer
@@ -3249,7 +3774,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the inventory.'
-        example: architecto
+        example: consequatur
         required: true
         schema:
           type: string
@@ -3936,7 +4461,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the transfer.'
-        example: architecto
+        example: consequatur
         required: true
         schema:
           type: string
@@ -4222,22 +4747,22 @@ paths:
                 name:
                   type: string
                   description: 用戶姓名。例如：張三
-                  example: architecto
+                  example: consequatur
                   nullable: false
                 username:
                   type: string
                   description: 用戶名（唯一）。例如：zhangsan
-                  example: architecto
+                  example: consequatur
                   nullable: false
                 password:
                   type: string
                   description: 用戶密碼（至少8個字元）。例如：password123
-                  example: '|]|{+-'
+                  example: 'O[2UZ5ij-e/dl4m{o,'
                   nullable: false
                 role:
                   type: string
                   description: '用戶角色，必須是 admin 或 viewer。例如：admin'
-                  example: architecto
+                  example: consequatur
                   nullable: false
               required:
                 - name

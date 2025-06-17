@@ -274,6 +274,118 @@ class ProductControllerTest extends TestCase
     }
     
     /** @test */
+    public function admin_can_successfully_update_product_with_variants()
+    {
+        // 創建分類
+        $category = Category::factory()->create();
+        $newCategory = Category::factory()->create();
+        
+        // 創建屬性和屬性值
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $sizeAttribute = Attribute::factory()->create(['name' => '尺寸']);
+        
+        $redValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        
+        $blueValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '藍色'
+        ]);
+        
+        $smallValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'S'
+        ]);
+        
+        $mediumValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'M'
+        ]);
+        
+        // 1. 創建一個商品
+        $product = Product::factory()->create([
+            'category_id' => $category->id,
+            'name' => '原始商品名稱',
+            'description' => '原始商品描述',
+        ]);
+        
+        // 關聯商品與屬性
+        $product->attributes()->attach([$colorAttribute->id, $sizeAttribute->id]);
+        
+        // 創建原始變體
+        $originalVariant = $product->variants()->create([
+            'sku' => 'ORIGINAL-RED-S',
+            'price' => 100.00,
+        ]);
+        $originalVariant->attributeValues()->attach([$redValue->id, $smallValue->id]);
+        
+        // 2. 準備更新用的新數據
+        $updatedData = [
+            'name' => '更新的商品名稱',
+            'description' => '更新的商品描述',
+            'category_id' => $newCategory->id,
+            'attributes' => [$colorAttribute->id, $sizeAttribute->id],
+            'variants' => [
+                // 保留原始變體但更新價格
+                [
+                    'id' => $originalVariant->id,
+                    'sku' => 'UPDATED-RED-S',
+                    'price' => 120.00,
+                    'attribute_value_ids' => [$redValue->id, $smallValue->id]
+                ],
+                // 新增一個變體
+                [
+                    'sku' => 'NEW-BLUE-M',
+                    'price' => 130.00,
+                    'attribute_value_ids' => [$blueValue->id, $mediumValue->id]
+                ]
+            ]
+        ];
+        
+        // 3. 發送 PUT 請求到 /api/products/{id}
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/products/{$product->id}", $updatedData);
+            
+        // 4. 斷言返回 200 狀態碼
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) use ($updatedData) {
+                $json->has('data')
+                    ->where('data.name', $updatedData['name'])
+                    ->where('data.description', $updatedData['description'])
+                    ->where('data.category_id', $updatedData['category_id'])
+                    ->has('data.variants', 2) // 應該有兩個變體
+                    ->etc();
+            });
+            
+        // 5. 斷言資料庫中的數據已被更新
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => $updatedData['name'],
+            'description' => $updatedData['description'],
+            'category_id' => $updatedData['category_id'],
+        ]);
+        
+        // 檢查變體更新
+        $this->assertDatabaseHas('product_variants', [
+            'id' => $originalVariant->id,
+            'sku' => 'UPDATED-RED-S',
+            'price' => 120.00,
+        ]);
+        
+        // 檢查新變體創建
+        $this->assertDatabaseHas('product_variants', [
+            'product_id' => $product->id,
+            'sku' => 'NEW-BLUE-M',
+            'price' => 130.00,
+        ]);
+        
+        // 確認變體總數
+        $this->assertCount(2, $product->fresh()->variants);
+    }
+    
+    /** @test */
     public function admin_can_delete_product()
     {
         // 創建產品

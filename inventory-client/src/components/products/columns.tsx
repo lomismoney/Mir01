@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ProductItem } from "@/types/api-helpers";
 
 /**
@@ -204,49 +205,55 @@ export const columns: ColumnDef<Product>[] = [
     header: "操作",
     cell: ({ row }) => {
       const product = row.original;
+      
+      // Actions 組件，因為需要使用 hooks
+      function ActionsComponent() {
+        const router = useRouter();
+        
+        const handleEdit = () => {
+          router.push(`/products/${product.id}/edit`);
+        };
 
-      const handleEdit = () => {
-        const event = new CustomEvent('editProduct', { detail: product });
-        window.dispatchEvent(event);
-      };
+        const handleDelete = () => {
+          const event = new CustomEvent('deleteProduct', { detail: product });
+          window.dispatchEvent(event);
+        };
 
-      const handleDelete = () => {
-        const event = new CustomEvent('deleteProduct', { detail: product });
-        window.dispatchEvent(event);
-      };
+        const handleViewVariants = () => {
+          const event = new CustomEvent('viewVariants', { detail: product });
+          window.dispatchEvent(event);
+        };
 
-      const handleViewVariants = () => {
-        const event = new CustomEvent('viewVariants', { detail: product });
-        window.dispatchEvent(event);
-      };
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">開啟選單</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleViewVariants}>
+                <Eye className="mr-2 h-4 w-4" />
+                查看規格
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleEdit}>
+                <Edit className="mr-2 h-4 w-4" />
+                編輯
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={handleDelete}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                刪除
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      }
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">開啟選單</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleViewVariants}>
-              <Eye className="mr-2 h-4 w-4" />
-              查看規格
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleEdit}>
-              <Edit className="mr-2 h-4 w-4" />
-              編輯
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={handleDelete}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              刪除
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <ActionsComponent />;
     },
     enableSorting: false,
     enableHiding: false,

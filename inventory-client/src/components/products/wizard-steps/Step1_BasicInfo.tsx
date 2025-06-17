@@ -264,9 +264,11 @@ export function Step1_BasicInfo({ formData, updateFormData }: Step1Props) {
                   </SelectItem>
                 ) : (
                   categoriesList.map((category) => (
-                    <SelectItem key={category.id} value={category.id.toString()}>
-                      {category.name}
-                    </SelectItem>
+                    category.id ? (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    ) : null
                   ))
                 )}
               </SelectContent>

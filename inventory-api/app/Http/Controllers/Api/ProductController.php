@@ -18,18 +18,27 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use App\Policies\ProductPolicy;
 use Illuminate\Support\Facades\DB;
+use App\Services\ProductService;
 
 class ProductController extends Controller
 {
     /**
+     * 產品服務實例
+     * 
+     * @var ProductService
+     */
+    protected $productService;
+
+    /**
      * 建構函式
      * 
-     * 控制器初始化，不再使用自動權限檢查，
-     * 改為在每個方法中明確進行權限驗證
+     * 控制器初始化，注入 ProductService 依賴
+     * 
+     * @param ProductService $productService 商品服務
      */
-    public function __construct()
+    public function __construct(ProductService $productService)
     {
-        // 移除自動權限檢查，改為手動檢查以提供更細粒度的控制
+        $this->productService = $productService;
     }
 
     /**
@@ -90,6 +99,7 @@ class ProductController extends Controller
         $query = QueryBuilder::for(Product::class)
             ->with([
                 'category', // ✅ 預先加載分類關聯，根除 N+1 查詢問題
+                'attributes', // ✅ 預先加載 SPU 的屬性關聯
                 'variants.attributeValues.attribute', // ✅ 預先加載 SKU 變體及其屬性
                 'variants.inventory.store' // ✅ 預先加載庫存資訊
             ])
@@ -164,7 +174,12 @@ class ProductController extends Controller
             });
 
             // 回傳經過完整關聯加載的 SPU 資源
-            return new ProductResource($product->load(['variants.attributeValues.attribute', 'variants.inventory']));
+            return new ProductResource($product->load([
+                'category',
+                'attributes', // ✅ 建立後也要加載 SPU 的屬性關聯
+                'variants.attributeValues.attribute', 
+                'variants.inventory'
+            ]));
 
         } catch (\Exception $e) {
             // 如果事務中有任何錯誤發生，回傳伺服器錯誤
@@ -177,62 +192,62 @@ class ProductController extends Controller
      * 
      * @group 商品管理
      * @urlParam id integer required 商品的 ID。 Example: 1
-     * 
-     * @response scenario="商品詳細資料" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "高階人體工學辦公椅",
-     *     "sku": "CHAIR-ERG-001",
-     *     "description": "具備可調節腰靠和 4D 扶手。",
-     *     "selling_price": 399.99,
-     *     "cost_price": 150.00,
-     *     "category_id": 1,
-     *     "created_at": "2024-01-01T10:00:00.000000Z",
-     *     "updated_at": "2024-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * @responseFile status=200 storage/responses/product.show.json
      */
     public function show(Product $product)
     {
         return new ProductResource($product->load([
             'category',
+            'attributes', // ✅ 加載 SPU 的屬性關聯
             'variants.attributeValues.attribute', 
             'variants.inventory.store'
         ]));
     }
 
     /**
-     * 更新指定的商品
+     * 更新指定的商品及其變體
      * 
      * @group 商品管理
+     * @authenticated
      * @urlParam id integer required 商品的 ID。 Example: 1
-     * @bodyParam name string required 商品的完整名稱。 Example: 高階人體工學辦公椅
-     * @bodyParam sku string required 商品的唯一庫存單位編號 (SKU)。 Example: CHAIR-ERG-001
-     * @bodyParam description string 商品的詳細描述。 Example: 具備可調節腰靠和 4D 扶手。
-     * @bodyParam selling_price number required 商品的銷售價格。 Example: 399.99
-     * @bodyParam cost_price number required 商品的成本價格。 Example: 150.00
-     * @bodyParam category_id integer 商品所屬分類的 ID。可為空值表示不屬於任何分類。 Example: 1
-     * 
-     * @response scenario="商品更新成功" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "高階人體工學辦公椅",
-     *     "sku": "CHAIR-ERG-001",
-     *     "description": "具備可調節腰靠和 4D 扶手。",
-     *     "selling_price": 399.99,
-     *     "cost_price": 150.00,
-     *     "category_id": 1,
-     *     "created_at": "2024-01-01T10:00:00.000000Z",
-     *     "updated_at": "2024-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
+     * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
+     * @bodyParam category_id integer 分類ID。 Example: 1
+     * @bodyParam attributes integer[] 該 SPU 擁有的屬性 ID 陣列。 Example: [1, 2]
+     * @bodyParam variants object[] SKU 變體陣列。
+     * @bodyParam variants.*.id integer 變體的 ID（用於更新現有變體）。 Example: 1
+     * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
+     * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
+     * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
+     * @responseFile status=200 storage/responses/product.show.json
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
         $this->authorize('update', $product); // 檢查是否有權限更新這個 $product
         
-        $product->update($request->validated());
-        return new ProductResource($product);
+        try {
+            $validatedData = $request->validated();
+            
+            // 使用 ProductService 處理複雜的更新邏輯
+            $updatedProduct = $this->productService->updateProductWithVariants($product, $validatedData);
+            
+            // 重新載入完整的關聯資料
+            $updatedProduct->load([
+                'category',
+                'attributes', // ✅ 更新後也要加載 SPU 的屬性關聯
+                'variants.attributeValues.attribute', 
+                'variants.inventory.store'
+            ]);
+            
+            return new ProductResource($updatedProduct);
+            
+        } catch (\Exception $e) {
+            // 如果更新過程中有任何錯誤發生，回傳伺服器錯誤
+            return response()->json([
+                'message' => '更新商品時發生錯誤', 
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

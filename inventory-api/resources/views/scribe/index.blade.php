@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>庫存管理系統 API Documentation</title>
+    <title>Laravel API Documentation</title>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 
@@ -26,7 +26,7 @@
             </style>
 
     <script>
-        var tryItOutBaseUrl = "http://localhost";
+        var tryItOutBaseUrl = "http://localhost:8000";
         var useCsrf = Boolean();
         var csrfUrl = "/sanctum/csrf-cookie";
     </script>
@@ -180,7 +180,7 @@
                                 <a href="#-GETapi-products--id-">顯示指定的商品</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="-PUTapi-products--id-">
-                                <a href="#-PUTapi-products--id-">更新指定的商品</a>
+                                <a href="#-PUTapi-products--id-">更新指定的商品及其變體</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="-DELETEapi-products--id-">
                                 <a href="#-DELETEapi-products--id-">刪除指定的商品</a>
@@ -317,7 +317,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: June 16, 2025</li>
+        <li>Last updated: June 17, 2025</li>
     </ul>
 </div>
 
@@ -326,7 +326,7 @@
     <div class="content">
         <h1 id="introduction">Introduction</h1>
 <aside>
-    <strong>Base URL</strong>: <code>http://localhost</code>
+    <strong>Base URL</strong>: <code>http://localhost:8000</code>
 </aside>
 <pre><code>This documentation aims to provide all the information you need to work with our API.
 
@@ -354,14 +354,14 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/health" \
+    --get "http://localhost:8000/api/health" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/health"
+    "http://localhost:8000/api/health"
 );
 
 const headers = {
@@ -479,14 +479,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/user" \
+    --get "http://localhost:8000/api/user" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/user"
+    "http://localhost:8000/api/user"
 );
 
 const headers = {
@@ -510,13 +510,13 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
         &quot;id&quot;: 14,
-        &quot;name&quot;: &quot;Mrs. Justina Gaylord&quot;,
-        &quot;username&quot;: &quot;lafayette.considine&quot;,
+        &quot;name&quot;: &quot;Lonny Ankunding&quot;,
+        &quot;username&quot;: &quot;eloisa.harber&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
     }
 }</code>
  </pre>
@@ -605,14 +605,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/purchases" \
+    "http://localhost:8000/api/purchases" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/purchases"
+    "http://localhost:8000/api/purchases"
 );
 
 const headers = {
@@ -732,20 +732,20 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/categories" \
+    "http://localhost:8000/api/categories" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"architecto\",
-    \"description\": \"Eius et animi quos velit et.\",
-    \"parent_id\": 16
+    \"name\": \"consequatur\",
+    \"description\": \"Dolores dolorum amet iste laborum eius est dolor.\",
+    \"parent_id\": 17
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories"
+    "http://localhost:8000/api/categories"
 );
 
 const headers = {
@@ -754,9 +754,9 @@ const headers = {
 };
 
 let body = {
-    "name": "architecto",
-    "description": "Eius et animi quos velit et.",
-    "parent_id": 16
+    "name": "consequatur",
+    "description": "Dolores dolorum amet iste laborum eius est dolor.",
+    "parent_id": 17
 };
 
 fetch(url, {
@@ -845,10 +845,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="POSTapi-categories"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>分類名稱。例如：電子產品 Example: <code>architecto</code></p>
+<p>分類名稱。例如：電子產品 Example: <code>consequatur</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
@@ -856,10 +856,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="description"                data-endpoint="POSTapi-categories"
-               value="Eius et animi quos velit et."
+               value="Dolores dolorum amet iste laborum eius est dolor."
                data-component="body">
     <br>
-<p>分類描述。例如：包含所有電子相關產品 Example: <code>Eius et animi quos velit et.</code></p>
+<p>分類描述。例如：包含所有電子相關產品 Example: <code>Dolores dolorum amet iste laborum eius est dolor.</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>parent_id</code></b>&nbsp;&nbsp;
@@ -867,10 +867,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="parent_id"                data-endpoint="POSTapi-categories"
-               value="16"
+               value="17"
                data-component="body">
     <br>
-<p>父分類ID，必須是存在的分類ID。例如：1 Example: <code>16</code></p>
+<p>父分類ID，必須是存在的分類ID。例如：1 Example: <code>17</code></p>
         </div>
         </form>
 
@@ -887,14 +887,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/categories/16" \
+    --get "http://localhost:8000/api/categories/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/16"
+    "http://localhost:8000/api/categories/1"
 );
 
 const headers = {
@@ -1003,10 +1003,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-categories--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>16</code></p>
+<p>The ID of the category. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -1028,20 +1028,20 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/categories/16" \
+    "http://localhost:8000/api/categories/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"architecto\",
-    \"description\": \"Eius et animi quos velit et.\",
-    \"parent_id\": 16
+    \"name\": \"consequatur\",
+    \"description\": \"Dolores dolorum amet iste laborum eius est dolor.\",
+    \"parent_id\": 17
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/16"
+    "http://localhost:8000/api/categories/1"
 );
 
 const headers = {
@@ -1050,9 +1050,9 @@ const headers = {
 };
 
 let body = {
-    "name": "architecto",
-    "description": "Eius et animi quos velit et.",
-    "parent_id": 16
+    "name": "consequatur",
+    "description": "Dolores dolorum amet iste laborum eius est dolor.",
+    "parent_id": 17
 };
 
 fetch(url, {
@@ -1145,10 +1145,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-categories--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>16</code></p>
+<p>The ID of the category. Example: <code>1</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -1157,10 +1157,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="PUTapi-categories--id-"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>分類名稱。例如：電子產品 Example: <code>architecto</code></p>
+<p>分類名稱。例如：電子產品 Example: <code>consequatur</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
@@ -1168,10 +1168,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="description"                data-endpoint="PUTapi-categories--id-"
-               value="Eius et animi quos velit et."
+               value="Dolores dolorum amet iste laborum eius est dolor."
                data-component="body">
     <br>
-<p>分類描述。例如：包含所有電子相關產品 Example: <code>Eius et animi quos velit et.</code></p>
+<p>分類描述。例如：包含所有電子相關產品 Example: <code>Dolores dolorum amet iste laborum eius est dolor.</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>parent_id</code></b>&nbsp;&nbsp;
@@ -1179,10 +1179,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="parent_id"                data-endpoint="PUTapi-categories--id-"
-               value="16"
+               value="17"
                data-component="body">
     <br>
-<p>父分類ID，必須是存在的分類ID且不能是自己。例如：1 Example: <code>16</code></p>
+<p>父分類ID，必須是存在的分類ID且不能是自己。例如：1 Example: <code>17</code></p>
         </div>
         </form>
 
@@ -1203,14 +1203,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/categories/16" \
+    "http://localhost:8000/api/categories/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories/16"
+    "http://localhost:8000/api/categories/1"
 );
 
 const headers = {
@@ -1303,10 +1303,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-categories--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the category. Example: <code>16</code></p>
+<p>The ID of the category. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -1328,14 +1328,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/stores" \
+    --get "http://localhost:8000/api/stores" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/stores"
+    "http://localhost:8000/api/stores"
 );
 
 const headers = {
@@ -1482,19 +1482,19 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/stores" \
+    "http://localhost:8000/api/stores" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"architecto\",
-    \"address\": \"architecto\"
+    \"name\": \"consequatur\",
+    \"address\": \"consequatur\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/stores"
+    "http://localhost:8000/api/stores"
 );
 
 const headers = {
@@ -1503,8 +1503,8 @@ const headers = {
 };
 
 let body = {
-    "name": "architecto",
-    "address": "architecto"
+    "name": "consequatur",
+    "address": "consequatur"
 };
 
 fetch(url, {
@@ -1524,10 +1524,10 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
         &quot;id&quot;: 7,
-        &quot;name&quot;: &quot;Bailey Ltd&quot;,
-        &quot;address&quot;: &quot;85625 Gaylord Knolls\nCecilburgh, WI 02042&quot;,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;name&quot;: &quot;Mueller-Dibbert&quot;,
+        &quot;address&quot;: &quot;87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474&quot;,
+        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1608,10 +1608,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="POSTapi-stores"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>分店名稱（唯一）。例如：台北總店 Example: <code>architecto</code></p>
+<p>分店名稱（唯一）。例如：台北總店 Example: <code>consequatur</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>address</code></b>&nbsp;&nbsp;
@@ -1619,10 +1619,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="address"                data-endpoint="POSTapi-stores"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>分店地址。例如：台北市信義區信義路五段7號 Example: <code>architecto</code></p>
+<p>分店地址。例如：台北市信義區信義路五段7號 Example: <code>consequatur</code></p>
         </div>
         </form>
 
@@ -1640,14 +1640,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/stores/1" \
+    --get "http://localhost:8000/api/stores/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/stores/1"
+    "http://localhost:8000/api/stores/1"
 );
 
 const headers = {
@@ -1671,10 +1671,10 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
         &quot;id&quot;: 8,
-        &quot;name&quot;: &quot;Cruickshank Inc&quot;,
-        &quot;address&quot;: &quot;532 Leuschke Causeway\nMcLaughlinstad, MI 07365&quot;,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;name&quot;: &quot;Kunde Group&quot;,
+        &quot;address&quot;: &quot;62028 Trudie Mills\nNorth Cordie, IL 75592&quot;,
+        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1776,19 +1776,19 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/stores/1" \
+    "http://localhost:8000/api/stores/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"architecto\",
-    \"address\": \"architecto\"
+    \"name\": \"consequatur\",
+    \"address\": \"consequatur\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/stores/1"
+    "http://localhost:8000/api/stores/1"
 );
 
 const headers = {
@@ -1797,8 +1797,8 @@ const headers = {
 };
 
 let body = {
-    "name": "architecto",
-    "address": "architecto"
+    "name": "consequatur",
+    "address": "consequatur"
 };
 
 fetch(url, {
@@ -1818,10 +1818,10 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
         &quot;id&quot;: 9,
-        &quot;name&quot;: &quot;Rempel, Gulgowski and O&#039;Kon&quot;,
-        &quot;address&quot;: &quot;80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432&quot;,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;name&quot;: &quot;Moore-Emard&quot;,
+        &quot;address&quot;: &quot;27319 Schmeler Fall Suite 958\nCarterland, NM 49546&quot;,
+        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1918,10 +1918,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="PUTapi-stores--id-"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>分店名稱（唯一，會排除當前分店）。例如：台北信義店 Example: <code>architecto</code></p>
+<p>分店名稱（唯一，會排除當前分店）。例如：台北信義店 Example: <code>consequatur</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>address</code></b>&nbsp;&nbsp;
@@ -1929,10 +1929,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="address"                data-endpoint="PUTapi-stores--id-"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>分店地址。例如：台北市信義區信義路五段7號 Example: <code>architecto</code></p>
+<p>分店地址。例如：台北市信義區信義路五段7號 Example: <code>consequatur</code></p>
         </div>
         </form>
 
@@ -1950,14 +1950,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/stores/1" \
+    "http://localhost:8000/api/stores/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/stores/1"
+    "http://localhost:8000/api/stores/1"
 );
 
 const headers = {
@@ -2075,14 +2075,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/users/1/stores" \
+    --get "http://localhost:8000/api/users/1/stores" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/1/stores"
+    "http://localhost:8000/api/users/1/stores"
 );
 
 const headers = {
@@ -2106,10 +2106,10 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
         &quot;id&quot;: 10,
-        &quot;name&quot;: &quot;Williamson, Boyle and Hane&quot;,
-        &quot;address&quot;: &quot;963 Kemmer Divide Suite 369\nWest Vernice, GA 89877&quot;,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;name&quot;: &quot;Maggio, Lakin and Durgan&quot;,
+        &quot;address&quot;: &quot;45898 Hammes Courts\nHaagshire, MN 43438-3224&quot;,
+        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2211,12 +2211,12 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/users/1/stores" \
+    "http://localhost:8000/api/users/1/stores" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"store_ids\": [
-        \"architecto\"
+        \"consequatur\"
     ]
 }"
 </code></pre></div>
@@ -2224,7 +2224,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/1/stores"
+    "http://localhost:8000/api/users/1/stores"
 );
 
 const headers = {
@@ -2234,7 +2234,7 @@ const headers = {
 
 let body = {
     "store_ids": [
-        "architecto"
+        "consequatur"
     ]
 };
 
@@ -2255,13 +2255,13 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
         &quot;id&quot;: 15,
-        &quot;name&quot;: &quot;Ms. Elisabeth Okuneva&quot;,
-        &quot;username&quot;: &quot;gulgowski.asia&quot;,
+        &quot;name&quot;: &quot;Dr. Cornelius Luettgen V&quot;,
+        &quot;username&quot;: &quot;russel.bert&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2363,10 +2363,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="store_ids.*"                data-endpoint="POSTapi-users--user_id--stores"
-               value="16"
+               value="17"
                data-component="body">
     <br>
-<p>分店ID，必須存在於系統中。例如：1 Example: <code>16</code></p>
+<p>分店ID，必須存在於系統中。例如：1 Example: <code>17</code></p>
                     </div>
                                     </details>
         </div>
@@ -2396,14 +2396,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/categories" \
+    --get "http://localhost:8000/api/categories" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/categories"
+    "http://localhost:8000/api/categories"
 );
 
 const headers = {
@@ -2559,14 +2559,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/attributes" \
+    --get "http://localhost:8000/api/attributes" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes"
+    "http://localhost:8000/api/attributes"
 );
 
 const headers = {
@@ -2737,18 +2737,18 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/attributes" \
+    "http://localhost:8000/api/attributes" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"architecto\"
+    \"name\": \"consequatur\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes"
+    "http://localhost:8000/api/attributes"
 );
 
 const headers = {
@@ -2757,7 +2757,7 @@ const headers = {
 };
 
 let body = {
-    "name": "architecto"
+    "name": "consequatur"
 };
 
 fetch(url, {
@@ -2853,10 +2853,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="POSTapi-attributes"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>屬性名稱（唯一）。例如：顏色 Example: <code>architecto</code></p>
+<p>屬性名稱（唯一）。例如：顏色 Example: <code>consequatur</code></p>
         </div>
         </form>
 
@@ -2874,14 +2874,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/attributes/16" \
+    --get "http://localhost:8000/api/attributes/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/16"
+    "http://localhost:8000/api/attributes/1"
 );
 
 const headers = {
@@ -2981,10 +2981,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-attributes--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>16</code></p>
+<p>The ID of the attribute. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -3013,18 +3013,18 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/attributes/16" \
+    "http://localhost:8000/api/attributes/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"architecto\"
+    \"name\": \"consequatur\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/16"
+    "http://localhost:8000/api/attributes/1"
 );
 
 const headers = {
@@ -3033,7 +3033,7 @@ const headers = {
 };
 
 let body = {
-    "name": "architecto"
+    "name": "consequatur"
 };
 
 fetch(url, {
@@ -3133,10 +3133,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-attributes--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>16</code></p>
+<p>The ID of the attribute. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -3156,10 +3156,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="PUTapi-attributes--id-"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>屬性名稱（唯一，會排除當前屬性）。例如：尺寸 Example: <code>architecto</code></p>
+<p>屬性名稱（唯一，會排除當前屬性）。例如：尺寸 Example: <code>consequatur</code></p>
         </div>
         </form>
 
@@ -3178,14 +3178,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/attributes/16" \
+    "http://localhost:8000/api/attributes/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/16"
+    "http://localhost:8000/api/attributes/1"
 );
 
 const headers = {
@@ -3284,10 +3284,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-attributes--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>16</code></p>
+<p>The ID of the attribute. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -3320,12 +3320,12 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/products/batch-delete" \
+    "http://localhost:8000/api/products/batch-delete" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"ids\": [
-        \"architecto\"
+        \"consequatur\"
     ]
 }"
 </code></pre></div>
@@ -3333,7 +3333,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/products/batch-delete"
+    "http://localhost:8000/api/products/batch-delete"
 );
 
 const headers = {
@@ -3343,7 +3343,7 @@ const headers = {
 
 let body = {
     "ids": [
-        "architecto"
+        "consequatur"
     ]
 };
 
@@ -3448,10 +3448,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="ids.*"                data-endpoint="POSTapi-products-batch-delete"
-               value="16"
+               value="17"
                data-component="body">
     <br>
-<p>商品 ID，必須存在於資料庫中。例如：1 Example: <code>16</code></p>
+<p>商品 ID，必須存在於資料庫中。例如：1 Example: <code>17</code></p>
                     </div>
                                     </details>
         </div>
@@ -3471,14 +3471,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/products?page=1&amp;per_page=15&amp;search=%E6%A4%85%E5%AD%90&amp;sort_by=name&amp;sort_order=desc" \
+    --get "http://localhost:8000/api/products?page=1&amp;per_page=15&amp;search=%E6%A4%85%E5%AD%90&amp;sort_by=name&amp;sort_order=desc" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/products"
+    "http://localhost:8000/api/products"
 );
 
 const params = {
@@ -3798,7 +3798,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/products" \
+    "http://localhost:8000/api/products" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -3814,7 +3814,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             \"sku\": \"HEADPHONE-BT-RED-L\",
             \"price\": 199.99,
             \"attribute_value_ids\": [
-                16
+                17
             ]
         }
     ]
@@ -3824,7 +3824,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/products"
+    "http://localhost:8000/api/products"
 );
 
 const headers = {
@@ -3845,7 +3845,7 @@ let body = {
             "sku": "HEADPHONE-BT-RED-L",
             "price": 199.99,
             "attribute_value_ids": [
-                16
+                17
             ]
         }
     ]
@@ -3940,6 +3940,14 @@ fetch(url, {
             &quot;max&quot;: 429.99,
             &quot;count&quot;: 2
         },
+        &quot;attributes&quot;: [
+            {
+                &quot;id&quot;: 1,
+                &quot;name&quot;: &quot;顏色&quot;,
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: &quot;商品顏色選項&quot;
+            }
+        ],
         &quot;category&quot;: {
             &quot;id&quot;: 1,
             &quot;name&quot;: &quot;辦公用品&quot;,
@@ -4172,14 +4180,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/products/1" \
+    --get "http://localhost:8000/api/products/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/products/1"
+    "http://localhost:8000/api/products/1"
 );
 
 const headers = {
@@ -4196,7 +4204,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-products--id-">
             <blockquote>
-            <p>Example response (200, 商品詳細資料):</p>
+            <p>Example response (200):</p>
         </blockquote>
                 <pre>
 
@@ -4204,13 +4212,90 @@ fetch(url, {
     &quot;data&quot;: {
         &quot;id&quot;: 1,
         &quot;name&quot;: &quot;高階人體工學辦公椅&quot;,
-        &quot;sku&quot;: &quot;CHAIR-ERG-001&quot;,
-        &quot;description&quot;: &quot;具備可調節腰靠和 4D 扶手。&quot;,
-        &quot;selling_price&quot;: 399.99,
-        &quot;cost_price&quot;: 150,
+        &quot;description&quot;: &quot;具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。&quot;,
         &quot;category_id&quot;: 1,
         &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;
+        &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+        &quot;variants&quot;: [
+            {
+                &quot;id&quot;: 1,
+                &quot;sku&quot;: &quot;CHAIR-ERG-001-BLACK&quot;,
+                &quot;price&quot;: 399.99,
+                &quot;product_id&quot;: 1,
+                &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;attribute_values&quot;: [
+                    {
+                        &quot;id&quot;: 1,
+                        &quot;value&quot;: &quot;黑色&quot;,
+                        &quot;attribute_id&quot;: 1,
+                        &quot;attribute&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;顏色&quot;
+                        }
+                    }
+                ],
+                &quot;inventory&quot;: [
+                    {
+                        &quot;id&quot;: 1,
+                        &quot;quantity&quot;: 50,
+                        &quot;low_stock_threshold&quot;: 10,
+                        &quot;store&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;台北旗艦店&quot;
+                        }
+                    }
+                ]
+            },
+            {
+                &quot;id&quot;: 2,
+                &quot;sku&quot;: &quot;CHAIR-ERG-001-WHITE&quot;,
+                &quot;price&quot;: 429.99,
+                &quot;product_id&quot;: 1,
+                &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;attribute_values&quot;: [
+                    {
+                        &quot;id&quot;: 2,
+                        &quot;value&quot;: &quot;白色&quot;,
+                        &quot;attribute_id&quot;: 1,
+                        &quot;attribute&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;顏色&quot;
+                        }
+                    }
+                ],
+                &quot;inventory&quot;: [
+                    {
+                        &quot;id&quot;: 2,
+                        &quot;quantity&quot;: 25,
+                        &quot;low_stock_threshold&quot;: 5,
+                        &quot;store&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;台北旗艦店&quot;
+                        }
+                    }
+                ]
+            }
+        ],
+        &quot;price_range&quot;: {
+            &quot;min&quot;: 399.99,
+            &quot;max&quot;: 429.99,
+            &quot;count&quot;: 2
+        },
+        &quot;attributes&quot;: [
+            {
+                &quot;id&quot;: 1,
+                &quot;name&quot;: &quot;顏色&quot;,
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: &quot;商品顏色選項&quot;
+            }
+        ],
+        &quot;category&quot;: {
+            &quot;id&quot;: 1,
+            &quot;name&quot;: &quot;辦公用品&quot;,
+            &quot;description&quot;: &quot;各種辦公室所需用品&quot;
+        }
     }
 }</code>
  </pre>
@@ -4298,9 +4383,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
-                    <h2 id="-PUTapi-products--id-">更新指定的商品</h2>
+                    <h2 id="-PUTapi-products--id-">更新指定的商品及其變體</h2>
 
 <p>
+<small class="badge badge-darkred">requires authentication</small>
 </p>
 
 
@@ -4311,23 +4397,34 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/products/1" \
+    "http://localhost:8000/api/products/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"高階人體工學辦公椅\",
-    \"sku\": \"CHAIR-ERG-001\",
-    \"description\": \"具備可調節腰靠和 4D 扶手。\",
-    \"selling_price\": 399.99,
-    \"cost_price\": 150,
-    \"category_id\": 1
+    \"name\": \"\\\"經典棉質T-shirt\\\"\",
+    \"description\": \"\\\"100% 純棉\\\"\",
+    \"category_id\": 1,
+    \"attributes\": [
+        1,
+        2
+    ],
+    \"variants\": [
+        {
+            \"id\": 17,
+            \"sku\": \"mqeopfuudtdsufvyvddqa\",
+            \"price\": 45,
+            \"attribute_value_ids\": [
+                17
+            ]
+        }
+    ]
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/products/1"
+    "http://localhost:8000/api/products/1"
 );
 
 const headers = {
@@ -4336,12 +4433,23 @@ const headers = {
 };
 
 let body = {
-    "name": "高階人體工學辦公椅",
-    "sku": "CHAIR-ERG-001",
-    "description": "具備可調節腰靠和 4D 扶手。",
-    "selling_price": 399.99,
-    "cost_price": 150,
-    "category_id": 1
+    "name": "\"經典棉質T-shirt\"",
+    "description": "\"100% 純棉\"",
+    "category_id": 1,
+    "attributes": [
+        1,
+        2
+    ],
+    "variants": [
+        {
+            "id": 17,
+            "sku": "mqeopfuudtdsufvyvddqa",
+            "price": 45,
+            "attribute_value_ids": [
+                17
+            ]
+        }
+    ]
 };
 
 fetch(url, {
@@ -4354,7 +4462,7 @@ fetch(url, {
 
 <span id="example-responses-PUTapi-products--id-">
             <blockquote>
-            <p>Example response (200, 商品更新成功):</p>
+            <p>Example response (200):</p>
         </blockquote>
                 <pre>
 
@@ -4362,13 +4470,90 @@ fetch(url, {
     &quot;data&quot;: {
         &quot;id&quot;: 1,
         &quot;name&quot;: &quot;高階人體工學辦公椅&quot;,
-        &quot;sku&quot;: &quot;CHAIR-ERG-001&quot;,
-        &quot;description&quot;: &quot;具備可調節腰靠和 4D 扶手。&quot;,
-        &quot;selling_price&quot;: 399.99,
-        &quot;cost_price&quot;: 150,
+        &quot;description&quot;: &quot;具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。&quot;,
         &quot;category_id&quot;: 1,
         &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;
+        &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+        &quot;variants&quot;: [
+            {
+                &quot;id&quot;: 1,
+                &quot;sku&quot;: &quot;CHAIR-ERG-001-BLACK&quot;,
+                &quot;price&quot;: 399.99,
+                &quot;product_id&quot;: 1,
+                &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;attribute_values&quot;: [
+                    {
+                        &quot;id&quot;: 1,
+                        &quot;value&quot;: &quot;黑色&quot;,
+                        &quot;attribute_id&quot;: 1,
+                        &quot;attribute&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;顏色&quot;
+                        }
+                    }
+                ],
+                &quot;inventory&quot;: [
+                    {
+                        &quot;id&quot;: 1,
+                        &quot;quantity&quot;: 50,
+                        &quot;low_stock_threshold&quot;: 10,
+                        &quot;store&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;台北旗艦店&quot;
+                        }
+                    }
+                ]
+            },
+            {
+                &quot;id&quot;: 2,
+                &quot;sku&quot;: &quot;CHAIR-ERG-001-WHITE&quot;,
+                &quot;price&quot;: 429.99,
+                &quot;product_id&quot;: 1,
+                &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+                &quot;attribute_values&quot;: [
+                    {
+                        &quot;id&quot;: 2,
+                        &quot;value&quot;: &quot;白色&quot;,
+                        &quot;attribute_id&quot;: 1,
+                        &quot;attribute&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;顏色&quot;
+                        }
+                    }
+                ],
+                &quot;inventory&quot;: [
+                    {
+                        &quot;id&quot;: 2,
+                        &quot;quantity&quot;: 25,
+                        &quot;low_stock_threshold&quot;: 5,
+                        &quot;store&quot;: {
+                            &quot;id&quot;: 1,
+                            &quot;name&quot;: &quot;台北旗艦店&quot;
+                        }
+                    }
+                ]
+            }
+        ],
+        &quot;price_range&quot;: {
+            &quot;min&quot;: 399.99,
+            &quot;max&quot;: 429.99,
+            &quot;count&quot;: 2
+        },
+        &quot;attributes&quot;: [
+            {
+                &quot;id&quot;: 1,
+                &quot;name&quot;: &quot;顏色&quot;,
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: &quot;商品顏色選項&quot;
+            }
+        ],
+        &quot;category&quot;: {
+            &quot;id&quot;: 1,
+            &quot;name&quot;: &quot;辦公用品&quot;,
+            &quot;description&quot;: &quot;各種辦公室所需用品&quot;
+        }
     }
 }</code>
  </pre>
@@ -4390,7 +4575,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 </span>
 <form id="form-PUTapi-products--id-" data-method="PUT"
       data-path="api/products/{id}"
-      data-authed="0"
+      data-authed="1"
       data-hasfiles="0"
       data-isarraybody="0"
       autocomplete="off"
@@ -4465,21 +4650,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="PUTapi-products--id-"
-               value="高階人體工學辦公椅"
+               value=""經典棉質T-shirt""
                data-component="body">
     <br>
-<p>商品的完整名稱。 Example: <code>高階人體工學辦公椅</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>sku</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="sku"                data-endpoint="PUTapi-products--id-"
-               value="CHAIR-ERG-001"
-               data-component="body">
-    <br>
-<p>商品的唯一庫存單位編號 (SKU)。 Example: <code>CHAIR-ERG-001</code></p>
+<p>SPU 的名稱。 Example: <code>"經典棉質T-shirt"</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
@@ -4487,32 +4661,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="description"                data-endpoint="PUTapi-products--id-"
-               value="具備可調節腰靠和 4D 扶手。"
+               value=""100% 純棉""
                data-component="body">
     <br>
-<p>商品的詳細描述。 Example: <code>具備可調節腰靠和 4D 扶手。</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>selling_price</code></b>&nbsp;&nbsp;
-<small>number</small>&nbsp;
- &nbsp;
-                <input type="number" style="display: none"
-               step="any"               name="selling_price"                data-endpoint="PUTapi-products--id-"
-               value="399.99"
-               data-component="body">
-    <br>
-<p>商品的銷售價格。 Example: <code>399.99</code></p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>cost_price</code></b>&nbsp;&nbsp;
-<small>number</small>&nbsp;
- &nbsp;
-                <input type="number" style="display: none"
-               step="any"               name="cost_price"                data-endpoint="PUTapi-products--id-"
-               value="150"
-               data-component="body">
-    <br>
-<p>商品的成本價格。 Example: <code>150</code></p>
+<p>SPU 的描述。 Example: <code>"100% 純棉"</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>category_id</code></b>&nbsp;&nbsp;
@@ -4523,7 +4675,134 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="1"
                data-component="body">
     <br>
-<p>商品所屬分類的 ID。可為空值表示不屬於任何分類。 Example: <code>1</code></p>
+<p>分類ID。 Example: <code>1</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>integer[]</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="attributes[0]"                data-endpoint="PUTapi-products--id-"
+               data-component="body">
+        <input type="number" style="display: none"
+               name="attributes[1]"                data-endpoint="PUTapi-products--id-"
+               data-component="body">
+    <br>
+<p>該 SPU 擁有的屬性 ID 陣列。</p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>variants</code></b>&nbsp;&nbsp;
+<small>object[]</small>&nbsp;
+<i>optional</i> &nbsp;
+<br>
+<p>SKU 變體陣列。</p>
+            </summary>
+                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.0.id"                data-endpoint="PUTapi-products--id-"
+               value="17"
+               data-component="body">
+    <br>
+<p>The <code>id</code> of an existing record in the product_variants table. Example: <code>17</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>sku</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="variants.0.sku"                data-endpoint="PUTapi-products--id-"
+               value="mqeopfuudtdsufvyvddqa"
+               data-component="body">
+    <br>
+<p>Must not be greater than 100 characters. Example: <code>mqeopfuudtdsufvyvddqa</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>price</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.0.price"                data-endpoint="PUTapi-products--id-"
+               value="45"
+               data-component="body">
+    <br>
+<p>Must be at least 0. Example: <code>45</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>attribute_value_ids</code></b>&nbsp;&nbsp;
+<small>integer[]</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.0.attribute_value_ids[0]"                data-endpoint="PUTapi-products--id-"
+               data-component="body">
+        <input type="number" style="display: none"
+               name="variants.0.attribute_value_ids[1]"                data-endpoint="PUTapi-products--id-"
+               data-component="body">
+    <br>
+<p>The <code>id</code> of an existing record in the attribute_values table.</p>
+                    </div>
+                                                                <div style=" margin-left: 14px; clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>*</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+<br>
+
+            </summary>
+                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.*.id"                data-endpoint="PUTapi-products--id-"
+               value="1"
+               data-component="body">
+    <br>
+<p>變體的 ID（用於更新現有變體）。 Example: <code>1</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>sku</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="variants.*.sku"                data-endpoint="PUTapi-products--id-"
+               value=""TSHIRT-RED-S""
+               data-component="body">
+    <br>
+<p>SKU 的唯一編號。 Example: <code>"TSHIRT-RED-S"</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>price</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.*.price"                data-endpoint="PUTapi-products--id-"
+               value="299.99"
+               data-component="body">
+    <br>
+<p>SKU 的價格。 Example: <code>299.99</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>attribute_value_ids</code></b>&nbsp;&nbsp;
+<small>integer[]</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="variants.*.attribute_value_ids[0]"                data-endpoint="PUTapi-products--id-"
+               data-component="body">
+        <input type="number" style="display: none"
+               name="variants.*.attribute_value_ids[1]"                data-endpoint="PUTapi-products--id-"
+               data-component="body">
+    <br>
+<p>組成此 SKU 的屬性值 ID 陣列。</p>
+                    </div>
+                                    </details>
+        </div>
+                                        </details>
         </div>
         </form>
 
@@ -4540,14 +4819,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/products/1" \
+    "http://localhost:8000/api/products/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/products/1"
+    "http://localhost:8000/api/products/1"
 );
 
 const headers = {
@@ -4671,14 +4950,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/products/variants?product_id=1&amp;product_name=T%E6%81%A4&amp;sku=TSHIRT-RED-S&amp;page=1&amp;per_page=15" \
+    --get "http://localhost:8000/api/products/variants?product_id=1&amp;product_name=T%E6%81%A4&amp;sku=TSHIRT-RED-S&amp;page=1&amp;per_page=15" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/products/variants"
+    "http://localhost:8000/api/products/variants"
 );
 
 const params = {
@@ -4979,14 +5258,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/products/variants/architecto" \
+    --get "http://localhost:8000/api/products/variants/consequatur" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/products/variants/architecto"
+    "http://localhost:8000/api/products/variants/consequatur"
 );
 
 const headers = {
@@ -5095,10 +5374,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="id"                data-endpoint="GETapi-products-variants--id-"
-               value="architecto"
+               value="consequatur"
                data-component="url">
     <br>
-<p>The ID of the variant. Example: <code>architecto</code></p>
+<p>The ID of the variant. Example: <code>consequatur</code></p>
             </div>
                     </form>
 
@@ -5120,14 +5399,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/attributes/16/values" \
+    --get "http://localhost:8000/api/attributes/1/values" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/16/values"
+    "http://localhost:8000/api/attributes/1/values"
 );
 
 const headers = {
@@ -5266,10 +5545,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="attribute_id"                data-endpoint="GETapi-attributes--attribute_id--values"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>16</code></p>
+<p>The ID of the attribute. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -5299,18 +5578,18 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/attributes/16/values" \
+    "http://localhost:8000/api/attributes/1/values" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"value\": \"architecto\"
+    \"value\": \"consequatur\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/attributes/16/values"
+    "http://localhost:8000/api/attributes/1/values"
 );
 
 const headers = {
@@ -5319,7 +5598,7 @@ const headers = {
 };
 
 let body = {
-    "value": "architecto"
+    "value": "consequatur"
 };
 
 fetch(url, {
@@ -5415,10 +5694,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="attribute_id"                data-endpoint="POSTapi-attributes--attribute_id--values"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the attribute. Example: <code>16</code></p>
+<p>The ID of the attribute. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>attribute</code></b>&nbsp;&nbsp;
@@ -5438,10 +5717,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="value"                data-endpoint="POSTapi-attributes--attribute_id--values"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>屬性值（在同一屬性下必須唯一）。例如：紅色 Example: <code>architecto</code></p>
+<p>屬性值（在同一屬性下必須唯一）。例如：紅色 Example: <code>consequatur</code></p>
         </div>
         </form>
 
@@ -5459,14 +5738,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/values/16" \
+    --get "http://localhost:8000/api/values/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/values/16"
+    "http://localhost:8000/api/values/1"
 );
 
 const headers = {
@@ -5566,10 +5845,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-values--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the value. Example: <code>16</code></p>
+<p>The ID of the value. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>value</code></b>&nbsp;&nbsp;
@@ -5599,14 +5878,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/values/16" \
+    "http://localhost:8000/api/values/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/values/16"
+    "http://localhost:8000/api/values/1"
 );
 
 const headers = {
@@ -5705,10 +5984,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-values--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the value. Example: <code>16</code></p>
+<p>The ID of the value. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>value</code></b>&nbsp;&nbsp;
@@ -5741,14 +6020,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/inventory?store_id=1&amp;low_stock=1&amp;out_of_stock=&amp;product_name=T%E6%81%A4&amp;paginate=1&amp;per_page=25" \
+    --get "http://localhost:8000/api/inventory?store_id=1&amp;low_stock=1&amp;out_of_stock=&amp;product_name=T%E6%81%A4&amp;paginate=1&amp;per_page=25" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory"
+    "http://localhost:8000/api/inventory"
 );
 
 const params = {
@@ -6067,14 +6346,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/inventory/architecto" \
+    --get "http://localhost:8000/api/inventory/consequatur" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/architecto"
+    "http://localhost:8000/api/inventory/consequatur"
 );
 
 const headers = {
@@ -6183,10 +6462,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="id"                data-endpoint="GETapi-inventory--id-"
-               value="architecto"
+               value="consequatur"
                data-component="url">
     <br>
-<p>The ID of the inventory. Example: <code>architecto</code></p>
+<p>The ID of the inventory. Example: <code>consequatur</code></p>
             </div>
                     </form>
 
@@ -6204,7 +6483,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/inventory/adjust" \
+    "http://localhost:8000/api/inventory/adjust" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -6222,7 +6501,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/adjust"
+    "http://localhost:8000/api/inventory/adjust"
 );
 
 const headers = {
@@ -6403,14 +6682,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/inventory/1/history?start_date=2023-01-01&amp;end_date=2023-12-31&amp;type=addition&amp;per_page=20" \
+    --get "http://localhost:8000/api/inventory/1/history?start_date=2023-01-01&amp;end_date=2023-12-31&amp;type=addition&amp;per_page=20" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/1/history"
+    "http://localhost:8000/api/inventory/1/history"
 );
 
 const params = {
@@ -6594,7 +6873,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/inventory/batch-check" \
+    "http://localhost:8000/api/inventory/batch-check" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -6610,7 +6889,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/batch-check"
+    "http://localhost:8000/api/inventory/batch-check"
 );
 
 const headers = {
@@ -6751,14 +7030,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/inventory/transfers?from_store_id=1&amp;to_store_id=2&amp;status=completed&amp;start_date=2023-01-01&amp;end_date=2023-12-31&amp;product_name=T%E6%81%A4&amp;per_page=20" \
+    --get "http://localhost:8000/api/inventory/transfers?from_store_id=1&amp;to_store_id=2&amp;status=completed&amp;start_date=2023-01-01&amp;end_date=2023-12-31&amp;product_name=T%E6%81%A4&amp;per_page=20" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/transfers"
+    "http://localhost:8000/api/inventory/transfers"
 );
 
 const params = {
@@ -7085,14 +7364,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/inventory/transfers/architecto" \
+    --get "http://localhost:8000/api/inventory/transfers/consequatur" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/transfers/architecto"
+    "http://localhost:8000/api/inventory/transfers/consequatur"
 );
 
 const headers = {
@@ -7201,10 +7480,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="id"                data-endpoint="GETapi-inventory-transfers--id-"
-               value="architecto"
+               value="consequatur"
                data-component="url">
     <br>
-<p>The ID of the transfer. Example: <code>architecto</code></p>
+<p>The ID of the transfer. Example: <code>consequatur</code></p>
             </div>
                     </form>
 
@@ -7222,7 +7501,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/inventory/transfers" \
+    "http://localhost:8000/api/inventory/transfers" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -7238,7 +7517,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/transfers"
+    "http://localhost:8000/api/inventory/transfers"
 );
 
 const headers = {
@@ -7417,7 +7696,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost/api/inventory/transfers/1/status" \
+    "http://localhost:8000/api/inventory/transfers/1/status" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -7429,7 +7708,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/transfers/1/status"
+    "http://localhost:8000/api/inventory/transfers/1/status"
 );
 
 const headers = {
@@ -7572,7 +7851,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost/api/inventory/transfers/1/cancel" \
+    "http://localhost:8000/api/inventory/transfers/1/cancel" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -7583,7 +7862,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/inventory/transfers/1/cancel"
+    "http://localhost:8000/api/inventory/transfers/1/cancel"
 );
 
 const headers = {
@@ -7718,14 +7997,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/users?filter%5Bname%5D=admin&amp;filter%5Busername%5D=superadmin&amp;filter%5Bsearch%5D=admin" \
+    --get "http://localhost:8000/api/users?filter%5Bname%5D=admin&amp;filter%5Busername%5D=superadmin&amp;filter%5Bsearch%5D=admin" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users"
+    "http://localhost:8000/api/users"
 );
 
 const params = {
@@ -7906,21 +8185,21 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/users" \
+    "http://localhost:8000/api/users" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"architecto\",
-    \"username\": \"architecto\",
-    \"password\": \"|]|{+-\",
-    \"role\": \"architecto\"
+    \"name\": \"consequatur\",
+    \"username\": \"consequatur\",
+    \"password\": \"O[2UZ5ij-e\\/dl4m{o,\",
+    \"role\": \"consequatur\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users"
+    "http://localhost:8000/api/users"
 );
 
 const headers = {
@@ -7929,10 +8208,10 @@ const headers = {
 };
 
 let body = {
-    "name": "architecto",
-    "username": "architecto",
-    "password": "|]|{+-",
-    "role": "architecto"
+    "name": "consequatur",
+    "username": "consequatur",
+    "password": "O[2UZ5ij-e\/dl4m{o,",
+    "role": "consequatur"
 };
 
 fetch(url, {
@@ -8039,10 +8318,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="POSTapi-users"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>用戶姓名。例如：張三 Example: <code>architecto</code></p>
+<p>用戶姓名。例如：張三 Example: <code>consequatur</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>username</code></b>&nbsp;&nbsp;
@@ -8050,10 +8329,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="username"                data-endpoint="POSTapi-users"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>用戶名（唯一）。例如：zhangsan Example: <code>architecto</code></p>
+<p>用戶名（唯一）。例如：zhangsan Example: <code>consequatur</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
@@ -8061,10 +8340,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="password"                data-endpoint="POSTapi-users"
-               value="|]|{+-"
+               value="O[2UZ5ij-e/dl4m{o,"
                data-component="body">
     <br>
-<p>用戶密碼（至少8個字元）。例如：password123 Example: <code>|]|{+-</code></p>
+<p>用戶密碼（至少8個字元）。例如：password123 Example: <code>O[2UZ5ij-e/dl4m{o,</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>role</code></b>&nbsp;&nbsp;
@@ -8072,10 +8351,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="role"                data-endpoint="POSTapi-users"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>用戶角色，必須是 admin 或 viewer。例如：admin Example: <code>architecto</code></p>
+<p>用戶角色，必須是 admin 或 viewer。例如：admin Example: <code>consequatur</code></p>
         </div>
         </form>
 
@@ -8094,14 +8373,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/users/1" \
+    --get "http://localhost:8000/api/users/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/1"
+    "http://localhost:8000/api/users/1"
 );
 
 const headers = {
@@ -8247,7 +8526,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/users/1" \
+    "http://localhost:8000/api/users/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -8261,7 +8540,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/1"
+    "http://localhost:8000/api/users/1"
 );
 
 const headers = {
@@ -8470,14 +8749,14 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/users/1" \
+    "http://localhost:8000/api/users/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/1"
+    "http://localhost:8000/api/users/1"
 );
 
 const headers = {
@@ -8612,18 +8891,18 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/values/16" \
+    "http://localhost:8000/api/values/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"value\": \"architecto\"
+    \"value\": \"consequatur\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/values/16"
+    "http://localhost:8000/api/values/1"
 );
 
 const headers = {
@@ -8632,7 +8911,7 @@ const headers = {
 };
 
 let body = {
-    "value": "architecto"
+    "value": "consequatur"
 };
 
 fetch(url, {
@@ -8738,10 +9017,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-values--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the value. Example: <code>16</code></p>
+<p>The ID of the value. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>value</code></b>&nbsp;&nbsp;
@@ -8761,10 +9040,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="value"                data-endpoint="PUTapi-values--id-"
-               value="architecto"
+               value="consequatur"
                data-component="body">
     <br>
-<p>屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色 Example: <code>architecto</code></p>
+<p>屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色 Example: <code>consequatur</code></p>
         </div>
         </form>
 
@@ -8785,7 +9064,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/login" \
+    "http://localhost:8000/api/login" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -8797,7 +9076,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/login"
+    "http://localhost:8000/api/login"
 );
 
 const headers = {
@@ -8961,14 +9240,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/logout" \
+    "http://localhost:8000/api/logout" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/logout"
+    "http://localhost:8000/api/logout"
 );
 
 const headers = {

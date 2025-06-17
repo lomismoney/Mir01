@@ -29,12 +29,22 @@ class UpdateProductRequest extends FormRequest
         $productId = $product instanceof \App\Models\Product ? $product->id : $product;
 
         return [
+            // SPU 基本資訊
             'name' => ['sometimes', 'required', 'string', 'max:200'],
-            'sku' => ['sometimes', 'required', 'string', 'max:100', Rule::unique('products')->ignore($productId)],
             'description' => ['sometimes', 'nullable', 'string'],
-            'selling_price' => ['sometimes', 'required', 'numeric', 'min:0'],
-            'cost_price' => ['sometimes', 'required', 'numeric', 'min:0'],
-            'category_id' => 'sometimes|nullable|integer|exists:categories,id',
+            'category_id' => ['sometimes', 'nullable', 'integer', 'exists:categories,id'],
+            
+            // 屬性關聯
+            'attributes' => ['sometimes', 'array'],
+            'attributes.*' => ['integer', 'exists:attributes,id'],
+            
+            // 變體資訊
+            'variants' => ['sometimes', 'array'],
+            'variants.*.id' => ['sometimes', 'integer', 'exists:product_variants,id'],
+            'variants.*.sku' => ['required', 'string', 'max:100'],
+            'variants.*.price' => ['required', 'numeric', 'min:0'],
+            'variants.*.attribute_value_ids' => ['sometimes', 'array'],
+            'variants.*.attribute_value_ids.*' => ['integer', 'exists:attribute_values,id'],
         ];
     }
 

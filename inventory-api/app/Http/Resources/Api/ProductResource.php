@@ -62,6 +62,18 @@ class ProductResource extends JsonResource
             ];
         }
         
+        // 加載屬性數據（如果關係已加載）
+        if ($this->relationLoaded('attributes')) {
+            $data['attributes'] = $this->attributes->map(function ($attribute) {
+                return [
+                    'id' => (int) $attribute->id,
+                    'name' => $attribute->name,
+                    'type' => $attribute->type,
+                    'description' => $attribute->description,
+                ];
+            })->toArray();
+        }
+        
         return $data;
     }
 } 
