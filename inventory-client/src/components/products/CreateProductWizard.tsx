@@ -374,7 +374,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
   };
 
   /**
-   * 最終提交處理 - 真實 API 整合版本
+   * 最終提交處理 - 統一 SPU/SKU API 格式版本
    */
   const handleSubmit = async () => {
     if (!validateStep(4)) {
@@ -383,33 +383,23 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
     }
 
     try {
+      // 🚀 統一使用新的 SPU/SKU API 格式
+      const apiPayload = transformWizardDataToApiPayload(formData, attributesData);
+      
+      console.log(`${isEditMode ? '編輯' : '創建'}模式 - 轉換後的 API 請求資料：`, apiPayload);
+      
       if (isEditMode && productId) {
-        // 編輯模式：暫時只支持基本商品信息更新（使用舊的 API 格式）
-        const basicUpdatePayload = {
-          name: formData.basicInfo.name,
-          sku: formData.basicInfo.name.replace(/\s+/g, '-').toUpperCase() + '-001', // 臨時 SKU
-          description: formData.basicInfo.description || null,
-          selling_price: 0, // 默認值，需要後續完善
-          cost_price: 0,   // 默認值，需要後續完善
-          category_id: formData.basicInfo.category_id,
-        };
-        
-        console.log('編輯模式 - 基本信息更新：', basicUpdatePayload);
-        
-        // 調用更新 API（使用舊的格式）
+        // 編輯模式：使用完整的 SPU/SKU 更新 API
         await updateProductMutation.mutateAsync({ 
           id: Number(productId), 
-          ...basicUpdatePayload 
+          ...apiPayload 
         });
         
-        toast.success('商品基本信息更新成功！');
+        toast.success('商品更新成功！', {
+          description: `商品「${apiPayload.name}」已成功更新，包含 ${apiPayload.variants?.length || 0} 個 SKU 變體。`
+        });
       } else {
-        // 創建模式：新增商品（使用新的 SPU/SKU 格式）
-        const apiPayload = transformWizardDataToApiPayload(formData, attributesData);
-        
-        console.log('創建模式 - 轉換後的 API 請求資料：', apiPayload);
-        
-        // 調用創建 API (mutateAsync 會返回一個 Promise)
+        // 創建模式：新增商品
         await createProductMutation.mutateAsync(apiPayload);
         
         // 成功訊息在 useCreateProduct 的 onSuccess 中處理
@@ -419,11 +409,12 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       router.push('/products');
 
     } catch (error) {
-      // onError 中已處理 toast，此處只需記錄詳細錯誤
+      // 錯誤處理
       console.error(`商品${isEditMode ? '更新' : '創建'}提交失敗:`, error);
       
-      // 額外的錯誤處理
-      toast.error(`商品${isEditMode ? '更新' : '創建'}失敗，請稍後重試`);
+      toast.error(`商品${isEditMode ? '更新' : '創建'}失敗`, {
+        description: error instanceof Error ? error.message : '請檢查輸入資料並重試'
+      });
     }
   };
 
@@ -618,7 +609,12 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
                   className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
                 >
                   {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <span>{isSubmitting ? '創建中...' : '完成創建'}</span>
+                  <span>
+                    {isSubmitting 
+                      ? (isEditMode ? '更新中...' : '創建中...') 
+                      : (isEditMode ? '完成更新' : '完成創建')
+                    }
+                  </span>
                 </Button>
               )}
             </div>

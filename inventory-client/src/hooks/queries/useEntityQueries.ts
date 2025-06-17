@@ -195,7 +195,13 @@ export function useCreateProduct() {
 type UpdateProductRequestBody = import('@/types/api').paths["/api/products/{id}"]["put"]["requestBody"]["content"]["application/json"];
 
 /**
- * 更新商品的 Hook
+ * 更新商品的 Hook (SPU/SKU 架構升級版)
+ * 
+ * 支援完整的 SPU/SKU 商品更新流程：
+ * 1. 更新 SPU (Standard Product Unit) - 標準商品單位
+ * 2. 重新關聯商品屬性 (attributes)
+ * 3. 智能 SKU 變體管理 (variants) - 新增/修改/刪除
+ * 4. 自動同步所有門市的庫存記錄
  * 
  * @returns React Query 變更結果
  */
@@ -210,15 +216,29 @@ export function useUpdateProduct() {
             });
             
             if (error) {
-                throw new Error('更新商品失敗');
+                const errorMessage = parseApiErrorMessage(error);
+                throw new Error(errorMessage || '更新商品失敗');
             }
             
             return data;
         },
         onSuccess: (data, variables) => {
-            // 成功後更新快取
+            // 成功後更新快取並顯示成功訊息
             queryClient.invalidateQueries({ queryKey: ['products'] });
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.id) });
+            queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.PRODUCT(variables.id), 'detail'] });
+            
+            // 🎯 在 Hook 層級不顯示 toast，讓組件層級處理
+            // 這樣可以提供更靈活的用戶反饋控制
+        },
+        onError: (error) => {
+            // 錯誤處理並顯示錯誤訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.error('商品更新失敗', {
+                    description: error.message || '請檢查輸入資料並重試。'
+                });
+            }
         },
     });
 }

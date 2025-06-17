@@ -17,16 +17,18 @@ use Illuminate\Support\Facades\DB;
 class ProductService
 {
     /**
-     * 更新商品及其變體
+     * 更新商品及其變體 (核心戰術指令實現)
      * 
-     * 此方法處理完整的商品更新流程：
-     * 1. 更新 SPU (產品主體) 的基本資訊
-     * 2. 更新產品與屬性的關聯
-     * 3. 處理變體的增刪改：
-     *    - 更新現有變體
-     *    - 刪除不再需要的變體
-     *    - 新增新的變體
-     * 4. 確保新變體在所有門市都有初始庫存記錄
+     * 此方法嚴格按照 SOP-ENG-01 協議實現完整的商品更新流程：
+     * 1. 啟動資料庫交易確保原子性
+     * 2. 更新 SPU (產品主體) 的基本資訊
+     * 3. 更新產品與屬性的關聯
+     * 4. 識別 SKU 變更類型：
+     *    - 帶有 id 的 SKU 視為「待更新」
+     *    - 不帶 id 的 SKU 視為「待新增」
+     *    - 資料庫中存在但請求中不存在的 SKU 視為「待刪除」
+     * 5. 執行操作：刪除 -> 更新 -> 新增
+     * 6. 確保新變體在所有門市都有初始庫存記錄
      * 
      * @param Product $product 要更新的商品實例
      * @param array $validatedData 經過驗證的請求數據
@@ -35,47 +37,74 @@ class ProductService
     public function updateProductWithVariants(Product $product, array $validatedData): Product
     {
         return DB::transaction(function () use ($product, $validatedData) {
-            // 1. 更新 SPU (Product) 的基本資訊
+            // a. 更新 SPU - 產品主體資訊更新
             $product->update([
                 'name' => $validatedData['name'],
                 'description' => $validatedData['description'] ?? $product->description,
                 'category_id' => $validatedData['category_id'] ?? $product->category_id,
             ]);
 
-            // 2. 如果提供了屬性，更新產品與屬性的關聯
-            if (isset($validatedData['attributes'])) {
-                $product->attributes()->sync($validatedData['attributes']);
-            }
+            // b. 更新產品與屬性的關聯 (必須提供完整的屬性陣列)
+            $product->attributes()->sync($validatedData['attributes']);
 
-            // 3. 處理變體更新（如果提供了變體數據）
-            if (isset($validatedData['variants'])) {
-                $this->updateProductVariants($product, $validatedData['variants']);
-            }
+            // c. 識別 SKU 變更並執行操作
+            $this->processVariantChanges($product, $validatedData['variants']);
 
             return $product;
         });
     }
 
     /**
-     * 更新商品的變體
+     * 處理變體變更 (戰術核心實現)
+     * 
+     * 嚴格按照作戰指令實現 SKU 的識別與操作：
+     * 1. 識別變更類型：待更新、待新增、待刪除
+     * 2. 執行操作：DELETE -> UPDATE -> CREATE
      * 
      * @param Product $product 商品實例
      * @param array $variantsData 變體數據陣列
      * @return void
      */
-    private function updateProductVariants(Product $product, array $variantsData): void
+    private function processVariantChanges(Product $product, array $variantsData): void
     {
-        // 收集所有應該保留的變體 ID
-        $providedVariantIds = collect($variantsData)
-            ->filter(function ($variantData) {
-                return isset($variantData['id']);
-            })
-            ->pluck('id')
-            ->toArray();
+        // 步驟 1: 識別 SKU 變更類型
+        $variantsToUpdate = collect($variantsData)->filter(fn($variant) => isset($variant['id']));
+        $variantsToCreate = collect($variantsData)->filter(fn($variant) => !isset($variant['id']));
+        
+        // 獲取當前產品的所有變體 ID
+        $currentVariantIds = $product->variants()->pluck('id')->toArray();
+        
+        // 獲取請求中要保留的變體 ID
+        $providedVariantIds = $variantsToUpdate->pluck('id')->toArray();
+        
+        // 計算要刪除的變體 ID (存在於資料庫但不在請求中)
+        $variantsToDelete = array_diff($currentVariantIds, $providedVariantIds);
 
-        // 刪除不在提供列表中的現有變體
-        $product->variants()
-            ->whereNotIn('id', $providedVariantIds)
+        // 步驟 2: 執行操作 - 刪除 (DELETE)
+        if (!empty($variantsToDelete)) {
+            $this->deleteVariants($variantsToDelete);
+        }
+
+        // 步驟 3: 執行操作 - 更新 (UPDATE)
+        foreach ($variantsToUpdate as $variantData) {
+            $this->updateExistingVariant($variantData['id'], $variantData);
+        }
+
+        // 步驟 4: 執行操作 - 新增 (CREATE)
+        foreach ($variantsToCreate as $variantData) {
+            $this->createNewVariant($product, $variantData);
+        }
+    }
+
+    /**
+     * 批量刪除變體
+     * 
+     * @param array $variantIds 要刪除的變體 ID 陣列
+     * @return void
+     */
+    private function deleteVariants(array $variantIds): void
+    {
+        ProductVariant::whereIn('id', $variantIds)
             ->get()
             ->each(function ($variant) {
                 // 刪除變體前先刪除其庫存記錄
@@ -85,17 +114,6 @@ class ProductService
                 // 刪除變體
                 $variant->delete();
             });
-
-        // 處理每個變體（更新現有的或創建新的）
-        foreach ($variantsData as $variantData) {
-            if (isset($variantData['id'])) {
-                // 更新現有變體
-                $this->updateExistingVariant($variantData['id'], $variantData);
-            } else {
-                // 創建新變體
-                $this->createNewVariant($product, $variantData);
-            }
-        }
     }
 
     /**

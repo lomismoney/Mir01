@@ -1407,27 +1407,22 @@ export interface paths {
                          *       2
                          *     ]
                          */
-                        attributes?: number[];
+                        attributes: number[];
                         /**
-                         * @description SKU 變體陣列。
+                         * @description SKU 變體陣列，至少需要一項。
                          * @example [
                          *       []
                          *     ]
                          */
-                        variants?: {
+                        variants: {
                             /**
-                             * @description The <code>id</code> of an existing record in the product_variants table.
-                             * @example 17
-                             */
-                            id?: number;
-                            /**
-                             * @description Must not be greater than 100 characters.
-                             * @example mqeopfuudtdsufvyvddqa
+                             * @description 單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters.
+                             * @example HEADPHONE-BT-RED-L
                              */
                             sku: string;
                             /**
-                             * @description Must be at least 0.
-                             * @example 45
+                             * @description 單一 SKU 變體的價格。. Must be at least 0.
+                             * @example 199.99
                              */
                             price: number;
                             /**
@@ -1438,14 +1433,9 @@ export interface paths {
                              */
                             attribute_value_ids?: number[];
                             /** @example {
-                             *       "id": 1
+                             *       "sku": "\"TSHIRT-RED-S\""
                              *     } */
                             "*"?: {
-                                /**
-                                 * @description 變體的 ID（用於更新現有變體）。
-                                 * @example 1
-                                 */
-                                id?: number;
                                 /**
                                  * @description SKU 的唯一編號。
                                  * @example "TSHIRT-RED-S"

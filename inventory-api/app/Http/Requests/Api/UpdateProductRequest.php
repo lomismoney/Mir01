@@ -22,29 +22,37 @@ class UpdateProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        // 從路由中獲取 product 參數，這可能是模型實例或 ID
-        $product = $this->route('product');
-        
-        // 確保我們獲取到的是 ID
-        $productId = $product instanceof \App\Models\Product ? $product->id : $product;
-
         return [
-            // SPU 基本資訊
-            'name' => ['sometimes', 'required', 'string', 'max:200'],
-            'description' => ['sometimes', 'nullable', 'string'],
-            'category_id' => ['sometimes', 'nullable', 'integer', 'exists:categories,id'],
+            'name'          => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'category_id'   => 'nullable|integer|exists:categories,id',
+            'attributes'    => 'required|array',
+            'attributes.*'  => 'integer|exists:attributes,id',
             
-            // 屬性關聯
-            'attributes' => ['sometimes', 'array'],
-            'attributes.*' => ['integer', 'exists:attributes,id'],
-            
-            // 變體資訊
-            'variants' => ['sometimes', 'array'],
-            'variants.*.id' => ['sometimes', 'integer', 'exists:product_variants,id'],
-            'variants.*.sku' => ['required', 'string', 'max:100'],
-            'variants.*.price' => ['required', 'numeric', 'min:0'],
-            'variants.*.attribute_value_ids' => ['sometimes', 'array'],
-            'variants.*.attribute_value_ids.*' => ['integer', 'exists:attribute_values,id'],
+            'variants'      => 'required|array|min:1',
+            'variants.*.id' => 'sometimes|integer|exists:product_variants,id',
+            'variants.*.sku' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    // 檢查 SKU 唯一性，但排除當前變體的 SKU
+                    $index = explode('.', $attribute)[1]; // 獲取陣列索引
+                    $variantId = $this->input("variants.{$index}.id");
+                    
+                    $query = \App\Models\ProductVariant::where('sku', $value);
+                    if ($variantId) {
+                        $query->where('id', '!=', $variantId);
+                    }
+                    
+                    if ($query->exists()) {
+                        $fail('SKU 已存在，請使用不同的 SKU。');
+                    }
+                }
+            ],
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.attribute_value_ids' => 'required|array',
+            'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
         ];
     }
 

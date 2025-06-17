@@ -729,4 +729,173 @@ class ProductControllerTest extends TestCase
                     ->etc();
             });
     }
+
+    /** @test */
+    public function admin_can_fully_update_a_product_with_spu_and_sku_changes()
+    {
+        // 戰術指令 4: 核心功能測試
+        // 測試完整的商品更新流程，包括 SPU 和 SKU 的增刪改
+        
+        // === 階段 1: 準備測試環境 ===
+        
+        // 創建分類
+        $category1 = Category::factory()->create(['name' => '原始分類']);
+        $category2 = Category::factory()->create(['name' => '新分類']);
+        
+        // 創建屬性和屬性值
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $sizeAttribute = Attribute::factory()->create(['name' => '尺寸']);
+        
+        $redValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        $blueValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '藍色'
+        ]);
+        $greenValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '綠色'
+        ]);
+        $smallValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'S'
+        ]);
+        $mediumValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'M'
+        ]);
+        
+        // 創建門市（用於庫存記錄）
+        $store1 = \App\Models\Store::factory()->create(['name' => '台北店']);
+        $store2 = \App\Models\Store::factory()->create(['name' => '台中店']);
+        
+        // === 階段 2: 創建初始產品（包含 3 個 SKU：A, B, C）===
+        
+        $product = Product::factory()->create([
+            'name' => '原始商品名稱',
+            'description' => '原始描述',
+            'category_id' => $category1->id
+        ]);
+        
+        // 關聯屬性
+        $product->attributes()->attach([$colorAttribute->id, $sizeAttribute->id]);
+        
+        // 創建 3 個初始變體：A (紅S), B (藍S), C (紅M)
+        $variantA = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'sku' => 'ORIGINAL-RED-S',
+            'price' => 100.00
+        ]);
+        $variantA->attributeValues()->attach([$redValue->id, $smallValue->id]);
+        
+        $variantB = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'sku' => 'ORIGINAL-BLUE-S',
+            'price' => 110.00
+        ]);
+        $variantB->attributeValues()->attach([$blueValue->id, $smallValue->id]);
+        
+        $variantC = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'sku' => 'ORIGINAL-RED-M',
+            'price' => 120.00
+        ]);
+        $variantC->attributeValues()->attach([$redValue->id, $mediumValue->id]);
+        
+        // 為每個變體創建庫存記錄
+        foreach ([$variantA, $variantB, $variantC] as $variant) {
+            foreach ([$store1, $store2] as $store) {
+                \App\Models\Inventory::create([
+                    'product_variant_id' => $variant->id,
+                    'store_id' => $store->id,
+                    'quantity' => 10,
+                    'low_stock_threshold' => 5
+                ]);
+            }
+        }
+        
+        // === 階段 3: 構造更新請求 ===
+        // 目標：修改 A，新增 D，刪除 B 和 C
+        
+        $updateData = [
+            'name' => '更新後的商品名稱',
+            'description' => '更新後的描述',
+            'category_id' => $category2->id,
+            'attributes' => [$colorAttribute->id, $sizeAttribute->id],
+            'variants' => [
+                // 修改現有的變體 A（帶 id）
+                [
+                    'id' => $variantA->id,
+                    'sku' => 'UPDATED-RED-S',
+                    'price' => 150.00,
+                    'attribute_value_ids' => [$redValue->id, $smallValue->id]
+                ],
+                // 新增變體 D（不帶 id）
+                [
+                    'sku' => 'NEW-GREEN-M',
+                    'price' => 200.00,
+                    'attribute_value_ids' => [$greenValue->id, $mediumValue->id]
+                ]
+                // 注意：B 和 C 不在此陣列中，所以會被刪除
+            ]
+        ];
+        
+        // === 階段 4: 執行更新請求 ===
+        
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/products/{$product->id}", $updateData);
+        
+        $response->assertStatus(200);
+        
+        // === 階段 5: 驗證結果 ===
+        
+        // 5.1 驗證 SPU 資訊已更新
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => '更新後的商品名稱',
+            'description' => '更新後的描述',
+            'category_id' => $category2->id
+        ]);
+        
+        // 5.2 驗證變體 A 已更新
+        $this->assertDatabaseHas('product_variants', [
+            'id' => $variantA->id,
+            'sku' => 'UPDATED-RED-S',
+            'price' => 150.00
+        ]);
+        
+        // 5.3 驗證新變體 D 已創建
+        $this->assertDatabaseHas('product_variants', [
+            'sku' => 'NEW-GREEN-M',
+            'price' => 200.00,
+            'product_id' => $product->id
+        ]);
+        
+        // 5.4 驗證變體 B 已刪除
+        $this->assertDatabaseMissing('product_variants', [
+            'id' => $variantB->id
+        ]);
+        
+        // 5.5 驗證變體 C 已刪除
+        $this->assertDatabaseMissing('product_variants', [
+            'id' => $variantC->id
+        ]);
+        
+        // 5.6 驗證最終產品只有 2 個變體（A 更新版 + D 新增版）
+        $finalProduct = Product::find($product->id);
+        $this->assertCount(2, $finalProduct->variants);
+        
+        // 5.7 驗證新變體 D 在所有門市都有庫存記錄
+        $newVariant = ProductVariant::where('sku', 'NEW-GREEN-M')->first();
+        $this->assertNotNull($newVariant);
+        
+        $inventoryCount = \App\Models\Inventory::where('product_variant_id', $newVariant->id)->count();
+        $this->assertEquals(2, $inventoryCount); // 應該在 2 個門市都有庫存記錄
+        
+        // 5.8 驗證已刪除變體的庫存記錄也被清理
+        $deletedInventoryCount = \App\Models\Inventory::whereIn('product_variant_id', [$variantB->id, $variantC->id])->count();
+        $this->assertEquals(0, $deletedInventoryCount);
+    }
 } 
