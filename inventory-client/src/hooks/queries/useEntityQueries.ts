@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
 import { parseApiErrorMessage } from '@/types/error';
-import { CreateStoreRequest, UpdateStoreRequest } from '@/types/api-helpers';
+import { CreateStoreRequest, UpdateStoreRequest, ProductFilters } from '@/types/api-helpers';
 
 /**
  * API Hooks - 商品管理
@@ -24,42 +24,51 @@ export const QUERY_KEYS = {
 };
 
 /**
- * 商品列表查詢 Hook（高性能版本 - 整合第二階段優化）
+ * 商品列表查詢 Hook（完整篩選版本 - TD-004 解決方案）
  * 
- * 效能優化特性：
- * 1. 利用激進緩存策略，減少API請求頻率
- * 2. 智能查詢鍵結構，支援搜索參數的精確緩存
- * 3. 禁用干擾性的背景更新
- * 4. 網絡狀態感知優化
+ * 功能特性：
+ * 1. 支援完整的後端篩選參數（product_name, store_id, category_id, low_stock, out_of_stock）
+ * 2. 智能查詢鍵結構，支援所有篩選參數的精確緩存
+ * 3. 向後相容舊版 search 參數
+ * 4. 高效能緩存策略，減少不必要的 API 請求
  * 
- * @param options - 查詢選項
- * @param options.search - 搜尋關鍵字
+ * @param filters - 篩選參數物件，包含所有可用的篩選條件
  * @returns React Query 查詢結果
  */
-export function useProducts(options: { search?: string } = {}) {
+export function useProducts(filters: ProductFilters = {}) {
     return useQuery({
-        queryKey: [...QUERY_KEYS.PRODUCTS, { search: options.search }],
+        queryKey: [...QUERY_KEYS.PRODUCTS, filters],
         queryFn: async () => {
-            const searchParam = options.search 
-                ? { search: options.search }
-                : undefined;
+            // 構建查詢參數，移除 undefined 值
+            const queryParams: Record<string, string | number | boolean> = {};
+            
+            if (filters.product_name) queryParams.product_name = filters.product_name;
+            if (filters.store_id !== undefined) queryParams.store_id = filters.store_id;
+            if (filters.category_id !== undefined) queryParams.category_id = filters.category_id;
+            if (filters.low_stock !== undefined) queryParams.low_stock = filters.low_stock;
+            if (filters.out_of_stock !== undefined) queryParams.out_of_stock = filters.out_of_stock;
+            if (filters.search) queryParams.search = filters.search; // 向後相容性
+            if (filters.page !== undefined) queryParams.page = filters.page;
+            if (filters.per_page !== undefined) queryParams.per_page = filters.per_page;
 
             const { data, error } = await apiClient.GET('/api/products', {
-                params: { query: searchParam }
+                params: { 
+                    query: Object.keys(queryParams).length > 0 ? queryParams : undefined 
+                }
             });
             
             if (error) {
                 throw new Error('獲取商品列表失敗');
             }
 
-            // 後端現在已經返回正確的數字類型，無需手動轉換
             return data;
         },
         
-        // 🚀 體驗優化配置（第二階段淨化行動）
-        placeholderData: (previousData) => previousData, // 搜尋時保持舊資料，避免載入閃爍
+        // 🚀 體驗優化配置
+        placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
         refetchOnMount: false,       // 依賴全域 staleTime
         refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
+        staleTime: 5 * 60 * 1000,   // 5 分鐘緩存，提升篩選體驗
     });
 }
 

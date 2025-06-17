@@ -523,4 +523,210 @@ class ProductControllerTest extends TestCase
             'id' => $product->id
         ]);
     }
+
+    // 🚀 TD-004 解決方案：新增篩選功能測試案例
+
+    /** @test */
+    public function admin_can_filter_products_by_product_name()
+    {
+        // 創建測試商品
+        Product::factory()->create(['name' => '辦公椅豪華版']);
+        Product::factory()->create(['name' => '辦公桌經典款']);
+        Product::factory()->create(['name' => '書櫃現代風']);
+
+        // 測試商品名稱篩選
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?product_name=辦公');
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 2) // 應該返回 2 個包含「辦公」的商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_filter_products_by_category_id()
+    {
+        // 創建分類
+        $furnitureCategory = Category::factory()->create(['name' => '家具']);
+        $electronicsCategory = Category::factory()->create(['name' => '電子產品']);
+
+        // 創建不同分類的商品
+        Product::factory()->count(2)->create(['category_id' => $furnitureCategory->id]);
+        Product::factory()->count(3)->create(['category_id' => $electronicsCategory->id]);
+
+        // 測試按分類篩選
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/products?category_id={$furnitureCategory->id}");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 2) // 應該返回 2 個家具類商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_filter_products_by_store_id()
+    {
+        // 創建門市
+        $store1 = \App\Models\Store::factory()->create(['name' => '台北店']);
+        $store2 = \App\Models\Store::factory()->create(['name' => '台中店']);
+
+        // 創建商品和變體
+        $product1 = Product::factory()->create();
+        $variant1 = ProductVariant::factory()->create(['product_id' => $product1->id]);
+        
+        $product2 = Product::factory()->create();
+        $variant2 = ProductVariant::factory()->create(['product_id' => $product2->id]);
+
+        // 在不同門市創建庫存
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $variant1->id,
+            'store_id' => $store1->id,
+            'quantity' => 10
+        ]);
+        
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $variant2->id,
+            'store_id' => $store2->id,
+            'quantity' => 5
+        ]);
+
+        // 測試按門市篩選
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/products?store_id={$store1->id}");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 1) // 應該只返回在台北店有庫存的商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_filter_products_by_low_stock()
+    {
+        // 創建門市
+        $store = \App\Models\Store::factory()->create();
+
+        // 創建商品和變體
+        $lowStockProduct = Product::factory()->create(['name' => '低庫存商品']);
+        $lowStockVariant = ProductVariant::factory()->create(['product_id' => $lowStockProduct->id]);
+
+        $normalStockProduct = Product::factory()->create(['name' => '正常庫存商品']);
+        $normalStockVariant = ProductVariant::factory()->create(['product_id' => $normalStockProduct->id]);
+
+        // 創建庫存 - 低庫存商品
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $lowStockVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 2,
+            'low_stock_threshold' => 5 // 庫存 2 <= 閾值 5，屬於低庫存
+        ]);
+
+        // 創建庫存 - 正常庫存商品
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $normalStockVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 10,
+            'low_stock_threshold' => 5 // 庫存 10 > 閾值 5，不屬於低庫存
+        ]);
+
+        // 測試低庫存篩選
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?low_stock=true');
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 1) // 應該只返回 1 個低庫存商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_filter_products_by_out_of_stock()
+    {
+        // 創建門市
+        $store = \App\Models\Store::factory()->create();
+
+        // 創建商品和變體
+        $outOfStockProduct = Product::factory()->create(['name' => '缺貨商品']);
+        $outOfStockVariant = ProductVariant::factory()->create(['product_id' => $outOfStockProduct->id]);
+
+        $inStockProduct = Product::factory()->create(['name' => '有庫存商品']);
+        $inStockVariant = ProductVariant::factory()->create(['product_id' => $inStockProduct->id]);
+
+        // 創建庫存 - 缺貨商品
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $outOfStockVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 0 // 庫存為 0，缺貨
+        ]);
+
+        // 創建庫存 - 有庫存商品
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $inStockVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 15 // 有庫存
+        ]);
+
+        // 測試缺貨篩選
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?out_of_stock=true');
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 1) // 應該只返回 1 個缺貨商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_combine_multiple_filters()
+    {
+        // 創建分類和門市
+        $category = Category::factory()->create(['name' => '辦公用品']);
+        $store = \App\Models\Store::factory()->create();
+
+        // 創建符合條件的商品
+        $targetProduct = Product::factory()->create([
+            'name' => '辦公椅經典款',
+            'category_id' => $category->id
+        ]);
+        $targetVariant = ProductVariant::factory()->create(['product_id' => $targetProduct->id]);
+
+        // 創建不符合條件的商品
+        $otherProduct = Product::factory()->create([
+            'name' => '書桌現代款', // 不包含「辦公椅」
+            'category_id' => $category->id
+        ]);
+        $otherVariant = ProductVariant::factory()->create(['product_id' => $otherProduct->id]);
+
+        // 創建庫存
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $targetVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 2,
+            'low_stock_threshold' => 5 // 低庫存
+        ]);
+
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $otherVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 10,
+            'low_stock_threshold' => 5 // 正常庫存
+        ]);
+
+        // 測試組合篩選：商品名稱 + 分類 + 門市 + 低庫存
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/products?product_name=辦公椅&category_id={$category->id}&store_id={$store->id}&low_stock=true");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 1) // 應該只返回 1 個符合所有條件的商品
+                    ->etc();
+            });
+    }
 } 

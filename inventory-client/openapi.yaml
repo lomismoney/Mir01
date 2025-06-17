@@ -1221,6 +1221,61 @@ paths:
             description: '排序方向 (asc, desc)，預設為 asc。'
             example: desc
             nullable: false
+        -
+          in: query
+          name: product_name
+          description: '專門用於商品名稱模糊搜尋，與 search 參數功能類似但更明確。'
+          example: '辦公椅'
+          required: false
+          schema:
+            type: string
+            description: '專門用於商品名稱模糊搜尋，與 search 參數功能類似但更明確。'
+            example: '辦公椅'
+            nullable: false
+        -
+          in: query
+          name: store_id
+          description: '按特定門市篩選庫存，只返回在該門市有庫存的商品。'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: '按特定門市篩選庫存，只返回在該門市有庫存的商品。'
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: category_id
+          description: '按商品分類篩選，只返回屬於指定分類的商品。'
+          example: 2
+          required: false
+          schema:
+            type: integer
+            description: '按商品分類篩選，只返回屬於指定分類的商品。'
+            example: 2
+            nullable: false
+        -
+          in: query
+          name: low_stock
+          description: '只顯示處於低庫存狀態的商品，即庫存數量低於或等於低庫存閾值的商品。'
+          example: true
+          required: false
+          schema:
+            type: boolean
+            description: '只顯示處於低庫存狀態的商品，即庫存數量低於或等於低庫存閾值的商品。'
+            example: true
+            nullable: false
+        -
+          in: query
+          name: out_of_stock
+          description: '只顯示已缺貨的商品，即庫存數量為 0 的商品。'
+          example: false
+          required: false
+          schema:
+            type: boolean
+            description: '只顯示已缺貨的商品，即庫存數量為 0 的商品。'
+            example: false
+            nullable: false
       responses:
         200:
           description: ''

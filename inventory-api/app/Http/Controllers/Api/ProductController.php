@@ -49,6 +49,11 @@ class ProductController extends Controller
      * @queryParam page integer 頁碼，預設為 1。 Example: 1
      * @queryParam per_page integer 每頁項目數，預設為 15。 Example: 15
      * @queryParam search string 搜尋商品名稱或 SKU。 Example: 椅子
+     * @queryParam product_name string 專門用於商品名稱模糊搜尋。 Example: 辦公椅
+     * @queryParam store_id integer 按特定門市篩選庫存。 Example: 1
+     * @queryParam category_id integer 按商品分類篩選。 Example: 2
+     * @queryParam low_stock boolean 只顯示低庫存商品。 Example: true
+     * @queryParam out_of_stock boolean 只顯示缺貨商品。 Example: false
      * @queryParam sort_by string 排序欄位 (name, created_at)。 Example: name
      * @queryParam sort_order string 排序方向 (asc, desc)，預設為 asc。 Example: desc
      * @responseFile storage/responses/products_index.json
@@ -111,7 +116,40 @@ class ProductController extends Controller
             ])
             ->allowedSorts(['name', 'created_at']); // 移除 selling_price 排序
 
-        $paginatedProducts = $query->paginate(15);
+        // 🚀 新增庫存管理篩選功能 (TD-004 解決方案)
+        
+        // 商品名稱模糊搜尋
+        if ($request->has('product_name') && !empty($request->product_name)) {
+            $query->where('name', 'like', '%' . $request->product_name . '%');
+        }
+
+        // 按分類篩選
+        if ($request->has('category_id') && !empty($request->category_id)) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // 按門市篩選 - 只返回在指定門市有庫存記錄的商品
+        if ($request->has('store_id') && !empty($request->store_id)) {
+            $query->whereHas('variants.inventory', function ($q) use ($request) {
+                $q->where('store_id', $request->store_id);
+            });
+        }
+
+        // 低庫存篩選 - 庫存數量 <= 低庫存閾值
+        if ($request->has('low_stock') && $request->boolean('low_stock')) {
+            $query->whereHas('variants.inventory', function ($q) {
+                $q->whereRaw('quantity <= low_stock_threshold');
+            });
+        }
+
+        // 缺貨篩選 - 庫存數量 = 0
+        if ($request->has('out_of_stock') && $request->boolean('out_of_stock')) {
+            $query->whereHas('variants.inventory', function ($q) {
+                $q->where('quantity', 0);
+            });
+        }
+
+        $paginatedProducts = $query->paginate($request->input('per_page', 15));
         
         return new ProductCollection($paginatedProducts);
     }

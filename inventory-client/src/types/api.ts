@@ -816,6 +816,31 @@ export interface paths {
                      * @example desc
                      */
                     sort_order?: string;
+                    /**
+                     * @description 專門用於商品名稱模糊搜尋，與 search 參數功能類似但更明確。
+                     * @example 辦公椅
+                     */
+                    product_name?: string;
+                    /**
+                     * @description 按特定門市篩選庫存，只返回在該門市有庫存的商品。
+                     * @example 1
+                     */
+                    store_id?: number;
+                    /**
+                     * @description 按商品分類篩選，只返回屬於指定分類的商品。
+                     * @example 2
+                     */
+                    category_id?: number;
+                    /**
+                     * @description 只顯示處於低庫存狀態的商品，即庫存數量低於或等於低庫存閾值的商品。
+                     * @example true
+                     */
+                    low_stock?: boolean;
+                    /**
+                     * @description 只顯示已缺貨的商品，即庫存數量為 0 的商品。
+                     * @example false
+                     */
+                    out_of_stock?: boolean;
                 };
                 header?: never;
                 path?: never;
