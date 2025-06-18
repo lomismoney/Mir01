@@ -8,6 +8,7 @@ import {
   IconDatabase,
   IconFileDescription,
   IconHelp,
+  IconHistory,
   IconInnerShadowTop,
   IconPackage,
   IconReport,
@@ -99,6 +100,7 @@ const data = {
       children: [
         { title: "庫存清單", url: "/inventory/management" },
         { title: "庫存轉移", url: "/inventory/transfers" },
+        { title: "變動歷史", url: "/inventory/history" },
       ]
     },
     {

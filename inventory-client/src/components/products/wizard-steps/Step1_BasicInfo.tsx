@@ -185,10 +185,11 @@ export function Step1_BasicInfo({
       formData.append('image', file);
 
       // 使用類型安全的 API 客戶端進行圖片上傳
-      const { data, error, response } = await apiClient.POST("/api/products/{product}/upload-image", {
+      const { data, error, response } = await apiClient.POST("/api/products/{product_id}/upload-image", {
         params: {
           path: {
-            product: Number(productId)
+            product_id: Number(productId),
+            id: Number(productId)
           }
         },
         body: formData as any // 由於 openapi-fetch 的類型限制，這裡需要類型斷言
@@ -197,11 +198,17 @@ export function Step1_BasicInfo({
       // 檢查請求是否成功
       if (error || !response.ok) {
         // 優雅處理不同類型的錯誤
-        if (response.status === 422 && error?.errors?.image) {
-          throw new Error(error.errors.image[0] || '圖片驗證失敗');
+        if (response.status === 422) {
+          // 422 驗證錯誤的處理
+          const validationError = error as any;
+          if (validationError?.errors?.image) {
+            throw new Error(validationError.errors.image[0] || '圖片驗證失敗');
+          } else if (validationError?.message) {
+            throw new Error(validationError.message);
+          }
         }
         
-        const errorMessage = error?.message || `上傳失敗 (HTTP ${response.status})`;
+        const errorMessage = (error as any)?.message || `上傳失敗 (HTTP ${response.status})`;
         throw new Error(errorMessage);
       }
 

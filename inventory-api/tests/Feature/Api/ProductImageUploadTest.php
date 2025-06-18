@@ -257,22 +257,26 @@ class ProductImageUploadTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'id',
-                'name',
-                'image_urls' => [
-                    'original',
-                    'thumb',
-                    'medium',
-                    'large',
-                ],
-                'has_image',
+                'data' => [
+                    'id',
+                    'name',
+                    'image_urls' => [
+                        'original',
+                        'thumb',
+                        'medium',
+                        'large',
+                    ],
+                    'has_image',
+                ]
             ])
             ->assertJson([
-                'has_image' => true,
+                'data' => [
+                    'has_image' => true,
+                ]
             ]);
 
         // 驗證 URL 不為空
-        $responseData = $response->json();
+        $responseData = $response->json('data');
         $this->assertNotEmpty($responseData['image_urls']['original']);
         $this->assertNotEmpty($responseData['image_urls']['thumb']);
         $this->assertNotEmpty($responseData['image_urls']['medium']);

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\ProductService;
 use App\Http\Requests\Api\UploadProductImageRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class ProductController extends Controller
@@ -359,10 +360,10 @@ class ProductController extends Controller
      *     "name": "商品名稱",
      *     "has_image": true,
      *     "image_urls": {
-     *       "original": "http://localhost:8000/storage/1/product-image.jpg",
-     *       "thumb": "http://localhost:8000/storage/1/conversions/product-image-thumb.jpg",
-     *       "medium": "http://localhost:8000/storage/1/conversions/product-image-medium.jpg",
-     *       "large": "http://localhost:8000/storage/1/conversions/product-image-large.jpg"
+     *       "original": "http://localhost/storage/1/product-image.jpg",
+     *       "thumb": "http://localhost/storage/1/conversions/product-image-thumb.jpg",
+     *       "medium": "http://localhost/storage/1/conversions/product-image-medium.jpg",
+     *       "large": "http://localhost/storage/1/conversions/product-image-large.jpg"
      *     }
      *   }
      * }
@@ -396,7 +397,7 @@ class ProductController extends Controller
             Log::info('開始上傳商品圖片', [
                 'product_id' => $product->id,
                 'product_name' => $product->name,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'file_info' => [
                     'original_name' => $request->file('image')->getClientOriginalName(),
                     'mime_type' => $request->file('image')->getMimeType(),
@@ -443,7 +444,7 @@ class ProductController extends Controller
                 'had_previous_image' => $hadPreviousImage,
                 'previous_image_id' => $previousImageId,
                 'conversion_results' => $conversionResults,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
             ]);
 
             // 檢查是否有轉換失敗
@@ -465,30 +466,29 @@ class ProductController extends Controller
 
             // 準備回應資料
             $responseData = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'has_image' => $product->hasImage(),
+                'media_id' => $media->id,
+                'file_name' => $media->file_name,
+                'file_size' => $media->size,
+                'mime_type' => $media->mime_type,
                 'image_urls' => $product->getImageUrls(),
-                'media_info' => [
-                    'id' => $media->id,
-                    'file_name' => $media->file_name,
-                    'mime_type' => $media->mime_type,
-                    'size' => $media->size,
-                    'human_readable_size' => $media->human_readable_size,
+                'conversions_generated' => [
+                    'thumb' => $media->hasGeneratedConversion('thumb'),
+                    'medium' => $media->hasGeneratedConversion('medium'),
+                    'large' => $media->hasGeneratedConversion('large'),
                 ],
-                'conversions_status' => $conversionResults,
+                'conversion_results' => $conversionResults,
             ];
 
             return response()->json([
                 'success' => true,
-                'message' => '圖片上傳成功',
+                'message' => '商品圖片上傳成功',
                 'data' => $responseData,
-            ], 200);
+            ], 201);
 
         } catch (AuthorizationException $e) {
             Log::warning('圖片上傳授權失敗', [
                 'product_id' => $product->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
 
@@ -500,7 +500,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             Log::error('圖片上傳失敗', [
                 'product_id' => $product->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),

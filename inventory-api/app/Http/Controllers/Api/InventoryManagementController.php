@@ -184,6 +184,34 @@ class InventoryManagementController extends Controller
      * @queryParam per_page integer 每頁顯示數量，預設15. Example: 20
      * 
      * @authenticated
+     * @response 200 {
+     *   "current_page": 1,
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "inventory_id": 1,
+     *       "user_id": 1,
+     *       "type": "addition",
+     *       "quantity": 10,
+     *       "before_quantity": 0,
+     *       "after_quantity": 10,
+     *       "notes": "初始庫存",
+     *       "metadata": {},
+     *       "created_at": "2023-01-01T10:00:00.000000Z",
+     *       "updated_at": "2023-01-01T10:00:00.000000Z",
+     *       "user": {
+     *         "name": "Admin User"
+     *       }
+     *     }
+     *   ],
+     *   "first_page_url": "http://localhost/api/inventory/1/history?page=1",
+     *   "from": 1,
+     *   "last_page": 1,
+     *   "last_page_url": "http://localhost/api/inventory/1/history?page=1",
+     *   "per_page": 15,
+     *   "to": 1,
+     *   "total": 1
+     * }
      * 
      * @param Request $request
      * @param int $id
@@ -241,5 +269,205 @@ class InventoryManagementController extends Controller
         $inventories = $query->get();
         
         return response()->json($inventories);
+    }
+
+    /**
+     * 獲取特定 SKU 的所有庫存歷史記錄
+     * 
+     * @urlParam sku string required 商品SKU. Example: T001-M-RED
+     * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
+     * @queryParam type string 交易類型篩選. Example: transfer_in
+     * @queryParam start_date date 起始日期. Example: 2023-01-01
+     * @queryParam end_date date 結束日期. Example: 2023-12-31
+     * @queryParam per_page integer 每頁顯示數量，預設20. Example: 50
+     * 
+     * @authenticated
+     * @response 200 {
+     *   "message": "成功獲取 SKU 歷史記錄",
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "inventory_id": 1,
+     *       "user_id": 1,
+     *       "type": "transfer_out",
+     *       "quantity": -2,
+     *       "before_quantity": 10,
+     *       "after_quantity": 8,
+     *       "notes": "轉出至門市 #2",
+     *       "metadata": {"transfer_id": 1},
+     *       "created_at": "2023-01-01T10:00:00.000000Z",
+     *       "updated_at": "2023-01-01T10:00:00.000000Z",
+     *       "store": {
+     *         "id": 1,
+     *         "name": "台中店"
+     *       },
+     *       "user": {
+     *         "name": "Admin User"
+     *       },
+     *       "product": {
+     *         "name": "商品名稱",
+     *         "sku": "T001-M-RED"
+     *       }
+     *     }
+     *   ],
+     *   "inventories": [
+     *     {
+     *       "id": 1,
+     *       "quantity": 8,
+     *       "low_stock_threshold": 5,
+     *       "store": {
+     *         "id": 1,
+     *         "name": "台中店"
+     *       },
+     *       "product_variant": {
+     *         "sku": "T001-M-RED",
+     *         "product": {
+     *           "name": "商品名稱"
+     *         }
+     *       }
+     *     }
+     *   ],
+     *   "pagination": {
+     *     "current_page": 1,
+     *     "per_page": 20,
+     *     "total": 10,
+     *     "last_page": 1
+     *   }
+     * }
+     * 
+     * @param Request $request
+     * @param string $sku
+     * @return JsonResponse
+     */
+    public function getSkuHistory(Request $request, string $sku): JsonResponse
+    {
+        $request->validate([
+            'store_id' => ['nullable', 'integer', 'exists:stores,id'],
+            'type' => ['nullable', 'string', 'in:addition,reduction,adjustment,transfer_in,transfer_out,transfer_cancel'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        // 找到所有該 SKU 的庫存項目
+        $inventories = Inventory::with(['store', 'productVariant.product'])
+            ->whereHas('productVariant', function($query) use ($sku) {
+                $query->where('sku', $sku);
+            })
+            ->get();
+
+        if ($inventories->isEmpty()) {
+            return response()->json([
+                'message' => "找不到 SKU 為 '{$sku}' 的庫存項目",
+                'data' => [],
+                'inventories' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'per_page' => $request->input('per_page', 20),
+                    'total' => 0,
+                    'last_page' => 1,
+                ]
+            ]);
+        }
+
+        $inventoryIds = $inventories->pluck('id');
+
+        // 建立交易記錄查詢
+        $query = DB::table('inventory_transactions')
+            ->join('inventories', 'inventory_transactions.inventory_id', '=', 'inventories.id')
+            ->join('stores', 'inventories.store_id', '=', 'stores.id')
+            ->join('users', 'inventory_transactions.user_id', '=', 'users.id')
+            ->join('product_variants', 'inventories.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->whereIn('inventory_transactions.inventory_id', $inventoryIds)
+            ->select([
+                'inventory_transactions.*',
+                'stores.name as store_name',
+                'stores.id as store_id',
+                'users.name as user_name',
+                'products.name as product_name',
+                'product_variants.sku as product_sku'
+            ]);
+
+        // 應用篩選條件
+        if ($request->filled('store_id')) {
+            $query->where('inventories.store_id', $request->store_id);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('inventory_transactions.type', $request->type);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->where('inventory_transactions.created_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->where('inventory_transactions.created_at', '<=', $request->end_date . ' 23:59:59');
+        }
+
+        // 排序和分頁
+        $perPage = $request->input('per_page', 20);
+        $transactions = $query->orderBy('inventory_transactions.created_at', 'desc')
+            ->paginate($perPage);
+
+        // 格式化交易記錄
+        $formattedTransactions = $transactions->getCollection()->map(function($transaction) {
+            return [
+                'id' => $transaction->id,
+                'inventory_id' => $transaction->inventory_id,
+                'user_id' => $transaction->user_id,
+                'type' => $transaction->type,
+                'quantity' => $transaction->quantity,
+                'before_quantity' => $transaction->before_quantity,
+                'after_quantity' => $transaction->after_quantity,
+                'notes' => $transaction->notes,
+                'metadata' => json_decode($transaction->metadata, true),
+                'created_at' => $transaction->created_at,
+                'updated_at' => $transaction->updated_at,
+                'store' => [
+                    'id' => $transaction->store_id,
+                    'name' => $transaction->store_name,
+                ],
+                'user' => [
+                    'name' => $transaction->user_name,
+                ],
+                'product' => [
+                    'name' => $transaction->product_name,
+                    'sku' => $transaction->product_sku,
+                ]
+            ];
+        });
+
+        // 格式化庫存項目資訊
+        $inventoryData = $inventories->map(function($inventory) {
+            return [
+                'id' => $inventory->id,
+                'quantity' => $inventory->quantity,
+                'low_stock_threshold' => $inventory->low_stock_threshold,
+                'store' => [
+                    'id' => $inventory->store->id,
+                    'name' => $inventory->store->name,
+                ],
+                'product_variant' => [
+                    'sku' => $inventory->productVariant->sku,
+                    'product' => [
+                        'name' => $inventory->productVariant->product->name,
+                    ]
+                ]
+            ];
+        });
+
+        return response()->json([
+            'message' => '成功獲取 SKU 歷史記錄',
+            'data' => $formattedTransactions,
+            'inventories' => $inventoryData,
+            'pagination' => [
+                'current_page' => $transactions->currentPage(),
+                'per_page' => $transactions->perPage(),
+                'total' => $transactions->total(),
+                'last_page' => $transactions->lastPage(),
+            ]
+        ]);
     }
 }

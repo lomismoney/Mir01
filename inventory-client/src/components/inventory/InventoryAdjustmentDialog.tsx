@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { InventoryAdjustmentForm } from "./InventoryAdjustmentForm"
 
 interface InventoryAdjustmentDialogProps {
@@ -30,16 +30,16 @@ export function InventoryAdjustmentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          新增入庫
+        <Button variant="outline" size="sm">
+          <ArrowUpDown className="h-4 w-4 mr-2" />
+          修改庫存
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>新增入庫</DialogTitle>
+          <DialogTitle>修改庫存</DialogTitle>
           <DialogDescription>
-            新增產品庫存或調整現有庫存數量
+            調整指定商品的庫存數量（增加、減少或設定）
           </DialogDescription>
         </DialogHeader>
         <InventoryAdjustmentForm

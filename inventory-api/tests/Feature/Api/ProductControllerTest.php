@@ -239,6 +239,20 @@ class ProductControllerTest extends TestCase
         $category = Category::factory()->create();
         $newCategory = Category::factory()->create();
         
+        // 創建屬性和屬性值
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $sizeAttribute = Attribute::factory()->create(['name' => '尺寸']);
+        
+        $redValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        
+        $smallValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'S'
+        ]);
+        
         // 創建產品
         $product = Product::factory()->create([
             'category_id' => $category->id,
@@ -246,11 +260,30 @@ class ProductControllerTest extends TestCase
             'description' => '原始商品描述',
         ]);
         
-        // 更新資料
+        // 關聯商品與屬性
+        $product->attributes()->attach([$colorAttribute->id, $sizeAttribute->id]);
+        
+        // 創建變體
+        $variant = $product->variants()->create([
+            'sku' => 'ORIGINAL-RED-S',
+            'price' => 100.00,
+        ]);
+        $variant->attributeValues()->attach([$redValue->id, $smallValue->id]);
+        
+        // 更新資料 - 必須包含完整的 attributes 和 variants
         $updatedData = [
             'name' => '更新的商品名稱',
             'description' => '更新的商品描述',
             'category_id' => $newCategory->id,
+            'attributes' => [$colorAttribute->id, $sizeAttribute->id],
+            'variants' => [
+                [
+                    'id' => $variant->id,
+                    'sku' => 'UPDATED-RED-S',
+                    'price' => 120.00,
+                    'attribute_value_ids' => [$redValue->id, $smallValue->id]
+                ]
+            ]
         ];
         
         $response = $this->actingAsAdmin()
@@ -485,15 +518,48 @@ class ProductControllerTest extends TestCase
     /** @test */
     public function staff_cannot_update_product()
     {
+        // 創建屬性和屬性值
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $sizeAttribute = Attribute::factory()->create(['name' => '尺寸']);
+        
+        $redValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        
+        $smallValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'S'
+        ]);
+        
         // 創建產品
         $product = Product::factory()->create([
             'name' => '原始商品名稱',
             'description' => '原始商品描述',
         ]);
         
+        // 關聯商品與屬性
+        $product->attributes()->attach([$colorAttribute->id, $sizeAttribute->id]);
+        
+        // 創建變體
+        $variant = $product->variants()->create([
+            'sku' => 'ORIGINAL-RED-S',
+            'price' => 100.00,
+        ]);
+        $variant->attributeValues()->attach([$redValue->id, $smallValue->id]);
+        
         $updatedData = [
             'name' => '員工嘗試更新的商品名稱',
             'description' => '員工嘗試更新的商品描述',
+            'attributes' => [$colorAttribute->id, $sizeAttribute->id],
+            'variants' => [
+                [
+                    'id' => $variant->id,
+                    'sku' => 'STAFF-UPDATED-RED-S',
+                    'price' => 120.00,
+                    'attribute_value_ids' => [$redValue->id, $smallValue->id]
+                ]
+            ]
         ];
         
         $response = $this->actingAsUser()

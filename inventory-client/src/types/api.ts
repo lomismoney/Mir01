@@ -46,7 +46,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 16 */
+                                /** @example 29 */
                                 id?: number;
                                 /** @example Mrs. Justina Gaylord */
                                 name?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-18T01:24:06.000000Z */
+                                /** @example 2025-06-18T08:28:04.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-18T01:24:06.000000Z */
+                                /** @example 2025-06-18T08:28:04.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -246,7 +246,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the category.
-                 * @example 16
+                 * @example 3
                  */
                 id: number;
             };
@@ -263,7 +263,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 3
                      */
                     id: number;
                 };
@@ -298,7 +298,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 3
                      */
                     id: number;
                 };
@@ -341,7 +341,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 3
                      */
                     id: number;
                 };
@@ -378,7 +378,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 16
+                 * @example 35
                  */
                 id: number;
             };
@@ -604,7 +604,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 1
+                 * @example 5
                  */
                 id: number;
                 /**
@@ -626,7 +626,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 5
                      */
                     id: number;
                     /**
@@ -660,7 +660,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 5
                      */
                     id: number;
                     /**
@@ -706,7 +706,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 5
                      */
                     id: number;
                     /**
@@ -787,7 +787,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the product.
-                 * @example 1
+                 * @example 3
                  */
                 product_id: number;
                 /**
@@ -815,7 +815,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the product.
-                     * @example 1
+                     * @example 3
                      */
                     product_id: number;
                     /**
@@ -856,13 +856,13 @@ export interface paths {
                                 /** @example true */
                                 has_image?: boolean;
                                 image_urls?: {
-                                    /** @example http://localhost:8000/storage/1/product-image.jpg */
+                                    /** @example http://localhost/storage/1/product-image.jpg */
                                     original?: string;
-                                    /** @example http://localhost:8000/storage/1/conversions/product-image-thumb.jpg */
+                                    /** @example http://localhost/storage/1/conversions/product-image-thumb.jpg */
                                     thumb?: string;
-                                    /** @example http://localhost:8000/storage/1/conversions/product-image-medium.jpg */
+                                    /** @example http://localhost/storage/1/conversions/product-image-medium.jpg */
                                     medium?: string;
-                                    /** @example http://localhost:8000/storage/1/conversions/product-image-large.jpg */
+                                    /** @example http://localhost/storage/1/conversions/product-image-large.jpg */
                                     large?: string;
                                 };
                             };
@@ -2239,7 +2239,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 1
+                 * @example 5
                  */
                 attribute_id: number;
                 /**
@@ -2261,7 +2261,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 5
                      */
                     attribute_id: number;
                     /**
@@ -2359,7 +2359,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 5
                      */
                     attribute_id: number;
                     /**
@@ -2405,7 +2405,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the value.
-                 * @example 1
+                 * @example 7
                  */
                 id: number;
                 /**
@@ -2427,7 +2427,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 7
                      */
                     id: number;
                     /**
@@ -2458,7 +2458,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 7
                      */
                     id: number;
                     /**
@@ -2513,7 +2513,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 7
                      */
                     id: number;
                     /**
@@ -2951,19 +2951,101 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                401: {
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": {
-                            /** @example Unauthenticated. */
-                            message?: string;
+                            /** @example 1 */
+                            current_page?: number;
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "inventory_id": 1,
+                             *         "user_id": 1,
+                             *         "type": "addition",
+                             *         "quantity": 10,
+                             *         "before_quantity": 0,
+                             *         "after_quantity": 10,
+                             *         "notes": "初始庫存",
+                             *         "metadata": [],
+                             *         "created_at": "2023-01-01T10:00:00.000000Z",
+                             *         "updated_at": "2023-01-01T10:00:00.000000Z",
+                             *         "user": {
+                             *           "name": "Admin User"
+                             *         }
+                             *       }
+                             *     ] */
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 1 */
+                                inventory_id?: number;
+                                /** @example 1 */
+                                user_id?: number;
+                                /** @example addition */
+                                type?: string;
+                                /** @example 10 */
+                                quantity?: number;
+                                /** @example 0 */
+                                before_quantity?: number;
+                                /** @example 10 */
+                                after_quantity?: number;
+                                /** @example 初始庫存 */
+                                notes?: string;
+                                metadata?: Record<string, never>;
+                                /** @example 2023-01-01T10:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2023-01-01T10:00:00.000000Z */
+                                updated_at?: string;
+                                user?: {
+                                    /** @example Admin User */
+                                    name?: string;
+                                };
+                            }[];
+                            /** @example http://localhost/api/inventory/1/history?page=1 */
+                            first_page_url?: string;
+                            /** @example 1 */
+                            from?: number;
+                            /** @example 1 */
+                            last_page?: number;
+                            /** @example http://localhost/api/inventory/1/history?page=1 */
+                            last_page_url?: string;
+                            /** @example 15 */
+                            per_page?: number;
+                            /** @example 1 */
+                            to?: number;
+                            /** @example 1 */
+                            total?: number;
                         };
                     };
                 };
             };
         };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inventory/sku/{sku}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 商品SKU.
+                 * @example T001-M-RED
+                 */
+                sku: string;
+            };
+            cookie?: never;
+        };
+        /** 獲取特定 SKU 的所有庫存歷史記錄 */
+        get: operations["SKU"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4083,15 +4165,10 @@ export interface operations {
                     /**
                      * @description 進貨項目列表
                      * @example [
-                     *       { "product_variant_id": 123, "quantity": 2, "unit_price": 50, "cost_price": 45 }
+                     *       "architecto"
                      *     ]
                      */
-                    items: {
-                        product_variant_id: number;
-                        quantity: number;
-                        unit_price: number;
-                        cost_price: number;
-                    }[];
+                    items: string[];
                 };
             };
         };
@@ -4280,16 +4357,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 11 */
+                            /** @example 57 */
                             id?: number;
                             /** @example Bailey Ltd */
                             name?: string;
                             /** @example 85625 Gaylord Knolls
                              *     Cecilburgh, WI 02042 */
                             address?: string;
-                            /** @example 2025-06-18T01:24:07.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:07.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4304,7 +4381,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 16
+                 * @example 35
                  */
                 id: number;
             };
@@ -4319,16 +4396,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 12 */
+                            /** @example 58 */
                             id?: number;
-                            /** @example Rempel, Gulgowski and O'Kon */
+                            /** @example Cruickshank Inc */
                             name?: string;
-                            /** @example 80841 Mya Lane Apt. 042
-                             *     Lyricberg, MO 42170-0432 */
+                            /** @example 532 Leuschke Causeway
+                             *     McLaughlinstad, MI 07365 */
                             address?: string;
-                            /** @example 2025-06-18T01:24:07.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:07.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4343,7 +4420,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 16
+                 * @example 35
                  */
                 id: number;
             };
@@ -4373,16 +4450,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 13 */
+                            /** @example 59 */
                             id?: number;
-                            /** @example Dach-Gaylord */
+                            /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
-                            /** @example 7763 Adriel Fork
-                             *     Antoniobury, PA 31881 */
+                            /** @example 80841 Mya Lane Apt. 042
+                             *     Lyricberg, MO 42170-0432 */
                             address?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4397,7 +4474,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 16
+                 * @example 35
                  */
                 id: number;
             };
@@ -4428,16 +4505,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 14 */
+                            /** @example 60 */
                             id?: number;
                             /** @example Hauck-Leuschke */
                             name?: string;
                             /** @example 544 Aglae Ridge Apt. 067
                              *     Lefflerhaven, TX 58408-7043 */
                             address?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4479,7 +4556,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 17 */
+                            /** @example 30 */
                             id?: number;
                             /** @example Ms. Elisabeth Okuneva */
                             name?: string;
@@ -4491,9 +4568,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T08:28:04.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4775,6 +4852,209 @@ export interface operations {
                                 /** @example 各種辦公室所需用品 */
                                 description?: string;
                             };
+                        };
+                    };
+                };
+            };
+        };
+    };
+    SKU: {
+        parameters: {
+            query?: {
+                /**
+                 * @description 門市ID，用於篩選特定門市的歷史記錄.
+                 * @example 1
+                 */
+                store_id?: number;
+                /**
+                 * @description 交易類型篩選.
+                 * @example transfer_in
+                 */
+                type?: string;
+                /**
+                 * @description date 起始日期.
+                 * @example 2023-01-01
+                 */
+                start_date?: string;
+                /**
+                 * @description date 結束日期.
+                 * @example 2023-12-31
+                 */
+                end_date?: string;
+                /**
+                 * @description 每頁顯示數量，預設20.
+                 * @example 50
+                 */
+                per_page?: number;
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description 商品SKU.
+                 * @example T001-M-RED
+                 */
+                sku: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The <code>id</code> of an existing record in the stores table.
+                     * @example 16
+                     */
+                    store_id?: number | null;
+                    /**
+                     * @example reduction
+                     * @enum {string|null}
+                     */
+                    type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2025-06-18T08:28:05
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
+                     * @example 2051-07-12
+                     */
+                    end_date?: string | null;
+                    /**
+                     * @description Must be at least 1. Must not be greater than 100.
+                     * @example 22
+                     */
+                    per_page?: number | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 成功獲取 SKU 歷史記錄 */
+                        message?: string;
+                        /** @example [
+                         *       {
+                         *         "id": 1,
+                         *         "inventory_id": 1,
+                         *         "user_id": 1,
+                         *         "type": "transfer_out",
+                         *         "quantity": -2,
+                         *         "before_quantity": 10,
+                         *         "after_quantity": 8,
+                         *         "notes": "轉出至門市 #2",
+                         *         "metadata": {
+                         *           "transfer_id": 1
+                         *         },
+                         *         "created_at": "2023-01-01T10:00:00.000000Z",
+                         *         "updated_at": "2023-01-01T10:00:00.000000Z",
+                         *         "store": {
+                         *           "id": 1,
+                         *           "name": "台中店"
+                         *         },
+                         *         "user": {
+                         *           "name": "Admin User"
+                         *         },
+                         *         "product": {
+                         *           "name": "商品名稱",
+                         *           "sku": "T001-M-RED"
+                         *         }
+                         *       }
+                         *     ] */
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 1 */
+                            inventory_id?: number;
+                            /** @example 1 */
+                            user_id?: number;
+                            /** @example transfer_out */
+                            type?: string;
+                            /** @example -2 */
+                            quantity?: number;
+                            /** @example 10 */
+                            before_quantity?: number;
+                            /** @example 8 */
+                            after_quantity?: number;
+                            /** @example 轉出至門市 #2 */
+                            notes?: string;
+                            metadata?: {
+                                /** @example 1 */
+                                transfer_id?: number;
+                            };
+                            /** @example 2023-01-01T10:00:00.000000Z */
+                            created_at?: string;
+                            /** @example 2023-01-01T10:00:00.000000Z */
+                            updated_at?: string;
+                            store?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 台中店 */
+                                name?: string;
+                            };
+                            user?: {
+                                /** @example Admin User */
+                                name?: string;
+                            };
+                            product?: {
+                                /** @example 商品名稱 */
+                                name?: string;
+                                /** @example T001-M-RED */
+                                sku?: string;
+                            };
+                        }[];
+                        /** @example [
+                         *       {
+                         *         "id": 1,
+                         *         "quantity": 8,
+                         *         "low_stock_threshold": 5,
+                         *         "store": {
+                         *           "id": 1,
+                         *           "name": "台中店"
+                         *         },
+                         *         "product_variant": {
+                         *           "sku": "T001-M-RED",
+                         *           "product": {
+                         *             "name": "商品名稱"
+                         *           }
+                         *         }
+                         *       }
+                         *     ] */
+                        inventories?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 8 */
+                            quantity?: number;
+                            /** @example 5 */
+                            low_stock_threshold?: number;
+                            store?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 台中店 */
+                                name?: string;
+                            };
+                            product_variant?: {
+                                /** @example T001-M-RED */
+                                sku?: string;
+                                product?: {
+                                    /** @example 商品名稱 */
+                                    name?: string;
+                                };
+                            };
+                        }[];
+                        pagination?: {
+                            /** @example 1 */
+                            current_page?: number;
+                            /** @example 20 */
+                            per_page?: number;
+                            /** @example 10 */
+                            total?: number;
+                            /** @example 1 */
+                            last_page?: number;
                         };
                     };
                 };

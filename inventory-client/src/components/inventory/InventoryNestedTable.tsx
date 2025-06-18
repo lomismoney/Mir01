@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -16,12 +17,14 @@ import {
   ArrowUpDown,
   AlertTriangle,
   CheckCircle,
-  XCircle
+  XCircle,
+  History
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductItem, ProductVariant } from "@/types/api-helpers";
+import { InventoryModificationDialog } from "./InventoryModificationDialog";
 
 /**
  * SKU 庫存狀態類型
@@ -80,6 +83,8 @@ export function InventoryNestedTable({
   onManageProduct 
 }: InventoryNestedTableProps) {
   
+  const router = useRouter()
+  
   /**
    * 展開狀態管理
    */
@@ -137,16 +142,16 @@ export function InventoryNestedTable({
   const transformToEnhancedData = (products: ProductItem[]): EnhancedSpu[] => {
     return products.map(product => {
       const enhancedSkus: EnhancedSku[] = (product.variants || []).map(variant => {
-        // 從庫存數據中獲取數量和閾值（取第一個門市的庫存）
-        const inventory = variant.inventory?.[0];
-        const quantity = inventory?.quantity || 0;
-        const threshold = inventory?.low_stock_threshold || 0;
+        // 計算所有分店的總庫存
+        const totalQuantity = variant.inventory?.reduce((sum: number, inv: any) => sum + (inv.quantity || 0), 0) || 0;
+        // 取最低的低庫存閾值
+        const threshold = Math.min(...(variant.inventory?.map((inv: any) => inv.low_stock_threshold || 0) || [0]));
         
         return {
           ...variant,
-          status: calculateSkuStatus(quantity, threshold),
+          status: calculateSkuStatus(totalQuantity, threshold),
           attributes: formatAttributes(variant.attribute_values),
-          quantity,
+          quantity: totalQuantity,
           threshold,
         };
       });
@@ -226,7 +231,12 @@ export function InventoryNestedTable({
                 <div className="flex flex-col items-center justify-center space-y-3 py-6">
                   <Package className="h-12 w-12 text-muted-foreground" />
                   <p className="text-lg font-medium text-muted-foreground">沒有庫存資料</p>
-                  <p className="text-sm text-muted-foreground">請先添加產品和庫存資料</p>
+                  <p className="text-sm text-muted-foreground">
+                    此區域顯示按商品分組的庫存詳情，點擊商品可展開查看各變體的庫存狀況
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    請先為商品變體建立庫存記錄，或調整上方篩選條件
+                  </p>
                 </div>
               </TableCell>
             </TableRow>
@@ -304,7 +314,7 @@ export function InventoryNestedTable({
                               <TableRow>
                                 <TableHead className="text-xs">SKU 編號</TableHead>
                                 <TableHead className="text-xs">規格屬性</TableHead>
-                                <TableHead className="text-xs text-center">庫存數量</TableHead>
+                                <TableHead className="text-xs text-center">總庫存</TableHead>
                                 <TableHead className="text-xs text-center">低庫存閾值</TableHead>
                                 <TableHead className="text-xs text-center">狀態</TableHead>
                                 <TableHead className="text-xs text-right">操作</TableHead>
@@ -318,42 +328,66 @@ export function InventoryNestedTable({
                                   </TableCell>
                                 </TableRow>
                               ) : (
-                                spu.enhancedSkus.map((sku) => (
-                                  <TableRow key={`sku-${sku.id}`} className="hover:bg-muted/30">
-                                    <TableCell className="font-mono text-xs">
-                                      {sku.sku || 'N/A'}
-                                    </TableCell>
-                                    <TableCell className="text-sm">
-                                      {sku.attributes}
-                                    </TableCell>
-                                    <TableCell className="text-center font-medium">
-                                      {sku.quantity.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell className="text-center text-muted-foreground">
-                                      {sku.threshold.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                      <Badge 
-                                        variant={getStatusBadgeVariant(sku.status)} 
-                                        className="gap-1 text-xs"
-                                      >
-                                        {getStatusIcon(sku.status)}
-                                        {sku.status}
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                      <Button 
-                                        variant="ghost" 
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        onClick={() => onAdjustInventory?.(sku.id || 0, sku.quantity)}
-                                      >
-                                        <ArrowUpDown className="h-4 w-4" />
-                                        <span className="sr-only">調整庫存</span>
-                                      </Button>
-                                    </TableCell>
-                                  </TableRow>
-                                ))
+                                spu.enhancedSkus.map((sku, index) => {
+                                  // 生成絕對唯一的 key，結合多個標識符
+                                  const uniqueKey = `spu-${spu.id}-sku-${sku.id || 'unknown'}-index-${index}-${sku.sku || 'no-sku'}`;
+                                  
+                                  return (
+                                    <TableRow key={uniqueKey} className="hover:bg-muted/30">
+                                      <TableCell className="font-mono text-xs">
+                                        {sku.sku || 'N/A'}
+                                      </TableCell>
+                                      <TableCell className="text-sm">
+                                        {sku.attributes}
+                                      </TableCell>
+                                      <TableCell className="text-center font-medium">
+                                        {sku.quantity.toLocaleString()}
+                                      </TableCell>
+                                      <TableCell className="text-center text-muted-foreground">
+                                        {sku.threshold.toLocaleString()}
+                                      </TableCell>
+                                      <TableCell className="text-center">
+                                        <Badge 
+                                          variant={getStatusBadgeVariant(sku.status)} 
+                                          className="gap-1 text-xs"
+                                        >
+                                          {getStatusIcon(sku.status)}
+                                          {sku.status}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <div className="flex items-center gap-1">
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            title="查看庫存歷史"
+                                            onClick={() => {
+                                              const inventoryId = sku.inventory?.[0]?.id
+                                              if (inventoryId) {
+                                                router.push(`/inventory/history/${inventoryId}?productName=${encodeURIComponent(spu.name || '')}&sku=${encodeURIComponent(sku.sku || '')}`)
+                                              }
+                                            }}
+                                          >
+                                            <History className="h-4 w-4" />
+                                            <span className="sr-only">查看歷史</span>
+                                          </Button>
+                                          <InventoryModificationDialog
+                                            productVariantId={sku.id || 0}
+                                            currentQuantity={sku.quantity}
+                                            storeId={sku.inventory?.[0]?.store?.id}
+                                            productName={spu.name}
+                                            sku={sku.sku}
+                                            onSuccess={() => {
+                                              // 這裡可以觸發父組件的刷新邏輯
+                                              onAdjustInventory?.(sku.id || 0, sku.quantity)
+                                            }}
+                                          />
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })
                               )}
                             </TableBody>
                           </Table>
