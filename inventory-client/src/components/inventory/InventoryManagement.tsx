@@ -54,7 +54,6 @@ export function InventoryManagement() {
   // 獲取基礎資料
   const { data: storesData, isLoading: isLoadingStores } = useStores()
   const { data: categoriesData, isLoading: isLoadingCategories } = useCategories()
-  const { data: productData, isLoading: isLoadingProducts, error, isError, refetch: refetchProducts } = useProducts(filters)
 
   // 獲取庫存列表數據 
   const {
