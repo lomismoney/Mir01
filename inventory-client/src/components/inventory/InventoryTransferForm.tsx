@@ -211,18 +211,18 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                         const fromStoreIdStr = form.watch("from_store_id")
                         if (fromStoreIdStr && variant?.inventory && Array.isArray(variant.inventory)) {
                           const fromStoreId = parseInt(fromStoreIdStr)
-                          console.log('Debug: fromStoreId:', fromStoreId, 'variant inventory:', variant.inventory)
+                          // Debugging log removed: fromStoreId and variant inventory
                           
                           const inventory = variant.inventory.find((inv: any) => {
-                            console.log('Debug: comparing', inv.store_id, 'with', fromStoreId)
+                            // Debugging log removed: comparing store_id with fromStoreId
                             return inv.store_id === fromStoreId
                           })
                           
                           const stockQuantity = inventory?.quantity || 0
-                          console.log('Debug: found inventory:', inventory, 'quantity:', stockQuantity)
+                          // Debugging log removed: found inventory and stock quantity
                           setCurrentStock(stockQuantity)
                         } else {
-                          console.log('Debug: no store selected or no inventory data')
+                          // Debugging log removed: no store selected or no inventory data
                           setCurrentStock(0)
                         }
                       }}
