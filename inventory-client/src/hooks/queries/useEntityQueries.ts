@@ -1186,8 +1186,25 @@ export function useCreateAttribute() {
       }
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTRIBUTES });
+    onSuccess: async (data, variables) => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("屬性已成功創建");
+      }
     },
   });
 }
@@ -1247,9 +1264,25 @@ export function useDeleteAttribute() {
         throw new Error('刪除屬性失敗'); 
       }
     },
-    onSuccess: () => {
-      // 無效化屬性快取，觸發重新獲取刪除後的屬性列表
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTRIBUTES });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("屬性已成功刪除");
+      }
     },
   });
 }
@@ -1273,8 +1306,25 @@ export function useCreateAttributeValue() {
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '新增選項失敗'); }
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTRIBUTES });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("屬性值已成功創建");
+      }
     },
   });
 }
@@ -1293,8 +1343,25 @@ export function useUpdateAttributeValue() {
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '更新選項失敗'); }
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTRIBUTES });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("屬性值已成功更新");
+      }
     },
   });
 }
@@ -1311,8 +1378,25 @@ export function useDeleteAttributeValue() {
       });
       if (error) { throw new Error('刪除選項失敗'); }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTRIBUTES });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.ATTRIBUTES,
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("屬性值已成功刪除");
+      }
     },
   });
 }
@@ -1353,7 +1437,7 @@ export function useInventoryList(params: {
       }
       return data;
     },
-    staleTime: 1000 * 60 * 2, // 2 分鐘內保持新鮮（庫存變化較頻繁）
+    staleTime: 2 * 60 * 1000,   // 2 分鐘內保持新鮮（庫存變化較頻繁）
     retry: (failureCount, error) => {
       // 認證錯誤不重試
       if (error.message?.includes('請先登入')) {
@@ -1410,9 +1494,25 @@ export function useInventoryAdjustment() {
       }
       return data;
     },
-    onSuccess: () => {
-      // 無效化所有庫存相關的快取
-      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['inventory'],
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("庫存已成功調整");
+      }
     },
   });
 }
@@ -1559,9 +1659,34 @@ export function useCreateInventoryTransfer() {
       }
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfers'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory', 'list'] });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory', 'transfers'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['inventory', 'transfers'],
+          exact: false
+        }),
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory', 'list'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['inventory', 'list'],
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("庫存轉移已成功創建");
+      }
     },
   });
 }
@@ -1586,10 +1711,37 @@ export function useUpdateInventoryTransferStatus() {
       }
       return data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfers'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfer', variables.id] });
-      queryClient.invalidateQueries({ queryKey: ['inventory', 'list'] });
+    onSuccess: async (_, variables) => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory', 'transfers'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['inventory', 'transfers'],
+          exact: false
+        }),
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory', 'transfer', variables.id],
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['inventory', 'transfer', variables.id]
+        }),
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory', 'list'],
+          exact: false,
+          refetchType: 'active'
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("轉移狀態已成功更新");
+      }
     },
   });
 }
@@ -1610,9 +1762,32 @@ export function useCancelInventoryTransfer() {
       }
       return data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfers'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory', 'transfer', variables.id] });
+    onSuccess: async (_, variables) => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory', 'transfers'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['inventory', 'transfers'],
+          exact: false
+        }),
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory', 'transfer', variables.id],
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['inventory', 'transfer', variables.id]
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("庫存轉移已成功取消");
+      }
     },
   });
 }
@@ -1637,7 +1812,7 @@ export function useStores(params: {
       }
       return data;
     },
-    staleTime: 1000 * 60 * 10, // 10 分鐘內保持新鮮（門市資訊變化較少）
+    staleTime: 10 * 60 * 1000,  // 10 分鐘內保持新鮮（門市資訊變化較少）
   });
 }
 
@@ -1675,8 +1850,25 @@ export function useCreateStore() {
       }
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stores'] });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['stores'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['stores'],
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("門市已成功創建");
+      }
     },
   });
 }
@@ -1697,9 +1889,32 @@ export function useUpdateStore() {
       }
       return data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['stores'] });
-      queryClient.invalidateQueries({ queryKey: ['stores', variables.id] });
+    onSuccess: async (_, variables) => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['stores'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['stores'],
+          exact: false
+        }),
+        queryClient.invalidateQueries({ 
+          queryKey: ['stores', variables.id],
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['stores', variables.id]
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("門市已成功更新");
+      }
     },
   });
 }
@@ -1718,8 +1933,25 @@ export function useDeleteStore() {
         throw new Error('刪除門市失敗');
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stores'] });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['stores'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['stores'],
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("門市已成功刪除");
+      }
     },
   });
 }
@@ -1748,7 +1980,7 @@ export function useProductVariants(params: {
         return data;
     },
     enabled: options?.enabled !== false,
-    staleTime: 1000 * 60 * 5, // 5 分鐘緩存時間
+    staleTime: 5 * 60 * 1000,   // 5 分鐘緩存時間
     });
 }
 
@@ -1793,10 +2025,34 @@ export function useCreatePurchase() {
       
       return data;
     },
-    onSuccess: () => {
-      // 刷新庫存資料
-      queryClient.invalidateQueries({ queryKey: ['inventory'] });
-      queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+    onSuccess: async () => {
+      // 🚀 升級為標準的「失效並強制重取」模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['inventory'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['inventory'],
+          exact: false
+        }),
+        queryClient.invalidateQueries({ 
+          queryKey: ['product-variants'],
+          exact: false,
+          refetchType: 'active'
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['product-variants'],
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("進貨單已成功創建");
+      }
     },
   });
 }
