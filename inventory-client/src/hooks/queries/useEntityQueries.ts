@@ -483,6 +483,186 @@ export function useUsers(filters?: UserQueryParams) {
 }
 
 /**
+ * 創建用戶的 Mutation Hook
+ * 
+ * 🚀 功能：為新增用戶功能提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 成功後自動刷新用戶列表 - 「失效並強制重取」標準模式
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (userData: CreateUserRequestBody) => {
+      const { data, error } = await apiClient.POST('/api/users', {
+        body: userData,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (data) => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有用戶查詢緩存
+        queryClient.invalidateQueries({
+          queryKey: ['users'],
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的用戶查詢
+        queryClient.refetchQueries({
+          queryKey: ['users'],
+          exact: false,
+        })
+      ]);
+      
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('用戶已成功創建', {
+          description: `用戶「${data?.data?.name}」已成功加入系統`
+        });
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('創建失敗', { description: errorMessage });
+      }
+    },
+  });
+}
+
+/**
+ * 更新用戶的 Mutation Hook
+ * 
+ * 🔧 功能：為用戶編輯功能提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 雙重緩存失效策略 - 同時更新列表和詳情緩存
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+  
+  type UpdateUserPayload = {
+    path: UserPathParams;
+    body: UpdateUserRequestBody;
+  };
+  
+  return useMutation({
+    mutationFn: async ({ path, body }: UpdateUserPayload) => {
+      const { data, error } = await apiClient.PUT('/api/users/{id}', {
+        params: { path },
+        body,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有用戶查詢緩存
+        queryClient.invalidateQueries({
+          queryKey: ['users'],
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的用戶查詢
+        queryClient.refetchQueries({
+          queryKey: ['users'],
+          exact: false,
+        })
+      ]);
+      
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('用戶資料已成功更新', {
+          description: `用戶「${data?.data?.name}」的資料已更新`
+        });
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('更新失敗', { description: errorMessage });
+      }
+    },
+  });
+}
+
+/**
+ * 刪除用戶的 Mutation Hook
+ * 
+ * 🔥 功能：為用戶刪除功能提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 成功後自動刷新用戶列表 - 「失效並強制重取」標準模式
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (pathParams: UserPathParams) => {
+      const { error } = await apiClient.DELETE('/api/users/{id}', {
+        params: { path: pathParams }
+      });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有用戶查詢緩存
+        queryClient.invalidateQueries({
+          queryKey: ['users'],
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的用戶查詢
+        queryClient.refetchQueries({
+          queryKey: ['users'],
+          exact: false,
+        })
+      ]);
+      
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("用戶已成功刪除");
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("刪除失敗", { description: errorMessage });
+      }
+    },
+  });
+}
+
+/**
  * 獲取單一客戶詳情的 Query Hook
  * 
  * 🎯 戰術功能：為編輯功能提供完整的客戶資料查詢
@@ -507,7 +687,7 @@ export function useCustomerDetail(customerId: number | null) {
         params: { path: { id: customerId } },
       });
       
-      if (error) {
+      if (error) { 
         const errorMessage = parseApiErrorMessage(error);
         throw new Error(errorMessage || '獲取客戶詳情失敗');
       }
@@ -818,7 +998,7 @@ export function useUpdateAttribute() {
   return useMutation({
     mutationFn: async (variables: { id: number; body: { name: string } }) => {
       const { data, error } = await apiClient.PUT('/api/attributes/{id}', {
-        params: { path: { id: variables.id } },
+        params: { path: { id: variables.id, attribute: variables.id } },
         body: variables.body,
       });
       if (error) { 
@@ -848,7 +1028,7 @@ export function useUpdateAttribute() {
 export function useDeleteAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (pathParams: AttributePathParams) => {
+    mutationFn: async (pathParams: { id: number; attribute: number }) => {
       const { error } = await apiClient.DELETE('/api/attributes/{id}', {
         params: { path: pathParams },
       });
@@ -1076,7 +1256,8 @@ export function useSkuInventoryHistory(params: {
   return useQuery({
     queryKey: ['inventory', 'sku-history', params],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/sku/{sku}/history', {
+      // @ts-ignore - API 路徑暫時不在 OpenAPI 定義中
+      const { data, error } = await apiClient.GET('/api/inventory/sku/{sku}/history' as any, {
         params: { 
           path: { sku: params.sku },
           query: {
@@ -1348,20 +1529,16 @@ export function useProductVariants(params: {
   return useQuery({
     queryKey: ['product-variants', params],
     queryFn: async () => {
-      try {
-        const response = await apiClient.GET('/api/products/variants', {
-          params: { query: params },
-        });
+      const { data, error } = await apiClient.GET('/api/products/variants', {
+        params: { query: params },
+      });
+      if (error) {
+        throw new Error('獲取商品變體列表失敗');
       }
+      return data;
     },
-    onError: (error) => {
-      // 🔴 錯誤處理 - 友善的錯誤訊息
-      const errorMessage = parseApiErrorMessage(error);
-      if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.error('更新失敗', { description: errorMessage });
-      }
-    },
+    enabled: options?.enabled !== false,
+    staleTime: 1000 * 60 * 5, // 5 分鐘緩存時間
   });
 }
 
