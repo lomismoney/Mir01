@@ -229,7 +229,7 @@ class InventoryManagementController extends Controller
         }
         
         // 按交易類型篩選
-        if ($request->filled('type')) {
+        if ($request->filled('type') && $request->type !== 'all') {
             $query->where('type', $request->type);
         }
         
@@ -237,6 +237,7 @@ class InventoryManagementController extends Controller
         $perPage = $request->input('per_page', 15);
         $transactions = $query->latest()->paginate($perPage);
         
+        // 確保即使沒有記錄也返回一個有效的響應結構
         return response()->json($transactions);
     }
 

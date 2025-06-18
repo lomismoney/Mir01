@@ -383,9 +383,9 @@ export function InventoryNestedTable({
                                             className="h-8 w-8"
                                             title="查看庫存歷史"
                                             onClick={() => {
-                                              const inventoryId = sku.inventory?.[0]?.id
-                                              if (inventoryId) {
-                                                router.push(`/inventory/history/${inventoryId}?productName=${encodeURIComponent(spu.name || '')}&sku=${encodeURIComponent(sku.sku || '')}`)
+                                              // 改為跳轉到 SKU 歷史頁面，顯示所有分店的該 SKU 歷史
+                                              if (sku.sku) {
+                                                router.push(`/inventory/history/sku/${encodeURIComponent(sku.sku)}?productName=${encodeURIComponent(spu.name || '')}`)
                                               }
                                             }}
                                           >
