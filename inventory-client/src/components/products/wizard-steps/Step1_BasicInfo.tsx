@@ -198,11 +198,17 @@ export function Step1_BasicInfo({
       // 檢查請求是否成功
       if (error || !response.ok) {
         // 優雅處理不同類型的錯誤
-        if (response.status === 422 && error?.message) {
-          throw new Error(error.message || '圖片驗證失敗');
+        if (response.status === 422) {
+          // 422 驗證錯誤的處理
+          const validationError = error as any;
+          if (validationError?.errors?.image) {
+            throw new Error(validationError.errors.image[0] || '圖片驗證失敗');
+          } else if (validationError?.message) {
+            throw new Error(validationError.message);
+          }
         }
         
-        const errorMessage = error?.message || `上傳失敗 (HTTP ${response.status})`;
+        const errorMessage = (error as any)?.message || `上傳失敗 (HTTP ${response.status})`;
         throw new Error(errorMessage);
       }
 

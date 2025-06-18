@@ -1024,6 +1024,43 @@ export function useInventoryHistory(params: {
   });
 }
 
+/**
+ * 獲取特定 SKU 的所有庫存歷史記錄
+ */
+export function useSkuInventoryHistory(params: {
+  sku: string;
+  store_id?: string;
+  type?: string;
+  start_date?: string;
+  end_date?: string;
+  per_page?: number;
+  page?: number;
+}) {
+  return useQuery({
+    queryKey: ['inventory', 'sku-history', params],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/inventory/sku/{sku}/history', {
+        params: { 
+          path: { sku: params.sku },
+          query: {
+            store_id: params.store_id ? parseInt(params.store_id) : undefined,
+            type: params.type,
+            start_date: params.start_date,
+            end_date: params.end_date,
+            per_page: params.per_page,
+            page: params.page,
+          }
+        },
+      });
+      if (error) {
+        throw new Error('獲取 SKU 庫存歷史失敗');
+      }
+      return data;
+    },
+    enabled: !!params.sku,
+  });
+}
+
 // ==================== 庫存轉移管理 (INVENTORY TRANSFERS) ====================
 
 /**

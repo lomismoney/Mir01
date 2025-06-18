@@ -59,6 +59,16 @@ class ProductAuthorizationTest extends TestCase
             'name' => '測試商品',
             'description' => '測試商品描述'
         ]);
+        
+        // 關聯商品與屬性
+        $this->product->attributes()->attach([$this->colorAttribute->id, $this->sizeAttribute->id]);
+        
+        // 創建變體
+        $variant = $this->product->variants()->create([
+            'sku' => 'TEST-PRODUCT-RED-M',
+            'price' => 100.00,
+        ]);
+        $variant->attributeValues()->attach([$this->redColor->id, $this->sizeM->id]);
     }
 
     /**
@@ -153,7 +163,22 @@ class ProductAuthorizationTest extends TestCase
         $updateData = [
             'name' => '更新的商品名稱',
             'description' => '更新的描述',
-            'category_id' => null
+            'category_id' => null,
+            'attributes' => [
+                $this->colorAttribute->id,
+                $this->sizeAttribute->id
+            ],
+            'variants' => [
+                [
+                    'id' => $this->product->variants->first()->id,
+                    'sku' => 'UPDATED-SKU-001',
+                    'price' => 150.00,
+                    'attribute_value_ids' => [
+                        $this->redColor->id,
+                        $this->sizeM->id
+                    ]
+                ]
+            ]
         ];
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -170,7 +195,22 @@ class ProductAuthorizationTest extends TestCase
         $updateData = [
             'name' => '更新的商品名稱',
             'description' => '更新的描述',
-            'category_id' => null
+            'category_id' => null,
+            'attributes' => [
+                $this->colorAttribute->id,
+                $this->sizeAttribute->id
+            ],
+            'variants' => [
+                [
+                    'id' => $this->product->variants->first()->id,
+                    'sku' => 'VIEWER-UPDATED-SKU-001',
+                    'price' => 150.00,
+                    'attribute_value_ids' => [
+                        $this->redColor->id,
+                        $this->sizeM->id
+                    ]
+                ]
+            ]
         ];
 
         $response = $this->actingAs($this->viewerUser, 'sanctum')

@@ -7,10 +7,12 @@
 // 庫存列表與表格組件
 export { InventoryListTable } from './InventoryListTable';
 export { InventoryNestedTable } from './InventoryNestedTable';
+export { InventoryHistory } from './InventoryHistory';
 
 // 庫存調整組件
 export { InventoryAdjustmentDialog } from './InventoryAdjustmentDialog';
 export { InventoryAdjustmentForm } from './InventoryAdjustmentForm';
+export { InventoryModificationDialog } from './InventoryModificationDialog';
 
 // 庫存轉移組件
 export { default as InventoryTransfer } from './InventoryTransfer';

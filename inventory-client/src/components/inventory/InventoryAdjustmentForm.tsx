@@ -126,7 +126,7 @@ export function InventoryAdjustmentForm({
       onSuccess: () => {
         toast({
           title: "成功",
-          description: isNewProduct ? "新增庫存成功" : "庫存調整已完成",
+          description: "庫存修改已完成",
         })
         queryClient.invalidateQueries({ queryKey: ["inventory"] })
         form.reset()
@@ -137,7 +137,7 @@ export function InventoryAdjustmentForm({
         toast({
           variant: "destructive",
           title: "錯誤",
-          description: `庫存調整失敗: ${error instanceof Error ? error.message : "未知錯誤"}`,
+          description: `庫存修改失敗: ${error instanceof Error ? error.message : "未知錯誤"}`,
         })
         setIsSubmitting(false)
       },
@@ -147,9 +147,9 @@ export function InventoryAdjustmentForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{currentQuantity > 0 ? "調整庫存" : "新增庫存"}</CardTitle>
+        <CardTitle>修改庫存</CardTitle>
         <CardDescription>
-          {currentQuantity > 0 ? `當前庫存: ${currentQuantity} 件` : "添加產品到庫存中"}
+          {currentQuantity > 0 ? `當前庫存: ${currentQuantity} 件` : "設定庫存數量"}
         </CardDescription>
       </CardHeader>
       <CardContent>

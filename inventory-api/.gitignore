@@ -48,5 +48,9 @@ _ide_helper*.php
 /bootstrap/cache/*
 !bootstrap/cache/.gitkeep
 
-# Laravel Telescope（如果有使用）
-/storage/app/telescope/
+# Scribe API 文檔 (自動生成，不需版控)
+/resources/views/scribe/
+/resources/views/vendor/scribe/
+/public/docs/
+/public/vendor/scribe/
+/.scribe/

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useCreatePurchase, useStores } from "@/hooks/queries/useEntityQueries";
 import { useToast } from "@/components/ui/use-toast";
@@ -42,9 +41,10 @@ interface PurchaseFormData {
 interface CreatePurchaseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-export function CreatePurchaseDialog({ open, onOpenChange }: CreatePurchaseDialogProps) {
+export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePurchaseDialogProps) {
   const { toast } = useToast();
   const createPurchaseMutation = useCreatePurchase();
   const { data: storesData, isLoading: isLoadingStores } = useStores();
@@ -113,6 +113,7 @@ export function CreatePurchaseDialog({ open, onOpenChange }: CreatePurchaseDialo
         });
         form.reset();
         onOpenChange(false);
+        onSuccess?.(); // 調用外部成功回調
       },
       onError: (error) => {
         toast({

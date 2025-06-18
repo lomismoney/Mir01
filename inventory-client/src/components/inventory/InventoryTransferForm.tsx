@@ -206,11 +206,23 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                       onValueChange={(productVariantId, variant) => {
                         field.onChange(productVariantId)
                         setSelectedVariant(variant)
-                        if (variant?.inventory && Array.isArray(variant.inventory)) {
-                          const fromStoreId = parseInt(form.watch("from_store_id"))
-                          const inventory = variant.inventory.find((inv: any) => inv.store_id === fromStoreId)
-                          setCurrentStock(inventory?.quantity || 0)
+                        
+                        // 獲取來源門市 ID
+                        const fromStoreIdStr = form.watch("from_store_id")
+                        if (fromStoreIdStr && variant?.inventory && Array.isArray(variant.inventory)) {
+                          const fromStoreId = parseInt(fromStoreIdStr)
+                          // Debugging log removed: fromStoreId and variant inventory
+                          
+                          const inventory = variant.inventory.find((inv: any) => {
+                            // Debugging log removed: comparing store_id with fromStoreId
+                            return inv.store_id === fromStoreId
+                          })
+                          
+                          const stockQuantity = inventory?.quantity || 0
+                          // Debugging log removed: found inventory and stock quantity
+                          setCurrentStock(stockQuantity)
                         } else {
+                          // Debugging log removed: no store selected or no inventory data
                           setCurrentStock(0)
                         }
                       }}
