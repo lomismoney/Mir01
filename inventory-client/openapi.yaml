@@ -46,6 +46,9 @@ tags:
   -
     name: 認證管理
     description: ''
+  -
+    name: 客戶管理
+    description: '客戶管理 API 端點，用於管理客戶資料'
 paths:
   /api/health:
     get:
@@ -5332,6 +5335,645 @@ paths:
         in: path
         name: id
         description: 轉移記錄ID.
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/customers:
+    get:
+      summary: 獲取客戶列表
+      operationId: getCustomers
+      description: '獲取系統中的客戶列表，支援搜尋篩選'
+      parameters:
+        -
+          in: query
+          name: search
+          description: 搜尋客戶名稱、電話或統編
+          example: '王大明'
+          required: false
+          schema:
+            type: string
+            description: 搜尋客戶名稱、電話或統編
+            example: '王大明'
+            nullable: false
+        -
+          in: query
+          name: start_date
+          description: 開始日期篩選
+          example: '2025-01-01'
+          required: false
+          schema:
+            type: string
+            format: date
+            description: 開始日期篩選
+            example: '2025-01-01'
+            nullable: false
+        -
+          in: query
+          name: end_date
+          description: 結束日期篩選
+          example: '2025-12-31'
+          required: false
+          schema:
+            type: string
+            format: date
+            description: 結束日期篩選
+            example: '2025-12-31'
+            nullable: false
+        -
+          in: query
+          name: page
+          description: 頁數
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 頁數
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: per_page
+          description: 每頁筆數
+          example: 15
+          required: false
+          schema:
+            type: integer
+            description: 每頁筆數
+            example: 15
+            nullable: false
+      responses:
+        200:
+          description: '客戶列表回應'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      name: '王大明'
+                      phone: '0912345678'
+                      is_company: false
+                      tax_id: null
+                      industry_type: null
+                      payment_type: 'cash'
+                      contact_address: '台北市中正區重慶南路一段122號'
+                      total_purchase_amount: 15000.0
+                      total_outstanding_amount: 0.0
+                      last_purchase_date: '2025-06-15T10:30:00.000000Z'
+                      created_at: '2025-06-10T09:20:00.000000Z'
+                      updated_at: '2025-06-15T10:30:00.000000Z'
+                      addresses:
+                        -
+                          id: 1
+                          type: 'shipping'
+                          name: '王大明'
+                          phone: '0912345678'
+                          address: '台北市中正區重慶南路一段122號'
+                          is_default: true
+                      default_address:
+                        id: 1
+                        type: 'shipping'
+                        name: '王大明'
+                        phone: '0912345678'
+                        address: '台北市中正區重慶南路一段122號'
+                        is_default: true
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    per_page: 15
+                    to: 1
+                    total: 1
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: '王大明'
+                        phone:
+                          type: string
+                          example: '0912345678'
+                        is_company:
+                          type: boolean
+                          example: false
+                        tax_id:
+                          type: string
+                          nullable: true
+                          example: null
+                        industry_type:
+                          type: string
+                          nullable: true
+                          example: null
+                        payment_type:
+                          type: string
+                          example: 'cash'
+                        contact_address:
+                          type: string
+                          example: '台北市中正區重慶南路一段122號'
+                        total_purchase_amount:
+                          type: number
+                          example: 15000.0
+                        total_outstanding_amount:
+                          type: number
+                          example: 0.0
+                        last_purchase_date:
+                          type: string
+                          nullable: true
+                          example: '2025-06-15T10:30:00.000000Z'
+                        created_at:
+                          type: string
+                          example: '2025-06-10T09:20:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2025-06-15T10:30:00.000000Z'
+                        addresses:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 1
+                              type:
+                                type: string
+                                example: 'shipping'
+                              name:
+                                type: string
+                                example: '王大明'
+                              phone:
+                                type: string
+                                example: '0912345678'
+                              address:
+                                type: string
+                                example: '台北市中正區重慶南路一段122號'
+                              is_default:
+                                type: boolean
+                                example: true
+                        default_address:
+                          type: object
+                          nullable: true
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            type:
+                              type: string
+                              example: 'shipping'
+                            name:
+                              type: string
+                              example: '王大明'
+                            phone:
+                              type: string
+                              example: '0912345678'
+                            address:
+                              type: string
+                              example: '台北市中正區重慶南路一段122號'
+                            is_default:
+                              type: boolean
+                              example: true
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 1
+                      total:
+                        type: integer
+                        example: 1
+      tags:
+        - 客戶管理
+    post:
+      summary: 建立新客戶
+      operationId: createCustomer
+      description: '建立新客戶資料'
+      parameters: []
+      responses:
+        201:
+          description: '客戶建立成功'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: '王大明'
+                    phone: '0912345678'
+                    is_company: false
+                    tax_id: null
+                    industry_type: null
+                    payment_type: 'cash'
+                    contact_address: '台北市中正區重慶南路一段122號'
+                    total_purchase_amount: 0.0
+                    total_outstanding_amount: 0.0
+                    last_purchase_date: null
+                    created_at: '2025-06-18T10:30:00.000000Z'
+                    updated_at: '2025-06-18T10:30:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: '王大明'
+                      phone:
+                        type: string
+                        example: '0912345678'
+                      is_company:
+                        type: boolean
+                        example: false
+                      tax_id:
+                        type: string
+                        nullable: true
+                        example: null
+                      industry_type:
+                        type: string
+                        nullable: true
+                        example: null
+                      payment_type:
+                        type: string
+                        example: 'cash'
+                      contact_address:
+                        type: string
+                        example: '台北市中正區重慶南路一段122號'
+                      total_purchase_amount:
+                        type: number
+                        example: 0.0
+                      total_outstanding_amount:
+                        type: number
+                        example: 0.0
+                      last_purchase_date:
+                        type: string
+                        nullable: true
+                        example: null
+                      created_at:
+                        type: string
+                        example: '2025-06-18T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-18T10:30:00.000000Z'
+      tags:
+        - 客戶管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: '客戶姓名或公司名稱'
+                  example: '王大明'
+                  nullable: false
+                phone:
+                  type: string
+                  description: '聯絡電話'
+                  example: '0912345678'
+                  nullable: false
+                is_company:
+                  type: boolean
+                  description: '是否為公司'
+                  example: false
+                  nullable: false
+                tax_id:
+                  type: string
+                  description: '統一編號（公司必填）'
+                  example: null
+                  nullable: true
+                industry_type:
+                  type: string
+                  description: '行業別'
+                  example: null
+                  nullable: true
+                payment_type:
+                  type: string
+                  description: '付款方式'
+                  example: 'cash'
+                  nullable: false
+                  enum:
+                    - cash
+                    - credit
+                    - bank_transfer
+                contact_address:
+                  type: string
+                  description: '聯絡地址'
+                  example: '台北市中正區重慶南路一段122號'
+                  nullable: false
+              required:
+                - name
+                - phone
+                - is_company
+                - payment_type
+                - contact_address
+  '/api/customers/{id}':
+    get:
+      summary: 獲取指定客戶資料
+      operationId: getCustomer
+      description: '根據客戶 ID 獲取特定客戶的完整資料'
+      parameters: []
+      responses:
+        200:
+          description: '客戶資料回應'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: '王大明'
+                    phone: '0912345678'
+                    is_company: false
+                    tax_id: null
+                    industry_type: null
+                    payment_type: 'cash'
+                    contact_address: '台北市中正區重慶南路一段122號'
+                    total_purchase_amount: 15000.0
+                    total_outstanding_amount: 0.0
+                    last_purchase_date: '2025-06-15T10:30:00.000000Z'
+                    created_at: '2025-06-10T09:20:00.000000Z'
+                    updated_at: '2025-06-15T10:30:00.000000Z'
+                    addresses:
+                      -
+                        id: 1
+                        type: 'shipping'
+                        name: '王大明'
+                        phone: '0912345678'
+                        address: '台北市中正區重慶南路一段122號'
+                        is_default: true
+                    default_address:
+                      id: 1
+                      type: 'shipping'
+                      name: '王大明'
+                      phone: '0912345678'
+                      address: '台北市中正區重慶南路一段122號'
+                      is_default: true
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: '王大明'
+                      phone:
+                        type: string
+                        example: '0912345678'
+                      is_company:
+                        type: boolean
+                        example: false
+                      tax_id:
+                        type: string
+                        nullable: true
+                        example: null
+                      industry_type:
+                        type: string
+                        nullable: true
+                        example: null
+                      payment_type:
+                        type: string
+                        example: 'cash'
+                      contact_address:
+                        type: string
+                        example: '台北市中正區重慶南路一段122號'
+                      total_purchase_amount:
+                        type: number
+                        example: 15000.0
+                      total_outstanding_amount:
+                        type: number
+                        example: 0.0
+                      last_purchase_date:
+                        type: string
+                        nullable: true
+                        example: '2025-06-15T10:30:00.000000Z'
+                      created_at:
+                        type: string
+                        example: '2025-06-10T09:20:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-15T10:30:00.000000Z'
+                      addresses:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            type:
+                              type: string
+                              example: 'shipping'
+                            name:
+                              type: string
+                              example: '王大明'
+                            phone:
+                              type: string
+                              example: '0912345678'
+                            address:
+                              type: string
+                              example: '台北市中正區重慶南路一段122號'
+                            is_default:
+                              type: boolean
+                              example: true
+                      default_address:
+                        type: object
+                        nullable: true
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          type:
+                            type: string
+                            example: 'shipping'
+                          name:
+                            type: string
+                            example: '王大明'
+                          phone:
+                            type: string
+                            example: '0912345678'
+                          address:
+                            type: string
+                            example: '台北市中正區重慶南路一段122號'
+                          is_default:
+                            type: boolean
+                            example: true
+        404:
+          description: '客戶不存在'
+      tags:
+        - 客戶管理
+    put:
+      summary: 更新指定客戶資料
+      operationId: updateCustomer
+      description: '更新客戶資料，支援部分更新'
+      parameters: []
+      responses:
+        200:
+          description: '客戶更新成功'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    name: '王大明'
+                    phone: '0912345678'
+                    is_company: false
+                    tax_id: null
+                    industry_type: null
+                    payment_type: 'cash'
+                    contact_address: '台北市中正區重慶南路一段122號'
+                    total_purchase_amount: 15000.0
+                    total_outstanding_amount: 0.0
+                    last_purchase_date: '2025-06-15T10:30:00.000000Z'
+                    created_at: '2025-06-10T09:20:00.000000Z'
+                    updated_at: '2025-06-18T10:30:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: '王大明'
+                      phone:
+                        type: string
+                        example: '0912345678'
+                      is_company:
+                        type: boolean
+                        example: false
+                      tax_id:
+                        type: string
+                        nullable: true
+                        example: null
+                      industry_type:
+                        type: string
+                        nullable: true
+                        example: null
+                      payment_type:
+                        type: string
+                        example: 'cash'
+                      contact_address:
+                        type: string
+                        example: '台北市中正區重慶南路一段122號'
+                      total_purchase_amount:
+                        type: number
+                        example: 15000.0
+                      total_outstanding_amount:
+                        type: number
+                        example: 0.0
+                      last_purchase_date:
+                        type: string
+                        nullable: true
+                        example: '2025-06-15T10:30:00.000000Z'
+                      created_at:
+                        type: string
+                        example: '2025-06-10T09:20:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-18T10:30:00.000000Z'
+        404:
+          description: '客戶不存在'
+      tags:
+        - 客戶管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: '客戶姓名或公司名稱'
+                  example: '王大明'
+                  nullable: false
+                phone:
+                  type: string
+                  description: '聯絡電話'
+                  example: '0912345678'
+                  nullable: false
+                is_company:
+                  type: boolean
+                  description: '是否為公司'
+                  example: false
+                  nullable: false
+                tax_id:
+                  type: string
+                  description: '統一編號（公司必填）'
+                  example: null
+                  nullable: true
+                industry_type:
+                  type: string
+                  description: '行業別'
+                  example: null
+                  nullable: true
+                payment_type:
+                  type: string
+                  description: '付款方式'
+                  example: 'cash'
+                  nullable: false
+                  enum:
+                    - cash
+                    - credit
+                    - bank_transfer
+                contact_address:
+                  type: string
+                  description: '聯絡地址'
+                  example: '台北市中正區重慶南路一段122號'
+                  nullable: false
+              required:
+                - name
+                - phone
+                - is_company
+                - payment_type
+                - contact_address
+    delete:
+      summary: 刪除指定客戶
+      operationId: deleteCustomer
+      description: '刪除客戶及其所有相關資料（地址等），此操作無法撤銷'
+      parameters: []
+      responses:
+        204:
+          description: '客戶刪除成功'
+        404:
+          description: '客戶不存在'
+      tags:
+        - 客戶管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: '客戶 ID'
         example: 1
         required: true
         schema:

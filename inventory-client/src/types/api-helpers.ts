@@ -193,3 +193,57 @@ export type ProductFilters = {
   /** 每頁項目數 */
   per_page?: number;
 };
+
+/**
+ * 客戶地址類型定義
+ * 
+ * 對應後端 CustomerAddress 模型的前端類型
+ */
+export type CustomerAddress = {
+  id?: number;
+  customer_id?: number;
+  address?: string;
+  is_default?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+/**
+ * 客戶類型定義
+ * 
+ * 對應後端 Customer 模型的前端類型，包含所有客戶相關資訊
+ */
+export type Customer = {
+  id?: number;
+  name?: string;
+  phone?: string;
+  is_company?: boolean;
+  tax_id?: string | null;
+  industry_type?: string | null;
+  payment_type?: string;
+  contact_address?: string | null;
+  total_unpaid_amount?: string;
+  total_completed_amount?: string;
+  created_at?: string;
+  updated_at?: string;
+  addresses?: CustomerAddress[];
+  default_address?: CustomerAddress | null;
+};
+
+/**
+ * 客戶篩選參數類型定義
+ * 
+ * 對應後端 API 的查詢參數，用於客戶列表的篩選功能
+ */
+export type CustomerFilters = {
+  /** 關鍵字搜尋，匹配姓名、電話、統一編號 */
+  search?: string;
+  /** 按創建日期篩選的開始日期 */
+  start_date?: string;
+  /** 按創建日期篩選的結束日期 */
+  end_date?: string;
+  /** 分頁參數 */
+  page?: number;
+  /** 每頁項目數 */
+  per_page?: number;
+};

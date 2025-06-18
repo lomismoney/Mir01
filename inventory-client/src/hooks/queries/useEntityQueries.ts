@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
 import { parseApiErrorMessage } from '@/types/error';
-import { CreateStoreRequest, UpdateStoreRequest, ProductFilters } from '@/types/api-helpers';
+import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, CustomerFilters, Customer } from '@/types/api-helpers';
 
 /**
  * API Hooks - 商品管理
@@ -19,6 +19,8 @@ export const QUERY_KEYS = {
     PRODUCT: (id: number) => ['products', id] as const,
     USERS: ['users'] as const,
     USER: (id: number) => ['users', id] as const,
+    CUSTOMERS: ['customers'] as const,
+    CUSTOMER: (id: number) => ['customers', id] as const,
     CATEGORIES: ['categories'] as const,
     ATTRIBUTES: ['attributes'] as const,
 };
@@ -481,236 +483,288 @@ export function useUsers(filters?: UserQueryParams) {
 }
 
 /**
- * 建立新用戶的 Mutation (最終版 - 標準化無效化)
- */
-export function useCreateUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (body: CreateUserRequestBody) => {
-      const { data, error } = await apiClient.POST('/api/users', { body });
-      if (error) { 
-        // 使用類型安全的錯誤處理
-        const errorMessage = parseApiErrorMessage(error) || '建立用戶失敗';
-        
-        throw new Error(errorMessage);
-      }
-      return data;
-    },
-    onSuccess: () => {
-      // 強制重新獲取用戶列表數據，確保新創建的用戶立即顯示
-      // 使用 refetchQueries 而不是 invalidateQueries 來立即觸發重新獲取
-      queryClient.refetchQueries({ queryKey: ['users'] });
-    },
-  });
-}
-
-/**
- * 更新用戶的 Mutation (最終版 - 標準化無效化)
- */
-export function useUpdateUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (variables: { path: UserPathParams; body: UpdateUserRequestBody }) => {
-      const { data, error } = await apiClient.PUT('/api/users/{id}', {
-        params: { path: variables.path },
-        body: variables.body,
-      });
-      if (error) { 
-        // 使用類型安全的錯誤處理
-        const errorMessage = parseApiErrorMessage(error) || '更新用戶失敗';
-        throw new Error(errorMessage);
-      }
-      return data;
-    },
-    onSuccess: (_, variables) => {
-      // 強制重新獲取用戶列表數據，確保更新的用戶立即顯示
-      queryClient.refetchQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['user', variables.path.user] }); 
-    },
-  });
-}
-
-/**
- * 刪除單一用戶的 Mutation (最終版 - 標準化無效化)
- */
-export function useDeleteUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (pathParams: UserPathParams) => {
-      const { error } = await apiClient.DELETE('/api/users/{id}', {
-        params: { path: pathParams },
-      });
-      if (error) { throw new Error('刪除用戶失敗'); }
-    },
-    onSuccess: (_, pathParams) => {
-      // 強制重新獲取用戶列表數據，確保刪除的用戶立即從列表中移除
-      queryClient.refetchQueries({ queryKey: ['users'] });
-      queryClient.removeQueries({ queryKey: ['user', pathParams.user] });
-    },
-  });
-}
-
-/**
- * 獲取所有商品分類（高性能版本 - 整合第二階段優化）
+ * 獲取單一客戶詳情的 Query Hook
  * 
- * 效能優化特性：
- * 1. 超長緩存策略 - 分類數據極少變動，20分鐘緩存
- * 2. 禁用所有背景更新 - 分類結構穩定
- * 3. 智能樹狀結構預處理 - 減少前端計算負擔
- * 4. 錯誤邊界整合 - 優雅處理網絡異常
+ * 🎯 戰術功能：為編輯功能提供完整的客戶資料查詢
  * 
- * 從後端 API 獲取分類列表，後端回傳的是按 parent_id 分組的集合結構，
- * 讓前端可以極其方便地建構層級樹狀結構。
+ * 功能特性：
+ * 1. 條件性查詢 - 只有當 customerId 有效時才觸發 API 請求
+ * 2. 智能緩存策略 - 使用客戶 ID 作為唯一緩存鍵
+ * 3. 類型安全的 API 調用 - 使用生成的類型定義
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 5. 支援完整的客戶資訊與地址列表
  * 
- * 範例回傳結構：
- * - data[null] 或 data[''] - 所有頂層分類（父分類為 null）
- * - data['1'] - id 為 1 的分類下的所有子分類
- * 
- * @returns React Query 查詢結果，包含分組後的分類資料
+ * @param customerId - 客戶 ID，為 null 時不觸發查詢
+ * @returns React Query 查詢結果，包含客戶詳情數據
  */
-export function useCategories() {
+export function useCustomerDetail(customerId: number | null) {
   return useQuery({
-    queryKey: QUERY_KEYS.CATEGORIES,
+    queryKey: QUERY_KEYS.CUSTOMER(customerId!), // 使用 ['customers', customerId] 作為唯一鍵
     queryFn: async () => {
-      // 類型系統知道 data 的結構是 { data?: Category[] } 或類似結構
-      const { data: responseData, error } = await apiClient.GET('/api/categories');
-
+      if (!customerId) return null; // 如果沒有 ID，則不執行查詢
+      
+      const { data, error } = await apiClient.GET('/api/customers/{id}', {
+        params: { path: { id: customerId } },
+      });
+      
       if (error) {
-        throw new Error('獲取分類列表失敗');
+        const errorMessage = parseApiErrorMessage(error);
+        throw new Error(errorMessage || '獲取客戶詳情失敗');
       }
       
-      const categories = responseData?.data || [];
-      
-      // 使用 Array.prototype.reduce 建立一個類型安全的 Record
-      const grouped = categories.reduce((acc, category) => {
-        // 使用空字串 '' 作為頂層分類的鍵
-        const parentIdKey = category.parent_id?.toString() || '';
-        
-        if (!acc[parentIdKey]) {
-          acc[parentIdKey] = [];
-        }
-        acc[parentIdKey].push(category);
-        
-        return acc;
-      }, {} as Record<string, typeof categories>); // 明確指定 accumulator 的初始類型
+      return data;
+    },
+    enabled: !!customerId, // 只有在 customerId 存在時，此查詢才會被觸發
+    staleTime: 5 * 60 * 1000, // 5 分鐘緩存時間，編輯期間避免重複請求
+    retry: 2, // 失敗時重試 2 次
+  });
+}
 
-      return grouped;
+/**
+ * 創建客戶的 Mutation Hook
+ * 
+ * 🚀 戰術功能：為「新增客戶」按鈕提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 成功後自動刷新客戶列表 - 「失效並強制重取」標準模式
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 5. 支援完整的客戶資訊與地址管理
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useCreateCustomer() {
+  const queryClient = useQueryClient();
+  
+  // 使用 API 生成的類型定義
+  type CreateCustomerRequestBody = import('@/types/api').paths['/api/customers']['post']['requestBody']['content']['application/json'];
+  
+  return useMutation({
+    mutationFn: async (customerData: CreateCustomerRequestBody) => {
+      const { data, error } = await apiClient.POST('/api/customers', {
+        body: customerData,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (data) => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有客戶查詢緩存
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.CUSTOMERS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的客戶查詢
+        queryClient.refetchQueries({
+          queryKey: QUERY_KEYS.CUSTOMERS,
+          exact: false,
+        })
+      ]);
+      
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('客戶已成功創建', {
+          description: `客戶「${data?.data?.name}」已成功加入系統`
+        });
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('創建失敗', { description: errorMessage });
+      }
+    },
+  });
+}
+
+/**
+ * 刪除客戶的 Mutation Hook
+ * 
+ * 🔥 戰術功能：為操作列的刪除按鈕裝填真正的彈藥
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 成功後自動刷新客戶列表 - 「失效並強制重取」標準模式
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useDeleteCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (customerId: number) => {
+      const { error } = await apiClient.DELETE('/api/customers/{id}', {
+        params: { path: { id: customerId } }
+      });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有客戶查詢緩存
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.CUSTOMERS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的客戶查詢
+        queryClient.refetchQueries({
+          queryKey: QUERY_KEYS.CUSTOMERS,
+          exact: false,
+        })
+      ]);
+      
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("客戶已成功刪除");
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("刪除失敗", { description: errorMessage });
+      }
+    },
+  });
+}
+
+// ==================== 客戶管理系統 (CUSTOMER MANAGEMENT) ====================
+
+/**
+ * 客戶查詢參數類型
+ */
+type CustomerQueryParams = {
+  search?: string;
+  start_date?: string;
+  end_date?: string;
+  page?: number;
+  per_page?: number;
+};
+
+/**
+ * 獲取客戶列表 Hook
+ * 
+ * @param filters - 篩選參數
+ * @returns React Query 查詢結果
+ */
+export function useCustomers(filters?: CustomerFilters) {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.CUSTOMERS, filters],
+    queryFn: async ({ queryKey }) => {
+      const [, queryFilters] = queryKey;
+      const queryParams: CustomerQueryParams = {
+        ...(queryFilters as CustomerFilters),
+      };
+      
+      const response = await apiClient.GET('/api/customers', {
+        params: { query: queryParams },
+      });
+      
+      if (response.error) {
+        throw new Error('獲取客戶列表失敗');
+      }
+      
+      return response.data;
     },
     
-    // 🚀 體驗優化配置（第二階段淨化行動）
-    placeholderData: (previousData) => previousData, // 保持舊資料，避免載入閃爍
-    refetchOnMount: false,       // 依賴全域 staleTime  
-    refetchOnWindowFocus: false, // 分類數據無需即時更新
-    refetchOnReconnect: false,   // 網絡重連也不刷新分類
-  });
-}
-
-// 導入由 openapi-typescript 自動生成的精確分類管理類型
-type CreateCategoryRequestBody = import('@/types/api').paths["/api/categories"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateCategoryRequestBody = NonNullable<import('@/types/api').paths["/api/categories/{id}"]["put"]["requestBody"]>["content"]["application/json"];
-type CategoryPathParams = import('@/types/api').paths["/api/categories/{id}"]["put"]["parameters"]["path"];
-
-/**
- * 建立新分類的 Mutation
- * 
- * @returns React Query 變更結果
- * 
- * 功能說明：
- * 1. 接收分類建立請求資料（名稱、描述、父分類 ID）
- * 2. 發送 POST 請求到 /api/categories 端點
- * 3. 處理 Laravel 驗證錯誤並提供友善的錯誤訊息
- * 4. 成功後自動無效化分類列表快取，觸發 UI 重新整理
- */
-export function useCreateCategory() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (body: CreateCategoryRequestBody) => {
-      const { data, error } = await apiClient.POST('/api/categories', { body });
-      if (error) { 
-        throw new Error(Object.values(error).flat().join('\n') || '建立分類失敗'); 
-      }
-      return data;
-    },
-    onSuccess: () => {
-      // 無效化分類快取，觸發重新獲取最新的分類樹狀結構
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CATEGORIES });
-    },
+    // 🚀 體驗優化配置
+    placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
+    refetchOnMount: false,       // 依賴全域 staleTime
+    refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
+    staleTime: 1 * 60 * 1000,   // 1 分鐘緩存，平衡體驗與資料新鮮度
   });
 }
 
 /**
- * 更新分類的 Mutation
+ * 更新客戶的 Mutation Hook
  * 
- * @returns React Query 變更結果
+ * 🔧 戰術功能：為客戶編輯功能提供完整的 API 集成
  * 
- * 功能說明：
- * 1. 接收分類更新資料（路徑參數和請求體）
- * 2. 發送 PUT 請求到 /api/categories/{id} 端點
- * 3. 支援部分更新（名稱、描述、父分類 ID）
- * 4. 處理業務邏輯驗證錯誤（如防止自我循環）
- * 5. 成功後自動無效化分類列表快取
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 雙重緩存失效策略 - 同時更新列表和詳情緩存
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 5. 支援完整的客戶資訊與地址管理更新
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
  */
-export function useUpdateCategory() {
+export function useUpdateCustomer() {
   const queryClient = useQueryClient();
+  
+  // 使用 API 生成的類型定義
+  type UpdateCustomerRequestBody = import('@/types/api').paths['/api/customers/{id}']['put']['requestBody']['content']['application/json'];
+  type UpdateCustomerPayload = {
+    id: number;
+    data: UpdateCustomerRequestBody;
+  };
+  
   return useMutation({
-    mutationFn: async (variables: { path: CategoryPathParams; body: UpdateCategoryRequestBody }) => {
-      const { data, error } = await apiClient.PUT('/api/categories/{id}', {
-        params: { path: variables.path },
-        body: variables.body,
+    mutationFn: async ({ id, data }: UpdateCustomerPayload) => {
+      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}', {
+        params: { path: { id } },
+        body: data,
       });
-      if (error) { 
-        throw new Error(Object.values(error).flat().join('\n') || '更新分類失敗'); 
-      }
-      return data;
+      if (error) throw error;
+      return responseData;
     },
-    onSuccess: () => {
-      // 無效化分類快取，觸發重新獲取更新後的分類樹狀結構
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CATEGORIES });
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有客戶查詢緩存
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.CUSTOMERS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的客戶查詢
+        queryClient.refetchQueries({
+          queryKey: QUERY_KEYS.CUSTOMERS,
+          exact: false,
+        }),
+        // 3. 單個客戶詳情頁的快取處理
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.CUSTOMER(variables.id),
+          refetchType: 'active' 
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.CUSTOMER(variables.id)
+        })
+      ]);
+      
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('客戶資料已成功更新', {
+          description: `客戶「${data?.data?.name}」的資料已更新`
+        });
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('更新失敗', { description: errorMessage });
+      }
     },
   });
 }
 
-/**
- * 刪除分類的 Mutation
- * 
- * @returns React Query 變更結果
- * 
- * 功能說明：
- * 1. 接收要刪除的分類 ID 路徑參數
- * 2. 發送 DELETE 請求到 /api/categories/{id} 端點
- * 3. 執行軟刪除操作，根據資料表外鍵約束：
- *    - 子分類會被級聯刪除
- *    - 關聯商品的 category_id 會被設為 null
- * 4. 成功後自動無效化分類列表快取
- */
-export function useDeleteCategory() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (pathParams: CategoryPathParams) => {
-      const { error } = await apiClient.DELETE('/api/categories/{id}', {
-        params: { path: pathParams },
-      });
-      if (error) { 
-        throw new Error('刪除分類失敗'); 
-      }
-    },
-    onSuccess: () => {
-      // 無效化分類快取，觸發重新獲取刪除後的分類樹狀結構
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CATEGORIES });
-    },
-  });
-}
+// ==================== 屬性管理系統 (ATTRIBUTE MANAGEMENT) ====================
 
 /**
- * 獲取所有商品屬性及其值
- * 
- * 從後端獲取商品屬性（規格庫），例如「顏色」、「尺寸」等屬性，
- * 同時包含每個屬性下的所有可用值。這些資料用於：
- * 1. 建立新商品時選擇可用屬性
- * 2. 建立商品變體 (SKU) 時組合屬性值
- * 3. 前端篩選介面的動態生成
- * 
- * @returns React Query 查詢結果，包含屬性及其值的完整列表
+ * 獲取屬性列表
  */
 export function useAttributes() {
   return useQuery({
@@ -722,43 +776,26 @@ export function useAttributes() {
       }
       return data;
     },
-    staleTime: 1000 * 60 * 10, // 10 分鐘內不重新請求（屬性變更較少）
   });
 }
 
-// 導入由 openapi-typescript 自動生成的精確屬性管理類型
-type CreateAttributeRequestBody = import('@/types/api').paths["/api/attributes"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateAttributeRequestBody = import('@/types/api').paths["/api/attributes/{id}"]["put"]["requestBody"]["content"]["application/json"];
-type AttributePathParams = import('@/types/api').paths["/api/attributes/{id}"]["put"]["parameters"]["path"];
-
 /**
- * 建立新屬性的 Mutation
- * 
- * @returns React Query 變更結果
- * 
- * 功能說明：
- * 1. 接收屬性建立請求資料（屬性名稱）
- * 2. 發送 POST 請求到 /api/attributes 端點
- * 3. 處理 Laravel 驗證錯誤並提供友善的錯誤訊息
- * 4. 成功後自動無效化屬性列表快取，觸發 UI 重新整理
+ * 創建屬性
  */
 export function useCreateAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: CreateAttributeRequestBody) => {
-      console.log('Creating attribute with body:', body);
-      const { data, error } = await apiClient.POST('/api/attributes', { body });
-      
+    mutationFn: async (body: { name: string }) => {
+      const { data, error } = await apiClient.POST('/api/attributes', {
+        body,
+      });
       if (error) {
-        console.error('API Error:', error);
-        // 使用類型安全的錯誤處理
         const errorMessage = parseApiErrorMessage(error) || '建立屬性失敗';
         throw new Error(errorMessage);
       }
       return data;
     },
     onSuccess: () => {
-      // 無效化屬性快取，觸發重新獲取最新的屬性列表
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTRIBUTES });
     },
   });
@@ -779,9 +816,9 @@ export function useCreateAttribute() {
 export function useUpdateAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (variables: { path: AttributePathParams; body: UpdateAttributeRequestBody }) => {
+    mutationFn: async (variables: { id: number; body: { name: string } }) => {
       const { data, error } = await apiClient.PUT('/api/attributes/{id}', {
-        params: { path: variables.path },
+        params: { path: { id: variables.id } },
         body: variables.body,
       });
       if (error) { 
@@ -1315,124 +1352,24 @@ export function useProductVariants(params: {
         const response = await apiClient.GET('/api/products/variants', {
           params: { query: params },
         });
-        
-        // 直接使用響應，不需要類型斷言
-        const { data, error } = response;
-        
-        if (error) {
-          console.error('Product variants API error:', error);
-          
-          // 使用類型安全的錯誤處理
-          const errorMessage = parseApiErrorMessage(error) || '獲取商品變體列表失敗';
-          throw new Error(errorMessage);
-        }
-        
-        return data;
-      } catch (err: unknown) {
-        console.error('Product variants fetch error:', err);
-        
-        // 如果是網路錯誤等，也嘗試返回空結果而不是拋出錯誤
-        if (err instanceof TypeError || (err instanceof Error && err.message.includes('fetch'))) {
-          console.log('Network error, returning empty array');
-          return { data: [], meta: { total: 0 } };
-        }
-        
-        throw err;
       }
     },
-    retry: 2, // 重試 2 次
-    retryDelay: 1000, // 1 秒後重試
-    enabled: options?.enabled ?? true, // 預設啟用
-  });
-}
-
-/**
- * 獲取單個商品變體詳情
- */
-export function useProductVariantDetail(id: number) {
-  return useQuery({
-    queryKey: ['product-variants', id],
-    queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/products/variants/{id}', {
-        params: { path: { id: id.toString() } },
-      });
-      if (error) {
-        throw new Error('獲取商品變體詳情失敗');
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('更新失敗', { description: errorMessage });
       }
-      return data;
     },
-    enabled: !!id,
   });
-}
-
-/**
- * 商品圖片上傳 Hook
- * 
- * 專門用於原子化創建流程中的圖片上傳功能。
- * 支援在商品創建後上傳圖片，實現鏈式提交邏輯。
- * 
- * @returns React Query 變更結果
- */
-export function useUploadProductImage() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async ({ productId, imageFile }: { productId: number; imageFile: File }) => {
-            // 準備 FormData
-            const formData = new FormData();
-            formData.append('image', imageFile);
-
-            const { data, error } = await apiClient.POST('/api/products/{product_id}/upload-image', {
-                params: {
-                    path: {
-                        product_id: productId,
-                        id: productId
-                    }
-                },
-                body: formData as any // 由於 openapi-fetch 的類型限制，需要類型斷言
-            });
-            
-            if (error) {
-                const errorMessage = parseApiErrorMessage(error);
-                throw new Error(errorMessage || '圖片上傳失敗');
-            }
-            
-            return data;
-        },
-        onSuccess: async (data, variables) => {
-            // 🚀 「失效並強制重取」標準快取處理模式 - 圖片上傳專用
-            await Promise.all([
-                // 1. 失效所有商品查詢緩存
-                queryClient.invalidateQueries({
-                    queryKey: QUERY_KEYS.PRODUCTS,
-                    exact: false,
-                    refetchType: 'active',
-                }),
-                // 2. 強制重新獲取所有活躍的商品查詢
-                queryClient.refetchQueries({
-                    queryKey: QUERY_KEYS.PRODUCTS,
-                    exact: false,
-                }),
-                // 3. 特定商品詳情的緩存處理
-                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) }),
-                queryClient.refetchQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) })
-            ]);
-            
-            console.log('🖼️ 圖片上傳完成，已強制刷新商品緩存');
-        },
-        onError: (error) => {
-            console.error('圖片上傳失敗:', error);
-        },
-    });
 }
 
 // ==================== 進貨管理系統 (PURCHASE MANAGEMENT) ====================
 
 /**
- * 進貨管理相關 Hooks
+ * 進貨管理相關類型定義
  */
-
-// 定義正確的進貨項目型別（覆寫 API 型別定義中的錯誤）
 export interface PurchaseItemRequest {
   product_variant_id: number;
   quantity: number;
