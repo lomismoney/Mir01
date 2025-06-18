@@ -22,7 +22,7 @@ import { toast } from 'sonner';
  */
 interface ImageUrls {
   original?: string;
-  thumbnail?: string;
+  thumb?: string;
   medium?: string;
   large?: string;
 }
@@ -202,7 +202,7 @@ export function ImageUploader({
         // 這裡只是示例，實際的 imageUrls 應該從 API 響應中獲取
         onUploadSuccess({
           original: previewUrl || undefined,
-          thumbnail: previewUrl || undefined,
+          thumb: previewUrl || undefined,
           medium: previewUrl || undefined,
           large: previewUrl || undefined,
         });

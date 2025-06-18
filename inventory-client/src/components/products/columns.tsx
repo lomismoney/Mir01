@@ -317,9 +317,9 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
 
       // SPU 主行顯示縮圖
       const product = item;
-      return product.image_urls?.thumbnail ? (
+      return product.image_urls?.thumb ? (
         <img
-          src={product.image_urls.thumbnail}
+          src={product.image_urls.thumb}
           alt={product.name}
           className="h-16 w-16 rounded-md object-cover"
         />

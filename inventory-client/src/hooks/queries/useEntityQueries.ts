@@ -1186,3 +1186,48 @@ export function useProductVariantDetail(id: number) {
     enabled: !!id,
   });
 }
+
+/**
+ * 商品圖片上傳 Hook
+ * 
+ * 專門用於原子化創建流程中的圖片上傳功能。
+ * 支援在商品創建後上傳圖片，實現鏈式提交邏輯。
+ * 
+ * @returns React Query 變更結果
+ */
+export function useUploadProductImage() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ productId, imageFile }: { productId: number; imageFile: File }) => {
+            // 準備 FormData
+            const formData = new FormData();
+            formData.append('image', imageFile);
+
+            const { data, error } = await apiClient.POST('/api/products/{product_id}/upload-image', {
+                params: {
+                    path: {
+                        product_id: productId,
+                        id: productId
+                    }
+                },
+                body: formData as any // 由於 openapi-fetch 的類型限制，需要類型斷言
+            });
+            
+            if (error) {
+                const errorMessage = parseApiErrorMessage(error);
+                throw new Error(errorMessage || '圖片上傳失敗');
+            }
+            
+            return data;
+        },
+        onSuccess: (data, variables) => {
+            // 成功後更新相關快取
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+        },
+        onError: (error) => {
+            console.error('圖片上傳失敗:', error);
+        },
+    });
+}

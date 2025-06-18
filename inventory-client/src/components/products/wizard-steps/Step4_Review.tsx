@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+
 import { 
   CheckCircle, 
   Package, 
@@ -52,13 +52,9 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
   const categories: Category[] = Array.isArray(categoriesData) ? categoriesData : [];
 
   /**
-   * 處理最終確認
+   * 原子化創建流程不需要額外的確認步驟
+   * 用戶點擊"創建商品"即表示確認
    */
-  const handleConfirmationChange = (checked: boolean) => {
-    updateFormData('confirmation', {
-      reviewed: checked,
-    });
-  };
 
   /**
    * 獲取分類名稱
@@ -343,33 +339,32 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
         </CardContent>
       </Card>
 
-      {/* 最終確認 */}
+      {/* 原子化創建流程說明 */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Info className="h-5 w-5" />
-            <span>最終確認</span>
+            <span>準備完成</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="finalConfirmation"
-              checked={formData.confirmation.reviewed}
-              onCheckedChange={handleConfirmationChange}
-            />
-            <div className="space-y-2">
-              <Label 
-                htmlFor="finalConfirmation" 
-                className="text-base font-medium cursor-pointer"
-              >
-                我已仔細檢查所有資訊，確認無誤
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                勾選此項目即表示您已確認所有商品資訊正確，
-                並同意依據以上配置創建商品。商品創建後可隨時編輯修改。
-              </p>
-            </div>
+          <div className="space-y-3">
+            <p className="text-base font-medium text-green-600">
+              ✅ 所有配置已完成，可以開始創建商品
+            </p>
+            <p className="text-sm text-muted-foreground">
+              點擊「創建商品」按鈕將會：
+            </p>
+            <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+              <li>• 創建商品主體和所有變體</li>
+              {formData.imageData.selectedFile && (
+                <li>• 自動上傳您選擇的商品圖片</li>
+              )}
+              <li>• 自動跳轉到商品列表頁面</li>
+            </ul>
+            <p className="text-sm text-muted-foreground">
+              商品創建後可隨時編輯修改，所有變更都會即時生效。
+            </p>
           </div>
         </CardContent>
       </Card>
