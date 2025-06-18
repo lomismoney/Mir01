@@ -45,6 +45,7 @@ export interface WizardFormData {
   variants: {
     items: Array<{
       key: string;
+      id?: number; // 編輯模式時的變體 ID
       options: { attributeId: number; value: string }[];
       sku: string;
       price: string;
@@ -102,14 +103,16 @@ function transformWizardDataToApiPayload(
 
   // 如果是單規格商品，創建一個預設變體
   if (!specifications.isVariable) {
+    const singleVariant = variants.items[0];
     return {
       name: basicInfo.name,
       description: basicInfo.description || null,
       category_id: basicInfo.category_id,
       attributes: [], // 單規格商品沒有屬性
       variants: [{
-        sku: `${basicInfo.name.replace(/\s+/g, '-').toUpperCase()}-001`,
-        price: 0, // 預設價格，用戶需要後續設定
+        ...(singleVariant?.id && { id: singleVariant.id }), // 編輯模式時包含變體 ID
+        sku: singleVariant?.sku || `${basicInfo.name.replace(/\s+/g, '-').toUpperCase()}-001`,
+        price: parseFloat(singleVariant?.price || '0') || 0,
         attribute_value_ids: []
       }]
     };
@@ -131,6 +134,7 @@ function transformWizardDataToApiPayload(
     });
 
     return {
+      ...(variant.id && { id: variant.id }), // 編輯模式時包含變體 ID
       sku: variant.sku,
       price: parseFloat(variant.price) || 0,
       attribute_value_ids: attributeValueIds
@@ -265,6 +269,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         
         return {
           key: `variant-${index}`,
+          id: variant.id, // 保存變體 ID 用於編輯模式
           options,
           sku: variant.sku || '',
           price: priceValue
@@ -429,7 +434,13 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
 
     switch (step) {
       case 1:
-        return <Step1_BasicInfo {...commonProps} />;
+        return (
+          <Step1_BasicInfo 
+            {...commonProps} 
+            productId={productId}
+            isEditMode={isEditMode}
+          />
+        );
       case 2:
         return <Step2_DefineSpecs {...commonProps} />;
       case 3:

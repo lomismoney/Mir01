@@ -36,17 +36,41 @@ class UpdateProductRequest extends FormRequest
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
-                    // 檢查 SKU 唯一性，但排除當前變體的 SKU
-                    $index = explode('.', $attribute)[1]; // 獲取陣列索引
-                    $variantId = $this->input("variants.{$index}.id");
+                    // 解析陣列索引 - 更健壯的方式
+                    $attributeParts = explode('.', $attribute);
+                    if (count($attributeParts) < 3) {
+                        $fail('無效的屬性路徑格式。');
+                        return;
+                    }
                     
+                    $index = $attributeParts[1];
+                    $currentVariantId = $this->input("variants.{$index}.id");
+                    
+                    // 1. 檢查同一請求中的重複 SKU
+                    $allVariants = $this->input('variants', []);
+                    $skuCount = 0;
+                    foreach ($allVariants as $variantIndex => $variant) {
+                        if (isset($variant['sku']) && $variant['sku'] === $value) {
+                            $skuCount++;
+                        }
+                    }
+                    
+                    if ($skuCount > 1) {
+                        $fail("SKU「{$value}」在此次請求中重複出現，每個變體必須有唯一的 SKU。");
+                        return;
+                    }
+                    
+                    // 2. 檢查資料庫中的 SKU 唯一性
                     $query = \App\Models\ProductVariant::where('sku', $value);
-                    if ($variantId) {
-                        $query->where('id', '!=', $variantId);
+                    
+                    // 如果當前變體有 ID（編輯模式），排除它自己
+                    if ($currentVariantId && is_numeric($currentVariantId)) {
+                        $query->where('id', '!=', $currentVariantId);
                     }
                     
                     if ($query->exists()) {
-                        $fail('SKU 已存在，請使用不同的 SKU。');
+                        $existingVariant = $query->first();
+                        $fail("SKU「{$value}」已被其他商品變體使用（ID: {$existingVariant->id}），請使用不同的 SKU。");
                     }
                 }
             ],

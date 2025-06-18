@@ -351,16 +351,17 @@ const ProductClientComponent = () => {
         </div>
         
         <div className="flex items-center space-x-2">
-          {/* 批量刪除按鈕 */}
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleBatchDelete}
-            disabled={table.getFilteredSelectedRowModel().rows.length === 0}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            刪除選中 ({table.getFilteredSelectedRowModel().rows.length})
-          </Button>
+          {/* 批量刪除按鈕 - 只在有選中項目時顯示 */}
+          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBatchDelete}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              刪除選中 ({table.getFilteredSelectedRowModel().rows.length})
+            </Button>
+          )}
           
           {/* 欄位顯示控制 */}
           <DropdownMenu>

@@ -19,6 +19,9 @@ use Illuminate\Http\Request;
 use App\Policies\ProductPolicy;
 use Illuminate\Support\Facades\DB;
 use App\Services\ProductService;
+use App\Http\Requests\Api\UploadProductImageRequest;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class ProductController extends Controller
 {
@@ -106,7 +109,8 @@ class ProductController extends Controller
                 'category', // ✅ 預先加載分類關聯，根除 N+1 查詢問題
                 'attributes', // ✅ 預先加載 SPU 的屬性關聯
                 'variants.attributeValues.attribute', // ✅ 預先加載 SKU 變體及其屬性
-                'variants.inventory.store' // ✅ 預先加載庫存資訊
+                'variants.inventory.store', // ✅ 預先加載庫存資訊
+                'media' // 📸 預先加載媒體關聯，讓 ProductResource 能夠輸出圖片 URL
             ])
             ->allowedFilters([
                 'name', 
@@ -216,7 +220,8 @@ class ProductController extends Controller
                 'category',
                 'attributes', // ✅ 建立後也要加載 SPU 的屬性關聯
                 'variants.attributeValues.attribute', 
-                'variants.inventory'
+                'variants.inventory',
+                'media' // 📸 建立後也要加載媒體關聯
             ]));
 
         } catch (\Exception $e) {
@@ -238,7 +243,8 @@ class ProductController extends Controller
             'category',
             'attributes', // ✅ 加載 SPU 的屬性關聯
             'variants.attributeValues.attribute', 
-            'variants.inventory.store'
+            'variants.inventory.store',
+            'media' // 📸 加載媒體關聯，輸出圖片 URL
         ]));
     }
 
@@ -274,7 +280,8 @@ class ProductController extends Controller
                 'category',
                 'attributes', // ✅ 更新後也要加載 SPU 的屬性關聯
                 'variants.attributeValues.attribute', 
-                'variants.inventory.store'
+                'variants.inventory.store',
+                'media' // 📸 更新後也要加載媒體關聯
             ]);
             
             return new ProductResource($updatedProduct);
@@ -327,5 +334,184 @@ class ProductController extends Controller
         
         // 返回 204 No Content
         return response()->noContent();
+    }
+
+    /**
+     * 上傳商品圖片
+     * 
+     * 遵循 Spatie Media Library v11 官方最佳實踐：
+     * - 使用專用的 FormRequest 進行驗證
+     * - 實施完整的錯誤處理和日誌記錄
+     * - 使用 singleFile 行為自動替換現有圖片
+     * - 返回所有轉換版本的 URL
+     * 
+     * @group 商品管理
+     * @authenticated
+     * 
+     * @urlParam id integer required 商品 ID Example: 1
+     * @bodyParam image file required 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "message": "圖片上傳成功",
+     *   "data": {
+     *     "id": 1,
+     *     "name": "商品名稱",
+     *     "has_image": true,
+     *     "image_urls": {
+     *       "original": "http://localhost:8000/storage/1/product-image.jpg",
+     *       "thumb": "http://localhost:8000/storage/1/conversions/product-image-thumb.jpg",
+     *       "medium": "http://localhost:8000/storage/1/conversions/product-image-medium.jpg",
+     *       "large": "http://localhost:8000/storage/1/conversions/product-image-large.jpg"
+     *     }
+     *   }
+     * }
+     * 
+     * @response 404 {
+     *   "success": false,
+     *   "message": "找不到指定的商品"
+     * }
+     * 
+     * @response 422 {
+     *   "success": false,
+     *   "message": "圖片上傳驗證失敗",
+     *   "errors": {
+     *     "image": ["圖片格式必須是：JPEG、JPG、PNG、GIF 或 WebP。"]
+     *   }
+     * }
+     * 
+     * @response 500 {
+     *   "success": false,
+     *   "message": "圖片上傳失敗",
+     *   "error": "詳細錯誤訊息"
+     * }
+     */
+    public function uploadImage(UploadProductImageRequest $request, Product $product)
+    {
+        try {
+            // 授權檢查
+            $this->authorize('update', $product);
+
+            // 記錄開始上傳
+            Log::info('開始上傳商品圖片', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'user_id' => auth()->id(),
+                'file_info' => [
+                    'original_name' => $request->file('image')->getClientOriginalName(),
+                    'mime_type' => $request->file('image')->getMimeType(),
+                    'size' => $request->file('image')->getSize(),
+                ]
+            ]);
+
+            // 獲取上傳的檔案
+            $uploadedFile = $request->file('image');
+            
+            // 檢查是否已有圖片（用於日誌記錄）
+            $hadPreviousImage = $product->hasImage();
+            $previousImageId = $hadPreviousImage ? $product->getFirstMedia('images')->id : null;
+
+            // 使用 Context7 推薦的 addMediaFromRequest 方法
+            // singleFile() 配置會自動替換現有圖片
+            $media = $product
+                ->addMediaFromRequest('image')
+                ->usingName($product->name . ' 主圖')
+                ->usingFileName('product-' . $product->id . '-' . time() . '.' . $uploadedFile->getClientOriginalExtension())
+                ->toMediaCollection('images');
+
+            // 等待轉換完成（因為使用 nonQueued()）
+            // 驗證所有轉換是否成功生成
+            $conversions = ['thumb', 'medium', 'large'];
+            $conversionResults = [];
+            
+            foreach ($conversions as $conversion) {
+                $hasConversion = $media->hasGeneratedConversion($conversion);
+                $conversionResults[$conversion] = [
+                    'generated' => $hasConversion,
+                    'url' => $hasConversion ? $media->getUrl($conversion) : null,
+                    'path' => $hasConversion ? $media->getPath($conversion) : null,
+                    'file_exists' => $hasConversion ? file_exists($media->getPath($conversion)) : false,
+                ];
+            }
+
+            // 記錄上傳成功
+            Log::info('商品圖片上傳成功', [
+                'product_id' => $product->id,
+                'media_id' => $media->id,
+                'media_file_name' => $media->file_name,
+                'media_size' => $media->size,
+                'had_previous_image' => $hadPreviousImage,
+                'previous_image_id' => $previousImageId,
+                'conversion_results' => $conversionResults,
+                'user_id' => auth()->id(),
+            ]);
+
+            // 檢查是否有轉換失敗
+            $failedConversions = array_filter($conversionResults, function($result) {
+                return !$result['generated'] || !$result['file_exists'];
+            });
+
+            if (!empty($failedConversions)) {
+                Log::warning('部分圖片轉換失敗', [
+                    'product_id' => $product->id,
+                    'media_id' => $media->id,
+                    'failed_conversions' => array_keys($failedConversions),
+                    'conversion_details' => $failedConversions,
+                ]);
+            }
+
+            // 重新載入產品以獲取最新的媒體關聯
+            $product->refresh();
+
+            // 準備回應資料
+            $responseData = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'has_image' => $product->hasImage(),
+                'image_urls' => $product->getImageUrls(),
+                'media_info' => [
+                    'id' => $media->id,
+                    'file_name' => $media->file_name,
+                    'mime_type' => $media->mime_type,
+                    'size' => $media->size,
+                    'human_readable_size' => $media->human_readable_size,
+                ],
+                'conversions_status' => $conversionResults,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => '圖片上傳成功',
+                'data' => $responseData,
+            ], 200);
+
+        } catch (AuthorizationException $e) {
+            Log::warning('圖片上傳授權失敗', [
+                'product_id' => $product->id,
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '您沒有權限上傳此商品的圖片',
+            ], 403);
+
+        } catch (\Exception $e) {
+            Log::error('圖片上傳失敗', [
+                'product_id' => $product->id,
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '圖片上傳失敗',
+                'error' => config('app.debug') ? $e->getMessage() : '內部伺服器錯誤',
+            ], 500);
+        }
     }
 }

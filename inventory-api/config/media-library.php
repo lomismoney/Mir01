@@ -24,12 +24,12 @@ return [
      * This queue will be used to generate derived and responsive images.
      * Leave empty to use the default queue.
      */
-    'queue_name' => env('MEDIA_QUEUE', ''),
+    'queue_name' => '',
 
     /*
      * By default all conversions will be performed on a queue.
      */
-    'queue_conversions_by_default' => env('QUEUE_CONVERSIONS_BY_DEFAULT', true),
+    'queue_conversions_by_default' => env('QUEUE_CONVERSIONS_BY_DEFAULT', false),
 
     /*
      * Should database transactions be run after database commits?
@@ -47,12 +47,10 @@ return [
     'media_observer' => Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver::class,
 
     /*
-     * When enabled, media collections will be serialised using the default
-     * laravel model serialization behaviour.
-     *
-     * Keep this option disabled if using Media Library Pro components (https://medialibrary.pro)
+     * When enabled, media collections will be serialised using the media library's
+     * custom serialiser. This will increase performance when loading media collections.
      */
-    'use_default_collection_serialization' => false,
+    'use_default_collection_serialization' => true,
 
     /*
      * The fully qualified class name of the model used for temporary uploads.
@@ -81,7 +79,7 @@ return [
     /*
      * The class that contains the strategy for determining a media file's path.
      */
-    'path_generator' => Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator::class,
+    'path_generator' => \App\Support\WindowsPathGenerator::class,
 
     /*
      * The class that contains the strategy for determining how to remove files.
@@ -101,7 +99,7 @@ return [
      * When urls to files get generated, this class will be called. Use the default
      * if your files are stored locally above the site root or on s3.
      */
-    'url_generator' => Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator::class,
+    'url_generator' => \Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator::class,
 
     /*
      * Moves media on updating to keep path consistent. Enable it only with a custom
@@ -143,20 +141,21 @@ return [
             '-O3', // this produces the slowest but best results
         ],
         Spatie\ImageOptimizer\Optimizers\Cwebp::class => [
-            '-m 6', // for the slowest compression method in order to get the best compression.
-            '-pass 10', // for maximizing the amount of analysis pass.
+            '-m', '6', // for the slowest compression method in order to get the best compression.
+            '-pass', '10', // for maximizing the amount of analysis pass.
             '-mt', // multithreading for some speed improvements.
-            '-q 90', // quality factor that brings the least noticeable changes.
+            '-q', '90', // quality factor that brings the least noticeable changes.
         ],
         Spatie\ImageOptimizer\Optimizers\Avifenc::class => [
-            '-a cq-level=23', // constant quality level, lower values mean better quality and greater file size (0-63).
-            '-j all', // number of jobs (worker threads, "all" uses all available cores).
-            '--min 0', // min quantizer for color (0-63).
-            '--max 63', // max quantizer for color (0-63).
-            '--minalpha 0', // min quantizer for alpha (0-63).
-            '--maxalpha 63', // max quantizer for alpha (0-63).
-            '-a end-usage=q', // rate control mode set to Constant Quality mode.
-            '-a tune=ssim', // SSIM as tune the encoder for distortion metric.
+            '-a', 'cq-level=23', // constant quality level
+            '-j', '8', // number of jobs
+            '--min', '0', // min quantizer level
+            '--max', '63', // max quantizer level
+            '--minalpha', '0', // min quantizer level for alpha
+            '--maxalpha', '63', // max quantizer level for alpha
+            '-a', 'end-usage=q', // rate control mode
+            '-a', 'cpu-used=4', // cpu effort used
+            '-a', 'tune=ssim', // SSIM tuning
         ],
     ],
 
@@ -197,8 +196,8 @@ return [
      * your custom jobs extend the ones provided by the package.
      */
     'jobs' => [
-        'perform_conversions' => Spatie\MediaLibrary\Conversions\Jobs\PerformConversionsJob::class,
-        'generate_responsive_images' => Spatie\MediaLibrary\ResponsiveImages\Jobs\GenerateResponsiveImagesJob::class,
+        'perform_conversions' => \Spatie\MediaLibrary\Conversions\Jobs\PerformConversionsJob::class,
+        'generate_responsive_images' => \Spatie\MediaLibrary\ResponsiveImages\Jobs\GenerateResponsiveImagesJob::class,
     ],
 
     /*
@@ -231,26 +230,39 @@ return [
 
     'responsive_images' => [
         /*
-         * This class is responsible for calculating the target widths of the responsive
-         * images. By default we optimize for filesize and create variations that each are 30%
-         * smaller than the previous one. More info in the documentation.
-         *
-         * https://docs.spatie.be/laravel-medialibrary/v9/advanced-usage/generating-responsive-images
+         * This class is responsible for generating a tiny placeholder of a media item.
+         * By default, a greyed-out, pixelated version will be generated.
          */
-        'width_calculator' => Spatie\MediaLibrary\ResponsiveImages\WidthCalculator\FileSizeOptimizedWidthCalculator::class,
+        'tiny_placeholder_generator' => Spatie\MediaLibrary\ResponsiveImages\TinyPlaceholderGenerator\Blurred::class,
 
         /*
-         * By default rendering media to a responsive image will add some javascript and a tiny placeholder.
-         * This ensures that the browser can already determine the correct layout.
-         * When disabled, no tiny placeholder is generated.
+         * This class will generate the responsive images. By default, we optimize images
+         * and create webp versions. You can customize this behaviour by writing your
+         * own class and specify it here.
+         */
+        'responsive_image_generator' => Spatie\MediaLibrary\ResponsiveImages\ResponsiveImageGenerator::class,
+
+        /*
+         * The widths to generate responsive images for. These values are used as
+         * the `w` descriptor in the `srcset` attribute of the `img` tag.
+         *
+         * All widths should be integers, they will be sorted from smallest to largest.
+         */
+        'widths' => [340, 284, 237, 198, 165, 138, 115],
+
+        /*
+         * By default, responsive images will be optimized. Here you can change settings for the
+         * optimization. Responsive images are optimized using the same optimizers as
+         * the conversions. You can read more about this in the docs.
          */
         'use_tiny_placeholders' => true,
 
         /*
-         * This class will generate the tiny placeholder used for progressive image loading. By default
-         * the media library will use a tiny blurred jpg image.
+         * This string will be used to separate the responsive image filename from the
+         * conversion name. If you change this, make sure to update your existing media
+         * as well.
          */
-        'tiny_placeholder_generator' => Spatie\MediaLibrary\ResponsiveImages\TinyPlaceholderGenerator\Blurred::class,
+        'responsive_image_filename_separator' => '___',
     ],
 
     /*
@@ -282,4 +294,13 @@ return [
      * disabled lazy loading globally in the service provider.
      */
     'force_lazy_loading' => env('FORCE_MEDIA_LIBRARY_LAZY_LOADING', true),
+
+    /*
+     * Here you can specify which url generator should be used for the given class.
+     */
+    'custom_url_generators' => [
+        // Model::class => UrlGenerator::class
+        // or
+        // 'model_morph_alias' => UrlGenerator::class
+    ],
 ];

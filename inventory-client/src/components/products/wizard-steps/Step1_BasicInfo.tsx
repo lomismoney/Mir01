@@ -23,6 +23,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WizardFormData } from '../CreateProductWizard';
 import { useCategories } from '@/hooks/queries/useEntityQueries';
 import { Category } from '@/types/category';
+import { ImageUploader } from '@/components/ui/ImageUploader';
+import { apiClient } from '@/lib/apiClient';
+import { toast } from 'sonner';
 
 /**
  * 步驟1組件Props
@@ -33,6 +36,10 @@ interface Step1Props {
     section: K,
     data: Partial<WizardFormData[K]>
   ) => void;
+  /** 商品 ID（編輯模式時使用） */
+  productId?: string | number;
+  /** 是否為編輯模式 */
+  isEditMode?: boolean;
 }
 
 /**
@@ -42,9 +49,15 @@ interface Step1Props {
  * - 商品名稱輸入（必填）
  * - 商品描述輸入（選填）
  * - 商品分類選擇（選填）
+ * - 商品圖片上傳（編輯模式時可用）
  * - 即時驗證與提示
  */
-export function Step1_BasicInfo({ formData, updateFormData }: Step1Props) {
+export function Step1_BasicInfo({ 
+  formData, 
+  updateFormData, 
+  productId, 
+  isEditMode = false 
+}: Step1Props) {
   // 獲取分類資料
   const { data: categoriesGrouped, isLoading: categoriesLoading, error: categoriesError } = useCategories();
   
@@ -151,6 +164,69 @@ export function Step1_BasicInfo({ formData, updateFormData }: Step1Props) {
    */
   const handleDescriptionBlur = () => {
     validateDescription(formData.basicInfo.description);
+  };
+
+  /**
+   * 處理圖片上傳
+   * 
+   * 僅在編輯模式下可用，將圖片上傳至指定的商品
+   * 使用類型安全的 API 客戶端，確保完整的類型檢查和認證支援
+   * 
+   * @param file - 要上傳的圖片文件
+   */
+  const handleImageUpload = async (file: File): Promise<void> => {
+    if (!isEditMode || !productId) {
+      throw new Error('圖片上傳僅在編輯模式下可用');
+    }
+
+    try {
+      // 對於 multipart/form-data，使用 FormData 對象
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // 使用類型安全的 API 客戶端進行圖片上傳
+      const { data, error, response } = await apiClient.POST("/api/products/{product}/upload-image", {
+        params: {
+          path: {
+            product: Number(productId)
+          }
+        },
+        body: formData as any // 由於 openapi-fetch 的類型限制，這裡需要類型斷言
+      });
+
+      // 檢查請求是否成功
+      if (error || !response.ok) {
+        // 優雅處理不同類型的錯誤
+        if (response.status === 422 && error?.errors?.image) {
+          throw new Error(error.errors.image[0] || '圖片驗證失敗');
+        }
+        
+        const errorMessage = error?.message || `上傳失敗 (HTTP ${response.status})`;
+        throw new Error(errorMessage);
+      }
+
+      // 上傳成功，記錄結果
+      console.log('✅ 圖片上傳成功:', data);
+      
+      if (data?.message) {
+        console.log('📝 服務器響應:', data.message);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ 圖片上傳錯誤:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * 圖片上傳成功回調
+   * 
+   * @param imageUrls - 上傳成功後的圖片 URLs
+   */
+  const handleImageUploadSuccess = (imageUrls: any) => {
+    toast.success('圖片上傳成功！');
+    // 可以在這裡更新表單數據或觸發重新獲取商品詳情
+    console.log('圖片上傳成功，URLs:', imageUrls);
   };
 
   return (
@@ -276,6 +352,30 @@ export function Step1_BasicInfo({ formData, updateFormData }: Step1Props) {
             <div className="text-xs text-gray-500">
               選填，稍後您也可以在商品管理中修改分類
             </div>
+          </div>
+
+          {/* 商品圖片上傳 */}
+          <div className="space-y-2">
+            <ImageUploader
+              onUpload={handleImageUpload}
+              onUploadSuccess={handleImageUploadSuccess}
+              disabled={!isEditMode}
+              label="商品圖片"
+              helperText={
+                !isEditMode 
+                  ? "請先創建商品後再上傳圖片" 
+                  : "支援 JPEG、PNG、GIF、WebP 格式，最大 10MB"
+              }
+            />
+            {!isEditMode && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>提示：</strong> 
+                  圖片上傳功能將在商品創建完成後開啟。您可以在創建商品後返回編輯頁面上傳圖片。
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         </div>
 

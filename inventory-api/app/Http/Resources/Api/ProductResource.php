@@ -17,63 +17,79 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ProductResource extends JsonResource
 {
     /**
-     * 將資源轉換為陣列格式
-     *
+     * 將資源轉換為陣列
+     * 
+     * 根據 Context7 最佳實踐優化圖片資源處理：
+     * - 使用 whenLoaded 避免 N+1 查詢問題
+     * - 提供完整的圖片 URL 結構
+     * - 包含圖片狀態資訊
+     * 
+     * @param Request $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
-        $data = [
-            'id' => (int) $this->id,
+        return [
+            'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'category_id' => $this->category_id ? (int) $this->category_id : null,
-            'created_at' => $this->created_at?->setTimezone('Asia/Taipei')?->toISOString(),
-            'updated_at' => $this->updated_at?->setTimezone('Asia/Taipei')?->toISOString(),
-        ];
-        
-        // 加載 SKU 變體數據（如果關係已加載）
-        if ($this->relationLoaded('variants')) {
-            $data['variants'] = ProductVariantResource::collection($this->variants);
+            'category_id' => $this->category_id,
             
-            // 計算價格範圍統計資訊
-            if ($this->variants->isNotEmpty()) {
-                $prices = $this->variants->pluck('price');
-                $data['price_range'] = [
-                    'min' => (float) $prices->min(),
-                    'max' => (float) $prices->max(),
-                    'count' => $this->variants->count(),
-                ];
-            } else {
-                $data['price_range'] = [
-                    'min' => null,
-                    'max' => null,
-                    'count' => 0,
-                ];
-            }
-        }
-        
-        // 加載分類數據（如果關係已加載）
-        if ($this->relationLoaded('category') && $this->category) {
-            $data['category'] = [
-                'id' => (int) $this->category->id,
-                'name' => $this->category->name,
-                'description' => $this->category->description,
-            ];
-        }
-        
-        // 加載屬性數據（如果關係已加載）
-        if ($this->relationLoaded('attributes')) {
-            $data['attributes'] = $this->attributes->map(function ($attribute) {
+            // 分類資訊（當已載入時）
+            'category' => new CategoryResource($this->whenLoaded('category')),
+            
+            // 變體資訊（當已載入時）
+            'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),
+            'variant_count' => $this->when(
+                $this->relationLoaded('variants'),
+                fn() => $this->variants->count()
+            ),
+            
+            // 圖片相關資訊
+            'has_image' => $this->hasImage(),
+            'image_urls' => $this->getImageUrls(),
+            
+            // 圖片詳細資訊（當有圖片時）
+            'image_info' => $this->when($this->hasImage(), function () {
+                $media = $this->getFirstMedia('images');
+                
+                if (!$media) {
+                    return null;
+                }
+                
                 return [
-                    'id' => (int) $attribute->id,
-                    'name' => $attribute->name,
-                    'type' => $attribute->type,
-                    'description' => $attribute->description,
+                    'id' => $media->id,
+                    'file_name' => $media->file_name,
+                    'mime_type' => $media->mime_type,
+                    'size' => $media->size,
+                    'human_readable_size' => $media->human_readable_size,
+                    'created_at' => $media->created_at,
+                    'conversions_generated' => [
+                        'thumb' => $media->hasGeneratedConversion('thumb'),
+                        'medium' => $media->hasGeneratedConversion('medium'),
+                        'large' => $media->hasGeneratedConversion('large'),
+                    ],
                 ];
-            })->toArray();
-        }
-        
-        return $data;
+            }),
+            
+            // 庫存統計（當已載入庫存時）
+            'total_stock' => $this->when(
+                $this->relationLoaded('inventories'),
+                fn() => $this->inventories->sum('quantity')
+            ),
+            
+            // 價格範圍（當已載入變體時）
+            'price_range' => $this->when(
+                $this->relationLoaded('variants'),
+                fn() => [
+                    'min' => $this->variants->min('price'),
+                    'max' => $this->variants->max('price'),
+                ]
+            ),
+            
+            // 時間戳
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 } 

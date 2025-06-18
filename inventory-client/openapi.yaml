@@ -88,27 +88,27 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 14
-                    name: 'Lonny Ankunding'
-                    username: eloisa.harber
+                    id: 16
+                    name: 'Mrs. Justina Gaylord'
+                    username: lafayette.considine
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-17T01:37:45.000000Z'
-                    updated_at: '2025-06-17T01:37:45.000000Z'
+                    created_at: '2025-06-18T01:24:06.000000Z'
+                    updated_at: '2025-06-18T01:24:06.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 14
+                        example: 16
                       name:
                         type: string
-                        example: 'Lonny Ankunding'
+                        example: 'Mrs. Justina Gaylord'
                       username:
                         type: string
-                        example: eloisa.harber
+                        example: lafayette.considine
                       role:
                         type: string
                         example: viewer
@@ -120,10 +120,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:06.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:06.000000Z'
       tags:
         - Endpoints
       security: []
@@ -188,17 +188,17 @@ paths:
                 name:
                   type: string
                   description: 分類名稱。例如：電子產品
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 description:
                   type: string
                   description: 分類描述。例如：包含所有電子相關產品
-                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
+                  example: 'Eius et animi quos velit et.'
                   nullable: true
                 parent_id:
                   type: integer
                   description: 父分類ID，必須是存在的分類ID。例如：1
-                  example: 17
+                  example: 16
                   nullable: true
               required:
                 - name
@@ -378,17 +378,17 @@ paths:
                 name:
                   type: string
                   description: 分類名稱。例如：電子產品
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 description:
                   type: string
                   description: 分類描述。例如：包含所有電子相關產品
-                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
+                  example: 'Eius et animi quos velit et.'
                   nullable: true
                 parent_id:
                   type: integer
                   description: 父分類ID，必須是存在的分類ID且不能是自己。例如：1
-                  example: 17
+                  example: 16
                   nullable: true
       security: []
     delete:
@@ -559,30 +559,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 7
-                    name: Mueller-Dibbert
-                    address: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
-                    created_at: '2025-06-17T01:37:45.000000Z'
-                    updated_at: '2025-06-17T01:37:45.000000Z'
+                    id: 11
+                    name: 'Bailey Ltd'
+                    address: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
+                    created_at: '2025-06-18T01:24:07.000000Z'
+                    updated_at: '2025-06-18T01:24:07.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 7
+                        example: 11
                       name:
                         type: string
-                        example: Mueller-Dibbert
+                        example: 'Bailey Ltd'
                       address:
                         type: string
-                        example: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
+                        example: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
                       created_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:07.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:07.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -595,12 +595,12 @@ paths:
                 name:
                   type: string
                   description: 分店名稱（唯一）。例如：台北總店
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 address:
                   type: string
                   description: 分店地址。例如：台北市信義區信義路五段7號
-                  example: consequatur
+                  example: architecto
                   nullable: true
               required:
                 - name
@@ -619,30 +619,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 8
-                    name: 'Kunde Group'
-                    address: "62028 Trudie Mills\nNorth Cordie, IL 75592"
-                    created_at: '2025-06-17T01:37:45.000000Z'
-                    updated_at: '2025-06-17T01:37:45.000000Z'
+                    id: 12
+                    name: 'Cruickshank Inc'
+                    address: "532 Leuschke Causeway\nMcLaughlinstad, MI 07365"
+                    created_at: '2025-06-18T01:24:07.000000Z'
+                    updated_at: '2025-06-18T01:24:07.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 8
+                        example: 12
                       name:
                         type: string
-                        example: 'Kunde Group'
+                        example: 'Cruickshank Inc'
                       address:
                         type: string
-                        example: "62028 Trudie Mills\nNorth Cordie, IL 75592"
+                        example: "532 Leuschke Causeway\nMcLaughlinstad, MI 07365"
                       created_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:07.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:07.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -659,30 +659,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 9
-                    name: Moore-Emard
-                    address: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
-                    created_at: '2025-06-17T01:37:45.000000Z'
-                    updated_at: '2025-06-17T01:37:45.000000Z'
+                    id: 13
+                    name: "Rempel, Gulgowski and O'Kon"
+                    address: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
+                    created_at: '2025-06-18T01:24:08.000000Z'
+                    updated_at: '2025-06-18T01:24:08.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 9
+                        example: 13
                       name:
                         type: string
-                        example: Moore-Emard
+                        example: "Rempel, Gulgowski and O'Kon"
                       address:
                         type: string
-                        example: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
+                        example: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
                       created_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:08.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:08.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -695,12 +695,12 @@ paths:
                 name:
                   type: string
                   description: 分店名稱（唯一，會排除當前分店）。例如：台北信義店
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 address:
                   type: string
                   description: 分店地址。例如：台北市信義區信義路五段7號
-                  example: consequatur
+                  example: architecto
                   nullable: true
               required:
                 - name
@@ -736,30 +736,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 10
-                    name: 'Maggio, Lakin and Durgan'
-                    address: "45898 Hammes Courts\nHaagshire, MN 43438-3224"
-                    created_at: '2025-06-17T01:37:45.000000Z'
-                    updated_at: '2025-06-17T01:37:45.000000Z'
+                    id: 14
+                    name: Hauck-Leuschke
+                    address: "544 Aglae Ridge Apt. 067\nLefflerhaven, TX 58408-7043"
+                    created_at: '2025-06-18T01:24:08.000000Z'
+                    updated_at: '2025-06-18T01:24:08.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 10
+                        example: 14
                       name:
                         type: string
-                        example: 'Maggio, Lakin and Durgan'
+                        example: Hauck-Leuschke
                       address:
                         type: string
-                        example: "45898 Hammes Courts\nHaagshire, MN 43438-3224"
+                        example: "544 Aglae Ridge Apt. 067\nLefflerhaven, TX 58408-7043"
                       created_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:08.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:08.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -776,27 +776,27 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 15
-                    name: 'Dr. Cornelius Luettgen V'
-                    username: russel.bert
+                    id: 17
+                    name: 'Ms. Elisabeth Okuneva'
+                    username: gulgowski.asia
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-17T01:37:45.000000Z'
-                    updated_at: '2025-06-17T01:37:45.000000Z'
+                    created_at: '2025-06-18T01:24:08.000000Z'
+                    updated_at: '2025-06-18T01:24:08.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 15
+                        example: 17
                       name:
                         type: string
-                        example: 'Dr. Cornelius Luettgen V'
+                        example: 'Ms. Elisabeth Okuneva'
                       username:
                         type: string
-                        example: russel.bert
+                        example: gulgowski.asia
                       role:
                         type: string
                         example: viewer
@@ -808,10 +808,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:08.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-17T01:37:45.000000Z'
+                        example: '2025-06-18T01:24:08.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -825,7 +825,7 @@ paths:
                   type: array
                   description: '要分配給用戶的分店ID列表。例如：[1, 2, 3]'
                   example:
-                    - consequatur
+                    - architecto
                   items:
                     type: string
               required:
@@ -1057,7 +1057,7 @@ paths:
                 name:
                   type: string
                   description: 屬性名稱（唯一）。例如：顏色
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - name
@@ -1102,7 +1102,7 @@ paths:
                 name:
                   type: string
                   description: 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - name
@@ -1155,11 +1155,167 @@ paths:
                   type: array
                   description: '要刪除的商品 ID 列表。例如：[1, 2, 3]'
                   example:
-                    - consequatur
+                    - architecto
                   items:
                     type: string
               required:
                 - ids
+  '/api/products/{product_id}/upload-image':
+    post:
+      summary: 上傳商品圖片
+      operationId: ''
+      description: "遵循 Spatie Media Library v11 官方最佳實踐：\n- 使用專用的 FormRequest 進行驗證\n- 實施完整的錯誤處理和日誌記錄\n- 使用 singleFile 行為自動替換現有圖片\n- 返回所有轉換版本的 URL"
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 圖片上傳成功
+                  data:
+                    id: 1
+                    name: 商品名稱
+                    has_image: true
+                    image_urls:
+                      original: 'http://localhost:8000/storage/1/product-image.jpg'
+                      thumb: 'http://localhost:8000/storage/1/conversions/product-image-thumb.jpg'
+                      medium: 'http://localhost:8000/storage/1/conversions/product-image-medium.jpg'
+                      large: 'http://localhost:8000/storage/1/conversions/product-image-large.jpg'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 圖片上傳成功
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 商品名稱
+                      has_image:
+                        type: boolean
+                        example: true
+                      image_urls:
+                        type: object
+                        properties:
+                          original:
+                            type: string
+                            example: 'http://localhost:8000/storage/1/product-image.jpg'
+                          thumb:
+                            type: string
+                            example: 'http://localhost:8000/storage/1/conversions/product-image-thumb.jpg'
+                          medium:
+                            type: string
+                            example: 'http://localhost:8000/storage/1/conversions/product-image-medium.jpg'
+                          large:
+                            type: string
+                            example: 'http://localhost:8000/storage/1/conversions/product-image-large.jpg'
+        404:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 找不到指定的商品
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 找不到指定的商品
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 圖片上傳驗證失敗
+                  errors:
+                    image:
+                      - '圖片格式必須是：JPEG、JPG、PNG、GIF 或 WebP。'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 圖片上傳驗證失敗
+                  errors:
+                    type: object
+                    properties:
+                      image:
+                        type: array
+                        example:
+                          - '圖片格式必須是：JPEG、JPG、PNG、GIF 或 WebP。'
+                        items:
+                          type: string
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 圖片上傳失敗
+                  error: 詳細錯誤訊息
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 圖片上傳失敗
+                  error:
+                    type: string
+                    example: 詳細錯誤訊息
+      tags:
+        - 商品管理
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: '圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)'
+                  nullable: false
+              required:
+                - image
+    parameters:
+      -
+        in: path
+        name: product_id
+        description: 'The ID of the product.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: id
+        description: '商品 ID'
+        example: 1
+        required: true
+        schema:
+          type: integer
   /api/products:
     get:
       summary: 顯示所有商品列表，支援分頁、排序和篩選功能
@@ -1201,6 +1357,61 @@ paths:
             nullable: false
         -
           in: query
+          name: product_name
+          description: 專門用於商品名稱模糊搜尋。
+          example: 辦公椅
+          required: false
+          schema:
+            type: string
+            description: 專門用於商品名稱模糊搜尋。
+            example: 辦公椅
+            nullable: false
+        -
+          in: query
+          name: store_id
+          description: 按特定門市篩選庫存。
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 按特定門市篩選庫存。
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: category_id
+          description: 按商品分類篩選。
+          example: 2
+          required: false
+          schema:
+            type: integer
+            description: 按商品分類篩選。
+            example: 2
+            nullable: false
+        -
+          in: query
+          name: low_stock
+          description: 只顯示低庫存商品。
+          example: true
+          required: false
+          schema:
+            type: boolean
+            description: 只顯示低庫存商品。
+            example: true
+            nullable: false
+        -
+          in: query
+          name: out_of_stock
+          description: 只顯示缺貨商品。
+          example: false
+          required: false
+          schema:
+            type: boolean
+            description: 只顯示缺貨商品。
+            example: false
+            nullable: false
+        -
+          in: query
           name: sort_by
           description: '排序欄位 (name, created_at)。'
           example: name
@@ -1220,61 +1431,6 @@ paths:
             type: string
             description: '排序方向 (asc, desc)，預設為 asc。'
             example: desc
-            nullable: false
-        -
-          in: query
-          name: product_name
-          description: '專門用於商品名稱模糊搜尋，與 search 參數功能類似但更明確。'
-          example: '辦公椅'
-          required: false
-          schema:
-            type: string
-            description: '專門用於商品名稱模糊搜尋，與 search 參數功能類似但更明確。'
-            example: '辦公椅'
-            nullable: false
-        -
-          in: query
-          name: store_id
-          description: '按特定門市篩選庫存，只返回在該門市有庫存的商品。'
-          example: 1
-          required: false
-          schema:
-            type: integer
-            description: '按特定門市篩選庫存，只返回在該門市有庫存的商品。'
-            example: 1
-            nullable: false
-        -
-          in: query
-          name: category_id
-          description: '按商品分類篩選，只返回屬於指定分類的商品。'
-          example: 2
-          required: false
-          schema:
-            type: integer
-            description: '按商品分類篩選，只返回屬於指定分類的商品。'
-            example: 2
-            nullable: false
-        -
-          in: query
-          name: low_stock
-          description: '只顯示處於低庫存狀態的商品，即庫存數量低於或等於低庫存閾值的商品。'
-          example: true
-          required: false
-          schema:
-            type: boolean
-            description: '只顯示處於低庫存狀態的商品，即庫存數量低於或等於低庫存閾值的商品。'
-            example: true
-            nullable: false
-        -
-          in: query
-          name: out_of_stock
-          description: '只顯示已缺貨的商品，即庫存數量為 0 的商品。'
-          example: false
-          required: false
-          schema:
-            type: boolean
-            description: '只顯示已缺貨的商品，即庫存數量為 0 的商品。'
-            example: false
             nullable: false
       responses:
         200:
@@ -1422,6 +1578,11 @@ paths:
                           category_id: 1
                           created_at: '2024-01-01T10:00:00.000000Z'
                           updated_at: '2024-01-01T10:00:00.000000Z'
+                          image_urls:
+                            original: 'http://localhost/storage/1/office-chair-original.jpg'
+                            thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                            medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                            large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                           variants:
                             -
                               id: 1
@@ -1468,6 +1629,11 @@ paths:
                           category_id: null
                           created_at: '2024-01-01T11:30:00.000000Z'
                           updated_at: '2024-01-01T11:30:00.000000Z'
+                          image_urls:
+                            original: 'http://localhost/storage/2/bluetooth-mouse-original.jpg'
+                            thumbnail: 'http://localhost/storage/2/conversions/bluetooth-mouse-thumb.jpg'
+                            medium: 'http://localhost/storage/2/conversions/bluetooth-mouse-medium.jpg'
+                            large: 'http://localhost/storage/2/conversions/bluetooth-mouse-large.jpg'
                           variants:
                             -
                               id: 3
@@ -1504,6 +1670,11 @@ paths:
                             category_id: 1
                             created_at: '2024-01-01T10:00:00.000000Z'
                             updated_at: '2024-01-01T10:00:00.000000Z'
+                            image_urls:
+                              original: 'http://localhost/storage/1/office-chair-original.jpg'
+                              thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                              medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                              large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                             variants:
                               -
                                 id: 1
@@ -1550,6 +1721,11 @@ paths:
                             category_id: null
                             created_at: '2024-01-01T11:30:00.000000Z'
                             updated_at: '2024-01-01T11:30:00.000000Z'
+                            image_urls:
+                              original: 'http://localhost/storage/2/bluetooth-mouse-original.jpg'
+                              thumbnail: 'http://localhost/storage/2/conversions/bluetooth-mouse-thumb.jpg'
+                              medium: 'http://localhost/storage/2/conversions/bluetooth-mouse-medium.jpg'
+                              large: 'http://localhost/storage/2/conversions/bluetooth-mouse-large.jpg'
                             variants:
                               -
                                 id: 3
@@ -1584,6 +1760,21 @@ paths:
                             updated_at:
                               type: string
                               example: '2024-01-01T10:00:00.000000Z'
+                            image_urls:
+                              type: object
+                              properties:
+                                original:
+                                  type: string
+                                  example: 'http://localhost/storage/1/office-chair-original.jpg'
+                                thumbnail:
+                                  type: string
+                                  example: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                                medium:
+                                  type: string
+                                  example: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                                large:
+                                  type: string
+                                  example: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                             variants:
                               type: array
                               example:
@@ -1723,6 +1914,11 @@ paths:
                     category_id: 1
                     created_at: '2024-01-01T10:00:00.000000Z'
                     updated_at: '2024-01-01T10:00:00.000000Z'
+                    image_urls:
+                      original: 'http://localhost/storage/1/office-chair-original.jpg'
+                      thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                      medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                      large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                     variants:
                       -
                         id: 1
@@ -1806,6 +2002,21 @@ paths:
                       updated_at:
                         type: string
                         example: '2024-01-01T10:00:00.000000Z'
+                      image_urls:
+                        type: object
+                        properties:
+                          original:
+                            type: string
+                            example: 'http://localhost/storage/1/office-chair-original.jpg'
+                          thumbnail:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                          medium:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                          large:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                       variants:
                         type: array
                         example:
@@ -2031,7 +2242,7 @@ paths:
                         type: array
                         description: 'The <code>id</code> of an existing record in the attribute_values table.'
                         example:
-                          - 17
+                          - 16
                         items:
                           type: integer
                       '*':
@@ -2091,6 +2302,11 @@ paths:
                     category_id: 1
                     created_at: '2024-01-01T10:00:00.000000Z'
                     updated_at: '2024-01-01T10:00:00.000000Z'
+                    image_urls:
+                      original: 'http://localhost/storage/1/office-chair-original.jpg'
+                      thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                      medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                      large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                     variants:
                       -
                         id: 1
@@ -2174,6 +2390,21 @@ paths:
                       updated_at:
                         type: string
                         example: '2024-01-01T10:00:00.000000Z'
+                      image_urls:
+                        type: object
+                        properties:
+                          original:
+                            type: string
+                            example: 'http://localhost/storage/1/office-chair-original.jpg'
+                          thumbnail:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                          medium:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                          large:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                       variants:
                         type: array
                         example:
@@ -2368,6 +2599,11 @@ paths:
                     category_id: 1
                     created_at: '2024-01-01T10:00:00.000000Z'
                     updated_at: '2024-01-01T10:00:00.000000Z'
+                    image_urls:
+                      original: 'http://localhost/storage/1/office-chair-original.jpg'
+                      thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                      medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                      large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                     variants:
                       -
                         id: 1
@@ -2451,6 +2687,21 @@ paths:
                       updated_at:
                         type: string
                         example: '2024-01-01T10:00:00.000000Z'
+                      image_urls:
+                        type: object
+                        properties:
+                          original:
+                            type: string
+                            example: 'http://localhost/storage/1/office-chair-original.jpg'
+                          thumbnail:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                          medium:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
+                          large:
+                            type: string
+                            example: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                       variants:
                         type: array
                         example:
@@ -2656,36 +2907,46 @@ paths:
                     type: integer
                 variants:
                   type: array
-                  description: 'SKU 變體陣列，至少需要一項。'
+                  description: 'SKU 變體陣列。'
                   example:
                     - []
                   items:
                     type: object
                     properties:
+                      id:
+                        type: integer
+                        description: 'The <code>id</code> of an existing record in the product_variants table.'
+                        example: 16
+                        nullable: false
                       sku:
                         type: string
-                        description: '單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters.'
-                        example: HEADPHONE-BT-RED-L
+                        description: 'Must not be greater than 255 characters.'
+                        example: 'n'
                         nullable: false
                       price:
                         type: number
-                        description: '單一 SKU 變體的價格。. Must be at least 0.'
-                        example: 199.99
+                        description: 'Must be at least 0.'
+                        example: 84
                         nullable: false
                       attribute_value_ids:
                         type: array
                         description: 'The <code>id</code> of an existing record in the attribute_values table.'
                         example:
-                          - 17
+                          - 16
                         items:
                           type: integer
                       '*':
                         type: object
                         description: ''
                         example:
-                          sku: '"TSHIRT-RED-S"'
+                          id: 1
                         nullable: false
                         properties:
+                          id:
+                            type: integer
+                            description: '變體的 ID（用於更新現有變體）。'
+                            example: 1
+                            nullable: false
                           sku:
                             type: string
                             description: 'SKU 的唯一編號。'
@@ -2713,8 +2974,6 @@ paths:
                       - price
               required:
                 - name
-                - attributes
-                - variants
     delete:
       summary: 刪除指定的商品
       operationId: ''
@@ -3169,7 +3428,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the variant.'
-        example: consequatur
+        example: architecto
         required: true
         schema:
           type: string
@@ -3325,7 +3584,7 @@ paths:
                 value:
                   type: string
                   description: 屬性值（在同一屬性下必須唯一）。例如：紅色
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - value
@@ -3414,7 +3673,7 @@ paths:
                 value:
                   type: string
                   description: 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - value
@@ -3821,7 +4080,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the inventory.'
-        example: consequatur
+        example: architecto
         required: true
         schema:
           type: string
@@ -4508,7 +4767,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the transfer.'
-        example: consequatur
+        example: architecto
         required: true
         schema:
           type: string
@@ -4794,22 +5053,22 @@ paths:
                 name:
                   type: string
                   description: 用戶姓名。例如：張三
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 username:
                   type: string
                   description: 用戶名（唯一）。例如：zhangsan
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 password:
                   type: string
                   description: 用戶密碼（至少8個字元）。例如：password123
-                  example: 'O[2UZ5ij-e/dl4m{o,'
+                  example: '|]|{+-'
                   nullable: false
                 role:
                   type: string
                   description: '用戶角色，必須是 admin 或 viewer。例如：admin'
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - name

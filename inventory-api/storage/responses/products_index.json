@@ -7,6 +7,12 @@
       "category_id": 1,
       "created_at": "2024-01-01T10:00:00.000000Z",
       "updated_at": "2024-01-01T10:00:00.000000Z",
+      "image_urls": {
+        "original": "http://localhost/storage/1/office-chair-original.jpg",
+        "thumbnail": "http://localhost/storage/1/conversions/office-chair-thumb.jpg",
+        "medium": "http://localhost/storage/1/conversions/office-chair-medium.jpg",
+        "large": "http://localhost/storage/1/conversions/office-chair-large.jpg"
+      },
       "variants": [
         {
           "id": 1,
@@ -65,6 +71,12 @@
       "category_id": null,
       "created_at": "2024-01-01T11:30:00.000000Z",
       "updated_at": "2024-01-01T11:30:00.000000Z",
+      "image_urls": {
+        "original": "http://localhost/storage/2/bluetooth-mouse-original.jpg",
+        "thumbnail": "http://localhost/storage/2/conversions/bluetooth-mouse-thumb.jpg",
+        "medium": "http://localhost/storage/2/conversions/bluetooth-mouse-medium.jpg",
+        "large": "http://localhost/storage/2/conversions/bluetooth-mouse-large.jpg"
+      },
       "variants": [
         {
           "id": 3,

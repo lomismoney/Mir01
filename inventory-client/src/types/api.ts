@@ -46,11 +46,11 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 14 */
+                                /** @example 16 */
                                 id?: number;
-                                /** @example Lonny Ankunding */
+                                /** @example Mrs. Justina Gaylord */
                                 name?: string;
-                                /** @example eloisa.harber */
+                                /** @example lafayette.considine */
                                 username?: string;
                                 /** @example viewer */
                                 role?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-17T01:37:45.000000Z */
+                                /** @example 2025-06-18T01:24:06.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-17T01:37:45.000000Z */
+                                /** @example 2025-06-18T01:24:06.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -215,17 +215,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Dolores dolorum amet iste laborum eius est dolor.
+                         * @example Eius et animi quos velit et.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID。例如：1
-                         * @example 17
+                         * @example 16
                          */
                         parent_id?: number | null;
                     };
@@ -309,17 +309,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example consequatur
+                         * @example architecto
                          */
                         name?: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Dolores dolorum amet iste laborum eius est dolor.
+                         * @example Eius et animi quos velit et.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID且不能是自己。例如：1
-                         * @example 17
+                         * @example 16
                          */
                         parent_id?: number | null;
                     };
@@ -574,7 +574,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一）。例如：顏色
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                     };
@@ -676,7 +676,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                     };
@@ -758,7 +758,7 @@ export interface paths {
                         /**
                          * @description 要刪除的商品 ID 列表。例如：[1, 2, 3]
                          * @example [
-                         *       "consequatur"
+                         *       "architecto"
                          *     ]
                          */
                         ids: string[];
@@ -771,6 +771,150 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{product_id}/upload-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the product.
+                 * @example 1
+                 */
+                product_id: number;
+                /**
+                 * @description 商品 ID
+                 * @example 1
+                 */
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 上傳商品圖片
+         * @description 遵循 Spatie Media Library v11 官方最佳實踐：
+         *     - 使用專用的 FormRequest 進行驗證
+         *     - 實施完整的錯誤處理和日誌記錄
+         *     - 使用 singleFile 行為自動替換現有圖片
+         *     - 返回所有轉換版本的 URL
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /**
+                     * @description The ID of the product.
+                     * @example 1
+                     */
+                    product_id: number;
+                    /**
+                     * @description 商品 ID
+                     * @example 1
+                     */
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        /**
+                         * Format: binary
+                         * @description 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
+                         */
+                        image: string;
+                    };
+                };
+            };
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example true */
+                            success?: boolean;
+                            /** @example 圖片上傳成功 */
+                            message?: string;
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 商品名稱 */
+                                name?: string;
+                                /** @example true */
+                                has_image?: boolean;
+                                image_urls?: {
+                                    /** @example http://localhost:8000/storage/1/product-image.jpg */
+                                    original?: string;
+                                    /** @example http://localhost:8000/storage/1/conversions/product-image-thumb.jpg */
+                                    thumb?: string;
+                                    /** @example http://localhost:8000/storage/1/conversions/product-image-medium.jpg */
+                                    medium?: string;
+                                    /** @example http://localhost:8000/storage/1/conversions/product-image-large.jpg */
+                                    large?: string;
+                                };
+                            };
+                        };
+                    };
+                };
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example false */
+                            success?: boolean;
+                            /** @example 找不到指定的商品 */
+                            message?: string;
+                        };
+                    };
+                };
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example false */
+                            success?: boolean;
+                            /** @example 圖片上傳驗證失敗 */
+                            message?: string;
+                            errors?: {
+                                /** @example [
+                                 *       "圖片格式必須是：JPEG、JPG、PNG、GIF 或 WebP。"
+                                 *     ] */
+                                image?: string[];
+                            };
+                        };
+                    };
+                };
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example false */
+                            success?: boolean;
+                            /** @example 圖片上傳失敗 */
+                            message?: string;
+                            /** @example 詳細錯誤訊息 */
+                            error?: string;
+                        };
+                    };
                 };
             };
         };
@@ -807,6 +951,31 @@ export interface paths {
                      */
                     search?: string;
                     /**
+                     * @description 專門用於商品名稱模糊搜尋。
+                     * @example 辦公椅
+                     */
+                    product_name?: string;
+                    /**
+                     * @description 按特定門市篩選庫存。
+                     * @example 1
+                     */
+                    store_id?: number;
+                    /**
+                     * @description 按商品分類篩選。
+                     * @example 2
+                     */
+                    category_id?: number;
+                    /**
+                     * @description 只顯示低庫存商品。
+                     * @example true
+                     */
+                    low_stock?: boolean;
+                    /**
+                     * @description 只顯示缺貨商品。
+                     * @example false
+                     */
+                    out_of_stock?: boolean;
+                    /**
                      * @description 排序欄位 (name, created_at)。
                      * @example name
                      */
@@ -816,31 +985,6 @@ export interface paths {
                      * @example desc
                      */
                     sort_order?: string;
-                    /**
-                     * @description 專門用於商品名稱模糊搜尋，與 search 參數功能類似但更明確。
-                     * @example 辦公椅
-                     */
-                    product_name?: string;
-                    /**
-                     * @description 按特定門市篩選庫存，只返回在該門市有庫存的商品。
-                     * @example 1
-                     */
-                    store_id?: number;
-                    /**
-                     * @description 按商品分類篩選，只返回屬於指定分類的商品。
-                     * @example 2
-                     */
-                    category_id?: number;
-                    /**
-                     * @description 只顯示處於低庫存狀態的商品，即庫存數量低於或等於低庫存閾值的商品。
-                     * @example true
-                     */
-                    low_stock?: boolean;
-                    /**
-                     * @description 只顯示已缺貨的商品，即庫存數量為 0 的商品。
-                     * @example false
-                     */
-                    out_of_stock?: boolean;
                 };
                 header?: never;
                 path?: never;
@@ -931,6 +1075,12 @@ export interface paths {
                              *         "category_id": 1,
                              *         "created_at": "2024-01-01T10:00:00.000000Z",
                              *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                             *         "image_urls": {
+                             *           "original": "http://localhost/storage/1/office-chair-original.jpg",
+                             *           "thumbnail": "http://localhost/storage/1/conversions/office-chair-thumb.jpg",
+                             *           "medium": "http://localhost/storage/1/conversions/office-chair-medium.jpg",
+                             *           "large": "http://localhost/storage/1/conversions/office-chair-large.jpg"
+                             *         },
                              *         "variants": [
                              *           {
                              *             "id": 1,
@@ -989,6 +1139,12 @@ export interface paths {
                              *         "category_id": null,
                              *         "created_at": "2024-01-01T11:30:00.000000Z",
                              *         "updated_at": "2024-01-01T11:30:00.000000Z",
+                             *         "image_urls": {
+                             *           "original": "http://localhost/storage/2/bluetooth-mouse-original.jpg",
+                             *           "thumbnail": "http://localhost/storage/2/conversions/bluetooth-mouse-thumb.jpg",
+                             *           "medium": "http://localhost/storage/2/conversions/bluetooth-mouse-medium.jpg",
+                             *           "large": "http://localhost/storage/2/conversions/bluetooth-mouse-large.jpg"
+                             *         },
                              *         "variants": [
                              *           {
                              *             "id": 3,
@@ -1020,6 +1176,16 @@ export interface paths {
                                 created_at?: string;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 updated_at?: string;
+                                image_urls?: {
+                                    /** @example http://localhost/storage/1/office-chair-original.jpg */
+                                    original?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
+                                    thumbnail?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
+                                    medium?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
+                                    large?: string;
+                                };
                                 /** @example [
                                  *       {
                                  *         "id": 1,
@@ -1202,6 +1368,16 @@ export interface paths {
                                 created_at?: string;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 updated_at?: string;
+                                image_urls?: {
+                                    /** @example http://localhost/storage/1/office-chair-original.jpg */
+                                    original?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
+                                    thumbnail?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
+                                    medium?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
+                                    large?: string;
+                                };
                                 /** @example [
                                  *       {
                                  *         "id": 1,
@@ -1407,35 +1583,45 @@ export interface paths {
                          *       2
                          *     ]
                          */
-                        attributes: number[];
+                        attributes?: number[];
                         /**
-                         * @description SKU 變體陣列，至少需要一項。
+                         * @description SKU 變體陣列。
                          * @example [
                          *       []
                          *     ]
                          */
-                        variants: {
+                        variants?: {
                             /**
-                             * @description 單一 SKU 變體的唯一庫存單位編號。. Must not be greater than 255 characters.
-                             * @example HEADPHONE-BT-RED-L
+                             * @description The <code>id</code> of an existing record in the product_variants table.
+                             * @example 16
+                             */
+                            id?: number;
+                            /**
+                             * @description Must not be greater than 255 characters.
+                             * @example n
                              */
                             sku: string;
                             /**
-                             * @description 單一 SKU 變體的價格。. Must be at least 0.
-                             * @example 199.99
+                             * @description Must be at least 0.
+                             * @example 84
                              */
                             price: number;
                             /**
                              * @description The <code>id</code> of an existing record in the attribute_values table.
                              * @example [
-                             *       17
+                             *       16
                              *     ]
                              */
                             attribute_value_ids?: number[];
                             /** @example {
-                             *       "sku": "\"TSHIRT-RED-S\""
+                             *       "id": 1
                              *     } */
                             "*"?: {
+                                /**
+                                 * @description 變體的 ID（用於更新現有變體）。
+                                 * @example 1
+                                 */
+                                id?: number;
                                 /**
                                  * @description SKU 的唯一編號。
                                  * @example "TSHIRT-RED-S"
@@ -1479,6 +1665,16 @@ export interface paths {
                                 created_at?: string;
                                 /** @example 2024-01-01T10:00:00.000000Z */
                                 updated_at?: string;
+                                image_urls?: {
+                                    /** @example http://localhost/storage/1/office-chair-original.jpg */
+                                    original?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
+                                    thumbnail?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
+                                    medium?: string;
+                                    /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
+                                    large?: string;
+                                };
                                 /** @example [
                                  *       {
                                  *         "id": 1,
@@ -1973,7 +2169,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the variant.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -1987,7 +2183,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the variant.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -2159,7 +2355,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一）。例如：紅色
-                         * @example consequatur
+                         * @example architecto
                          */
                         value: string;
                     };
@@ -2258,7 +2454,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-                         * @example consequatur
+                         * @example architecto
                          */
                         value: string;
                     };
@@ -2579,7 +2775,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the inventory.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -2593,7 +2789,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the inventory.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -3155,7 +3351,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the transfer.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -3169,7 +3365,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the transfer.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -3421,22 +3617,22 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 用戶姓名。例如：張三
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                         /**
                          * @description 用戶名（唯一）。例如：zhangsan
-                         * @example consequatur
+                         * @example architecto
                          */
                         username: string;
                         /**
                          * @description 用戶密碼（至少8個字元）。例如：password123
-                         * @example O[2UZ5ij-e/dl4m{o,
+                         * @example |]|{+-
                          */
                         password: string;
                         /**
                          * @description 用戶角色，必須是 admin 或 viewer。例如：admin
-                         * @example consequatur
+                         * @example architecto
                          */
                         role: string;
                     };
@@ -3964,12 +4160,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一）。例如：台北總店
-                     * @example consequatur
+                     * @example architecto
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example consequatur
+                     * @example architecto
                      */
                     address?: string | null;
                 };
@@ -3983,16 +4179,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 7 */
+                            /** @example 11 */
                             id?: number;
-                            /** @example Mueller-Dibbert */
+                            /** @example Bailey Ltd */
                             name?: string;
-                            /** @example 87713 Brandy Roads Suite 202
-                             *     Williamsonfort, CT 64474 */
+                            /** @example 85625 Gaylord Knolls
+                             *     Cecilburgh, WI 02042 */
                             address?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:07.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:07.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4022,16 +4218,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 8 */
+                            /** @example 12 */
                             id?: number;
-                            /** @example Kunde Group */
+                            /** @example Cruickshank Inc */
                             name?: string;
-                            /** @example 62028 Trudie Mills
-                             *     North Cordie, IL 75592 */
+                            /** @example 532 Leuschke Causeway
+                             *     McLaughlinstad, MI 07365 */
                             address?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:07.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:07.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4057,12 +4253,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一，會排除當前分店）。例如：台北信義店
-                     * @example consequatur
+                     * @example architecto
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example consequatur
+                     * @example architecto
                      */
                     address?: string | null;
                 };
@@ -4076,16 +4272,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 9 */
+                            /** @example 13 */
                             id?: number;
-                            /** @example Moore-Emard */
+                            /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
-                            /** @example 27319 Schmeler Fall Suite 958
-                             *     Carterland, NM 49546 */
+                            /** @example 80841 Mya Lane Apt. 042
+                             *     Lyricberg, MO 42170-0432 */
                             address?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:08.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:08.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4131,16 +4327,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 10 */
+                            /** @example 14 */
                             id?: number;
-                            /** @example Maggio, Lakin and Durgan */
+                            /** @example Hauck-Leuschke */
                             name?: string;
-                            /** @example 45898 Hammes Courts
-                             *     Haagshire, MN 43438-3224 */
+                            /** @example 544 Aglae Ridge Apt. 067
+                             *     Lefflerhaven, TX 58408-7043 */
                             address?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:08.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:08.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4167,7 +4363,7 @@ export interface operations {
                     /**
                      * @description 要分配給用戶的分店ID列表。例如：[1, 2, 3]
                      * @example [
-                     *       "consequatur"
+                     *       "architecto"
                      *     ]
                      */
                     store_ids: string[];
@@ -4182,11 +4378,11 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 15 */
+                            /** @example 17 */
                             id?: number;
-                            /** @example Dr. Cornelius Luettgen V */
+                            /** @example Ms. Elisabeth Okuneva */
                             name?: string;
-                            /** @example russel.bert */
+                            /** @example gulgowski.asia */
                             username?: string;
                             /** @example viewer */
                             role?: string;
@@ -4194,9 +4390,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:08.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-17T01:37:45.000000Z */
+                            /** @example 2025-06-18T01:24:08.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4257,7 +4453,7 @@ export interface operations {
                         /**
                          * @description The <code>id</code> of an existing record in the attribute_values table.
                          * @example [
-                         *       17
+                         *       16
                          *     ]
                          */
                         attribute_value_ids?: number[];
@@ -4308,6 +4504,16 @@ export interface operations {
                             created_at?: string;
                             /** @example 2024-01-01T10:00:00.000000Z */
                             updated_at?: string;
+                            image_urls?: {
+                                /** @example http://localhost/storage/1/office-chair-original.jpg */
+                                original?: string;
+                                /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
+                                thumbnail?: string;
+                                /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
+                                medium?: string;
+                                /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
+                                large?: string;
+                            };
                             /** @example [
                              *       {
                              *         "id": 1,

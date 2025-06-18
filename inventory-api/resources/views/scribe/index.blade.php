@@ -170,6 +170,9 @@
                                                     <li class="tocify-item level-2" data-unique="-POSTapi-products-batch-delete">
                                 <a href="#-POSTapi-products-batch-delete">批量刪除商品</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="-POSTapi-products--product_id--upload-image">
+                                <a href="#-POSTapi-products--product_id--upload-image">上傳商品圖片</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="-GETapi-products">
                                 <a href="#-GETapi-products">顯示所有商品列表，支援分頁、排序和篩選功能</a>
                             </li>
@@ -317,7 +320,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: June 17, 2025</li>
+        <li>Last updated: June 18, 2025</li>
     </ul>
 </div>
 
@@ -509,14 +512,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 14,
-        &quot;name&quot;: &quot;Lonny Ankunding&quot;,
-        &quot;username&quot;: &quot;eloisa.harber&quot;,
+        &quot;id&quot;: 16,
+        &quot;name&quot;: &quot;Mrs. Justina Gaylord&quot;,
+        &quot;username&quot;: &quot;lafayette.considine&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-18T01:24:06.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-18T01:24:06.000000Z&quot;
     }
 }</code>
  </pre>
@@ -736,9 +739,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"consequatur\",
-    \"description\": \"Dolores dolorum amet iste laborum eius est dolor.\",
-    \"parent_id\": 17
+    \"name\": \"architecto\",
+    \"description\": \"Eius et animi quos velit et.\",
+    \"parent_id\": 16
 }"
 </code></pre></div>
 
@@ -754,9 +757,9 @@ const headers = {
 };
 
 let body = {
-    "name": "consequatur",
-    "description": "Dolores dolorum amet iste laborum eius est dolor.",
-    "parent_id": 17
+    "name": "architecto",
+    "description": "Eius et animi quos velit et.",
+    "parent_id": 16
 };
 
 fetch(url, {
@@ -845,10 +848,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="POSTapi-categories"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>分類名稱。例如：電子產品 Example: <code>consequatur</code></p>
+<p>分類名稱。例如：電子產品 Example: <code>architecto</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
@@ -856,10 +859,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="description"                data-endpoint="POSTapi-categories"
-               value="Dolores dolorum amet iste laborum eius est dolor."
+               value="Eius et animi quos velit et."
                data-component="body">
     <br>
-<p>分類描述。例如：包含所有電子相關產品 Example: <code>Dolores dolorum amet iste laborum eius est dolor.</code></p>
+<p>分類描述。例如：包含所有電子相關產品 Example: <code>Eius et animi quos velit et.</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>parent_id</code></b>&nbsp;&nbsp;
@@ -867,10 +870,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="parent_id"                data-endpoint="POSTapi-categories"
-               value="17"
+               value="16"
                data-component="body">
     <br>
-<p>父分類ID，必須是存在的分類ID。例如：1 Example: <code>17</code></p>
+<p>父分類ID，必須是存在的分類ID。例如：1 Example: <code>16</code></p>
         </div>
         </form>
 
@@ -1032,9 +1035,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"consequatur\",
-    \"description\": \"Dolores dolorum amet iste laborum eius est dolor.\",
-    \"parent_id\": 17
+    \"name\": \"architecto\",
+    \"description\": \"Eius et animi quos velit et.\",
+    \"parent_id\": 16
 }"
 </code></pre></div>
 
@@ -1050,9 +1053,9 @@ const headers = {
 };
 
 let body = {
-    "name": "consequatur",
-    "description": "Dolores dolorum amet iste laborum eius est dolor.",
-    "parent_id": 17
+    "name": "architecto",
+    "description": "Eius et animi quos velit et.",
+    "parent_id": 16
 };
 
 fetch(url, {
@@ -1157,10 +1160,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="PUTapi-categories--id-"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>分類名稱。例如：電子產品 Example: <code>consequatur</code></p>
+<p>分類名稱。例如：電子產品 Example: <code>architecto</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
@@ -1168,10 +1171,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="description"                data-endpoint="PUTapi-categories--id-"
-               value="Dolores dolorum amet iste laborum eius est dolor."
+               value="Eius et animi quos velit et."
                data-component="body">
     <br>
-<p>分類描述。例如：包含所有電子相關產品 Example: <code>Dolores dolorum amet iste laborum eius est dolor.</code></p>
+<p>分類描述。例如：包含所有電子相關產品 Example: <code>Eius et animi quos velit et.</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>parent_id</code></b>&nbsp;&nbsp;
@@ -1179,10 +1182,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="parent_id"                data-endpoint="PUTapi-categories--id-"
-               value="17"
+               value="16"
                data-component="body">
     <br>
-<p>父分類ID，必須是存在的分類ID且不能是自己。例如：1 Example: <code>17</code></p>
+<p>父分類ID，必須是存在的分類ID且不能是自己。例如：1 Example: <code>16</code></p>
         </div>
         </form>
 
@@ -1486,8 +1489,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"consequatur\",
-    \"address\": \"consequatur\"
+    \"name\": \"architecto\",
+    \"address\": \"architecto\"
 }"
 </code></pre></div>
 
@@ -1503,8 +1506,8 @@ const headers = {
 };
 
 let body = {
-    "name": "consequatur",
-    "address": "consequatur"
+    "name": "architecto",
+    "address": "architecto"
 };
 
 fetch(url, {
@@ -1523,11 +1526,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 7,
-        &quot;name&quot;: &quot;Mueller-Dibbert&quot;,
-        &quot;address&quot;: &quot;87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474&quot;,
-        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
+        &quot;id&quot;: 11,
+        &quot;name&quot;: &quot;Bailey Ltd&quot;,
+        &quot;address&quot;: &quot;85625 Gaylord Knolls\nCecilburgh, WI 02042&quot;,
+        &quot;created_at&quot;: &quot;2025-06-18T01:24:07.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-18T01:24:07.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1608,10 +1611,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="POSTapi-stores"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>分店名稱（唯一）。例如：台北總店 Example: <code>consequatur</code></p>
+<p>分店名稱（唯一）。例如：台北總店 Example: <code>architecto</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>address</code></b>&nbsp;&nbsp;
@@ -1619,10 +1622,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="address"                data-endpoint="POSTapi-stores"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>分店地址。例如：台北市信義區信義路五段7號 Example: <code>consequatur</code></p>
+<p>分店地址。例如：台北市信義區信義路五段7號 Example: <code>architecto</code></p>
         </div>
         </form>
 
@@ -1670,11 +1673,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 8,
-        &quot;name&quot;: &quot;Kunde Group&quot;,
-        &quot;address&quot;: &quot;62028 Trudie Mills\nNorth Cordie, IL 75592&quot;,
-        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
+        &quot;id&quot;: 12,
+        &quot;name&quot;: &quot;Cruickshank Inc&quot;,
+        &quot;address&quot;: &quot;532 Leuschke Causeway\nMcLaughlinstad, MI 07365&quot;,
+        &quot;created_at&quot;: &quot;2025-06-18T01:24:07.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-18T01:24:07.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1780,8 +1783,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"consequatur\",
-    \"address\": \"consequatur\"
+    \"name\": \"architecto\",
+    \"address\": \"architecto\"
 }"
 </code></pre></div>
 
@@ -1797,8 +1800,8 @@ const headers = {
 };
 
 let body = {
-    "name": "consequatur",
-    "address": "consequatur"
+    "name": "architecto",
+    "address": "architecto"
 };
 
 fetch(url, {
@@ -1817,11 +1820,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 9,
-        &quot;name&quot;: &quot;Moore-Emard&quot;,
-        &quot;address&quot;: &quot;27319 Schmeler Fall Suite 958\nCarterland, NM 49546&quot;,
-        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
+        &quot;id&quot;: 13,
+        &quot;name&quot;: &quot;Rempel, Gulgowski and O&#039;Kon&quot;,
+        &quot;address&quot;: &quot;80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432&quot;,
+        &quot;created_at&quot;: &quot;2025-06-18T01:24:08.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-18T01:24:08.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1918,10 +1921,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="PUTapi-stores--id-"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>分店名稱（唯一，會排除當前分店）。例如：台北信義店 Example: <code>consequatur</code></p>
+<p>分店名稱（唯一，會排除當前分店）。例如：台北信義店 Example: <code>architecto</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>address</code></b>&nbsp;&nbsp;
@@ -1929,10 +1932,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="address"                data-endpoint="PUTapi-stores--id-"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>分店地址。例如：台北市信義區信義路五段7號 Example: <code>consequatur</code></p>
+<p>分店地址。例如：台北市信義區信義路五段7號 Example: <code>architecto</code></p>
         </div>
         </form>
 
@@ -2105,11 +2108,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 10,
-        &quot;name&quot;: &quot;Maggio, Lakin and Durgan&quot;,
-        &quot;address&quot;: &quot;45898 Hammes Courts\nHaagshire, MN 43438-3224&quot;,
-        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
+        &quot;id&quot;: 14,
+        &quot;name&quot;: &quot;Hauck-Leuschke&quot;,
+        &quot;address&quot;: &quot;544 Aglae Ridge Apt. 067\nLefflerhaven, TX 58408-7043&quot;,
+        &quot;created_at&quot;: &quot;2025-06-18T01:24:08.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-18T01:24:08.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2216,7 +2219,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"store_ids\": [
-        \"consequatur\"
+        \"architecto\"
     ]
 }"
 </code></pre></div>
@@ -2234,7 +2237,7 @@ const headers = {
 
 let body = {
     "store_ids": [
-        "consequatur"
+        "architecto"
     ]
 };
 
@@ -2254,14 +2257,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 15,
-        &quot;name&quot;: &quot;Dr. Cornelius Luettgen V&quot;,
-        &quot;username&quot;: &quot;russel.bert&quot;,
+        &quot;id&quot;: 17,
+        &quot;name&quot;: &quot;Ms. Elisabeth Okuneva&quot;,
+        &quot;username&quot;: &quot;gulgowski.asia&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-17T01:37:45.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-18T01:24:08.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-18T01:24:08.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2363,10 +2366,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="store_ids.*"                data-endpoint="POSTapi-users--user_id--stores"
-               value="17"
+               value="16"
                data-component="body">
     <br>
-<p>分店ID，必須存在於系統中。例如：1 Example: <code>17</code></p>
+<p>分店ID，必須存在於系統中。例如：1 Example: <code>16</code></p>
                     </div>
                                     </details>
         </div>
@@ -2741,7 +2744,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"consequatur\"
+    \"name\": \"architecto\"
 }"
 </code></pre></div>
 
@@ -2757,7 +2760,7 @@ const headers = {
 };
 
 let body = {
-    "name": "consequatur"
+    "name": "architecto"
 };
 
 fetch(url, {
@@ -2853,10 +2856,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="POSTapi-attributes"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>屬性名稱（唯一）。例如：顏色 Example: <code>consequatur</code></p>
+<p>屬性名稱（唯一）。例如：顏色 Example: <code>architecto</code></p>
         </div>
         </form>
 
@@ -3017,7 +3020,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"consequatur\"
+    \"name\": \"architecto\"
 }"
 </code></pre></div>
 
@@ -3033,7 +3036,7 @@ const headers = {
 };
 
 let body = {
-    "name": "consequatur"
+    "name": "architecto"
 };
 
 fetch(url, {
@@ -3156,10 +3159,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="PUTapi-attributes--id-"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>屬性名稱（唯一，會排除當前屬性）。例如：尺寸 Example: <code>consequatur</code></p>
+<p>屬性名稱（唯一，會排除當前屬性）。例如：尺寸 Example: <code>architecto</code></p>
         </div>
         </form>
 
@@ -3325,7 +3328,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"ids\": [
-        \"consequatur\"
+        \"architecto\"
     ]
 }"
 </code></pre></div>
@@ -3343,7 +3346,7 @@ const headers = {
 
 let body = {
     "ids": [
-        "consequatur"
+        "architecto"
     ]
 };
 
@@ -3448,12 +3451,224 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="ids.*"                data-endpoint="POSTapi-products-batch-delete"
-               value="17"
+               value="16"
                data-component="body">
     <br>
-<p>商品 ID，必須存在於資料庫中。例如：1 Example: <code>17</code></p>
+<p>商品 ID，必須存在於資料庫中。例如：1 Example: <code>16</code></p>
                     </div>
                                     </details>
+        </div>
+        </form>
+
+                    <h2 id="-POSTapi-products--product_id--upload-image">上傳商品圖片</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>遵循 Spatie Media Library v11 官方最佳實踐：</p>
+<ul>
+<li>使用專用的 FormRequest 進行驗證</li>
+<li>實施完整的錯誤處理和日誌記錄</li>
+<li>使用 singleFile 行為自動替換現有圖片</li>
+<li>返回所有轉換版本的 URL</li>
+</ul>
+
+<span id="example-requests-POSTapi-products--product_id--upload-image">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost:8000/api/products/1/upload-image" \
+    --header "Content-Type: multipart/form-data" \
+    --header "Accept: application/json" \
+    --form "image=@C:\Users\Zou\AppData\Local\Temp\phpD444.tmp" </code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/products/1/upload-image"
+);
+
+const headers = {
+    "Content-Type": "multipart/form-data",
+    "Accept": "application/json",
+};
+
+const body = new FormData();
+body.append('image', document.querySelector('input[name="image"]').files[0]);
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-products--product_id--upload-image">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;success&quot;: true,
+    &quot;message&quot;: &quot;圖片上傳成功&quot;,
+    &quot;data&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;商品名稱&quot;,
+        &quot;has_image&quot;: true,
+        &quot;image_urls&quot;: {
+            &quot;original&quot;: &quot;http://localhost:8000/storage/1/product-image.jpg&quot;,
+            &quot;thumb&quot;: &quot;http://localhost:8000/storage/1/conversions/product-image-thumb.jpg&quot;,
+            &quot;medium&quot;: &quot;http://localhost:8000/storage/1/conversions/product-image-medium.jpg&quot;,
+            &quot;large&quot;: &quot;http://localhost:8000/storage/1/conversions/product-image-large.jpg&quot;
+        }
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (404):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;success&quot;: false,
+    &quot;message&quot;: &quot;找不到指定的商品&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (422):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;success&quot;: false,
+    &quot;message&quot;: &quot;圖片上傳驗證失敗&quot;,
+    &quot;errors&quot;: {
+        &quot;image&quot;: [
+            &quot;圖片格式必須是：JPEG、JPG、PNG、GIF 或 WebP。&quot;
+        ]
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (500):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;success&quot;: false,
+    &quot;message&quot;: &quot;圖片上傳失敗&quot;,
+    &quot;error&quot;: &quot;詳細錯誤訊息&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-products--product_id--upload-image" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-products--product_id--upload-image"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-products--product_id--upload-image"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-products--product_id--upload-image" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-products--product_id--upload-image">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-products--product_id--upload-image" data-method="POST"
+      data-path="api/products/{product_id}/upload-image"
+      data-authed="1"
+      data-hasfiles="1"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-products--product_id--upload-image', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-products--product_id--upload-image"
+                    onclick="tryItOut('POSTapi-products--product_id--upload-image');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-products--product_id--upload-image"
+                    onclick="cancelTryOut('POSTapi-products--product_id--upload-image');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-products--product_id--upload-image"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/products/{product_id}/upload-image</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-products--product_id--upload-image"
+               value="multipart/form-data"
+               data-component="header">
+    <br>
+<p>Example: <code>multipart/form-data</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-products--product_id--upload-image"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>product_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="product_id"                data-endpoint="POSTapi-products--product_id--upload-image"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ID of the product. Example: <code>1</code></p>
+            </div>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="id"                data-endpoint="POSTapi-products--product_id--upload-image"
+               value="1"
+               data-component="url">
+    <br>
+<p>商品 ID Example: <code>1</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>image</code></b>&nbsp;&nbsp;
+<small>file</small>&nbsp;
+ &nbsp;
+                <input type="file" style="display: none"
+                              name="image"                data-endpoint="POSTapi-products--product_id--upload-image"
+               value=""
+               data-component="body">
+    <br>
+<p>圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB) Example: <code>C:\Users\Zou\AppData\Local\Temp\phpD444.tmp</code></p>
         </div>
         </form>
 
@@ -3471,7 +3686,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/products?page=1&amp;per_page=15&amp;search=%E6%A4%85%E5%AD%90&amp;sort_by=name&amp;sort_order=desc" \
+    --get "http://localhost:8000/api/products?page=1&amp;per_page=15&amp;search=%E6%A4%85%E5%AD%90&amp;product_name=%E8%BE%A6%E5%85%AC%E6%A4%85&amp;store_id=1&amp;category_id=2&amp;low_stock=1&amp;out_of_stock=&amp;sort_by=name&amp;sort_order=desc" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
@@ -3485,6 +3700,11 @@ const params = {
     "page": "1",
     "per_page": "15",
     "search": "椅子",
+    "product_name": "辦公椅",
+    "store_id": "1",
+    "category_id": "2",
+    "low_stock": "1",
+    "out_of_stock": "0",
     "sort_by": "name",
     "sort_order": "desc",
 };
@@ -3564,6 +3784,12 @@ fetch(url, {
             &quot;category_id&quot;: 1,
             &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
             &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+            &quot;image_urls&quot;: {
+                &quot;original&quot;: &quot;http://localhost/storage/1/office-chair-original.jpg&quot;,
+                &quot;thumbnail&quot;: &quot;http://localhost/storage/1/conversions/office-chair-thumb.jpg&quot;,
+                &quot;medium&quot;: &quot;http://localhost/storage/1/conversions/office-chair-medium.jpg&quot;,
+                &quot;large&quot;: &quot;http://localhost/storage/1/conversions/office-chair-large.jpg&quot;
+            },
             &quot;variants&quot;: [
                 {
                     &quot;id&quot;: 1,
@@ -3622,6 +3848,12 @@ fetch(url, {
             &quot;category_id&quot;: null,
             &quot;created_at&quot;: &quot;2024-01-01T11:30:00.000000Z&quot;,
             &quot;updated_at&quot;: &quot;2024-01-01T11:30:00.000000Z&quot;,
+            &quot;image_urls&quot;: {
+                &quot;original&quot;: &quot;http://localhost/storage/2/bluetooth-mouse-original.jpg&quot;,
+                &quot;thumbnail&quot;: &quot;http://localhost/storage/2/conversions/bluetooth-mouse-thumb.jpg&quot;,
+                &quot;medium&quot;: &quot;http://localhost/storage/2/conversions/bluetooth-mouse-medium.jpg&quot;,
+                &quot;large&quot;: &quot;http://localhost/storage/2/conversions/bluetooth-mouse-large.jpg&quot;
+            },
             &quot;variants&quot;: [
                 {
                     &quot;id&quot;: 3,
@@ -3761,6 +3993,81 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>搜尋商品名稱或 SKU。 Example: <code>椅子</code></p>
             </div>
                                     <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>product_name</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="product_name"                data-endpoint="GETapi-products"
+               value="辦公椅"
+               data-component="query">
+    <br>
+<p>專門用於商品名稱模糊搜尋。 Example: <code>辦公椅</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>store_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="store_id"                data-endpoint="GETapi-products"
+               value="1"
+               data-component="query">
+    <br>
+<p>按特定門市篩選庫存。 Example: <code>1</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>category_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="category_id"                data-endpoint="GETapi-products"
+               value="2"
+               data-component="query">
+    <br>
+<p>按商品分類篩選。 Example: <code>2</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>low_stock</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+                <label data-endpoint="GETapi-products" style="display: none">
+            <input type="radio" name="low_stock"
+                   value="1"
+                   data-endpoint="GETapi-products"
+                   data-component="query"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="GETapi-products" style="display: none">
+            <input type="radio" name="low_stock"
+                   value="0"
+                   data-endpoint="GETapi-products"
+                   data-component="query"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>只顯示低庫存商品。 Example: <code>true</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>out_of_stock</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+                <label data-endpoint="GETapi-products" style="display: none">
+            <input type="radio" name="out_of_stock"
+                   value="1"
+                   data-endpoint="GETapi-products"
+                   data-component="query"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="GETapi-products" style="display: none">
+            <input type="radio" name="out_of_stock"
+                   value="0"
+                   data-endpoint="GETapi-products"
+                   data-component="query"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>只顯示缺貨商品。 Example: <code>false</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>sort_by</code></b>&nbsp;&nbsp;
 <small>string</small>&nbsp;
 <i>optional</i> &nbsp;
@@ -3814,7 +4121,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             \"sku\": \"HEADPHONE-BT-RED-L\",
             \"price\": 199.99,
             \"attribute_value_ids\": [
-                17
+                16
             ]
         }
     ]
@@ -3845,7 +4152,7 @@ let body = {
             "sku": "HEADPHONE-BT-RED-L",
             "price": 199.99,
             "attribute_value_ids": [
-                17
+                16
             ]
         }
     ]
@@ -3873,6 +4180,12 @@ fetch(url, {
         &quot;category_id&quot;: 1,
         &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
         &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+        &quot;image_urls&quot;: {
+            &quot;original&quot;: &quot;http://localhost/storage/1/office-chair-original.jpg&quot;,
+            &quot;thumbnail&quot;: &quot;http://localhost/storage/1/conversions/office-chair-thumb.jpg&quot;,
+            &quot;medium&quot;: &quot;http://localhost/storage/1/conversions/office-chair-medium.jpg&quot;,
+            &quot;large&quot;: &quot;http://localhost/storage/1/conversions/office-chair-large.jpg&quot;
+        },
         &quot;variants&quot;: [
             {
                 &quot;id&quot;: 1,
@@ -4216,6 +4529,12 @@ fetch(url, {
         &quot;category_id&quot;: 1,
         &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
         &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+        &quot;image_urls&quot;: {
+            &quot;original&quot;: &quot;http://localhost/storage/1/office-chair-original.jpg&quot;,
+            &quot;thumbnail&quot;: &quot;http://localhost/storage/1/conversions/office-chair-thumb.jpg&quot;,
+            &quot;medium&quot;: &quot;http://localhost/storage/1/conversions/office-chair-medium.jpg&quot;,
+            &quot;large&quot;: &quot;http://localhost/storage/1/conversions/office-chair-large.jpg&quot;
+        },
         &quot;variants&quot;: [
             {
                 &quot;id&quot;: 1,
@@ -4410,11 +4729,11 @@ You can check the Dev Tools console for debugging information.</code></pre>
     ],
     \"variants\": [
         {
-            \"id\": 17,
-            \"sku\": \"mqeopfuudtdsufvyvddqa\",
-            \"price\": 45,
+            \"id\": 16,
+            \"sku\": \"n\",
+            \"price\": 84,
             \"attribute_value_ids\": [
-                17
+                16
             ]
         }
     ]
@@ -4442,11 +4761,11 @@ let body = {
     ],
     "variants": [
         {
-            "id": 17,
-            "sku": "mqeopfuudtdsufvyvddqa",
-            "price": 45,
+            "id": 16,
+            "sku": "n",
+            "price": 84,
             "attribute_value_ids": [
-                17
+                16
             ]
         }
     ]
@@ -4474,6 +4793,12 @@ fetch(url, {
         &quot;category_id&quot;: 1,
         &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
         &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
+        &quot;image_urls&quot;: {
+            &quot;original&quot;: &quot;http://localhost/storage/1/office-chair-original.jpg&quot;,
+            &quot;thumbnail&quot;: &quot;http://localhost/storage/1/conversions/office-chair-thumb.jpg&quot;,
+            &quot;medium&quot;: &quot;http://localhost/storage/1/conversions/office-chair-medium.jpg&quot;,
+            &quot;large&quot;: &quot;http://localhost/storage/1/conversions/office-chair-large.jpg&quot;
+        },
         &quot;variants&quot;: [
             {
                 &quot;id&quot;: 1,
@@ -4705,10 +5030,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="variants.0.id"                data-endpoint="PUTapi-products--id-"
-               value="17"
+               value="16"
                data-component="body">
     <br>
-<p>The <code>id</code> of an existing record in the product_variants table. Example: <code>17</code></p>
+<p>The <code>id</code> of an existing record in the product_variants table. Example: <code>16</code></p>
                     </div>
                                                                 <div style="margin-left: 14px; clear: unset;">
                         <b style="line-height: 2;"><code>sku</code></b>&nbsp;&nbsp;
@@ -4716,10 +5041,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="variants.0.sku"                data-endpoint="PUTapi-products--id-"
-               value="mqeopfuudtdsufvyvddqa"
+               value="n"
                data-component="body">
     <br>
-<p>Must not be greater than 100 characters. Example: <code>mqeopfuudtdsufvyvddqa</code></p>
+<p>Must not be greater than 255 characters. Example: <code>n</code></p>
                     </div>
                                                                 <div style="margin-left: 14px; clear: unset;">
                         <b style="line-height: 2;"><code>price</code></b>&nbsp;&nbsp;
@@ -4727,10 +5052,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="variants.0.price"                data-endpoint="PUTapi-products--id-"
-               value="45"
+               value="84"
                data-component="body">
     <br>
-<p>Must be at least 0. Example: <code>45</code></p>
+<p>Must be at least 0. Example: <code>84</code></p>
                     </div>
                                                                 <div style="margin-left: 14px; clear: unset;">
                         <b style="line-height: 2;"><code>attribute_value_ids</code></b>&nbsp;&nbsp;
@@ -5258,14 +5583,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/products/variants/consequatur" \
+    --get "http://localhost:8000/api/products/variants/architecto" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/products/variants/consequatur"
+    "http://localhost:8000/api/products/variants/architecto"
 );
 
 const headers = {
@@ -5374,10 +5699,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="id"                data-endpoint="GETapi-products-variants--id-"
-               value="consequatur"
+               value="architecto"
                data-component="url">
     <br>
-<p>The ID of the variant. Example: <code>consequatur</code></p>
+<p>The ID of the variant. Example: <code>architecto</code></p>
             </div>
                     </form>
 
@@ -5582,7 +5907,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"value\": \"consequatur\"
+    \"value\": \"architecto\"
 }"
 </code></pre></div>
 
@@ -5598,7 +5923,7 @@ const headers = {
 };
 
 let body = {
-    "value": "consequatur"
+    "value": "architecto"
 };
 
 fetch(url, {
@@ -5717,10 +6042,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="value"                data-endpoint="POSTapi-attributes--attribute_id--values"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>屬性值（在同一屬性下必須唯一）。例如：紅色 Example: <code>consequatur</code></p>
+<p>屬性值（在同一屬性下必須唯一）。例如：紅色 Example: <code>architecto</code></p>
         </div>
         </form>
 
@@ -6346,14 +6671,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/inventory/consequatur" \
+    --get "http://localhost:8000/api/inventory/architecto" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/inventory/consequatur"
+    "http://localhost:8000/api/inventory/architecto"
 );
 
 const headers = {
@@ -6462,10 +6787,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="id"                data-endpoint="GETapi-inventory--id-"
-               value="consequatur"
+               value="architecto"
                data-component="url">
     <br>
-<p>The ID of the inventory. Example: <code>consequatur</code></p>
+<p>The ID of the inventory. Example: <code>architecto</code></p>
             </div>
                     </form>
 
@@ -7364,14 +7689,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/inventory/transfers/consequatur" \
+    --get "http://localhost:8000/api/inventory/transfers/architecto" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/inventory/transfers/consequatur"
+    "http://localhost:8000/api/inventory/transfers/architecto"
 );
 
 const headers = {
@@ -7480,10 +7805,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="id"                data-endpoint="GETapi-inventory-transfers--id-"
-               value="consequatur"
+               value="architecto"
                data-component="url">
     <br>
-<p>The ID of the transfer. Example: <code>consequatur</code></p>
+<p>The ID of the transfer. Example: <code>architecto</code></p>
             </div>
                     </form>
 
@@ -8189,10 +8514,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"name\": \"consequatur\",
-    \"username\": \"consequatur\",
-    \"password\": \"O[2UZ5ij-e\\/dl4m{o,\",
-    \"role\": \"consequatur\"
+    \"name\": \"architecto\",
+    \"username\": \"architecto\",
+    \"password\": \"|]|{+-\",
+    \"role\": \"architecto\"
 }"
 </code></pre></div>
 
@@ -8208,10 +8533,10 @@ const headers = {
 };
 
 let body = {
-    "name": "consequatur",
-    "username": "consequatur",
-    "password": "O[2UZ5ij-e\/dl4m{o,",
-    "role": "consequatur"
+    "name": "architecto",
+    "username": "architecto",
+    "password": "|]|{+-",
+    "role": "architecto"
 };
 
 fetch(url, {
@@ -8318,10 +8643,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="name"                data-endpoint="POSTapi-users"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>用戶姓名。例如：張三 Example: <code>consequatur</code></p>
+<p>用戶姓名。例如：張三 Example: <code>architecto</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>username</code></b>&nbsp;&nbsp;
@@ -8329,10 +8654,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="username"                data-endpoint="POSTapi-users"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>用戶名（唯一）。例如：zhangsan Example: <code>consequatur</code></p>
+<p>用戶名（唯一）。例如：zhangsan Example: <code>architecto</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
@@ -8340,10 +8665,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="password"                data-endpoint="POSTapi-users"
-               value="O[2UZ5ij-e/dl4m{o,"
+               value="|]|{+-"
                data-component="body">
     <br>
-<p>用戶密碼（至少8個字元）。例如：password123 Example: <code>O[2UZ5ij-e/dl4m{o,</code></p>
+<p>用戶密碼（至少8個字元）。例如：password123 Example: <code>|]|{+-</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>role</code></b>&nbsp;&nbsp;
@@ -8351,10 +8676,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="role"                data-endpoint="POSTapi-users"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>用戶角色，必須是 admin 或 viewer。例如：admin Example: <code>consequatur</code></p>
+<p>用戶角色，必須是 admin 或 viewer。例如：admin Example: <code>architecto</code></p>
         </div>
         </form>
 
@@ -8895,7 +9220,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"value\": \"consequatur\"
+    \"value\": \"architecto\"
 }"
 </code></pre></div>
 
@@ -8911,7 +9236,7 @@ const headers = {
 };
 
 let body = {
-    "value": "consequatur"
+    "value": "architecto"
 };
 
 fetch(url, {
@@ -9040,10 +9365,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="value"                data-endpoint="PUTapi-values--id-"
-               value="consequatur"
+               value="architecto"
                data-component="body">
     <br>
-<p>屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色 Example: <code>consequatur</code></p>
+<p>屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色 Example: <code>architecto</code></p>
         </div>
         </form>
 

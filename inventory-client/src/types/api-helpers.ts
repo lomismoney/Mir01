@@ -140,6 +140,12 @@ export type ProductItem = {
   category_id?: number;
   created_at?: string;
   updated_at?: string;
+  image_urls?: {
+    original?: string;
+    thumbnail?: string;
+    medium?: string;
+    large?: string;
+  } | null;
   variants?: ProductVariant[];
   price_range?: {
     min?: number;

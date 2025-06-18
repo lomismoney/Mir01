@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Eye, ChevronRight, ChevronDown, Package } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, ChevronRight, ChevronDown, Package, Image as ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ProductItem } from "@/types/api-helpers";
 
@@ -301,6 +301,36 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         <span className="text-muted-foreground">未分類</span>
       );
     },
+  },
+
+  // 縮圖欄位
+  {
+    id: "thumbnail",
+    header: "縮圖",
+    cell: ({ row }) => {
+      const item = row.original;
+      
+      if (item.isVariantRow) {
+        // SKU 變體行不顯示縮圖
+        return <div className="pl-8" />;
+      }
+
+      // SPU 主行顯示縮圖
+      const product = item;
+      return product.image_urls?.thumbnail ? (
+        <img
+          src={product.image_urls.thumbnail}
+          alt={product.name}
+          className="h-16 w-16 rounded-md object-cover"
+        />
+      ) : (
+        <div className="flex h-16 w-16 items-center justify-center rounded-md bg-secondary">
+          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+        </div>
+      );
+    },
+    enableSorting: false,
+    size: 80,
   },
 
   // 價格欄位
