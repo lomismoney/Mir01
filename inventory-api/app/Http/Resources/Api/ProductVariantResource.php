@@ -25,6 +25,11 @@ class ProductVariantResource extends JsonResource
             'id' => $this->id,
             'sku' => $this->sku,
             'price' => $this->price,
+            'cost_price' => $this->cost_price,
+            'average_cost' => $this->average_cost,
+            'total_purchased_quantity' => $this->total_purchased_quantity,
+            'profit_margin' => $this->profit_margin,
+            'profit_amount' => $this->profit_amount,
             'product_id' => $this->product_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -54,15 +59,18 @@ class ProductVariantResource extends JsonResource
             }),
             
             'inventory' => $this->whenLoaded('inventory', function () {
-                return [
-                    'id' => $this->inventory->id,
-                    'quantity' => $this->inventory->quantity,
-                    'low_stock_threshold' => $this->inventory->low_stock_threshold,
-                    'store' => [
-                        'id' => $this->inventory->store->id,
-                        'name' => $this->inventory->store->name,
-                    ],
-                ];
+                return $this->inventory->map(function ($inventory) {
+                    return [
+                        'id' => $inventory->id,
+                        'quantity' => $inventory->quantity,
+                        'low_stock_threshold' => $inventory->low_stock_threshold,
+                        'store_id' => $inventory->store_id,
+                        'store' => [
+                            'id' => $inventory->store->id,
+                            'name' => $inventory->store->name,
+                        ],
+                    ];
+                });
             }),
         ];
     }

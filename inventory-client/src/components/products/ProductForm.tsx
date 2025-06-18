@@ -12,7 +12,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAttributes } from '@/hooks/queries/useEntityQueries';
+import { 
+  useAttributes,
+  useCreateProduct // 新增：導入商品創建 Hook
+} from '@/hooks/queries/useEntityQueries';
 import { 
   type Attribute, 
   type ProductSubmissionData 
@@ -76,15 +79,14 @@ export function ProductForm({
   // 獲取屬性資料
   const { data: attributesData, isLoading: attributesLoading, error: attributesError } = useAttributes();
   
-  // 商品創建 Mutation（暫時停用，直接使用狀態管理）
-  // const createProductMutation = useCreateProduct();
+  // 商品創建 Mutation
+  const createProductMutation = useCreateProduct();
   
   // 確保類型安全的屬性資料
   const attributes: Attribute[] = Array.isArray(attributesData) ? attributesData : [];
   
-  // 表單載入狀態（暫時使用本地狀態）
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const isLoading = isSubmitting;
+  // 表單載入狀態
+  const isLoading = createProductMutation.isPending;
 
   // 基本表單狀態
   const [formData, setFormData] = useState<ProductFormData>({
@@ -289,7 +291,7 @@ export function ProductForm({
     if (e) e.preventDefault();
     
     // 防止重複提交
-    if (isSubmitting) return;
+    if (createProductMutation.isPending) return;
     
     // === 1. 基礎數據驗證 ===
     if (!formData.name.trim()) {
@@ -321,8 +323,6 @@ export function ProductForm({
 
     // === 2. 準備 API 請求的數據格式 ===
     try {
-      setIsSubmitting(true);
-      
       // 準備正確的後端 API 格式
       const correctSubmissionData = {
         name: formData.name,
@@ -354,11 +354,11 @@ export function ProductForm({
       // 使用正確的類型定義，替代之前的 any 類型斷言
       const submissionData: ProductSubmissionData = correctSubmissionData;
 
-      // === 3. 模擬 API 調用（等待後端實現） ===
+      // === 3. 調用實際的 API 端點 ===
       console.log('準備提交的資料:', submissionData);
       
-      // 模擬 API 延遲
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 使用 createProductMutation 進行實際的 API 調用
+      await createProductMutation.mutateAsync(submissionData);
       
       // 顯示成功訊息
       toast.success('商品創建成功！');
@@ -369,8 +369,6 @@ export function ProductForm({
     } catch (error) {
       console.error('商品創建失敗：', error);
       toast.error(`商品創建失敗：${(error as Error).message}`);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

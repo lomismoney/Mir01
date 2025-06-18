@@ -10,52 +10,11 @@ import { ProductItem, ProductFilters } from "@/types/api-helpers"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Search, Store, Tag, AlertTriangle, PackageX, RotateCcw } from "lucide-react"
-
-/**
- * API 回傳的商品數據結構
- * 與 useProducts hook 返回的數據完全匹配
- */
-interface ApiProductVariant {
-  id?: number;
-  sku?: string;
-  price?: number; // API 回傳 number 類型
-  product_id?: number;
-  created_at?: string;
-  updated_at?: string;
-  attribute_values?: {
-    id?: number;
-    value?: string;
-    attribute_id?: number;
-    attribute?: {
-      id?: number;
-      name?: string;
-    };
-  }[];
-}
-
-interface ApiProduct {
-  id?: number;
-  name?: string;
-  description?: string;
-  category_id?: number;
-  created_at?: string;
-  updated_at?: string;
-  variants?: ApiProductVariant[];
-  price_range?: {
-    min?: number;
-    max?: number;
-    count?: number;
-  };
-  category?: {
-    id?: number;
-    name?: string;
-    description?: string;
-  };
-}
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { RotateCw as RefreshIcon, Search, AlertCircle, LogIn } from "lucide-react"
+import { InventoryListTable } from "@/components/inventory/InventoryListTable"
+import { InventoryAdjustmentDialog } from "@/components/inventory/InventoryAdjustmentDialog"
+import Link from "next/link"
 
 export function InventoryManagement() {
   const { toast } = useToast()
@@ -74,57 +33,23 @@ export function InventoryManagement() {
 
   // 獲取商品列表數據 (包含變體和庫存資訊)
   const {
-    data: productData,
-    isLoading: isLoadingProducts,
-    isError,
-    error,
-    refetch: refetchProducts,
-  } = useProducts(filters)
+    data: inventoryData,
+    isLoading: isLoadingInventory,
+    error: inventoryError,
+    refetch: refetchInventory,
+  } = useInventoryList({
+    store_id: selectedStoreId,
+    low_stock: showLowStock,
+    out_of_stock: showOutOfStock,
+    product_name: searchTerm || undefined,
+  })
 
-  /**
-   * 監聽 debouncedProductName 變化，更新篩選器
-   * 實現防抖搜尋功能，避免頻繁 API 請求
-   */
-  useEffect(() => {
-    setFilters(prev => ({
-      ...prev,
-      product_name: debouncedProductName || undefined
-    }))
-  }, [debouncedProductName])
-
-  /**
-   * 轉換 API 數據為 ProductItem 格式
-   * 主要處理 price 字段的類型轉換 (number -> string)
-   * 確保端到端類型安全，嚴格禁止使用 any 類型
-   */
-  const transformProductData = (data: ApiProduct[]): ProductItem[] => {
-    return data.map((product: ApiProduct) => ({
-      ...product,
-      variants: product.variants?.map((variant: ApiProductVariant) => ({
-        ...variant,
-        price: variant.price?.toString() || undefined, // 將 number 轉為 string
-      })) || []
-    }))
-  }
-
-  /**
-   * 處理門市篩選變更
-   */
-  const handleStoreChange = (value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      store_id: value === "all" ? undefined : Number(value)
-    }))
-  }
-
-  /**
-   * 處理分類篩選變更
-   */
-  const handleCategoryChange = (value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      category_id: value === "all" ? undefined : Number(value)
-    }))
+  const handleRefresh = () => {
+    refetchInventory()
+    toast({
+      title: "重新整理",
+      description: "已重新載入庫存資料",
+    })
   }
 
   /**
@@ -345,20 +270,41 @@ export function InventoryManagement() {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* 重置按鈕 */}
-          {getActiveFiltersCount() > 0 && (
-            <div className="flex justify-end mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleResetFilters}
-                className="flex items-center gap-2"
-              >
-                <RotateCcw className="h-4 w-4" />
-                重置篩選器
-              </Button>
+      {/* 庫存列表 */}
+      <Card>
+        <CardContent className="p-0">
+          {inventoryError ? (
+            <div className="p-6">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>載入失敗</AlertTitle>
+                <AlertDescription className="flex items-center justify-between">
+                  <span>{inventoryError.message}</span>
+                  {inventoryError.message?.includes('請先登入') && (
+                    <Button asChild size="sm" className="ml-4">
+                      <Link href="/login">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        立即登入
+                      </Link>
+                    </Button>
+                  )}
+                </AlertDescription>
+              </Alert>
             </div>
+          ) : (
+            <InventoryListTable
+              data={inventoryData?.data || []}
+              isLoading={isLoadingInventory}
+              onSelectInventory={(inventoryId, productVariantId, quantity) => {
+                toast({
+                  title: "功能提示",
+                  description: "庫存調整功能可以透過右上角的「新增入庫」來實現",
+                })
+              }}
+            />
           )}
         </CardContent>
       </Card>

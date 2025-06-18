@@ -787,11 +787,23 @@ export function useInventoryList(params: {
         params: { query: params },
       });
       if (error) {
-        throw new Error('獲取庫存列表失敗');
+        // 簡化錯誤處理，避免型別問題
+        const errorString = String(error);
+        if (errorString.includes('401') || errorString.includes('Unauthorized')) {
+          throw new Error('請先登入以查看庫存資料');
+        }
+        throw new Error('獲取庫存列表失敗，請檢查網路連線或稍後再試');
       }
       return data;
     },
     staleTime: 1000 * 60 * 2, // 2 分鐘內保持新鮮（庫存變化較頻繁）
+    retry: (failureCount, error) => {
+      // 認證錯誤不重試
+      if (error.message?.includes('請先登入')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 }
 
@@ -1230,4 +1242,52 @@ export function useUploadProductImage() {
             console.error('圖片上傳失敗:', error);
         },
     });
+}
+
+// ==================== 進貨管理系統 (PURCHASE MANAGEMENT) ====================
+
+/**
+ * 進貨管理相關 Hooks
+ */
+
+// 定義正確的進貨項目型別（覆寫 API 型別定義中的錯誤）
+export interface PurchaseItemRequest {
+  product_variant_id: number;
+  quantity: number;
+  unit_price: number;
+  cost_price: number;
+}
+
+export interface PurchaseRequest {
+  store_id: number;
+  order_number: string;
+  purchased_at?: string;
+  shipping_cost: number;
+  items: PurchaseItemRequest[];
+}
+
+/**
+ * 創建進貨單
+ */
+export function useCreatePurchase() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (purchaseData: PurchaseRequest) => {
+      const { data, error } = await apiClient.POST('/api/purchases', {
+        body: purchaseData as any, // 暫時使用 any 來繞過型別錯誤
+      });
+      
+      if (error) {
+        throw new Error(parseApiErrorMessage(error));
+      }
+      
+      return data;
+    },
+    onSuccess: () => {
+      // 刷新庫存資料
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+    },
+  });
 }

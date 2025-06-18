@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
-import { useInventoryAdjustment, useStores, useProductVariants } from "@/hooks/queries/useEntityQueries"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useInventoryAdjustment, useStores } from "@/hooks/queries/useEntityQueries"
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,10 +21,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
+import { ProductSelector } from "./ProductSelector"
 
 interface AdjustmentFormValues {
   storeId: string;
-  productVariantId: string;
+  productVariantId: number;
   action: 'add' | 'reduce' | 'set';
   quantity: string;
   notes: string;
@@ -35,7 +36,7 @@ interface InventoryAdjustmentFormProps {
   storeId?: number;
   currentQuantity: number;
   onSuccess?: () => void;
-  dialogOpen?: boolean; // 新增：控制是否啟用資料載入
+  dialogOpen?: boolean;
 }
 
 export function InventoryAdjustmentForm({
@@ -43,7 +44,7 @@ export function InventoryAdjustmentForm({
   storeId,
   currentQuantity,
   onSuccess,
-  dialogOpen = true, // 預設為 true，保持向後相容
+  dialogOpen = true,
 }: InventoryAdjustmentFormProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -53,25 +54,6 @@ export function InventoryAdjustmentForm({
 
   // 獲取門市列表
   const { data: storesData, isLoading: isLoadingStores, error: storesError } = useStores()
-
-  // 獲取商品變體列表，當需要選擇產品時
-  const { 
-    data: productsData, 
-    isLoading: isLoadingProducts, 
-    error: productsError 
-  } = useProductVariants({}, { enabled: dialogOpen && isNewProduct })
-
-  // 處理商品變體獲取錯誤
-  useEffect(() => {
-    if (productsError) {
-      console.error('Products error:', productsError);
-      toast({
-        variant: "destructive",
-        title: "載入商品失敗",
-        description: "無法載入商品列表，請檢查網路連線或稍後再試",
-      })
-    }
-  }, [productsError, toast])
 
   // 處理門市獲取錯誤
   useEffect(() => {
@@ -88,7 +70,7 @@ export function InventoryAdjustmentForm({
   const form = useForm<AdjustmentFormValues>({
     defaultValues: {
       storeId: storeId ? storeId.toString() : "",
-      productVariantId: isNewProduct ? "" : productVariantId.toString(),
+      productVariantId: isNewProduct ? 0 : productVariantId,
       action: 'add',
       quantity: '',
       notes: '',
@@ -119,7 +101,7 @@ export function InventoryAdjustmentForm({
     }
     
     const finalProductVariantId = isNewProduct 
-      ? parseInt(data.productVariantId)
+      ? data.productVariantId
       : selectedProductVariantId
     
     // 驗證產品 ID
@@ -208,38 +190,20 @@ export function InventoryAdjustmentForm({
                 name="productVariantId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>選擇產品</FormLabel>
-                    <Select 
-                      disabled={isLoadingProducts || isSubmitting} 
-                      onValueChange={(value) => {
-                        field.onChange(value)
-                        setSelectedProductVariantId(parseInt(value))
-                      }} 
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="選擇產品" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {isLoadingProducts ? (
-                          <SelectItem value="loading" disabled>
-                            載入商品中...
-                          </SelectItem>
-                        ) : productsData?.data && productsData.data.length > 0 ? (
-                          productsData.data.map((variant: import("@/types/api-helpers").ProductVariant) => (
-                            <SelectItem key={variant.id} value={variant.id?.toString() || ''}>
-                              {variant.product?.name} - {variant.sku}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no-products" disabled>
-                            目前沒有可用的商品，請先新增商品
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>選擇商品</FormLabel>
+                    <FormControl>
+                      <ProductSelector
+                        value={field.value}
+                        onValueChange={(variantId, variant) => {
+                          field.onChange(variantId)
+                          setSelectedProductVariantId(variantId)
+                        }}
+                        placeholder="搜尋並選擇商品規格"
+                        disabled={isSubmitting}
+                        showCurrentStock={true}
+                        storeId={parseInt(form.watch("storeId")) || undefined}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -340,4 +304,4 @@ export function InventoryAdjustmentForm({
       </CardContent>
     </Card>
   )
-} 
+}

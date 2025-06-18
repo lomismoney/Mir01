@@ -246,7 +246,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the category.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
             };
@@ -263,7 +263,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 1
+                     * @example 16
                      */
                     id: number;
                 };
@@ -298,7 +298,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 1
+                     * @example 16
                      */
                     id: number;
                 };
@@ -341,7 +341,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 1
+                     * @example 16
                      */
                     id: number;
                 };
@@ -378,7 +378,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
             };
@@ -1925,7 +1925,12 @@ export interface paths {
                              *       {
                              *         "id": 1,
                              *         "sku": "TSHIRT-RED-S",
-                             *         "price": "299.99",
+                             *         "price": 299.99,
+                             *         "cost_price": 150,
+                             *         "average_cost": 165.5,
+                             *         "total_purchased_quantity": 100,
+                             *         "profit_margin": 44.65,
+                             *         "profit_amount": 133.5,
                              *         "product_id": 1,
                              *         "created_at": "2024-01-01T10:00:00.000000Z",
                              *         "updated_at": "2024-01-01T10:00:00.000000Z",
@@ -1979,7 +1984,12 @@ export interface paths {
                              *       {
                              *         "id": 2,
                              *         "sku": "TSHIRT-BLUE-M",
-                             *         "price": "299.99",
+                             *         "price": 299.99,
+                             *         "cost_price": 140,
+                             *         "average_cost": 155.25,
+                             *         "total_purchased_quantity": 80,
+                             *         "profit_margin": 48.17,
+                             *         "profit_amount": 143.75,
                              *         "product_id": 1,
                              *         "created_at": "2024-01-01T10:00:00.000000Z",
                              *         "updated_at": "2024-01-01T10:00:00.000000Z",
@@ -2037,7 +2047,17 @@ export interface paths {
                                 /** @example TSHIRT-RED-S */
                                 sku?: string;
                                 /** @example 299.99 */
-                                price?: string;
+                                price?: number;
+                                /** @example 150 */
+                                cost_price?: number;
+                                /** @example 165.5 */
+                                average_cost?: number;
+                                /** @example 100 */
+                                total_purchased_quantity?: number;
+                                /** @example 44.65 */
+                                profit_margin?: number;
+                                /** @example 133.5 */
+                                profit_amount?: number;
                                 /** @example 1 */
                                 product_id?: number;
                                 /** @example 2024-01-01T10:00:00.000000Z */
@@ -4037,7 +4057,44 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 門市ID
+                     * @example 1
+                     */
+                    store_id: number;
+                    /**
+                     * @description 進貨單號
+                     * @example PO-20240101-001
+                     */
+                    order_number: string;
+                    /**
+                     * @description 進貨日期
+                     * @example 2024-01-01T10:00:00+08:00
+                     */
+                    purchased_at?: string;
+                    /**
+                     * @description 總運費成本
+                     * @example 150
+                     */
+                    shipping_cost: number;
+                    /**
+                     * @description 進貨項目列表
+                     * @example [
+                     *       { "product_variant_id": 123, "quantity": 2, "unit_price": 50, "cost_price": 45 }
+                     *     ]
+                     */
+                    items: {
+                        product_variant_id: number;
+                        quantity: number;
+                        unit_price: number;
+                        cost_price: number;
+                    }[];
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -4049,14 +4106,58 @@ export interface operations {
                         id?: number;
                         /** @example PO-20240101-001 */
                         order_number?: string;
-                        /** @example 150 */
+                        /** @example 4145 */
                         total_amount?: number;
-                        /** @example pending */
+                        /** @example 150 */
+                        shipping_cost?: number;
+                        /** @example completed */
                         status?: string;
                         /** @example 2024-01-01T00:00:00+08:00 */
                         purchased_at?: string;
-                        /** @example [] */
-                        items?: unknown[];
+                        /** @example [
+                         *       {
+                         *         "id": 1,
+                         *         "product_variant_id": 1,
+                         *         "sku": "T-SHIRT-RED-S",
+                         *         "product_name": "經典棉質T-shirt",
+                         *         "quantity": 10,
+                         *         "unit_price": 299,
+                         *         "cost_price": 150,
+                         *         "allocated_shipping_cost": 36.17,
+                         *         "total_cost_price": 186.17
+                         *       },
+                         *       {
+                         *         "id": 2,
+                         *         "product_variant_id": 2,
+                         *         "sku": "T-SHIRT-BLUE-M",
+                         *         "product_name": "經典棉質T-shirt",
+                         *         "quantity": 5,
+                         *         "unit_price": 399,
+                         *         "cost_price": 200,
+                         *         "allocated_shipping_cost": 48.17,
+                         *         "total_cost_price": 248.17
+                         *       }
+                         *     ] */
+                        items?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 1 */
+                            product_variant_id?: number;
+                            /** @example T-SHIRT-RED-S */
+                            sku?: string;
+                            /** @example 經典棉質T-shirt */
+                            product_name?: string;
+                            /** @example 10 */
+                            quantity?: number;
+                            /** @example 299 */
+                            unit_price?: number;
+                            /** @example 150 */
+                            cost_price?: number;
+                            /** @example 36.17 */
+                            allocated_shipping_cost?: number;
+                            /** @example 186.17 */
+                            total_cost_price?: number;
+                        }[];
                     };
                 };
             };
@@ -4203,7 +4304,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
             };
@@ -4220,10 +4321,10 @@ export interface operations {
                         data?: {
                             /** @example 12 */
                             id?: number;
-                            /** @example Cruickshank Inc */
+                            /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
-                            /** @example 532 Leuschke Causeway
-                             *     McLaughlinstad, MI 07365 */
+                            /** @example 80841 Mya Lane Apt. 042
+                             *     Lyricberg, MO 42170-0432 */
                             address?: string;
                             /** @example 2025-06-18T01:24:07.000000Z */
                             created_at?: string;
@@ -4242,7 +4343,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
             };
@@ -4274,10 +4375,10 @@ export interface operations {
                         data?: {
                             /** @example 13 */
                             id?: number;
-                            /** @example Rempel, Gulgowski and O'Kon */
+                            /** @example Dach-Gaylord */
                             name?: string;
-                            /** @example 80841 Mya Lane Apt. 042
-                             *     Lyricberg, MO 42170-0432 */
+                            /** @example 7763 Adriel Fork
+                             *     Antoniobury, PA 31881 */
                             address?: string;
                             /** @example 2025-06-18T01:24:08.000000Z */
                             created_at?: string;
@@ -4296,7 +4397,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
             };

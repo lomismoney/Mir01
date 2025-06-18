@@ -56,8 +56,14 @@ async function getTokenSmart(): Promise<string | null> {
       cachedToken = session?.user?.apiToken || null;
       
       // 🛡️ 安全日誌（僅在開發環境）
-      if (process.env.NODE_ENV === 'development' && cachedToken) {
-        console.log('🔑 Token 已緩存，後續請求將零延遲執行');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔑 Token 獲取狀態:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          hasApiToken: !!session?.user?.apiToken,
+          tokenPrefix: cachedToken ? cachedToken.substring(0, 10) + '...' : 'null',
+          sessionObject: session
+        });
       }
       
       return cachedToken;
@@ -116,8 +122,29 @@ apiClient.use({
     // 🚀 使用智能 token 管理器（零延遲或極低延遲）
     const token = await getTokenSmart();
     
+    // 開發環境中顯示詳細的認證資訊
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 API 請求認證狀態:', {
+        url: request.url,
+        method: request.method,
+        hasToken: !!token,
+        tokenPrefix: token ? token.substring(0, 10) + '...' : 'null',
+        authorizationHeader: request.headers.get('Authorization'),
+        timestamp: new Date().toISOString()
+      });
+    }
+    
     if (token) {
       request.headers.set("Authorization", `Bearer ${token}`);
+      // 再次確認 header 是否正確設置
+      if (process.env.NODE_ENV === 'development') {
+        const authHeader = request.headers.get('Authorization');
+        console.log('🔐 Authorization header 已設置:', {
+          header: authHeader,
+          tokenLength: token.length,
+          headerLength: authHeader?.length
+        });
+      }
     }
     
     // 確保必要的標頭存在
@@ -125,6 +152,31 @@ apiClient.use({
     
     return request;
   },
+  
+  async onResponse({ response }) {
+    // 添加響應日誌
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📡 API 響應狀態:', {
+        url: response.url,
+        status: response.status,
+        statusText: response.statusText,
+        timestamp: new Date().toISOString()
+      });
+      
+      // 如果是認證錯誤，記錄詳細資訊
+      if (response.status === 401) {
+        console.error('🚨 認證失敗:', {
+          url: response.url,
+          status: response.status,
+          headers: Object.fromEntries(response.headers.entries()),
+          requestUrl: response.url,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+    
+    return response;
+  },
 });
 
-export { apiClient }; 
+export { apiClient, getTokenSmart }; 

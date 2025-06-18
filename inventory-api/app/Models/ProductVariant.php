@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * ProductVariant 模型 - 商品變體 (SKU)
@@ -26,9 +26,13 @@ class ProductVariant extends Model
      * 保護 id 和時間戳不被意外修改
      */
     protected $fillable = [
-        'product_id', // 所屬 SPU 商品的 ID
-        'sku',        // 庫存單位編號，全域唯一
-        'price',      // 商品變體價格
+        'product_id',                 // 所屬 SPU 商品的 ID
+        'sku',                       // 庫存單位編號，全域唯一
+        'price',                     // 商品變體價格
+        'cost_price',                // 商品單項成本價格（不含運費）
+        'average_cost',              // 平均成本價格（含運費攤銷）
+        'total_purchased_quantity',  // 累計進貨數量
+        'total_cost_amount',         // 累計成本金額（含運費攤銷）
     ];
 
     /**
@@ -37,6 +41,10 @@ class ProductVariant extends Model
     protected $casts = [
         'product_id' => 'integer',
         'price' => 'decimal:2',
+        'cost_price' => 'decimal:2',
+        'average_cost' => 'decimal:2',
+        'total_purchased_quantity' => 'integer',
+        'total_cost_amount' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -68,14 +76,14 @@ class ProductVariant extends Model
     }
 
     /**
-     * 獲取該變體的庫存記錄
-     * SKU 與庫存是一對一關係
+     * 獲取該變體的所有庫存記錄
+     * 一個 SKU 在不同門市可能都有庫存記錄
      * 
-     * @return HasOne<Inventory>
+     * @return HasMany<Inventory>
      */
-    public function inventory(): HasOne
+    public function inventory(): HasMany
     {
-        return $this->hasOne(Inventory::class);
+        return $this->hasMany(Inventory::class);
     }
 
     /**
@@ -127,5 +135,66 @@ class ProductVariant extends Model
         $combination = $this->getAttributeCombinationAttribute();
         
         return $combination ? "{$productName} - {$combination}" : $productName;
+    }
+
+    /**
+     * 更新平均成本
+     * 根據新的進貨數據重新計算平均成本
+     * 
+     * @param int $newQuantity 新進貨數量
+     * @param float $newCostPrice 新進貨的單項成本
+     * @param float $allocatedShippingCost 攤銷的運費
+     * @return void
+     */
+    public function updateAverageCost(int $newQuantity, float $newCostPrice, float $allocatedShippingCost = 0): void
+    {
+        // 確保屬性不是 null
+        $currentTotalPurchased = $this->total_purchased_quantity ?? 0;
+        $currentTotalCost = $this->total_cost_amount ?? 0.0;
+
+        // 新進貨的總成本
+        $newTotalCost = ($newCostPrice + $allocatedShippingCost) * $newQuantity;
+
+        // 累加歷史數據
+        $updatedTotalPurchased = $currentTotalPurchased + $newQuantity;
+        $updatedTotalCost = $currentTotalCost + $newTotalCost;
+
+        $this->total_purchased_quantity = $updatedTotalPurchased;
+        $this->total_cost_amount = $updatedTotalCost;
+
+        // 避免除以零
+        if ($updatedTotalPurchased > 0) {
+            $this->average_cost = $updatedTotalCost / $updatedTotalPurchased;
+        } else {
+            $this->average_cost = 0;
+        }
+
+        $this->save();
+    }
+
+    /**
+     * 獲取利潤率
+     * 計算售價與平均成本之間的利潤率
+     * 
+     * @return float
+     */
+    public function getProfitMarginAttribute(): float
+    {
+        if ($this->average_cost <= 0) {
+            return 0;
+        }
+        
+        return (($this->price - $this->average_cost) / $this->price) * 100;
+    }
+
+    /**
+     * 獲取利潤金額
+     * 計算售價與平均成本之間的利潤金額
+     * 
+     * @return float
+     */
+    public function getProfitAmountAttribute(): float
+    {
+        return $this->price - $this->average_cost;
     }
 }
