@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { RotateCw as RefreshIcon, Search } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { RotateCw as RefreshIcon, Search, AlertCircle, LogIn } from "lucide-react"
 import { InventoryListTable } from "@/components/inventory/InventoryListTable"
 import { InventoryAdjustmentDialog } from "@/components/inventory/InventoryAdjustmentDialog"
+import Link from "next/link"
 
 export function InventoryManagement() {
   const { toast } = useToast()
@@ -28,6 +30,7 @@ export function InventoryManagement() {
   const {
     data: inventoryData,
     isLoading: isLoadingInventory,
+    error: inventoryError,
     refetch: refetchInventory,
   } = useInventoryList({
     store_id: selectedStoreId,
@@ -142,16 +145,36 @@ export function InventoryManagement() {
       {/* 庫存列表 */}
       <Card>
         <CardContent className="p-0">
-          <InventoryListTable
-            data={inventoryData?.data || []}
-            isLoading={isLoadingInventory}
-            onSelectInventory={(inventoryId, productVariantId, quantity) => {
-              toast({
-                title: "功能提示",
-                description: "庫存調整功能可以透過右上角的「新增入庫」來實現",
-              })
-            }}
-          />
+          {inventoryError ? (
+            <div className="p-6">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>載入失敗</AlertTitle>
+                <AlertDescription className="flex items-center justify-between">
+                  <span>{inventoryError.message}</span>
+                  {inventoryError.message?.includes('請先登入') && (
+                    <Button asChild size="sm" className="ml-4">
+                      <Link href="/login">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        立即登入
+                      </Link>
+                    </Button>
+                  )}
+                </AlertDescription>
+              </Alert>
+            </div>
+          ) : (
+            <InventoryListTable
+              data={inventoryData?.data || []}
+              isLoading={isLoadingInventory}
+              onSelectInventory={(inventoryId, productVariantId, quantity) => {
+                toast({
+                  title: "功能提示",
+                  description: "庫存調整功能可以透過右上角的「新增入庫」來實現",
+                })
+              }}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: 'Laravel API Documentation'
+  title: '庫存管理系統 API Documentation'
   description: ''
   version: 1.0.0
 servers:
@@ -88,21 +88,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 14
+                    id: 12
                     name: 'Mrs. Justina Gaylord'
                     username: lafayette.considine
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-14T22:23:03.000000Z'
-                    updated_at: '2025-06-14T22:23:03.000000Z'
+                    created_at: '2025-06-16T08:28:41.000000Z'
+                    updated_at: '2025-06-16T08:28:41.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 14
+                        example: 12
                       name:
                         type: string
                         example: 'Mrs. Justina Gaylord'
@@ -120,10 +120,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:03.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:03.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
       tags:
         - Endpoints
       security: []
@@ -143,10 +143,31 @@ paths:
                 example:
                   id: 1
                   order_number: PO-20240101-001
-                  total_amount: 150.0
-                  status: pending
+                  total_amount: 4145.0
+                  shipping_cost: 150.0
+                  status: completed
                   purchased_at: '2024-01-01T00:00:00+08:00'
-                  items: []
+                  items:
+                    -
+                      id: 1
+                      product_variant_id: 1
+                      sku: T-SHIRT-RED-S
+                      product_name: 經典棉質T-shirt
+                      quantity: 10
+                      unit_price: 299.0
+                      cost_price: 150.0
+                      allocated_shipping_cost: 36.17
+                      total_cost_price: 186.17
+                    -
+                      id: 2
+                      product_variant_id: 2
+                      sku: T-SHIRT-BLUE-M
+                      product_name: 經典棉質T-shirt
+                      quantity: 5
+                      unit_price: 399.0
+                      cost_price: 200.0
+                      allocated_shipping_cost: 48.17
+                      total_cost_price: 248.17
                 properties:
                   id:
                     type: integer
@@ -156,18 +177,110 @@ paths:
                     example: PO-20240101-001
                   total_amount:
                     type: number
+                    example: 4145.0
+                  shipping_cost:
+                    type: number
                     example: 150.0
                   status:
                     type: string
-                    example: pending
+                    example: completed
                   purchased_at:
                     type: string
                     example: '2024-01-01T00:00:00+08:00'
                   items:
                     type: array
-                    example: []
+                    example:
+                      -
+                        id: 1
+                        product_variant_id: 1
+                        sku: T-SHIRT-RED-S
+                        product_name: 經典棉質T-shirt
+                        quantity: 10
+                        unit_price: 299
+                        cost_price: 150
+                        allocated_shipping_cost: 36.17
+                        total_cost_price: 186.17
+                      -
+                        id: 2
+                        product_variant_id: 2
+                        sku: T-SHIRT-BLUE-M
+                        product_name: 經典棉質T-shirt
+                        quantity: 5
+                        unit_price: 399
+                        cost_price: 200
+                        allocated_shipping_cost: 48.17
+                        total_cost_price: 248.17
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        product_variant_id:
+                          type: integer
+                          example: 1
+                        sku:
+                          type: string
+                          example: T-SHIRT-RED-S
+                        product_name:
+                          type: string
+                          example: 經典棉質T-shirt
+                        quantity:
+                          type: integer
+                          example: 10
+                        unit_price:
+                          type: number
+                          example: 299.0
+                        cost_price:
+                          type: number
+                          example: 150.0
+                        allocated_shipping_cost:
+                          type: number
+                          example: 36.17
+                        total_cost_price:
+                          type: number
+                          example: 186.17
       tags:
         - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                store_id:
+                  type: integer
+                  description: 門市ID
+                  example: 1
+                  nullable: false
+                order_number:
+                  type: string
+                  description: 進貨單號
+                  example: PO-20240101-001
+                  nullable: false
+                purchased_at:
+                  type: string
+                  description: 進貨日期
+                  example: '2024-01-01T10:00:00+08:00'
+                  nullable: false
+                shipping_cost:
+                  type: number
+                  description: 總運費成本
+                  example: 150.0
+                  nullable: false
+                items:
+                  type: array
+                  description: 進貨項目列表
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - store_id
+                - order_number
+                - shipping_cost
+                - items
       security: []
   /api/categories:
     post:
@@ -405,7 +518,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the category.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -559,18 +672,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 7
+                    id: 23
                     name: 'Bailey Ltd'
                     address: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    created_at: '2025-06-16T08:28:41.000000Z'
+                    updated_at: '2025-06-16T08:28:41.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 7
+                        example: 23
                       name:
                         type: string
                         example: 'Bailey Ltd'
@@ -579,10 +692,10 @@ paths:
                         example: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -619,30 +732,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 8
-                    name: 'Cruickshank Inc'
-                    address: "532 Leuschke Causeway\nMcLaughlinstad, MI 07365"
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    id: 24
+                    name: "Rempel, Gulgowski and O'Kon"
+                    address: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
+                    created_at: '2025-06-16T08:28:41.000000Z'
+                    updated_at: '2025-06-16T08:28:41.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 8
+                        example: 24
                       name:
                         type: string
-                        example: 'Cruickshank Inc'
+                        example: "Rempel, Gulgowski and O'Kon"
                       address:
                         type: string
-                        example: "532 Leuschke Causeway\nMcLaughlinstad, MI 07365"
+                        example: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -659,30 +772,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 9
-                    name: "Rempel, Gulgowski and O'Kon"
-                    address: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    id: 25
+                    name: Dach-Gaylord
+                    address: "7763 Adriel Fork\nAntoniobury, PA 31881"
+                    created_at: '2025-06-16T08:28:41.000000Z'
+                    updated_at: '2025-06-16T08:28:41.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 9
+                        example: 25
                       name:
                         type: string
-                        example: "Rempel, Gulgowski and O'Kon"
+                        example: Dach-Gaylord
                       address:
                         type: string
-                        example: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
+                        example: "7763 Adriel Fork\nAntoniobury, PA 31881"
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -717,7 +830,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the store.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -736,30 +849,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 10
-                    name: 'Jenkins Group'
-                    address: "885 Koelpin Wells Suite 038\nNew Allenfurt, CT 41106-9708"
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    id: 26
+                    name: 'Zboncak LLC'
+                    address: "828 Dorthy Glen Suite 140\nMurrayland, MI 71111-4231"
+                    created_at: '2025-06-16T08:28:41.000000Z'
+                    updated_at: '2025-06-16T08:28:41.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 10
+                        example: 26
                       name:
                         type: string
-                        example: 'Jenkins Group'
+                        example: 'Zboncak LLC'
                       address:
                         type: string
-                        example: "885 Koelpin Wells Suite 038\nNew Allenfurt, CT 41106-9708"
+                        example: "828 Dorthy Glen Suite 140\nMurrayland, MI 71111-4231"
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -776,21 +889,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 15
+                    id: 13
                     name: 'Ms. Elisabeth Okuneva'
                     username: gulgowski.asia
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-14T22:23:04.000000Z'
-                    updated_at: '2025-06-14T22:23:04.000000Z'
+                    created_at: '2025-06-16T08:28:41.000000Z'
+                    updated_at: '2025-06-16T08:28:41.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 15
+                        example: 13
                       name:
                         type: string
                         example: 'Ms. Elisabeth Okuneva'
@@ -808,10 +921,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-14T22:23:04.000000Z'
+                        example: '2025-06-16T08:28:41.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -2236,7 +2349,12 @@ paths:
                     -
                       id: 1
                       sku: TSHIRT-RED-S
-                      price: '299.99'
+                      price: 299.99
+                      cost_price: 150.0
+                      average_cost: 165.5
+                      total_purchased_quantity: 100
+                      profit_margin: 44.65
+                      profit_amount: 133.5
                       product_id: 1
                       created_at: '2024-01-01T10:00:00.000000Z'
                       updated_at: '2024-01-01T10:00:00.000000Z'
@@ -2278,7 +2396,12 @@ paths:
                     -
                       id: 2
                       sku: TSHIRT-BLUE-M
-                      price: '299.99'
+                      price: 299.99
+                      cost_price: 140.0
+                      average_cost: 155.25
+                      total_purchased_quantity: 80
+                      profit_margin: 48.17
+                      profit_amount: 143.75
                       product_id: 1
                       created_at: '2024-01-01T10:00:00.000000Z'
                       updated_at: '2024-01-01T10:00:00.000000Z'
@@ -2337,7 +2460,12 @@ paths:
                       -
                         id: 1
                         sku: TSHIRT-RED-S
-                        price: '299.99'
+                        price: 299.99
+                        cost_price: 150
+                        average_cost: 165.5
+                        total_purchased_quantity: 100
+                        profit_margin: 44.65
+                        profit_amount: 133.5
                         product_id: 1
                         created_at: '2024-01-01T10:00:00.000000Z'
                         updated_at: '2024-01-01T10:00:00.000000Z'
@@ -2379,7 +2507,12 @@ paths:
                       -
                         id: 2
                         sku: TSHIRT-BLUE-M
-                        price: '299.99'
+                        price: 299.99
+                        cost_price: 140
+                        average_cost: 155.25
+                        total_purchased_quantity: 80
+                        profit_margin: 48.17
+                        profit_amount: 143.75
                         product_id: 1
                         created_at: '2024-01-01T10:00:00.000000Z'
                         updated_at: '2024-01-01T10:00:00.000000Z'
@@ -2428,8 +2561,23 @@ paths:
                           type: string
                           example: TSHIRT-RED-S
                         price:
-                          type: string
-                          example: '299.99'
+                          type: number
+                          example: 299.99
+                        cost_price:
+                          type: number
+                          example: 150.0
+                        average_cost:
+                          type: number
+                          example: 165.5
+                        total_purchased_quantity:
+                          type: integer
+                          example: 100
+                        profit_margin:
+                          type: number
+                          example: 44.65
+                        profit_amount:
+                          type: number
+                          example: 133.5
                         product_id:
                           type: integer
                           example: 1

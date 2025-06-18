@@ -87,7 +87,7 @@ export function ProductSelector({
         setSelectedVariant({
             id: variant.id,
             sku: variant.sku,
-            price: variant.price,
+            price: variant.price?.toString(),
             product_id: variant.product_id,
             created_at: variant.created_at,
             updated_at: variant.updated_at,

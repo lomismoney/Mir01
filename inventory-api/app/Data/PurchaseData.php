@@ -20,6 +20,9 @@ class PurchaseData extends Data
         #[Rule(['nullable', 'date'])]
         public ?Carbon $purchased_at,
 
+        #[Rule(['required', 'numeric', 'min:0'])]
+        public float $shipping_cost,
+
         #[Rule(['required', 'array', 'min:1'])]
         #[DataCollectionOf(PurchaseItemData::class)]
         public array $items,

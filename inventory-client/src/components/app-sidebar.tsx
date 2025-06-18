@@ -133,18 +133,18 @@ const data = {
   ] as NavLink[],
   navClouds: [
     {
-      title: "入庫管理",
+      title: "進貨管理",
       icon: IconPackage,
       isActive: true,
-      url: "/inbound",
+      url: "/purchases",
       items: [
         {
-          title: "待入庫",
-          url: "/inbound/pending",
+          title: "新增進貨",
+          url: "/purchases",
         },
         {
-          title: "已入庫",
-          url: "/inbound/completed",
+          title: "進貨記錄",
+          url: "/purchases/history",
         },
       ],
     },

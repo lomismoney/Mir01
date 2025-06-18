@@ -509,14 +509,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 14,
+        &quot;id&quot;: 12,
         &quot;name&quot;: &quot;Mrs. Justina Gaylord&quot;,
         &quot;username&quot;: &quot;lafayette.considine&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;
     }
 }</code>
  </pre>
@@ -607,7 +607,17 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <pre><code class="language-bash">curl --request POST \
     "http://localhost/api/purchases" \
     --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre></div>
+    --header "Accept: application/json" \
+    --data "{
+    \"store_id\": 1,
+    \"order_number\": \"PO-20240101-001\",
+    \"purchased_at\": \"2024-01-01T10:00:00+08:00\",
+    \"shipping_cost\": 150,
+    \"items\": [
+        \"architecto\"
+    ]
+}"
+</code></pre></div>
 
 
 <div class="javascript-example">
@@ -620,9 +630,20 @@ const headers = {
     "Accept": "application/json",
 };
 
+let body = {
+    "store_id": 1,
+    "order_number": "PO-20240101-001",
+    "purchased_at": "2024-01-01T10:00:00+08:00",
+    "shipping_cost": 150,
+    "items": [
+        "architecto"
+    ]
+};
+
 fetch(url, {
     method: "POST",
     headers,
+    body: JSON.stringify(body),
 }).then(response =&gt; response.json());</code></pre></div>
 
 </span>
@@ -636,10 +657,34 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;id&quot;: 1,
     &quot;order_number&quot;: &quot;PO-20240101-001&quot;,
-    &quot;total_amount&quot;: 150,
-    &quot;status&quot;: &quot;pending&quot;,
+    &quot;total_amount&quot;: 4145,
+    &quot;shipping_cost&quot;: 150,
+    &quot;status&quot;: &quot;completed&quot;,
     &quot;purchased_at&quot;: &quot;2024-01-01T00:00:00+08:00&quot;,
-    &quot;items&quot;: []
+    &quot;items&quot;: [
+        {
+            &quot;id&quot;: 1,
+            &quot;product_variant_id&quot;: 1,
+            &quot;sku&quot;: &quot;T-SHIRT-RED-S&quot;,
+            &quot;product_name&quot;: &quot;經典棉質T-shirt&quot;,
+            &quot;quantity&quot;: 10,
+            &quot;unit_price&quot;: 299,
+            &quot;cost_price&quot;: 150,
+            &quot;allocated_shipping_cost&quot;: 36.17,
+            &quot;total_cost_price&quot;: 186.17
+        },
+        {
+            &quot;id&quot;: 2,
+            &quot;product_variant_id&quot;: 2,
+            &quot;sku&quot;: &quot;T-SHIRT-BLUE-M&quot;,
+            &quot;product_name&quot;: &quot;經典棉質T-shirt&quot;,
+            &quot;quantity&quot;: 5,
+            &quot;unit_price&quot;: 399,
+            &quot;cost_price&quot;: 200,
+            &quot;allocated_shipping_cost&quot;: 48.17,
+            &quot;total_cost_price&quot;: 248.17
+        }
+    ]
 }</code>
  </pre>
     </span>
@@ -712,7 +757,107 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <br>
 <p>Example: <code>application/json</code></p>
             </div>
-                        </form>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>store_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="store_id"                data-endpoint="POSTapi-purchases"
+               value="1"
+               data-component="body">
+    <br>
+<p>門市ID Example: <code>1</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>order_number</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="order_number"                data-endpoint="POSTapi-purchases"
+               value="PO-20240101-001"
+               data-component="body">
+    <br>
+<p>進貨單號 Example: <code>PO-20240101-001</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>purchased_at</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+                <input type="text" style="display: none"
+                              name="purchased_at"                data-endpoint="POSTapi-purchases"
+               value="2024-01-01T10:00:00+08:00"
+               data-component="body">
+    <br>
+<p>進貨日期 Example: <code>2024-01-01T10:00:00+08:00</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>shipping_cost</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="shipping_cost"                data-endpoint="POSTapi-purchases"
+               value="150"
+               data-component="body">
+    <br>
+<p>總運費成本 Example: <code>150</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>items</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+ &nbsp;
+<br>
+<p>進貨項目列表</p>
+            </summary>
+                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>product_variant_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="items.0.product_variant_id"                data-endpoint="POSTapi-purchases"
+               value="1"
+               data-component="body">
+    <br>
+<p>商品變體ID Example: <code>1</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>quantity</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="items.0.quantity"                data-endpoint="POSTapi-purchases"
+               value="10"
+               data-component="body">
+    <br>
+<p>數量 Example: <code>10</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>unit_price</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="items.0.unit_price"                data-endpoint="POSTapi-purchases"
+               value="299"
+               data-component="body">
+    <br>
+<p>單價 Example: <code>299</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>cost_price</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="items.0.cost_price"                data-endpoint="POSTapi-purchases"
+               value="150"
+               data-component="body">
+    <br>
+<p>成本價格 Example: <code>150</code></p>
+                    </div>
+                                    </details>
+        </div>
+        </form>
 
                     <h2 id="endpoints-POSTapi-categories">儲存新建立的分類資源</h2>
 
@@ -1523,11 +1668,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 7,
+        &quot;id&quot;: 23,
         &quot;name&quot;: &quot;Bailey Ltd&quot;,
         &quot;address&quot;: &quot;85625 Gaylord Knolls\nCecilburgh, WI 02042&quot;,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1640,14 +1785,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/stores/1" \
+    --get "http://localhost/api/stores/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/stores/1"
+    "http://localhost/api/stores/16"
 );
 
 const headers = {
@@ -1670,11 +1815,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 8,
-        &quot;name&quot;: &quot;Cruickshank Inc&quot;,
-        &quot;address&quot;: &quot;532 Leuschke Causeway\nMcLaughlinstad, MI 07365&quot;,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;id&quot;: 24,
+        &quot;name&quot;: &quot;Rempel, Gulgowski and O&#039;Kon&quot;,
+        &quot;address&quot;: &quot;80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432&quot;,
+        &quot;created_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1755,10 +1900,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-stores--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the store. Example: <code>1</code></p>
+<p>The ID of the store. Example: <code>16</code></p>
             </div>
                     </form>
 
@@ -1776,7 +1921,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/stores/1" \
+    "http://localhost/api/stores/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1788,7 +1933,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/stores/1"
+    "http://localhost/api/stores/16"
 );
 
 const headers = {
@@ -1817,11 +1962,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 9,
-        &quot;name&quot;: &quot;Rempel, Gulgowski and O&#039;Kon&quot;,
-        &quot;address&quot;: &quot;80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432&quot;,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;id&quot;: 25,
+        &quot;name&quot;: &quot;Dach-Gaylord&quot;,
+        &quot;address&quot;: &quot;7763 Adriel Fork\nAntoniobury, PA 31881&quot;,
+        &quot;created_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;
     }
 }</code>
  </pre>
@@ -1906,10 +2051,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-stores--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the store. Example: <code>1</code></p>
+<p>The ID of the store. Example: <code>16</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -1950,14 +2095,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/stores/1" \
+    "http://localhost/api/stores/16" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/stores/1"
+    "http://localhost/api/stores/16"
 );
 
 const headers = {
@@ -2050,10 +2195,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-stores--id-"
-               value="1"
+               value="16"
                data-component="url">
     <br>
-<p>The ID of the store. Example: <code>1</code></p>
+<p>The ID of the store. Example: <code>16</code></p>
             </div>
                     </form>
 
@@ -2105,11 +2250,11 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 10,
-        &quot;name&quot;: &quot;Williamson, Boyle and Hane&quot;,
-        &quot;address&quot;: &quot;963 Kemmer Divide Suite 369\nWest Vernice, GA 89877&quot;,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;id&quot;: 26,
+        &quot;name&quot;: &quot;Zboncak LLC&quot;,
+        &quot;address&quot;: &quot;828 Dorthy Glen Suite 140\nMurrayland, MI 71111-4231&quot;,
+        &quot;created_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;
     }
 }</code>
  </pre>
@@ -2254,14 +2399,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 15,
+        &quot;id&quot;: 13,
         &quot;name&quot;: &quot;Ms. Elisabeth Okuneva&quot;,
         &quot;username&quot;: &quot;gulgowski.asia&quot;,
         &quot;role&quot;: &quot;viewer&quot;,
         &quot;role_display&quot;: &quot;檢視者&quot;,
         &quot;is_admin&quot;: false,
-        &quot;created_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2025-06-16T04:48:20.000000Z&quot;
+        &quot;created_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2025-06-16T08:28:41.000000Z&quot;
     }
 }</code>
  </pre>
@@ -4714,7 +4859,12 @@ fetch(url, {
         {
             &quot;id&quot;: 1,
             &quot;sku&quot;: &quot;TSHIRT-RED-S&quot;,
-            &quot;price&quot;: &quot;299.99&quot;,
+            &quot;price&quot;: 299.99,
+            &quot;cost_price&quot;: 150,
+            &quot;average_cost&quot;: 165.5,
+            &quot;total_purchased_quantity&quot;: 100,
+            &quot;profit_margin&quot;: 44.65,
+            &quot;profit_amount&quot;: 133.5,
             &quot;product_id&quot;: 1,
             &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
             &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
@@ -4768,7 +4918,12 @@ fetch(url, {
         {
             &quot;id&quot;: 2,
             &quot;sku&quot;: &quot;TSHIRT-BLUE-M&quot;,
-            &quot;price&quot;: &quot;299.99&quot;,
+            &quot;price&quot;: 299.99,
+            &quot;cost_price&quot;: 140,
+            &quot;average_cost&quot;: 155.25,
+            &quot;total_purchased_quantity&quot;: 80,
+            &quot;profit_margin&quot;: 48.17,
+            &quot;profit_amount&quot;: 143.75,
             &quot;product_id&quot;: 1,
             &quot;created_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,
             &quot;updated_at&quot;: &quot;2024-01-01T10:00:00.000000Z&quot;,

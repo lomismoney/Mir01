@@ -36,6 +36,10 @@ class InventoryResource extends JsonResource
                     'id' => $this->productVariant->id,
                     'sku' => $this->productVariant->sku,
                     'price' => $this->productVariant->price,
+                    'cost_price' => $this->productVariant->cost_price,
+                    'average_cost' => $this->productVariant->average_cost,
+                    'profit_margin' => $this->productVariant->profit_margin,
+                    'profit_amount' => $this->productVariant->profit_amount,
                     'product' => $this->whenLoaded('productVariant', function () {
                         return $this->productVariant->product ? [
                             'id' => $this->productVariant->product->id,

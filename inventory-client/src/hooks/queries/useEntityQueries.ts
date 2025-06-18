@@ -86,14 +86,40 @@ export function useProduct(id: number) {
     });
 }
 
-// 商品創建端點暫時未定義 - 等待後端實現
+// 導入由 openapi-typescript 生成的精確商品創建類型
+type CreateProductRequestBody = import('@/types/api').paths["/api/products"]["post"]["requestBody"]["content"]["application/json"];
 
 /**
- * 創建商品的 Hook (暫時停用 - 等待後端端點實現)
- * TODO: 需要後端實現 POST /api/products 端點
+ * 創建商品的 Hook
+ * 
+ * 支援 SPU/SKU 架構的商品創建：
+ * 1. 創建 SPU (Standard Product Unit) - 商品主體
+ * 2. 關聯商品屬性 (如顏色、尺寸等規格類型)
+ * 3. 創建 SKU (Stock Keeping Unit) - 具體的庫存單位變體
+ * 4. 為每個 SKU 在所有門市自動建立初始庫存記錄
+ * 
+ * @returns React Query 變更結果
  */
 export function useCreateProduct() {
-  throw new Error('創建商品功能暫時停用 - 等待後端端點實現');
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (body: CreateProductRequestBody) => {
+      const { data, error } = await apiClient.POST('/api/products', { body });
+      
+      if (error) {
+        // 使用類型安全的錯誤處理
+        const errorMessage = parseApiErrorMessage(error) || '創建商品失敗';
+        throw new Error(errorMessage);
+      }
+      
+      return data;
+    },
+    onSuccess: () => {
+      // 成功後更新快取
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
 }
 
 // 導入由 openapi-typescript 生成的精確類型
@@ -672,11 +698,23 @@ export function useInventoryList(params: {
         params: { query: params },
       });
       if (error) {
-        throw new Error('獲取庫存列表失敗');
+        // 簡化錯誤處理，避免型別問題
+        const errorString = String(error);
+        if (errorString.includes('401') || errorString.includes('Unauthorized')) {
+          throw new Error('請先登入以查看庫存資料');
+        }
+        throw new Error('獲取庫存列表失敗，請檢查網路連線或稍後再試');
       }
       return data;
     },
     staleTime: 1000 * 60 * 2, // 2 分鐘內保持新鮮（庫存變化較頻繁）
+    retry: (failureCount, error) => {
+      // 認證錯誤不重試
+      if (error.message?.includes('請先登入')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 }
 
@@ -1069,5 +1107,51 @@ export function useProductVariantDetail(id: number) {
       return data;
     },
     enabled: !!id,
+  });
+}
+
+/**
+ * 進貨管理相關 Hooks
+ */
+
+// 定義正確的進貨項目型別（覆寫 API 型別定義中的錯誤）
+export interface PurchaseItemRequest {
+  product_variant_id: number;
+  quantity: number;
+  unit_price: number;
+  cost_price: number;
+}
+
+export interface PurchaseRequest {
+  store_id: number;
+  order_number: string;
+  purchased_at?: string;
+  shipping_cost: number;
+  items: PurchaseItemRequest[];
+}
+
+/**
+ * 創建進貨單
+ */
+export function useCreatePurchase() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (purchaseData: PurchaseRequest) => {
+      const { data, error } = await apiClient.POST('/api/purchases', {
+        body: purchaseData as any, // 暫時使用 any 來繞過型別錯誤
+      });
+      
+      if (error) {
+        throw new Error(parseApiErrorMessage(error));
+      }
+      
+      return data;
+    },
+    onSuccess: () => {
+      // 刷新庫存資料
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+    },
   });
 }
