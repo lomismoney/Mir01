@@ -362,9 +362,9 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
               )}
               <li>• 自動跳轉到商品列表頁面</li>
             </ul>
-            <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
               商品創建後可隨時編輯修改，所有變更都會即時生效。
-            </p>
+              </p>
           </div>
         </CardContent>
       </Card>

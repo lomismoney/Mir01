@@ -167,19 +167,27 @@ export function useCreateProduct() {
             
             return data;
         },
-        onSuccess: (data) => {
-            // 統一的快取失效機制 - 專業級數據同步
-            queryClient.invalidateQueries({
-                queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
-                exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
-                refetchType: 'active', // 關鍵：立即重取活躍的查詢
-            });
+        onSuccess: async (data) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                })
+            ]);
             
             // 使用 toast 顯示成功訊息
             if (typeof window !== 'undefined') {
                 const { toast } = require('sonner');
                 toast.success('商品創建成功！', {
-                    description: `商品「${data?.data?.name}」已成功創建，包含 ${data?.data?.variants?.length || 0} 個 SKU 變體。`
+                    description: `商品「${data?.data?.name}」已成功創建，商品列表已自動更新。`
                 });
             }
         },
@@ -231,19 +239,27 @@ export function useCreateSimpleProduct() {
             
             return data;
         },
-        onSuccess: (data) => {
-            // 統一的快取失效機制 - 專業級數據同步
-            queryClient.invalidateQueries({
-                queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
-                exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
-                refetchType: 'active', // 關鍵：立即重取活躍的查詢
-            });
+        onSuccess: async (data) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                })
+            ]);
             
             // 使用 toast 顯示成功訊息
             if (typeof window !== 'undefined') {
                 const { toast } = require('sonner');
                 toast.success('單規格商品創建成功！', {
-                    description: `商品「${data?.data?.name}」已成功創建為單規格商品。`
+                    description: `商品「${data?.data?.name}」已成功創建，商品列表已自動更新。`
                 });
             }
         },
@@ -290,17 +306,24 @@ export function useUpdateProduct() {
             
             return data;
         },
-        onSuccess: (data, variables) => {
-            // 統一的快取失效機制 - 專業級數據同步
-            queryClient.invalidateQueries({
-                queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
-                exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
-                refetchType: 'active', // 關鍵：立即重取活躍的查詢
-            });
-            
-            // 單個實體詳情頁的快取處理
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.id) });
-            queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.PRODUCT(variables.id), 'detail'] });
+        onSuccess: async (data, variables) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                }),
+                // 3. 單個實體詳情頁的快取處理
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.id) }),
+                queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.PRODUCT(variables.id), 'detail'] })
+            ]);
             
             // 🎯 在 Hook 層級不顯示 toast，讓組件層級處理
             // 這樣可以提供更靈活的用戶反饋控制
@@ -337,13 +360,21 @@ export function useDeleteProduct() {
             
             return data;
         },
-        onSuccess: (data, id) => {
-            // 統一的快取失效機制 - 專業級數據同步
-            queryClient.invalidateQueries({
-                queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
-                exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
-                refetchType: 'active', // 關鍵：立即重取活躍的查詢
-            });
+        onSuccess: async (data, id) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                })
+            ]);
             
             // 移除已刪除商品的快取
             queryClient.removeQueries({ queryKey: QUERY_KEYS.PRODUCT(id) });
@@ -377,12 +408,25 @@ export function useDeleteMultipleProducts() {
         throw new Error(errorMessage);
       }
     },
-    onSuccess: () => {
-      // 統一的快取失效機制 - 專業級數據同步
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
-        exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
-        refetchType: 'active', // 關鍵：立即重取活躍的查詢
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有商品查詢緩存
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.PRODUCTS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的商品查詢
+        queryClient.refetchQueries({
+          queryKey: QUERY_KEYS.PRODUCTS,
+          exact: false,
+        })
+      ]);
+      
+      // 移除已刪除商品的快取
+      variables.ids.forEach(id => {
+        queryClient.removeQueries({ queryKey: QUERY_KEYS.PRODUCT(id) });
       });
     },
   });
@@ -1318,10 +1362,26 @@ export function useUploadProductImage() {
             
             return data;
         },
-        onSuccess: (data, variables) => {
-            // 成功後更新相關快取
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) });
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+        onSuccess: async (data, variables) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 圖片上傳專用
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                }),
+                // 3. 特定商品詳情的緩存處理
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) }),
+                queryClient.refetchQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) })
+            ]);
+            
+            console.log('🖼️ 圖片上傳完成，已強制刷新商品緩存');
         },
         onError: (error) => {
             console.error('圖片上傳失敗:', error);

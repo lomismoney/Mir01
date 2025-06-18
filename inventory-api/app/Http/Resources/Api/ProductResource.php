@@ -23,7 +23,7 @@ class ProductResource extends JsonResource
      * - 使用 whenLoaded 避免 N+1 查詢問題
      * - 提供完整的圖片 URL 結構
      * - 包含圖片狀態資訊
-     * 
+     *
      * @param Request $request
      * @return array<string, mixed>
      */
@@ -37,7 +37,7 @@ class ProductResource extends JsonResource
             
             // 分類資訊（當已載入時）
             'category' => new CategoryResource($this->whenLoaded('category')),
-            
+        
             // 變體資訊（當已載入時）
             'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),
             'variant_count' => $this->when(

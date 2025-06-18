@@ -567,7 +567,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       
       // 延遲跳轉，讓用戶看到成功提示
       setTimeout(() => {
-        router.push('/products');
+      router.push('/products');
       }, 1500);
 
     } catch (error) {
