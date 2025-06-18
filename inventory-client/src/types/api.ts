@@ -4083,10 +4083,15 @@ export interface operations {
                     /**
                      * @description 進貨項目列表
                      * @example [
-                     *       "architecto"
+                     *       { "product_variant_id": 123, "quantity": 2, "unit_price": 50, "cost_price": 45 }
                      *     ]
                      */
-                    items: string[];
+                    items: {
+                        product_variant_id: number;
+                        quantity: number;
+                        unit_price: number;
+                        cost_price: number;
+                    }[];
                 };
             };
         };
