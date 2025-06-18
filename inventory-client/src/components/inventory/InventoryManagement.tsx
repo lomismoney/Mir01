@@ -70,7 +70,6 @@ export function InventoryManagement() {
 
   const handleRefresh = () => {
     refetchInventory()
-    refetchProducts()
     toast({
       title: "重新整理",
       description: "已重新載入庫存資料",
@@ -145,7 +144,6 @@ export function InventoryManagement() {
   const handleAdjustInventory = (skuId: number, currentQuantity: number) => {
     // 刷新庫存資料
     refetchInventory()
-    refetchProducts()
   }
 
   /**
@@ -233,20 +231,32 @@ export function InventoryManagement() {
   }
 
   // 顯示錯誤狀態
-  if (isError) {
+  if (inventoryError) {
     return (
+      <div className="space-y-6 p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">庫存管理</h2>
+          <Alert className="max-w-md mx-auto">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>載入失敗</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>無法載入庫存資料，請稍後再試</span>
+              <Button variant="outline" size="sm" onClick={handleRefresh} className="ml-4">
+                <RefreshIcon className="h-4 w-4 mr-2" />
+                重試
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    )
+  }
+
+  return (
     <div className="space-y-6 p-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-4">庫存管理</h2>
-          <p className="text-muted-foreground mb-4">
-          此功能正在開發中，請稍後再試。
-          </p>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-          <p className="text-yellow-800">
-            📋 技術債務：需要修復庫存管理頁面的狀態管理和 UI 組件導入問題
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-center">
           <Button
             onClick={() => setPurchaseDialogOpen(true)}
             className="flex items-center gap-2"
@@ -418,15 +428,13 @@ export function InventoryManagement() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>載入失敗</AlertTitle>
                 <AlertDescription className="flex items-center justify-between">
-                  <span>{inventoryError.message}</span>
-                  {inventoryError.message?.includes('請先登入') && (
-                    <Button asChild size="sm" className="ml-4">
-                      <Link href="/login">
-                        <LogIn className="h-4 w-4 mr-2" />
-                        立即登入
-                      </Link>
-                    </Button>
-                  )}
+                  <span>無法載入庫存資料</span>
+                  <Button asChild size="sm" className="ml-4">
+                    <Link href="/login">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      立即登入
+                    </Link>
+                  </Button>
                 </AlertDescription>
               </Alert>
             </div>
@@ -472,7 +480,6 @@ export function InventoryManagement() {
         onOpenChange={setPurchaseDialogOpen}
         onSuccess={() => {
           refetchInventory()
-          refetchProducts()
           toast({
             title: "進貨成功",
             description: "商品已成功入庫，庫存已更新",
@@ -480,5 +487,5 @@ export function InventoryManagement() {
         }}
       />
     </div>
-  );
+  )
 } 

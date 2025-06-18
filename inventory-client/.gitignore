@@ -48,6 +48,9 @@ next-env.d.ts
 test-*.js
 test-*.ts
 test-*.tsx
+
+# auto-generated API types
+src/types/api.ts
 debug-*.js
 debug-*.ts
 debug-*.tsx
