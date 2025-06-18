@@ -44,6 +44,7 @@ interface EnhancedSku extends ProductVariant {
   attributes: string;
   quantity: number;
   threshold: number;
+  average_cost?: number;
 }
 
 /**
@@ -146,6 +147,8 @@ export function InventoryNestedTable({
         const totalQuantity = variant.inventory?.reduce((sum: number, inv: any) => sum + (inv.quantity || 0), 0) || 0;
         // 取最低的低庫存閾值
         const threshold = Math.min(...(variant.inventory?.map((inv: any) => inv.low_stock_threshold || 0) || [0]));
+        // 獲取平均成本（如果有的話）
+        const average_cost = (variant as any)?.average_cost;
         
         return {
           ...variant,
@@ -153,6 +156,7 @@ export function InventoryNestedTable({
           attributes: formatAttributes(variant.attribute_values),
           quantity: totalQuantity,
           threshold,
+          average_cost,
         };
       });
 
@@ -207,11 +211,11 @@ export function InventoryNestedTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]"></TableHead>
-            <TableHead>產品名稱</TableHead>
-            <TableHead className="text-center">總庫存</TableHead>
-            <TableHead className="text-center">規格數量</TableHead>
-            <TableHead className="text-center">狀態</TableHead>
-            <TableHead className="text-right">操作</TableHead>
+            <TableHead className="w-[300px]">產品名稱</TableHead>
+            <TableHead className="text-center w-[120px]">總庫存</TableHead>
+            <TableHead className="text-center w-[120px]">規格數量</TableHead>
+            <TableHead className="text-center w-[120px]">狀態</TableHead>
+            <TableHead className="text-right w-[120px]">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -219,7 +223,7 @@ export function InventoryNestedTable({
             // 載入中顯示骨架屏
             Array.from({ length: 3 }).map((_, index) => (
               <TableRow key={`skeleton-${index}`}>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={8}>
                   <Skeleton className="h-12 w-full" />
                 </TableCell>
               </TableRow>
@@ -227,7 +231,7 @@ export function InventoryNestedTable({
           ) : enhancedData.length === 0 ? (
             // 無資料顯示
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 <div className="flex flex-col items-center justify-center space-y-3 py-6">
                   <Package className="h-12 w-12 text-muted-foreground" />
                   <p className="text-lg font-medium text-muted-foreground">沒有庫存資料</p>
@@ -298,7 +302,7 @@ export function InventoryNestedTable({
                 // SKU 詳情行（條件渲染）
                 ...(isExpanded ? [
                   <TableRow key={`sku-header-${spuId}`} className="bg-background">
-                    <TableCell colSpan={6} className="p-0">
+                    <TableCell colSpan={8} className="p-0">
                       <div className="p-4 border-l-4 border-l-blue-200 bg-slate-50">
                         <div className="mb-3">
                           <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -312,18 +316,20 @@ export function InventoryNestedTable({
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="text-xs">SKU 編號</TableHead>
-                                <TableHead className="text-xs">規格屬性</TableHead>
-                                <TableHead className="text-xs text-center">總庫存</TableHead>
-                                <TableHead className="text-xs text-center">低庫存閾值</TableHead>
-                                <TableHead className="text-xs text-center">狀態</TableHead>
-                                <TableHead className="text-xs text-right">操作</TableHead>
+                                <TableHead className="text-xs w-[120px]">SKU 編號</TableHead>
+                                <TableHead className="text-xs w-[200px]">規格屬性</TableHead>
+                                <TableHead className="text-xs text-center w-[100px]">總庫存</TableHead>
+                                <TableHead className="text-xs text-center w-[100px]">低庫存閾值</TableHead>
+                                <TableHead className="text-xs text-right w-[120px]">售價</TableHead>
+                                <TableHead className="text-xs text-right w-[120px]">平均成本</TableHead>
+                                <TableHead className="text-xs text-center w-[100px]">狀態</TableHead>
+                                <TableHead className="text-xs text-right w-[100px]">操作</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {spu.enhancedSkus.length === 0 ? (
                                 <TableRow>
-                                  <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                                  <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
                                     此產品暫無變體資料
                                   </TableCell>
                                 </TableRow>
@@ -346,6 +352,20 @@ export function InventoryNestedTable({
                                       <TableCell className="text-center text-muted-foreground">
                                         {sku.threshold.toLocaleString()}
                                       </TableCell>
+                                      <TableCell className="text-right font-medium">
+                                        {typeof sku.price === 'string' && parseFloat(sku.price) > 0 
+                                          ? `NT$ ${parseFloat(sku.price).toLocaleString()}` 
+                                          : (sku.price && Number(sku.price) > 0)
+                                            ? `NT$ ${Number(sku.price).toLocaleString()}`
+                                            : "—"
+                                        }
+                                      </TableCell>
+                                      <TableCell className="text-right font-medium">
+                                        {(sku as any)?.average_cost && (sku as any).average_cost > 0
+                                          ? `NT$ ${(sku as any).average_cost.toLocaleString()}`
+                                          : "—"
+                                        }
+                                      </TableCell>
                                       <TableCell className="text-center">
                                         <Badge 
                                           variant={getStatusBadgeVariant(sku.status)} 
@@ -356,7 +376,7 @@ export function InventoryNestedTable({
                                         </Badge>
                                       </TableCell>
                                       <TableCell className="text-right">
-                                        <div className="flex items-center gap-1">
+                                        <div className="flex items-center justify-end gap-1">
                                           <Button
                                             variant="ghost"
                                             size="icon"

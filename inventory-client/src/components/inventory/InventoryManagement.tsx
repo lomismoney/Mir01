@@ -25,7 +25,6 @@ import {
   PackageX,
   Package
 } from "lucide-react"
-import { InventoryListTable } from "@/components/inventory/InventoryListTable"
 import { CreatePurchaseDialog } from "@/components/purchases/CreatePurchaseDialog"
 import Link from "next/link"
 
@@ -234,37 +233,47 @@ export function InventoryManagement() {
   if (inventoryError) {
     return (
       <div className="space-y-6 p-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">庫存管理</h2>
-          <Alert className="max-w-md mx-auto">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>載入失敗</AlertTitle>
-            <AlertDescription className="flex items-center justify-between">
-              <span>無法載入庫存資料，請稍後再試</span>
-              <Button variant="outline" size="sm" onClick={handleRefresh} className="ml-4">
-                <RefreshIcon className="h-4 w-4 mr-2" />
-                重試
-              </Button>
-            </AlertDescription>
-          </Alert>
+        {/* 頁面標題區 */}
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-2xl font-bold">庫存管理</h1>
+          <p className="text-muted-foreground">
+            管理商品庫存數量、監控庫存水位和處理庫存調整
+          </p>
         </div>
+        
+        <Alert className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>載入失敗</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>無法載入庫存資料，請稍後再試</span>
+            <Button variant="outline" size="sm" onClick={handleRefresh} className="ml-4">
+              <RefreshIcon className="h-4 w-4 mr-2" />
+              重試
+            </Button>
+          </AlertDescription>
+        </Alert>
       </div>
     )
   }
 
   return (
     <div className="space-y-6 p-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">庫存管理</h2>
-        <div className="flex items-center gap-2 justify-center">
-          <Button
-            onClick={() => setPurchaseDialogOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Package className="h-4 w-4" />
-            商品入庫
-          </Button>
+      {/* 頁面標題區 */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">庫存管理</h1>
+          <p className="text-muted-foreground">
+            管理商品庫存數量、監控庫存水位和處理庫存調整
+          </p>
         </div>
+        
+        <Button
+          onClick={() => setPurchaseDialogOpen(true)}
+          className="flex items-center gap-2"
+        >
+          <Package className="h-4 w-4 mr-1" />
+          商品入庫
+        </Button>
       </div>
 
       {/* 篩選器區域 */}
@@ -410,15 +419,15 @@ export function InventoryManagement() {
         </CardContent>
       </Card>
 
-      {/* 庫存列表 */}
+      {/* 商品庫存明細 */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            庫存總覽
+            商品庫存明細
           </CardTitle>
           <CardDescription>
-            顯示各商品變體的庫存狀況，包含成本與利潤分析
+            按商品分組顯示庫存詳情，支援展開查看各變體的庫存狀況
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -439,38 +448,13 @@ export function InventoryManagement() {
               </Alert>
             </div>
           ) : (
-            <InventoryListTable
-              data={inventoryData?.data || []}
+            <InventoryNestedTable
+              data={transformInventoryToProductData(inventoryData?.data || [])}
               isLoading={isLoadingInventory}
-              onSelectInventory={() => {
-                toast({
-                  title: "功能提示",
-                  description: "請使用下方巢狀表格中的修改庫存按鈕來調整個別商品的庫存數量",
-                })
-              }}
+              onAdjustInventory={handleAdjustInventory}
+              onManageProduct={handleManageProduct}
             />
           )}
-        </CardContent>
-      </Card>
-
-      {/* 巢狀庫存表格 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Tag className="h-5 w-5" />
-            商品庫存明細
-          </CardTitle>
-          <CardDescription>
-            按商品分組顯示庫存詳情，支援展開查看各變體的庫存狀況
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          <InventoryNestedTable
-            data={transformInventoryToProductData(inventoryData?.data || [])}
-            isLoading={isLoadingInventory}
-            onAdjustInventory={handleAdjustInventory}
-            onManageProduct={handleManageProduct}
-          />
         </CardContent>
       </Card>
 
