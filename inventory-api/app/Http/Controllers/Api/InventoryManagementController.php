@@ -274,66 +274,20 @@ class InventoryManagementController extends Controller
     /**
      * 獲取特定 SKU 的所有庫存歷史記錄
      * 
-     * @urlParam sku string required 商品SKU. Example: T001-M-RED
-     * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
-     * @queryParam type string 交易類型篩選. Example: transfer_in
-     * @queryParam start_date date 起始日期. Example: 2023-01-01
-     * @queryParam end_date date 結束日期. Example: 2023-12-31
-     * @queryParam per_page integer 每頁顯示數量，預設20. Example: 50
+     * 查詢指定 SKU 在所有門市的庫存變動歷史，支援多種篩選條件
      * 
+     * @group 庫存管理
      * @authenticated
-     * @response 200 {
-     *   "message": "成功獲取 SKU 歷史記錄",
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "inventory_id": 1,
-     *       "user_id": 1,
-     *       "type": "transfer_out",
-     *       "quantity": -2,
-     *       "before_quantity": 10,
-     *       "after_quantity": 8,
-     *       "notes": "轉出至門市 #2",
-     *       "metadata": {"transfer_id": 1},
-     *       "created_at": "2023-01-01T10:00:00.000000Z",
-     *       "updated_at": "2023-01-01T10:00:00.000000Z",
-     *       "store": {
-     *         "id": 1,
-     *         "name": "台中店"
-     *       },
-     *       "user": {
-     *         "name": "Admin User"
-     *       },
-     *       "product": {
-     *         "name": "商品名稱",
-     *         "sku": "T001-M-RED"
-     *       }
-     *     }
-     *   ],
-     *   "inventories": [
-     *     {
-     *       "id": 1,
-     *       "quantity": 8,
-     *       "low_stock_threshold": 5,
-     *       "store": {
-     *         "id": 1,
-     *         "name": "台中店"
-     *       },
-     *       "product_variant": {
-     *         "sku": "T001-M-RED",
-     *         "product": {
-     *           "name": "商品名稱"
-     *         }
-     *       }
-     *     }
-     *   ],
-     *   "pagination": {
-     *     "current_page": 1,
-     *     "per_page": 20,
-     *     "total": 10,
-     *     "last_page": 1
-     *   }
-     * }
+     * 
+     * @urlParam sku string required 商品SKU編號. Example: T001-M-RED
+     * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
+     * @queryParam type string 交易類型篩選 (addition, reduction, adjustment, transfer_in, transfer_out, transfer_cancel). Example: transfer_in
+     * @queryParam start_date date 起始日期 (YYYY-MM-DD). Example: 2023-01-01
+     * @queryParam end_date date 結束日期 (YYYY-MM-DD). Example: 2023-12-31
+     * @queryParam per_page integer 每頁顯示數量，預設20，最大100. Example: 50
+     * @queryParam page integer 頁碼. Example: 1
+     * 
+     * @responseFile storage/responses/inventory.sku.history.json
      * 
      * @param Request $request
      * @param string $sku

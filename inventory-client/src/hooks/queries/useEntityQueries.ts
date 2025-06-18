@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
 import { parseApiErrorMessage } from '@/types/error';
-import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, CustomerFilters, Customer } from '@/types/api-helpers';
+import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, CustomerFilters, Customer, AttributePathParams } from '@/types/api-helpers';
 
 /**
  * API Hooks - 商品管理
@@ -22,6 +22,7 @@ export const QUERY_KEYS = {
     CUSTOMERS: ['customers'] as const,
     CUSTOMER: (id: number) => ['customers', id] as const,
     CATEGORIES: ['categories'] as const,
+    CATEGORY: (id: number) => ['categories', id] as const,
     ATTRIBUTES: ['attributes'] as const,
 };
 
@@ -686,12 +687,12 @@ export function useCustomerDetail(customerId: number | null) {
       const { data, error } = await apiClient.GET('/api/customers/{id}', {
         params: { path: { id: customerId } },
       });
-      
-      if (error) { 
+
+      if (error) {
         const errorMessage = parseApiErrorMessage(error);
         throw new Error(errorMessage || '獲取客戶詳情失敗');
-      }
-      
+        }
+        
       return data;
     },
     enabled: !!customerId, // 只有在 customerId 存在時，此查詢才會被觸發
@@ -941,6 +942,216 @@ export function useUpdateCustomer() {
   });
 }
 
+// ==================== 分類管理系統 (CATEGORY MANAGEMENT) ====================
+
+/**
+ * 獲取分類列表 Hook
+ * 
+ * 🎯 功能：為分類管理頁面提供分類列表查詢
+ * 
+ * 功能特性：
+ * 1. 支援搜索篩選參數
+ * 2. 智能查詢鍵結構，支援精確緩存失效
+ * 3. 類型安全的 API 調用
+ * 4. 標準化的錯誤處理
+ * 
+ * @param filters - 篩選參數，支援 search
+ * @returns React Query 查詢結果
+ */
+export function useCategories(filters: { search?: string } = {}) {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.CATEGORIES, filters],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET("/api/categories", {
+        params: { query: filters },
+      });
+      if (error) throw error;
+      return data;
+    },
+    // 🚀 體驗優化配置
+    placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
+    refetchOnMount: false,       // 依賴全域 staleTime
+    refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
+    staleTime: 5 * 60 * 1000,   // 5 分鐘緩存，分類資料相對穩定
+  });
+}
+
+/**
+ * 創建分類的 Mutation Hook
+ * 
+ * 🚀 功能：為新增分類功能提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 成功後自動刷新分類列表 - 標準化緩存處理
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+  
+  type CreateCategoryRequestBody = import('@/types/api').paths["/api/categories"]["post"]["requestBody"]["content"]["application/json"];
+  
+  return useMutation({
+    mutationFn: async (categoryData: CreateCategoryRequestBody) => {
+      const { data, error } = await apiClient.POST("/api/categories", { body: categoryData });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async () => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.CATEGORIES, 
+          exact: false,
+          refetchType: 'active' 
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.CATEGORIES,
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("分類已成功創建");
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("創建失敗", { description: errorMessage });
+      }
+    },
+  });
+}
+
+/**
+ * 更新分類的 Mutation Hook
+ * 
+ * 🔧 功能：為分類編輯功能提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 雙重緩存失效策略 - 同時更新列表和詳情緩存
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useUpdateCategory() {
+  const queryClient = useQueryClient();
+  
+  type UpdateCategoryRequestBody = import('@/types/api').paths["/api/categories/{id}"]["put"]["requestBody"]["content"]["application/json"];
+  type UpdateCategoryPayload = {
+    id: number;
+    data: UpdateCategoryRequestBody;
+  };
+  
+  return useMutation({
+    mutationFn: async (payload: UpdateCategoryPayload) => {
+      const { data, error } = await apiClient.PUT("/api/categories/{id}", {
+        params: { path: { id: payload.id } },
+        body: payload.data,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.CATEGORIES, 
+          exact: false,
+          refetchType: 'active' 
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.CATEGORIES,
+          exact: false
+        }),
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.CATEGORY(variables.id), 
+          refetchType: 'active' 
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("分類已成功更新");
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("更新失敗", { description: errorMessage });
+      }
+    },
+  });
+}
+
+/**
+ * 刪除分類的 Mutation Hook
+ * 
+ * 🔥 功能：為分類刪除功能提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 成功後自動刷新分類列表 - 標準化緩存處理
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (categoryId: number) => {
+      const { data, error } = await apiClient.DELETE("/api/categories/{id}", {
+        params: { path: { id: categoryId } },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async () => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.CATEGORIES, 
+          exact: false,
+          refetchType: 'active' 
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.CATEGORIES,
+          exact: false
+        })
+      ]);
+      
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("分類已成功刪除");
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("刪除失敗", { description: errorMessage });
+      }
+    },
+  });
+}
+
 // ==================== 屬性管理系統 (ATTRIBUTE MANAGEMENT) ====================
 
 /**
@@ -1028,7 +1239,7 @@ export function useUpdateAttribute() {
 export function useDeleteAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (pathParams: { id: number; attribute: number }) => {
+    mutationFn: async (pathParams: AttributePathParams) => {
       const { error } = await apiClient.DELETE('/api/attributes/{id}', {
         params: { path: pathParams },
       });
@@ -1256,8 +1467,7 @@ export function useSkuInventoryHistory(params: {
   return useQuery({
     queryKey: ['inventory', 'sku-history', params],
     queryFn: async () => {
-      // @ts-ignore - API 路徑暫時不在 OpenAPI 定義中
-      const { data, error } = await apiClient.GET('/api/inventory/sku/{sku}/history' as any, {
+      const { data, error } = await apiClient.GET('/api/inventory/sku/{sku}/history', {
         params: { 
           path: { sku: params.sku },
           query: {
@@ -1530,16 +1740,16 @@ export function useProductVariants(params: {
     queryKey: ['product-variants', params],
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/products/variants', {
-        params: { query: params },
-      });
-      if (error) {
+          params: { query: params },
+        });
+        if (error) {
         throw new Error('獲取商品變體列表失敗');
-      }
-      return data;
+        }
+        return data;
     },
     enabled: options?.enabled !== false,
     staleTime: 1000 * 60 * 5, // 5 分鐘緩存時間
-  });
+    });
 }
 
 // ==================== 進貨管理系統 (PURCHASE MANAGEMENT) ====================
@@ -1562,6 +1772,9 @@ export interface PurchaseRequest {
   items: PurchaseItemRequest[];
 }
 
+// 從 API 契約中導入精確的類型定義
+type CreatePurchaseRequestBody = import('@/types/api').paths["/api/purchases"]["post"]["requestBody"]["content"]["application/json"];
+
 /**
  * 創建進貨單
  */
@@ -1569,9 +1782,9 @@ export function useCreatePurchase() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (purchaseData: PurchaseRequest) => {
+    mutationFn: async (purchaseData: CreatePurchaseRequestBody) => {
       const { data, error } = await apiClient.POST('/api/purchases', {
-        body: purchaseData as any, // 暫時使用 any 來繞過型別錯誤
+        body: purchaseData,
       });
       
       if (error) {
@@ -1584,6 +1797,95 @@ export function useCreatePurchase() {
       // 刷新庫存資料
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+    },
+  });
+}
+
+/**
+ * 上傳商品圖片的 Mutation Hook
+ * 
+ * 🖼️ 功能：為商品圖片上傳功能提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 支援單張圖片上傳到指定商品
+ * 2. 使用 FormData 處理 multipart/form-data 格式
+ * 3. 成功後自動刷新商品列表和詳情 - 確保圖片立即顯示
+ * 4. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 5. 標準化的錯誤處理
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useUploadProductImage() {
+  const queryClient = useQueryClient();
+  
+  // 定義上傳圖片的請求體類型
+  // 注意：由於 openapi-fetch 對 multipart/form-data 的類型推斷限制，
+  // 我們需要使用 unknown 而非 any，這樣更安全且語義更清晰
+  type UploadImageRequestBody = FormData;
+  
+  return useMutation({
+    mutationFn: async (payload: { productId: number; imageFile: File }) => {
+      const formData = new FormData();
+      formData.append('image', payload.imageFile);
+
+      // 注意：對於 multipart/form-data，openapi-fetch 需要特殊處理
+      // 使用 unknown 類型斷言是當前的最佳實踐，直到 openapi-fetch 
+      // 提供更好的 multipart/form-data 類型支援
+      const { data, error } = await apiClient.POST("/api/products/{product_id}/upload-image", {
+        params: {
+          path: { 
+            product_id: payload.productId,
+            id: payload.productId  // OpenAPI 定義中似乎有重複的參數，我們兩個都提供
+          },
+        },
+        body: formData as unknown as {
+          image: string;
+        },
+        // openapi-fetch 會自動處理 multipart/form-data 的 Content-Type，此處無需手動設置
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有商品查詢緩存（縮圖可能更新）
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.PRODUCTS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的商品查詢
+        queryClient.refetchQueries({
+          queryKey: QUERY_KEYS.PRODUCTS,
+          exact: false,
+        }),
+        // 3. 失效特定商品的詳情緩存（image_urls 已更新）
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.PRODUCT(variables.productId),
+          refetchType: 'active',
+        }),
+        // 4. 失效商品詳情的緩存
+        queryClient.invalidateQueries({
+          queryKey: [...QUERY_KEYS.PRODUCT(variables.productId), 'detail'],
+          refetchType: 'active',
+        })
+      ]);
+      
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("圖片已成功上傳");
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiErrorMessage(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("圖片上傳失敗", { description: errorMessage });
+      }
     },
   });
 }

@@ -247,3 +247,14 @@ export type CustomerFilters = {
   /** 每頁項目數 */
   per_page?: number;
 };
+
+/**
+ * 屬性路徑參數類型定義
+ * 
+ * 用於需要同時傳遞屬性 ID 和相關 ID 的 API 端點
+ * 例如：更新屬性、刪除屬性值等操作
+ */
+export type AttributePathParams = {
+  id: number;
+  attribute: number;
+};

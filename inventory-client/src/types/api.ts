@@ -46,11 +46,11 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 16 */
+                                /** @example 12 */
                                 id?: number;
-                                /** @example Mrs. Justina Gaylord */
+                                /** @example Lonny Ankunding */
                                 name?: string;
-                                /** @example lafayette.considine */
+                                /** @example eloisa.harber */
                                 username?: string;
                                 /** @example viewer */
                                 role?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-18T01:24:06.000000Z */
+                                /** @example 2025-06-18T15:59:25.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-18T01:24:06.000000Z */
+                                /** @example 2025-06-18T15:59:25.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -215,17 +215,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example architecto
+                         * @example consequatur
                          */
                         name: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Eius et animi quos velit et.
+                         * @example Dolores dolorum amet iste laborum eius est dolor.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID。例如：1
-                         * @example 16
+                         * @example 17
                          */
                         parent_id?: number | null;
                     };
@@ -246,7 +246,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the category.
-                 * @example 16
+                 * @example 1
                  */
                 id: number;
             };
@@ -263,7 +263,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                 };
@@ -298,7 +298,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                 };
@@ -309,17 +309,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example architecto
+                         * @example consequatur
                          */
                         name?: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Eius et animi quos velit et.
+                         * @example Dolores dolorum amet iste laborum eius est dolor.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID且不能是自己。例如：1
-                         * @example 16
+                         * @example 17
                          */
                         parent_id?: number | null;
                     };
@@ -341,7 +341,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 16
+                     * @example 1
                      */
                     id: number;
                 };
@@ -378,7 +378,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 16
+                 * @example 1
                  */
                 id: number;
             };
@@ -574,7 +574,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一）。例如：顏色
-                         * @example architecto
+                         * @example consequatur
                          */
                         name: string;
                     };
@@ -676,7 +676,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
-                         * @example architecto
+                         * @example consequatur
                          */
                         name: string;
                     };
@@ -758,7 +758,7 @@ export interface paths {
                         /**
                          * @description 要刪除的商品 ID 列表。例如：[1, 2, 3]
                          * @example [
-                         *       "architecto"
+                         *       "consequatur"
                          *     ]
                          */
                         ids: string[];
@@ -856,13 +856,13 @@ export interface paths {
                                 /** @example true */
                                 has_image?: boolean;
                                 image_urls?: {
-                                    /** @example http://localhost:8000/storage/1/product-image.jpg */
+                                    /** @example http://localhost/storage/1/product-image.jpg */
                                     original?: string;
-                                    /** @example http://localhost:8000/storage/1/conversions/product-image-thumb.jpg */
+                                    /** @example http://localhost/storage/1/conversions/product-image-thumb.jpg */
                                     thumb?: string;
-                                    /** @example http://localhost:8000/storage/1/conversions/product-image-medium.jpg */
+                                    /** @example http://localhost/storage/1/conversions/product-image-medium.jpg */
                                     medium?: string;
-                                    /** @example http://localhost:8000/storage/1/conversions/product-image-large.jpg */
+                                    /** @example http://localhost/storage/1/conversions/product-image-large.jpg */
                                     large?: string;
                                 };
                             };
@@ -918,6 +918,27 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/simple": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 創建單規格商品 (v3.0 雙軌制 API 端點)
+         * @description 專門處理單規格商品的快速創建，無需前端處理複雜的 SPU/SKU 屬性結構。
+         *     此端點在後端內部自動處理標準屬性的創建和關聯，提供最簡化的創建體驗。
+         */
+        post: operations["v30API"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1320,26 +1341,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/products/simple": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 建立簡化單規格商品 (Single Variant Product)
-         * @description 專門用於創建單一規格商品的簡化端點，自動處理 SPU/SKU 結構和標準屬性
-         */
-        post: operations["createSimpleProduct"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/products/{id}": {
         parameters: {
             query?: never;
@@ -1613,23 +1614,23 @@ export interface paths {
                         variants?: {
                             /**
                              * @description The <code>id</code> of an existing record in the product_variants table.
-                             * @example 16
+                             * @example 17
                              */
                             id?: number;
                             /**
                              * @description Must not be greater than 255 characters.
-                             * @example n
+                             * @example mqeopfuudtdsufvyvddqa
                              */
                             sku: string;
                             /**
                              * @description Must be at least 0.
-                             * @example 84
+                             * @example 45
                              */
                             price: number;
                             /**
                              * @description The <code>id</code> of an existing record in the attribute_values table.
                              * @example [
-                             *       16
+                             *       17
                              *     ]
                              */
                             attribute_value_ids?: number[];
@@ -2209,7 +2210,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the variant.
-                 * @example architecto
+                 * @example consequatur
                  */
                 id: string;
             };
@@ -2223,7 +2224,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the variant.
-                     * @example architecto
+                     * @example consequatur
                      */
                     id: string;
                 };
@@ -2247,6 +2248,328 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getApiCustomers"];
+        put?: never;
+        /** 創建新客戶 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description 客戶名稱或公司抬頭.
+                         * @example 測試客戶
+                         */
+                        name: string;
+                        /**
+                         * @description 手機號碼.
+                         * @example 0987654321
+                         */
+                        phone?: string | null;
+                        /**
+                         * @description 是否為公司戶.
+                         * @example false
+                         */
+                        is_company: boolean;
+                        /**
+                         * @description 統一編號 (is_company為true時必填).
+                         * @example 12345678
+                         */
+                        tax_id?: string | null;
+                        /**
+                         * @description 行業別.
+                         * @example 設計師
+                         */
+                        industry_type: string;
+                        /**
+                         * @description 付款類別.
+                         * @example 現金付款
+                         */
+                        payment_type: string;
+                        /**
+                         * @description 主要聯絡地址.
+                         * @example 台北市信義區
+                         */
+                        contact_address?: string | null;
+                        /**
+                         * @description nullable 運送地址列表.
+                         * @example [
+                         *       "consequatur"
+                         *     ]
+                         */
+                        addresses?: (string | null)[];
+                    };
+                };
+            };
+            responses: {
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 測試客戶 */
+                                name?: string;
+                                /** @example 0987654321 */
+                                phone?: string;
+                                /** @example false */
+                                is_company?: boolean;
+                                /** @example null */
+                                tax_id?: string;
+                                /** @example 設計師 */
+                                industry_type?: string;
+                                /** @example 現金付款 */
+                                payment_type?: string;
+                                /** @example 台北市信義區 */
+                                contact_address?: string;
+                                /** @example 0.00 */
+                                total_unpaid_amount?: string;
+                                /** @example 0.00 */
+                                total_completed_amount?: string;
+                                /** @example 2025-06-18T10:30:00.000000Z */
+                                created_at?: string;
+                                /** @example 2025-06-18T10:30:00.000000Z */
+                                updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "customer_id": 1,
+                                 *         "address": "台北市大安區復興南路一段100號",
+                                 *         "is_default": true,
+                                 *         "created_at": "2025-06-18T10:30:00.000000Z",
+                                 *         "updated_at": "2025-06-18T10:30:00.000000Z"
+                                 *       },
+                                 *       {
+                                 *         "id": 2,
+                                 *         "customer_id": 1,
+                                 *         "address": "台北市信義區市府路45號",
+                                 *         "is_default": false,
+                                 *         "created_at": "2025-06-18T10:30:00.000000Z",
+                                 *         "updated_at": "2025-06-18T10:30:00.000000Z"
+                                 *       }
+                                 *     ] */
+                                addresses?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 1 */
+                                    customer_id?: number;
+                                    /** @example 台北市大安區復興南路一段100號 */
+                                    address?: string;
+                                    /** @example true */
+                                    is_default?: boolean;
+                                    /** @example 2025-06-18T10:30:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2025-06-18T10:30:00.000000Z */
+                                    updated_at?: string;
+                                }[];
+                                default_address?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 1 */
+                                    customer_id?: number;
+                                    /** @example 台北市大安區復興南路一段100號 */
+                                    address?: string;
+                                    /** @example true */
+                                    is_default?: boolean;
+                                    /** @example 2025-06-18T10:30:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2025-06-18T10:30:00.000000Z */
+                                    updated_at?: string;
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer.
+                 * @example 1
+                 */
+                id: number;
+                /**
+                 * @description 客戶的 ID。
+                 * @example 1
+                 */
+                customer: number;
+            };
+            cookie?: never;
+        };
+        /** 顯示指定的客戶詳細資訊 */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /**
+                     * @description The ID of the customer.
+                     * @example 1
+                     */
+                    id: number;
+                    /**
+                     * @description 客戶的 ID。
+                     * @example 1
+                     */
+                    customer: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 優秀科技有限公司 */
+                                name?: string;
+                                /** @example 02-12345678 */
+                                phone?: string;
+                                /** @example true */
+                                is_company?: boolean;
+                                /** @example 98765432 */
+                                tax_id?: string;
+                                /** @example 科技業 */
+                                industry_type?: string;
+                                /** @example 轉帳付款 */
+                                payment_type?: string;
+                                /** @example 台北市信義區市府路45號12樓 */
+                                contact_address?: string;
+                                /** @example 15000.00 */
+                                total_unpaid_amount?: string;
+                                /** @example 85000.00 */
+                                total_completed_amount?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "customer_id": 1,
+                                 *         "address": "台北市信義區市府路45號12樓",
+                                 *         "is_default": true,
+                                 *         "created_at": "2025-06-18T10:30:00.000000Z",
+                                 *         "updated_at": "2025-06-18T10:30:00.000000Z"
+                                 *       },
+                                 *       {
+                                 *         "id": 2,
+                                 *         "customer_id": 1,
+                                 *         "address": "台中市西屯區台灣大道三段99號",
+                                 *         "is_default": false,
+                                 *         "created_at": "2025-06-18T10:30:00.000000Z",
+                                 *         "updated_at": "2025-06-18T10:30:00.000000Z"
+                                 *       },
+                                 *       {
+                                 *         "id": 3,
+                                 *         "customer_id": 1,
+                                 *         "address": "高雄市前鎮區成功二路88號",
+                                 *         "is_default": false,
+                                 *         "created_at": "2025-06-18T10:30:00.000000Z",
+                                 *         "updated_at": "2025-06-18T10:30:00.000000Z"
+                                 *       }
+                                 *     ] */
+                                addresses?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 1 */
+                                    customer_id?: number;
+                                    /** @example 台北市信義區市府路45號12樓 */
+                                    address?: string;
+                                    /** @example true */
+                                    is_default?: boolean;
+                                    /** @example 2025-06-18T10:30:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2025-06-18T10:30:00.000000Z */
+                                    updated_at?: string;
+                                }[];
+                                default_address?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 1 */
+                                    customer_id?: number;
+                                    /** @example 台北市信義區市府路45號12樓 */
+                                    address?: string;
+                                    /** @example true */
+                                    is_default?: boolean;
+                                    /** @example 2025-06-18T10:30:00.000000Z */
+                                    created_at?: string;
+                                    /** @example 2025-06-18T10:30:00.000000Z */
+                                    updated_at?: string;
+                                };
+                                /** @example 2025-06-18T10:30:00.000000Z */
+                                created_at?: string;
+                                /** @example 2025-06-18T10:30:00.000000Z */
+                                updated_at?: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** 刪除指定的客戶 */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /**
+                     * @description The ID of the customer.
+                     * @example 1
+                     */
+                    id: number;
+                    /**
+                     * @description 客戶的 ID。
+                     * @example 1
+                     */
+                    customer: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 刪除成功 */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -2395,7 +2718,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一）。例如：紅色
-                         * @example architecto
+                         * @example consequatur
                          */
                         value: string;
                     };
@@ -2494,7 +2817,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-                         * @example architecto
+                         * @example consequatur
                          */
                         value: string;
                     };
@@ -2815,7 +3138,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the inventory.
-                 * @example architecto
+                 * @example consequatur
                  */
                 id: string;
             };
@@ -2829,7 +3152,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the inventory.
-                     * @example architecto
+                     * @example consequatur
                      */
                     id: string;
                 };
@@ -2971,19 +3294,104 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                401: {
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": {
-                            /** @example Unauthenticated. */
-                            message?: string;
+                            /** @example 1 */
+                            current_page?: number;
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "inventory_id": 1,
+                             *         "user_id": 1,
+                             *         "type": "addition",
+                             *         "quantity": 10,
+                             *         "before_quantity": 0,
+                             *         "after_quantity": 10,
+                             *         "notes": "初始庫存",
+                             *         "metadata": [],
+                             *         "created_at": "2023-01-01T10:00:00.000000Z",
+                             *         "updated_at": "2023-01-01T10:00:00.000000Z",
+                             *         "user": {
+                             *           "name": "Admin User"
+                             *         }
+                             *       }
+                             *     ] */
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 1 */
+                                inventory_id?: number;
+                                /** @example 1 */
+                                user_id?: number;
+                                /** @example addition */
+                                type?: string;
+                                /** @example 10 */
+                                quantity?: number;
+                                /** @example 0 */
+                                before_quantity?: number;
+                                /** @example 10 */
+                                after_quantity?: number;
+                                /** @example 初始庫存 */
+                                notes?: string;
+                                metadata?: Record<string, never>;
+                                /** @example 2023-01-01T10:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2023-01-01T10:00:00.000000Z */
+                                updated_at?: string;
+                                user?: {
+                                    /** @example Admin User */
+                                    name?: string;
+                                };
+                            }[];
+                            /** @example http://localhost/api/inventory/1/history?page=1 */
+                            first_page_url?: string;
+                            /** @example 1 */
+                            from?: number;
+                            /** @example 1 */
+                            last_page?: number;
+                            /** @example http://localhost/api/inventory/1/history?page=1 */
+                            last_page_url?: string;
+                            /** @example 15 */
+                            per_page?: number;
+                            /** @example 1 */
+                            to?: number;
+                            /** @example 1 */
+                            total?: number;
                         };
                     };
                 };
             };
         };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inventory/sku/{sku}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 商品SKU編號.
+                 * @example T001-M-RED
+                 */
+                sku: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * 獲取特定 SKU 的所有庫存歷史記錄
+         * @description 查詢指定 SKU 在所有門市的庫存變動歷史，支援多種篩選條件
+         */
+        get: operations["SKU"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3391,7 +3799,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the transfer.
-                 * @example architecto
+                 * @example consequatur
                  */
                 id: string;
             };
@@ -3405,7 +3813,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the transfer.
-                     * @example architecto
+                     * @example consequatur
                      */
                     id: string;
                 };
@@ -3535,64 +3943,6 @@ export interface paths {
         };
         trace?: never;
     };
-    "/api/customers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * 獲取客戶列表
-         * @description 獲取系統中的客戶列表，支援搜尋篩選
-         */
-        get: operations["getCustomers"];
-        put?: never;
-        /**
-         * 建立新客戶
-         * @description 建立新客戶資料
-         */
-        post: operations["createCustomer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/customers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description 客戶 ID
-                 * @example 1
-                 */
-                id: number;
-            };
-            cookie?: never;
-        };
-        /**
-         * 獲取指定客戶資料
-         * @description 根據客戶 ID 獲取特定客戶的完整資料
-         */
-        get: operations["getCustomer"];
-        /**
-         * 更新指定客戶資料
-         * @description 更新客戶資料，支援部分更新
-         */
-        put: operations["updateCustomer"];
-        post?: never;
-        /**
-         * 刪除指定客戶
-         * @description 刪除客戶及其所有相關資料（地址等），此操作無法撤銷
-         */
-        delete: operations["deleteCustomer"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/users": {
         parameters: {
             query?: never;
@@ -3715,22 +4065,22 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 用戶姓名。例如：張三
-                         * @example architecto
+                         * @example consequatur
                          */
                         name: string;
                         /**
                          * @description 用戶名（唯一）。例如：zhangsan
-                         * @example architecto
+                         * @example consequatur
                          */
                         username: string;
                         /**
                          * @description 用戶密碼（至少8個字元）。例如：password123
-                         * @example |]|{+-
+                         * @example O[2UZ5ij-e/dl4m{o,
                          */
                         password: string;
                         /**
                          * @description 用戶角色，必須是 admin 或 viewer。例如：admin
-                         * @example architecto
+                         * @example consequatur
                          */
                         role: string;
                     };
@@ -4161,7 +4511,7 @@ export interface operations {
                     /**
                      * @description 進貨項目列表
                      * @example [
-                     *       "architecto"
+                     *       "consequatur"
                      *     ]
                      */
                     items: string[];
@@ -4334,12 +4684,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一）。例如：台北總店
-                     * @example architecto
+                     * @example consequatur
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example architecto
+                     * @example consequatur
                      */
                     address?: string | null;
                 };
@@ -4353,16 +4703,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 11 */
+                            /** @example 15 */
                             id?: number;
-                            /** @example Bailey Ltd */
+                            /** @example Mueller-Dibbert */
                             name?: string;
-                            /** @example 85625 Gaylord Knolls
-                             *     Cecilburgh, WI 02042 */
+                            /** @example 87713 Brandy Roads Suite 202
+                             *     Williamsonfort, CT 64474 */
                             address?: string;
-                            /** @example 2025-06-18T01:24:07.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:07.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4377,7 +4727,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 16
+                 * @example 1
                  */
                 id: number;
             };
@@ -4392,16 +4742,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 12 */
+                            /** @example 16 */
                             id?: number;
-                            /** @example Rempel, Gulgowski and O'Kon */
+                            /** @example Kunde Group */
                             name?: string;
-                            /** @example 80841 Mya Lane Apt. 042
-                             *     Lyricberg, MO 42170-0432 */
+                            /** @example 62028 Trudie Mills
+                             *     North Cordie, IL 75592 */
                             address?: string;
-                            /** @example 2025-06-18T01:24:07.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:07.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4416,7 +4766,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 16
+                 * @example 1
                  */
                 id: number;
             };
@@ -4427,12 +4777,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一，會排除當前分店）。例如：台北信義店
-                     * @example architecto
+                     * @example consequatur
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example architecto
+                     * @example consequatur
                      */
                     address?: string | null;
                 };
@@ -4446,16 +4796,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 13 */
+                            /** @example 17 */
                             id?: number;
-                            /** @example Dach-Gaylord */
+                            /** @example Moore-Emard */
                             name?: string;
-                            /** @example 7763 Adriel Fork
-                             *     Antoniobury, PA 31881 */
+                            /** @example 27319 Schmeler Fall Suite 958
+                             *     Carterland, NM 49546 */
                             address?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4470,7 +4820,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 16
+                 * @example 1
                  */
                 id: number;
             };
@@ -4501,16 +4851,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 14 */
+                            /** @example 18 */
                             id?: number;
-                            /** @example Hauck-Leuschke */
+                            /** @example Hahn-Harber */
                             name?: string;
-                            /** @example 544 Aglae Ridge Apt. 067
-                             *     Lefflerhaven, TX 58408-7043 */
+                            /** @example 6098 Kutch Loaf
+                             *     Port Eldonland, PA 73828-6765 */
                             address?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4537,7 +4887,7 @@ export interface operations {
                     /**
                      * @description 要分配給用戶的分店ID列表。例如：[1, 2, 3]
                      * @example [
-                     *       "architecto"
+                     *       "consequatur"
                      *     ]
                      */
                     store_ids: string[];
@@ -4552,11 +4902,11 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 17 */
+                            /** @example 13 */
                             id?: number;
-                            /** @example Ms. Elisabeth Okuneva */
+                            /** @example Dr. Cornelius Luettgen V */
                             name?: string;
-                            /** @example gulgowski.asia */
+                            /** @example russel.bert */
                             username?: string;
                             /** @example viewer */
                             role?: string;
@@ -4564,10 +4914,244 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T01:24:08.000000Z */
+                            /** @example 2025-06-18T15:59:26.000000Z */
                             updated_at?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    v30API: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 商品名稱。
+                     * @example "經典白色T恤"
+                     */
+                    name: string;
+                    /**
+                     * @description 唯一的庫存單位編號。
+                     * @example "TSHIRT-WHITE-001"
+                     */
+                    sku: string;
+                    /**
+                     * @description 商品價格。
+                     * @example 299.99
+                     */
+                    price: number;
+                    /**
+                     * @description 商品分類 ID，可為空。
+                     * @example 1
+                     */
+                    category_id?: number | null;
+                    /**
+                     * @description 商品描述，可為空。
+                     * @example "100% 純棉材質，舒適透氣"
+                     */
+                    description?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 高階人體工學辦公椅 */
+                            name?: string;
+                            /** @example 具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。 */
+                            description?: string;
+                            /** @example 1 */
+                            category_id?: number;
+                            /** @example 2024-01-01T10:00:00.000000Z */
+                            created_at?: string;
+                            /** @example 2024-01-01T10:00:00.000000Z */
+                            updated_at?: string;
+                            image_urls?: {
+                                /** @example http://localhost/storage/1/office-chair-original.jpg */
+                                original?: string;
+                                /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
+                                thumbnail?: string;
+                                /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
+                                medium?: string;
+                                /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
+                                large?: string;
+                            };
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "sku": "CHAIR-ERG-001-BLACK",
+                             *         "price": 399.99,
+                             *         "product_id": 1,
+                             *         "created_at": "2024-01-01T10:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                             *         "attribute_values": [
+                             *           {
+                             *             "id": 1,
+                             *             "value": "黑色",
+                             *             "attribute_id": 1,
+                             *             "attribute": {
+                             *               "id": 1,
+                             *               "name": "顏色"
+                             *             }
+                             *           }
+                             *         ],
+                             *         "inventory": [
+                             *           {
+                             *             "id": 1,
+                             *             "quantity": 50,
+                             *             "low_stock_threshold": 10,
+                             *             "store": {
+                             *               "id": 1,
+                             *               "name": "台北旗艦店"
+                             *             }
+                             *           }
+                             *         ]
+                             *       },
+                             *       {
+                             *         "id": 2,
+                             *         "sku": "CHAIR-ERG-001-WHITE",
+                             *         "price": 429.99,
+                             *         "product_id": 1,
+                             *         "created_at": "2024-01-01T10:00:00.000000Z",
+                             *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                             *         "attribute_values": [
+                             *           {
+                             *             "id": 2,
+                             *             "value": "白色",
+                             *             "attribute_id": 1,
+                             *             "attribute": {
+                             *               "id": 1,
+                             *               "name": "顏色"
+                             *             }
+                             *           }
+                             *         ],
+                             *         "inventory": [
+                             *           {
+                             *             "id": 2,
+                             *             "quantity": 25,
+                             *             "low_stock_threshold": 5,
+                             *             "store": {
+                             *               "id": 1,
+                             *               "name": "台北旗艦店"
+                             *             }
+                             *           }
+                             *         ]
+                             *       }
+                             *     ] */
+                            variants?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example CHAIR-ERG-001-BLACK */
+                                sku?: string;
+                                /** @example 399.99 */
+                                price?: number;
+                                /** @example 1 */
+                                product_id?: number;
+                                /** @example 2024-01-01T10:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2024-01-01T10:00:00.000000Z */
+                                updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "value": "黑色",
+                                 *         "attribute_id": 1,
+                                 *         "attribute": {
+                                 *           "id": 1,
+                                 *           "name": "顏色"
+                                 *         }
+                                 *       }
+                                 *     ] */
+                                attribute_values?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 黑色 */
+                                    value?: string;
+                                    /** @example 1 */
+                                    attribute_id?: number;
+                                    attribute?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 顏色 */
+                                        name?: string;
+                                    };
+                                }[];
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "quantity": 50,
+                                 *         "low_stock_threshold": 10,
+                                 *         "store": {
+                                 *           "id": 1,
+                                 *           "name": "台北旗艦店"
+                                 *         }
+                                 *       }
+                                 *     ] */
+                                inventory?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 50 */
+                                    quantity?: number;
+                                    /** @example 10 */
+                                    low_stock_threshold?: number;
+                                    store?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 台北旗艦店 */
+                                        name?: string;
+                                    };
+                                }[];
+                            }[];
+                            price_range?: {
+                                /** @example 399.99 */
+                                min?: number;
+                                /** @example 429.99 */
+                                max?: number;
+                                /** @example 2 */
+                                count?: number;
+                            };
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "name": "顏色",
+                             *         "type": "string",
+                             *         "description": "商品顏色選項"
+                             *       }
+                             *     ] */
+                            attributes?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 顏色 */
+                                name?: string;
+                                /** @example string */
+                                type?: string;
+                                /** @example 商品顏色選項 */
+                                description?: string;
+                            }[];
+                            category?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 辦公用品 */
+                                name?: string;
+                                /** @example 各種辦公室所需用品 */
+                                description?: string;
+                            };
                         };
                     };
                 };
@@ -4627,7 +5211,7 @@ export interface operations {
                         /**
                          * @description The <code>id</code> of an existing record in the attribute_values table.
                          * @example [
-                         *       16
+                         *       17
                          *     ]
                          */
                         attribute_value_ids?: number[];
@@ -4854,679 +5438,314 @@ export interface operations {
             };
         };
     };
-    createSimpleProduct: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description 商品名稱。
-                     * @example 無線藍牙滑鼠
-                     */
-                    name: string;
-                    /**
-                     * @description 商品的唯一 SKU 編號。
-                     * @example MOUSE-BT-002
-                     */
-                    sku: string;
-                    /**
-                     * @description 商品價格。
-                     * @example 79.99
-                     */
-                    price: number;
-                    /**
-                     * @description 商品分類 ID（可選）。
-                     * @example 2
-                     */
-                    category_id?: number | null;
-                    /**
-                     * @description 商品描述（可選）。
-                     * @example 2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。
-                     */
-                    description?: string | null;
-                };
-            };
-        };
-        responses: {
-            /** @description 成功創建單規格商品 */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: {
-                            /** @example 3 */
-                            id?: number;
-                            /** @example 無線藍牙滑鼠 */
-                            name?: string;
-                            /** @example 2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。 */
-                            description?: string;
-                            /** @example 2 */
-                            category_id?: number;
-                            /** @example 2024-01-01T11:30:00.000000Z */
-                            created_at?: string;
-                            /** @example 2024-01-01T11:30:00.000000Z */
-                            updated_at?: string;
-                            image_urls?: {
-                                /** @example http://localhost/storage/3/bluetooth-mouse-original.jpg */
-                                original?: string;
-                                /** @example http://localhost/storage/3/conversions/bluetooth-mouse-thumb.jpg */
-                                thumbnail?: string;
-                                /** @example http://localhost/storage/3/conversions/bluetooth-mouse-medium.jpg */
-                                medium?: string;
-                                /** @example http://localhost/storage/3/conversions/bluetooth-mouse-large.jpg */
-                                large?: string;
-                            };
-                            /** @example [
-                             *       {
-                             *         "id": 4,
-                             *         "sku": "MOUSE-BT-002",
-                             *         "price": 79.99,
-                             *         "product_id": 3,
-                             *         "created_at": "2024-01-01T11:30:00.000000Z",
-                             *         "updated_at": "2024-01-01T11:30:00.000000Z",
-                             *         "attribute_values": [
-                             *           {
-                             *             "id": 1,
-                             *             "value": "標準",
-                             *             "attribute_id": 1,
-                             *             "attribute": {
-                             *               "id": 1,
-                             *               "name": "標準"
-                             *             }
-                             *           }
-                             *         ],
-                             *         "inventory": [
-                             *           {
-                             *             "id": 3,
-                             *             "quantity": 0,
-                             *             "low_stock_threshold": 5,
-                             *             "store": {
-                             *               "id": 1,
-                             *               "name": "台北旗艦店"
-                             *             }
-                             *           },
-                             *           {
-                             *             "id": 4,
-                             *             "quantity": 0,
-                             *             "low_stock_threshold": 5,
-                             *             "store": {
-                             *               "id": 2,
-                             *               "name": "台中分店"
-                             *             }
-                             *           }
-                             *         ]
-                             *       }
-                             *     ] */
-                            variants?: {
-                                /** @example 4 */
-                                id?: number;
-                                /** @example MOUSE-BT-002 */
-                                sku?: string;
-                                /** @example 79.99 */
-                                price?: number;
-                                /** @example 3 */
-                                product_id?: number;
-                                /** @example 2024-01-01T11:30:00.000000Z */
-                                created_at?: string;
-                                /** @example 2024-01-01T11:30:00.000000Z */
-                                updated_at?: string;
-                                /** @example [
-                                 *       {
-                                 *         "id": 1,
-                                 *         "value": "標準",
-                                 *         "attribute_id": 1,
-                                 *         "attribute": {
-                                 *           "id": 1,
-                                 *           "name": "標準"
-                                 *         }
-                                 *       }
-                                 *     ] */
-                                attribute_values?: {
-                                    /** @example 1 */
-                                    id?: number;
-                                    /** @example 標準 */
-                                    value?: string;
-                                    /** @example 1 */
-                                    attribute_id?: number;
-                                    attribute?: {
-                                        /** @example 1 */
-                                        id?: number;
-                                        /** @example 標準 */
-                                        name?: string;
-                                    };
-                                }[];
-                                /** @example [
-                                 *       {
-                                 *         "id": 3,
-                                 *         "quantity": 0,
-                                 *         "low_stock_threshold": 5,
-                                 *         "store": {
-                                 *           "id": 1,
-                                 *           "name": "台北旗艦店"
-                                 *         }
-                                 *       },
-                                 *       {
-                                 *         "id": 4,
-                                 *         "quantity": 0,
-                                 *         "low_stock_threshold": 5,
-                                 *         "store": {
-                                 *           "id": 2,
-                                 *           "name": "台中分店"
-                                 *         }
-                                 *       }
-                                 *     ] */
-                                inventory?: {
-                                    /** @example 3 */
-                                    id?: number;
-                                    /** @example 0 */
-                                    quantity?: number;
-                                    /** @example 5 */
-                                    low_stock_threshold?: number;
-                                    store?: {
-                                        /** @example 1 */
-                                        id?: number;
-                                        /** @example 台北旗艦店 */
-                                        name?: string;
-                                    };
-                                }[];
-                            }[];
-                            price_range?: {
-                                /** @example 79.99 */
-                                min?: number;
-                                /** @example 79.99 */
-                                max?: number;
-                                /** @example 1 */
-                                count?: number;
-                            };
-                            /** @example [
-                             *       {
-                             *         "id": 1,
-                             *         "name": "標準",
-                             *         "type": "string",
-                             *         "description": "系統自動生成的標準屬性"
-                             *       }
-                             *     ] */
-                            attributes?: {
-                                /** @example 1 */
-                                id?: number;
-                                /** @example 標準 */
-                                name?: string;
-                                /** @example string */
-                                type?: string;
-                                /** @example 系統自動生成的標準屬性 */
-                                description?: string;
-                            }[];
-                            category?: {
-                                /** @example 2 */
-                                id?: number;
-                                /** @example 3C產品 */
-                                name?: string;
-                                /** @example 電子產品和數位設備 */
-                                description?: string;
-                            };
-                        };
-                    };
-                };
-            };
-            /** @description 驗證錯誤 */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example The given data was invalid. */
-                        message?: string;
-                        errors?: {
-                            /** @example [
-                             *       "SKU 已經存在，請使用不同的 SKU。"
-                             *     ] */
-                            sku?: string[];
-                            /** @example [
-                             *       "price 欄位必須為數字。"
-                             *     ] */
-                            price?: string[];
-                        };
-                    };
-                };
-            };
-        };
-    };
-    getCustomers: {
+    getApiCustomers: {
         parameters: {
             query?: {
                 /**
-                 * @description 搜尋客戶名稱、電話或統編
-                 * @example 王大明
+                 * @description 關鍵字搜尋，將匹配姓名、電話、統一編號。
+                 * @example 設計公司
                  */
                 search?: string;
                 /**
-                 * @description 開始日期篩選
+                 * @description date 按創建日期篩選的開始日期 (格式: Y-m-d)。
                  * @example 2025-01-01
                  */
                 start_date?: string;
                 /**
-                 * @description 結束日期篩選
-                 * @example 2025-12-31
+                 * @description date 按創建日期篩選的結束日期 (格式: Y-m-d)。
+                 * @example 2025-06-18
+                 */
+                end_date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @example consequatur */
+                    search?: string | null;
+                    /**
+                     * @description Must be a valid date in the format <code>Y-m-d</code>.
+                     * @example 2025-06-18
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.
+                     * @example 2106-07-18
+                     */
+                    end_date?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    SKU: {
+        parameters: {
+            query?: {
+                /**
+                 * @description 門市ID，用於篩選特定門市的歷史記錄.
+                 * @example 1
+                 */
+                store_id?: number;
+                /**
+                 * @description 交易類型篩選 (addition, reduction, adjustment, transfer_in, transfer_out, transfer_cancel).
+                 * @example transfer_in
+                 */
+                type?: string;
+                /**
+                 * @description date 起始日期 (YYYY-MM-DD).
+                 * @example 2023-01-01
+                 */
+                start_date?: string;
+                /**
+                 * @description date 結束日期 (YYYY-MM-DD).
+                 * @example 2023-12-31
                  */
                 end_date?: string;
                 /**
-                 * @description 頁數
+                 * @description 每頁顯示數量，預設20，最大100.
+                 * @example 50
+                 */
+                per_page?: number;
+                /**
+                 * @description 頁碼.
                  * @example 1
                  */
                 page?: number;
-                /**
-                 * @description 每頁筆數
-                 * @example 15
-                 */
-                per_page?: number;
             };
             header?: never;
-            path?: never;
+            path: {
+                /**
+                 * @description 商品SKU編號.
+                 * @example T001-M-RED
+                 */
+                sku: string;
+            };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The <code>id</code> of an existing record in the stores table.
+                     * @example 17
+                     */
+                    store_id?: number | null;
+                    /**
+                     * @example transfer_out
+                     * @enum {string|null}
+                     */
+                    type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2025-06-18T15:59:26
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
+                     * @example 2106-07-18
+                     */
+                    end_date?: string | null;
+                    /**
+                     * @description Must be at least 1. Must not be greater than 100.
+                     * @example 13
+                     */
+                    per_page?: number | null;
+                };
+            };
+        };
         responses: {
-            /** @description 客戶列表回應 */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
+                        /** @example 成功獲取 SKU 歷史記錄 */
+                        message?: string;
+                        /** @example [
+                         *       {
+                         *         "id": 1,
+                         *         "inventory_id": 1,
+                         *         "user_id": 1,
+                         *         "type": "transfer_out",
+                         *         "quantity": -2,
+                         *         "before_quantity": 10,
+                         *         "after_quantity": 8,
+                         *         "notes": "轉出至門市 #2",
+                         *         "metadata": {
+                         *           "transfer_id": 1,
+                         *           "to_store_id": 2,
+                         *           "to_store_name": "台北店"
+                         *         },
+                         *         "created_at": "2023-01-15T10:30:00.000000Z",
+                         *         "updated_at": "2023-01-15T10:30:00.000000Z",
+                         *         "store": {
+                         *           "id": 1,
+                         *           "name": "台中店"
+                         *         },
+                         *         "user": {
+                         *           "name": "管理員"
+                         *         },
+                         *         "product": {
+                         *           "name": "時尚T恤",
+                         *           "sku": "T001-M-RED"
+                         *         }
+                         *       },
+                         *       {
+                         *         "id": 2,
+                         *         "inventory_id": 1,
+                         *         "user_id": 2,
+                         *         "type": "addition",
+                         *         "quantity": 50,
+                         *         "before_quantity": 8,
+                         *         "after_quantity": 58,
+                         *         "notes": "進貨補充庫存",
+                         *         "metadata": {
+                         *           "purchase_id": 123,
+                         *           "purchase_order": "PO2023-001"
+                         *         },
+                         *         "created_at": "2023-01-20T14:00:00.000000Z",
+                         *         "updated_at": "2023-01-20T14:00:00.000000Z",
+                         *         "store": {
+                         *           "id": 1,
+                         *           "name": "台中店"
+                         *         },
+                         *         "user": {
+                         *           "name": "採購員"
+                         *         },
+                         *         "product": {
+                         *           "name": "時尚T恤",
+                         *           "sku": "T001-M-RED"
+                         *         }
+                         *       }
+                         *     ] */
                         data?: {
                             /** @example 1 */
                             id?: number;
-                            /** @example 王大明 */
-                            name?: string;
-                            /** @example 0912345678 */
-                            phone?: string;
-                            /** @example false */
-                            is_company?: boolean;
-                            /** @example null */
-                            tax_id?: string | null;
-                            /** @example null */
-                            industry_type?: string | null;
-                            /** @example cash */
-                            payment_type?: string;
-                            /** @example 台北市中正區重慶南路一段122號 */
-                            contact_address?: string;
-                            /** @example 15000 */
-                            total_purchase_amount?: number;
-                            /** @example 0 */
-                            total_outstanding_amount?: number;
-                            /** @example 2025-06-15T10:30:00.000000Z */
-                            last_purchase_date?: string | null;
-                            /** @example 2025-06-10T09:20:00.000000Z */
+                            /** @example 1 */
+                            inventory_id?: number;
+                            /** @example 1 */
+                            user_id?: number;
+                            /** @example transfer_out */
+                            type?: string;
+                            /** @example -2 */
+                            quantity?: number;
+                            /** @example 10 */
+                            before_quantity?: number;
+                            /** @example 8 */
+                            after_quantity?: number;
+                            /** @example 轉出至門市 #2 */
+                            notes?: string;
+                            metadata?: {
+                                /** @example 1 */
+                                transfer_id?: number;
+                                /** @example 2 */
+                                to_store_id?: number;
+                                /** @example 台北店 */
+                                to_store_name?: string;
+                            };
+                            /** @example 2023-01-15T10:30:00.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-15T10:30:00.000000Z */
+                            /** @example 2023-01-15T10:30:00.000000Z */
                             updated_at?: string;
-                            addresses?: {
+                            store?: {
                                 /** @example 1 */
                                 id?: number;
-                                /** @example shipping */
-                                type?: string;
-                                /** @example 王大明 */
+                                /** @example 台中店 */
                                 name?: string;
-                                /** @example 0912345678 */
-                                phone?: string;
-                                /** @example 台北市中正區重慶南路一段122號 */
-                                address?: string;
-                                /** @example true */
-                                is_default?: boolean;
-                            }[];
-                            default_address?: {
-                                /** @example 1 */
-                                id?: number;
-                                /** @example shipping */
-                                type?: string;
-                                /** @example 王大明 */
+                            };
+                            user?: {
+                                /** @example 管理員 */
                                 name?: string;
-                                /** @example 0912345678 */
-                                phone?: string;
-                                /** @example 台北市中正區重慶南路一段122號 */
-                                address?: string;
-                                /** @example true */
-                                is_default?: boolean;
-                            } | null;
+                            };
+                            product?: {
+                                /** @example 時尚T恤 */
+                                name?: string;
+                                /** @example T001-M-RED */
+                                sku?: string;
+                            };
                         }[];
-                        meta?: {
+                        /** @example [
+                         *       {
+                         *         "id": 1,
+                         *         "quantity": 58,
+                         *         "low_stock_threshold": 10,
+                         *         "store": {
+                         *           "id": 1,
+                         *           "name": "台中店"
+                         *         },
+                         *         "product_variant": {
+                         *           "sku": "T001-M-RED",
+                         *           "product": {
+                         *             "name": "時尚T恤"
+                         *           }
+                         *         }
+                         *       },
+                         *       {
+                         *         "id": 3,
+                         *         "quantity": 25,
+                         *         "low_stock_threshold": 5,
+                         *         "store": {
+                         *           "id": 2,
+                         *           "name": "台北店"
+                         *         },
+                         *         "product_variant": {
+                         *           "sku": "T001-M-RED",
+                         *           "product": {
+                         *             "name": "時尚T恤"
+                         *           }
+                         *         }
+                         *       }
+                         *     ] */
+                        inventories?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 58 */
+                            quantity?: number;
+                            /** @example 10 */
+                            low_stock_threshold?: number;
+                            store?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 台中店 */
+                                name?: string;
+                            };
+                            product_variant?: {
+                                /** @example T001-M-RED */
+                                sku?: string;
+                                product?: {
+                                    /** @example 時尚T恤 */
+                                    name?: string;
+                                };
+                            };
+                        }[];
+                        pagination?: {
                             /** @example 1 */
                             current_page?: number;
-                            /** @example 1 */
-                            from?: number;
+                            /** @example 20 */
+                            per_page?: number;
+                            /** @example 15 */
+                            total?: number;
                             /** @example 1 */
                             last_page?: number;
-                            /** @example 15 */
-                            per_page?: number;
-                            /** @example 1 */
-                            to?: number;
-                            /** @example 1 */
-                            total?: number;
                         };
                     };
                 };
-            };
-        };
-    };
-    createCustomer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description 客戶姓名或公司名稱
-                     * @example 王大明
-                     */
-                    name: string;
-                    /**
-                     * @description 聯絡電話
-                     * @example 0912345678
-                     */
-                    phone: string;
-                    /**
-                     * @description 是否為公司
-                     * @example false
-                     */
-                    is_company: boolean;
-                    /**
-                     * @description 統一編號（公司必填）
-                     * @example null
-                     */
-                    tax_id?: string | null;
-                    /**
-                     * @description 行業別
-                     * @example null
-                     */
-                    industry_type?: string | null;
-                    /**
-                     * @description 付款方式
-                     * @example cash
-                     * @enum {string}
-                     */
-                    payment_type: "cash" | "credit" | "bank_transfer";
-                    /**
-                     * @description 聯絡地址
-                     * @example 台北市中正區重慶南路一段122號
-                     */
-                    contact_address: string;
-                };
-            };
-        };
-        responses: {
-            /** @description 客戶建立成功 */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: {
-                            /** @example 1 */
-                            id?: number;
-                            /** @example 王大明 */
-                            name?: string;
-                            /** @example 0912345678 */
-                            phone?: string;
-                            /** @example false */
-                            is_company?: boolean;
-                            /** @example null */
-                            tax_id?: string | null;
-                            /** @example null */
-                            industry_type?: string | null;
-                            /** @example cash */
-                            payment_type?: string;
-                            /** @example 台北市中正區重慶南路一段122號 */
-                            contact_address?: string;
-                            /** @example 0 */
-                            total_purchase_amount?: number;
-                            /** @example 0 */
-                            total_outstanding_amount?: number;
-                            /** @example null */
-                            last_purchase_date?: string | null;
-                            /** @example 2025-06-18T10:30:00.000000Z */
-                            created_at?: string;
-                            /** @example 2025-06-18T10:30:00.000000Z */
-                            updated_at?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    getCustomer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description 客戶 ID
-                 * @example 1
-                 */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description 客戶資料回應 */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: {
-                            /** @example 1 */
-                            id?: number;
-                            /** @example 王大明 */
-                            name?: string;
-                            /** @example 0912345678 */
-                            phone?: string;
-                            /** @example false */
-                            is_company?: boolean;
-                            /** @example null */
-                            tax_id?: string | null;
-                            /** @example null */
-                            industry_type?: string | null;
-                            /** @example cash */
-                            payment_type?: string;
-                            /** @example 台北市中正區重慶南路一段122號 */
-                            contact_address?: string;
-                            /** @example 15000 */
-                            total_purchase_amount?: number;
-                            /** @example 0 */
-                            total_outstanding_amount?: number;
-                            /** @example 2025-06-15T10:30:00.000000Z */
-                            last_purchase_date?: string | null;
-                            /** @example 2025-06-10T09:20:00.000000Z */
-                            created_at?: string;
-                            /** @example 2025-06-15T10:30:00.000000Z */
-                            updated_at?: string;
-                            addresses?: {
-                                /** @example 1 */
-                                id?: number;
-                                /** @example shipping */
-                                type?: string;
-                                /** @example 王大明 */
-                                name?: string;
-                                /** @example 0912345678 */
-                                phone?: string;
-                                /** @example 台北市中正區重慶南路一段122號 */
-                                address?: string;
-                                /** @example true */
-                                is_default?: boolean;
-                            }[];
-                            default_address?: {
-                                /** @example 1 */
-                                id?: number;
-                                /** @example shipping */
-                                type?: string;
-                                /** @example 王大明 */
-                                name?: string;
-                                /** @example 0912345678 */
-                                phone?: string;
-                                /** @example 台北市中正區重慶南路一段122號 */
-                                address?: string;
-                                /** @example true */
-                                is_default?: boolean;
-                            } | null;
-                        };
-                    };
-                };
-            };
-            /** @description 客戶不存在 */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    updateCustomer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description 客戶 ID
-                 * @example 1
-                 */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description 客戶姓名或公司名稱
-                     * @example 王大明
-                     */
-                    name: string;
-                    /**
-                     * @description 聯絡電話
-                     * @example 0912345678
-                     */
-                    phone: string;
-                    /**
-                     * @description 是否為公司
-                     * @example false
-                     */
-                    is_company: boolean;
-                    /**
-                     * @description 統一編號（公司必填）
-                     * @example null
-                     */
-                    tax_id?: string | null;
-                    /**
-                     * @description 行業別
-                     * @example null
-                     */
-                    industry_type?: string | null;
-                    /**
-                     * @description 付款方式
-                     * @example cash
-                     * @enum {string}
-                     */
-                    payment_type: "cash" | "credit" | "bank_transfer";
-                    /**
-                     * @description 聯絡地址
-                     * @example 台北市中正區重慶南路一段122號
-                     */
-                    contact_address: string;
-                };
-            };
-        };
-        responses: {
-            /** @description 客戶更新成功 */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: {
-                            /** @example 1 */
-                            id?: number;
-                            /** @example 王大明 */
-                            name?: string;
-                            /** @example 0912345678 */
-                            phone?: string;
-                            /** @example false */
-                            is_company?: boolean;
-                            /** @example null */
-                            tax_id?: string | null;
-                            /** @example null */
-                            industry_type?: string | null;
-                            /** @example cash */
-                            payment_type?: string;
-                            /** @example 台北市中正區重慶南路一段122號 */
-                            contact_address?: string;
-                            /** @example 15000 */
-                            total_purchase_amount?: number;
-                            /** @example 0 */
-                            total_outstanding_amount?: number;
-                            /** @example 2025-06-15T10:30:00.000000Z */
-                            last_purchase_date?: string | null;
-                            /** @example 2025-06-10T09:20:00.000000Z */
-                            created_at?: string;
-                            /** @example 2025-06-18T10:30:00.000000Z */
-                            updated_at?: string;
-                        };
-                    };
-                };
-            };
-            /** @description 客戶不存在 */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    deleteCustomer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description 客戶 ID
-                 * @example 1
-                 */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description 客戶刪除成功 */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description 客戶不存在 */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
