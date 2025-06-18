@@ -2394,6 +2394,354 @@ paths:
                 - name
                 - attributes
                 - variants
+  /api/products/simple:
+    post:
+      summary: '建立簡化單規格商品 (Single Variant Product)'
+      operationId: createSimpleProduct
+      description: '專門用於創建單一規格商品的簡化端點，自動處理 SPU/SKU 結構和標準屬性'
+      parameters: []
+      responses:
+        201:
+          description: '成功創建單規格商品'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 3
+                    name: 無線藍牙滑鼠
+                    description: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                    category_id: 2
+                    created_at: '2024-01-01T11:30:00.000000Z'
+                    updated_at: '2024-01-01T11:30:00.000000Z'
+                    image_urls:
+                      original: 'http://localhost/storage/3/bluetooth-mouse-original.jpg'
+                      thumbnail: 'http://localhost/storage/3/conversions/bluetooth-mouse-thumb.jpg'
+                      medium: 'http://localhost/storage/3/conversions/bluetooth-mouse-medium.jpg'
+                      large: 'http://localhost/storage/3/conversions/bluetooth-mouse-large.jpg'
+                    variants:
+                      -
+                        id: 4
+                        sku: MOUSE-BT-002
+                        price: 79.99
+                        product_id: 3
+                        created_at: '2024-01-01T11:30:00.000000Z'
+                        updated_at: '2024-01-01T11:30:00.000000Z'
+                        attribute_values:
+                          -
+                            id: 1
+                            value: 標準
+                            attribute_id: 1
+                            attribute:
+                              id: 1
+                              name: 標準
+                        inventory:
+                          -
+                            id: 3
+                            quantity: 0
+                            low_stock_threshold: 5
+                            store:
+                              id: 1
+                              name: 台北旗艦店
+                          -
+                            id: 4
+                            quantity: 0
+                            low_stock_threshold: 5
+                            store:
+                              id: 2
+                              name: 台中分店
+                    price_range:
+                      min: 79.99
+                      max: 79.99
+                      count: 1
+                    attributes:
+                      -
+                        id: 1
+                        name: 標準
+                        type: string
+                        description: 系統自動生成的標準屬性
+                    category:
+                      id: 2
+                      name: 3C產品
+                      description: 電子產品和數位設備
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 3
+                      name:
+                        type: string
+                        example: 無線藍牙滑鼠
+                      description:
+                        type: string
+                        example: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                      category_id:
+                        type: integer
+                        example: 2
+                      created_at:
+                        type: string
+                        example: '2024-01-01T11:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2024-01-01T11:30:00.000000Z'
+                      image_urls:
+                        type: object
+                        properties:
+                          original:
+                            type: string
+                            example: 'http://localhost/storage/3/bluetooth-mouse-original.jpg'
+                          thumbnail:
+                            type: string
+                            example: 'http://localhost/storage/3/conversions/bluetooth-mouse-thumb.jpg'
+                          medium:
+                            type: string
+                            example: 'http://localhost/storage/3/conversions/bluetooth-mouse-medium.jpg'
+                          large:
+                            type: string
+                            example: 'http://localhost/storage/3/conversions/bluetooth-mouse-large.jpg'
+                      variants:
+                        type: array
+                        example:
+                          -
+                            id: 4
+                            sku: MOUSE-BT-002
+                            price: 79.99
+                            product_id: 3
+                            created_at: '2024-01-01T11:30:00.000000Z'
+                            updated_at: '2024-01-01T11:30:00.000000Z'
+                            attribute_values:
+                              -
+                                id: 1
+                                value: 標準
+                                attribute_id: 1
+                                attribute:
+                                  id: 1
+                                  name: 標準
+                            inventory:
+                              -
+                                id: 3
+                                quantity: 0
+                                low_stock_threshold: 5
+                                store:
+                                  id: 1
+                                  name: 台北旗艦店
+                              -
+                                id: 4
+                                quantity: 0
+                                low_stock_threshold: 5
+                                store:
+                                  id: 2
+                                  name: 台中分店
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 4
+                            sku:
+                              type: string
+                              example: MOUSE-BT-002
+                            price:
+                              type: number
+                              example: 79.99
+                            product_id:
+                              type: integer
+                              example: 3
+                            created_at:
+                              type: string
+                              example: '2024-01-01T11:30:00.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2024-01-01T11:30:00.000000Z'
+                            attribute_values:
+                              type: array
+                              example:
+                                -
+                                  id: 1
+                                  value: 標準
+                                  attribute_id: 1
+                                  attribute:
+                                    id: 1
+                                    name: 標準
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  value:
+                                    type: string
+                                    example: 標準
+                                  attribute_id:
+                                    type: integer
+                                    example: 1
+                                  attribute:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: integer
+                                        example: 1
+                                      name:
+                                        type: string
+                                        example: 標準
+                            inventory:
+                              type: array
+                              example:
+                                -
+                                  id: 3
+                                  quantity: 0
+                                  low_stock_threshold: 5
+                                  store:
+                                    id: 1
+                                    name: 台北旗艦店
+                                -
+                                  id: 4
+                                  quantity: 0
+                                  low_stock_threshold: 5
+                                  store:
+                                    id: 2
+                                    name: 台中分店
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 3
+                                  quantity:
+                                    type: integer
+                                    example: 0
+                                  low_stock_threshold:
+                                    type: integer
+                                    example: 5
+                                  store:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: integer
+                                        example: 1
+                                      name:
+                                        type: string
+                                        example: 台北旗艦店
+                      price_range:
+                        type: object
+                        properties:
+                          min:
+                            type: number
+                            example: 79.99
+                          max:
+                            type: number
+                            example: 79.99
+                          count:
+                            type: integer
+                            example: 1
+                      attributes:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            name: 標準
+                            type: string
+                            description: 系統自動生成的標準屬性
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 標準
+                            type:
+                              type: string
+                              example: string
+                            description:
+                              type: string
+                              example: 系統自動生成的標準屬性
+                      category:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 2
+                          name:
+                            type: string
+                            example: 3C產品
+                          description:
+                            type: string
+                            example: 電子產品和數位設備
+        422:
+          description: '驗證錯誤'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'The given data was invalid.'
+                  errors:
+                    sku:
+                      - 'SKU 已經存在，請使用不同的 SKU。'
+                    price:
+                      - 'price 欄位必須為數字。'
+                properties:
+                  message:
+                    type: string
+                    example: 'The given data was invalid.'
+                  errors:
+                    type: object
+                    properties:
+                      sku:
+                        type: array
+                        example:
+                          - 'SKU 已經存在，請使用不同的 SKU。'
+                        items:
+                          type: string
+                      price:
+                        type: array
+                        example:
+                          - 'price 欄位必須為數字。'
+                        items:
+                          type: string
+      tags:
+        - 商品管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: '商品名稱。'
+                  example: '無線藍牙滑鼠'
+                  nullable: false
+                sku:
+                  type: string
+                  description: '商品的唯一 SKU 編號。'
+                  example: 'MOUSE-BT-002'
+                  nullable: false
+                price:
+                  type: number
+                  description: '商品價格。'
+                  example: 79.99
+                  nullable: false
+                category_id:
+                  type: integer
+                  description: '商品分類 ID（可選）。'
+                  example: 2
+                  nullable: true
+                description:
+                  type: string
+                  description: '商品描述（可選）。'
+                  example: '2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。'
+                  nullable: true
+              required:
+                - name
+                - sku
+                - price
   '/api/products/{id}':
     get:
       summary: 顯示指定的商品

@@ -90,6 +90,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products/{product}/upload-image', [ProductController::class, 'uploadImage']);
     
     /**
+     * 單規格商品快速創建路由 (v3.0 雙軌制 API)
+     * 專門處理單規格商品的創建，無需前端處理複雜的 SPU/SKU 結構
+     * 
+     * 注意：此路由必須在 products resource 路由之前定義，
+     * 避免 /api/products/{id} 路由將 'simple' 誤解為產品 ID
+     * 
+     * POST   /api/products/simple   - 創建單規格商品（簡化版）
+     */
+    Route::post('/products/simple', [ProductController::class, 'storeSimple']);
+    
+    /**
      * 商品資源路由
      * 提供完整的 CRUD 操作 (index, store, show, update, destroy)
      */

@@ -68,7 +68,7 @@ export function useProducts(filters: ProductFilters = {}) {
         placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
         refetchOnMount: false,       // 依賴全域 staleTime
         refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
-        staleTime: 5 * 60 * 1000,   // 5 分鐘緩存，提升篩選體驗
+        staleTime: 1 * 60 * 1000,   // 1 分鐘緩存，平衡體驗與資料新鮮度
     });
 }
 
@@ -167,15 +167,27 @@ export function useCreateProduct() {
             
             return data;
         },
-        onSuccess: (data) => {
-            // 成功後更新快取並顯示成功訊息
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+        onSuccess: async (data) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                })
+            ]);
             
             // 使用 toast 顯示成功訊息
             if (typeof window !== 'undefined') {
                 const { toast } = require('sonner');
                 toast.success('商品創建成功！', {
-                    description: `商品「${data?.data?.name}」已成功創建，包含 ${data?.data?.variants?.length || 0} 個 SKU 變體。`
+                    description: `商品「${data?.data?.name}」已成功創建，商品列表已自動更新。`
                 });
             }
         },
@@ -184,6 +196,78 @@ export function useCreateProduct() {
             if (typeof window !== 'undefined') {
                 const { toast } = require('sonner');
                 toast.error('商品創建失敗', {
+                    description: error.message || '請檢查輸入資料並重試。'
+                });
+            }
+        },
+    });
+}
+
+/**
+ * 創建單規格商品的 Hook (v3.0 雙軌制 API)
+ * 
+ * 專門用於單規格商品的快速創建，無需處理複雜的 SPU/SKU 屬性結構。
+ * 此 Hook 使用簡化的 API 端點，後端會自動處理標準屬性的創建和關聯。
+ * 
+ * 支援功能：
+ * 1. 簡化的商品創建流程（只需 name, sku, price 等基本資訊）
+ * 2. 後端自動處理 SPU/SKU 架構轉換
+ * 3. 自動創建標準屬性和屬性值
+ * 4. 自動初始化所有門市的庫存記錄
+ * 
+ * @returns React Query 變更結果
+ */
+export function useCreateSimpleProduct() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (productData: {
+            name: string;
+            sku: string;
+            price: number;
+            category_id?: number | null;
+            description?: string;
+        }) => {
+            const { data, error } = await apiClient.POST('/api/products/simple', {
+                body: productData
+            });
+            
+            if (error) {
+                const errorMessage = parseApiErrorMessage(error);
+                throw new Error(errorMessage);
+            }
+            
+            return data;
+        },
+        onSuccess: async (data) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                })
+            ]);
+            
+            // 使用 toast 顯示成功訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.success('單規格商品創建成功！', {
+                    description: `商品「${data?.data?.name}」已成功創建，商品列表已自動更新。`
+                });
+            }
+        },
+        onError: (error) => {
+            // 錯誤處理並顯示錯誤訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.error('單規格商品創建失敗', {
                     description: error.message || '請檢查輸入資料並重試。'
                 });
             }
@@ -222,11 +306,24 @@ export function useUpdateProduct() {
             
             return data;
         },
-        onSuccess: (data, variables) => {
-            // 成功後更新快取並顯示成功訊息
-            queryClient.invalidateQueries({ queryKey: ['products'] });
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.id) });
-            queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.PRODUCT(variables.id), 'detail'] });
+        onSuccess: async (data, variables) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                }),
+                // 3. 單個實體詳情頁的快取處理
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.id) }),
+                queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.PRODUCT(variables.id), 'detail'] })
+            ]);
             
             // 🎯 在 Hook 層級不顯示 toast，讓組件層級處理
             // 這樣可以提供更靈活的用戶反饋控制
@@ -263,9 +360,23 @@ export function useDeleteProduct() {
             
             return data;
         },
-        onSuccess: (data, id) => {
-            // 成功後更新快取
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+        onSuccess: async (data, id) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                })
+            ]);
+            
+            // 移除已刪除商品的快取
             queryClient.removeQueries({ queryKey: QUERY_KEYS.PRODUCT(id) });
         },
     });
@@ -297,8 +408,26 @@ export function useDeleteMultipleProducts() {
         throw new Error(errorMessage);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      await Promise.all([
+        // 1. 失效所有商品查詢緩存
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.PRODUCTS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 2. 強制重新獲取所有活躍的商品查詢
+        queryClient.refetchQueries({
+          queryKey: QUERY_KEYS.PRODUCTS,
+          exact: false,
+        })
+      ]);
+      
+      // 移除已刪除商品的快取
+      variables.ids.forEach(id => {
+        queryClient.removeQueries({ queryKey: QUERY_KEYS.PRODUCT(id) });
+      });
     },
   });
 }
@@ -1235,6 +1364,69 @@ export function useProductVariantDetail(id: number) {
     enabled: !!id,
   });
 }
+
+/**
+ * 商品圖片上傳 Hook
+ * 
+ * 專門用於原子化創建流程中的圖片上傳功能。
+ * 支援在商品創建後上傳圖片，實現鏈式提交邏輯。
+ * 
+ * @returns React Query 變更結果
+ */
+export function useUploadProductImage() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ productId, imageFile }: { productId: number; imageFile: File }) => {
+            // 準備 FormData
+            const formData = new FormData();
+            formData.append('image', imageFile);
+
+            const { data, error } = await apiClient.POST('/api/products/{product_id}/upload-image', {
+                params: {
+                    path: {
+                        product_id: productId,
+                        id: productId
+                    }
+                },
+                body: formData as any // 由於 openapi-fetch 的類型限制，需要類型斷言
+            });
+            
+            if (error) {
+                const errorMessage = parseApiErrorMessage(error);
+                throw new Error(errorMessage || '圖片上傳失敗');
+            }
+            
+            return data;
+        },
+        onSuccess: async (data, variables) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 圖片上傳專用
+            await Promise.all([
+                // 1. 失效所有商品查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的商品查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.PRODUCTS,
+                    exact: false,
+                }),
+                // 3. 特定商品詳情的緩存處理
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) }),
+                queryClient.refetchQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) })
+            ]);
+            
+            console.log('🖼️ 圖片上傳完成，已強制刷新商品緩存');
+        },
+        onError: (error) => {
+            console.error('圖片上傳失敗:', error);
+        },
+    });
+}
+
+// ==================== 進貨管理系統 (PURCHASE MANAGEMENT) ====================
 
 /**
  * 進貨管理相關 Hooks

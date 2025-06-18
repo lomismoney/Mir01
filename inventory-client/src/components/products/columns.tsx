@@ -13,6 +13,8 @@ import {
 import { MoreHorizontal, Edit, Trash2, Eye, ChevronRight, ChevronDown, Package, Image as ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ProductItem } from "@/types/api-helpers";
+import { cn } from "@/lib/utils";
+import { addImageCacheBuster } from "@/lib/utils";
 
 /**
  * 商品表格欄位定義 (SPU+SKU 巢狀架構)
@@ -317,17 +319,30 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
 
       // SPU 主行顯示縮圖
       const product = item;
-      return product.image_urls?.thumbnail ? (
-        <img
-          src={product.image_urls.thumbnail}
-          alt={product.name}
-          className="h-16 w-16 rounded-md object-cover"
-        />
-      ) : (
-        <div className="flex h-16 w-16 items-center justify-center rounded-md bg-secondary">
-          <ImageIcon className="h-6 w-6 text-muted-foreground" />
-        </div>
-      );
+      
+      if (product.image_urls?.thumb) {
+        // 🚀 使用工具函數添加時間戳參數強制刷新圖片緩存
+        const cacheBustingUrl = addImageCacheBuster(
+          product.image_urls.thumb, 
+          product.updated_at
+        );
+        
+        return (
+          <img
+            src={cacheBustingUrl || product.image_urls.thumb}
+            alt={product.name}
+            className="h-16 w-16 rounded-md object-cover"
+            // 添加 key 屬性確保 React 重新渲染圖片元素
+            key={`product-${product.id}-${product.updated_at}`}
+          />
+        );
+      } else {
+        return (
+          <div className="flex h-16 w-16 items-center justify-center rounded-md bg-secondary">
+            <ImageIcon className="h-6 w-6 text-muted-foreground" />
+          </div>
+        );
+      }
     },
     enableSorting: false,
     size: 80,

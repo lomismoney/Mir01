@@ -1320,6 +1320,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/products/simple": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 建立簡化單規格商品 (Single Variant Product)
+         * @description 專門用於創建單一規格商品的簡化端點，自動處理 SPU/SKU 結構和標準屬性
+         */
+        post: operations["createSimpleProduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/products/{id}": {
         parameters: {
             query?: never;
@@ -4929,7 +4949,8 @@ export interface operations {
             };
         };
         responses: {
-            200: {
+            /** @description 成功創建單規格商品 */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

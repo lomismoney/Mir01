@@ -142,7 +142,7 @@ export type ProductItem = {
   updated_at?: string;
   image_urls?: {
     original?: string;
-    thumbnail?: string;
+    thumb?: string;
     medium?: string;
     large?: string;
   } | null;

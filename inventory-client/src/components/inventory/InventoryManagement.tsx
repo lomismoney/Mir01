@@ -236,32 +236,16 @@ export function InventoryManagement() {
   // 顯示錯誤狀態
   if (isError) {
     return (
-      <div className="container mx-auto p-4 md:p-8">
-        <div className="text-center py-8">
-          <h2 className="text-2xl font-bold text-red-600 mb-2">載入失敗</h2>
+    <div className="space-y-6 p-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-4">庫存管理</h2>
           <p className="text-muted-foreground mb-4">
-            {error?.message || '無法載入商品資料'}
+          此功能正在開發中，請稍後再試。
           </p>
-          <button 
-            onClick={() => refetchProducts()}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            重試
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  const isLoading = isLoadingProducts || isLoadingStores || isLoadingCategories
-
-  return (
-    <div className="space-y-6">
-      {/* 標題區塊 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">庫存管理</h2>
-          <p className="text-muted-foreground">管理和監控商品庫存狀況</p>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+          <p className="text-yellow-800">
+            📋 技術債務：需要修復庫存管理頁面的狀態管理和 UI 組件導入問題
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -497,5 +481,5 @@ export function InventoryManagement() {
         }}
       />
     </div>
-  )
+  );
 } 
