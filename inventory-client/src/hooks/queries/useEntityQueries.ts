@@ -68,7 +68,7 @@ export function useProducts(filters: ProductFilters = {}) {
         placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
         refetchOnMount: false,       // 依賴全域 staleTime
         refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
-        staleTime: 5 * 60 * 1000,   // 5 分鐘緩存，提升篩選體驗
+        staleTime: 1 * 60 * 1000,   // 1 分鐘緩存，平衡體驗與資料新鮮度
     });
 }
 
@@ -168,8 +168,12 @@ export function useCreateProduct() {
             return data;
         },
         onSuccess: (data) => {
-            // 成功後更新快取並顯示成功訊息
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+            // 統一的快取失效機制 - 專業級數據同步
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
+                exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
+                refetchType: 'active', // 關鍵：立即重取活躍的查詢
+            });
             
             // 使用 toast 顯示成功訊息
             if (typeof window !== 'undefined') {
@@ -184,6 +188,70 @@ export function useCreateProduct() {
             if (typeof window !== 'undefined') {
                 const { toast } = require('sonner');
                 toast.error('商品創建失敗', {
+                    description: error.message || '請檢查輸入資料並重試。'
+                });
+            }
+        },
+    });
+}
+
+/**
+ * 創建單規格商品的 Hook (v3.0 雙軌制 API)
+ * 
+ * 專門用於單規格商品的快速創建，無需處理複雜的 SPU/SKU 屬性結構。
+ * 此 Hook 使用簡化的 API 端點，後端會自動處理標準屬性的創建和關聯。
+ * 
+ * 支援功能：
+ * 1. 簡化的商品創建流程（只需 name, sku, price 等基本資訊）
+ * 2. 後端自動處理 SPU/SKU 架構轉換
+ * 3. 自動創建標準屬性和屬性值
+ * 4. 自動初始化所有門市的庫存記錄
+ * 
+ * @returns React Query 變更結果
+ */
+export function useCreateSimpleProduct() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (productData: {
+            name: string;
+            sku: string;
+            price: number;
+            category_id?: number | null;
+            description?: string;
+        }) => {
+            const { data, error } = await apiClient.POST('/api/products/simple', {
+                body: productData
+            });
+            
+            if (error) {
+                const errorMessage = parseApiErrorMessage(error);
+                throw new Error(errorMessage);
+            }
+            
+            return data;
+        },
+        onSuccess: (data) => {
+            // 統一的快取失效機制 - 專業級數據同步
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
+                exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
+                refetchType: 'active', // 關鍵：立即重取活躍的查詢
+            });
+            
+            // 使用 toast 顯示成功訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.success('單規格商品創建成功！', {
+                    description: `商品「${data?.data?.name}」已成功創建為單規格商品。`
+                });
+            }
+        },
+        onError: (error) => {
+            // 錯誤處理並顯示錯誤訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.error('單規格商品創建失敗', {
                     description: error.message || '請檢查輸入資料並重試。'
                 });
             }
@@ -223,8 +291,14 @@ export function useUpdateProduct() {
             return data;
         },
         onSuccess: (data, variables) => {
-            // 成功後更新快取並顯示成功訊息
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+            // 統一的快取失效機制 - 專業級數據同步
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
+                exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
+                refetchType: 'active', // 關鍵：立即重取活躍的查詢
+            });
+            
+            // 單個實體詳情頁的快取處理
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.id) });
             queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.PRODUCT(variables.id), 'detail'] });
             
@@ -264,8 +338,14 @@ export function useDeleteProduct() {
             return data;
         },
         onSuccess: (data, id) => {
-            // 成功後更新快取
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+            // 統一的快取失效機制 - 專業級數據同步
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
+                exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
+                refetchType: 'active', // 關鍵：立即重取活躍的查詢
+            });
+            
+            // 移除已刪除商品的快取
             queryClient.removeQueries({ queryKey: QUERY_KEYS.PRODUCT(id) });
         },
     });
@@ -298,7 +378,12 @@ export function useDeleteMultipleProducts() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // 統一的快取失效機制 - 專業級數據同步
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCTS, // 使用 ['products'] 作為前綴
+        exact: false, // 確保匹配所有以 ['products'] 開頭的查詢，包括帶有 filters 的
+        refetchType: 'active', // 關鍵：立即重取活躍的查詢
+      });
     },
   });
 }

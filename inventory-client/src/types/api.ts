@@ -1320,6 +1320,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/products/simple": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 建立簡化單規格商品 (Single Variant Product)
+         * @description 專門用於創建單一規格商品的簡化端點，自動處理 SPU/SKU 結構和標準屬性
+         */
+        post: operations["createSimpleProduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/products/{id}": {
         parameters: {
             query?: never;
@@ -4083,15 +4103,10 @@ export interface operations {
                     /**
                      * @description 進貨項目列表
                      * @example [
-                     *       { "product_variant_id": 123, "quantity": 2, "unit_price": 50, "cost_price": 45 }
+                     *       "architecto"
                      *     ]
                      */
-                    items: {
-                        product_variant_id: number;
-                        quantity: number;
-                        unit_price: number;
-                        cost_price: number;
-                    }[];
+                    items: string[];
                 };
             };
         };
@@ -4775,6 +4790,251 @@ export interface operations {
                                 /** @example 各種辦公室所需用品 */
                                 description?: string;
                             };
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createSimpleProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 商品名稱。
+                     * @example 無線藍牙滑鼠
+                     */
+                    name: string;
+                    /**
+                     * @description 商品的唯一 SKU 編號。
+                     * @example MOUSE-BT-002
+                     */
+                    sku: string;
+                    /**
+                     * @description 商品價格。
+                     * @example 79.99
+                     */
+                    price: number;
+                    /**
+                     * @description 商品分類 ID（可選）。
+                     * @example 2
+                     */
+                    category_id?: number | null;
+                    /**
+                     * @description 商品描述（可選）。
+                     * @example 2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。
+                     */
+                    description?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description 成功創建單規格商品 */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 3 */
+                            id?: number;
+                            /** @example 無線藍牙滑鼠 */
+                            name?: string;
+                            /** @example 2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。 */
+                            description?: string;
+                            /** @example 2 */
+                            category_id?: number;
+                            /** @example 2024-01-01T11:30:00.000000Z */
+                            created_at?: string;
+                            /** @example 2024-01-01T11:30:00.000000Z */
+                            updated_at?: string;
+                            image_urls?: {
+                                /** @example http://localhost/storage/3/bluetooth-mouse-original.jpg */
+                                original?: string;
+                                /** @example http://localhost/storage/3/conversions/bluetooth-mouse-thumb.jpg */
+                                thumbnail?: string;
+                                /** @example http://localhost/storage/3/conversions/bluetooth-mouse-medium.jpg */
+                                medium?: string;
+                                /** @example http://localhost/storage/3/conversions/bluetooth-mouse-large.jpg */
+                                large?: string;
+                            };
+                            /** @example [
+                             *       {
+                             *         "id": 4,
+                             *         "sku": "MOUSE-BT-002",
+                             *         "price": 79.99,
+                             *         "product_id": 3,
+                             *         "created_at": "2024-01-01T11:30:00.000000Z",
+                             *         "updated_at": "2024-01-01T11:30:00.000000Z",
+                             *         "attribute_values": [
+                             *           {
+                             *             "id": 1,
+                             *             "value": "標準",
+                             *             "attribute_id": 1,
+                             *             "attribute": {
+                             *               "id": 1,
+                             *               "name": "標準"
+                             *             }
+                             *           }
+                             *         ],
+                             *         "inventory": [
+                             *           {
+                             *             "id": 3,
+                             *             "quantity": 0,
+                             *             "low_stock_threshold": 5,
+                             *             "store": {
+                             *               "id": 1,
+                             *               "name": "台北旗艦店"
+                             *             }
+                             *           },
+                             *           {
+                             *             "id": 4,
+                             *             "quantity": 0,
+                             *             "low_stock_threshold": 5,
+                             *             "store": {
+                             *               "id": 2,
+                             *               "name": "台中分店"
+                             *             }
+                             *           }
+                             *         ]
+                             *       }
+                             *     ] */
+                            variants?: {
+                                /** @example 4 */
+                                id?: number;
+                                /** @example MOUSE-BT-002 */
+                                sku?: string;
+                                /** @example 79.99 */
+                                price?: number;
+                                /** @example 3 */
+                                product_id?: number;
+                                /** @example 2024-01-01T11:30:00.000000Z */
+                                created_at?: string;
+                                /** @example 2024-01-01T11:30:00.000000Z */
+                                updated_at?: string;
+                                /** @example [
+                                 *       {
+                                 *         "id": 1,
+                                 *         "value": "標準",
+                                 *         "attribute_id": 1,
+                                 *         "attribute": {
+                                 *           "id": 1,
+                                 *           "name": "標準"
+                                 *         }
+                                 *       }
+                                 *     ] */
+                                attribute_values?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 標準 */
+                                    value?: string;
+                                    /** @example 1 */
+                                    attribute_id?: number;
+                                    attribute?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 標準 */
+                                        name?: string;
+                                    };
+                                }[];
+                                /** @example [
+                                 *       {
+                                 *         "id": 3,
+                                 *         "quantity": 0,
+                                 *         "low_stock_threshold": 5,
+                                 *         "store": {
+                                 *           "id": 1,
+                                 *           "name": "台北旗艦店"
+                                 *         }
+                                 *       },
+                                 *       {
+                                 *         "id": 4,
+                                 *         "quantity": 0,
+                                 *         "low_stock_threshold": 5,
+                                 *         "store": {
+                                 *           "id": 2,
+                                 *           "name": "台中分店"
+                                 *         }
+                                 *       }
+                                 *     ] */
+                                inventory?: {
+                                    /** @example 3 */
+                                    id?: number;
+                                    /** @example 0 */
+                                    quantity?: number;
+                                    /** @example 5 */
+                                    low_stock_threshold?: number;
+                                    store?: {
+                                        /** @example 1 */
+                                        id?: number;
+                                        /** @example 台北旗艦店 */
+                                        name?: string;
+                                    };
+                                }[];
+                            }[];
+                            price_range?: {
+                                /** @example 79.99 */
+                                min?: number;
+                                /** @example 79.99 */
+                                max?: number;
+                                /** @example 1 */
+                                count?: number;
+                            };
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "name": "標準",
+                             *         "type": "string",
+                             *         "description": "系統自動生成的標準屬性"
+                             *       }
+                             *     ] */
+                            attributes?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 標準 */
+                                name?: string;
+                                /** @example string */
+                                type?: string;
+                                /** @example 系統自動生成的標準屬性 */
+                                description?: string;
+                            }[];
+                            category?: {
+                                /** @example 2 */
+                                id?: number;
+                                /** @example 3C產品 */
+                                name?: string;
+                                /** @example 電子產品和數位設備 */
+                                description?: string;
+                            };
+                        };
+                    };
+                };
+            };
+            /** @description 驗證錯誤 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example The given data was invalid. */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "SKU 已經存在，請使用不同的 SKU。"
+                             *     ] */
+                            sku?: string[];
+                            /** @example [
+                             *       "price 欄位必須為數字。"
+                             *     ] */
+                            price?: string[];
                         };
                     };
                 };

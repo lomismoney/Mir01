@@ -10,7 +10,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, Circle, Loader2 } from 'lucide-reac
 import { toast } from 'sonner';
 
 // 導入 API Hooks
-import { useCreateProduct, useUpdateProduct, useProductDetail, useAttributes, useUploadProductImage } from '@/hooks/queries/useEntityQueries';
+import { useCreateProduct, useCreateSimpleProduct, useUpdateProduct, useProductDetail, useAttributes, useUploadProductImage } from '@/hooks/queries/useEntityQueries';
 
 // 導入步驟組件
 import { 
@@ -166,6 +166,48 @@ function transformWizardDataToApiPayload(
 }
 
 /**
+ * 轉換為單規格商品數據 (v3.0 雙軌制 API)
+ * 
+ * 專門處理單規格商品的數據轉換，只提取最核心的商品資訊。
+ * 無需處理複雜的屬性和變體結構，後端會自動處理這些細節。
+ * 
+ * @param formData 嚮導表單數據
+ * @returns 簡化的單規格商品數據
+ */
+function transformToSimplePayload(formData: WizardFormData) {
+  const { basicInfo, variants } = formData;
+  
+  // 取得第一個（也是唯一的）變體資訊
+  const firstVariant = variants.items[0];
+  
+  return {
+    name: basicInfo.name,
+    sku: firstVariant.sku,
+    price: parseFloat(firstVariant.price),
+    category_id: basicInfo.category_id,
+    description: basicInfo.description || undefined,
+  };
+}
+
+/**
+ * 轉換為多規格商品數據 (v3.0 雙軌制 API)
+ * 
+ * 處理多規格商品的完整數據結構，包含屬性和變體的複雜關聯。
+ * 這是原有 transformWizardDataToApiPayload 函數的簡化版本。
+ * 
+ * @param formData 嚮導表單數據
+ * @param attributesData 屬性數據
+ * @returns 完整的多規格商品數據
+ */
+function transformToVariantPayload(
+  formData: WizardFormData, 
+  attributesData?: any
+): paths['/api/products']['post']['requestBody']['content']['application/json'] {
+  // 直接使用現有的轉換邏輯
+  return transformWizardDataToApiPayload(formData, attributesData);
+}
+
+/**
  * 商品創建/編輯嚮導主組件 Props
  */
 interface CreateProductWizardProps {
@@ -195,6 +237,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
   
   // API Hooks
   const createProductMutation = useCreateProduct();
+  const createSimpleProductMutation = useCreateSimpleProduct();
   const updateProductMutation = useUpdateProduct();
   const uploadImageMutation = useUploadProductImage();
   const { data: attributesData } = useAttributes();
@@ -433,15 +476,15 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
     try {
       setIsSubmitting(true);
       
-      // 步驟1：準備商品數據
-      const apiPayload = transformWizardDataToApiPayload(formData, attributesData);
-      console.log(`${isEditMode ? '編輯' : '創建'}模式 - API 請求資料：`, apiPayload);
-      
       let productResult: any;
+      let productName: string;
       
-      // 步驟2：創建或更新商品主體
+      // 步驟1：判斷創建模式並選擇合適的 API 通道 (v3.0 雙軌制 API)
       if (isEditMode && productId) {
-        // 編輯模式：更新商品
+        // 編輯模式：始終使用完整的多規格 API
+        const apiPayload = transformWizardDataToApiPayload(formData, attributesData);
+        console.log('編輯模式 - API 請求資料：', apiPayload);
+        
         toast.loading('正在更新商品資訊...', { id: 'submit-progress' });
         
         productResult = await updateProductMutation.mutateAsync({ 
@@ -449,20 +492,45 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
           ...apiPayload 
         });
         
+        productName = apiPayload.name;
+        
         toast.success('商品資訊更新成功！', {
           id: 'submit-progress',
-          description: `商品「${apiPayload.name}」已成功更新`
+          description: `商品「${productName}」已成功更新`
         });
       } else {
-        // 創建模式：新增商品
-        toast.loading('正在創建商品...', { id: 'submit-progress' });
+        // 創建模式：根據商品類型選擇 API 通道
+        const isSingleVariant = !formData.specifications.isVariable;
         
-        productResult = await createProductMutation.mutateAsync(apiPayload);
-        
-        toast.success('商品創建成功！', {
-          id: 'submit-progress',
-          description: `商品「${apiPayload.name}」已成功創建`
-        });
+        if (isSingleVariant) {
+          // === 走「簡易創建」通道 ===
+          const simplePayload = transformToSimplePayload(formData);
+          console.log('單規格創建模式 - API 請求資料：', simplePayload);
+          
+          toast.loading('正在創建單規格商品...', { id: 'submit-progress' });
+          
+          productResult = await createSimpleProductMutation.mutateAsync(simplePayload);
+          productName = simplePayload.name;
+          
+          toast.success('單規格商品創建成功！', {
+            id: 'submit-progress',
+            description: `商品「${productName}」已成功創建為單規格商品`
+          });
+        } else {
+          // === 走「多規格創建」通道 ===
+          const variantPayload = transformToVariantPayload(formData, attributesData);
+          console.log('多規格創建模式 - API 請求資料：', variantPayload);
+          
+          toast.loading('正在創建多規格商品...', { id: 'submit-progress' });
+          
+          productResult = await createProductMutation.mutateAsync(variantPayload);
+          productName = variantPayload.name;
+          
+          toast.success('多規格商品創建成功！', {
+            id: 'submit-progress',
+            description: `商品「${productName}」已成功創建，包含 ${variantPayload.variants.length} 個變體`
+          });
+        }
       }
       
       // 步驟3：處理圖片上傳（如果有選擇圖片）
@@ -494,7 +562,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       
       // 步驟4：成功完成，跳轉頁面
       toast.success('✅ 所有操作完成！', {
-        description: `商品「${apiPayload.name}」已成功${isEditMode ? '更新' : '創建'}${formData.imageData.selectedFile ? '並上傳圖片' : ''}`
+        description: `商品「${productName}」已成功${isEditMode ? '更新' : '創建'}${formData.imageData.selectedFile ? '並上傳圖片' : ''}`
       });
       
       // 延遲跳轉，讓用戶看到成功提示

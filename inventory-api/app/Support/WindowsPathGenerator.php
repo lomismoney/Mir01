@@ -49,16 +49,19 @@ class WindowsPathGenerator implements PathGenerator
     /**
      * 標準化路徑分隔符
      * 
+     * 對於存儲路徑，使用系統分隔符
+     * 對於 URL 路徑，始終使用正斜線
+     * 
      * @param string $path
      * @return string
      */
     protected function normalizePath(string $path): string
     {
-        // 在 Windows 上使用反斜線，其他系統使用正斜線
-        $separator = DIRECTORY_SEPARATOR;
+        // 始終使用正斜線作為分隔符，確保 URL 正確
+        $separator = '/';
         
-        // 替換所有分隔符為系統預設分隔符
-        $path = str_replace(['/', '\\'], $separator, $path);
+        // 替換所有分隔符為正斜線
+        $path = str_replace(['\\', DIRECTORY_SEPARATOR], $separator, $path);
         
         // 移除重複的分隔符
         $path = preg_replace('/[' . preg_quote($separator, '/') . ']+/', $separator, $path);
