@@ -3,10 +3,7 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useCreateInventoryTransfer, useStores, useProductVariants } from "@/hooks/queries/useEntityQueries"
-import { Store } from "@/types/store"
-import { ProductVariant } from "@/types/api-helpers"
-import { PaginatedResponse } from "@/types/inventory"
+import { useCreateInventoryTransfer, useStores } from "@/hooks/queries/useEntityQueries"
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import {
@@ -22,11 +19,12 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, ArrowRight } from "lucide-react"
+import { ProductSelector } from "./ProductSelector"
 
 interface TransferFormValues {
   from_store_id: string;
   to_store_id: string;
-  product_variant_id: string;
+  product_variant_id: number;
   quantity: string;
   notes: string;
 }
@@ -39,31 +37,61 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedVariant, setSelectedVariant] = useState<any>(null)
+  const [currentStock, setCurrentStock] = useState<number>(0)
 
   const form = useForm<TransferFormValues>({
     defaultValues: {
       from_store_id: "",
       to_store_id: "",
-      product_variant_id: "",
+      product_variant_id: 0,
       quantity: "",
       notes: "",
     },
   })
 
   const { data: storesData, isLoading: isLoadingStores } = useStores()
-  const { data: productsData, isLoading: isLoadingProducts } = useProductVariants()
 
   const transferMutation = useCreateInventoryTransfer()
 
   const onSubmit = (data: TransferFormValues) => {
+    // 驗證
+    if (data.from_store_id === data.to_store_id) {
+      toast({
+        variant: "destructive",
+        title: "驗證錯誤",
+        description: "來源門市與目標門市不能相同",
+      })
+      return
+    }
+
+    const quantity = parseInt(data.quantity, 10)
+    if (quantity > currentStock) {
+      toast({
+        variant: "destructive",
+        title: "驗證錯誤",
+        description: `轉移數量不能超過現有庫存 ${currentStock} 件`,
+      })
+      return
+    }
+
+    if (currentStock === 0) {
+      toast({
+        variant: "destructive",
+        title: "驗證錯誤",
+        description: "來源門市庫存不足，無法進行轉移",
+      })
+      return
+    }
+
     setIsSubmitting(true)
     
     // 轉換值為適當的類型
     transferMutation.mutate({
       from_store_id: parseInt(data.from_store_id),
       to_store_id: parseInt(data.to_store_id),
-      product_variant_id: parseInt(data.product_variant_id),
-      quantity: parseInt(data.quantity),
+      product_variant_id: data.product_variant_id,
+      quantity: quantity,
       notes: data.notes,
     }, {
       onSuccess: () => {
@@ -99,7 +127,17 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                 <FormLabel>來源門市</FormLabel>
                 <Select 
                   disabled={isLoadingStores || isSubmitting} 
-                      onValueChange={field.onChange} 
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        // 重置商品選擇和庫存信息
+                        form.setValue("product_variant_id", 0)
+                        // 重置目標門市如果與來源門市相同
+                        if (form.watch("to_store_id") === value) {
+                          form.setValue("to_store_id", "")
+                        }
+                        setSelectedVariant(null)
+                        setCurrentStock(0)
+                      }} 
                       value={field.value}
                     >
                       <FormControl>
@@ -141,7 +179,9 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {storesData?.data?.map((store) => (
+                        {storesData?.data
+                          ?.filter((store) => store.id?.toString() !== form.watch("from_store_id"))
+                          ?.map((store) => (
                           <SelectItem key={store.id} value={store.id?.toString() || ''}>
                             {store.name}
                           </SelectItem>
@@ -160,24 +200,36 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>產品</FormLabel>
-                  <Select 
-                    disabled={isLoadingProducts || isSubmitting} 
-                    onValueChange={field.onChange} 
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="選擇產品" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {productsData?.data?.map((variant: ProductVariant) => (
-                        <SelectItem key={variant.id} value={variant.id?.toString() || ''}>
-                          {variant.product?.name} - {variant.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <ProductSelector
+                      value={field.value}
+                      onValueChange={(productVariantId, variant) => {
+                        field.onChange(productVariantId)
+                        setSelectedVariant(variant)
+                        if (variant?.inventory && Array.isArray(variant.inventory)) {
+                          const fromStoreId = parseInt(form.watch("from_store_id"))
+                          const inventory = variant.inventory.find((inv: any) => inv.store_id === fromStoreId)
+                          setCurrentStock(inventory?.quantity || 0)
+                        } else {
+                          setCurrentStock(0)
+                        }
+                      }}
+                      storeId={form.watch("from_store_id") ? parseInt(form.watch("from_store_id")) : undefined}
+                      disabled={isSubmitting || !form.watch("from_store_id")}
+                      placeholder="先選擇來源門市，再選擇產品"
+                      showCurrentStock={true}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {!form.watch("from_store_id") 
+                      ? "請先選擇來源門市"
+                      : selectedVariant && currentStock === 0
+                      ? "所選商品在來源門市無庫存"
+                      : selectedVariant && currentStock > 0
+                      ? `可轉移數量：${currentStock} 件`
+                      : "請選擇要轉移的商品"
+                    }
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -188,17 +240,24 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
               name="quantity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>數量</FormLabel>
+                  <FormLabel>轉移數量</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       type="number" 
                       min="1" 
-                      disabled={isSubmitting}
+                      max={currentStock > 0 ? currentStock : undefined}
+                      disabled={isSubmitting || !selectedVariant}
+                      placeholder={selectedVariant ? `最多可轉移 ${currentStock} 件` : "請先選擇商品"}
                     />
                   </FormControl>
                   <FormDescription>
-                    請輸入大於 0 的正整數
+                    {selectedVariant && currentStock > 0 
+                      ? `來源門市現有庫存：${currentStock} 件`
+                      : selectedVariant && currentStock === 0
+                      ? "來源門市庫存不足，無法轉移"
+                      : "請先選擇商品與來源門市"
+                    }
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -224,7 +283,15 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
             />
 
             <div className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                disabled={
+                  isSubmitting || 
+                  !selectedVariant || 
+                  currentStock === 0 || 
+                  form.watch("from_store_id") === form.watch("to_store_id")
+                }
+              >
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 創建轉移
               </Button>

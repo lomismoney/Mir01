@@ -13,9 +13,10 @@ class PurchaseResponseData extends Data
         public int $id,
         public string $order_number,
         public float $total_amount,
+        public float $shipping_cost,
         public string $status,
         public Carbon $purchased_at,
-        /** @var DataCollection<int, PurchaseItemData> */
+        /** @var DataCollection<int, PurchaseItemResponseData> */
         public DataCollection $items,
     ) {}
 }

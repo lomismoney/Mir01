@@ -152,7 +152,7 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
       const price = row.original.price;
       return (
         <div className="font-medium">
-          {formatPrice(typeof price === 'string' ? parseFloat(price) : price)}
+          {formatPrice(Number.isFinite(Number(price)) ? Number(price) : undefined)}
         </div>
       );
     },
