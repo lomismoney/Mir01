@@ -79,6 +79,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/products/variants/{id}', [ProductVariantController::class, 'show']);
     
     /**
+     * 商品圖片上傳路由
+     * 使用 Spatie Media Library 處理商品圖片上傳和轉換
+     * 
+     * 注意：此路由必須在 products resource 路由之前定義，
+     * 避免 /api/products/{id} 路由將 'upload-image' 誤解為產品 ID
+     * 
+     * POST   /api/products/{product}/upload-image   - 為指定商品上傳圖片
+     */
+    Route::post('/products/{product}/upload-image', [ProductController::class, 'uploadImage']);
+    
+    /**
      * 商品資源路由
      * 提供完整的 CRUD 操作 (index, store, show, update, destroy)
      */

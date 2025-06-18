@@ -274,6 +274,118 @@ class ProductControllerTest extends TestCase
     }
     
     /** @test */
+    public function admin_can_successfully_update_product_with_variants()
+    {
+        // 創建分類
+        $category = Category::factory()->create();
+        $newCategory = Category::factory()->create();
+        
+        // 創建屬性和屬性值
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $sizeAttribute = Attribute::factory()->create(['name' => '尺寸']);
+        
+        $redValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        
+        $blueValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '藍色'
+        ]);
+        
+        $smallValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'S'
+        ]);
+        
+        $mediumValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'M'
+        ]);
+        
+        // 1. 創建一個商品
+        $product = Product::factory()->create([
+            'category_id' => $category->id,
+            'name' => '原始商品名稱',
+            'description' => '原始商品描述',
+        ]);
+        
+        // 關聯商品與屬性
+        $product->attributes()->attach([$colorAttribute->id, $sizeAttribute->id]);
+        
+        // 創建原始變體
+        $originalVariant = $product->variants()->create([
+            'sku' => 'ORIGINAL-RED-S',
+            'price' => 100.00,
+        ]);
+        $originalVariant->attributeValues()->attach([$redValue->id, $smallValue->id]);
+        
+        // 2. 準備更新用的新數據
+        $updatedData = [
+            'name' => '更新的商品名稱',
+            'description' => '更新的商品描述',
+            'category_id' => $newCategory->id,
+            'attributes' => [$colorAttribute->id, $sizeAttribute->id],
+            'variants' => [
+                // 保留原始變體但更新價格
+                [
+                    'id' => $originalVariant->id,
+                    'sku' => 'UPDATED-RED-S',
+                    'price' => 120.00,
+                    'attribute_value_ids' => [$redValue->id, $smallValue->id]
+                ],
+                // 新增一個變體
+                [
+                    'sku' => 'NEW-BLUE-M',
+                    'price' => 130.00,
+                    'attribute_value_ids' => [$blueValue->id, $mediumValue->id]
+                ]
+            ]
+        ];
+        
+        // 3. 發送 PUT 請求到 /api/products/{id}
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/products/{$product->id}", $updatedData);
+            
+        // 4. 斷言返回 200 狀態碼
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) use ($updatedData) {
+                $json->has('data')
+                    ->where('data.name', $updatedData['name'])
+                    ->where('data.description', $updatedData['description'])
+                    ->where('data.category_id', $updatedData['category_id'])
+                    ->has('data.variants', 2) // 應該有兩個變體
+                    ->etc();
+            });
+            
+        // 5. 斷言資料庫中的數據已被更新
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => $updatedData['name'],
+            'description' => $updatedData['description'],
+            'category_id' => $updatedData['category_id'],
+        ]);
+        
+        // 檢查變體更新
+        $this->assertDatabaseHas('product_variants', [
+            'id' => $originalVariant->id,
+            'sku' => 'UPDATED-RED-S',
+            'price' => 120.00,
+        ]);
+        
+        // 檢查新變體創建
+        $this->assertDatabaseHas('product_variants', [
+            'product_id' => $product->id,
+            'sku' => 'NEW-BLUE-M',
+            'price' => 130.00,
+        ]);
+        
+        // 確認變體總數
+        $this->assertCount(2, $product->fresh()->variants);
+    }
+    
+    /** @test */
     public function admin_can_delete_product()
     {
         // 創建產品
@@ -410,5 +522,380 @@ class ProductControllerTest extends TestCase
         $this->assertDatabaseHas('products', [
             'id' => $product->id
         ]);
+    }
+
+    // 🚀 TD-004 解決方案：新增篩選功能測試案例
+
+    /** @test */
+    public function admin_can_filter_products_by_product_name()
+    {
+        // 創建測試商品
+        Product::factory()->create(['name' => '辦公椅豪華版']);
+        Product::factory()->create(['name' => '辦公桌經典款']);
+        Product::factory()->create(['name' => '書櫃現代風']);
+
+        // 測試商品名稱篩選
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?product_name=辦公');
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 2) // 應該返回 2 個包含「辦公」的商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_filter_products_by_category_id()
+    {
+        // 創建分類
+        $furnitureCategory = Category::factory()->create(['name' => '家具']);
+        $electronicsCategory = Category::factory()->create(['name' => '電子產品']);
+
+        // 創建不同分類的商品
+        Product::factory()->count(2)->create(['category_id' => $furnitureCategory->id]);
+        Product::factory()->count(3)->create(['category_id' => $electronicsCategory->id]);
+
+        // 測試按分類篩選
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/products?category_id={$furnitureCategory->id}");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 2) // 應該返回 2 個家具類商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_filter_products_by_store_id()
+    {
+        // 創建門市
+        $store1 = \App\Models\Store::factory()->create(['name' => '台北店']);
+        $store2 = \App\Models\Store::factory()->create(['name' => '台中店']);
+
+        // 創建商品和變體
+        $product1 = Product::factory()->create();
+        $variant1 = ProductVariant::factory()->create(['product_id' => $product1->id]);
+        
+        $product2 = Product::factory()->create();
+        $variant2 = ProductVariant::factory()->create(['product_id' => $product2->id]);
+
+        // 在不同門市創建庫存
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $variant1->id,
+            'store_id' => $store1->id,
+            'quantity' => 10
+        ]);
+        
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $variant2->id,
+            'store_id' => $store2->id,
+            'quantity' => 5
+        ]);
+
+        // 測試按門市篩選
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/products?store_id={$store1->id}");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 1) // 應該只返回在台北店有庫存的商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_filter_products_by_low_stock()
+    {
+        // 創建門市
+        $store = \App\Models\Store::factory()->create();
+
+        // 創建商品和變體
+        $lowStockProduct = Product::factory()->create(['name' => '低庫存商品']);
+        $lowStockVariant = ProductVariant::factory()->create(['product_id' => $lowStockProduct->id]);
+
+        $normalStockProduct = Product::factory()->create(['name' => '正常庫存商品']);
+        $normalStockVariant = ProductVariant::factory()->create(['product_id' => $normalStockProduct->id]);
+
+        // 創建庫存 - 低庫存商品
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $lowStockVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 2,
+            'low_stock_threshold' => 5 // 庫存 2 <= 閾值 5，屬於低庫存
+        ]);
+
+        // 創建庫存 - 正常庫存商品
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $normalStockVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 10,
+            'low_stock_threshold' => 5 // 庫存 10 > 閾值 5，不屬於低庫存
+        ]);
+
+        // 測試低庫存篩選
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?low_stock=true');
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 1) // 應該只返回 1 個低庫存商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_filter_products_by_out_of_stock()
+    {
+        // 創建門市
+        $store = \App\Models\Store::factory()->create();
+
+        // 創建商品和變體
+        $outOfStockProduct = Product::factory()->create(['name' => '缺貨商品']);
+        $outOfStockVariant = ProductVariant::factory()->create(['product_id' => $outOfStockProduct->id]);
+
+        $inStockProduct = Product::factory()->create(['name' => '有庫存商品']);
+        $inStockVariant = ProductVariant::factory()->create(['product_id' => $inStockProduct->id]);
+
+        // 創建庫存 - 缺貨商品
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $outOfStockVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 0 // 庫存為 0，缺貨
+        ]);
+
+        // 創建庫存 - 有庫存商品
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $inStockVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 15 // 有庫存
+        ]);
+
+        // 測試缺貨篩選
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?out_of_stock=true');
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 1) // 應該只返回 1 個缺貨商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_combine_multiple_filters()
+    {
+        // 創建分類和門市
+        $category = Category::factory()->create(['name' => '辦公用品']);
+        $store = \App\Models\Store::factory()->create();
+
+        // 創建符合條件的商品
+        $targetProduct = Product::factory()->create([
+            'name' => '辦公椅經典款',
+            'category_id' => $category->id
+        ]);
+        $targetVariant = ProductVariant::factory()->create(['product_id' => $targetProduct->id]);
+
+        // 創建不符合條件的商品
+        $otherProduct = Product::factory()->create([
+            'name' => '書桌現代款', // 不包含「辦公椅」
+            'category_id' => $category->id
+        ]);
+        $otherVariant = ProductVariant::factory()->create(['product_id' => $otherProduct->id]);
+
+        // 創建庫存
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $targetVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 2,
+            'low_stock_threshold' => 5 // 低庫存
+        ]);
+
+        \App\Models\Inventory::factory()->create([
+            'product_variant_id' => $otherVariant->id,
+            'store_id' => $store->id,
+            'quantity' => 10,
+            'low_stock_threshold' => 5 // 正常庫存
+        ]);
+
+        // 測試組合篩選：商品名稱 + 分類 + 門市 + 低庫存
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/products?product_name=辦公椅&category_id={$category->id}&store_id={$store->id}&low_stock=true");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', 1) // 應該只返回 1 個符合所有條件的商品
+                    ->etc();
+            });
+    }
+
+    /** @test */
+    public function admin_can_fully_update_a_product_with_spu_and_sku_changes()
+    {
+        // 戰術指令 4: 核心功能測試
+        // 測試完整的商品更新流程，包括 SPU 和 SKU 的增刪改
+        
+        // === 階段 1: 準備測試環境 ===
+        
+        // 創建分類
+        $category1 = Category::factory()->create(['name' => '原始分類']);
+        $category2 = Category::factory()->create(['name' => '新分類']);
+        
+        // 創建屬性和屬性值
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $sizeAttribute = Attribute::factory()->create(['name' => '尺寸']);
+        
+        $redValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        $blueValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '藍色'
+        ]);
+        $greenValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '綠色'
+        ]);
+        $smallValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'S'
+        ]);
+        $mediumValue = AttributeValue::factory()->create([
+            'attribute_id' => $sizeAttribute->id,
+            'value' => 'M'
+        ]);
+        
+        // 創建門市（用於庫存記錄）
+        $store1 = \App\Models\Store::factory()->create(['name' => '台北店']);
+        $store2 = \App\Models\Store::factory()->create(['name' => '台中店']);
+        
+        // === 階段 2: 創建初始產品（包含 3 個 SKU：A, B, C）===
+        
+        $product = Product::factory()->create([
+            'name' => '原始商品名稱',
+            'description' => '原始描述',
+            'category_id' => $category1->id
+        ]);
+        
+        // 關聯屬性
+        $product->attributes()->attach([$colorAttribute->id, $sizeAttribute->id]);
+        
+        // 創建 3 個初始變體：A (紅S), B (藍S), C (紅M)
+        $variantA = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'sku' => 'ORIGINAL-RED-S',
+            'price' => 100.00
+        ]);
+        $variantA->attributeValues()->attach([$redValue->id, $smallValue->id]);
+        
+        $variantB = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'sku' => 'ORIGINAL-BLUE-S',
+            'price' => 110.00
+        ]);
+        $variantB->attributeValues()->attach([$blueValue->id, $smallValue->id]);
+        
+        $variantC = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'sku' => 'ORIGINAL-RED-M',
+            'price' => 120.00
+        ]);
+        $variantC->attributeValues()->attach([$redValue->id, $mediumValue->id]);
+        
+        // 為每個變體創建庫存記錄
+        foreach ([$variantA, $variantB, $variantC] as $variant) {
+            foreach ([$store1, $store2] as $store) {
+                \App\Models\Inventory::create([
+                    'product_variant_id' => $variant->id,
+                    'store_id' => $store->id,
+                    'quantity' => 10,
+                    'low_stock_threshold' => 5
+                ]);
+            }
+        }
+        
+        // === 階段 3: 構造更新請求 ===
+        // 目標：修改 A，新增 D，刪除 B 和 C
+        
+        $updateData = [
+            'name' => '更新後的商品名稱',
+            'description' => '更新後的描述',
+            'category_id' => $category2->id,
+            'attributes' => [$colorAttribute->id, $sizeAttribute->id],
+            'variants' => [
+                // 修改現有的變體 A（帶 id）
+                [
+                    'id' => $variantA->id,
+                    'sku' => 'UPDATED-RED-S',
+                    'price' => 150.00,
+                    'attribute_value_ids' => [$redValue->id, $smallValue->id]
+                ],
+                // 新增變體 D（不帶 id）
+                [
+                    'sku' => 'NEW-GREEN-M',
+                    'price' => 200.00,
+                    'attribute_value_ids' => [$greenValue->id, $mediumValue->id]
+                ]
+                // 注意：B 和 C 不在此陣列中，所以會被刪除
+            ]
+        ];
+        
+        // === 階段 4: 執行更新請求 ===
+        
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/products/{$product->id}", $updateData);
+        
+        $response->assertStatus(200);
+        
+        // === 階段 5: 驗證結果 ===
+        
+        // 5.1 驗證 SPU 資訊已更新
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => '更新後的商品名稱',
+            'description' => '更新後的描述',
+            'category_id' => $category2->id
+        ]);
+        
+        // 5.2 驗證變體 A 已更新
+        $this->assertDatabaseHas('product_variants', [
+            'id' => $variantA->id,
+            'sku' => 'UPDATED-RED-S',
+            'price' => 150.00
+        ]);
+        
+        // 5.3 驗證新變體 D 已創建
+        $this->assertDatabaseHas('product_variants', [
+            'sku' => 'NEW-GREEN-M',
+            'price' => 200.00,
+            'product_id' => $product->id
+        ]);
+        
+        // 5.4 驗證變體 B 已刪除
+        $this->assertDatabaseMissing('product_variants', [
+            'id' => $variantB->id
+        ]);
+        
+        // 5.5 驗證變體 C 已刪除
+        $this->assertDatabaseMissing('product_variants', [
+            'id' => $variantC->id
+        ]);
+        
+        // 5.6 驗證最終產品只有 2 個變體（A 更新版 + D 新增版）
+        $finalProduct = Product::find($product->id);
+        $this->assertCount(2, $finalProduct->variants);
+        
+        // 5.7 驗證新變體 D 在所有門市都有庫存記錄
+        $newVariant = ProductVariant::where('sku', 'NEW-GREEN-M')->first();
+        $this->assertNotNull($newVariant);
+        
+        $inventoryCount = \App\Models\Inventory::where('product_variant_id', $newVariant->id)->count();
+        $this->assertEquals(2, $inventoryCount); // 應該在 2 個門市都有庫存記錄
+        
+        // 5.8 驗證已刪除變體的庫存記錄也被清理
+        $deletedInventoryCount = \App\Models\Inventory::whereIn('product_variant_id', [$variantB->id, $variantC->id])->count();
+        $this->assertEquals(0, $deletedInventoryCount);
     }
 } 

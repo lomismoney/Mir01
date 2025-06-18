@@ -22,19 +22,61 @@ class UpdateProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        // 從路由中獲取 product 參數，這可能是模型實例或 ID
-        $product = $this->route('product');
-        
-        // 確保我們獲取到的是 ID
-        $productId = $product instanceof \App\Models\Product ? $product->id : $product;
-
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:200'],
-            'sku' => ['sometimes', 'required', 'string', 'max:100', Rule::unique('products')->ignore($productId)],
-            'description' => ['sometimes', 'nullable', 'string'],
-            'selling_price' => ['sometimes', 'required', 'numeric', 'min:0'],
-            'cost_price' => ['sometimes', 'required', 'numeric', 'min:0'],
-            'category_id' => 'sometimes|nullable|integer|exists:categories,id',
+            'name'          => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'category_id'   => 'nullable|integer|exists:categories,id',
+            'attributes'    => 'required|array',
+            'attributes.*'  => 'integer|exists:attributes,id',
+            
+            'variants'      => 'required|array|min:1',
+            'variants.*.id' => 'sometimes|integer|exists:product_variants,id',
+            'variants.*.sku' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    // 解析陣列索引 - 更健壯的方式
+                    $attributeParts = explode('.', $attribute);
+                    if (count($attributeParts) < 3) {
+                        $fail('無效的屬性路徑格式。');
+                        return;
+                    }
+                    
+                    $index = $attributeParts[1];
+                    $currentVariantId = $this->input("variants.{$index}.id");
+                    
+                    // 1. 檢查同一請求中的重複 SKU
+                    $allVariants = $this->input('variants', []);
+                    $skuCount = 0;
+                    foreach ($allVariants as $variantIndex => $variant) {
+                        if (isset($variant['sku']) && $variant['sku'] === $value) {
+                            $skuCount++;
+                        }
+                    }
+                    
+                    if ($skuCount > 1) {
+                        $fail("SKU「{$value}」在此次請求中重複出現，每個變體必須有唯一的 SKU。");
+                        return;
+                    }
+                    
+                    // 2. 檢查資料庫中的 SKU 唯一性
+                    $query = \App\Models\ProductVariant::where('sku', $value);
+                    
+                    // 如果當前變體有 ID（編輯模式），排除它自己
+                    if ($currentVariantId && is_numeric($currentVariantId)) {
+                        $query->where('id', '!=', $currentVariantId);
+                    }
+                    
+                    if ($query->exists()) {
+                        $existingVariant = $query->first();
+                        $fail("SKU「{$value}」已被其他商品變體使用（ID: {$existingVariant->id}），請使用不同的 SKU。");
+                    }
+                }
+            ],
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.attribute_value_ids' => 'required|array',
+            'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
         ];
     }
 

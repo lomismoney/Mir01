@@ -140,6 +140,12 @@ export type ProductItem = {
   category_id?: number;
   created_at?: string;
   updated_at?: string;
+  image_urls?: {
+    original?: string;
+    thumbnail?: string;
+    medium?: string;
+    large?: string;
+  } | null;
   variants?: ProductVariant[];
   price_range?: {
     min?: number;
@@ -162,3 +168,28 @@ export type StoresListResponse = operations['getApiStores']['responses'][200]['c
 // User Stores 相關類型
 export type UserStoresResponse = operations['getApiUsersUser_idStores']['responses'][200]['content']['application/json'];
 export type AssignUserStoresRequest = operations['postApiUsersUser_idStores']['requestBody']['content']['application/json'];
+
+/**
+ * 商品篩選參數類型定義
+ * 
+ * 對應後端 API 的查詢參數，用於商品列表的篩選功能
+ * 所有參數都是可選的，支援任意組合的篩選條件
+ */
+export type ProductFilters = {
+  /** 商品名稱模糊搜尋 */
+  product_name?: string;
+  /** 門市 ID 篩選 */
+  store_id?: number;
+  /** 分類 ID 篩選 */
+  category_id?: number;
+  /** 只顯示低庫存商品 */
+  low_stock?: boolean;
+  /** 只顯示缺貨商品 */
+  out_of_stock?: boolean;
+  /** 搜尋關鍵字（保留向後相容性） */
+  search?: string;
+  /** 分頁參數 */
+  page?: number;
+  /** 每頁項目數 */
+  per_page?: number;
+};

@@ -18,18 +18,30 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use App\Policies\ProductPolicy;
 use Illuminate\Support\Facades\DB;
+use App\Services\ProductService;
+use App\Http\Requests\Api\UploadProductImageRequest;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class ProductController extends Controller
 {
     /**
+     * 產品服務實例
+     * 
+     * @var ProductService
+     */
+    protected $productService;
+
+    /**
      * 建構函式
      * 
-     * 控制器初始化，不再使用自動權限檢查，
-     * 改為在每個方法中明確進行權限驗證
+     * 控制器初始化，注入 ProductService 依賴
+     * 
+     * @param ProductService $productService 商品服務
      */
-    public function __construct()
+    public function __construct(ProductService $productService)
     {
-        // 移除自動權限檢查，改為手動檢查以提供更細粒度的控制
+        $this->productService = $productService;
     }
 
     /**
@@ -40,6 +52,11 @@ class ProductController extends Controller
      * @queryParam page integer 頁碼，預設為 1。 Example: 1
      * @queryParam per_page integer 每頁項目數，預設為 15。 Example: 15
      * @queryParam search string 搜尋商品名稱或 SKU。 Example: 椅子
+     * @queryParam product_name string 專門用於商品名稱模糊搜尋。 Example: 辦公椅
+     * @queryParam store_id integer 按特定門市篩選庫存。 Example: 1
+     * @queryParam category_id integer 按商品分類篩選。 Example: 2
+     * @queryParam low_stock boolean 只顯示低庫存商品。 Example: true
+     * @queryParam out_of_stock boolean 只顯示缺貨商品。 Example: false
      * @queryParam sort_by string 排序欄位 (name, created_at)。 Example: name
      * @queryParam sort_order string 排序方向 (asc, desc)，預設為 asc。 Example: desc
      * @responseFile storage/responses/products_index.json
@@ -90,8 +107,10 @@ class ProductController extends Controller
         $query = QueryBuilder::for(Product::class)
             ->with([
                 'category', // ✅ 預先加載分類關聯，根除 N+1 查詢問題
+                'attributes', // ✅ 預先加載 SPU 的屬性關聯
                 'variants.attributeValues.attribute', // ✅ 預先加載 SKU 變體及其屬性
-                'variants.inventory.store' // ✅ 預先加載庫存資訊
+                'variants.inventory.store', // ✅ 預先加載庫存資訊
+                'media' // 📸 預先加載媒體關聯，讓 ProductResource 能夠輸出圖片 URL
             ])
             ->allowedFilters([
                 'name', 
@@ -101,7 +120,40 @@ class ProductController extends Controller
             ])
             ->allowedSorts(['name', 'created_at']); // 移除 selling_price 排序
 
-        $paginatedProducts = $query->paginate(15);
+        // 🚀 新增庫存管理篩選功能 (TD-004 解決方案)
+        
+        // 商品名稱模糊搜尋
+        if ($request->has('product_name') && !empty($request->product_name)) {
+            $query->where('name', 'like', '%' . $request->product_name . '%');
+        }
+
+        // 按分類篩選
+        if ($request->has('category_id') && !empty($request->category_id)) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // 按門市篩選 - 只返回在指定門市有庫存記錄的商品
+        if ($request->has('store_id') && !empty($request->store_id)) {
+            $query->whereHas('variants.inventory', function ($q) use ($request) {
+                $q->where('store_id', $request->store_id);
+            });
+        }
+
+        // 低庫存篩選 - 庫存數量 <= 低庫存閾值
+        if ($request->has('low_stock') && $request->boolean('low_stock')) {
+            $query->whereHas('variants.inventory', function ($q) {
+                $q->whereRaw('quantity <= low_stock_threshold');
+            });
+        }
+
+        // 缺貨篩選 - 庫存數量 = 0
+        if ($request->has('out_of_stock') && $request->boolean('out_of_stock')) {
+            $query->whereHas('variants.inventory', function ($q) {
+                $q->where('quantity', 0);
+            });
+        }
+
+        $paginatedProducts = $query->paginate($request->input('per_page', 15));
         
         return new ProductCollection($paginatedProducts);
     }
@@ -164,7 +216,13 @@ class ProductController extends Controller
             });
 
             // 回傳經過完整關聯加載的 SPU 資源
-            return new ProductResource($product->load(['variants.attributeValues.attribute', 'variants.inventory']));
+            return new ProductResource($product->load([
+                'category',
+                'attributes', // ✅ 建立後也要加載 SPU 的屬性關聯
+                'variants.attributeValues.attribute', 
+                'variants.inventory',
+                'media' // 📸 建立後也要加載媒體關聯
+            ]));
 
         } catch (\Exception $e) {
             // 如果事務中有任何錯誤發生，回傳伺服器錯誤
@@ -177,62 +235,64 @@ class ProductController extends Controller
      * 
      * @group 商品管理
      * @urlParam id integer required 商品的 ID。 Example: 1
-     * 
-     * @response scenario="商品詳細資料" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "高階人體工學辦公椅",
-     *     "sku": "CHAIR-ERG-001",
-     *     "description": "具備可調節腰靠和 4D 扶手。",
-     *     "selling_price": 399.99,
-     *     "cost_price": 150.00,
-     *     "category_id": 1,
-     *     "created_at": "2024-01-01T10:00:00.000000Z",
-     *     "updated_at": "2024-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * @responseFile status=200 storage/responses/product.show.json
      */
     public function show(Product $product)
     {
         return new ProductResource($product->load([
             'category',
+            'attributes', // ✅ 加載 SPU 的屬性關聯
             'variants.attributeValues.attribute', 
-            'variants.inventory.store'
+            'variants.inventory.store',
+            'media' // 📸 加載媒體關聯，輸出圖片 URL
         ]));
     }
 
     /**
-     * 更新指定的商品
+     * 更新指定的商品及其變體
      * 
      * @group 商品管理
+     * @authenticated
      * @urlParam id integer required 商品的 ID。 Example: 1
-     * @bodyParam name string required 商品的完整名稱。 Example: 高階人體工學辦公椅
-     * @bodyParam sku string required 商品的唯一庫存單位編號 (SKU)。 Example: CHAIR-ERG-001
-     * @bodyParam description string 商品的詳細描述。 Example: 具備可調節腰靠和 4D 扶手。
-     * @bodyParam selling_price number required 商品的銷售價格。 Example: 399.99
-     * @bodyParam cost_price number required 商品的成本價格。 Example: 150.00
-     * @bodyParam category_id integer 商品所屬分類的 ID。可為空值表示不屬於任何分類。 Example: 1
-     * 
-     * @response scenario="商品更新成功" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "高階人體工學辦公椅",
-     *     "sku": "CHAIR-ERG-001",
-     *     "description": "具備可調節腰靠和 4D 扶手。",
-     *     "selling_price": 399.99,
-     *     "cost_price": 150.00,
-     *     "category_id": 1,
-     *     "created_at": "2024-01-01T10:00:00.000000Z",
-     *     "updated_at": "2024-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
+     * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
+     * @bodyParam category_id integer 分類ID。 Example: 1
+     * @bodyParam attributes integer[] 該 SPU 擁有的屬性 ID 陣列。 Example: [1, 2]
+     * @bodyParam variants object[] SKU 變體陣列。
+     * @bodyParam variants.*.id integer 變體的 ID（用於更新現有變體）。 Example: 1
+     * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
+     * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
+     * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
+     * @responseFile status=200 storage/responses/product.show.json
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
         $this->authorize('update', $product); // 檢查是否有權限更新這個 $product
         
-        $product->update($request->validated());
-        return new ProductResource($product);
+        try {
+            $validatedData = $request->validated();
+            
+            // 使用 ProductService 處理複雜的更新邏輯
+            $updatedProduct = $this->productService->updateProductWithVariants($product, $validatedData);
+            
+            // 重新載入完整的關聯資料
+            $updatedProduct->load([
+                'category',
+                'attributes', // ✅ 更新後也要加載 SPU 的屬性關聯
+                'variants.attributeValues.attribute', 
+                'variants.inventory.store',
+                'media' // 📸 更新後也要加載媒體關聯
+            ]);
+            
+            return new ProductResource($updatedProduct);
+            
+        } catch (\Exception $e) {
+            // 如果更新過程中有任何錯誤發生，回傳伺服器錯誤
+            return response()->json([
+                'message' => '更新商品時發生錯誤', 
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -274,5 +334,184 @@ class ProductController extends Controller
         
         // 返回 204 No Content
         return response()->noContent();
+    }
+
+    /**
+     * 上傳商品圖片
+     * 
+     * 遵循 Spatie Media Library v11 官方最佳實踐：
+     * - 使用專用的 FormRequest 進行驗證
+     * - 實施完整的錯誤處理和日誌記錄
+     * - 使用 singleFile 行為自動替換現有圖片
+     * - 返回所有轉換版本的 URL
+     * 
+     * @group 商品管理
+     * @authenticated
+     * 
+     * @urlParam id integer required 商品 ID Example: 1
+     * @bodyParam image file required 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "message": "圖片上傳成功",
+     *   "data": {
+     *     "id": 1,
+     *     "name": "商品名稱",
+     *     "has_image": true,
+     *     "image_urls": {
+     *       "original": "http://localhost:8000/storage/1/product-image.jpg",
+     *       "thumb": "http://localhost:8000/storage/1/conversions/product-image-thumb.jpg",
+     *       "medium": "http://localhost:8000/storage/1/conversions/product-image-medium.jpg",
+     *       "large": "http://localhost:8000/storage/1/conversions/product-image-large.jpg"
+     *     }
+     *   }
+     * }
+     * 
+     * @response 404 {
+     *   "success": false,
+     *   "message": "找不到指定的商品"
+     * }
+     * 
+     * @response 422 {
+     *   "success": false,
+     *   "message": "圖片上傳驗證失敗",
+     *   "errors": {
+     *     "image": ["圖片格式必須是：JPEG、JPG、PNG、GIF 或 WebP。"]
+     *   }
+     * }
+     * 
+     * @response 500 {
+     *   "success": false,
+     *   "message": "圖片上傳失敗",
+     *   "error": "詳細錯誤訊息"
+     * }
+     */
+    public function uploadImage(UploadProductImageRequest $request, Product $product)
+    {
+        try {
+            // 授權檢查
+            $this->authorize('update', $product);
+
+            // 記錄開始上傳
+            Log::info('開始上傳商品圖片', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'user_id' => auth()->id(),
+                'file_info' => [
+                    'original_name' => $request->file('image')->getClientOriginalName(),
+                    'mime_type' => $request->file('image')->getMimeType(),
+                    'size' => $request->file('image')->getSize(),
+                ]
+            ]);
+
+            // 獲取上傳的檔案
+            $uploadedFile = $request->file('image');
+            
+            // 檢查是否已有圖片（用於日誌記錄）
+            $hadPreviousImage = $product->hasImage();
+            $previousImageId = $hadPreviousImage ? $product->getFirstMedia('images')->id : null;
+
+            // 使用 Context7 推薦的 addMediaFromRequest 方法
+            // singleFile() 配置會自動替換現有圖片
+            $media = $product
+                ->addMediaFromRequest('image')
+                ->usingName($product->name . ' 主圖')
+                ->usingFileName('product-' . $product->id . '-' . time() . '.' . $uploadedFile->getClientOriginalExtension())
+                ->toMediaCollection('images');
+
+            // 等待轉換完成（因為使用 nonQueued()）
+            // 驗證所有轉換是否成功生成
+            $conversions = ['thumb', 'medium', 'large'];
+            $conversionResults = [];
+            
+            foreach ($conversions as $conversion) {
+                $hasConversion = $media->hasGeneratedConversion($conversion);
+                $conversionResults[$conversion] = [
+                    'generated' => $hasConversion,
+                    'url' => $hasConversion ? $media->getUrl($conversion) : null,
+                    'path' => $hasConversion ? $media->getPath($conversion) : null,
+                    'file_exists' => $hasConversion ? file_exists($media->getPath($conversion)) : false,
+                ];
+            }
+
+            // 記錄上傳成功
+            Log::info('商品圖片上傳成功', [
+                'product_id' => $product->id,
+                'media_id' => $media->id,
+                'media_file_name' => $media->file_name,
+                'media_size' => $media->size,
+                'had_previous_image' => $hadPreviousImage,
+                'previous_image_id' => $previousImageId,
+                'conversion_results' => $conversionResults,
+                'user_id' => auth()->id(),
+            ]);
+
+            // 檢查是否有轉換失敗
+            $failedConversions = array_filter($conversionResults, function($result) {
+                return !$result['generated'] || !$result['file_exists'];
+            });
+
+            if (!empty($failedConversions)) {
+                Log::warning('部分圖片轉換失敗', [
+                    'product_id' => $product->id,
+                    'media_id' => $media->id,
+                    'failed_conversions' => array_keys($failedConversions),
+                    'conversion_details' => $failedConversions,
+                ]);
+            }
+
+            // 重新載入產品以獲取最新的媒體關聯
+            $product->refresh();
+
+            // 準備回應資料
+            $responseData = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'has_image' => $product->hasImage(),
+                'image_urls' => $product->getImageUrls(),
+                'media_info' => [
+                    'id' => $media->id,
+                    'file_name' => $media->file_name,
+                    'mime_type' => $media->mime_type,
+                    'size' => $media->size,
+                    'human_readable_size' => $media->human_readable_size,
+                ],
+                'conversions_status' => $conversionResults,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => '圖片上傳成功',
+                'data' => $responseData,
+            ], 200);
+
+        } catch (AuthorizationException $e) {
+            Log::warning('圖片上傳授權失敗', [
+                'product_id' => $product->id,
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '您沒有權限上傳此商品的圖片',
+            ], 403);
+
+        } catch (\Exception $e) {
+            Log::error('圖片上傳失敗', [
+                'product_id' => $product->id,
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '圖片上傳失敗',
+                'error' => config('app.debug') ? $e->getMessage() : '內部伺服器錯誤',
+            ], 500);
+        }
     }
 }

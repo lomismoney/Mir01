@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Image\Enums\Fit;
 
 /**
  * Product 模型 - SPU (Standard Product Unit)
@@ -16,10 +20,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * 與 Category 是多對一關係
  * 與 ProductVariant（SKU）是一對多關係
  * 與 Attribute 通過樞紐表建立多對多關係
+ * 支援媒體庫功能，可儲存商品圖片
  */
-class Product extends Model
+class Product extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     /**
      * 允許大量賦值的屬性設定
@@ -144,5 +149,162 @@ class Product extends Model
             'min' => $variants->min('price'),
             'max' => $variants->max('price'),
         ];
+    }
+
+    /**
+     * 註冊媒體集合
+     * 
+     * 定義商品圖片的存儲集合和驗證規則
+     * 暫時禁用轉換以解決 Windows 路徑問題
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('images')
+            ->acceptsMimeTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'])
+            ->singleFile(); // 每個商品只允許一張主圖
+    }
+
+    /**
+     * 註冊媒體轉換
+     * 
+     * 暫時註釋掉以避免 Windows 路徑問題
+     * 後續將重新啟用
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        // 暫時禁用轉換以解決路徑問題
+        // 將在路徑問題解決後重新啟用
+        
+        /*
+        $this->addMediaConversion('thumb')
+            ->fit(Fit::Contain, 300, 300)
+            ->quality(85)
+            ->format('jpg')
+            ->nonQueued(); // Windows 環境建議不使用隊列
+
+        $this->addMediaConversion('medium')
+            ->fit(Fit::Contain, 600, 600)
+            ->quality(85)
+            ->format('jpg')
+            ->nonQueued();
+
+        $this->addMediaConversion('large')
+            ->fit(Fit::Contain, 1200, 1200)
+            ->quality(90)
+            ->format('jpg')
+            ->nonQueued();
+        */
+    }
+
+    /**
+     * 檢查商品是否有圖片
+     * 
+     * @return bool
+     */
+    public function hasImage(): bool
+    {
+        return $this->hasMedia('images');
+    }
+
+    /**
+     * 獲取商品圖片 URL
+     * 
+     * 簡化版本，只返回原始圖片
+     * 
+     * @return string|null
+     */
+    public function getImageUrl(): ?string
+    {
+        $media = $this->getFirstMedia('images');
+        return $media ? $media->getUrl() : null;
+    }
+
+    /**
+     * 獲取所有尺寸的圖片 URL
+     * 
+     * 暫時只返回原始圖片，轉換功能將稍後重新啟用
+     * 
+     * @return array<string, string|null>
+     */
+    public function getImageUrls(): array
+    {
+        $media = $this->getFirstMedia('images');
+        
+        if (!$media) {
+            return [
+                'original' => null,
+                'thumb' => null,
+                'medium' => null,
+                'large' => null,
+            ];
+        }
+
+        // 暫時只返回原始圖片
+        $originalUrl = $media->getUrl();
+        
+        return [
+            'original' => $originalUrl,
+            'thumb' => $originalUrl, // 暫時使用原始圖片
+            'medium' => $originalUrl, // 暫時使用原始圖片
+            'large' => $originalUrl, // 暫時使用原始圖片
+        ];
+    }
+
+    /**
+     * 獲取圖片的所有尺寸路徑
+     * 返回包含所有轉換版本的檔案路徑陣列
+     * 
+     * @return array<string, string> 包含各種尺寸路徑的陣列
+     */
+    public function getImagePaths(): array
+    {
+        if (!$this->hasImage()) {
+            return [
+                'original' => '',
+                'thumb' => '',
+                'medium' => '',
+                'large' => '',
+            ];
+        }
+
+        $media = $this->getFirstMedia('images');
+        
+        return [
+            'original' => $media->getPath(),
+            'thumb' => $media->getPath('thumb'),
+            'medium' => $media->getPath('medium'),
+            'large' => $media->getPath('large'),
+        ];
+    }
+
+    /**
+     * 檢查指定轉換是否已生成
+     * 
+     * @param string $conversionName 轉換名稱
+     * @return bool
+     */
+    public function hasConversion(string $conversionName): bool
+    {
+        if (!$this->hasImage()) {
+            return false;
+        }
+
+        return $this->getFirstMedia('images')->hasGeneratedConversion($conversionName);
+    }
+
+    /**
+     * 獲取可用的轉換 URL
+     * 如果指定的轉換不存在，則回退到原圖
+     * 
+     * @param array<string> $conversions 優先順序的轉換名稱陣列
+     * @return string
+     */
+    public function getAvailableImageUrl(array $conversions = ['medium', 'large', 'thumb']): string
+    {
+        if (!$this->hasImage()) {
+            return '';
+        }
+
+        return $this->getFirstMedia('images')->getAvailableUrl($conversions);
     }
 }

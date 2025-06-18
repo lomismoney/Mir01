@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo, useEffect } from 'react';
+import { useState, memo, useEffect, useMemo } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -12,6 +12,8 @@ import {
   getFilteredRowModel,
   VisibilityState,
   RowSelectionState,
+  getExpandedRowModel,
+  ExpandedState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Package, Search, Trash2, ChevronDown } from "lucide-react";
+import { Loader2, Package, Search, Trash2, ChevronDown, Info } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -41,30 +43,87 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useProducts, useDeleteProduct, useDeleteMultipleProducts } from '@/hooks/queries/useEntityQueries';
 import { useAdminAuth } from '@/hooks/use-admin-auth';
 import { useDebounce } from '@/hooks/use-debounce';
-import { columns, type Product } from "./columns";
+import { columns, type ExpandedProductItem } from "./columns";
 import VariantDetailsModal from "./VariantDetailsModal";
 import { ProductItem } from "@/types/api-helpers";
+import { useRouter } from 'next/navigation';
 
 import { toast } from "sonner";
 
 /**
- * 商品管理客戶端頁面組件（利劍行動重構版本）
+ * 將 SPU 商品數據轉換為支援巢狀顯示的擴展格式
+ * 
+ * @param products - 原始商品數據陣列
+ * @returns 轉換後的擴展商品數據陣列，只包含 SPU 主行，變體行通過 getSubRows 動態提供
+ */
+function transformProductsForNestedDisplay(products: ProductItem[]): ExpandedProductItem[] {
+  return products.map(product => ({
+    ...product,
+    id: `product-${product.id}`, // 轉換為字符串 ID
+    originalId: product.id, // 保存原始數字 ID
+    isVariantRow: false,
+    // 預處理變體資訊，供 getSubRows 使用
+    processedVariants: product.variants && product.variants.length > 1 
+      ? product.variants.map(variant => ({
+          ...product, // 繼承 SPU 資訊
+          id: `product-${product.id}-variant-${variant.id}`, // 創建唯一字符串 ID
+          originalId: product.id, // 保存原始 SPU ID
+          isVariantRow: true,
+          parentId: product.id,
+          variantInfo: {
+            id: variant.id || 0,
+            sku: variant.sku || '',
+            price: parseFloat(variant.price || '0'), // 轉換字符串價格為數字
+            attribute_values: (variant.attribute_values || []).map(attr => ({
+              id: attr.id || 0,
+              value: attr.value || '',
+              attribute: attr.attribute ? {
+                id: attr.attribute.id || 0,
+                name: attr.attribute.name || '',
+              } : undefined,
+            })),
+            inventories: Array.isArray(variant.inventory) 
+              ? variant.inventory.map(inv => ({
+                  store_id: inv.store?.id || 0,
+                  quantity: inv.quantity || 0,
+                  store: inv.store ? {
+                    id: inv.store.id || 0,
+                    name: inv.store.name || '',
+                  } : undefined,
+                }))
+              : [],
+          },
+        }))
+      : undefined,
+  }));
+}
+
+/**
+ * 商品管理客戶端頁面組件（巢狀顯示升級版）
  * 
  * 架構升級：
  * 1. 完全基於 TanStack Table 的 DataTable 架構
- * 2. 統一的 columns 定義，關注點分離
- * 3. useDebounce 優化搜尋體驗，減少 API 請求
- * 4. 事件驅動的操作處理機制
- * 5. 與其他管理模組架構完全一致
+ * 2. 支援 SPU+SKU 巢狀顯示，可展開查看變體詳情
+ * 3. 統一的 columns 定義，關注點分離
+ * 4. useDebounce 優化搜尋體驗，減少 API 請求
+ * 5. 事件驅動的操作處理機制
+ * 6. 與其他管理模組架構完全一致
+ * 
+ * 巢狀顯示特性：
+ * - SPU 主行顯示商品基本資訊和價格範圍
+ * - 可展開查看該 SPU 下的所有 SKU 變體
+ * - SKU 變體行顯示具體的規格、價格、庫存資訊
+ * - 智能展開/收合控制，單規格商品無展開按鈕
  * 
  * 效能優化：
  * - TanStack Table 內建虛擬化和優化
  * - 防抖搜尋，避免過度 API 請求
  * - React.memo 防止不必要重渲染
- * - 職責分離的架構設計
+ * - 智能數據轉換，僅在必要時重新計算
  * 
  * 安全特性：
  * - 統一的權限驗證機制 (useAdminAuth)
@@ -72,6 +131,7 @@ import { toast } from "sonner";
  * - 完整的錯誤處理
  */
 const ProductClientComponent = () => {
+  const router = useRouter();
   const { user, isLoading, isAuthorized } = useAdminAuth();
   
   // 搜索狀態管理 - 使用防抖優化
@@ -83,6 +143,7 @@ const ProductClientComponent = () => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [expanded, setExpanded] = useState<ExpandedState>({});
   
   // 使用防抖後的搜索查詢
   const { data: productsResponse, isLoading: isProductsLoading, error } = useProducts(
@@ -100,10 +161,15 @@ const ProductClientComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
 
+  // 轉換商品數據為巢狀顯示格式
+  const expandedProducts = useMemo(() => {
+    const rawProducts = (productsResponse?.data || []) as ProductItem[];
+    return transformProductsForNestedDisplay(rawProducts);
+  }, [productsResponse?.data]);
+
   // 初始化表格
-  const products = (productsResponse?.data || []) as Product[];
   const table = useReactTable({
-    data: products,
+    data: expandedProducts,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -111,14 +177,27 @@ const ProductClientComponent = () => {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onExpandedChange: setExpanded,
     autoResetPageIndex: false, // 🎯 斬斷循環：禁用分頁自動重設
+    // 🚀 巢狀顯示核心配置
+    getSubRows: (row) => {
+      // 如果是 SPU 主行且有預處理的變體，返回變體行
+      if (!row.isVariantRow && row.processedVariants) {
+        return row.processedVariants;
+      }
+      return undefined;
+    },
+    // 只允許 SPU 主行被選中
+    enableRowSelection: (row) => !row.original.isVariantRow,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      expanded,
     },
   });
 
@@ -175,8 +254,14 @@ const ProductClientComponent = () => {
   const confirmBatchDelete = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
     const selectedIds = selectedRows
-      .map(row => row.original.id)
-      .filter((id): id is number => id !== undefined && id !== null);
+      .map(row => {
+        // 確保只獲取 SPU 主行的原始 ID
+        if (!row.original.isVariantRow && row.original.originalId) {
+          return row.original.originalId;
+        }
+        return null;
+      })
+      .filter((id): id is number => id !== null);
     
     if (selectedIds.length === 0) {
       toast.error('沒有有效的商品 ID 可供刪除');
@@ -200,213 +285,192 @@ const ProductClientComponent = () => {
    */
   useEffect(() => {
     const handleEditEvent = (event: CustomEvent) => {
-      const product = event.detail as Product;
-      // TODO: 實現編輯功能
-      toast.info(`編輯商品功能即將推出：${product.name}`);
+      const productId = event.detail.id;
+      router.push(`/products/${productId}/edit`);
     };
 
     const handleDeleteEvent = (event: CustomEvent) => {
-      const product = event.detail as Product;
-      if (product.id && product.name) {
-        handleDeleteProduct({ id: product.id, name: product.name });
-      }
+      const { id, name } = event.detail;
+      handleDeleteProduct({ id, name });
     };
 
     const handleViewVariantsEvent = (event: CustomEvent) => {
-      const product = event.detail as Product;
-      // 設置選中的商品並開啟模態框
-      setSelectedProduct(product as ProductItem);
+      const product = event.detail;
+      setSelectedProduct(product);
       setIsModalOpen(true);
     };
 
-    // 使用新的事件名稱
+    // 添加事件監聽器
     window.addEventListener('editProduct', handleEditEvent as EventListener);
     window.addEventListener('deleteProduct', handleDeleteEvent as EventListener);
     window.addEventListener('viewVariants', handleViewVariantsEvent as EventListener);
 
+    // 清理事件監聽器
     return () => {
       window.removeEventListener('editProduct', handleEditEvent as EventListener);
       window.removeEventListener('deleteProduct', handleDeleteEvent as EventListener);
       window.removeEventListener('viewVariants', handleViewVariantsEvent as EventListener);
     };
-  }, []);
+  }, [router]);
 
-  // 使用統一的權限守衛
+  // 權限檢查
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">正在驗證權限...</span>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center h-32">
+        <Loader2 className="h-6 w-6 animate-spin" />
+        <span className="ml-2">載入中...</span>
+      </div>
     );
   }
 
   if (!isAuthorized) {
-    return null; // useAdminAuth 會處理重新導向
-  }
-
-  // 處理商品資料載入狀態
-  if (isProductsLoading) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">載入商品資料中...</span>
-        </CardContent>
-      </Card>
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          您沒有權限訪問此頁面。請聯繫管理員。
+        </AlertDescription>
+      </Alert>
     );
   }
-
-  // 處理錯誤狀態
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center">
-            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">載入失敗</h3>
-            <p className="text-gray-500">無法載入商品資料，請稍後再試。</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const selectedRowCount = table.getFilteredSelectedRowModel().rows.length;
 
   return (
-    <div className="space-y-6">
-      {/* 搜尋和操作區 */}
+    <div className="space-y-4">
+      {/* 搜索和操作工具欄 */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="搜尋商品名稱..."
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-8 w-[300px]"
+            />
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          {/* 批量刪除按鈕 - 只在有選中項目時顯示 */}
+          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBatchDelete}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              刪除選中 ({table.getFilteredSelectedRowModel().rows.length})
+            </Button>
+          )}
+          
+          {/* 欄位顯示控制 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <ChevronDown className="h-4 w-4 mr-2" />
+                欄位顯示
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  )
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* 巢狀商品表格 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center space-x-2">
             <Package className="h-5 w-5" />
-            商品列表
+            <span>商品列表</span>
+            <div className="text-sm text-muted-foreground font-normal">
+              （支援展開查看 SKU 變體詳情）
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between gap-4 mb-4">
-            {/* 搜尋框 - 現已支援防抖優化 */}
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="搜尋商品名稱..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10"
-              />
+          {isProductsLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span className="ml-2">載入商品資料中...</span>
             </div>
-
-            <div className="flex items-center space-x-2">
-              {/* 欄位顯示控制 */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    欄位 <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => {
-                      return (
-                        <DropdownMenuCheckboxItem
-                          key={column.id}
-                          className="capitalize"
-                          checked={column.getIsVisible()}
-                          onCheckedChange={(value) =>
-                            column.toggleVisibility(!!value)
-                          }
-                        >
-                          {column.id === "name" && "商品名稱"}
-                          {column.id === "description" && "描述"}
-                          {column.id === "category" && "分類"}
-                          {column.id === "price_range" && "價格範圍"}
-                          {column.id === "variant_count" && "規格數量"}
-                          {column.id === "created_at" && "建立時間"}
-                          {column.id === "actions" && "操作"}
-                          {!["name", "description", "category", "price_range", "variant_count", "created_at", "actions"].includes(column.id) && column.id}
-                        </DropdownMenuCheckboxItem>
-                      )
-                    })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* 批量刪除按鈕 */}
-              {selectedRowCount > 0 && (
-                <Button
-                  variant="destructive"
-                  onClick={handleBatchDelete}
-                  disabled={deleteMultipleProductsMutation.isPending}
-                >
-                  {deleteMultipleProductsMutation.isPending && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  刪除選中 ({selectedRowCount})
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* TanStack Table - 完全取代手動表格 */}
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                        </TableHead>
-                      )
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
+          ) : error ? (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                載入商品資料時發生錯誤。請重新整理頁面。
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        return (
+                          <TableHead key={header.id}>
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </TableHead>
+                        )
+                      })}
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <Package className="h-8 w-8 text-gray-400" />
-                        <p className="text-gray-500">
-                          {searchQuery ? '沒有找到符合條件的商品' : '尚無商品資料'}
-                        </p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        className={row.original.isVariantRow ? "bg-muted/30" : ""}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
+                        沒有找到商品資料。
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+          
           {/* 分頁控制 */}
           <div className="flex items-center justify-end space-x-2 py-4">
             <div className="flex-1 text-sm text-muted-foreground">
-              已選擇 {selectedRowCount} 個項目
+              已選擇 {table.getFilteredSelectedRowModel().rows.length} 個商品，
+              共 {table.getFilteredRowModel().rows.filter(row => !row.original.isVariantRow).length} 個商品
             </div>
             <div className="space-x-2">
               <Button
@@ -430,7 +494,7 @@ const ProductClientComponent = () => {
         </CardContent>
       </Card>
 
-      {/* 單個商品刪除確認對話框 */}
+      {/* 刪除確認對話框 */}
       <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -443,12 +507,10 @@ const ProductClientComponent = () => {
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteProduct}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteProductMutation.isPending}
             >
-              {deleteProductMutation.isPending && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              )}
+              {deleteProductMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               確認刪除
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -461,19 +523,17 @@ const ProductClientComponent = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>確認批量刪除</AlertDialogTitle>
             <AlertDialogDescription>
-              您確定要刪除選中的 {selectedRowCount} 個商品嗎？此操作無法復原。
+              您確定要刪除選中的 {table.getFilteredSelectedRowModel().rows.length} 個商品嗎？此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowBatchDeleteDialog(false)}>取消</AlertDialogCancel>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmBatchDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteMultipleProductsMutation.isPending}
             >
-              {deleteMultipleProductsMutation.isPending && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              )}
+              {deleteMultipleProductsMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               確認刪除
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -490,13 +550,4 @@ const ProductClientComponent = () => {
   );
 };
 
-/**
- * 使用 React.memo 優化的商品管理頁面元件
- * 
- * 效能優化：
- * - 防止父元件重渲染時的不必要重繪
- * - 僅當 props 發生變化時才重新渲染
- * - 配合 useAdminAuth 統一權限管理
- * - TanStack Table 內建虛擬化和效能優化
- */
 export default memo(ProductClientComponent); 
