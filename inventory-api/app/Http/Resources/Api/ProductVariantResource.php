@@ -62,12 +62,14 @@ class ProductVariantResource extends JsonResource
                 return $this->inventory->map(function ($inventory) {
                     return [
                         'id' => $inventory->id,
+                        'product_variant_id' => $inventory->product_variant_id,
+                        'store_id' => $inventory->store_id,
                         'quantity' => $inventory->quantity,
                         'low_stock_threshold' => $inventory->low_stock_threshold,
-                        'store_id' => $inventory->store_id,
                         'store' => [
                             'id' => $inventory->store->id,
                             'name' => $inventory->store->name,
+                            'address' => $inventory->store->address,
                         ],
                     ];
                 });
