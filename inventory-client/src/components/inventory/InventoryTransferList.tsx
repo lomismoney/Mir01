@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { InventoryTransfer, PaginatedResponse } from "@/types/inventory"
+import { InventoryTransferItem } from "@/types/api-helpers"
 import { useInventoryTransfers } from "@/hooks/queries/useEntityQueries"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDate } from "@/lib/utils"
@@ -11,11 +11,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RefreshIcon } from "@/components/ui/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu"
+import { MoreHorizontal, Edit, History } from "lucide-react"
+import { TransferStatusEditDialog } from "./TransferStatusEditDialog"
+import { TransferHistoryDialog } from "./TransferHistoryDialog"
 
 export const InventoryTransferList = () => {
   const { toast } = useToast()
   const [page, setPage] = useState(1)
   const [perPage] = useState(10)
+  const [editingTransfer, setEditingTransfer] = useState<InventoryTransferItem | null>(null)
+  const [viewingHistoryTransfer, setViewingHistoryTransfer] = useState<InventoryTransferItem | null>(null)
 
   const { data, isLoading, error, refetch } = useInventoryTransfers({ page, per_page: perPage })
 
@@ -50,6 +61,16 @@ export const InventoryTransferList = () => {
     }
   }
 
+  const canEditStatus = (status: string) => {
+    // 已完成和已取消的記錄不能編輯
+    return status !== 'completed' && status !== 'cancelled'
+  }
+
+  const handleEditSuccess = () => {
+    setEditingTransfer(null)
+    refetch()
+  }
+
   return (
     <div>
       {isLoading ? (
@@ -71,12 +92,13 @@ export const InventoryTransferList = () => {
                   <TableHead>數量</TableHead>
                   <TableHead>狀態</TableHead>
                   <TableHead>備註</TableHead>
+                  <TableHead className="w-[80px]">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data?.data && data?.data.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="h-24 text-center">
+                    <TableCell colSpan={9} className="h-24 text-center">
                       <div className="flex flex-col items-center justify-center space-y-3 py-6">
                         <p className="text-lg font-medium text-muted-foreground">沒有庫存轉移記錄</p>
                         <p className="text-sm text-muted-foreground">點擊"新增轉移"標籤來創建庫存轉移</p>
@@ -92,7 +114,36 @@ export const InventoryTransferList = () => {
                     <TableCell>{transfer.product_variant?.product?.name || `產品 #${transfer.product_variant_id}`}</TableCell>
                     <TableCell>{transfer.quantity}</TableCell>
                     <TableCell>{getStatusBadge(transfer.status || 'unknown')}</TableCell>
-                    <TableCell>{transfer.notes || "-"}</TableCell>
+                    <TableCell>
+                      <div className="max-w-[200px] truncate" title={transfer.notes || ""}>
+                        {transfer.notes || "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={() => setViewingHistoryTransfer(transfer)}
+                          >
+                            <History className="mr-2 h-4 w-4" />
+                            查看歷史
+                          </DropdownMenuItem>
+                          {canEditStatus(transfer.status || '') && (
+                            <DropdownMenuItem 
+                              onClick={() => setEditingTransfer(transfer)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              編輯狀態
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -115,6 +166,25 @@ export const InventoryTransferList = () => {
                 下一頁
               </Button>
             </div>
+
+            {/* 編輯狀態對話框 */}
+            {editingTransfer && (
+              <TransferStatusEditDialog
+                transfer={editingTransfer}
+                open={!!editingTransfer}
+                onOpenChange={(open: boolean) => !open && setEditingTransfer(null)}
+                onSuccess={handleEditSuccess}
+              />
+            )}
+
+            {/* 查看歷史對話框 */}
+            {viewingHistoryTransfer && (
+              <TransferHistoryDialog
+                transfer={viewingHistoryTransfer}
+                open={!!viewingHistoryTransfer}
+                onOpenChange={(open: boolean) => !open && setViewingHistoryTransfer(null)}
+              />
+            )}
           </>
         )}
     </div>

@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InventoryAdjustmentRequest;
 use App\Http\Resources\Api\InventoryResource;
+use App\Http\Resources\Api\ProductResource;
+use App\Http\Resources\Api\InventoryTransactionResource;
 use App\Models\Inventory;
+use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Store;
+use App\Models\InventoryTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -39,29 +43,41 @@ class InventoryManagementController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Inventory::with([
-            'productVariant.product',
-            'productVariant.attributeValues.attribute',
-            'store'
+        $query = Product::with([
+            'category',
+            'variants.attributeValues.attribute',
+            'variants.inventory' => function ($query) use ($request) {
+                if ($request->has('store_id')) {
+                    $query->where('store_id', $request->store_id);
+                }
+            },
+            'variants.inventory.store',
         ]);
-        
-        // 按門市篩選
+
+        // 只查詢有庫存記錄的商品
+        $query->whereHas('variants.inventory');
+
+        // 按門市篩選 (如果請求中有 store_id，則 inventory 關聯已被限制)
         if ($request->has('store_id')) {
-            $query->where('store_id', $request->store_id);
+            $query->whereHas('variants.inventory', function ($q) use ($request) {
+                $q->where('store_id', $request->store_id);
+            });
         }
         
         // 按庫存狀態篩選
         if ($request->boolean('low_stock')) {
-            $query->lowStock();
+            $query->whereHas('variants.inventory', function ($q) {
+                $q->lowStock();
+            });
         } elseif ($request->boolean('out_of_stock')) {
-            $query->outOfStock();
+            $query->whereHas('variants.inventory', function ($q) {
+                $q->outOfStock();
+            });
         }
         
         // 按商品名稱搜尋
         if ($request->filled('product_name')) {
-            $query->whereHas('productVariant.product', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->product_name . '%');
-            });
+            $query->where('name', 'like', '%' . $request->product_name . '%');
         }
         
         // 應用排序
@@ -70,12 +86,12 @@ class InventoryManagementController extends Controller
         // 應用分頁或獲取所有
         if ($request->boolean('paginate', true)) {
             $perPage = $request->input('per_page', 15);
-            $inventories = $query->paginate($perPage);
+            $products = $query->paginate($perPage);
         } else {
-            $inventories = $query->get();
+            $products = $query->get();
         }
         
-        return InventoryResource::collection($inventories);
+        return ProductResource::collection($products);
     }
 
     /**
@@ -229,7 +245,7 @@ class InventoryManagementController extends Controller
         }
         
         // 按交易類型篩選
-        if ($request->filled('type')) {
+        if ($request->filled('type') && $request->type !== 'all') {
             $query->where('type', $request->type);
         }
         
@@ -237,6 +253,7 @@ class InventoryManagementController extends Controller
         $perPage = $request->input('per_page', 15);
         $transactions = $query->latest()->paginate($perPage);
         
+        // 確保即使沒有記錄也返回一個有效的響應結構
         return response()->json($transactions);
     }
 
@@ -423,5 +440,106 @@ class InventoryManagementController extends Controller
                 'last_page' => $transactions->lastPage(),
             ]
         ]);
+    }
+
+    /**
+     * 獲取所有庫存交易歷史記錄
+     * 
+     * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
+     * @queryParam type string 交易類型篩選. Example: transfer_in
+     * @queryParam start_date date 起始日期. Example: 2023-01-01
+     * @queryParam end_date date 結束日期. Example: 2023-12-31
+     * @queryParam product_name string 商品名稱搜尋. Example: T恤
+     * @queryParam per_page integer 每頁顯示數量，預設20. Example: 50
+     * @queryParam page integer 頁碼. Example: 1
+     * 
+     * @authenticated
+     * @response 200 {
+     *   "message": "成功獲取庫存交易記錄",
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "inventory_id": 1,
+     *       "user_id": 1,
+     *       "type": "addition",
+     *       "quantity": 10,
+     *       "before_quantity": 0,
+     *       "after_quantity": 10,
+     *       "notes": "初始庫存",
+     *       "metadata": {},
+     *       "created_at": "2023-01-01T10:00:00.000000Z",
+     *       "updated_at": "2023-01-01T10:00:00.000000Z",
+     *       "store": {
+     *         "id": 1,
+     *         "name": "台中店"
+     *       },
+     *       "user": {
+     *         "name": "Admin User"
+     *       },
+     *       "product": {
+     *         "name": "商品名稱",
+     *         "sku": "T001-M-RED"
+     *       }
+     *     }
+     *   ],
+     *   "pagination": {
+     *     "current_page": 1,
+     *     "per_page": 20,
+     *     "total": 100,
+     *     "last_page": 5
+     *   }
+     * }
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getAllTransactions(Request $request): AnonymousResourceCollection
+    {
+        $request->validate([
+            'store_id' => ['nullable', 'integer', 'exists:stores,id'],
+            'type' => ['nullable', 'string', 'in:addition,reduction,adjustment,transfer_in,transfer_out,transfer_cancel'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'product_name' => ['nullable', 'string'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $query = InventoryTransaction::with([
+            'user', 
+            'inventory.store', 
+            'inventory.productVariant.product'
+        ]);
+
+        // 應用篩選條件
+        if ($request->filled('store_id')) {
+            $query->whereHas('inventory', function ($q) use ($request) {
+                $q->where('store_id', $request->store_id);
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->where('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->where('created_at', '<=', $request->end_date . ' 23:59:59');
+        }
+
+        if ($request->filled('product_name')) {
+            $query->whereHas('inventory.productVariant.product', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->product_name . '%');
+            });
+        }
+
+        // 排序和分頁
+        $perPage = $request->input('per_page', 20);
+        $transactions = $query->latest()->paginate($perPage);
+
+        return InventoryTransactionResource::collection($transactions);
     }
 }

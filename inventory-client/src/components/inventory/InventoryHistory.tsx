@@ -40,7 +40,7 @@ interface InventoryHistoryProps {
 
 export function InventoryHistory({ inventoryId, productName, sku }: InventoryHistoryProps) {
   const [filters, setFilters] = useState({
-    type: '',
+    type: 'all',
     start_date: '',
     end_date: '',
     per_page: 20,
@@ -77,6 +77,9 @@ export function InventoryHistory({ inventoryId, productName, sku }: InventoryHis
               {productName} {sku && `(${sku})`}
             </p>
           )}
+          <p className="text-sm text-muted-foreground mt-1">
+            此為特定庫存記錄（ID: {inventoryId}）的歷史
+          </p>
         </div>
         <Button onClick={() => refetch()} variant="outline" size="sm">
           <RefreshCw className="h-4 w-4 mr-2" />
@@ -104,7 +107,7 @@ export function InventoryHistory({ inventoryId, productName, sku }: InventoryHis
                   <SelectValue placeholder="全部類型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">全部類型</SelectItem>
+                  <SelectItem value="all">全部類型</SelectItem>
                   <SelectItem value="addition">入庫</SelectItem>
                   <SelectItem value="reduction">出庫</SelectItem>
                   <SelectItem value="adjustment">調整</SelectItem>
@@ -228,14 +231,49 @@ export function InventoryHistory({ inventoryId, productName, sku }: InventoryHis
                       </div>
                     )}
                     
-                    {transaction.metadata && (
-                      <div className="text-xs text-muted-foreground">
-                        <span className="font-medium">額外資訊:</span> 
-                        {typeof transaction.metadata === 'string' 
-                          ? transaction.metadata 
-                          : JSON.stringify(transaction.metadata)}
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium">額外資訊:</span> 
+                      <span>
+                      {(() => {
+                        if (!transaction.metadata) return '無';
+                          
+                          // 處理 metadata，可能是字符串或對象
+                          let metadataObj: any = transaction.metadata;
+                          
+                          // 如果是字符串，嘗試解析為 JSON
+                          if (typeof metadataObj === 'string') {
+                            try {
+                              metadataObj = JSON.parse(metadataObj);
+                            } catch (e) {
+                              // 如果解析失敗，直接返回原始字符串
+                              return String(metadataObj);
+                            }
+                          }
+                          
+                          // 格式化顯示 metadata 對象
+                          if (typeof metadataObj === 'object' && metadataObj !== null) {
+                            const entries = Object.entries(metadataObj);
+                            if (entries.length === 0) return '無';
+                            
+                            return entries.map(([key, value]) => {
+                              // 轉換 key 為更友好的顯示名稱
+                              const displayKey = key
+                                .replace(/_/g, ' ')
+                                .replace(/\b\w/g, l => l.toUpperCase())
+                                .replace('Order Id', '訂單編號')
+                                .replace('Source', '來源')
+                                .replace('Reason', '原因')
+                                .replace('Purchase Order', '採購單號')
+                                .replace('Transfer Id', '轉移編號');
+                              
+                              return `${displayKey}: ${String(value)}`;
+                            }).join(', ');
+                          }
+                          
+                          return '無';
+                        })()}
+                      </span>
                       </div>
-                    )}
                   </div>
                 </div>
               ))}

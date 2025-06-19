@@ -35,6 +35,7 @@ class CustomerController extends Controller
      * @queryParam search string 關鍵字搜尋，將匹配姓名、電話、統一編號。Example: 設計公司
      * @queryParam start_date date 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
      * @queryParam end_date date 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
+     * @responseFile 200 storage/responses/customer.index.json
      */
     public function index(Request $request)
     {

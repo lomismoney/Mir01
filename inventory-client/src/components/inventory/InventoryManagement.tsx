@@ -7,11 +7,12 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { useToast } from "@/components/ui/use-toast"
 import { InventoryNestedTable } from "@/components/inventory/InventoryNestedTable"
 import { ProductFilters } from "@/types/api-helpers"
+import { Category } from "@/types/category"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { 
@@ -25,9 +26,9 @@ import {
   PackageX,
   Package
 } from "lucide-react"
-import { InventoryListTable } from "@/components/inventory/InventoryListTable"
-import { CreatePurchaseDialog } from "@/components/purchases/CreatePurchaseDialog"
+
 import Link from "next/link"
+import { InventoryPagination } from "./InventoryPagination"
 
 export function InventoryManagement() {
   const { toast } = useToast()
@@ -36,9 +37,9 @@ export function InventoryManagement() {
   // 篩選器狀態管理
   const [filters, setFilters] = useState<ProductFilters>({})
   const [productNameInput, setProductNameInput] = useState("")
+  const [page, setPage] = useState(1)
 
-  // 對話框狀態管理
-  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false)
+
 
   // 使用 debounce 優化商品名稱搜尋
   const debouncedProductName = useDebounce(productNameInput, 300)
@@ -55,6 +56,9 @@ export function InventoryManagement() {
   const { data: storesData, isLoading: isLoadingStores } = useStores()
   const { data: categoriesData, isLoading: isLoadingCategories } = useCategories()
 
+  // 從分組格式中提取所有分類
+  const allCategories = categoriesData ? Object.values(categoriesData).flat() : [];
+
   // 獲取庫存列表數據 
   const {
     data: inventoryData,
@@ -66,7 +70,11 @@ export function InventoryManagement() {
     low_stock: filters.low_stock,
     out_of_stock: filters.out_of_stock,
     product_name: filters.product_name,
+    page,
+    per_page: 15,
   })
+
+  const paginationMeta = inventoryData?.meta
 
   const handleRefresh = () => {
     refetchInventory()
@@ -147,77 +155,6 @@ export function InventoryManagement() {
   }
 
   /**
-   * 轉換庫存資料為商品分組的巢狀表格格式
-   * @param inventoryData - 庫存列表資料
-   * @returns 轉換後的商品分組資料格式
-   */
-  const transformInventoryToProductData = (inventoryData: unknown[]) => {
-    if (!Array.isArray(inventoryData)) {
-      return []
-    }
-    
-    // 按商品分組庫存資料
-    const productGroups = new Map<number, any>()
-    
-    inventoryData.forEach((inventory: any) => {
-      if (!inventory?.product_variant?.product) {
-        return
-      }
-      
-      const product = inventory.product_variant.product
-      const productId = product.id
-      const variantId = inventory.product_variant.id
-      
-      if (!productGroups.has(productId)) {
-        // 創建商品分組
-        productGroups.set(productId, {
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          category_id: product.category_id,
-          category: product.category,
-          created_at: product.created_at,
-          updated_at: product.updated_at,
-          variants: new Map() // 使用 Map 來避免重複的 variant
-        })
-      }
-      
-      const productGroup = productGroups.get(productId)
-      
-      // 檢查是否已有此 variant
-      if (!productGroup.variants.has(variantId)) {
-        // 創建新的 variant
-        productGroup.variants.set(variantId, {
-          id: inventory.product_variant.id,
-          sku: inventory.product_variant.sku,
-          price: inventory.product_variant.price,
-          product_id: inventory.product_variant.product_id,
-          created_at: inventory.product_variant.created_at,
-          updated_at: inventory.product_variant.updated_at,
-          product: product,
-          attribute_values: inventory.product_variant.attribute_values || [],
-          inventory: []
-        })
-      }
-      
-      // 添加庫存資訊到現有 variant
-      const variant = productGroup.variants.get(variantId)
-      variant.inventory.push({
-        id: inventory.id,
-        quantity: inventory.quantity,
-        low_stock_threshold: inventory.low_stock_threshold,
-        store: inventory.store
-      })
-    })
-    
-    // 轉換 Map 為 Array
-    return Array.from(productGroups.values()).map(product => ({
-      ...product,
-      variants: Array.from(product.variants.values())
-    }))
-  }
-
-  /**
    * 計算當前篩選器的數量
    */
   const getActiveFiltersCount = () => {
@@ -234,36 +171,38 @@ export function InventoryManagement() {
   if (inventoryError) {
     return (
       <div className="space-y-6 p-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">庫存管理</h2>
-          <Alert className="max-w-md mx-auto">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>載入失敗</AlertTitle>
-            <AlertDescription className="flex items-center justify-between">
-              <span>無法載入庫存資料，請稍後再試</span>
-              <Button variant="outline" size="sm" onClick={handleRefresh} className="ml-4">
-                <RefreshIcon className="h-4 w-4 mr-2" />
-                重試
-              </Button>
-            </AlertDescription>
-          </Alert>
+        {/* 頁面標題區 */}
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-2xl font-bold">庫存管理</h1>
+          <p className="text-muted-foreground">
+            管理商品庫存數量、監控庫存水位和處理庫存調整
+          </p>
         </div>
+        
+        <Alert className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>載入失敗</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>無法載入庫存資料，請稍後再試</span>
+            <Button variant="outline" size="sm" onClick={handleRefresh} className="ml-4">
+              <RefreshIcon className="h-4 w-4 mr-2" />
+              重試
+            </Button>
+          </AlertDescription>
+        </Alert>
       </div>
     )
   }
 
   return (
     <div className="space-y-6 p-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">庫存管理</h2>
-        <div className="flex items-center gap-2 justify-center">
-          <Button
-            onClick={() => setPurchaseDialogOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Package className="h-4 w-4" />
-            商品入庫
-          </Button>
+      {/* 頁面標題區 */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">庫存管理</h1>
+          <p className="text-muted-foreground">
+            管理商品庫存數量、監控庫存水位和處理庫存調整
+          </p>
         </div>
       </div>
 
@@ -338,7 +277,7 @@ export function InventoryManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">所有分類</SelectItem>
-                  {categoriesData?.data?.map((category) => (
+                  {allCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id?.toString() || ""}>
                       {category.name}
                     </SelectItem>
@@ -410,15 +349,15 @@ export function InventoryManagement() {
         </CardContent>
       </Card>
 
-      {/* 庫存列表 */}
+      {/* 商品庫存明細 */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            庫存總覽
+            商品庫存明細
           </CardTitle>
           <CardDescription>
-            顯示各商品變體的庫存狀況，包含成本與利潤分析
+            按商品分組顯示庫存詳情，支援展開查看各變體的庫存狀況
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -439,53 +378,30 @@ export function InventoryManagement() {
               </Alert>
             </div>
           ) : (
-            <InventoryListTable
+            <InventoryNestedTable
               data={inventoryData?.data || []}
               isLoading={isLoadingInventory}
-              onSelectInventory={() => {
-                toast({
-                  title: "功能提示",
-                  description: "請使用下方巢狀表格中的修改庫存按鈕來調整個別商品的庫存數量",
-                })
-              }}
+              onAdjustInventory={handleAdjustInventory}
+              onManageProduct={handleManageProduct}
             />
           )}
         </CardContent>
+        {inventoryData?.meta && (
+          <CardFooter className="flex items-center justify-center border-t pt-6">
+            <InventoryPagination
+              meta={{
+                current_page: inventoryData.meta.current_page || 1,
+                last_page: inventoryData.meta.last_page || 1,
+                per_page: inventoryData.meta.per_page || 15,
+                total: inventoryData.meta.total || 0,
+              }}
+              onPageChange={setPage}
+            />
+          </CardFooter>
+        )}
       </Card>
 
-      {/* 巢狀庫存表格 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Tag className="h-5 w-5" />
-            商品庫存明細
-          </CardTitle>
-          <CardDescription>
-            按商品分組顯示庫存詳情，支援展開查看各變體的庫存狀況
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          <InventoryNestedTable
-            data={transformInventoryToProductData(inventoryData?.data || [])}
-            isLoading={isLoadingInventory}
-            onAdjustInventory={handleAdjustInventory}
-            onManageProduct={handleManageProduct}
-          />
-        </CardContent>
-      </Card>
 
-      {/* 商品入庫對話框 */}
-      <CreatePurchaseDialog
-        open={purchaseDialogOpen}
-        onOpenChange={setPurchaseDialogOpen}
-        onSuccess={() => {
-          refetchInventory()
-          toast({
-            title: "進貨成功",
-            description: "商品已成功入庫，庫存已更新",
-          })
-        }}
-      />
     </div>
   )
 } 

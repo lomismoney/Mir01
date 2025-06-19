@@ -160,14 +160,49 @@ export type ProductItem = {
 };
 
 // 從 API 類型中提取 Store 相關類型
-export type CreateStoreRequest = operations['postApiStores']['requestBody']['content']['application/json'];
-export type UpdateStoreRequest = operations['putApiStoresId']['requestBody']['content']['application/json'];
-export type StoreResponse = operations['postApiStores']['responses'][200]['content']['application/json']['data'];
-export type StoresListResponse = operations['getApiStores']['responses'][200]['content']['application/json'];
+// 由於 OpenAPI 規範問題，暫時使用手動類型定義
+export type CreateStoreRequest = {
+  name: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+};
+
+export type UpdateStoreRequest = {
+  name?: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+};
+
+export type StoreResponse = {
+  id: number;
+  name: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StoresListResponse = {
+  data: StoreResponse[];
+  meta?: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+};
 
 // User Stores 相關類型
-export type UserStoresResponse = operations['getApiUsersUser_idStores']['responses'][200]['content']['application/json'];
-export type AssignUserStoresRequest = operations['postApiUsersUser_idStores']['requestBody']['content']['application/json'];
+export type UserStoresResponse = {
+  data: StoreResponse[];
+};
+
+export type AssignUserStoresRequest = {
+  store_ids: number[];
+};
 
 /**
  * 商品篩選參數類型定義
@@ -188,6 +223,119 @@ export type ProductFilters = {
   out_of_stock?: boolean;
   /** 搜尋關鍵字（保留向後相容性） */
   search?: string;
+  /** 分頁參數 */
+  page?: number;
+  /** 每頁項目數 */
+  per_page?: number;
+  /** 是否分頁 */
+  paginate?: boolean;
+};
+
+/**
+ * 庫存管理頁面專用的商品類型
+ * 此類型對應後端 InventoryManagementController::index() 返回的資料結構
+ * 基於 ProductResource，包含完整的變體和庫存資訊
+ */
+export type InventoryProductItem = {
+  id?: number;
+  name?: string;
+  description?: string;
+  category_id?: number;
+  created_at?: string;
+  updated_at?: string;
+  image_urls?: {
+    original?: string;
+    thumb?: string;
+    medium?: string;
+    large?: string;
+  } | null;
+  category?: {
+    id?: number;
+    name?: string;
+    description?: string;
+  };
+  variants?: {
+    id?: number;
+    sku?: string;
+    price?: string;  // API 回傳字符串格式
+    product_id?: number;
+    created_at?: string;
+    updated_at?: string;
+    attribute_values?: {
+      id?: number;
+      value?: string;
+      attribute_id?: number;
+      attribute?: {
+        id?: number;
+        name?: string;
+      };
+    }[];
+    inventory?: {
+      id?: number;
+      quantity?: number;
+      low_stock_threshold?: number;
+      store?: {
+        id?: number;
+        name?: string;
+      };
+    }[];
+  }[];
+  price_range?: {
+    min?: number;
+    max?: number;
+    count?: number;
+  };
+  attributes?: {
+    id?: number;
+    name?: string;
+    type?: string;
+    description?: string;
+  }[];
+};
+
+/**
+ * 庫存交易記錄類型定義
+ * 對應後端 getAllTransactions API 的返回資料結構
+ */
+export type InventoryTransaction = {
+  id?: number;
+  inventory_id?: number;
+  user_id?: number;
+  type?: string;
+  quantity?: number;
+  before_quantity?: number;
+  after_quantity?: number;
+  notes?: string;
+  metadata?: Record<string, any>;
+  created_at?: string;
+  updated_at?: string;
+  store?: {
+    id?: number;
+    name?: string;
+  };
+  user?: {
+    name?: string;
+  };
+  product?: {
+    name?: string;
+    sku?: string;
+  };
+};
+
+/**
+ * 庫存交易記錄查詢參數類型
+ */
+export type InventoryTransactionFilters = {
+  /** 門市 ID 篩選 */
+  store_id?: number;
+  /** 交易類型篩選 */
+  type?: string;
+  /** 起始日期 */
+  start_date?: string;
+  /** 結束日期 */
+  end_date?: string;
+  /** 商品名稱搜尋 */
+  product_name?: string;
   /** 分頁參數 */
   page?: number;
   /** 每頁項目數 */

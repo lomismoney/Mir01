@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             StoreSeeder::class,
             UserStoreSeeder::class,
+            TestInventorySeeder::class,
             // 未來可以加入 ProductSeeder 等...
         ]);
     }

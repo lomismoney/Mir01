@@ -19,6 +19,9 @@ export { default as InventoryTransfer } from './InventoryTransfer';
 export { InventoryTransferDialog } from './InventoryTransferDialog';
 export { InventoryTransferForm } from './InventoryTransferForm';
 export { InventoryTransferList } from './InventoryTransferList';
+export { TransferStatusEditDialog } from './TransferStatusEditDialog';
+export { TransferHistoryDialog } from './TransferHistoryDialog';
 
 // 庫存管理主組件
-export { InventoryManagement } from './InventoryManagement'; 
+export { InventoryManagement } from './InventoryManagement';
+export { IncomingManagement } from './IncomingManagement'; 
