@@ -26,7 +26,7 @@ import {
   PackageX,
   Package
 } from "lucide-react"
-import { CreatePurchaseDialog } from "@/components/purchases/CreatePurchaseDialog"
+
 import Link from "next/link"
 import { InventoryPagination } from "./InventoryPagination"
 
@@ -39,8 +39,7 @@ export function InventoryManagement() {
   const [productNameInput, setProductNameInput] = useState("")
   const [page, setPage] = useState(1)
 
-  // 對話框狀態管理
-  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false)
+
 
   // 使用 debounce 優化商品名稱搜尋
   const debouncedProductName = useDebounce(productNameInput, 300)
@@ -205,14 +204,6 @@ export function InventoryManagement() {
             管理商品庫存數量、監控庫存水位和處理庫存調整
           </p>
         </div>
-        
-        <Button
-          onClick={() => setPurchaseDialogOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Package className="h-4 w-4 mr-1" />
-          商品入庫
-        </Button>
       </div>
 
       {/* 篩選器區域 */}
@@ -410,18 +401,7 @@ export function InventoryManagement() {
         )}
       </Card>
 
-      {/* 商品入庫對話框 */}
-      <CreatePurchaseDialog
-        open={purchaseDialogOpen}
-        onOpenChange={setPurchaseDialogOpen}
-        onSuccess={() => {
-          refetchInventory()
-          toast({
-            title: "進貨成功",
-            description: "商品已成功入庫，庫存已更新",
-          })
-        }}
-      />
+
     </div>
   )
 } 

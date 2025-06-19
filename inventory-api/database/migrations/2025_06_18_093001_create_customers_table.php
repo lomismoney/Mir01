@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('total_unpaid_amount', 12, 2)->default(0); // 未付款總額
             $table->decimal('total_completed_amount', 12, 2)->default(0); // 已完成訂單總額
             $table->timestamps(); // created_at 和 updated_at
+            $table->softDeletes(); // deleted_at for soft deletes
         });
     }
 

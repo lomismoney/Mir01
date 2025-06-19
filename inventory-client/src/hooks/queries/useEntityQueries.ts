@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters, CustomerFilters, Customer, AttributePathParams } from '@/types/api-helpers';
@@ -1986,9 +1986,25 @@ export function useProductVariants(params: {
   return useQuery({
     queryKey: ['product-variants', params],
     queryFn: async () => {
+      // 根據 spatie/laravel-query-builder 的預期，將篩選參數包在 'filter' 物件中
+      const { page, per_page, ...filterParams } = params;
+      
+      const query: {
+        page?: number;
+        per_page?: number;
+        filter?: typeof filterParams;
+      } = {};
+
+      if (page !== undefined) query.page = page;
+      if (per_page !== undefined) query.per_page = per_page;
+      if (Object.keys(filterParams).length > 0) {
+        query.filter = filterParams;
+      }
+
       const { data, error } = await apiClient.GET('/api/products/variants', {
-          params: { query: params },
+          params: { query },
       });
+      
       if (error) {
         throw new Error('獲取商品變體列表失敗');
       }
@@ -2022,76 +2038,9 @@ export function useProductVariantDetail(id: number) {
 
 // ==================== 進貨管理系統 (PURCHASE MANAGEMENT) ====================
 
-/**
- * 進貨管理相關類型定義
- */
-export interface PurchaseItemRequest {
-  product_variant_id: number;
-  quantity: number;
-  unit_price: number;
-  cost_price: number;
-}
 
-export interface PurchaseRequest {
-  store_id: number;
-  order_number: string;
-  purchased_at?: string;
-  shipping_cost: number;
-  items: PurchaseItemRequest[];
-}
 
-// 從 API 契約中導入精確的類型定義
-type CreatePurchaseRequestBody = import('@/types/api').paths["/api/purchases"]["post"]["requestBody"]["content"]["application/json"];
 
-/**
- * 創建進貨單
- */
-export function useCreatePurchase() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (purchaseData: CreatePurchaseRequestBody) => {
-      const { data, error } = await apiClient.POST('/api/purchases', {
-        body: purchaseData,
-      });
-      
-      if (error) {
-        throw new Error(parseApiError(error));
-      }
-      
-      return data;
-    },
-    onSuccess: async () => {
-      // 🚀 升級為標準的「失效並強制重取」模式
-      await Promise.all([
-        queryClient.invalidateQueries({ 
-          queryKey: ['inventory'],
-          exact: false,
-          refetchType: 'active'
-        }),
-        queryClient.refetchQueries({ 
-          queryKey: ['inventory'],
-          exact: false
-        }),
-        queryClient.invalidateQueries({ 
-          queryKey: ['product-variants'],
-          exact: false,
-          refetchType: 'active'
-        }),
-        queryClient.refetchQueries({ 
-          queryKey: ['product-variants'],
-          exact: false
-        })
-      ]);
-      
-      // 🔔 成功通知
-      if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.success("進貨單已成功創建");
-      }
-    },
-  });
-}
 
 /**
  * 上傳商品圖片的 Mutation Hook
@@ -2180,4 +2129,191 @@ export function useUploadProductImage() {
       }
     },
   });
+}
+
+/**
+ * 進貨單相關查詢 Hooks
+ */
+
+// 獲取進貨單列表
+export function usePurchases(params?: {
+  store_id?: number
+  status?: string
+  order_number?: string
+  start_date?: string
+  end_date?: string
+  page?: number
+  per_page?: number
+  sort?: string
+}) {
+  return useQuery({
+    queryKey: ['purchases', params],
+    queryFn: async () => {
+      const query: Record<string, string | number> = {}
+      
+      if (params?.store_id) query['filter[store_id]'] = params.store_id
+      if (params?.status) query['filter[status]'] = params.status
+      if (params?.order_number) query['filter[order_number]'] = params.order_number
+      if (params?.start_date) query['filter[start_date]'] = params.start_date
+      if (params?.end_date) query['filter[end_date]'] = params.end_date
+      if (params?.page) query.page = params.page
+      if (params?.per_page) query.per_page = params.per_page
+      if (params?.sort) query.sort = params.sort
+
+      const { data, error } = await apiClient.GET('/api/purchases', {
+        params: { query }
+      })
+      
+      if (error) {
+        throw new Error('獲取進貨單列表失敗')
+      }
+      
+      // Laravel API 回應結構通常包含 data, meta, links 等鍵
+      // 對於分頁資料，我們返回整個 data 對象（包含 data, meta, links）
+      return data
+    },
+    placeholderData: keepPreviousData,
+  })
+}
+
+// 獲取單一進貨單
+export function usePurchase(id: number | string) {
+  return useQuery({
+    queryKey: ['purchase', id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/purchases/{id}', {
+        params: { path: { id: Number(id) } }
+      });
+      
+      if (error) {
+        throw new Error('獲取進貨單失敗');
+      }
+      
+      // Laravel API 將資料包裹在 "data" 鍵中，需要解包
+      return (data as any)?.data;
+    },
+    enabled: !!id,
+  });
+}
+
+// 創建進貨單
+export function useCreatePurchase() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (purchaseData: any) => {
+      const { data, error } = await apiClient.POST('/api/purchases', {
+        body: purchaseData
+      })
+      
+      if (error) {
+        throw new Error(parseApiError(error) || '創建進貨單失敗')
+      }
+      
+      // 創建操作通常返回單一資源，需要解包 data
+      return (data as any)?.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchases'] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
+    },
+  })
+}
+
+// 更新進貨單
+export function useUpdatePurchase() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number | string; data: any }) => {
+      const { data: responseData, error } = await apiClient.PUT('/api/purchases/{id}', {
+        params: { path: { id: Number(id) } },
+        body: data
+      })
+      
+      if (error) {
+        throw new Error(parseApiError(error) || '更新進貨單失敗')
+      }
+      
+      // 更新操作返回更新後的資源，需要解包 data
+      return (responseData as any)?.data
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['purchases'] })
+      queryClient.invalidateQueries({ queryKey: ['purchase', id] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
+    },
+  })
+}
+
+// 更新進貨單狀態
+export function useUpdatePurchaseStatus() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: number | string; status: string }) => {
+      const { data, error } = await apiClient.PATCH('/api/purchases/{id}/status', {
+        params: { path: { id: Number(id) } },
+        body: { status }
+      })
+      
+      if (error) {
+        throw new Error(parseApiError(error) || '更新進貨單狀態失敗')
+      }
+      
+      // 狀態更新返回更新後的資源，需要解包 data
+      return (data as any)?.data
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['purchases'] })
+      queryClient.invalidateQueries({ queryKey: ['purchase', id] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
+    },
+  })
+}
+
+// 取消進貨單
+export function useCancelPurchase() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (id: number | string) => {
+      const { data, error } = await apiClient.PATCH('/api/purchases/{id}/cancel', {
+        params: { path: { id: Number(id) } }
+      })
+      
+      if (error) {
+        throw new Error(parseApiError(error) || '取消進貨單失敗')
+      }
+      
+      // 取消操作返回更新後的資源，需要解包 data
+      return (data as any)?.data
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['purchases'] })
+      queryClient.invalidateQueries({ queryKey: ['purchase', id] })
+    },
+  })
+}
+
+// 刪除進貨單
+export function useDeletePurchase() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (id: number | string) => {
+      const { data, error } = await apiClient.DELETE('/api/purchases/{id}', {
+        params: { path: { id: Number(id) } }
+      })
+      
+      if (error) {
+        throw new Error(parseApiError(error) || '刪除進貨單失敗')
+      }
+      
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchases'] })
+    },
+  })
 }

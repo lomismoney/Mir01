@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\InventoryAdjustmentRequest;
 use App\Http\Resources\Api\InventoryResource;
 use App\Http\Resources\Api\ProductResource;
+use App\Http\Resources\Api\InventoryTransactionResource;
 use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Store;
+use App\Models\InventoryTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -491,7 +493,7 @@ class InventoryManagementController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function getAllTransactions(Request $request): JsonResponse
+    public function getAllTransactions(Request $request): AnonymousResourceCollection
     {
         $request->validate([
             'store_id' => ['nullable', 'integer', 'exists:stores,id'],
@@ -503,85 +505,41 @@ class InventoryManagementController extends Controller
             'page' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        // 建立交易記錄查詢
-        $query = DB::table('inventory_transactions')
-            ->join('inventories', 'inventory_transactions.inventory_id', '=', 'inventories.id')
-            ->join('stores', 'inventories.store_id', '=', 'stores.id')
-            ->join('users', 'inventory_transactions.user_id', '=', 'users.id')
-            ->join('product_variants', 'inventories.product_variant_id', '=', 'product_variants.id')
-            ->join('products', 'product_variants.product_id', '=', 'products.id')
-            ->select([
-                'inventory_transactions.*',
-                'stores.name as store_name',
-                'stores.id as store_id',
-                'users.name as user_name',
-                'products.name as product_name',
-                'product_variants.sku as product_sku'
-            ]);
+        $query = InventoryTransaction::with([
+            'user', 
+            'inventory.store', 
+            'inventory.productVariant.product'
+        ]);
 
         // 應用篩選條件
         if ($request->filled('store_id')) {
-            $query->where('inventories.store_id', $request->store_id);
+            $query->whereHas('inventory', function ($q) use ($request) {
+                $q->where('store_id', $request->store_id);
+            });
         }
 
         if ($request->filled('type')) {
-            $query->where('inventory_transactions.type', $request->type);
+            $query->where('type', $request->type);
         }
 
         if ($request->filled('start_date')) {
-            $query->where('inventory_transactions.created_at', '>=', $request->start_date);
+            $query->where('created_at', '>=', $request->start_date);
         }
 
         if ($request->filled('end_date')) {
-            $query->where('inventory_transactions.created_at', '<=', $request->end_date . ' 23:59:59');
+            $query->where('created_at', '<=', $request->end_date . ' 23:59:59');
         }
 
         if ($request->filled('product_name')) {
-            $query->where('products.name', 'like', '%' . $request->product_name . '%');
+            $query->whereHas('inventory.productVariant.product', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->product_name . '%');
+            });
         }
 
         // 排序和分頁
         $perPage = $request->input('per_page', 20);
-        $transactions = $query->orderBy('inventory_transactions.created_at', 'desc')
-            ->paginate($perPage);
+        $transactions = $query->latest()->paginate($perPage);
 
-        // 格式化交易記錄
-        $formattedTransactions = $transactions->getCollection()->map(function($transaction) {
-            return [
-                'id' => $transaction->id,
-                'inventory_id' => $transaction->inventory_id,
-                'user_id' => $transaction->user_id,
-                'type' => $transaction->type,
-                'quantity' => $transaction->quantity,
-                'before_quantity' => $transaction->before_quantity,
-                'after_quantity' => $transaction->after_quantity,
-                'notes' => $transaction->notes,
-                'metadata' => json_decode($transaction->metadata, true),
-                'created_at' => $transaction->created_at,
-                'updated_at' => $transaction->updated_at,
-                'store' => [
-                    'id' => $transaction->store_id,
-                    'name' => $transaction->store_name,
-                ],
-                'user' => [
-                    'name' => $transaction->user_name,
-                ],
-                'product' => [
-                    'name' => $transaction->product_name,
-                    'sku' => $transaction->product_sku,
-                ]
-            ];
-        });
-
-        return response()->json([
-            'message' => '成功獲取庫存交易記錄',
-            'data' => $formattedTransactions,
-            'pagination' => [
-                'current_page' => $transactions->currentPage(),
-                'per_page' => $transactions->perPage(),
-                'total' => $transactions->total(),
-                'last_page' => $transactions->lastPage(),
-            ]
-        ]);
+        return InventoryTransactionResource::collection($transactions);
     }
 }

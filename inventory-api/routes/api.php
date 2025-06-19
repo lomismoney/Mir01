@@ -108,9 +108,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /**
      * 進貨單管理路由
-     * POST /api/purchases - 創建新的進貨單
+     * 提供完整的進貨單 CRUD 操作，包含狀態管理功能
+     * 
+     * 路由列表：
+     * GET    /api/purchases              - 獲取進貨單列表（支援篩選和排序）
+     * POST   /api/purchases              - 創建新的進貨單
+     * GET    /api/purchases/{id}         - 獲取指定進貨單
+     * PUT    /api/purchases/{id}         - 更新指定進貨單
+     * DELETE /api/purchases/{id}         - 刪除指定進貨單
+     * PATCH  /api/purchases/{id}/status  - 更新進貨單狀態
+     * PATCH  /api/purchases/{id}/cancel  - 取消進貨單
      */
-    Route::post('purchases', [PurchaseController::class, 'store']);
+    Route::apiResource('purchases', PurchaseController::class);
+    Route::patch('purchases/{id}/status', [PurchaseController::class, 'updateStatus']);
+    Route::patch('purchases/{id}/cancel', [PurchaseController::class, 'cancel']);
 
     /**
      * 用戶管理路由

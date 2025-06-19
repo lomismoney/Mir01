@@ -100,6 +100,7 @@ const data = {
       icon: IconBuilding,
       children: [
         { title: "庫存清單", url: "/inventory/management" },
+        { title: "進貨管理", url: "/inventory/incoming" },
         { title: "庫存轉移", url: "/inventory/transfers" },
         { title: "變動歷史", url: "/inventory/history" },
       ]
@@ -140,37 +141,6 @@ const data = {
     },
   ] as NavLink[],
   navClouds: [
-    {
-      title: "進貨管理",
-      icon: IconPackage,
-      isActive: true,
-      url: "/purchases",
-      items: [
-        {
-          title: "新增進貨",
-          url: "/purchases",
-        },
-        {
-          title: "進貨記錄",
-          url: "/purchases/history",
-        },
-      ],
-    },
-    {
-      title: "出庫管理",
-      icon: IconTruck,
-      url: "/outbound",
-      items: [
-        {
-          title: "待出庫",
-          url: "/outbound/pending",
-        },
-        {
-          title: "已出庫",
-          url: "/outbound/completed",
-        },
-      ],
-    },
     {
       title: "庫存報告",
       icon: IconFileDescription,
