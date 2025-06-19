@@ -257,5 +257,14 @@ Route::middleware('auth:sanctum')->group(function () {
      * PATCH  /api/order-items/{order_item}/status  - 更新訂單項目狀態
      */
     Route::patch('/order-items/{order_item}/status', [App\Http\Controllers\Api\OrderItemController::class, 'updateStatus']);
+    
+    /**
+     * 訂單取消路由
+     * 提供訂單取消功能，並自動返還庫存
+     * 
+     * 路由列表：
+     * POST   /api/orders/{order}/cancel  - 取消訂單
+     */
+    Route::post('/orders/{order}/cancel', [App\Http\Controllers\Api\OrderController::class, 'cancel']);
 });
  

@@ -9,24 +9,42 @@ use Illuminate\Support\Arr;
 
 class OrderService
 {
-    // 假設 InventoryService 已被創建並可以注入
-    // public function __construct(protected InventoryService $inventoryService) {}
+    /**
+     * 注入庫存服務
+     * 
+     * @param InventoryService $inventoryService
+     */
+    public function __construct(protected InventoryService $inventoryService)
+    {
+    }
 
     public function createOrder(array $validatedData): Order
     {
         return DB::transaction(function () use ($validatedData) {
-            // 1. 從訂單項目中計算商品總價
+            // 1. 首先檢查所有商品的庫存是否足夠
+            $stockCheckResults = $this->inventoryService->batchCheckStock($validatedData['items']);
+            
+            if (!empty($stockCheckResults)) {
+                // 有商品庫存不足，組織錯誤訊息
+                $errorMessage = "以下商品庫存不足：\n";
+                foreach ($stockCheckResults as $result) {
+                    $errorMessage .= "- {$result['product_name']} (SKU: {$result['sku']})：需求 {$result['requested_quantity']}，庫存 {$result['available_quantity']}\n";
+                }
+                throw new \Exception($errorMessage);
+            }
+
+            // 2. 從訂單項目中計算商品總價
             $subtotal = collect($validatedData['items'])->sum(function ($item) {
                 return $item['price'] * $item['quantity'];
             });
 
-            // 2. 計算最終總金額
+            // 3. 計算最終總金額
             $grandTotal = $subtotal 
                         + ($validatedData['shipping_fee'] ?? 0) 
                         + ($validatedData['tax'] ?? 0) 
                         - ($validatedData['discount_amount'] ?? 0);
 
-            // 3. 創建訂單主記錄
+            // 4. 創建訂單主記錄
             $order = Order::create([
                 'order_number'      => 'PO-' . now()->format('Ymd') . '-' . Str::random(4),
                 'customer_id'       => $validatedData['customer_id'],
@@ -44,16 +62,17 @@ class OrderService
                 'notes'             => $validatedData['notes'] ?? null,
             ]);
 
-            // 4. 創建訂單項目，並觸發庫存扣減
+            // 5. 創建訂單項目
             foreach ($validatedData['items'] as $itemData) {
                 $order->items()->create($itemData);
-
-                // 如果是庫存銷售，則扣減庫存
-                if ($itemData['is_stocked_sale'] && isset($itemData['product_variant_id'])) {
-                    // 這裡將調用庫存服務 (暫為偽代碼)
-                    // $this->inventoryService->deductStock($itemData['product_variant_id'], $itemData['quantity']);
-                }
             }
+            
+            // 6. 批量扣減庫存（整個交易內執行，確保原子性）
+            $this->inventoryService->batchDeductStock(
+                $validatedData['items'],
+                null, // 使用預設門市
+                ['order_number' => $order->order_number, 'order_id' => $order->id]
+            );
 
             // 5. 記錄初始狀態歷史
             $order->statusHistories()->create([
@@ -144,11 +163,17 @@ class OrderService
         if (!empty($idsToDelete)) {
             $itemsToDelete = $order->items()->whereIn('id', $idsToDelete)->get();
             
+            // 先返還庫存，再刪除項目
             foreach ($itemsToDelete as $item) {
                 // 如果是庫存銷售，則返還庫存
                 if ($item->is_stocked_sale && $item->product_variant_id) {
-                    // TODO: 未來實作庫存返還
-                    // $this->inventoryService->returnStock($item->product_variant_id, $item->quantity);
+                    $this->inventoryService->returnStock(
+                        $item->product_variant_id, 
+                        $item->quantity,
+                        null, // 使用預設門市
+                        "訂單編輯：移除商品 {$item->product_name}",
+                        ['order_number' => $order->order_number, 'order_id' => $order->id]
+                    );
                 }
                 $item->delete();
             }
@@ -177,24 +202,54 @@ class OrderService
                 // 如果商品變體改變了，需要處理舊商品的庫存返還
                 if ($originalIsStocked && $originalVariantId && $originalVariantId != $item->product_variant_id) {
                     // 返還舊商品的全部庫存
-                    // $this->inventoryService->returnStock($originalVariantId, $originalQty);
+                    $this->inventoryService->returnStock(
+                        $originalVariantId, 
+                        $originalQty,
+                        null,
+                        "訂單編輯：更換商品",
+                        ['order_number' => $order->order_number, 'order_id' => $order->id]
+                    );
                     // 扣減新商品的全部庫存
-                    // $this->inventoryService->deductStock($item->product_variant_id, $item->quantity);
+                    $this->inventoryService->deductStock(
+                        $item->product_variant_id, 
+                        $item->quantity,
+                        null,
+                        "訂單編輯：新增商品",
+                        ['order_number' => $order->order_number, 'order_id' => $order->id]
+                    );
                 } else {
                     // 商品變體沒變，只是數量變化
                     $qtyDifference = $item->quantity - $originalQty;
                     
                     if ($qtyDifference > 0) {
                         // 數量增加，需要額外扣減庫存
-                        // $this->inventoryService->deductStock($item->product_variant_id, $qtyDifference);
+                        $this->inventoryService->deductStock(
+                            $item->product_variant_id, 
+                            $qtyDifference,
+                            null,
+                            "訂單編輯：增加數量",
+                            ['order_number' => $order->order_number, 'order_id' => $order->id]
+                        );
                     } elseif ($qtyDifference < 0) {
                         // 數量減少，需要返還部分庫存
-                        // $this->inventoryService->returnStock($item->product_variant_id, abs($qtyDifference));
+                        $this->inventoryService->returnStock(
+                            $item->product_variant_id, 
+                            abs($qtyDifference),
+                            null,
+                            "訂單編輯：減少數量",
+                            ['order_number' => $order->order_number, 'order_id' => $order->id]
+                        );
                     }
                 }
             } elseif ($originalIsStocked && $originalVariantId && !$item->is_stocked_sale) {
                 // 從庫存銷售改為非庫存銷售，返還全部庫存
-                // $this->inventoryService->returnStock($originalVariantId, $originalQty);
+                $this->inventoryService->returnStock(
+                    $originalVariantId, 
+                    $originalQty,
+                    null,
+                    "訂單編輯：改為非庫存銷售",
+                    ['order_number' => $order->order_number, 'order_id' => $order->id]
+                );
             }
         }
     }
@@ -303,6 +358,98 @@ class OrderService
                 'user_id' => auth()->id(),
                 'notes' => $shipmentData['notes'] ?? '商品已出貨，追蹤號碼：' . $shipmentData['tracking_number'],
             ]);
+            
+            // 6. 預載入關聯並返回
+            return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);
+        });
+    }
+
+    /**
+     * 刪除訂單並返還庫存
+     * 
+     * 在刪除訂單前，會先返還所有庫存銷售商品的庫存數量
+     * 
+     * @param Order $order 要刪除的訂單
+     * @return bool
+     */
+    public function deleteOrder(Order $order): bool
+    {
+        return DB::transaction(function () use ($order) {
+            // 1. 獲取所有訂單項目
+            $items = $order->items;
+            
+            // 2. 返還庫存（在刪除前執行，確保數據完整性）
+            $this->inventoryService->batchReturnStock(
+                $items,
+                null, // 使用預設門市
+                ['order_number' => $order->order_number, 'order_id' => $order->id, 'reason' => '訂單刪除']
+            );
+            
+            // 3. 刪除訂單（會級聯刪除訂單項目和狀態歷史）
+            $order->delete();
+            
+            return true;
+        });
+    }
+
+    /**
+     * 取消訂單並返還庫存
+     * 
+     * 將訂單狀態更新為已取消，並返還所有庫存
+     * 
+     * @param Order $order 要取消的訂單
+     * @param string|null $reason 取消原因
+     * @return Order
+     */
+    public function cancelOrder(Order $order, ?string $reason = null): Order
+    {
+        return DB::transaction(function () use ($order, $reason) {
+            // 1. 檢查訂單是否可以取消
+            if (in_array($order->shipping_status, ['shipped', 'delivered'])) {
+                throw new \Exception('已出貨或已交付的訂單無法取消');
+            }
+            
+            // 2. 記錄原始狀態
+            $originalShippingStatus = $order->shipping_status;
+            $originalPaymentStatus = $order->payment_status;
+            
+            // 3. 更新訂單狀態
+            $order->update([
+                'shipping_status' => 'cancelled',
+                'payment_status' => $order->payment_status === 'paid' ? 'refunded' : 'cancelled',
+            ]);
+            
+            // 4. 返還庫存
+            $this->inventoryService->batchReturnStock(
+                $order->items,
+                null, // 使用預設門市
+                [
+                    'order_number' => $order->order_number, 
+                    'order_id' => $order->id, 
+                    'reason' => $reason ?? '訂單取消'
+                ]
+            );
+            
+            // 5. 記錄狀態變更歷史
+            if ($originalShippingStatus !== 'cancelled') {
+                $order->statusHistories()->create([
+                    'from_status' => $originalShippingStatus,
+                    'to_status' => 'cancelled',
+                    'status_type' => 'shipping',
+                    'user_id' => auth()->id(),
+                    'notes' => $reason ?? '訂單已取消',
+                ]);
+            }
+            
+            if ($originalPaymentStatus !== $order->payment_status) {
+                $order->statusHistories()->create([
+                    'from_status' => $originalPaymentStatus,
+                    'to_status' => $order->payment_status,
+                    'status_type' => 'payment',
+                    'user_id' => auth()->id(),
+                    'notes' => '付款狀態已更新',
+                ]);
+            }
             
             // 6. 預載入關聯並返回
             return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);

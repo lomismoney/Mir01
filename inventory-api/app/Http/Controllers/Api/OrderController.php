@@ -199,9 +199,8 @@ class OrderController extends Controller
         // 1. 權限驗證
         // $this->authorize('delete', $order);
 
-        // 2. 執行刪除操作
-        // 注意：此操作會觸發我們在遷移中設定的所有級聯刪除
-        $order->delete();
+        // 2. 委派給 Service 層處理，包含庫存返還邏輯
+        $this->orderService->deleteOrder($order);
 
         // 3. 返回 204 No Content 響應，這是 RESTful API 中成功刪除操作的標準實踐
         return response()->noContent();
@@ -316,5 +315,61 @@ class OrderController extends Controller
 
         // 5. 返回更新後的訂單資源
         return new OrderResource($updatedOrder);
+    }
+
+    /**
+     * @group 訂單管理
+     * @authenticated
+     * 取消訂單
+     * 
+     * 此端點用於取消訂單，將訂單狀態更新為已取消，
+     * 並自動返還所有庫存銷售商品的庫存數量。
+     * 注意：已出貨或已交付的訂單無法取消。
+     * 
+     * @urlParam order integer required 要取消的訂單 ID。Example: 1
+     * 
+     * @bodyParam reason string 取消原因。Example: 客戶要求取消
+     * 
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "order_number": "PO-20250619-001",
+     *     "shipping_status": "cancelled",
+     *     "payment_status": "cancelled",
+     *     "updated_at": "2025-06-19T12:00:00.000000Z"
+     *   }
+     * }
+     * @response 422 scenario="訂單狀態不允許此操作" {
+     *   "message": "此訂單的狀態不允許取消操作",
+     *   "errors": {
+     *     "shipping_status": ["已出貨或已交付的訂單無法取消"]
+     *   }
+     * }
+     */
+    public function cancel(Request $request, Order $order)
+    {
+        // 1. 權限驗證
+        // $this->authorize('update', $order);
+
+        // 2. 驗證請求參數
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            // 3. 委派給 Service 層處理業務邏輯
+            $cancelledOrder = $this->orderService->cancelOrder($order, $validated['reason'] ?? null);
+            
+            // 4. 返回更新後的訂單資源
+            return new OrderResource($cancelledOrder);
+        } catch (\Exception $e) {
+            // 5. 處理業務邏輯錯誤
+            return response()->json([
+                'message' => '此訂單的狀態不允許取消操作',
+                'errors' => [
+                    'shipping_status' => [$e->getMessage()]
+                ]
+            ], 422);
+        }
     }
 }
