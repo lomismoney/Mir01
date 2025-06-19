@@ -57,8 +57,8 @@ export function InventoryManagement() {
   const { data: storesData, isLoading: isLoadingStores } = useStores()
   const { data: categoriesData, isLoading: isLoadingCategories } = useCategories()
 
-  // 從新的API回應格式中獲取分類資料
-  const allCategories = categoriesData?.data || [];
+  // 從分組格式中提取所有分類
+  const allCategories = categoriesData ? Object.values(categoriesData).flat() : [];
 
   // 獲取庫存列表數據 
   const {

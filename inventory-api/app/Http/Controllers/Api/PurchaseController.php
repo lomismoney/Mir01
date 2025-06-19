@@ -22,11 +22,13 @@ class PurchaseController extends Controller
     /**
      * Store a newly created resource in storage.
      * 
+     * @group 進貨管理
+     * @authenticated
      * @bodyParam store_id integer required 門市ID Example: 1
      * @bodyParam order_number string required 進貨單號 Example: PO-20240101-001
      * @bodyParam purchased_at string 進貨日期 Example: 2024-01-01T10:00:00+08:00
      * @bodyParam shipping_cost number required 總運費成本 Example: 150.00
-     * @bodyParam items array required 進貨項目列表
+     * @bodyParam items object[] required 進貨項目列表 
      * @bodyParam items[].product_variant_id integer required 商品變體ID Example: 1
      * @bodyParam items[].quantity integer required 數量 Example: 10
      * @bodyParam items[].unit_price number required 單價 Example: 299.00

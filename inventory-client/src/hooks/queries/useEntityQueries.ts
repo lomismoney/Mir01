@@ -849,15 +849,17 @@ export function useCustomers(filters?: CustomerFilters) {
         ...(queryFilters as CustomerFilters),
       };
       
-      const response = await apiClient.GET('/api/customers', {
+      const { data, error } = await apiClient.GET('/api/customers', {
         params: { query: queryParams },
       });
       
-      if (response.error) {
-        throw new Error('獲取客戶列表失敗');
+      if (error) {
+        console.error('客戶 API 錯誤:', error);
+        const errorMessage = parseApiError(error) || '獲取客戶列表失敗';
+        throw new Error(errorMessage);
       }
       
-      return response.data;
+      return data;
     },
     
     // 🚀 體驗優化配置
