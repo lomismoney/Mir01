@@ -123,8 +123,25 @@ const CategoriesClientPage = () => {
   const [currentParentId, setCurrentParentId] = useState<number | null>(null);
   const [breadcrumb, setBreadcrumb] = useState<{ id: number | null; name: string }[]>([{ id: null, name: '所有分類' }]);
   
-  // 資料獲取 - 直接使用 hook 返回的分組資料
-  const { data: groupedCategories, isLoading: isCategoriesLoading, error } = useCategories();
+  // 資料獲取 - 處理新的 API 回應格式
+  const { data: categoriesResponse, isLoading: isCategoriesLoading, error } = useCategories();
+  
+  // 將 API 回應轉換為分組格式
+  const groupedCategories = useMemo(() => {
+    if (!categoriesResponse?.data) return {};
+    
+    // 按 parent_id 分組
+    const grouped: Record<string, Category[]> = {};
+    categoriesResponse.data.forEach((category: any) => {
+      const parentKey = category.parent_id ? category.parent_id.toString() : '';
+      if (!grouped[parentKey]) {
+        grouped[parentKey] = [];
+      }
+      grouped[parentKey].push(category);
+    });
+    
+    return grouped;
+  }, [categoriesResponse]);
   
   // 資料轉換 - 將分組資料轉為平坦陣列
   const allCategories = useMemo(() => {
@@ -215,8 +232,8 @@ const CategoriesClientPage = () => {
 
     try {
       await updateMutation.mutateAsync({
-        path: { id: editingCategory.id },
-        body: {
+        id: editingCategory.id,
+        data: {
           name: formData.name.trim(),
           description: formData.description || null,
           parent_id: formData.parent_id,
@@ -239,7 +256,7 @@ const CategoriesClientPage = () => {
     if (!categoryToDelete) return;
 
     try {
-      await deleteMutation.mutateAsync({ id: categoryToDelete.id });
+      await deleteMutation.mutateAsync(categoryToDelete.id);
       toast.success('分類刪除成功！');
       setIsDeleteDialogOpen(false);
       setCategoryToDelete(null);
