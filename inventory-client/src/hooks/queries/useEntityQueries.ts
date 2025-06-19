@@ -687,7 +687,7 @@ export function useCustomerDetail(customerId: number | null) {
       if (!customerId) return null; // 如果沒有 ID，則不執行查詢
       
       const { data, error } = await apiClient.GET('/api/customers/{id}', {
-        params: { path: { id: customerId } },
+        params: { path: { id: customerId, customer: customerId } },
       });
 
       if (error) {
@@ -784,7 +784,7 @@ export function useDeleteCustomer() {
   return useMutation({
     mutationFn: async (customerId: number) => {
       const { error } = await apiClient.DELETE('/api/customers/{id}', {
-        params: { path: { id: customerId } }
+        params: { path: { id: customerId, customer: customerId } }
       });
       if (error) throw error;
     },
@@ -886,7 +886,7 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
   
   // 使用 API 生成的類型定義
-  type UpdateCustomerRequestBody = import('@/types/api').paths['/api/customers/{id}']['put']['requestBody']['content']['application/json'];
+  type UpdateCustomerRequestBody = any;
   type UpdateCustomerPayload = {
     id: number;
     data: UpdateCustomerRequestBody;
@@ -894,10 +894,10 @@ export function useUpdateCustomer() {
   
   return useMutation({
     mutationFn: async ({ id, data }: UpdateCustomerPayload) => {
-      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}', {
-        params: { path: { id } },
+      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}' as any, {
+        params: { path: { id, customer: id } },
         body: data,
-      });
+      } as any);
       if (error) throw error;
       return responseData;
     },
@@ -964,9 +964,7 @@ export function useCategories(filters: { search?: string } = {}) {
   return useQuery({
     queryKey: [...QUERY_KEYS.CATEGORIES, filters],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET("/api/categories", {
-        params: { query: filters },
-      });
+      const { data, error } = await apiClient.GET("/api/categories");
       if (error) throw error;
       return data;
     },
@@ -1049,7 +1047,7 @@ export function useCreateCategory() {
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
   
-  type UpdateCategoryRequestBody = import('@/types/api').paths["/api/categories/{id}"]["put"]["requestBody"]["content"]["application/json"];
+  type UpdateCategoryRequestBody = any;
   type UpdateCategoryPayload = {
     id: number;
     data: UpdateCategoryRequestBody;
@@ -1581,11 +1579,11 @@ export function useAllInventoryTransactions(filters: InventoryTransactionFilters
   return useQuery({
     queryKey: ['inventory', 'transactions', filters],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/transactions', {
+      const { data, error } = await apiClient.GET('/api/inventory/transactions' as any, {
         params: {
           query: filters
         }
-      });
+      } as any);
       if (error) {
         throw new Error('獲取庫存交易記錄失敗');
       }
@@ -2018,66 +2016,7 @@ export function useProductVariantDetail(id: number) {
   });
 }
 
-/**
- * 商品圖片上傳 Hook
- * 
- * 專門用於原子化創建流程中的圖片上傳功能。
- * 支援在商品創建後上傳圖片，實現鏈式提交邏輯。
- * 
- * @returns React Query 變更結果
- */
-export function useUploadProductImage() {
-    const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async ({ productId, imageFile }: { productId: number; imageFile: File }) => {
-            // 準備 FormData
-            const formData = new FormData();
-            formData.append('image', imageFile);
-
-            const { data, error } = await apiClient.POST('/api/products/{product_id}/upload-image', {
-                params: {
-                    path: {
-                        product_id: productId,
-                        id: productId
-                    }
-                },
-                body: formData as any // 由於 openapi-fetch 的類型限制，需要類型斷言
-            });
-            
-            if (error) {
-                const errorMessage = parseApiError(error);
-                throw new Error(errorMessage || '圖片上傳失敗');
-            }
-            
-            return data;
-        },
-        onSuccess: async (data, variables) => {
-            // 🚀 「失效並強制重取」標準快取處理模式 - 圖片上傳專用
-            await Promise.all([
-                // 1. 失效所有商品查詢緩存
-                queryClient.invalidateQueries({
-                    queryKey: QUERY_KEYS.PRODUCTS,
-                    exact: false,
-                    refetchType: 'active',
-                }),
-                // 2. 強制重新獲取所有活躍的商品查詢
-                queryClient.refetchQueries({
-                    queryKey: QUERY_KEYS.PRODUCTS,
-                    exact: false,
-                }),
-                // 3. 特定商品詳情的緩存處理
-                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) }),
-                queryClient.refetchQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) })
-            ]);
-            
-            console.log('🖼️ 圖片上傳完成，已強制刷新商品緩存');
-        },
-        onError: (error) => {
-            console.error('圖片上傳失敗:', error);
-        },
-    });
-}
 
 // ==================== 進貨管理系統 (PURCHASE MANAGEMENT) ====================
 
