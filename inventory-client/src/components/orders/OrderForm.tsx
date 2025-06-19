@@ -92,7 +92,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
       is_stocked_sale: true,
       status: 'pending',
       quantity: 1, // 新增的品項數量預設為 1
-      price: variant.price,
+      // 🎯 確保價格是數字類型，符合 Zod 驗證要求
+      price: Number(variant.price) || 0,
       product_name: variant.specifications, // 使用規格描述作為商品名稱
       sku: variant.sku,
       custom_specifications: undefined,
@@ -141,7 +142,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
 
   // 計算小計
   const subtotal = items?.reduce((acc, item) => {
-    const itemTotal = (item.price || 0) * (item.quantity || 0);
+    // 🎯 使用 ?? 正確處理 price 的 undefined 狀態
+    const itemTotal = (item.price ?? 0) * (item.quantity || 0);
     return acc + itemTotal;
   }, 0) || 0;
 
@@ -200,7 +202,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                 {/* 遍歷渲染已添加的項目 */}
                 {fields.map((field, index) => {
                   const quantity = form.watch(`items.${index}.quantity`) || 0;
-                  const price = form.watch(`items.${index}.price`) || 0;
+                  // 🎯 正確處理價格的 undefined 狀態
+                  const price = form.watch(`items.${index}.price`) ?? 0;
                   const subtotal = quantity * price;
 
                   return (
@@ -228,8 +231,26 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                                   step="0.01"
                                   min="0"
                                   className="text-right"
-                                  {...field}
-                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  // 🎯 確保顯示值是字符串，避免表單控制問題
+                                  value={field.value?.toString() || ''}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    // 如果使用者清空了輸入框，我們傳遞一個 `undefined` 給 react-hook-form
+                                    // 讓 Zod 在驗證時處理這個空值（將其轉換為錯誤或要求填寫）
+                                    // 而不是在輸入時就強制變為 0
+                                    if (value === '') {
+                                      field.onChange(undefined); 
+                                    } else {
+                                      const parsedValue = parseFloat(value);
+                                      // 只有在轉換為數字有效時才更新
+                                      if (!isNaN(parsedValue)) {
+                                        field.onChange(parsedValue);
+                                      }
+                                    }
+                                  }}
+                                  onBlur={field.onBlur}
+                                  name={field.name}
+                                  ref={field.ref}
                                 />
                               </FormControl>
                             </FormItem>

@@ -112,6 +112,7 @@ class ProductController extends Controller
                 'attributes', // ✅ 預先加載 SPU 的屬性關聯
                 'variants.attributeValues.attribute', // ✅ 預先加載 SKU 變體及其屬性
                 'variants.inventory.store', // ✅ 預先加載庫存資訊
+                'variants.product.media', // 🎯 預先加載變體回到商品的關聯及其媒體，讓 ProductVariantResource 能夠輸出圖片 URL
                 'media' // 📸 預先加載媒體關聯，讓 ProductResource 能夠輸出圖片 URL
             ])
             ->allowedFilters([
