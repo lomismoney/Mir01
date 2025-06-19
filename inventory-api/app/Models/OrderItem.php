@@ -44,6 +44,14 @@ class OrderItem extends Model
     ];
 
     /**
+     * 模型的預設屬性值
+     */
+    protected $attributes = [
+        'status' => '待處理',
+        'is_stocked_sale' => true,
+    ];
+
+    /**
      * 一個訂單項目屬於一個訂單
      */
     public function order(): BelongsTo

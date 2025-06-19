@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
-import { useOrderDetail } from '@/hooks/queries/useEntityQueries';
+import { useOrderDetail, useUpdateOrderItemStatus } from '@/hooks/queries/useEntityQueries';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 interface OrderDetailComponentProps {
   orderId: number;
@@ -13,6 +15,23 @@ interface OrderDetailComponentProps {
 
 export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
     const { data: response, isLoading, isError, error } = useOrderDetail(orderId);
+    const { mutate: updateItemStatus, isPending } = useUpdateOrderItemStatus();
+    
+    // 可用的項目狀態選項
+    const statusOptions = [
+        { value: '待處理', label: '待處理' },
+        { value: '已叫貨', label: '已叫貨' },
+        { value: '已出貨', label: '已出貨' },
+        { value: '完成', label: '完成' },
+    ];
+    
+    // 處理狀態更新
+    const handleStatusChange = (itemId: number, newStatus: string) => {
+        updateItemStatus({
+            orderItemId: itemId,
+            status: newStatus,
+        });
+    };
 
     if (isLoading) {
         return (
@@ -27,7 +46,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
         return <div className="text-red-500">無法加載訂單詳情: {error?.message}</div>;
     }
 
-    const order = response?.data;
+    const order = (response as any)?.data;
 
     if (!order) {
         return <div>找不到訂單資料。</div>;
@@ -52,7 +71,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {order.items?.map((item) => (
+                                {order.items?.map((item: any) => (
                                     <TableRow key={item.id}>
                                         <TableCell>
                                             <div>{item.product_name}</div>
@@ -66,7 +85,29 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                         <TableCell className="text-right">${parseFloat(item.price).toLocaleString()}</TableCell>
                                         <TableCell className="text-center">{item.quantity}</TableCell>
                                         <TableCell className="text-right">${(parseFloat(item.price) * item.quantity).toLocaleString()}</TableCell>
-                                        <TableCell><Badge variant="secondary">{item.status}</Badge></TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Select
+                                                    value={item.status}
+                                                    onValueChange={(newStatus) => handleStatusChange(item.id, newStatus)}
+                                                    disabled={isPending}
+                                                >
+                                                    <SelectTrigger className="w-[120px]">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {statusOptions.map((option) => (
+                                                            <SelectItem key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {isPending && (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                )}
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

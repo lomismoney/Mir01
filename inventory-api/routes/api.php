@@ -248,5 +248,14 @@ Route::middleware('auth:sanctum')->group(function () {
      */
     Route::post('/orders/{order}/confirm-payment', [App\Http\Controllers\Api\OrderController::class, 'confirmPayment']);
     Route::post('/orders/{order}/create-shipment', [App\Http\Controllers\Api\OrderController::class, 'createShipment']);
+    
+    /**
+     * 訂單項目管理路由
+     * 提供訂單項目狀態管理的專用端點
+     * 
+     * 路由列表：
+     * PATCH  /api/order-items/{order_item}/status  - 更新訂單項目狀態
+     */
+    Route::patch('/order-items/{order_item}/status', [App\Http\Controllers\Api\OrderItemController::class, 'updateStatus']);
 });
  

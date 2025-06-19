@@ -2607,3 +2607,93 @@ export function useDeleteOrder() {
     },
   });
 }
+
+/**
+ * 更新訂單項目狀態的 Mutation Hook
+ * 
+ * 🎯 戰術功能：為訂單項目狀態追蹤提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 類型安全的 API 調用 - 使用生成的類型定義
+ * 2. 成功後自動刷新訂單詳情 - 「失效並強制重取」標準模式
+ * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
+ * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
+ * 5. 支援狀態變更歷史記錄 - 自動記錄狀態變更軌跡
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useUpdateOrderItemStatus() {
+  const queryClient = useQueryClient();
+  
+  // 使用 API 生成的類型定義
+  type UpdateOrderItemStatusRequestBody = import('@/types/api').paths['/api/order-items/{order_item_id}/status']['patch']['requestBody']['content']['application/json'];
+  type UpdateOrderItemStatusPayload = {
+    orderItemId: number;
+    status: string;
+    notes?: string;
+  };
+  
+  return useMutation({
+    mutationFn: async ({ orderItemId, status, notes }: UpdateOrderItemStatusPayload) => {
+      const requestBody: UpdateOrderItemStatusRequestBody = {
+        status,
+        ...(notes && { notes })
+      };
+      
+      const { data, error } = await apiClient.PATCH('/api/order-items/{order_item_id}/status', {
+        params: { path: { order_item_id: orderItemId } },
+        body: requestBody,
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error) || '更新訂單項目狀態失敗';
+        throw new Error(errorMessage);
+      }
+      
+      return data;
+    },
+    onSuccess: async (data, variables) => {
+      // 從返回的訂單資料中提取訂單 ID
+      const orderId = data?.data?.id;
+      
+      if (orderId) {
+        // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+        await Promise.all([
+          // 1. 失效指定訂單的詳情緩存
+          queryClient.invalidateQueries({
+            queryKey: QUERY_KEYS.ORDER(orderId),
+            exact: false,
+            refetchType: 'active',
+          }),
+          // 2. 強制重新獲取訂單詳情
+          queryClient.refetchQueries({
+            queryKey: QUERY_KEYS.ORDER(orderId),
+            exact: false,
+          }),
+          // 3. 同時失效訂單列表緩存（因為可能影響整體訂單狀態）
+          queryClient.invalidateQueries({
+            queryKey: QUERY_KEYS.ORDERS,
+            exact: false,
+            refetchType: 'active',
+          })
+        ]);
+      }
+      
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('訂單項目狀態已更新', {
+          description: `項目狀態已更新為「${variables.status}」`
+        });
+      }
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      const errorMessage = parseApiError(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('狀態更新失敗', { description: errorMessage });
+      }
+    },
+  });
+}

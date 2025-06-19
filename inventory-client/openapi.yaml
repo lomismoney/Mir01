@@ -17,9 +17,6 @@ tags:
     name: 'User Store Management'
     description: ''
   -
-    name: 分類管理
-    description: ''
-  -
     name: 商品屬性管理
     description: ''
   -
@@ -50,7 +47,13 @@ tags:
     name: 訂單管理
     description: ''
   -
+    name: 訂單項目管理
+    description: ''
+  -
     name: 認證管理
+    description: ''
+  -
+    name: 進貨管理
     description: ''
 paths:
   /api/health:
@@ -94,21 +97,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 18
+                    id: 20
                     name: 'Lonny Ankunding'
                     username: eloisa.harber
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-19T09:01:54.000000Z'
-                    updated_at: '2025-06-19T09:01:54.000000Z'
+                    created_at: '2025-06-19T10:47:14.000000Z'
+                    updated_at: '2025-06-19T10:47:14.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 18
+                        example: 20
                       name:
                         type: string
                         example: 'Lonny Ankunding'
@@ -126,167 +129,12 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
       tags:
         - Endpoints
-      security: []
-  /api/purchases:
-    post:
-      summary: 'Store a newly created resource in storage.'
-      operationId: storeANewlyCreatedResourceInStorage
-      description: ''
-      parameters: []
-      responses:
-        201:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  id: 1
-                  order_number: PO-20240101-001
-                  total_amount: 4145.0
-                  shipping_cost: 150.0
-                  status: completed
-                  purchased_at: '2024-01-01T00:00:00+08:00'
-                  items:
-                    -
-                      id: 1
-                      product_variant_id: 1
-                      sku: T-SHIRT-RED-S
-                      product_name: 經典棉質T-shirt
-                      quantity: 10
-                      unit_price: 299.0
-                      cost_price: 150.0
-                      allocated_shipping_cost: 36.17
-                      total_cost_price: 186.17
-                    -
-                      id: 2
-                      product_variant_id: 2
-                      sku: T-SHIRT-BLUE-M
-                      product_name: 經典棉質T-shirt
-                      quantity: 5
-                      unit_price: 399.0
-                      cost_price: 200.0
-                      allocated_shipping_cost: 48.17
-                      total_cost_price: 248.17
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  order_number:
-                    type: string
-                    example: PO-20240101-001
-                  total_amount:
-                    type: number
-                    example: 4145.0
-                  shipping_cost:
-                    type: number
-                    example: 150.0
-                  status:
-                    type: string
-                    example: completed
-                  purchased_at:
-                    type: string
-                    example: '2024-01-01T00:00:00+08:00'
-                  items:
-                    type: array
-                    example:
-                      -
-                        id: 1
-                        product_variant_id: 1
-                        sku: T-SHIRT-RED-S
-                        product_name: 經典棉質T-shirt
-                        quantity: 10
-                        unit_price: 299
-                        cost_price: 150
-                        allocated_shipping_cost: 36.17
-                        total_cost_price: 186.17
-                      -
-                        id: 2
-                        product_variant_id: 2
-                        sku: T-SHIRT-BLUE-M
-                        product_name: 經典棉質T-shirt
-                        quantity: 5
-                        unit_price: 399
-                        cost_price: 200
-                        allocated_shipping_cost: 48.17
-                        total_cost_price: 248.17
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 1
-                        product_variant_id:
-                          type: integer
-                          example: 1
-                        sku:
-                          type: string
-                          example: T-SHIRT-RED-S
-                        product_name:
-                          type: string
-                          example: 經典棉質T-shirt
-                        quantity:
-                          type: integer
-                          example: 10
-                        unit_price:
-                          type: number
-                          example: 299.0
-                        cost_price:
-                          type: number
-                          example: 150.0
-                        allocated_shipping_cost:
-                          type: number
-                          example: 36.17
-                        total_cost_price:
-                          type: number
-                          example: 186.17
-      tags:
-        - Endpoints
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                store_id:
-                  type: integer
-                  description: 門市ID
-                  example: 1
-                  nullable: false
-                order_number:
-                  type: string
-                  description: 進貨單號
-                  example: PO-20240101-001
-                  nullable: false
-                purchased_at:
-                  type: string
-                  description: 進貨日期
-                  example: '2024-01-01T10:00:00+08:00'
-                  nullable: false
-                shipping_cost:
-                  type: number
-                  description: 總運費成本
-                  example: 150.0
-                  nullable: false
-                items:
-                  type: array
-                  description: 進貨項目列表
-                  example:
-                    - consequatur
-                  items:
-                    type: string
-              required:
-                - store_id
-                - order_number
-                - shipping_cost
-                - items
       security: []
   /api/categories:
     post:
@@ -322,146 +170,11 @@ paths:
               required:
                 - name
       security: []
-    get:
-      summary: 顯示分類列表
-      operationId: ''
-      description: "優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、\n高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。\n\n範例：\n- json[''] 或 json[null] 就是所有頂層分類\n- json['1'] 就是 id 為 1 的分類下的所有子分類"
-      parameters: []
-      responses:
-        200:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  data:
-                    -
-                      id: 1
-                      name: 辦公用品
-                      description: 各種辦公室所需用品
-                      parent_id: null
-                      created_at: '2024-01-01T10:00:00.000000Z'
-                      updated_at: '2024-01-01T10:00:00.000000Z'
-                    -
-                      id: 2
-                      name: 辦公椅
-                      description: 各式辦公椅系列
-                      parent_id: 1
-                      created_at: '2024-01-02T10:00:00.000000Z'
-                      updated_at: '2024-01-02T10:00:00.000000Z'
-                    -
-                      id: 3
-                      name: 電腦周邊
-                      description: 電腦相關配件
-                      parent_id: null
-                      created_at: '2024-01-03T10:00:00.000000Z'
-                      updated_at: '2024-01-03T10:00:00.000000Z'
-                  links:
-                    first: 'http://localhost/api/categories?page=1'
-                    last: 'http://localhost/api/categories?page=1'
-                    prev: null
-                    next: null
-                  meta:
-                    current_page: 1
-                    from: 1
-                    last_page: 1
-                    path: 'http://localhost/api/categories'
-                    per_page: 15
-                    to: 3
-                    total: 3
-                properties:
-                  data:
-                    type: array
-                    example:
-                      -
-                        id: 1
-                        name: 辦公用品
-                        description: 各種辦公室所需用品
-                        parent_id: null
-                        created_at: '2024-01-01T10:00:00.000000Z'
-                        updated_at: '2024-01-01T10:00:00.000000Z'
-                      -
-                        id: 2
-                        name: 辦公椅
-                        description: 各式辦公椅系列
-                        parent_id: 1
-                        created_at: '2024-01-02T10:00:00.000000Z'
-                        updated_at: '2024-01-02T10:00:00.000000Z'
-                      -
-                        id: 3
-                        name: 電腦周邊
-                        description: 電腦相關配件
-                        parent_id: null
-                        created_at: '2024-01-03T10:00:00.000000Z'
-                        updated_at: '2024-01-03T10:00:00.000000Z'
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 1
-                        name:
-                          type: string
-                          example: 辦公用品
-                        description:
-                          type: string
-                          example: 各種辦公室所需用品
-                        parent_id:
-                          type: string
-                          example: null
-                        created_at:
-                          type: string
-                          example: '2024-01-01T10:00:00.000000Z'
-                        updated_at:
-                          type: string
-                          example: '2024-01-01T10:00:00.000000Z'
-                  links:
-                    type: object
-                    properties:
-                      first:
-                        type: string
-                        example: 'http://localhost/api/categories?page=1'
-                      last:
-                        type: string
-                        example: 'http://localhost/api/categories?page=1'
-                      prev:
-                        type: string
-                        example: null
-                      next:
-                        type: string
-                        example: null
-                  meta:
-                    type: object
-                    properties:
-                      current_page:
-                        type: integer
-                        example: 1
-                      from:
-                        type: integer
-                        example: 1
-                      last_page:
-                        type: integer
-                        example: 1
-                      path:
-                        type: string
-                        example: 'http://localhost/api/categories'
-                      per_page:
-                        type: integer
-                        example: 15
-                      to:
-                        type: integer
-                        example: 3
-                      total:
-                        type: integer
-                        example: 3
-      tags:
-        - 分類管理
   '/api/categories/{id}':
     get:
       summary: 顯示指定的分類資源
       operationId: ''
-      description: '返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出'
+      description: "返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出\n包含該分類的商品數量統計"
       parameters: []
       responses:
         401:
@@ -678,18 +391,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 27
+                    id: 31
                     name: Mueller-Dibbert
                     address: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
-                    created_at: '2025-06-19T09:01:54.000000Z'
-                    updated_at: '2025-06-19T09:01:54.000000Z'
+                    created_at: '2025-06-19T10:47:14.000000Z'
+                    updated_at: '2025-06-19T10:47:14.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 27
+                        example: 31
                       name:
                         type: string
                         example: Mueller-Dibbert
@@ -698,10 +411,10 @@ paths:
                         example: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
                       created_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -738,18 +451,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 28
+                    id: 32
                     name: 'Kunde Group'
                     address: "62028 Trudie Mills\nNorth Cordie, IL 75592"
-                    created_at: '2025-06-19T09:01:54.000000Z'
-                    updated_at: '2025-06-19T09:01:54.000000Z'
+                    created_at: '2025-06-19T10:47:14.000000Z'
+                    updated_at: '2025-06-19T10:47:14.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 28
+                        example: 32
                       name:
                         type: string
                         example: 'Kunde Group'
@@ -758,10 +471,10 @@ paths:
                         example: "62028 Trudie Mills\nNorth Cordie, IL 75592"
                       created_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -778,18 +491,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 29
+                    id: 33
                     name: Moore-Emard
                     address: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
-                    created_at: '2025-06-19T09:01:54.000000Z'
-                    updated_at: '2025-06-19T09:01:54.000000Z'
+                    created_at: '2025-06-19T10:47:14.000000Z'
+                    updated_at: '2025-06-19T10:47:14.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 29
+                        example: 33
                       name:
                         type: string
                         example: Moore-Emard
@@ -798,10 +511,10 @@ paths:
                         example: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
                       created_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -855,18 +568,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 30
+                    id: 34
                     name: Hahn-Harber
                     address: "6098 Kutch Loaf\nPort Eldonland, PA 73828-6765"
-                    created_at: '2025-06-19T09:01:54.000000Z'
-                    updated_at: '2025-06-19T09:01:54.000000Z'
+                    created_at: '2025-06-19T10:47:14.000000Z'
+                    updated_at: '2025-06-19T10:47:14.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 30
+                        example: 34
                       name:
                         type: string
                         example: Hahn-Harber
@@ -875,10 +588,10 @@ paths:
                         example: "6098 Kutch Loaf\nPort Eldonland, PA 73828-6765"
                       created_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -895,21 +608,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 19
+                    id: 21
                     name: 'Dr. Cornelius Luettgen V'
                     username: russel.bert
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-19T09:01:54.000000Z'
-                    updated_at: '2025-06-19T09:01:54.000000Z'
+                    created_at: '2025-06-19T10:47:14.000000Z'
+                    updated_at: '2025-06-19T10:47:14.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 19
+                        example: 21
                       name:
                         type: string
                         example: 'Dr. Cornelius Luettgen V'
@@ -927,10 +640,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T09:01:54.000000Z'
+                        example: '2025-06-19T10:47:14.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -3920,81 +3633,6 @@ paths:
         schema:
           type: string
   /api/customers:
-    get:
-      summary: ''
-      operationId: getApiCustomers
-      description: ''
-      parameters:
-        -
-          in: query
-          name: search
-          description: 關鍵字搜尋，將匹配姓名、電話、統一編號。
-          example: 設計公司
-          required: false
-          schema:
-            type: string
-            description: 關鍵字搜尋，將匹配姓名、電話、統一編號。
-            example: 設計公司
-            nullable: false
-        -
-          in: query
-          name: start_date
-          description: 'date 按創建日期篩選的開始日期 (格式: Y-m-d)。'
-          example: '2025-01-01'
-          required: false
-          schema:
-            type: string
-            description: 'date 按創建日期篩選的開始日期 (格式: Y-m-d)。'
-            example: '2025-01-01'
-            nullable: false
-        -
-          in: query
-          name: end_date
-          description: 'date 按創建日期篩選的結束日期 (格式: Y-m-d)。'
-          example: '2025-06-18'
-          required: false
-          schema:
-            type: string
-            description: 'date 按創建日期篩選的結束日期 (格式: Y-m-d)。'
-            example: '2025-06-18'
-            nullable: false
-      responses:
-        401:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  message: Unauthenticated.
-                properties:
-                  message:
-                    type: string
-                    example: Unauthenticated.
-      tags:
-        - 客戶管理
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                search:
-                  type: string
-                  description: ''
-                  example: consequatur
-                  nullable: true
-                start_date:
-                  type: string
-                  description: 'Must be a valid date in the format <code>Y-m-d</code>.'
-                  example: '2025-06-19'
-                  nullable: true
-                end_date:
-                  type: string
-                  description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2106-07-18'
-                  nullable: true
     post:
       summary: 創建新客戶
       operationId: ''
@@ -5012,6 +4650,277 @@ paths:
                         example: 2
       tags:
         - 庫存管理
+  /api/inventory/transactions:
+    get:
+      summary: 獲取所有庫存交易歷史記錄
+      operationId: ''
+      description: ''
+      parameters:
+        -
+          in: query
+          name: store_id
+          description: 門市ID，用於篩選特定門市的歷史記錄.
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 門市ID，用於篩選特定門市的歷史記錄.
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: type
+          description: 交易類型篩選.
+          example: transfer_in
+          required: false
+          schema:
+            type: string
+            description: 交易類型篩選.
+            example: transfer_in
+            nullable: false
+        -
+          in: query
+          name: start_date
+          description: 'date 起始日期.'
+          example: '2023-01-01'
+          required: false
+          schema:
+            type: string
+            description: 'date 起始日期.'
+            example: '2023-01-01'
+            nullable: false
+        -
+          in: query
+          name: end_date
+          description: 'date 結束日期.'
+          example: '2023-12-31'
+          required: false
+          schema:
+            type: string
+            description: 'date 結束日期.'
+            example: '2023-12-31'
+            nullable: false
+        -
+          in: query
+          name: product_name
+          description: 商品名稱搜尋.
+          example: T恤
+          required: false
+          schema:
+            type: string
+            description: 商品名稱搜尋.
+            example: T恤
+            nullable: false
+        -
+          in: query
+          name: per_page
+          description: 每頁顯示數量，預設20.
+          example: 50
+          required: false
+          schema:
+            type: integer
+            description: 每頁顯示數量，預設20.
+            example: 50
+            nullable: false
+        -
+          in: query
+          name: page
+          description: 頁碼.
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 頁碼.
+            example: 1
+            nullable: false
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 成功獲取庫存交易記錄
+                  data:
+                    -
+                      id: 1
+                      inventory_id: 1
+                      user_id: 1
+                      type: addition
+                      quantity: 10
+                      before_quantity: 0
+                      after_quantity: 10
+                      notes: 初始庫存
+                      metadata: {  }
+                      created_at: '2023-01-01T10:00:00.000000Z'
+                      updated_at: '2023-01-01T10:00:00.000000Z'
+                      store:
+                        id: 1
+                        name: 台中店
+                      user:
+                        name: 'Admin User'
+                      product:
+                        name: 商品名稱
+                        sku: T001-M-RED
+                  pagination:
+                    current_page: 1
+                    per_page: 20
+                    total: 100
+                    last_page: 5
+                properties:
+                  message:
+                    type: string
+                    example: 成功獲取庫存交易記錄
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        inventory_id: 1
+                        user_id: 1
+                        type: addition
+                        quantity: 10
+                        before_quantity: 0
+                        after_quantity: 10
+                        notes: 初始庫存
+                        metadata: []
+                        created_at: '2023-01-01T10:00:00.000000Z'
+                        updated_at: '2023-01-01T10:00:00.000000Z'
+                        store:
+                          id: 1
+                          name: 台中店
+                        user:
+                          name: 'Admin User'
+                        product:
+                          name: 商品名稱
+                          sku: T001-M-RED
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        inventory_id:
+                          type: integer
+                          example: 1
+                        user_id:
+                          type: integer
+                          example: 1
+                        type:
+                          type: string
+                          example: addition
+                        quantity:
+                          type: integer
+                          example: 10
+                        before_quantity:
+                          type: integer
+                          example: 0
+                        after_quantity:
+                          type: integer
+                          example: 10
+                        notes:
+                          type: string
+                          example: 初始庫存
+                        metadata:
+                          type: object
+                          properties: {  }
+                        created_at:
+                          type: string
+                          example: '2023-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2023-01-01T10:00:00.000000Z'
+                        store:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 台中店
+                        user:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              example: 'Admin User'
+                        product:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              example: 商品名稱
+                            sku:
+                              type: string
+                              example: T001-M-RED
+                  pagination:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 20
+                      total:
+                        type: integer
+                        example: 100
+                      last_page:
+                        type: integer
+                        example: 5
+      tags:
+        - 庫存管理
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                store_id:
+                  type: integer
+                  description: 'The <code>id</code> of an existing record in the stores table.'
+                  example: 17
+                  nullable: true
+                type:
+                  type: string
+                  description: ''
+                  example: reduction
+                  nullable: true
+                  enum:
+                    - addition
+                    - reduction
+                    - adjustment
+                    - transfer_in
+                    - transfer_out
+                    - transfer_cancel
+                start_date:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2025-06-19T10:47:14'
+                  nullable: true
+                end_date:
+                  type: string
+                  description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
+                  example: '2106-07-18'
+                  nullable: true
+                product_name:
+                  type: string
+                  description: ''
+                  example: consequatur
+                  nullable: true
+                per_page:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 100.'
+                  example: 13
+                  nullable: true
+                page:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 56
+                  nullable: true
   '/api/inventory/{id}':
     get:
       summary: 獲取單條庫存記錄詳情
@@ -5637,7 +5546,7 @@ paths:
                 type:
                   type: string
                   description: ''
-                  example: transfer_out
+                  example: addition
                   nullable: true
                   enum:
                     - addition
@@ -5649,7 +5558,7 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-19T09:01:54'
+                  example: '2025-06-19T10:47:14'
                   nullable: true
                 end_date:
                   type: string
@@ -7242,6 +7151,136 @@ paths:
         required: true
         schema:
           type: integer
+  '/api/order-items/{order_item_id}/status':
+    patch:
+      summary: ''
+      operationId: patchApiOrderItemsOrder_item_idStatus
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    order_number: PO-20250619-001
+                    items:
+                      -
+                        id: 1
+                        status: 已叫貨
+                        product_name: 辦公桌
+                        sku: DESK-001
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      order_number:
+                        type: string
+                        example: PO-20250619-001
+                      items:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            status: 已叫貨
+                            product_name: 辦公桌
+                            sku: DESK-001
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            status:
+                              type: string
+                              example: 已叫貨
+                            product_name:
+                              type: string
+                              example: 辦公桌
+                            sku:
+                              type: string
+                              example: DESK-001
+        404:
+          description: 項目不存在
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 找不到指定的訂單項目
+                properties:
+                  message:
+                    type: string
+                    example: 找不到指定的訂單項目
+        422:
+          description: 驗證失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 驗證失敗
+                  errors:
+                    status:
+                      - '項目狀態必須是：待處理、已叫貨、已出貨、完成 其中之一'
+                properties:
+                  message:
+                    type: string
+                    example: 驗證失敗
+                  errors:
+                    type: object
+                    properties:
+                      status:
+                        type: array
+                        example:
+                          - '項目狀態必須是：待處理、已叫貨、已出貨、完成 其中之一'
+                        items:
+                          type: string
+      tags:
+        - 訂單項目管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: 新的項目狀態。
+                  example: 已叫貨
+                  nullable: false
+                notes:
+                  type: string
+                  description: 狀態變更備註。
+                  example: 商品已從倉庫叫貨
+                  nullable: true
+              required:
+                - status
+    parameters:
+      -
+        in: path
+        name: order_item_id
+        description: 'The ID of the order item.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: order_item
+        description: '訂單項目的 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
   /api/login:
     post:
       summary: 處理使用者登入請求
@@ -7355,3 +7394,441 @@ paths:
           description: 成功登出
       tags:
         - 認證管理
+  /api/purchases:
+    get:
+      summary: 'Display a listing of the resource.'
+      operationId: displayAListingOfTheResource
+      description: ''
+      parameters:
+        -
+          in: query
+          name: 'filter[store_id]'
+          description: 門市ID篩選
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 門市ID篩選
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: 'filter[status]'
+          description: 狀態篩選
+          example: pending
+          required: false
+          schema:
+            type: string
+            description: 狀態篩選
+            example: pending
+            nullable: false
+        -
+          in: query
+          name: 'filter[order_number]'
+          description: 進貨單號篩選
+          example: PO-20240101-001
+          required: false
+          schema:
+            type: string
+            description: 進貨單號篩選
+            example: PO-20240101-001
+            nullable: false
+        -
+          in: query
+          name: 'filter[start_date]'
+          description: 開始日期篩選
+          example: '2024-01-01'
+          required: false
+          schema:
+            type: string
+            description: 開始日期篩選
+            example: '2024-01-01'
+            nullable: false
+        -
+          in: query
+          name: 'filter[end_date]'
+          description: 結束日期篩選
+          example: '2024-12-31'
+          required: false
+          schema:
+            type: string
+            description: 結束日期篩選
+            example: '2024-12-31'
+            nullable: false
+        -
+          in: query
+          name: sort
+          description: 排序欄位
+          example: '-purchased_at'
+          required: false
+          schema:
+            type: string
+            description: 排序欄位
+            example: '-purchased_at'
+            nullable: false
+        -
+          in: query
+          name: page
+          description: 頁數
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 頁數
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: per_page
+          description: 每頁筆數
+          example: 20
+          required: false
+          schema:
+            type: integer
+            description: 每頁筆數
+            example: 20
+            nullable: false
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - 進貨管理
+    post:
+      summary: 'Store a newly created resource in storage.'
+      operationId: storeANewlyCreatedResourceInStorage
+      description: ''
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  id: 1
+                  order_number: PO-20240101-001
+                  total_amount: 4145.0
+                  shipping_cost: 150.0
+                  status: completed
+                  purchased_at: '2024-01-01T00:00:00+08:00'
+                  items:
+                    -
+                      id: 1
+                      product_variant_id: 1
+                      sku: T-SHIRT-RED-S
+                      product_name: 經典棉質T-shirt
+                      quantity: 10
+                      unit_price: 299.0
+                      cost_price: 150.0
+                      allocated_shipping_cost: 36.17
+                      total_cost_price: 186.17
+                    -
+                      id: 2
+                      product_variant_id: 2
+                      sku: T-SHIRT-BLUE-M
+                      product_name: 經典棉質T-shirt
+                      quantity: 5
+                      unit_price: 399.0
+                      cost_price: 200.0
+                      allocated_shipping_cost: 48.17
+                      total_cost_price: 248.17
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  order_number:
+                    type: string
+                    example: PO-20240101-001
+                  total_amount:
+                    type: number
+                    example: 4145.0
+                  shipping_cost:
+                    type: number
+                    example: 150.0
+                  status:
+                    type: string
+                    example: completed
+                  purchased_at:
+                    type: string
+                    example: '2024-01-01T00:00:00+08:00'
+                  items:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        product_variant_id: 1
+                        sku: T-SHIRT-RED-S
+                        product_name: 經典棉質T-shirt
+                        quantity: 10
+                        unit_price: 299
+                        cost_price: 150
+                        allocated_shipping_cost: 36.17
+                        total_cost_price: 186.17
+                      -
+                        id: 2
+                        product_variant_id: 2
+                        sku: T-SHIRT-BLUE-M
+                        product_name: 經典棉質T-shirt
+                        quantity: 5
+                        unit_price: 399
+                        cost_price: 200
+                        allocated_shipping_cost: 48.17
+                        total_cost_price: 248.17
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        product_variant_id:
+                          type: integer
+                          example: 1
+                        sku:
+                          type: string
+                          example: T-SHIRT-RED-S
+                        product_name:
+                          type: string
+                          example: 經典棉質T-shirt
+                        quantity:
+                          type: integer
+                          example: 10
+                        unit_price:
+                          type: number
+                          example: 299.0
+                        cost_price:
+                          type: number
+                          example: 150.0
+                        allocated_shipping_cost:
+                          type: number
+                          example: 36.17
+                        total_cost_price:
+                          type: number
+                          example: 186.17
+      tags:
+        - 進貨管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                store_id:
+                  type: integer
+                  description: 門市ID
+                  example: 1
+                  nullable: false
+                order_number:
+                  type: string
+                  description: 進貨單號
+                  example: PO-20240101-001
+                  nullable: false
+                purchased_at:
+                  type: string
+                  description: 進貨日期
+                  example: '2024-01-01T10:00:00+08:00'
+                  nullable: false
+                shipping_cost:
+                  type: number
+                  description: 總運費成本
+                  example: 150.0
+                  nullable: false
+                status:
+                  type: string
+                  description: 進貨單狀態
+                  example: pending
+                  nullable: false
+                items:
+                  type: array
+                  description: 進貨項目列表
+                  example:
+                    - []
+                  items:
+                    type: object
+                    properties:
+                      product_variant_id:
+                        type: integer
+                        description: 商品變體ID
+                        example: 1
+                        nullable: false
+                      quantity:
+                        type: integer
+                        description: 數量
+                        example: 10
+                        nullable: false
+                      cost_price:
+                        type: number
+                        description: 成本價格
+                        example: 150.0
+                        nullable: false
+                    required:
+                      - product_variant_id
+                      - quantity
+                      - cost_price
+              required:
+                - store_id
+                - order_number
+                - shipping_cost
+                - items
+  '/api/purchases/{id}':
+    get:
+      summary: 'Display the specified resource.'
+      operationId: displayTheSpecifiedResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - 進貨管理
+    put:
+      summary: 'Update the specified resource in storage.'
+      operationId: updateTheSpecifiedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 進貨管理
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                store_id:
+                  type: integer
+                  description: 門市ID
+                  example: 1
+                  nullable: false
+                order_number:
+                  type: string
+                  description: 進貨單號
+                  example: PO-20240101-001
+                  nullable: false
+                purchased_at:
+                  type: string
+                  description: 進貨日期
+                  example: '2024-01-01T10:00:00+08:00'
+                  nullable: false
+                shipping_cost:
+                  type: number
+                  description: 總運費成本
+                  example: 150.0
+                  nullable: false
+                status:
+                  type: string
+                  description: 進貨單狀態
+                  example: confirmed
+                  nullable: false
+                items:
+                  type: array
+                  description: 進貨項目列表
+                  example:
+                    - []
+                  items:
+                    type: object
+                    properties:
+                      product_variant_id:
+                        type: integer
+                        description: 商品變體ID
+                        example: 1
+                        nullable: false
+                      quantity:
+                        type: integer
+                        description: 數量
+                        example: 10
+                        nullable: false
+                      cost_price:
+                        type: number
+                        description: 成本價格
+                        example: 150.0
+                        nullable: false
+    delete:
+      summary: 'Remove the specified resource from storage.'
+      operationId: removeTheSpecifiedResourceFromStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 進貨管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: 進貨單ID
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/purchases/{id}/status':
+    patch:
+      summary: 'Update the status of the specified purchase.'
+      operationId: updateTheStatusOfTheSpecifiedPurchase
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 進貨管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: 新狀態
+                  example: in_transit
+                  nullable: false
+              required:
+                - status
+    parameters:
+      -
+        in: path
+        name: id
+        description: 進貨單ID
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/purchases/{id}/cancel':
+    patch:
+      summary: 'Cancel the specified purchase.'
+      operationId: cancelTheSpecifiedPurchase
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - 進貨管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: 進貨單ID
+        example: 1
+        required: true
+        schema:
+          type: integer
