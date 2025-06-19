@@ -49,6 +49,16 @@ class Category extends Model
     }
 
     /**
+     * 獲取此分類的所有後代（子孫）分類
+     * 
+     * @return HasMany<Category>
+     */
+    public function descendants(): HasMany
+    {
+        return $this->children()->with('descendants');
+    }
+
+    /**
      * 獲取此分類下的所有商品
      * 
      * @return HasMany<Product>

@@ -74,49 +74,74 @@ export function ProductSelector({
   })
 
   // 獲取選中商品的變體列表
-  const { data: variantsData, isLoading: isLoadingVariants } = useProductVariants(
+  const { data: variantsData, isLoading: isLoadingVariants, error: variantsError } = useProductVariants(
     selectedProductId ? { product_id: selectedProductId } : {},
     { enabled: !!selectedProductId }
   )
+
+  // 當 selectedProductId 變化時，立即清除之前的變體選擇
+  useEffect(() => {
+    if (selectedProductId) {
+      setSelectedVariant(null);
+      // 清除選擇，但不調用回調避免無限循環
+    }
+  }, [selectedProductId]);
 
   // 找到當前選中的變體
   useEffect(() => {
     if (value && variantsData?.data) {
       const variant = variantsData.data.find((v) => v.id === value)
       if (variant) {
-        setSelectedVariant({
-            id: variant.id,
-            sku: variant.sku,
-            price: variant.price?.toString(),
-            product_id: variant.product_id,
-            created_at: variant.created_at,
-            updated_at: variant.updated_at,
-            product: variant.product ? {
-                id: variant.product.id!,
-                name: variant.product.name!,
-                description: variant.product.description
-            } : undefined,
-            attribute_values: variant.attribute_values,
-            inventory: variant.inventory
-        })
-        setSelectedProductId(variant.product_id || null)
+        // 確保變體屬於當前選中的商品
+        if (variant.product_id === selectedProductId) {
+          setSelectedVariant({
+              id: variant.id,
+              sku: variant.sku,
+              price: variant.price?.toString(),
+              product_id: variant.product_id,
+              created_at: variant.created_at,
+              updated_at: variant.updated_at,
+              product: variant.product ? {
+                  id: variant.product.id!,
+                  name: variant.product.name!,
+                  description: variant.product.description
+              } : undefined,
+              attribute_values: variant.attribute_values,
+              inventory: variant.inventory
+          })
+          setSelectedProductId(variant.product_id || null)
+                 } else {
+           // 如果變體不屬於當前商品，清除選擇
+           setSelectedVariant(null);
+           setSelectedProductId(null);
+           onValueChange?.(0);
+         }
       }
+    } else if (value === 0 || !value) {
+      // 如果 value 為 0 或空，清除選擇
+      setSelectedVariant(null);
     }
-  }, [value, variantsData])
+  }, [value, variantsData, selectedProductId])
 
   // 處理商品選擇
   const handleProductSelect = (productId: number) => {
-    setSelectedProductId(productId)
-    setSelectedVariant(null)
-    // 清除當前選擇的變體
-    onValueChange?.(0)
+    // 只有當選擇不同商品時才清除變體選擇
+    if (productId !== selectedProductId) {
+      setSelectedProductId(productId)
+      setSelectedVariant(null)
+      // 清除當前選擇的變體
+      onValueChange?.(0)
+    }
   }
 
   // 處理變體選擇
   const handleVariantSelect = (variant: any) => {
-    setSelectedVariant(variant)
-    onValueChange?.(variant.id, variant)
-    setOpen(false)
+    // 確保變體屬於當前選中的商品
+    if (variant.product_id === selectedProductId) {
+      setSelectedVariant(variant)
+      onValueChange?.(variant.id, variant)
+      setOpen(false)
+    }
   }
 
   // 重置選擇
@@ -190,6 +215,12 @@ export function ProductSelector({
     }
   }
 
+  // 確保只顯示屬於當前選中商品的變體
+  const filteredVariants = useMemo(() => {
+    if (!variantsData?.data || !selectedProductId) return [];
+    return variantsData.data.filter((variant: any) => variant.product_id === selectedProductId);
+  }, [variantsData, selectedProductId]);
+
   return (
     <div className="space-y-2">
       <Popover open={open} onOpenChange={setOpen}>
@@ -256,10 +287,10 @@ export function ProductSelector({
                   
                   {isLoadingVariants ? (
                     <CommandItem disabled>載入規格中...</CommandItem>
-                  ) : variantsData?.data?.length === 0 ? (
+                  ) : filteredVariants.length === 0 ? (
                     <CommandItem disabled>此商品暫無規格</CommandItem>
                   ) : (
-                    variantsData?.data?.map((variant: any) => (
+                    filteredVariants.map((variant: any) => (
                       <CommandItem
                         key={variant.id}
                         onSelect={() => handleVariantSelect(variant)}

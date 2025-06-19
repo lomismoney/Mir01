@@ -109,8 +109,10 @@ export default function StoresPage() {
     try {
       await updateStoreMutation.mutateAsync({
         id: editingStore.id,
-        name: editStoreName.trim(),
-        address: editStoreAddress.trim() || null
+        data: {
+          name: editStoreName.trim(),
+          address: editStoreAddress.trim() || null
+        }
       });
       
       toast.success('分店更新成功');

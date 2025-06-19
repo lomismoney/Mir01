@@ -119,6 +119,21 @@ function transformWizardDataToApiPayload(
   // 如果是單規格商品，創建一個預設變體
   if (!specifications.isVariable) {
     const singleVariant = variants.items[0];
+    
+    // 驗證單規格商品的數據
+    if (!singleVariant || !singleVariant.price || singleVariant.price.trim() === '') {
+      throw new Error('商品價格為必填項目，請在步驟3中設定價格');
+    }
+    
+    const price = parseFloat(singleVariant.price);
+    if (isNaN(price) || price <= 0) {
+      throw new Error('商品價格必須為大於 0 的有效數字');
+    }
+    
+    if (!singleVariant.sku || singleVariant.sku.trim() === '') {
+      throw new Error('商品 SKU 為必填項目，請在步驟3中設定 SKU');
+    }
+    
     return {
       name: basicInfo.name,
       description: basicInfo.description || null,
@@ -126,15 +141,38 @@ function transformWizardDataToApiPayload(
       attributes: [], // 單規格商品沒有屬性
       variants: [{
         ...(singleVariant?.id && { id: singleVariant.id }), // 編輯模式時包含變體 ID
-        sku: singleVariant?.sku || `${basicInfo.name.replace(/\s+/g, '-').toUpperCase()}-001`,
-        price: parseFloat(singleVariant?.price || '0') || 0,
+        sku: singleVariant.sku.trim(),
+        price: price,
         attribute_value_ids: []
       }]
     };
   }
 
+  // 多規格商品：驗證所有變體數據
+  if (variants.items.length === 0) {
+    throw new Error('多規格商品必須至少有一個變體，請返回步驟3配置變體');
+  }
+  
+  // 驗證每個變體的數據
+  for (let i = 0; i < variants.items.length; i++) {
+    const variant = variants.items[i];
+    
+    if (!variant.sku || variant.sku.trim() === '') {
+      throw new Error(`第 ${i + 1} 個變體的 SKU 為必填項目，請在步驟3中設定`);
+    }
+    
+    if (!variant.price || variant.price.trim() === '') {
+      throw new Error(`第 ${i + 1} 個變體的價格為必填項目，請在步驟3中設定`);
+    }
+    
+    const price = parseFloat(variant.price);
+    if (isNaN(price) || price <= 0) {
+      throw new Error(`第 ${i + 1} 個變體的價格必須為大於 0 的有效數字`);
+    }
+  }
+
   // 多規格商品：需要映射屬性值名稱到ID
-  const transformedVariants = variants.items.map(variant => {
+  const transformedVariants = variants.items.map((variant, index) => {
     const attributeValueIds: number[] = [];
     
     // 遍歷變體的每個選項，找到對應的屬性值ID
@@ -150,8 +188,8 @@ function transformWizardDataToApiPayload(
 
     return {
       ...(variant.id && { id: variant.id }), // 編輯模式時包含變體 ID
-      sku: variant.sku,
-      price: parseFloat(variant.price) || 0,
+      sku: variant.sku.trim(),
+      price: parseFloat(variant.price),
       attribute_value_ids: attributeValueIds
     };
   });
@@ -180,10 +218,25 @@ function transformToSimplePayload(formData: WizardFormData) {
   // 取得第一個（也是唯一的）變體資訊
   const firstVariant = variants.items[0];
   
+  // 驗證價格並提供詳細的錯誤信息
+  if (!firstVariant || !firstVariant.price || firstVariant.price.trim() === '') {
+    throw new Error('商品價格為必填項目，請在步驟3中設定價格');
+  }
+  
+  const price = parseFloat(firstVariant.price);
+  if (isNaN(price) || price <= 0) {
+    throw new Error('商品價格必須為大於 0 的有效數字');
+  }
+  
+  // 驗證 SKU
+  if (!firstVariant.sku || firstVariant.sku.trim() === '') {
+    throw new Error('商品 SKU 為必填項目，請在步驟3中設定 SKU');
+  }
+  
   return {
     name: basicInfo.name,
-    sku: firstVariant.sku,
-    price: parseFloat(firstVariant.price),
+    sku: firstVariant.sku.trim(),
+    price: price,
     category_id: basicInfo.category_id,
     description: basicInfo.description || undefined,
   };
@@ -415,15 +468,47 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         return true;
       
       case 3:
-        // 變體配置驗證：如果是多規格，必須有變體資料
-        if (formData.specifications.isVariable) {
-          return formData.variants.items.length > 0;
+        // 變體配置驗證：檢查所有變體的 SKU 和價格
+        if (formData.variants.items.length === 0) {
+          return false;
         }
-        return true;
+        
+        return formData.variants.items.every(variant => {
+          // 檢查 SKU
+          if (!variant.sku || variant.sku.trim() === '') {
+            return false;
+          }
+          
+          // 檢查價格
+          if (!variant.price || variant.price.trim() === '') {
+            return false;
+          }
+          
+          // 驗證價格格式
+          const price = parseFloat(variant.price);
+          return !isNaN(price) && price > 0;
+        });
       
       case 4:
-        // 預覽確認：基本驗證通過即可（原子化創建流程）
-        return formData.basicInfo.name.trim().length > 0;
+        // 預覽確認：完整驗證所有步驟
+        // 基本資訊
+        if (!formData.basicInfo.name.trim()) {
+          return false;
+        }
+        
+        // 變體驗證
+        if (formData.variants.items.length === 0) {
+          return false;
+        }
+        
+        // 檢查每個變體的完整性
+        return formData.variants.items.every(variant => {
+          const hasValidSku = variant.sku && variant.sku.trim().length > 0;
+          const hasValidPrice = variant.price && variant.price.trim().length > 0;
+          const priceIsNumber = !isNaN(parseFloat(variant.price || '')) && parseFloat(variant.price || '') > 0;
+          
+          return hasValidSku && hasValidPrice && priceIsNumber;
+        });
       
       default:
         return true;
@@ -435,7 +520,43 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
    */
   const handleNextStep = () => {
     if (!validateStep(step)) {
-      toast.error('請完成當前步驟的必填資訊');
+      let errorMessage = '請完成當前步驟的必填資訊';
+      
+      switch (step) {
+        case 1:
+          errorMessage = '請輸入商品名稱';
+          break;
+        case 2:
+          if (formData.specifications.isVariable && formData.specifications.selectedAttributes.length === 0) {
+            errorMessage = '多規格商品必須選擇至少一個屬性';
+          }
+          break;
+        case 3:
+          if (formData.variants.items.length === 0) {
+            errorMessage = '請先配置商品變體';
+          } else {
+            const missingSkuVariants = formData.variants.items.filter(v => !v.sku || !v.sku.trim());
+            const missingPriceVariants = formData.variants.items.filter(v => !v.price || !v.price.trim());
+            const invalidPriceVariants = formData.variants.items.filter(v => {
+              const price = parseFloat(v.price || '');
+              return isNaN(price) || price <= 0;
+            });
+            
+            if (missingSkuVariants.length > 0) {
+              errorMessage = `請為所有變體設定 SKU，還有 ${missingSkuVariants.length} 個變體未設定`;
+            } else if (missingPriceVariants.length > 0) {
+              errorMessage = `請為所有變體設定價格，還有 ${missingPriceVariants.length} 個變體未設定價格`;
+            } else if (invalidPriceVariants.length > 0) {
+              errorMessage = `請輸入有效的價格（大於0的數字），有 ${invalidPriceVariants.length} 個變體的價格無效`;
+            }
+          }
+          break;
+        case 4:
+          errorMessage = '請確認所有資訊無誤';
+          break;
+      }
+      
+      toast.error(errorMessage);
       return;
     }
     

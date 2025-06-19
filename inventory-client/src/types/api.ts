@@ -46,11 +46,11 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 12 */
+                                /** @example 14 */
                                 id?: number;
-                                /** @example Lonny Ankunding */
+                                /** @example Mrs. Justina Gaylord */
                                 name?: string;
-                                /** @example eloisa.harber */
+                                /** @example lafayette.considine */
                                 username?: string;
                                 /** @example viewer */
                                 role?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-18T15:59:25.000000Z */
+                                /** @example 2025-06-19T06:50:44.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-18T15:59:25.000000Z */
+                                /** @example 2025-06-19T06:50:44.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -70,23 +70,6 @@ export interface paths {
         };
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/purchases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Store a newly created resource in storage. */
-        post: operations["storeANewlyCreatedResourceInStorage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -126,31 +109,77 @@ export interface paths {
                         "application/json": {
                             /** @example [
                              *       {
-                             *         "id": 1,
-                             *         "name": "辦公用品",
-                             *         "description": "各種辦公室所需用品",
-                             *         "parent_id": null,
-                             *         "created_at": "2024-01-01T10:00:00.000000Z",
-                             *         "updated_at": "2024-01-01T10:00:00.000000Z"
-                             *       },
-                             *       {
                              *         "id": 2,
                              *         "name": "辦公椅",
                              *         "description": "各式辦公椅系列",
                              *         "parent_id": 1,
-                             *         "created_at": "2024-01-02T10:00:00.000000Z",
-                             *         "updated_at": "2024-01-02T10:00:00.000000Z"
+                             *         "products_count": 3
+                             *       },
+                             *       {
+                             *         "id": 4,
+                             *         "name": "文具用品",
+                             *         "description": "各種文具",
+                             *         "parent_id": 1,
+                             *         "products_count": 2
+                             *       }
+                             *     ] */
+                            1?: {
+                                /** @example 2 */
+                                id?: number;
+                                /** @example 辦公椅 */
+                                name?: string;
+                                /** @example 各式辦公椅系列 */
+                                description?: string;
+                                /** @example 1 */
+                                parent_id?: number;
+                                /** @example 3 */
+                                products_count?: number;
+                            }[];
+                            /** @example [
+                             *       {
+                             *         "id": 5,
+                             *         "name": "滑鼠",
+                             *         "description": "各式滑鼠",
+                             *         "parent_id": 3,
+                             *         "products_count": 8
+                             *       },
+                             *       {
+                             *         "id": 6,
+                             *         "name": "鍵盤",
+                             *         "description": "各式鍵盤",
+                             *         "parent_id": 3,
+                             *         "products_count": 4
+                             *       }
+                             *     ] */
+                            3?: {
+                                /** @example 5 */
+                                id?: number;
+                                /** @example 滑鼠 */
+                                name?: string;
+                                /** @example 各式滑鼠 */
+                                description?: string;
+                                /** @example 3 */
+                                parent_id?: number;
+                                /** @example 8 */
+                                products_count?: number;
+                            }[];
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "name": "辦公用品",
+                             *         "description": "各種辦公室所需用品",
+                             *         "parent_id": null,
+                             *         "products_count": 5
                              *       },
                              *       {
                              *         "id": 3,
                              *         "name": "電腦周邊",
                              *         "description": "電腦相關配件",
                              *         "parent_id": null,
-                             *         "created_at": "2024-01-03T10:00:00.000000Z",
-                             *         "updated_at": "2024-01-03T10:00:00.000000Z"
+                             *         "products_count": 12
                              *       }
                              *     ] */
-                            data?: {
+                            ""?: {
                                 /** @example 1 */
                                 id?: number;
                                 /** @example 辦公用品 */
@@ -159,37 +188,9 @@ export interface paths {
                                 description?: string;
                                 /** @example null */
                                 parent_id?: string;
-                                /** @example 2024-01-01T10:00:00.000000Z */
-                                created_at?: string;
-                                /** @example 2024-01-01T10:00:00.000000Z */
-                                updated_at?: string;
+                                /** @example 5 */
+                                products_count?: number;
                             }[];
-                            links?: {
-                                /** @example http://localhost/api/categories?page=1 */
-                                first?: string;
-                                /** @example http://localhost/api/categories?page=1 */
-                                last?: string;
-                                /** @example null */
-                                prev?: string;
-                                /** @example null */
-                                next?: string;
-                            };
-                            meta?: {
-                                /** @example 1 */
-                                current_page?: number;
-                                /** @example 1 */
-                                from?: number;
-                                /** @example 1 */
-                                last_page?: number;
-                                /** @example http://localhost/api/categories */
-                                path?: string;
-                                /** @example 15 */
-                                per_page?: number;
-                                /** @example 3 */
-                                to?: number;
-                                /** @example 3 */
-                                total?: number;
-                            };
                         };
                     };
                 };
@@ -215,17 +216,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Dolores dolorum amet iste laborum eius est dolor.
+                         * @example Eius et animi quos velit et.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID。例如：1
-                         * @example 17
+                         * @example 16
                          */
                         parent_id?: number | null;
                     };
@@ -255,6 +256,7 @@ export interface paths {
         /**
          * 顯示指定的分類資源
          * @description 返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出
+         *     包含該分類的商品數量統計
          */
         get: {
             parameters: {
@@ -309,17 +311,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example consequatur
+                         * @example architecto
                          */
                         name?: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Dolores dolorum amet iste laborum eius est dolor.
+                         * @example Eius et animi quos velit et.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID且不能是自己。例如：1
-                         * @example 17
+                         * @example 16
                          */
                         parent_id?: number | null;
                     };
@@ -574,7 +576,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一）。例如：顏色
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                     };
@@ -676,7 +678,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                     };
@@ -758,7 +760,7 @@ export interface paths {
                         /**
                          * @description 要刪除的商品 ID 列表。例如：[1, 2, 3]
                          * @example [
-                         *       "consequatur"
+                         *       "architecto"
                          *     ]
                          */
                         ids: string[];
@@ -1614,23 +1616,23 @@ export interface paths {
                         variants?: {
                             /**
                              * @description The <code>id</code> of an existing record in the product_variants table.
-                             * @example 17
+                             * @example 16
                              */
                             id?: number;
                             /**
                              * @description Must not be greater than 255 characters.
-                             * @example mqeopfuudtdsufvyvddqa
+                             * @example n
                              */
                             sku: string;
                             /**
                              * @description Must be at least 0.
-                             * @example 45
+                             * @example 84
                              */
                             price: number;
                             /**
                              * @description The <code>id</code> of an existing record in the attribute_values table.
                              * @example [
-                             *       17
+                             *       16
                              *     ]
                              */
                             attribute_value_ids?: number[];
@@ -2210,7 +2212,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the variant.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -2224,7 +2226,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the variant.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -2311,7 +2313,7 @@ export interface paths {
                         /**
                          * @description nullable 運送地址列表.
                          * @example [
-                         *       "consequatur"
+                         *       "architecto"
                          *     ]
                          */
                         addresses?: (string | null)[];
@@ -2415,7 +2417,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the customer.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
                 /**
@@ -2434,7 +2436,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the customer.
-                     * @example 1
+                     * @example 16
                      */
                     id: number;
                     /**
@@ -2548,7 +2550,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the customer.
-                     * @example 1
+                     * @example 16
                      */
                     id: number;
                     /**
@@ -2718,7 +2720,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一）。例如：紅色
-                         * @example consequatur
+                         * @example architecto
                          */
                         value: string;
                     };
@@ -2817,7 +2819,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-                         * @example consequatur
+                         * @example architecto
                          */
                         value: string;
                     };
@@ -3131,6 +3133,192 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/inventory/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 獲取所有庫存交易歷史記錄 */
+        get: {
+            parameters: {
+                query?: {
+                    /**
+                     * @description 門市ID，用於篩選特定門市的歷史記錄.
+                     * @example 1
+                     */
+                    store_id?: number;
+                    /**
+                     * @description 交易類型篩選.
+                     * @example transfer_in
+                     */
+                    type?: string;
+                    /**
+                     * @description date 起始日期.
+                     * @example 2023-01-01
+                     */
+                    start_date?: string;
+                    /**
+                     * @description date 結束日期.
+                     * @example 2023-12-31
+                     */
+                    end_date?: string;
+                    /**
+                     * @description 商品名稱搜尋.
+                     * @example T恤
+                     */
+                    product_name?: string;
+                    /**
+                     * @description 每頁顯示數量，預設20.
+                     * @example 50
+                     */
+                    per_page?: number;
+                    /**
+                     * @description 頁碼.
+                     * @example 1
+                     */
+                    page?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description The <code>id</code> of an existing record in the stores table.
+                         * @example 16
+                         */
+                        store_id?: number | null;
+                        /**
+                         * @example adjustment
+                         * @enum {string|null}
+                         */
+                        type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
+                        /**
+                         * @description Must be a valid date.
+                         * @example 2025-06-19T06:50:46
+                         */
+                        start_date?: string | null;
+                        /**
+                         * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
+                         * @example 2051-07-13
+                         */
+                        end_date?: string | null;
+                        /** @example architecto */
+                        product_name?: string | null;
+                        /**
+                         * @description Must be at least 1. Must not be greater than 100.
+                         * @example 22
+                         */
+                        per_page?: number | null;
+                        /**
+                         * @description Must be at least 1.
+                         * @example 67
+                         */
+                        page?: number | null;
+                    };
+                };
+            };
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example 成功獲取庫存交易記錄 */
+                            message?: string;
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "inventory_id": 1,
+                             *         "user_id": 1,
+                             *         "type": "addition",
+                             *         "quantity": 10,
+                             *         "before_quantity": 0,
+                             *         "after_quantity": 10,
+                             *         "notes": "初始庫存",
+                             *         "metadata": [],
+                             *         "created_at": "2023-01-01T10:00:00.000000Z",
+                             *         "updated_at": "2023-01-01T10:00:00.000000Z",
+                             *         "store": {
+                             *           "id": 1,
+                             *           "name": "台中店"
+                             *         },
+                             *         "user": {
+                             *           "name": "Admin User"
+                             *         },
+                             *         "product": {
+                             *           "name": "商品名稱",
+                             *           "sku": "T001-M-RED"
+                             *         }
+                             *       }
+                             *     ] */
+                            data?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 1 */
+                                inventory_id?: number;
+                                /** @example 1 */
+                                user_id?: number;
+                                /** @example addition */
+                                type?: string;
+                                /** @example 10 */
+                                quantity?: number;
+                                /** @example 0 */
+                                before_quantity?: number;
+                                /** @example 10 */
+                                after_quantity?: number;
+                                /** @example 初始庫存 */
+                                notes?: string;
+                                metadata?: Record<string, never>;
+                                /** @example 2023-01-01T10:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2023-01-01T10:00:00.000000Z */
+                                updated_at?: string;
+                                store?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 台中店 */
+                                    name?: string;
+                                };
+                                user?: {
+                                    /** @example Admin User */
+                                    name?: string;
+                                };
+                                product?: {
+                                    /** @example 商品名稱 */
+                                    name?: string;
+                                    /** @example T001-M-RED */
+                                    sku?: string;
+                                };
+                            }[];
+                            pagination?: {
+                                /** @example 1 */
+                                current_page?: number;
+                                /** @example 20 */
+                                per_page?: number;
+                                /** @example 100 */
+                                total?: number;
+                                /** @example 5 */
+                                last_page?: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/inventory/{id}": {
         parameters: {
             query?: never;
@@ -3138,7 +3326,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the inventory.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -3152,7 +3340,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the inventory.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -3799,7 +3987,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the transfer.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -3813,7 +4001,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the transfer.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -4065,22 +4253,22 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 用戶姓名。例如：張三
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                         /**
                          * @description 用戶名（唯一）。例如：zhangsan
-                         * @example consequatur
+                         * @example architecto
                          */
                         username: string;
                         /**
                          * @description 用戶密碼（至少8個字元）。例如：password123
-                         * @example O[2UZ5ij-e/dl4m{o,
+                         * @example |]|{+-
                          */
                         password: string;
                         /**
                          * @description 用戶角色，必須是 admin 或 viewer。例如：admin
-                         * @example consequatur
+                         * @example architecto
                          */
                         role: string;
                     };
@@ -4442,6 +4630,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Store a newly created resource in storage. */
+        post: operations["storeANewlyCreatedResourceInStorage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4473,114 +4678,6 @@ export interface operations {
                         status?: string;
                         /** @example API is running */
                         message?: string;
-                    };
-                };
-            };
-        };
-    };
-    storeANewlyCreatedResourceInStorage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description 門市ID
-                     * @example 1
-                     */
-                    store_id: number;
-                    /**
-                     * @description 進貨單號
-                     * @example PO-20240101-001
-                     */
-                    order_number: string;
-                    /**
-                     * @description 進貨日期
-                     * @example 2024-01-01T10:00:00+08:00
-                     */
-                    purchased_at?: string;
-                    /**
-                     * @description 總運費成本
-                     * @example 150
-                     */
-                    shipping_cost: number;
-                    /**
-                     * @description 進貨項目列表
-                     * @example [
-                     *       "consequatur"
-                     *     ]
-                     */
-                    items: string[];
-                };
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 1 */
-                        id?: number;
-                        /** @example PO-20240101-001 */
-                        order_number?: string;
-                        /** @example 4145 */
-                        total_amount?: number;
-                        /** @example 150 */
-                        shipping_cost?: number;
-                        /** @example completed */
-                        status?: string;
-                        /** @example 2024-01-01T00:00:00+08:00 */
-                        purchased_at?: string;
-                        /** @example [
-                         *       {
-                         *         "id": 1,
-                         *         "product_variant_id": 1,
-                         *         "sku": "T-SHIRT-RED-S",
-                         *         "product_name": "經典棉質T-shirt",
-                         *         "quantity": 10,
-                         *         "unit_price": 299,
-                         *         "cost_price": 150,
-                         *         "allocated_shipping_cost": 36.17,
-                         *         "total_cost_price": 186.17
-                         *       },
-                         *       {
-                         *         "id": 2,
-                         *         "product_variant_id": 2,
-                         *         "sku": "T-SHIRT-BLUE-M",
-                         *         "product_name": "經典棉質T-shirt",
-                         *         "quantity": 5,
-                         *         "unit_price": 399,
-                         *         "cost_price": 200,
-                         *         "allocated_shipping_cost": 48.17,
-                         *         "total_cost_price": 248.17
-                         *       }
-                         *     ] */
-                        items?: {
-                            /** @example 1 */
-                            id?: number;
-                            /** @example 1 */
-                            product_variant_id?: number;
-                            /** @example T-SHIRT-RED-S */
-                            sku?: string;
-                            /** @example 經典棉質T-shirt */
-                            product_name?: string;
-                            /** @example 10 */
-                            quantity?: number;
-                            /** @example 299 */
-                            unit_price?: number;
-                            /** @example 150 */
-                            cost_price?: number;
-                            /** @example 36.17 */
-                            allocated_shipping_cost?: number;
-                            /** @example 186.17 */
-                            total_cost_price?: number;
-                        }[];
                     };
                 };
             };
@@ -4684,12 +4781,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一）。例如：台北總店
-                     * @example consequatur
+                     * @example architecto
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example consequatur
+                     * @example architecto
                      */
                     address?: string | null;
                 };
@@ -4703,16 +4800,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 15 */
+                            /** @example 7 */
                             id?: number;
-                            /** @example Mueller-Dibbert */
+                            /** @example Bailey Ltd */
                             name?: string;
-                            /** @example 87713 Brandy Roads Suite 202
-                             *     Williamsonfort, CT 64474 */
+                            /** @example 85625 Gaylord Knolls
+                             *     Cecilburgh, WI 02042 */
                             address?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4742,16 +4839,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 16 */
+                            /** @example 8 */
                             id?: number;
-                            /** @example Kunde Group */
+                            /** @example Cruickshank Inc */
                             name?: string;
-                            /** @example 62028 Trudie Mills
-                             *     North Cordie, IL 75592 */
+                            /** @example 532 Leuschke Causeway
+                             *     McLaughlinstad, MI 07365 */
                             address?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4777,12 +4874,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一，會排除當前分店）。例如：台北信義店
-                     * @example consequatur
+                     * @example architecto
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example consequatur
+                     * @example architecto
                      */
                     address?: string | null;
                 };
@@ -4796,16 +4893,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 17 */
+                            /** @example 9 */
                             id?: number;
-                            /** @example Moore-Emard */
+                            /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
-                            /** @example 27319 Schmeler Fall Suite 958
-                             *     Carterland, NM 49546 */
+                            /** @example 80841 Mya Lane Apt. 042
+                             *     Lyricberg, MO 42170-0432 */
                             address?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4851,16 +4948,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 18 */
+                            /** @example 10 */
                             id?: number;
-                            /** @example Hahn-Harber */
+                            /** @example Hauck-Leuschke */
                             name?: string;
-                            /** @example 6098 Kutch Loaf
-                             *     Port Eldonland, PA 73828-6765 */
+                            /** @example 544 Aglae Ridge Apt. 067
+                             *     Lefflerhaven, TX 58408-7043 */
                             address?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4887,7 +4984,7 @@ export interface operations {
                     /**
                      * @description 要分配給用戶的分店ID列表。例如：[1, 2, 3]
                      * @example [
-                     *       "consequatur"
+                     *       "architecto"
                      *     ]
                      */
                     store_ids: string[];
@@ -4902,11 +4999,11 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 13 */
+                            /** @example 15 */
                             id?: number;
-                            /** @example Dr. Cornelius Luettgen V */
+                            /** @example Ms. Elisabeth Okuneva */
                             name?: string;
-                            /** @example russel.bert */
+                            /** @example gulgowski.asia */
                             username?: string;
                             /** @example viewer */
                             role?: string;
@@ -4914,9 +5011,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T06:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5211,7 +5308,7 @@ export interface operations {
                         /**
                          * @description The <code>id</code> of an existing record in the attribute_values table.
                          * @example [
-                         *       17
+                         *       16
                          *     ]
                          */
                         attribute_value_ids?: number[];
@@ -5464,30 +5561,157 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @example consequatur */
+                    /** @example architecto */
                     search?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2025-06-18
+                     * @example 2025-06-19
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2106-07-18
+                     * @example 2051-07-13
                      */
                     end_date?: string | null;
                 };
             };
         };
         responses: {
-            401: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
+                        /** @example [
+                         *       {
+                         *         "id": 1,
+                         *         "name": "測試客戶一",
+                         *         "phone": "0987654321",
+                         *         "is_company": false,
+                         *         "tax_id": null,
+                         *         "industry_type": "設計師",
+                         *         "payment_type": "現金付款",
+                         *         "contact_address": "台北市信義區信義路一段100號",
+                         *         "created_at": "2024-01-01T10:00:00.000000Z",
+                         *         "updated_at": "2024-01-01T10:00:00.000000Z",
+                         *         "default_address": {
+                         *           "id": 1,
+                         *           "customer_id": 1,
+                         *           "address": "台北市信義區信義路一段100號",
+                         *           "is_default": true,
+                         *           "created_at": "2024-01-01T10:00:00.000000Z",
+                         *           "updated_at": "2024-01-01T10:00:00.000000Z"
+                         *         }
+                         *       },
+                         *       {
+                         *         "id": 2,
+                         *         "name": "ABC設計公司",
+                         *         "phone": "0912345678",
+                         *         "is_company": true,
+                         *         "tax_id": "12345678",
+                         *         "industry_type": "設計公司",
+                         *         "payment_type": "轉帳付款",
+                         *         "contact_address": "台北市大安區仁愛路四段200號",
+                         *         "created_at": "2024-01-02T14:30:00.000000Z",
+                         *         "updated_at": "2024-01-02T14:30:00.000000Z",
+                         *         "default_address": {
+                         *           "id": 2,
+                         *           "customer_id": 2,
+                         *           "address": "台北市大安區仁愛路四段200號",
+                         *           "is_default": true,
+                         *           "created_at": "2024-01-02T14:30:00.000000Z",
+                         *           "updated_at": "2024-01-02T14:30:00.000000Z"
+                         *         }
+                         *       }
+                         *     ] */
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 測試客戶一 */
+                            name?: string;
+                            /** @example 0987654321 */
+                            phone?: string;
+                            /** @example false */
+                            is_company?: boolean;
+                            /** @example null */
+                            tax_id?: string;
+                            /** @example 設計師 */
+                            industry_type?: string;
+                            /** @example 現金付款 */
+                            payment_type?: string;
+                            /** @example 台北市信義區信義路一段100號 */
+                            contact_address?: string;
+                            /** @example 2024-01-01T10:00:00.000000Z */
+                            created_at?: string;
+                            /** @example 2024-01-01T10:00:00.000000Z */
+                            updated_at?: string;
+                            default_address?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 1 */
+                                customer_id?: number;
+                                /** @example 台北市信義區信義路一段100號 */
+                                address?: string;
+                                /** @example true */
+                                is_default?: boolean;
+                                /** @example 2024-01-01T10:00:00.000000Z */
+                                created_at?: string;
+                                /** @example 2024-01-01T10:00:00.000000Z */
+                                updated_at?: string;
+                            };
+                        }[];
+                        links?: {
+                            /** @example http://localhost/api/customers?page=1 */
+                            first?: string;
+                            /** @example http://localhost/api/customers?page=1 */
+                            last?: string;
+                            /** @example null */
+                            prev?: string;
+                            /** @example null */
+                            next?: string;
+                        };
+                        meta?: {
+                            /** @example 1 */
+                            current_page?: number;
+                            /** @example 1 */
+                            from?: number;
+                            /** @example 1 */
+                            last_page?: number;
+                            /** @example [
+                             *       {
+                             *         "url": null,
+                             *         "label": "&laquo; Previous",
+                             *         "active": false
+                             *       },
+                             *       {
+                             *         "url": "http://localhost/api/customers?page=1",
+                             *         "label": "1",
+                             *         "active": true
+                             *       },
+                             *       {
+                             *         "url": null,
+                             *         "label": "Next &raquo;",
+                             *         "active": false
+                             *       }
+                             *     ] */
+                            links?: {
+                                /** @example null */
+                                url?: string;
+                                /** @example &laquo; Previous */
+                                label?: string;
+                                /** @example false */
+                                active?: boolean;
+                            }[];
+                            /** @example http://localhost/api/customers */
+                            path?: string;
+                            /** @example 15 */
+                            per_page?: number;
+                            /** @example 2 */
+                            to?: number;
+                            /** @example 2 */
+                            total?: number;
+                        };
                     };
                 };
             };
@@ -5542,27 +5766,27 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description The <code>id</code> of an existing record in the stores table.
-                     * @example 17
+                     * @example 16
                      */
                     store_id?: number | null;
                     /**
-                     * @example transfer_out
+                     * @example addition
                      * @enum {string|null}
                      */
                     type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2025-06-18T15:59:26
+                     * @example 2025-06-19T06:50:46
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2106-07-18
+                     * @example 2051-07-13
                      */
                     end_date?: string | null;
                     /**
                      * @description Must be at least 1. Must not be greater than 100.
-                     * @example 13
+                     * @example 22
                      */
                     per_page?: number | null;
                 };
@@ -5744,6 +5968,135 @@ export interface operations {
                             /** @example 1 */
                             last_page?: number;
                         };
+                    };
+                };
+            };
+        };
+    };
+    storeANewlyCreatedResourceInStorage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 門市ID
+                     * @example 1
+                     */
+                    store_id: number;
+                    /**
+                     * @description 進貨單號
+                     * @example PO-20240101-001
+                     */
+                    order_number: string;
+                    /**
+                     * @description 進貨日期
+                     * @example 2024-01-01T10:00:00+08:00
+                     */
+                    purchased_at?: string;
+                    /**
+                     * @description 總運費成本
+                     * @example 150
+                     */
+                    shipping_cost: number;
+                    /**
+                     * @description 進貨項目列表
+                     * @example [
+                     *       []
+                     *     ]
+                     */
+                    items: {
+                        /**
+                         * @description 商品變體ID
+                         * @example 1
+                         */
+                        product_variant_id: number;
+                        /**
+                         * @description 數量
+                         * @example 10
+                         */
+                        quantity: number;
+                        /**
+                         * @description 單價
+                         * @example 299
+                         */
+                        unit_price: number;
+                        /**
+                         * @description 成本價格
+                         * @example 150
+                         */
+                        cost_price: number;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 1 */
+                        id?: number;
+                        /** @example PO-20240101-001 */
+                        order_number?: string;
+                        /** @example 4145 */
+                        total_amount?: number;
+                        /** @example 150 */
+                        shipping_cost?: number;
+                        /** @example completed */
+                        status?: string;
+                        /** @example 2024-01-01T00:00:00+08:00 */
+                        purchased_at?: string;
+                        /** @example [
+                         *       {
+                         *         "id": 1,
+                         *         "product_variant_id": 1,
+                         *         "sku": "T-SHIRT-RED-S",
+                         *         "product_name": "經典棉質T-shirt",
+                         *         "quantity": 10,
+                         *         "unit_price": 299,
+                         *         "cost_price": 150,
+                         *         "allocated_shipping_cost": 36.17,
+                         *         "total_cost_price": 186.17
+                         *       },
+                         *       {
+                         *         "id": 2,
+                         *         "product_variant_id": 2,
+                         *         "sku": "T-SHIRT-BLUE-M",
+                         *         "product_name": "經典棉質T-shirt",
+                         *         "quantity": 5,
+                         *         "unit_price": 399,
+                         *         "cost_price": 200,
+                         *         "allocated_shipping_cost": 48.17,
+                         *         "total_cost_price": 248.17
+                         *       }
+                         *     ] */
+                        items?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 1 */
+                            product_variant_id?: number;
+                            /** @example T-SHIRT-RED-S */
+                            sku?: string;
+                            /** @example 經典棉質T-shirt */
+                            product_name?: string;
+                            /** @example 10 */
+                            quantity?: number;
+                            /** @example 299 */
+                            unit_price?: number;
+                            /** @example 150 */
+                            cost_price?: number;
+                            /** @example 36.17 */
+                            allocated_shipping_cost?: number;
+                            /** @example 186.17 */
+                            total_cost_price?: number;
+                        }[];
                     };
                 };
             };

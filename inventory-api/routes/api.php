@@ -194,6 +194,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // 庫存管理
     Route::get('/inventory', [App\Http\Controllers\Api\InventoryManagementController::class, 'index']);
+    Route::get('/inventory/transactions', [App\Http\Controllers\Api\InventoryManagementController::class, 'getAllTransactions']);
     Route::get('/inventory/{id}', [App\Http\Controllers\Api\InventoryManagementController::class, 'show']);
     Route::post('/inventory/adjust', [App\Http\Controllers\Api\InventoryManagementController::class, 'adjust']);
     Route::get('/inventory/{id}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'history']);

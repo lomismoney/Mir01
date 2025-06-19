@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
+import apiClient from "@/lib/apiClient";
 import { handleApiError } from "@/lib/errorHandler";
 import { Store } from "./useStores";
 
@@ -16,20 +16,19 @@ type UserStoreAssignBody = {
  */
 export function useUserStores(userId: number) {
   return useQuery({
-    queryKey: ['users', userId, 'stores'],
+    queryKey: ["user-stores", userId],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET(`/api/users/{user_id}/stores`, {
-        params: { path: { user_id: userId } }
-      });
+      const { data, error } = await apiClient.GET(`/api/users/{user_id}/stores` as any, {
+        params: { path: { user_id: userId } },
+      } as any);
 
       if (error) {
-        // 處理錯誤但不拋出，而是返回空數組作為預設值
         handleApiError(error);
-        return { data: [] };
+        throw new Error("取得用戶門市失敗");
       }
 
-      // 如果 data 有 data 屬性，返回它；否則返回整個 data 對象
-      return { data: data?.data || data || [] };
+      // 如果 data 有 data 屬性，返回它；否則返回空陣列
+      return { data: (data as any)?.data || data || [] };
     },
     enabled: !!userId,
   });
@@ -43,31 +42,21 @@ export function useAssignUserStores() {
 
   return useMutation({
     mutationFn: async ({ userId, storeIds }: { userId: number; storeIds: number[] }) => {
-      // 確保所有 ID 都轉為字符串，符合後端期望的格式
-      const stringStoreIds = storeIds.map(id => String(id));
-      
-      const { data, error } = await apiClient.POST(`/api/users/{user_id}/stores`, {
+      const { data, error } = await apiClient.POST(`/api/users/{user_id}/stores` as any, {
         params: { path: { user_id: userId } },
-        body: { store_ids: stringStoreIds }
-      });
+        body: { store_ids: storeIds },
+      } as any);
 
       if (error) {
-        // 處理錯誤並拋出帶有訊息的錯誤
-        const errorMessage = handleApiError(error);
-        throw new Error(errorMessage);
+        handleApiError(error);
+        throw new Error("分配門市失敗");
       }
 
       return data;
     },
     onSuccess: (_, variables) => {
-      // 成功分配後，更新相關查詢緩存
-      queryClient.invalidateQueries({ queryKey: ['users', variables.userId, 'stores'] });
-      queryClient.invalidateQueries({ queryKey: ['users', variables.userId] });
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ["user-stores", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
-    onError: (error) => {
-      console.error('Failed to assign stores:', error);
-      // 錯誤已經在 mutationFn 中使用 handleApiError 處理
-    }
   });
 } 

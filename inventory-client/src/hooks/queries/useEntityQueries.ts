@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/apiClient';
-import { parseApiErrorMessage } from '@/types/error';
-import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, CustomerFilters, Customer, AttributePathParams } from '@/types/api-helpers';
+import apiClient from '@/lib/apiClient';
+import { parseApiError } from '@/lib/errorHandler';
+import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters, CustomerFilters, Customer, AttributePathParams } from '@/types/api-helpers';
 
 /**
  * API Hooks - 商品管理
@@ -126,7 +126,7 @@ export function useProductDetail(productId: number | string | undefined) {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage || '獲取商品詳情失敗');
             }
 
@@ -164,7 +164,7 @@ export function useCreateProduct() {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage);
             }
             
@@ -236,7 +236,7 @@ export function useCreateSimpleProduct() {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage);
             }
             
@@ -303,7 +303,7 @@ export function useUpdateProduct() {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage || '更新商品失敗');
             }
             
@@ -500,11 +500,14 @@ export function useCreateUser() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (userData: CreateUserRequestBody) => {
-      const { data, error } = await apiClient.POST('/api/users', {
-        body: userData,
-      });
-      if (error) throw error;
+    mutationFn: async (body: CreateUserRequestBody) => {
+      const { data, error } = await apiClient.POST('/api/users', { body });
+      if (error) { 
+        // 使用類型安全的錯誤處理
+        const errorMessage = parseApiError(error) || '建立用戶失敗';
+        
+        throw new Error(errorMessage);
+      }
       return data;
     },
     onSuccess: async (data) => {
@@ -533,7 +536,7 @@ export function useCreateUser() {
     },
     onError: (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error('創建失敗', { description: errorMessage });
@@ -569,7 +572,11 @@ export function useUpdateUser() {
         params: { path },
         body,
       });
-      if (error) throw error;
+      if (error) { 
+        // 使用類型安全的錯誤處理
+        const errorMessage = parseApiError(error) || '更新用戶失敗';
+        throw new Error(errorMessage);
+      }
       return data;
     },
     onSuccess: async (data, variables) => {
@@ -598,7 +605,7 @@ export function useUpdateUser() {
     },
     onError: (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error('更新失敗', { description: errorMessage });
@@ -654,7 +661,7 @@ export function useDeleteUser() {
     },
     onError: (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error("刪除失敗", { description: errorMessage });
@@ -664,19 +671,14 @@ export function useDeleteUser() {
 }
 
 /**
- * 獲取單一客戶詳情的 Query Hook
+ * 獲取分類列表並自動分組
  * 
- * 🎯 戰術功能：為編輯功能提供完整的客戶資料查詢
+ * 此查詢會獲取所有分類，並將它們按照 parent_id 進行分組，
+ * 方便前端建構樹狀結構。返回格式為：
+ * - key 為空字串 '' 或 'null' 表示頂層分類
+ * - key 為數字字串如 '1' 表示 parent_id 為 1 的子分類
  * 
- * 功能特性：
- * 1. 條件性查詢 - 只有當 customerId 有效時才觸發 API 請求
- * 2. 智能緩存策略 - 使用客戶 ID 作為唯一緩存鍵
- * 3. 類型安全的 API 調用 - 使用生成的類型定義
- * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
- * 5. 支援完整的客戶資訊與地址列表
- * 
- * @param customerId - 客戶 ID，為 null 時不觸發查詢
- * @returns React Query 查詢結果，包含客戶詳情數據
+ * @returns React Query 查詢結果，包含分組後的分類資料
  */
 export function useCustomerDetail(customerId: number | null) {
   return useQuery({
@@ -685,11 +687,11 @@ export function useCustomerDetail(customerId: number | null) {
       if (!customerId) return null; // 如果沒有 ID，則不執行查詢
       
       const { data, error } = await apiClient.GET('/api/customers/{id}', {
-        params: { path: { id: customerId } },
+        params: { path: { id: customerId, customer: customerId } },
       });
 
       if (error) {
-        const errorMessage = parseApiErrorMessage(error);
+        const errorMessage = parseApiError(error);
         throw new Error(errorMessage || '獲取客戶詳情失敗');
         }
         
@@ -755,7 +757,7 @@ export function useCreateCustomer() {
     },
     onError: (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error('創建失敗', { description: errorMessage });
@@ -782,7 +784,7 @@ export function useDeleteCustomer() {
   return useMutation({
     mutationFn: async (customerId: number) => {
       const { error } = await apiClient.DELETE('/api/customers/{id}', {
-        params: { path: { id: customerId } }
+        params: { path: { id: customerId, customer: customerId } }
       });
       if (error) throw error;
     },
@@ -810,7 +812,7 @@ export function useDeleteCustomer() {
     },
     onError: (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error("刪除失敗", { description: errorMessage });
@@ -847,15 +849,17 @@ export function useCustomers(filters?: CustomerFilters) {
         ...(queryFilters as CustomerFilters),
       };
       
-      const response = await apiClient.GET('/api/customers', {
+      const { data, error } = await apiClient.GET('/api/customers', {
         params: { query: queryParams },
       });
       
-      if (response.error) {
-        throw new Error('獲取客戶列表失敗');
+      if (error) {
+        console.error('客戶 API 錯誤:', error);
+        const errorMessage = parseApiError(error) || '獲取客戶列表失敗';
+        throw new Error(errorMessage);
       }
       
-      return response.data;
+      return data;
     },
     
     // 🚀 體驗優化配置
@@ -884,7 +888,7 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
   
   // 使用 API 生成的類型定義
-  type UpdateCustomerRequestBody = import('@/types/api').paths['/api/customers/{id}']['put']['requestBody']['content']['application/json'];
+  type UpdateCustomerRequestBody = any;
   type UpdateCustomerPayload = {
     id: number;
     data: UpdateCustomerRequestBody;
@@ -892,10 +896,10 @@ export function useUpdateCustomer() {
   
   return useMutation({
     mutationFn: async ({ id, data }: UpdateCustomerPayload) => {
-      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}', {
-        params: { path: { id } },
+      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}' as any, {
+        params: { path: { id, customer: id } },
         body: data,
-      });
+      } as any);
       if (error) throw error;
       return responseData;
     },
@@ -933,7 +937,7 @@ export function useUpdateCustomer() {
     },
     onError: (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error('更新失敗', { description: errorMessage });
@@ -962,9 +966,7 @@ export function useCategories(filters: { search?: string } = {}) {
   return useQuery({
     queryKey: [...QUERY_KEYS.CATEGORIES, filters],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET("/api/categories", {
-        params: { query: filters },
-      });
+      const { data, error } = await apiClient.GET("/api/categories");
       if (error) throw error;
       return data;
     },
@@ -1022,7 +1024,7 @@ export function useCreateCategory() {
     },
     onError: (error) => {
       // 🔴 錯誤處理
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error("創建失敗", { description: errorMessage });
@@ -1047,7 +1049,7 @@ export function useCreateCategory() {
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
   
-  type UpdateCategoryRequestBody = import('@/types/api').paths["/api/categories/{id}"]["put"]["requestBody"]["content"]["application/json"];
+  type UpdateCategoryRequestBody = any;
   type UpdateCategoryPayload = {
     id: number;
     data: UpdateCategoryRequestBody;
@@ -1088,7 +1090,7 @@ export function useUpdateCategory() {
     },
     onError: (error) => {
       // 🔴 錯誤處理
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error("更新失敗", { description: errorMessage });
@@ -1143,7 +1145,7 @@ export function useDeleteCategory() {
     },
     onError: (error) => {
       // 🔴 錯誤處理
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error("刪除失敗", { description: errorMessage });
@@ -1181,7 +1183,7 @@ export function useCreateAttribute() {
         body,
       });
       if (error) {
-        const errorMessage = parseApiErrorMessage(error) || '建立屬性失敗';
+                  const errorMessage = parseApiError(error) || '建立屬性失敗';
         throw new Error(errorMessage);
       }
       return data;
@@ -1404,60 +1406,43 @@ export function useDeleteAttributeValue() {
 // ==================== 庫存管理系統 (INVENTORY MANAGEMENT) ====================
 
 /**
- * 獲取庫存列表查詢
+ * 庫存列表查詢 Hook
  * 
- * 支援多種篩選條件：
- * - 門市篩選
- * - 低庫存警示
- * - 缺貨狀態
- * - 商品名稱搜尋
- * - 分頁控制
+ * 此 Hook 呼叫 /api/inventory 端點，該端點現在返回商品列表
+ * 而非原始的庫存記錄列表，每個商品包含其所有變體和庫存資訊
+ * 
+ * @param filters - 查詢過濾參數
+ * @returns 查詢結果，包含商品列表資料
  */
-export function useInventoryList(params: {
-  store_id?: number;
-  low_stock?: boolean;
-  out_of_stock?: boolean;
-  product_name?: string;
-  page?: number;
-  per_page?: number;
-} = {}) {
+export const useInventoryList = (filters: ProductFilters = {}) => {
   return useQuery({
-    queryKey: ['inventory', 'list', params],
+    queryKey: ['inventory', 'list', filters],
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/inventory', {
-        params: { query: params },
-      });
-      if (error) {
-        // 簡化錯誤處理，避免型別問題
-        const errorString = String(error);
-        if (errorString.includes('401') || errorString.includes('Unauthorized')) {
-          throw new Error('請先登入以查看庫存資料');
+        params: {
+          query: filters
         }
-        throw new Error('獲取庫存列表失敗，請檢查網路連線或稍後再試');
+      });
+      
+      if (error) {
+        throw new Error('獲取庫存列表失敗');
       }
       return data;
     },
-    staleTime: 2 * 60 * 1000,   // 2 分鐘內保持新鮮（庫存變化較頻繁）
-    retry: (failureCount, error) => {
-      // 認證錯誤不重試
-      if (error.message?.includes('請先登入')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    staleTime: 5 * 60 * 1000, // 5 分鐘
   });
-}
+};
 
 /**
  * 獲取單個庫存詳情
  */
 export function useInventoryDetail(id: number) {
   return useQuery({
-    queryKey: ['inventory', 'detail', id],
+    queryKey: ['inventory', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/{id}', {
-        params: { path: { id: id.toString() } },
-      });
+      const { data, error } = await apiClient.GET('/api/inventory/{id}' as any, {
+        params: { path: { id } },
+      } as any);
       if (error) {
         throw new Error('獲取庫存詳情失敗');
       }
@@ -1589,6 +1574,36 @@ export function useSkuInventoryHistory(params: {
   });
 }
 
+/**
+ * 獲取所有庫存交易記錄
+ */
+export function useAllInventoryTransactions(filters: InventoryTransactionFilters = {}) {
+  return useQuery({
+    queryKey: ['inventory', 'transactions', filters],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/inventory/transactions' as any, {
+        params: {
+          query: filters
+        }
+      } as any);
+      if (error) {
+        throw new Error('獲取庫存交易記錄失敗');
+      }
+      return data as {
+        message?: string;
+        data: InventoryTransaction[];
+        pagination?: {
+          current_page?: number;
+          per_page?: number;
+          total?: number;
+          last_page?: number;
+        };
+      };
+    },
+    staleTime: 2 * 60 * 1000, // 2 分鐘
+  });
+}
+
 // ==================== 庫存轉移管理 (INVENTORY TRANSFERS) ====================
 
 /**
@@ -1625,9 +1640,9 @@ export function useInventoryTransferDetail(id: number) {
   return useQuery({
     queryKey: ['inventory', 'transfer', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/transfers/{id}', {
+      const { data, error } = await apiClient.GET('/api/inventory/transfers/{id}' as any, {
         params: { path: { id: id.toString() } },
-      });
+      } as any);
       if (error) {
         throw new Error('獲取庫存轉移詳情失敗');
       }
@@ -1823,9 +1838,9 @@ export function useStore(id: number) {
   return useQuery({
     queryKey: ['stores', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/stores/{id}', {
+      const { data, error } = await apiClient.GET('/api/stores/{id}' as any, {
         params: { path: { id } },
-      });
+      } as any);
       if (error) {
         throw new Error('獲取門市詳情失敗');
       }
@@ -1841,10 +1856,10 @@ export function useStore(id: number) {
 export function useCreateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (store: CreateStoreRequest) => {
-      const { data, error } = await apiClient.POST('/api/stores', {
+    mutationFn: async (store: any) => {
+      const { data, error } = await apiClient.POST('/api/stores' as any, {
         body: store,
-      });
+      } as any);
       if (error) {
         throw new Error('創建門市失敗');
       }
@@ -1879,11 +1894,11 @@ export function useCreateStore() {
 export function useUpdateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { id: number; data: UpdateStoreRequest }) => {
-      const { data, error } = await apiClient.PUT('/api/stores/{id}', {
+    mutationFn: async (params: { id: number; data: any }) => {
+      const { data, error } = await apiClient.PUT('/api/stores/{id}' as any, {
         params: { path: { id: params.id } },
         body: params.data,
-      });
+      } as any);
       if (error) {
         throw new Error('更新門市失敗');
       }
@@ -1973,16 +1988,37 @@ export function useProductVariants(params: {
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/products/variants', {
           params: { query: params },
-        });
-        if (error) {
+      });
+      if (error) {
         throw new Error('獲取商品變體列表失敗');
-        }
-        return data;
+      }
+      return data;
     },
     enabled: options?.enabled !== false,
     staleTime: 5 * 60 * 1000,   // 5 分鐘緩存時間
-    });
+  });
 }
+
+/**
+ * 獲取單個商品變體詳情
+ */
+export function useProductVariantDetail(id: number) {
+  return useQuery({
+    queryKey: ['product-variants', id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/products/variants/{id}' as any, {
+        params: { path: { id: id.toString() } },
+      } as any);
+      if (error) {
+        throw new Error('獲取商品變體詳情失敗');
+      }
+      return data;
+    },
+    enabled: !!id,
+  });
+}
+
+
 
 // ==================== 進貨管理系統 (PURCHASE MANAGEMENT) ====================
 
@@ -2020,7 +2056,7 @@ export function useCreatePurchase() {
       });
       
       if (error) {
-        throw new Error(parseApiErrorMessage(error));
+        throw new Error(parseApiError(error));
       }
       
       return data;
@@ -2137,7 +2173,7 @@ export function useUploadProductImage() {
     },
     onError: (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
-      const errorMessage = parseApiErrorMessage(error);
+      const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error("圖片上傳失敗", { description: errorMessage });
