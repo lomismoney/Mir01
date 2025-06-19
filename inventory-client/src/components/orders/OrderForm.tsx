@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { CustomerSelector } from './CustomerSelector';
 import { CustomerForm } from '@/components/customers/CustomerForm';
-import { ProductVariantSelector } from './ProductVariantSelector';
+
+import { ProductSelector, type Variant } from '@/components/ui/ProductSelector';
 import { useCreateCustomer } from '@/hooks/queries/useEntityQueries';
 import { Customer, ProductVariant, OrderFormData } from '@/types/api-helpers';
 
@@ -53,7 +54,6 @@ interface OrderFormProps {
 
 export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProps) {
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
-  const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
   const createCustomerMutation = useCreateCustomer();
 
   const form = useForm<OrderFormValues>({
@@ -68,6 +68,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
     },
   });
 
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+
   // 當 initialData 變更時，重置表單
   useEffect(() => {
     if (initialData) {
@@ -76,10 +78,30 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
   }, [initialData, form]);
 
   // 初始化 useFieldArray 來管理 items 字段
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove, update, replace } = useFieldArray({
     control: form.control,
     name: "items",
   });
+
+  // 處理從 ProductSelector 回傳的選擇結果
+  const handleProductSelect = (selectedVariants: Variant[]) => {
+    // 將 ProductSelector 回傳的 Variant[] 陣列
+    // 轉換成 useFieldArray 需要的格式
+    const formItems = selectedVariants.map(variant => ({
+      product_variant_id: Number(variant.id),
+      is_stocked_sale: true,
+      status: 'pending',
+      quantity: 1, // 新增的品項數量預設為 1
+      price: variant.price,
+      product_name: variant.specifications, // 使用規格描述作為商品名稱
+      sku: variant.sku,
+      custom_specifications: undefined,
+    }));
+
+    // 使用 useFieldArray 的 replace 方法，一次性替換整個品項列表
+    // 這比多次 append/remove 更高效
+    replace(formItems);
+  };
 
   function handleSubmit(values: OrderFormValues) {
     // 轉換表單數據為 API 期望的格式
@@ -109,21 +131,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
     setIsCustomerDialogOpen(false);
   };
 
-  const handleProductsSelected = (selectedVariants: (ProductVariant & { product_name?: string })[]) => {
-    // 將選中的商品變體添加到訂單項目中
-    selectedVariants.forEach(variant => {
-      append({
-        product_variant_id: variant.id || null,
-        is_stocked_sale: true,
-        status: 'pending',
-        quantity: 1, // 預設數量為 1
-        price: parseFloat(variant.price || '0'),
-        product_name: variant.product_name || variant.product?.name || '',
-        sku: variant.sku || '',
-        custom_specifications: undefined,
-      });
-    });
-  };
+
 
   // 實時價格計算
   const items = form.watch('items');
@@ -172,7 +180,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">訂單項目</h3>
-              <Button type="button" variant="outline" onClick={() => setIsProductSelectorOpen(true)}>
+              <Button type="button" variant="outline" onClick={(e) => { e.preventDefault(); setIsSelectorOpen(true); }}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 新增項目
               </Button>
@@ -499,10 +507,13 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
       </Dialog>
 
       {/* 商品選擇對話框 */}
-      <ProductVariantSelector
-        open={isProductSelectorOpen}
-        onOpenChange={setIsProductSelectorOpen}
-        onSelect={handleProductsSelected}
+      <ProductSelector
+        open={isSelectorOpen}
+        onOpenChange={setIsSelectorOpen}
+        onSelect={handleProductSelect}
+        multiple={true}
+        // 將表單中已有的品項 ID 傳入，以便在選擇器中保持勾選狀態
+        selectedIds={fields.map(field => field.product_variant_id).filter(id => id !== null) as number[]}
       />
     </>
   );

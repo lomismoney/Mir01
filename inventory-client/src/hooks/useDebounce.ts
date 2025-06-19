@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 /**
  * useDebounce Hook
  * 
- * 將快速變化的值進行防抖處理，在指定的延遲時間後才更新輸出值
- * 常用於搜尋輸入框，避免每次輸入都觸發 API 請求
+ * 用於延遲處理值的變化，常用於搜尋輸入框等場景，
+ * 避免在使用者快速輸入時頻繁觸發 API 請求
  * 
- * @param value - 需要防抖的值
- * @param delay - 防抖延遲時間（毫秒）
- * @returns 防抖後的值
+ * @param value - 需要 debounce 的值
+ * @param delay - 延遲時間（毫秒）
+ * @returns 延遲後的值
  * 
  * @example
  * ```tsx
@@ -25,20 +25,20 @@ import { useState, useEffect } from 'react';
  * ```
  */
 export function useDebounce<T>(value: T, delay: number): T {
-  // 儲存防抖後的值
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
-    // 設定定時器，在 delay 時間後更新防抖值
-    const timer = setTimeout(() => {
+    // 在延遲時間後更新 debounced value
+    const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
-    // 清理函數：在 value 或 delay 變化時清除舊的定時器
+    // 如果 value 或 delay 發生變化，則清除上一個 timeout
+    // 這可以防止在延遲時間內 value 改變時，還觸發舊的 debounced value 更新
     return () => {
-      clearTimeout(timer);
+      clearTimeout(handler);
     };
-  }, [value, delay]); // 依賴於 value 和 delay
+  }, [value, delay]);
 
   return debouncedValue;
 } 

@@ -34,6 +34,27 @@ class ProductVariantResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             
+            // 🎯 新增：總庫存數量 (解決庫存顯示問題)
+            'stock' => $this->when(
+                $this->relationLoaded('inventory'),
+                fn() => $this->inventory->sum('quantity')
+            ),
+            
+            // 🎯 新增：規格描述 (屬性值組合)
+            'specifications' => $this->when(
+                $this->relationLoaded('attributeValues'),
+                fn() => $this->attributeValues->pluck('value')->join(' + ')
+            ),
+            
+            // 🎯 新增：圖片 URL (SKU 沒有圖片時沿用 SPU 圖片)
+            'image_url' => $this->when(
+                $this->relationLoaded('product'),
+                function () {
+                    // SKU 沒有專屬圖片，沿用 SPU 的商品圖片
+                    return $this->product->hasImage() ? $this->product->getImageUrl() : null;
+                }
+            ),
+            
             // 關聯資源
             'product' => $this->whenLoaded('product', function () {
                 return [
