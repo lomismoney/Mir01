@@ -212,5 +212,29 @@ Route::middleware('auth:sanctum')->group(function () {
      * DELETE /api/customers/{id}   - 刪除指定客戶
      */
     Route::apiResource('customers', App\Http\Controllers\Api\CustomerController::class);
+
+    /**
+     * 訂單管理資源路由
+     * 提供完整的訂單 CRUD 操作，支援多維度篩選功能
+     * 
+     * 路由列表：
+     * GET    /api/orders        - 獲取訂單列表（支援訂單號/客戶名稱搜尋、狀態篩選、日期範圍篩選）
+     * POST   /api/orders        - 創建新訂單
+     * GET    /api/orders/{id}   - 獲取指定訂單詳情
+     * PUT    /api/orders/{id}   - 更新指定訂單
+     * DELETE /api/orders/{id}   - 刪除指定訂單
+     */
+    Route::apiResource('orders', App\Http\Controllers\Api\OrderController::class);
+    
+    /**
+     * 訂單狀態管理路由
+     * 提供訂單狀態變更的專用端點
+     * 
+     * 路由列表：
+     * POST   /api/orders/{order}/confirm-payment   - 確認訂單付款
+     * POST   /api/orders/{order}/create-shipment   - 創建訂單出貨記錄
+     */
+    Route::post('/orders/{order}/confirm-payment', [App\Http\Controllers\Api\OrderController::class, 'confirmPayment']);
+    Route::post('/orders/{order}/create-shipment', [App\Http\Controllers\Api\OrderController::class, 'createShipment']);
 });
  

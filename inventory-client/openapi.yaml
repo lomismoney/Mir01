@@ -47,6 +47,9 @@ tags:
     name: 規格庫管理
     description: ''
   -
+    name: 訂單管理
+    description: ''
+  -
     name: 認證管理
     description: ''
 paths:
@@ -91,21 +94,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 12
+                    id: 18
                     name: 'Lonny Ankunding'
                     username: eloisa.harber
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-18T15:59:25.000000Z'
-                    updated_at: '2025-06-18T15:59:25.000000Z'
+                    created_at: '2025-06-19T09:01:54.000000Z'
+                    updated_at: '2025-06-19T09:01:54.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 12
+                        example: 18
                       name:
                         type: string
                         example: 'Lonny Ankunding'
@@ -123,10 +126,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-18T15:59:25.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-18T15:59:25.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
       tags:
         - Endpoints
       security: []
@@ -675,18 +678,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 15
+                    id: 27
                     name: Mueller-Dibbert
                     address: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
-                    created_at: '2025-06-18T15:59:26.000000Z'
-                    updated_at: '2025-06-18T15:59:26.000000Z'
+                    created_at: '2025-06-19T09:01:54.000000Z'
+                    updated_at: '2025-06-19T09:01:54.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 15
+                        example: 27
                       name:
                         type: string
                         example: Mueller-Dibbert
@@ -695,10 +698,10 @@ paths:
                         example: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
                       created_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -735,18 +738,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 16
+                    id: 28
                     name: 'Kunde Group'
                     address: "62028 Trudie Mills\nNorth Cordie, IL 75592"
-                    created_at: '2025-06-18T15:59:26.000000Z'
-                    updated_at: '2025-06-18T15:59:26.000000Z'
+                    created_at: '2025-06-19T09:01:54.000000Z'
+                    updated_at: '2025-06-19T09:01:54.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 16
+                        example: 28
                       name:
                         type: string
                         example: 'Kunde Group'
@@ -755,10 +758,10 @@ paths:
                         example: "62028 Trudie Mills\nNorth Cordie, IL 75592"
                       created_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -775,18 +778,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 17
+                    id: 29
                     name: Moore-Emard
                     address: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
-                    created_at: '2025-06-18T15:59:26.000000Z'
-                    updated_at: '2025-06-18T15:59:26.000000Z'
+                    created_at: '2025-06-19T09:01:54.000000Z'
+                    updated_at: '2025-06-19T09:01:54.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 17
+                        example: 29
                       name:
                         type: string
                         example: Moore-Emard
@@ -795,10 +798,10 @@ paths:
                         example: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
                       created_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -852,18 +855,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 18
+                    id: 30
                     name: Hahn-Harber
                     address: "6098 Kutch Loaf\nPort Eldonland, PA 73828-6765"
-                    created_at: '2025-06-18T15:59:26.000000Z'
-                    updated_at: '2025-06-18T15:59:26.000000Z'
+                    created_at: '2025-06-19T09:01:54.000000Z'
+                    updated_at: '2025-06-19T09:01:54.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 18
+                        example: 30
                       name:
                         type: string
                         example: Hahn-Harber
@@ -872,10 +875,10 @@ paths:
                         example: "6098 Kutch Loaf\nPort Eldonland, PA 73828-6765"
                       created_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -892,21 +895,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 13
+                    id: 19
                     name: 'Dr. Cornelius Luettgen V'
                     username: russel.bert
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-18T15:59:26.000000Z'
-                    updated_at: '2025-06-18T15:59:26.000000Z'
+                    created_at: '2025-06-19T09:01:54.000000Z'
+                    updated_at: '2025-06-19T09:01:54.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 13
+                        example: 19
                       name:
                         type: string
                         example: 'Dr. Cornelius Luettgen V'
@@ -924,10 +927,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-18T15:59:26.000000Z'
+                        example: '2025-06-19T09:01:54.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -3985,7 +3988,7 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>.'
-                  example: '2025-06-18'
+                  example: '2025-06-19'
                   nullable: true
                 end_date:
                   type: string
@@ -5646,7 +5649,7 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-18T15:59:26'
+                  example: '2025-06-19T09:01:54'
                   nullable: true
                 end_date:
                   type: string
@@ -6693,6 +6696,548 @@ paths:
         in: path
         name: user
         description: '用戶的 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/orders:
+    get:
+      summary: ''
+      operationId: getApiOrders
+      description: ''
+      parameters:
+        -
+          in: query
+          name: search
+          description: 關鍵字搜尋，將匹配訂單號、客戶名稱。
+          example: PO-20250619-001
+          required: false
+          schema:
+            type: string
+            description: 關鍵字搜尋，將匹配訂單號、客戶名稱。
+            example: PO-20250619-001
+            nullable: false
+        -
+          in: query
+          name: shipping_status
+          description: 按貨物進度篩選。
+          example: 待出貨
+          required: false
+          schema:
+            type: string
+            description: 按貨物進度篩選。
+            example: 待出貨
+            nullable: false
+        -
+          in: query
+          name: payment_status
+          description: 按付款進度篩選。
+          example: 待付款
+          required: false
+          schema:
+            type: string
+            description: 按付款進度篩選。
+            example: 待付款
+            nullable: false
+        -
+          in: query
+          name: start_date
+          description: 'date 按創建日期篩選的開始日期 (格式: Y-m-d)。'
+          example: '2025-01-01'
+          required: false
+          schema:
+            type: string
+            description: 'date 按創建日期篩選的開始日期 (格式: Y-m-d)。'
+            example: '2025-01-01'
+            nullable: false
+        -
+          in: query
+          name: end_date
+          description: 'date 按創建日期篩選的結束日期 (格式: Y-m-d)。'
+          example: '2025-06-19'
+          required: false
+          schema:
+            type: string
+            description: 'date 按創建日期篩選的結束日期 (格式: Y-m-d)。'
+            example: '2025-06-19'
+            nullable: false
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - 訂單管理
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                search:
+                  type: string
+                  description: ''
+                  example: consequatur
+                  nullable: true
+                shipping_status:
+                  type: string
+                  description: ''
+                  example: consequatur
+                  nullable: true
+                payment_status:
+                  type: string
+                  description: ''
+                  example: consequatur
+                  nullable: true
+                start_date:
+                  type: string
+                  description: 'Must be a valid date in the format <code>Y-m-d</code>.'
+                  example: '2025-06-19'
+                  nullable: true
+                end_date:
+                  type: string
+                  description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.'
+                  example: '2106-07-18'
+                  nullable: true
+    post:
+      summary: ''
+      operationId: postApiOrders
+      description: ''
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {  }
+                properties: {  }
+      tags:
+        - 訂單管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customer_id:
+                  type: integer
+                  description: 客戶ID。
+                  example: 1
+                  nullable: false
+                shipping_status:
+                  type: string
+                  description: 貨物狀態。
+                  example: 待出貨
+                  nullable: false
+                payment_status:
+                  type: string
+                  description: 付款狀態。
+                  example: 待付款
+                  nullable: false
+                shipping_fee:
+                  type: numeric
+                  description: 運費。
+                  example: '100'
+                  nullable: true
+                tax:
+                  type: numeric
+                  description: 稅金。
+                  example: '50'
+                  nullable: true
+                discount_amount:
+                  type: numeric
+                  description: 折扣金額。
+                  example: '0'
+                  nullable: true
+                payment_method:
+                  type: string
+                  description: 付款方式。
+                  example: 轉帳
+                  nullable: false
+                order_source:
+                  type: string
+                  description: 訂單來源。
+                  example: 現場客戶
+                  nullable: false
+                shipping_address:
+                  type: string
+                  description: 運送地址。
+                  example: 台北市信義區信義路五段7號
+                  nullable: false
+                notes:
+                  type: string
+                  description: 備註。
+                  example: 請小心輕放
+                  nullable: true
+                items:
+                  type: array
+                  description: 訂單項目清單。
+                  example:
+                    - consequatur
+                  items:
+                    type: string
+              required:
+                - customer_id
+                - shipping_status
+                - payment_status
+                - payment_method
+                - order_source
+                - shipping_address
+                - items
+  '/api/orders/{id}':
+    get:
+      summary: ''
+      operationId: getApiOrdersId
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: !!binary //57AAoAIAAgACAAIAAiAGQAYQB0AGEAIgA6ACAAewAKACAAIAAgACAAIAAgACAAIAAiAGkAZAAiADoAIAA0ACwACgAgACAAIAAgACAAIAAgACAAIgBvAHIAZABlAHIAXwBuAHUAbQBiAGUAcgAiADoAIAAiAFAATwAtADIAMAAyADUAMAA2ADEAOQAtAE8AUQBsAE0AIgAsAAoAIAAgACAAIAAgACAAIAAgACIAYwB1AHMAdABvAG0AZQByAF8AaQBkACIAOgAgADEALAAKACAAIAAgACAAIAAgACAAIAAiAGMAcgBlAGEAdABvAHIAXwB1AHMAZQByAF8AaQBkACIAOgAgADEALAAKACAAIAAgACAAIAAgACAAIAAiAHMAaABpAHAAcABpAG4AZwBfAHMAdABhAHQAdQBzACIAOgAgACIAhV/6UaiMIgAsAAoAIAAgACAAIAAgACAAIAAgACIAcABhAHkAbQBlAG4AdABfAHMAdABhAHQAdQBzACIAOgAgACIAhV/YTj5rIgAsAAoAIAAgACAAIAAgACAAIAAgACIAcwB1AGIAdABvAHQAYQBsACIAOgAgACIAMQAyADMAMAAwAC4AMAAwACIALAAKACAAIAAgACAAIAAgACAAIAAiAHMAaABpAHAAcABpAG4AZwBfAGYAZQBlACIAOgAgACIAMgA1ADAALgAwADAAIgAsAAoAIAAgACAAIAAgACAAIAAgACIAdABhAHgAIgA6ACAAIgAxADUAMAAuADAAMAAiACwACgAgACAAIAAgACAAIAAgACAAIgBkAGkAcwBjAG8AdQBuAHQAXwBhAG0AbwB1AG4AdAAiADoAIAAiADEAMAAwAC4AMAAwACIALAAKACAAIAAgACAAIAAgACAAIAAiAGcAcgBhAG4AZABfAHQAbwB0AGEAbAAiADoAIAAiADEAMgA2ADAAMAAuADAAMAAiACwACgAgACAAIAAgACAAIAAgACAAIgBwAGEAeQBtAGUAbgB0AF8AbQBlAHQAaABvAGQAIgA6ACAAIgBJjzNeIgAsAAoAIAAgACAAIAAgACAAIAAgACIAbwByAGQAZQByAF8AcwBvAHUAcgBjAGUAIgA6ACAAIgD+czRYols2YiIALAAKACAAIAAgACAAIAAgACAAIAAiAHMAaABpAHAAcABpAG4AZwBfAGEAZABkAHIAZQBzAHMAIgA6ACAAIgCwZRdTAl4fV85XQFPqgTF1V4gyAF+GIAAoACxuZoowV0BXKQAiACwACgAgACAAIAAgACAAIAAgACAAIgBuAG8AdABlAHMAIgA6ACAAIgCiWzZigYlCbCpRSFFVhgZ0IgAsAAoAIAAgACAAIAAgACAAIAAgACIAYwByAGUAYQB0AGUAZABfAGEAdAAiADoAIAAiADIAMAAyADUALQAwADYALQAxADkAVAAwADUAOgA1ADIAOgAzADEALgAwADAAMAAwADAAMABaACIALAAKACAAIAAgACAAIAAgACAAIAAiAHUAcABkAGEAdABlAGQAXwBhAHQAIgA6ACAAIgAyADAAMgA1AC0AMAA2AC0AMQA5AFQAMAA1ADoANQAyADoAMwAxAC4AMAAwADAAMAAwADAAWgAiACwACgAgACAAIAAgACAAIAAgACAAIgBpAHQAZQBtAHMAIgA6ACAAWwAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAaQBkACIAOgAgADEALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBvAHIAZABlAHIAXwBpAGQAIgA6ACAANAAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHAAcgBvAGQAdQBjAHQAXwB2AGEAcgBpAGEAbgB0AF8AaQBkACIAOgAgADEALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBpAHMAXwBzAHQAbwBjAGsAZQBkAF8AcwBhAGwAZQAiADoAIAB0AHIAdQBlACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAcwB0AGEAdAB1AHMAIgA6ACAAIgCFX1WGBnQiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAYwB1AHMAdABvAG0AXwBzAHAAZQBjAGkAZgBpAGMAYQB0AGkAbwBuAHMAIgA6ACAAbgB1AGwAbAAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHAAcgBvAGQAdQBjAHQAXwBuAGEAbQBlACIAOgAgACIAk314UXRtpFvDaiAALQAgAH12coIiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAcwBrAHUAIgA6ACAAIgBDAEEAQgAtAEMATABBAFMAUwBJAEMALQBXAEgAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHAAcgBpAGMAZQAiADoAIAAiADMAOAAwADAALgAwADAAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHEAdQBhAG4AdABpAHQAeQAiADoAIAAxACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAYwByAGUAYQB0AGUAZABfAGEAdAAiADoAIAAiADIAMAAyADUALQAwADYALQAxADkAVAAwADUAOgA1ADIAOgAzADEALgAwADAAMAAwADAAMABaACIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgB1AHAAZABhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEAOQBUADAANQA6ADUAMgA6ADMAMQAuADAAMAAwADAAMAAwAFoAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHAAcgBvAGQAdQBjAHQAXwB2AGEAcgBpAGEAbgB0ACIAOgAgAHsACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBpAGQAIgA6ACAAMQAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAcAByAG8AZAB1AGMAdABfAGkAZAAiADoAIAAxACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBzAGsAdQAiADoAIAAiAEIAMAAxAC0ANgAwAC0AMAAwADEAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAcAByAGkAYwBlACIAOgAgACIAMgA1ADAAMAAuADAAMAAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBjAG8AcwB0AF8AcAByAGkAYwBlACIAOgAgACIAMAAuADAAMAAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBhAHYAZQByAGEAZwBlAF8AYwBvAHMAdAAiADoAIAAiADAALgAwADAAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdABvAHQAYQBsAF8AcAB1AHIAYwBoAGEAcwBlAGQAXwBxAHUAYQBuAHQAaQB0AHkAIgA6ACAAMAAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdABvAHQAYQBsAF8AYwBvAHMAdABfAGEAbQBvAHUAbgB0ACIAOgAgACIAMAAuADAAMAAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBjAHIAZQBhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEANgBUADIAMwA6ADMANgA6ADEANQAuADAAMAAwADAAMAAwAFoAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdQBwAGQAYQB0AGUAZABfAGEAdAAiADoAIAAiADIAMAAyADUALQAwADYALQAxADYAVAAyADMAOgAzADYAOgAxADUALgAwADAAMAAwADAAMABaACIACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAH0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB9ACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGkAZAAiADoAIAAyACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAbwByAGQAZQByAF8AaQBkACIAOgAgADQALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBwAHIAbwBkAHUAYwB0AF8AdgBhAHIAaQBhAG4AdABfAGkAZAAiADoAIABuAHUAbABsACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAaQBzAF8AcwB0AG8AYwBrAGUAZABfAHMAYQBsAGUAIgA6ACAAZgBhAGwAcwBlACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAcwB0AGEAdAB1AHMAIgA6ACAAIgCFX1WGBnQiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAYwB1AHMAdABvAG0AXwBzAHAAZQBjAGkAZgBpAGMAYQB0AGkAbwBuAHMAIgA6ACAAIgB7AFwAIgBQZ+qMXAAiADoAXAAiADKQ41NhaihnXAAiACwAIABcACIAOlz4W1wAIgA6AFwAIgAxADIANQBjAG0AXAAiAH0AIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHAAcgBvAGQAdQBjAHQAXwBuAGEAbQBlACIAOgAgACIAAor9iGFqKGevamKXIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHMAawB1ACIAOgAgACIAQwBVAFMAVABPAE0ALQBPAEEASwAtAFQATwBQAC0AMQAyADUAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHAAcgBpAGMAZQAiADoAIAAiADgANQAwADAALgAwADAAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHEAdQBhAG4AdABpAHQAeQAiADoAIAAxACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAYwByAGUAYQB0AGUAZABfAGEAdAAiADoAIAAiADIAMAAyADUALQAwADYALQAxADkAVAAwADUAOgA1ADIAOgAzADEALgAwADAAMAAwADAAMABaACIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgB1AHAAZABhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEAOQBUADAANQA6ADUAMgA6ADMAMQAuADAAMAAwADAAMAAwAFoAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHAAcgBvAGQAdQBjAHQAXwB2AGEAcgBpAGEAbgB0ACIAOgAgAG4AdQBsAGwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB9AAoAIAAgACAAIAAgACAAIAAgAF0ALAAKACAAIAAgACAAIAAgACAAIAAiAGMAdQBzAHQAbwBtAGUAcgAiADoAIAB7AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBpAGQAIgA6ACAAMQAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBuAGEAbQBlACIAOgAgACIAO513bb58xlvlXW1poYD9TglnUJZsUfhTIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBwAGgAbwBuAGUAIgA6ACAAIgAwADIALQAyADIANgA4AC0AMwA0ADYANgAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGkAcwBfAGMAbwBtAHAAYQBuAHkAIgA6ACAAdAByAHUAZQAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgB0AGEAeABfAGkAZAAiADoAIAAiADAANAA1ADQAMQAzADAAMgAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGkAbgBkAHUAcwB0AHIAeQBfAHQAeQBwAGUAIgA6ACAAIgD7llBb/YggkG1pIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBwAGEAeQBtAGUAbgB0AF8AdAB5AHAAZQAiADoAIAAiAAhnUH0zADAAKVkiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGMAbwBuAHQAYQBjAHQAXwBhAGQAZAByAGUAcwBzACIAOgAgACIAsGUXUwJeH1fOV0BT6oExdVeIMgBfhiIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdABvAHQAYQBsAF8AdQBuAHAAYQBpAGQAXwBhAG0AbwB1AG4AdAAiADoAIAAiADUAMAAwADAAMAAwAC4AMAAwACIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdABvAHQAYQBsAF8AYwBvAG0AcABsAGUAdABlAGQAXwBhAG0AbwB1AG4AdAAiADoAIAAiADIANQAwADAAMAAwADAALgAwADAAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBjAHIAZQBhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEAOABUADAAOQA6ADUAOAA6ADQAMgAuADAAMAAwADAAMAAwAFoAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgB1AHAAZABhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEAOABUADAAOQA6ADUAOAA6ADQAMgAuADAAMAAwADAAMAAwAFoAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBkAGUAZgBhAHUAbAB0AF8AYQBkAGQAcgBlAHMAcwAiADoAIAB7AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGkAZAAiADoAIAAxACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAYwB1AHMAdABvAG0AZQByAF8AaQBkACIAOgAgADEALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBhAGQAZAByAGUAcwBzACIAOgAgACIAsGUXUwJeH1fOV0BT6oExdVeIMgBfhiAAKAA9fmxR+FMpACIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBpAHMAXwBkAGUAZgBhAHUAbAB0ACIAOgAgAHQAcgB1AGUALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBjAHIAZQBhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEAOABUADAAOQA6ADUAOAA6ADQAMgAuADAAMAAwADAAMAAwAFoAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHUAcABkAGEAdABlAGQAXwBhAHQAIgA6ACAAIgAyADAAMgA1AC0AMAA2AC0AMQA4AFQAMAA5ADoANQA4ADoANAAyAC4AMAAwADAAMAAwADAAWgAiAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQAKACAAIAAgACAAIAAgACAAIAB9ACwACgAgACAAIAAgACAAIAAgACAAIgBjAHIAZQBhAHQAbwByACIAOgAgAHsACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGkAZAAiADoAIAAxACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAG4AYQBtAGUAIgA6ACAAIgBTAHUAcABlAHIAIABBAGQAbQBpAG4AIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgB1AHMAZQByAG4AYQBtAGUAIgA6ACAAIgBzAHUAcABlAHIAYQBkAG0AaQBuACIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAcgBvAGwAZQAiADoAIAAiAGEAZABtAGkAbgAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGMAcgBlAGEAdABlAGQAXwBhAHQAIgA6ACAAIgAyADAAMgA1AC0AMAA2AC0AMQA4AFQAMQAwADoAMAAyADoANAA2AC4AMAAwADAAMAAwADAAWgAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHUAcABkAGEAdABlAGQAXwBhAHQAIgA6ACAAIgAyADAAMgA1AC0AMAA2AC0AMQA4AFQAMQAwADoAMAAyADoANAA2AC4AMAAwADAAMAAwADAAWgAiAAoAIAAgACAAIAAgACAAIAAgAH0ALAAKACAAIAAgACAAIAAgACAAIAAiAHMAdABhAHQAdQBzAF8AaABpAHMAdABvAHIAaQBlAHMAIgA6ACAAWwAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAaQBkACIAOgAgADEALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBvAHIAZABlAHIAXwBpAGQAIgA6ACAANAAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHMAdABhAHQAdQBzAF8AdAB5AHAAZQAiADoAIAAiAHMAaABpAHAAcABpAG4AZwAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAZgByAG8AbQBfAHMAdABhAHQAdQBzACIAOgAgAG4AdQBsAGwALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgB0AG8AXwBzAHQAYQB0AHUAcwAiADoAIAAiAIVf+lGojCIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgB1AHMAZQByAF8AaQBkACIAOgAgADEALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBuAG8AdABlAHMAIgA6ACAAIgACiq5V8l11UvpeIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGMAcgBlAGEAdABlAGQAXwBhAHQAIgA6ACAAIgAyADAAMgA1AC0AMAA2AC0AMQA5AFQAMAA1ADoANQAyADoAMwAxAC4AMAAwADAAMAAwADAAWgAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdQBzAGUAcgAiADoAIAB7AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAaQBkACIAOgAgADEALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAG4AYQBtAGUAIgA6ACAAIgBTAHUAcABlAHIAIABBAGQAbQBpAG4AIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdQBzAGUAcgBuAGEAbQBlACIAOgAgACIAcwB1AHAAZQByAGEAZABtAGkAbgAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgByAG8AbABlACIAOgAgACIAYQBkAG0AaQBuACIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGMAcgBlAGEAdABlAGQAXwBhAHQAIgA6ACAAIgAyADAAMgA1AC0AMAA2AC0AMQA4AFQAMQAwADoAMAAyADoANAA2AC4AMAAwADAAMAAwADAAWgAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgB1AHAAZABhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEAOABUADEAMAA6ADAAMgA6ADQANgAuADAAMAAwADAAMAAwAFoAIgAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAH0ALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAaQBkACIAOgAgADIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBvAHIAZABlAHIAXwBpAGQAIgA6ACAANAAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHMAdABhAHQAdQBzAF8AdAB5AHAAZQAiADoAIAAiAHAAYQB5AG0AZQBuAHQAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGYAcgBvAG0AXwBzAHQAYQB0AHUAcwAiADoAIABuAHUAbABsACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdABvAF8AcwB0AGEAdAB1AHMAIgA6ACAAIgCFX9hOPmsiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdQBzAGUAcgBfAGkAZAAiADoAIAAxACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAbgBvAHQAZQBzACIAOgAgAG4AdQBsAGwALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBjAHIAZQBhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEAOQBUADAANQA6ADUAMgA6ADMAMQAuADAAMAAwADAAMAAwAFoAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHUAcwBlAHIAIgA6ACAAewAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAGkAZAAiADoAIAAxACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBuAGEAbQBlACIAOgAgACIAUwB1AHAAZQByACAAQQBkAG0AaQBuACIALAAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAiAHUAcwBlAHIAbgBhAG0AZQAiADoAIAAiAHMAdQBwAGUAcgBhAGQAbQBpAG4AIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAcgBvAGwAZQAiADoAIAAiAGEAZABtAGkAbgAiACwACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgBjAHIAZQBhAHQAZQBkAF8AYQB0ACIAOgAgACIAMgAwADIANQAtADAANgAtADEAOABUADEAMAA6ADAAMgA6ADQANgAuADAAMAAwADAAMAAwAFoAIgAsAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAdQBwAGQAYQB0AGUAZABfAGEAdAAiADoAIAAiADIAMAAyADUALQAwADYALQAxADgAVAAxADAAOgAwADIAOgA0ADYALgAwADAAMAAwADAAMABaACIACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAH0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB9AAoAIAAgACAAIAAgACAAIAAgAF0ACgAgACAAIAAgAH0ACgB9AAoA
+      tags:
+        - 訂單管理
+    put:
+      summary: ''
+      operationId: putApiOrdersId
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {  }
+                properties: {  }
+      tags:
+        - 訂單管理
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customer_id:
+                  type: integer
+                  description: 客戶ID。
+                  example: 2
+                  nullable: false
+                shipping_status:
+                  type: string
+                  description: '貨物狀態（pending, processing, shipped, delivered）。'
+                  example: processing
+                  nullable: false
+                payment_status:
+                  type: string
+                  description: '付款狀態（pending, paid, failed, refunded）。'
+                  example: paid
+                  nullable: false
+                shipping_fee:
+                  type: numeric
+                  description: 運費。
+                  example: '150'
+                  nullable: true
+                tax:
+                  type: numeric
+                  description: 稅金。
+                  example: '75'
+                  nullable: true
+                discount_amount:
+                  type: numeric
+                  description: 折扣金額。
+                  example: '50'
+                  nullable: true
+                payment_method:
+                  type: string
+                  description: 付款方式。
+                  example: 信用卡
+                  nullable: true
+                shipping_address:
+                  type: string
+                  description: 運送地址。
+                  example: 台北市大安區羅斯福路四段1號
+                  nullable: true
+                billing_address:
+                  type: string
+                  description: 帳單地址。
+                  example: 台北市大安區羅斯福路四段1號
+                  nullable: true
+                customer_address_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the customer_addresses table.'
+                  example: null
+                  nullable: true
+                notes:
+                  type: string
+                  description: 備註。
+                  example: 請在下午配送
+                  nullable: true
+                po_number:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: mqeopfuudtdsufvyvddqa
+                  nullable: true
+                reference_number:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: mniihfqcoynlazghdtqtq
+                  nullable: true
+                subtotal:
+                  type: number
+                  description: 'Must be at least 0.'
+                  example: 80
+                  nullable: true
+                grand_total:
+                  type: number
+                  description: 'Must be at least 0.'
+                  example: 6
+                  nullable: true
+                items:
+                  type: array
+                  description: 訂單項目清單（提供此參數時會同步所有項目）。
+                  example:
+                    - consequatur
+                  items:
+                    type: string
+    delete:
+      summary: ''
+      operationId: deleteApiOrdersId
+      description: ''
+      parameters: []
+      responses:
+        204:
+          description: 刪除成功
+      tags:
+        - 訂單管理
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the order.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: order
+        description: '訂單的 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/orders/{order_id}/confirm-payment':
+    post:
+      summary: ''
+      operationId: postApiOrdersOrder_idConfirmPayment
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    order_number: PO-20250619-001
+                    payment_status: paid
+                    updated_at: '2025-06-19T10:30:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      order_number:
+                        type: string
+                        example: PO-20250619-001
+                      payment_status:
+                        type: string
+                        example: paid
+                      updated_at:
+                        type: string
+                        example: '2025-06-19T10:30:00.000000Z'
+        422:
+          description: 訂單狀態不允許此操作
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 此訂單的付款狀態不允許確認付款操作
+                  errors:
+                    payment_status:
+                      - 訂單已付款，無法重複確認
+                properties:
+                  message:
+                    type: string
+                    example: 此訂單的付款狀態不允許確認付款操作
+                  errors:
+                    type: object
+                    properties:
+                      payment_status:
+                        type: array
+                        example:
+                          - 訂單已付款，無法重複確認
+                        items:
+                          type: string
+      tags:
+        - 訂單管理
+    parameters:
+      -
+        in: path
+        name: order_id
+        description: 'The ID of the order.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: order
+        description: '要確認付款的訂單 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/orders/{order_id}/create-shipment':
+    post:
+      summary: ''
+      operationId: postApiOrdersOrder_idCreateShipment
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    order_number: PO-20250619-001
+                    shipping_status: shipped
+                    tracking_number: SF1234567890
+                    shipped_at: '2025-06-19T14:30:00.000000Z'
+                    updated_at: '2025-06-19T14:30:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      order_number:
+                        type: string
+                        example: PO-20250619-001
+                      shipping_status:
+                        type: string
+                        example: shipped
+                      tracking_number:
+                        type: string
+                        example: SF1234567890
+                      shipped_at:
+                        type: string
+                        example: '2025-06-19T14:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2025-06-19T14:30:00.000000Z'
+        422:
+          description: 訂單狀態不允許此操作
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 此訂單的貨物狀態不允許出貨操作
+                  errors:
+                    shipping_status:
+                      - 訂單已出貨，無法重複操作
+                properties:
+                  message:
+                    type: string
+                    example: 此訂單的貨物狀態不允許出貨操作
+                  errors:
+                    type: object
+                    properties:
+                      shipping_status:
+                        type: array
+                        example:
+                          - 訂單已出貨，無法重複操作
+                        items:
+                          type: string
+      tags:
+        - 訂單管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tracking_number:
+                  type: string
+                  description: 物流追蹤號碼。
+                  example: SF1234567890
+                  nullable: false
+                carrier:
+                  type: string
+                  description: 承運商名稱。
+                  example: 順豐速運
+                  nullable: true
+                shipped_at:
+                  type: datetime
+                  description: '實際出貨時間（格式: Y-m-d H:i:s）。'
+                  example: '2025-06-19 14:30:00'
+                  nullable: true
+                estimated_delivery_date:
+                  type: date
+                  description: '預計送達日期（格式: Y-m-d）。'
+                  example: '2025-06-21'
+                  nullable: true
+                notes:
+                  type: string
+                  description: 出貨備註。
+                  example: 易碎物品，請小心處理
+                  nullable: true
+              required:
+                - tracking_number
+    parameters:
+      -
+        in: path
+        name: order_id
+        description: 'The ID of the order.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: order
+        description: '要創建出貨記錄的訂單 ID。'
         example: 1
         required: true
         schema:

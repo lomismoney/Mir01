@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
 import { parseApiErrorMessage } from '@/types/error';
-import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, CustomerFilters, Customer, AttributePathParams } from '@/types/api-helpers';
+import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, CustomerFilters, Customer, AttributePathParams, OrderFormData } from '@/types/api-helpers';
 
 /**
  * API Hooks - 商品管理
@@ -24,6 +24,8 @@ export const QUERY_KEYS = {
     CATEGORIES: ['categories'] as const,
     CATEGORY: (id: number) => ['categories', id] as const,
     ATTRIBUTES: ['attributes'] as const,
+    ORDERS: ['orders'] as const,
+    ORDER: (id: number) => ['orders', id] as const,
 };
 
 /**
@@ -2141,6 +2143,296 @@ export function useUploadProductImage() {
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error("圖片上傳失敗", { description: errorMessage });
+      }
+    },
+  });
+}
+
+// ==================== 訂單管理系統 (ORDER MANAGEMENT) ====================
+
+/**
+ * Hook for fetching a paginated list of orders
+ * 
+ * 功能特性：
+ * 1. 支援多維度篩選（搜尋、狀態、日期範圍）
+ * 2. 扁平化的查詢鍵結構，支援精確緩存
+ * 3. 與後端 API 完全對應的參數結構
+ * 4. 標準的 staleTime 配置
+ * 5. 🎯 100% 類型安全 - 使用精確的篩選參數類型
+ * 
+ * @param filters - 訂單篩選參數
+ * @returns React Query 查詢結果
+ */
+export function useOrders(filters: {
+  search?: string;
+  shipping_status?: string;
+  payment_status?: string;
+  start_date?: string;
+  end_date?: string;
+} = {}) {
+  return useQuery({
+    // 遵循我們已建立的、扁平化的查詢鍵結構
+    queryKey: [...QUERY_KEYS.ORDERS, filters],
+    queryFn: async () => {
+      // 假設 apiClient 已能處理此端點
+      const { data, error } = await apiClient.GET("/api/orders", {
+        params: { query: filters },
+      });
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 1 * 60 * 1000, // 設置 1 分鐘的數據保鮮期
+  });
+}
+
+/**
+ * 創建訂單的 Hook
+ * 
+ * 支援完整的訂單創建流程：
+ * 1. 客戶資訊綁定
+ * 2. 商品項目管理
+ * 3. 價格計算
+ * 4. 庫存扣減
+ * 
+ * @returns React Query 變更結果
+ */
+export function useCreateOrder() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (orderData: OrderFormData) => {
+            const { data, error } = await apiClient.POST('/api/orders', {
+                body: orderData as any // 暫時使用 any 繞過類型檢查，直到 API 契約修復
+            });
+            
+            if (error) {
+                const errorMessage = parseApiErrorMessage(error);
+                throw new Error(errorMessage || '創建訂單失敗');
+            }
+            
+            return data;
+        },
+        onSuccess: async (data) => {
+            // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+            await Promise.all([
+                // 1. 失效所有訂單查詢緩存
+                queryClient.invalidateQueries({
+                    queryKey: QUERY_KEYS.ORDERS,
+                    exact: false,
+                    refetchType: 'active',
+                }),
+                // 2. 強制重新獲取所有活躍的訂單查詢
+                queryClient.refetchQueries({
+                    queryKey: QUERY_KEYS.ORDERS,
+                    exact: false,
+                })
+            ]);
+            
+            // 使用 toast 顯示成功訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.success('訂單創建成功！', {
+                    description: `訂單已成功創建，訂單列表已自動更新。`
+                });
+            }
+        },
+        onError: (error) => {
+            // 錯誤處理並顯示錯誤訊息
+            if (typeof window !== 'undefined') {
+                const { toast } = require('sonner');
+                toast.error('訂單創建失敗', {
+                    description: error.message || '請檢查輸入資料並重試。'
+                });
+            }
+        },
+    });
+}
+
+/**
+ * Hook for fetching a single order's details
+ * 
+ * 功能特性：
+ * 1. 獲取單一訂單的完整資訊（包含關聯的客戶、項目、狀態歷史）
+ * 2. 使用獨立的查詢鍵確保每個訂單獨立緩存
+ * 3. 條件性查詢，只有在 orderId 存在時才執行
+ * 4. 較長的緩存時間，適合詳情頁使用場景
+ * 
+ * @param orderId - 訂單 ID
+ * @returns React Query 查詢結果
+ */
+export function useOrderDetail(orderId: number | null) {
+  return useQuery({
+    queryKey: QUERY_KEYS.ORDER(orderId!), // 使用 ['orders', orderId] 作為唯一鍵
+    queryFn: async () => {
+      if (!orderId) return null; // 如果沒有 ID，則不執行查詢
+      const { data, error } = await apiClient.GET("/api/orders/{id}", {
+        params: { path: { id: orderId } },
+      });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!orderId, // 只有在 orderId 存在時，此查詢才會被觸發
+    staleTime: 5 * 60 * 1000, // 詳情頁數據可以緩存 5 分鐘
+  });
+}
+
+/**
+ * Hook for confirming an order's payment
+ * 
+ * 功能特性：
+ * 1. 確認訂單付款狀態
+ * 2. 自動刷新相關緩存（列表和詳情）
+ * 3. 提供用戶友善的成功/錯誤提示
+ * 4. 標準化的錯誤處理
+ * 5. 🎯 100% 類型安全 - 移除所有 any 類型斷言
+ * 
+ * @returns React Query mutation 結果
+ */
+export function useConfirmOrderPayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (orderId: number) => {
+      // 🚀 使用精確的 API 類型，完全移除 any 斷言
+      const { data, error } = await apiClient.POST("/api/orders/{order_id}/confirm-payment", {
+        params: { 
+          path: { 
+            order_id: orderId,
+            order: orderId  // API 定義中需要兩個參數
+          } 
+        },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, orderId) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("訂單款項已確認");
+      }
+      // 標準化快取處理：同時刷新列表和詳情
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(orderId), refetchType: 'active' });
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("操作失敗", { description: parseApiErrorMessage(error) });
+      }
+    },
+  });
+}
+
+/**
+ * Hook for creating a shipment for an order
+ * 
+ * 功能特性：
+ * 1. 創建訂單出貨記錄
+ * 2. 支援物流資訊（如追蹤號碼）
+ * 3. 自動刷新相關緩存
+ * 4. 完整的成功/錯誤回饋
+ * 5. 🎯 100% 類型安全 - 使用精確的 API 類型定義
+ * 
+ * @returns React Query mutation 結果
+ */
+export function useCreateOrderShipment() {
+  const queryClient = useQueryClient();
+  
+  // 🚀 使用 API 生成的精確類型定義
+  type CreateShipmentRequestBody = import('@/types/api').paths["/api/orders/{order_id}/create-shipment"]["post"]["requestBody"]["content"]["application/json"];
+  
+  return useMutation({
+    mutationFn: async (payload: { orderId: number; data: CreateShipmentRequestBody }) => {
+      // 🚀 使用精確的 API 類型，完全移除 any 斷言
+      const { data, error } = await apiClient.POST("/api/orders/{order_id}/create-shipment", {
+        params: { 
+          path: { 
+            order_id: payload.orderId,
+            order: payload.orderId  // API 定義中需要兩個參數
+          } 
+        },
+        body: payload.data,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, payload) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("訂單已標記為已出貨");
+      }
+      // 標準化快取處理
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(payload.orderId), refetchType: 'active' });
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("操作失敗", { description: parseApiErrorMessage(error) });
+      }
+    },
+  });
+}
+
+/**
+ * Hook for updating an existing order
+ */
+export function useUpdateOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { id: number; data: any /* 暫定 any，後續應替換為 UpdateOrderRequestBody */ }) => {
+      const { data, error } = await apiClient.PUT("/api/orders/{id}", {
+        params: { path: { id: payload.id } },
+        body: payload.data,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("訂單已成功更新");
+      }
+      // 同時失效列表和詳情的快取
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(variables.id), refetchType: 'active' });
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("更新失敗", { description: parseApiErrorMessage(error) });
+      }
+    },
+  });
+}
+
+/**
+ * Hook for deleting a single order
+ */
+export function useDeleteOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (orderId: number) => {
+      const { data, error } = await apiClient.DELETE("/api/orders/{id}", {
+        params: { path: { id: orderId } },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("訂單已成功刪除");
+      }
+      // 標準化快取處理
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.ORDERS,
+        refetchType: 'active',
+      });
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("刪除失敗", { description: parseApiErrorMessage(error) });
       }
     },
   });

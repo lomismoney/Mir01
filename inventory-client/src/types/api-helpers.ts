@@ -258,3 +258,156 @@ export type AttributePathParams = {
   id: number;
   attribute: number;
 };
+
+/**
+ * 用戶類型定義
+ * 
+ * 對應後端 User 模型的前端類型
+ */
+export type User = {
+  id?: number;
+  name?: string;
+  email?: string;
+  role?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+/**
+ * 訂單項目類型定義
+ * 
+ * 對應後端 OrderItem 模型的前端類型，支援標準商品和訂製商品
+ */
+export interface OrderItem {
+  id: number;
+  product_variant_id: number | null;
+  is_stocked_sale: boolean;
+  status: string;
+  custom_specifications: Record<string, any> | null;
+  product_name: string;
+  sku: string;
+  price: string;
+  cost: string;
+  quantity: number;
+  tax_rate: string;
+  discount_amount: string;
+  custom_product_name: string | null;
+  custom_product_specs: string | null;
+  custom_product_image: string | null;
+  custom_product_category: string | null;
+  custom_product_brand: string | null;
+  created_at: string;
+  updated_at: string;
+  // 如果需要，可以添加 productVariant 的嵌套類型
+  product_variant?: {
+    id: number;
+    sku: string;
+    price: string;
+    product?: {
+      id: number;
+      name: string;
+      description: string | null;
+    };
+  } | null;
+}
+
+/**
+ * 訂單狀態歷史類型定義
+ * 
+ * 記錄訂單狀態變更的歷史記錄
+ */
+export interface OrderStatusHistory {
+  id: number;
+  order_id: number;
+  field_name: string;
+  old_value: string | null;
+  new_value: string;
+  user_id: number;
+  created_at: string;
+  user?: User;
+}
+
+/**
+ * 訂單主體類型定義
+ * 
+ * 對應後端 Order 模型的前端類型，包含完整的訂單資訊
+ */
+export interface Order {
+  id: number;
+  order_number: string;
+  customer_id: number;
+  customer: Customer; // 嵌套的客戶對象
+  creator_id: number;
+  creator: User;      // 嵌套的創建者對象
+  shipping_status: string;
+  payment_status: string;
+  shipping_fee: string | null;
+  shipping_address: string | null;
+  shipping_phone: string | null;
+  billing_address: string | null;
+  notes: string | null;
+  subtotal: string;
+  tax_amount: string;
+  discount_amount: string;
+  grand_total: string;
+  created_at: string;
+  updated_at: string;
+  items: OrderItem[]; // 訂單項目的陣列
+  status_histories?: OrderStatusHistory[]; // 狀態歷史記錄
+}
+
+/**
+ * 訂單篩選參數類型定義
+ * 
+ * 對應後端 API 的查詢參數，用於訂單列表的篩選功能
+ */
+export type OrderFilters = {
+  /** 搜尋關鍵字（訂單號、客戶名稱、電話） */
+  search?: string;
+  /** 貨物狀態篩選 */
+  shipping_status?: string;
+  /** 付款狀態篩選 */
+  payment_status?: string;
+  /** 按創建日期篩選的開始日期 */
+  start_date?: string;
+  /** 按創建日期篩選的結束日期 */
+  end_date?: string;
+  /** 分頁參數 */
+  page?: number;
+  /** 每頁項目數 */
+  per_page?: number;
+};
+
+/**
+ * 訂單創建表單數據類型
+ * 
+ * 此類型用於解決 API 契約生成的類型定義問題
+ * 確保前端表單數據與後端 API 期望格式完全匹配
+ */
+export interface OrderFormData {
+  customer_id: number;
+  shipping_status: string;
+  payment_status: string;
+  shipping_fee?: number | null;
+  tax?: number | null;
+  discount_amount?: number | null;
+  payment_method: string;
+  order_source: string;
+  shipping_address: string;
+  notes?: string | null;
+  items: OrderItemData[];
+}
+
+/**
+ * 訂單項目數據類型
+ */
+export interface OrderItemData {
+  product_variant_id?: number | null;
+  is_stocked_sale: boolean;
+  status: string;
+  custom_specifications?: string | null;
+  product_name: string;
+  sku: string;
+  price: number;
+  quantity: number;
+}

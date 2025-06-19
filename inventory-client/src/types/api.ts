@@ -46,7 +46,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 12 */
+                                /** @example 18 */
                                 id?: number;
                                 /** @example Lonny Ankunding */
                                 name?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-18T15:59:25.000000Z */
+                                /** @example 2025-06-19T09:01:54.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-18T15:59:25.000000Z */
+                                /** @example 2025-06-19T09:01:54.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -4320,6 +4320,103 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getApiOrders"];
+        put?: never;
+        post: operations["postApiOrders"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                id: number;
+                /**
+                 * @description 訂單的 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        get: operations["getApiOrdersId"];
+        put: operations["putApiOrdersId"];
+        post?: never;
+        delete: operations["deleteApiOrdersId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{order_id}/confirm-payment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要確認付款的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postApiOrdersOrder_idConfirmPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{order_id}/create-shipment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要創建出貨記錄的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postApiOrdersOrder_idCreateShipment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/login": {
         parameters: {
             query?: never;
@@ -4703,16 +4800,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 15 */
+                            /** @example 27 */
                             id?: number;
                             /** @example Mueller-Dibbert */
                             name?: string;
                             /** @example 87713 Brandy Roads Suite 202
                              *     Williamsonfort, CT 64474 */
                             address?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4742,16 +4839,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 16 */
+                            /** @example 28 */
                             id?: number;
                             /** @example Kunde Group */
                             name?: string;
                             /** @example 62028 Trudie Mills
                              *     North Cordie, IL 75592 */
                             address?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4796,16 +4893,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 17 */
+                            /** @example 29 */
                             id?: number;
                             /** @example Moore-Emard */
                             name?: string;
                             /** @example 27319 Schmeler Fall Suite 958
                              *     Carterland, NM 49546 */
                             address?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4851,16 +4948,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 18 */
+                            /** @example 30 */
                             id?: number;
                             /** @example Hahn-Harber */
                             name?: string;
                             /** @example 6098 Kutch Loaf
                              *     Port Eldonland, PA 73828-6765 */
                             address?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4902,7 +4999,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 13 */
+                            /** @example 19 */
                             id?: number;
                             /** @example Dr. Cornelius Luettgen V */
                             name?: string;
@@ -4914,9 +5011,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-18T15:59:26.000000Z */
+                            /** @example 2025-06-19T09:01:54.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5468,7 +5565,7 @@ export interface operations {
                     search?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2025-06-18
+                     * @example 2025-06-19
                      */
                     start_date?: string | null;
                     /**
@@ -5552,7 +5649,7 @@ export interface operations {
                     type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2025-06-18T15:59:26
+                     * @example 2025-06-19T09:01:54
                      */
                     start_date?: string | null;
                     /**
@@ -5743,6 +5840,484 @@ export interface operations {
                             total?: number;
                             /** @example 1 */
                             last_page?: number;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getApiOrders: {
+        parameters: {
+            query?: {
+                /**
+                 * @description 關鍵字搜尋，將匹配訂單號、客戶名稱。
+                 * @example PO-20250619-001
+                 */
+                search?: string;
+                /**
+                 * @description 按貨物進度篩選。
+                 * @example 待出貨
+                 */
+                shipping_status?: string;
+                /**
+                 * @description 按付款進度篩選。
+                 * @example 待付款
+                 */
+                payment_status?: string;
+                /**
+                 * @description date 按創建日期篩選的開始日期 (格式: Y-m-d)。
+                 * @example 2025-01-01
+                 */
+                start_date?: string;
+                /**
+                 * @description date 按創建日期篩選的結束日期 (格式: Y-m-d)。
+                 * @example 2025-06-19
+                 */
+                end_date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @example consequatur */
+                    search?: string | null;
+                    /** @example consequatur */
+                    shipping_status?: string | null;
+                    /** @example consequatur */
+                    payment_status?: string | null;
+                    /**
+                     * @description Must be a valid date in the format <code>Y-m-d</code>.
+                     * @example 2025-06-19
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.
+                     * @example 2106-07-18
+                     */
+                    end_date?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApiOrders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 客戶ID。
+                     * @example 1
+                     */
+                    customer_id: number;
+                    /**
+                     * @description 貨物狀態。
+                     * @example 待出貨
+                     */
+                    shipping_status: string;
+                    /**
+                     * @description 付款狀態。
+                     * @example 待付款
+                     */
+                    payment_status: string;
+                    /**
+                     * @description 運費。
+                     * @example 100
+                     */
+                    shipping_fee?: Record<string, never> | null;
+                    /**
+                     * @description 稅金。
+                     * @example 50
+                     */
+                    tax?: Record<string, never> | null;
+                    /**
+                     * @description 折扣金額。
+                     * @example 0
+                     */
+                    discount_amount?: Record<string, never> | null;
+                    /**
+                     * @description 付款方式。
+                     * @example 轉帳
+                     */
+                    payment_method: string;
+                    /**
+                     * @description 訂單來源。
+                     * @example 現場客戶
+                     */
+                    order_source: string;
+                    /**
+                     * @description 運送地址。
+                     * @example 台北市信義區信義路五段7號
+                     */
+                    shipping_address: string;
+                    /**
+                     * @description 備註。
+                     * @example 請小心輕放
+                     */
+                    notes?: string | null;
+                    /**
+                     * @description 訂單項目清單。
+                     * @example [
+                     *       "consequatur"
+                     *     ]
+                     */
+                    items: string[];
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    getApiOrdersId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                id: number;
+                /**
+                 * @description 訂單的 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    putApiOrdersId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                id: number;
+                /**
+                 * @description 訂單的 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 客戶ID。
+                     * @example 2
+                     */
+                    customer_id?: number;
+                    /**
+                     * @description 貨物狀態（pending, processing, shipped, delivered）。
+                     * @example processing
+                     */
+                    shipping_status?: string;
+                    /**
+                     * @description 付款狀態（pending, paid, failed, refunded）。
+                     * @example paid
+                     */
+                    payment_status?: string;
+                    /**
+                     * @description 運費。
+                     * @example 150
+                     */
+                    shipping_fee?: Record<string, never> | null;
+                    /**
+                     * @description 稅金。
+                     * @example 75
+                     */
+                    tax?: Record<string, never> | null;
+                    /**
+                     * @description 折扣金額。
+                     * @example 50
+                     */
+                    discount_amount?: Record<string, never> | null;
+                    /**
+                     * @description 付款方式。
+                     * @example 信用卡
+                     */
+                    payment_method?: string | null;
+                    /**
+                     * @description 運送地址。
+                     * @example 台北市大安區羅斯福路四段1號
+                     */
+                    shipping_address?: string | null;
+                    /**
+                     * @description 帳單地址。
+                     * @example 台北市大安區羅斯福路四段1號
+                     */
+                    billing_address?: string | null;
+                    /**
+                     * @description The <code>id</code> of an existing record in the customer_addresses table.
+                     * @example null
+                     */
+                    customer_address_id?: string | null;
+                    /**
+                     * @description 備註。
+                     * @example 請在下午配送
+                     */
+                    notes?: string | null;
+                    /**
+                     * @description Must not be greater than 50 characters.
+                     * @example mqeopfuudtdsufvyvddqa
+                     */
+                    po_number?: string | null;
+                    /**
+                     * @description Must not be greater than 50 characters.
+                     * @example mniihfqcoynlazghdtqtq
+                     */
+                    reference_number?: string | null;
+                    /**
+                     * @description Must be at least 0.
+                     * @example 80
+                     */
+                    subtotal?: number | null;
+                    /**
+                     * @description Must be at least 0.
+                     * @example 6
+                     */
+                    grand_total?: number | null;
+                    /**
+                     * @description 訂單項目清單（提供此參數時會同步所有項目）。
+                     * @example [
+                     *       "consequatur"
+                     *     ]
+                     */
+                    items?: string[];
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    deleteApiOrdersId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                id: number;
+                /**
+                 * @description 訂單的 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 刪除成功 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    postApiOrdersOrder_idConfirmPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要確認付款的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example PO-20250619-001 */
+                            order_number?: string;
+                            /** @example paid */
+                            payment_status?: string;
+                            /** @example 2025-06-19T10:30:00.000000Z */
+                            updated_at?: string;
+                        };
+                    };
+                };
+            };
+            /** @description 訂單狀態不允許此操作 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 此訂單的付款狀態不允許確認付款操作 */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "訂單已付款，無法重複確認"
+                             *     ] */
+                            payment_status?: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    postApiOrdersOrder_idCreateShipment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要創建出貨記錄的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 物流追蹤號碼。
+                     * @example SF1234567890
+                     */
+                    tracking_number: string;
+                    /**
+                     * @description 承運商名稱。
+                     * @example 順豐速運
+                     */
+                    carrier?: string | null;
+                    /**
+                     * @description 實際出貨時間（格式: Y-m-d H:i:s）。
+                     * @example 2025-06-19 14:30:00
+                     */
+                    shipped_at?: Record<string, never> | null;
+                    /**
+                     * @description 預計送達日期（格式: Y-m-d）。
+                     * @example 2025-06-21
+                     */
+                    estimated_delivery_date?: Record<string, never> | null;
+                    /**
+                     * @description 出貨備註。
+                     * @example 易碎物品，請小心處理
+                     */
+                    notes?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example PO-20250619-001 */
+                            order_number?: string;
+                            /** @example shipped */
+                            shipping_status?: string;
+                            /** @example SF1234567890 */
+                            tracking_number?: string;
+                            /** @example 2025-06-19T14:30:00.000000Z */
+                            shipped_at?: string;
+                            /** @example 2025-06-19T14:30:00.000000Z */
+                            updated_at?: string;
+                        };
+                    };
+                };
+            };
+            /** @description 訂單狀態不允許此操作 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 此訂單的貨物狀態不允許出貨操作 */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "訂單已出貨，無法重複操作"
+                             *     ] */
+                            shipping_status?: string[];
                         };
                     };
                 };
