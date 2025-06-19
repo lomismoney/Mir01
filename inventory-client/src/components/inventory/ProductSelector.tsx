@@ -70,7 +70,7 @@ export function ProductSelector({
 
   // 獲取商品列表（支援搜尋）
   const { data: productsData, isLoading: isLoadingProducts } = useProducts({
-    search: searchTerm,
+    product_name: searchTerm,
   })
 
   // 獲取選中商品的變體列表
@@ -78,6 +78,8 @@ export function ProductSelector({
     selectedProductId ? { product_id: selectedProductId } : {},
     { enabled: !!selectedProductId }
   )
+
+
 
   // 當 selectedProductId 變化時，立即清除之前的變體選擇
   useEffect(() => {
@@ -287,8 +289,16 @@ export function ProductSelector({
                   
                   {isLoadingVariants ? (
                     <CommandItem disabled>載入規格中...</CommandItem>
+                  ) : variantsError ? (
+                    <CommandItem disabled className="text-red-500">
+                      載入規格失敗: {variantsError.message}
+                    </CommandItem>
+                  ) : !variantsData?.data ? (
+                    <CommandItem disabled>無變體數據</CommandItem>
                   ) : filteredVariants.length === 0 ? (
-                    <CommandItem disabled>此商品暫無規格</CommandItem>
+                    <CommandItem disabled>
+                      此商品暫無規格 (商品ID: {selectedProductId})
+                    </CommandItem>
                   ) : (
                     filteredVariants.map((variant: any) => (
                       <CommandItem

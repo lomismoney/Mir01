@@ -3,6 +3,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { useCreatePurchase, useStores } from "@/hooks/queries/useEntityQueries";
 import { useToast } from "@/components/ui/use-toast";
+import { PURCHASE_STATUS_LABELS, PURCHASE_STATUS } from "@/types/purchase";
 import {
   Dialog,
   DialogContent,
@@ -30,10 +31,10 @@ interface PurchaseFormData {
   order_number: string;
   purchased_at: string;
   shipping_cost: string;
+  status: string;
   items: {
     product_variant_id: number;
     quantity: string;
-    unit_price: string;
     cost_price: string;
   }[];
 }
@@ -55,11 +56,11 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
       order_number: "",
       purchased_at: new Date().toISOString().split('T')[0],
       shipping_cost: "0",
+      status: PURCHASE_STATUS.PENDING,
       items: [
         {
           product_variant_id: 0,
           quantity: "",
-          unit_price: "",
           cost_price: "",
         },
       ],
@@ -97,10 +98,10 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
       order_number: data.order_number,
       purchased_at: data.purchased_at ? `${data.purchased_at}T10:00:00+08:00` : undefined,
       shipping_cost: parseFloat(data.shipping_cost) || 0,
+      status: data.status,
       items: data.items.map(item => ({
         product_variant_id: item.product_variant_id,
         quantity: parseInt(item.quantity),
-        unit_price: parseFloat(item.unit_price),
         cost_price: parseFloat(item.cost_price),
       })),
     };
@@ -129,7 +130,6 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
     append({
       product_variant_id: 0,
       quantity: "",
-      unit_price: "",
       cost_price: "",
     });
   };
@@ -138,8 +138,8 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
     const shippingCost = parseFloat(form.watch("shipping_cost")) || 0;
     const itemsTotal = form.watch("items").reduce((total, item) => {
       const quantity = parseInt(item.quantity) || 0;
-      const unitPrice = parseFloat(item.unit_price) || 0;
-      return total + (quantity * unitPrice);
+      const costPrice = parseFloat(item.cost_price) || 0;
+      return total + (quantity * costPrice);
     }, 0);
     return itemsTotal + shippingCost;
   };
@@ -150,7 +150,7 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
         <DialogHeader>
           <DialogTitle>新增進貨單</DialogTitle>
           <DialogDescription>
-            建立多項商品進貨單，系統將自動計算運費攤銷和平均成本
+            建立進貨單並設定進貨價格，系統將根據狀態自動同步庫存並計算運費攤銷
           </DialogDescription>
         </DialogHeader>
 
@@ -162,7 +162,7 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
                 <CardTitle>基本資訊</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="store_id"
@@ -229,6 +229,31 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>狀態</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="選擇狀態" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.entries(PURCHASE_STATUS_LABELS).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -261,32 +286,32 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <FormField
-                        control={form.control}
-                        name={`items.${index}.product_variant_id`}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-2">
-                            <FormLabel>商品 *</FormLabel>
-                            <FormControl>
-                              <ProductSelector
-                                value={field.value}
-                                onValueChange={(variantId, variant) => {
-                                  field.onChange(variantId);
-                                  // 自動填入單價
-                                  if (variant?.price) {
-                                    form.setValue(`items.${index}.unit_price`, variant.price.toString());
-                                  }
-                                }}
-                                placeholder="搜尋並選擇商品規格"
-                                disabled={createPurchaseMutation.isPending}
-                                showCurrentStock={false}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                              <FormField
+                          control={form.control}
+                          name={`items.${index}.product_variant_id`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>商品 *</FormLabel>
+                              <FormControl>
+                                <ProductSelector
+                                  value={field.value}
+                                  onValueChange={(variantId, variant) => {
+                                    field.onChange(variantId);
+                                    // 可選：自動填入成本價（如果商品有預設成本價）
+                                    if (variant?.price) {
+                                      form.setValue(`items.${index}.cost_price`, variant.price.toString());
+                                    }
+                                  }}
+                                  placeholder="搜尋並選擇商品規格"
+                                  disabled={createPurchaseMutation.isPending}
+                                  showCurrentStock={false}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
                       <FormField
                         control={form.control}
@@ -302,33 +327,19 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name={`items.${index}.unit_price`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>單價 *</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="number" min="0" step="0.01" placeholder="0.00" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`items.${index}.cost_price`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>成本價 *</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="number" min="0" step="0.01" placeholder="0.00" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                                              <FormField
+                          control={form.control}
+                          name={`items.${index}.cost_price`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>進貨價 *</FormLabel>
+                              <FormControl>
+                                <Input {...field} type="number" min="0" step="0.01" placeholder="0.00" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                     </div>
                   </div>
                 ))}
