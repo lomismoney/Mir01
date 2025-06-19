@@ -122,7 +122,7 @@ const AttributesClientPage = () => {
 
     try {
       await updateAttributeMutation.mutateAsync({
-        path: { id: selectedAttribute.id, attribute: selectedAttribute.id },
+        id: selectedAttribute.id,
         body: { name: attributeName.trim() }
       });
       toast.success('規格更新成功！');

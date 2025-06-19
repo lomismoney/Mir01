@@ -200,5 +200,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/inventory/{id}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'history']);
     Route::get('/inventory/sku/{sku}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'getSkuHistory']);
     Route::post('/inventory/batch-check', [App\Http\Controllers\Api\InventoryManagementController::class, 'batchCheck']);
+
+    /**
+     * 客戶管理資源路由
+     * 提供完整的客戶 CRUD 操作，支援搜尋和篩選功能
+     * 
+     * 路由列表：
+     * GET    /api/customers        - 獲取客戶列表（支援搜尋和日期篩選）
+     * POST   /api/customers        - 創建新客戶
+     * GET    /api/customers/{id}   - 獲取指定客戶
+     * PUT    /api/customers/{id}   - 更新指定客戶
+     * DELETE /api/customers/{id}   - 刪除指定客戶
+     */
+    Route::apiResource('customers', App\Http\Controllers\Api\CustomerController::class);
 });
  

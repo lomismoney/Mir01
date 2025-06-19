@@ -1,0 +1,42 @@
+{
+    "data": {
+        "id": 1,
+        "name": "測試客戶（已更新）",
+        "phone": "0987654321",
+        "is_company": false,
+        "tax_id": null,
+        "industry_type": "設計師",
+        "payment_type": "現金付款",
+        "contact_address": "台北市信義區松高路99號",
+        "total_unpaid_amount": "15000.00",
+        "total_completed_amount": "85000.00",
+        "addresses": [
+            {
+                "id": 1,
+                "customer_id": 1,
+                "address": "台北市大安區信義路四段101號",
+                "is_default": true,
+                "created_at": "2025-06-18T10:30:00.000000Z",
+                "updated_at": "2025-06-18T12:45:00.000000Z"
+            },
+            {
+                "id": 15,
+                "customer_id": 1,
+                "address": "新北市板橋區文化路二段200號",
+                "is_default": false,
+                "created_at": "2025-06-18T12:45:00.000000Z",
+                "updated_at": "2025-06-18T12:45:00.000000Z"
+            }
+        ],
+        "default_address": {
+            "id": 1,
+            "customer_id": 1,
+            "address": "台北市大安區信義路四段101號",
+            "is_default": true,
+            "created_at": "2025-06-18T10:30:00.000000Z",
+            "updated_at": "2025-06-18T12:45:00.000000Z"
+        },
+        "created_at": "2025-06-18T10:30:00.000000Z",
+        "updated_at": "2025-06-18T12:45:00.000000Z"
+    }
+} 
