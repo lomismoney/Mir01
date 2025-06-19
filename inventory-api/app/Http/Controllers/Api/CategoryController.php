@@ -42,13 +42,58 @@ class CategoryController extends Controller
      * @authenticated
      * @responseFile storage/responses/categories.index.json
      * 
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        // 獲取所有分類並使用 CategoryResource 格式化輸出
-        $categories = Category::paginate(15);
-        return CategoryResource::collection($categories);
+        // 獲取所有分類，並預載入每個分類的直接商品數量
+        $categories = Category::withCount('products')->get();
+        $categoryMap = $categories->keyBy('id');
+
+        // 為每個分類計算其包含所有後代的商品總數
+        // 這個遞迴計算是安全的，因為它在一個已經載入的集合上操作，避免了 N+1 問題
+        foreach ($categories as $category) {
+            $this->calculateTotalProducts($category, $categoryMap);
+        }
+
+        // 按 parent_id 分組，以方便前端建構層級樹
+        $grouped = $categories->groupBy(function ($category) {
+            return $category->parent_id ?? '';
+        });
+
+        // 使用 CategoryResource 格式化並返回分組後的資料
+        return response()->json($grouped->map(function ($group) {
+            return CategoryResource::collection($group);
+        }));
+    }
+
+    /**
+     * 遞迴計算一個分類及其所有後代的商品總數
+     *
+     * @param \App\Models\Category $category 當前分類
+     * @param \Illuminate\Support\Collection $categoryMap 所有分類的查找表
+     * @return int 商品總數
+     */
+    private function calculateTotalProducts(Category $category, $categoryMap): int
+    {
+        // 記憶化：如果已經計算過，直接返回結果以提高效率
+        if (isset($category->total_products_count)) {
+            return $category->total_products_count;
+        }
+
+        // 從該分類自身的商品數量開始計算
+        $total = $category->products_count;
+
+        // 找到所有直接子分類，並遞迴地將它們的商品總數累加進來
+        $children = $categoryMap->where('parent_id', $category->id);
+        foreach ($children as $child) {
+            $total += $this->calculateTotalProducts($child, $categoryMap);
+        }
+
+        // 將計算結果儲存在物件屬性中，以便記憶化和給父級使用
+        $category->total_products_count = $total;
+
+        return $total;
     }
 
     /**
@@ -72,13 +117,42 @@ class CategoryController extends Controller
      * 顯示指定的分類資源
      * 
      * 返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出
+     * 包含該分類的商品數量統計
      * 
      * @param \App\Models\Category $category
      * @return \App\Http\Resources\Api\CategoryResource
      */
     public function show(Category $category)
     {
+        // 載入該分類直接關聯的商品數量
+        $category->loadCount('products');
+        
+        // 遞迴獲取所有後代分類
+        $descendants = $category->descendants()->withCount('products')->get();
+        
+        // 計算總數
+        $total = $category->products_count;
+        $this->addDescendantCounts($descendants, $total);
+
+        $category->total_products_count = $total;
+
         return new CategoryResource($category);
+    }
+
+    /**
+     * 遞迴地將後代分類的商品數量加到總數中
+     *
+     * @param \Illuminate\Support\Collection $categories
+     * @param int $total
+     */
+    private function addDescendantCounts($categories, int &$total)
+    {
+        foreach ($categories as $category) {
+            $total += $category->products_count;
+            if ($category->relationLoaded('descendants')) {
+                $this->addDescendantCounts($category->descendants, $total);
+            }
+        }
     }
 
     /**

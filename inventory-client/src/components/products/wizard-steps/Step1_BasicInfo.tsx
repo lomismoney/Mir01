@@ -24,7 +24,7 @@ import { WizardFormData } from '../CreateProductWizard';
 import { useCategories } from '@/hooks/queries/useEntityQueries';
 import { Category } from '@/types/category';
 import { ImageUploader } from '@/components/ui/ImageUploader';
-import { apiClient } from '@/lib/apiClient';
+import apiClient from '@/lib/apiClient';
 import { toast } from 'sonner';
 
 /**

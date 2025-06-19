@@ -401,8 +401,15 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
                             onChange={(e) => handleVariantChange(variant.key, 'price', e.target.value)}
                             min="0"
                             step="0.01"
-                            className="max-w-[120px]"
+                            className={`max-w-[120px] ${
+                              variant.price && (isNaN(parseFloat(variant.price)) || parseFloat(variant.price) <= 0)
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                : ''
+                            }`}
                           />
+                          {variant.price && (isNaN(parseFloat(variant.price)) || parseFloat(variant.price) <= 0) && (
+                            <AlertCircle className="h-4 w-4 text-red-500" />
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

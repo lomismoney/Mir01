@@ -7,11 +7,12 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { useToast } from "@/components/ui/use-toast"
 import { InventoryNestedTable } from "@/components/inventory/InventoryNestedTable"
 import { ProductFilters } from "@/types/api-helpers"
+import { Category } from "@/types/category"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { 
@@ -27,6 +28,7 @@ import {
 } from "lucide-react"
 import { CreatePurchaseDialog } from "@/components/purchases/CreatePurchaseDialog"
 import Link from "next/link"
+import { InventoryPagination } from "./InventoryPagination"
 
 export function InventoryManagement() {
   const { toast } = useToast()
@@ -35,6 +37,7 @@ export function InventoryManagement() {
   // 篩選器狀態管理
   const [filters, setFilters] = useState<ProductFilters>({})
   const [productNameInput, setProductNameInput] = useState("")
+  const [page, setPage] = useState(1)
 
   // 對話框狀態管理
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false)
@@ -54,6 +57,10 @@ export function InventoryManagement() {
   const { data: storesData, isLoading: isLoadingStores } = useStores()
   const { data: categoriesData, isLoading: isLoadingCategories } = useCategories()
 
+  // 將分組的分類資料展平為單一陣列
+  const allCategories = categoriesData ? 
+    Object.values(categoriesData).flat() : [];
+
   // 獲取庫存列表數據 
   const {
     data: inventoryData,
@@ -65,7 +72,11 @@ export function InventoryManagement() {
     low_stock: filters.low_stock,
     out_of_stock: filters.out_of_stock,
     product_name: filters.product_name,
+    page,
+    per_page: 15,
   })
+
+  const paginationMeta = inventoryData?.meta
 
   const handleRefresh = () => {
     refetchInventory()
@@ -143,77 +154,6 @@ export function InventoryManagement() {
   const handleAdjustInventory = (skuId: number, currentQuantity: number) => {
     // 刷新庫存資料
     refetchInventory()
-  }
-
-  /**
-   * 轉換庫存資料為商品分組的巢狀表格格式
-   * @param inventoryData - 庫存列表資料
-   * @returns 轉換後的商品分組資料格式
-   */
-  const transformInventoryToProductData = (inventoryData: unknown[]) => {
-    if (!Array.isArray(inventoryData)) {
-      return []
-    }
-    
-    // 按商品分組庫存資料
-    const productGroups = new Map<number, any>()
-    
-    inventoryData.forEach((inventory: any) => {
-      if (!inventory?.product_variant?.product) {
-        return
-      }
-      
-      const product = inventory.product_variant.product
-      const productId = product.id
-      const variantId = inventory.product_variant.id
-      
-      if (!productGroups.has(productId)) {
-        // 創建商品分組
-        productGroups.set(productId, {
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          category_id: product.category_id,
-          category: product.category,
-          created_at: product.created_at,
-          updated_at: product.updated_at,
-          variants: new Map() // 使用 Map 來避免重複的 variant
-        })
-      }
-      
-      const productGroup = productGroups.get(productId)
-      
-      // 檢查是否已有此 variant
-      if (!productGroup.variants.has(variantId)) {
-        // 創建新的 variant
-        productGroup.variants.set(variantId, {
-          id: inventory.product_variant.id,
-          sku: inventory.product_variant.sku,
-          price: inventory.product_variant.price,
-          product_id: inventory.product_variant.product_id,
-          created_at: inventory.product_variant.created_at,
-          updated_at: inventory.product_variant.updated_at,
-          product: product,
-          attribute_values: inventory.product_variant.attribute_values || [],
-          inventory: []
-        })
-      }
-      
-      // 添加庫存資訊到現有 variant
-      const variant = productGroup.variants.get(variantId)
-      variant.inventory.push({
-        id: inventory.id,
-        quantity: inventory.quantity,
-        low_stock_threshold: inventory.low_stock_threshold,
-        store: inventory.store
-      })
-    })
-    
-    // 轉換 Map 為 Array
-    return Array.from(productGroups.values()).map(product => ({
-      ...product,
-      variants: Array.from(product.variants.values())
-    }))
   }
 
   /**
@@ -347,7 +287,7 @@ export function InventoryManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">所有分類</SelectItem>
-                  {categoriesData?.data?.map((category) => (
+                  {allCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id?.toString() || ""}>
                       {category.name}
                     </SelectItem>
@@ -449,13 +389,26 @@ export function InventoryManagement() {
             </div>
           ) : (
             <InventoryNestedTable
-              data={transformInventoryToProductData(inventoryData?.data || [])}
+              data={inventoryData?.data || []}
               isLoading={isLoadingInventory}
               onAdjustInventory={handleAdjustInventory}
               onManageProduct={handleManageProduct}
             />
           )}
         </CardContent>
+        {inventoryData?.meta && (
+          <CardFooter className="flex items-center justify-center border-t pt-6">
+            <InventoryPagination
+              meta={{
+                current_page: inventoryData.meta.current_page || 1,
+                last_page: inventoryData.meta.last_page || 1,
+                per_page: inventoryData.meta.per_page || 15,
+                total: inventoryData.meta.total || 0,
+              }}
+              onPageChange={setPage}
+            />
+          </CardFooter>
+        )}
       </Card>
 
       {/* 商品入庫對話框 */}

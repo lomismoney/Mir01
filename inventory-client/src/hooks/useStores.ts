@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
+import apiClient from "@/lib/apiClient";
 import { handleApiError } from "@/lib/errorHandler";
 
 /**
@@ -53,21 +53,20 @@ export function useStores() {
  * 獲取單個分店的 Hook
  * @param id - 分店 ID
  */
-export function useStoreDetail(id: number) {
+export function useStore(id: number) {
   return useQuery({
-    queryKey: ['stores', id],
+    queryKey: ["stores", id],
     queryFn: async () => {
       // 使用正確的 API 類型
-      const { data, error } = await apiClient.GET(`/api/stores/{id}`, {
+      const { data, error } = await apiClient.GET(`/api/stores/{id}` as any, {
         params: { path: { id } }
-      });
+      } as any);
 
       if (error) {
-        throw handleApiError(error);
+        throw new Error("取得門市詳情失敗");
       }
 
-      // 如果 data 有 data 屬性，返回它；否則返回整個 data 對象
-      return { data: data?.data || data };
+      return { data: (data as any)?.data || data };
     },
     enabled: !!id,
   });
@@ -80,21 +79,19 @@ export function useCreateStore() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (storeData: CreateStoreBody) => {
-      // 使用正確的 API 類型
-      const { data, error } = await apiClient.POST("/api/stores", {
-        body: storeData
-      });
+    mutationFn: async (data: any) => {
+      const { data: responseData, error } = await apiClient.POST("/api/stores" as any, {
+        body: data,
+      } as any);
 
       if (error) {
-        throw handleApiError(error);
+        throw new Error("新增門市失敗");
       }
 
-      return data;
+      return responseData;
     },
     onSuccess: () => {
-      // 成功創建後，更新分店列表的查詢緩存
-      queryClient.invalidateQueries({ queryKey: ['stores'] });
+      queryClient.invalidateQueries({ queryKey: ["stores"] });
     },
   });
 }
@@ -106,23 +103,21 @@ export function useUpdateStore() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...storeData }: UpdateStoreBody & { id: number }) => {
-      // 使用正確的 API 類型
-      const { data, error } = await apiClient.PUT(`/api/stores/{id}`, {
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const { data: responseData, error } = await apiClient.PUT(`/api/stores/{id}` as any, {
         params: { path: { id } },
-        body: storeData
-      });
+        body: data,
+      } as any);
 
       if (error) {
-        throw handleApiError(error);
+        throw new Error("更新門市失敗");
       }
 
-      return data;
+      return responseData;
     },
     onSuccess: (_, variables) => {
-      // 成功更新後，更新相關查詢緩存
-      queryClient.invalidateQueries({ queryKey: ['stores'] });
-      queryClient.invalidateQueries({ queryKey: ['stores', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["stores"] });
+      queryClient.invalidateQueries({ queryKey: ["stores", variables.id] });
     },
   });
 }

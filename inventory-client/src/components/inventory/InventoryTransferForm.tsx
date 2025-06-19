@@ -27,6 +27,7 @@ interface TransferFormValues {
   product_variant_id: number;
   quantity: string;
   notes: string;
+  status: string;
 }
 
 interface InventoryTransferFormProps {
@@ -47,6 +48,7 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
       product_variant_id: 0,
       quantity: "",
       notes: "",
+      status: "pending", // 預設為待處理
     },
   })
 
@@ -93,6 +95,7 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
       product_variant_id: data.product_variant_id,
       quantity: quantity,
       notes: data.notes,
+      status: data.status,
     }, {
       onSuccess: () => {
         toast({
@@ -270,6 +273,36 @@ export function InventoryTransferForm({ onSuccess }: InventoryTransferFormProps 
                       ? "來源門市庫存不足，無法轉移"
                       : "請先選擇商品與來源門市"
                     }
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>初始狀態</FormLabel>
+                  <Select 
+                    disabled={isSubmitting} 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="選擇初始狀態" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pending">待處理</SelectItem>
+                      <SelectItem value="in_transit">運送中</SelectItem>
+                      <SelectItem value="completed">已完成</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    設定為「已完成」會立即執行庫存轉移操作
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

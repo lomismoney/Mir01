@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/apiClient';
-import { parseApiErrorMessage } from '@/types/error';
-import { CreateStoreRequest, UpdateStoreRequest, ProductFilters } from '@/types/api-helpers';
+import apiClient from '@/lib/apiClient';
+import { parseApiError } from '@/lib/errorHandler';
+import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters } from '@/types/api-helpers';
 
 /**
  * API Hooks - 商品管理
@@ -123,7 +123,7 @@ export function useProductDetail(productId: number | string | undefined) {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage || '獲取商品詳情失敗');
             }
 
@@ -161,7 +161,7 @@ export function useCreateProduct() {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage);
             }
             
@@ -233,7 +233,7 @@ export function useCreateSimpleProduct() {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage);
             }
             
@@ -300,7 +300,7 @@ export function useUpdateProduct() {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage || '更新商品失敗');
             }
             
@@ -490,7 +490,7 @@ export function useCreateUser() {
       const { data, error } = await apiClient.POST('/api/users', { body });
       if (error) { 
         // 使用類型安全的錯誤處理
-        const errorMessage = parseApiErrorMessage(error) || '建立用戶失敗';
+        const errorMessage = parseApiError(error) || '建立用戶失敗';
         
         throw new Error(errorMessage);
       }
@@ -517,7 +517,7 @@ export function useUpdateUser() {
       });
       if (error) { 
         // 使用類型安全的錯誤處理
-        const errorMessage = parseApiErrorMessage(error) || '更新用戶失敗';
+        const errorMessage = parseApiError(error) || '更新用戶失敗';
         throw new Error(errorMessage);
       }
       return data;
@@ -551,20 +551,12 @@ export function useDeleteUser() {
 }
 
 /**
- * 獲取所有商品分類（高性能版本 - 整合第二階段優化）
+ * 獲取分類列表並自動分組
  * 
- * 效能優化特性：
- * 1. 超長緩存策略 - 分類數據極少變動，20分鐘緩存
- * 2. 禁用所有背景更新 - 分類結構穩定
- * 3. 智能樹狀結構預處理 - 減少前端計算負擔
- * 4. 錯誤邊界整合 - 優雅處理網絡異常
- * 
- * 從後端 API 獲取分類列表，後端回傳的是按 parent_id 分組的集合結構，
- * 讓前端可以極其方便地建構層級樹狀結構。
- * 
- * 範例回傳結構：
- * - data[null] 或 data[''] - 所有頂層分類（父分類為 null）
- * - data['1'] - id 為 1 的分類下的所有子分類
+ * 此查詢會獲取所有分類，並將它們按照 parent_id 進行分組，
+ * 方便前端建構樹狀結構。返回格式為：
+ * - key 為空字串 '' 或 'null' 表示頂層分類
+ * - key 為數字字串如 '1' 表示 parent_id 為 1 的子分類
  * 
  * @returns React Query 查詢結果，包含分組後的分類資料
  */
@@ -572,29 +564,15 @@ export function useCategories() {
   return useQuery({
     queryKey: QUERY_KEYS.CATEGORIES,
     queryFn: async () => {
-      // 類型系統知道 data 的結構是 { data?: Category[] } 或類似結構
+      // 後端直接回傳分組後的物件，而不是 { data: [...] } 結構
       const { data: responseData, error } = await apiClient.GET('/api/categories');
 
       if (error) {
         throw new Error('獲取分類列表失敗');
       }
       
-      const categories = responseData?.data || [];
-      
-      // 使用 Array.prototype.reduce 建立一個類型安全的 Record
-      const grouped = categories.reduce((acc, category) => {
-        // 使用空字串 '' 作為頂層分類的鍵
-        const parentIdKey = category.parent_id?.toString() || '';
-        
-        if (!acc[parentIdKey]) {
-          acc[parentIdKey] = [];
-        }
-        acc[parentIdKey].push(category);
-        
-        return acc;
-      }, {} as Record<string, typeof categories>); // 明確指定 accumulator 的初始類型
-
-      return grouped;
+      // 直接回傳 API 的回應，如果為空則給一個空物件
+      return responseData || {};
     },
     
     // 🚀 體驗優化配置（第二階段淨化行動）
@@ -752,7 +730,7 @@ export function useCreateAttribute() {
       if (error) {
         console.error('API Error:', error);
         // 使用類型安全的錯誤處理
-        const errorMessage = parseApiErrorMessage(error) || '建立屬性失敗';
+        const errorMessage = parseApiError(error) || '建立屬性失敗';
         throw new Error(errorMessage);
       }
       return data;
@@ -892,60 +870,59 @@ export function useDeleteAttributeValue() {
 // ==================== 庫存管理系統 (INVENTORY MANAGEMENT) ====================
 
 /**
- * 獲取庫存列表查詢
+ * 庫存列表查詢 Hook
  * 
- * 支援多種篩選條件：
- * - 門市篩選
- * - 低庫存警示
- * - 缺貨狀態
- * - 商品名稱搜尋
- * - 分頁控制
+ * 此 Hook 呼叫 /api/inventory 端點，該端點現在返回商品列表
+ * 而非原始的庫存記錄列表，每個商品包含其所有變體和庫存資訊
+ * 
+ * @param filters - 查詢過濾參數
+ * @returns 查詢結果，包含商品列表資料
  */
-export function useInventoryList(params: {
-  store_id?: number;
-  low_stock?: boolean;
-  out_of_stock?: boolean;
-  product_name?: string;
-  page?: number;
-  per_page?: number;
-} = {}) {
+export const useInventoryList = (filters: ProductFilters = {}) => {
   return useQuery({
-    queryKey: ['inventory', 'list', params],
+    queryKey: ['inventory', 'list', filters],
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/inventory', {
-        params: { query: params },
-      });
-      if (error) {
-        // 簡化錯誤處理，避免型別問題
-        const errorString = String(error);
-        if (errorString.includes('401') || errorString.includes('Unauthorized')) {
-          throw new Error('請先登入以查看庫存資料');
+        params: {
+          query: filters
         }
-        throw new Error('獲取庫存列表失敗，請檢查網路連線或稍後再試');
+      });
+      
+      if (error) {
+        throw new Error('獲取庫存列表失敗');
       }
-      return data;
+      
+      // 類型轉換 - 後端實際返回 ProductResource 格式的商品資料
+      return data as {
+        data: InventoryProductItem[];
+        meta?: {
+          current_page?: number;
+          per_page?: number;
+          total?: number;
+          last_page?: number;
+        };
+        links?: {
+          first?: string;
+          last?: string;
+          prev?: string;
+          next?: string;
+        };
+      };
     },
-    staleTime: 1000 * 60 * 2, // 2 分鐘內保持新鮮（庫存變化較頻繁）
-    retry: (failureCount, error) => {
-      // 認證錯誤不重試
-      if (error.message?.includes('請先登入')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    staleTime: 5 * 60 * 1000, // 5 分鐘
   });
-}
+};
 
 /**
  * 獲取單個庫存詳情
  */
 export function useInventoryDetail(id: number) {
   return useQuery({
-    queryKey: ['inventory', 'detail', id],
+    queryKey: ['inventory', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/{id}', {
-        params: { path: { id: id.toString() } },
-      });
+      const { data, error } = await apiClient.GET('/api/inventory/{id}' as any, {
+        params: { path: { id } },
+      } as any);
       if (error) {
         throw new Error('獲取庫存詳情失敗');
       }
@@ -1061,6 +1038,36 @@ export function useSkuInventoryHistory(params: {
   });
 }
 
+/**
+ * 獲取所有庫存交易記錄
+ */
+export function useAllInventoryTransactions(filters: InventoryTransactionFilters = {}) {
+  return useQuery({
+    queryKey: ['inventory', 'transactions', filters],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/inventory/transactions', {
+        params: {
+          query: filters
+        }
+      });
+      if (error) {
+        throw new Error('獲取庫存交易記錄失敗');
+      }
+      return data as {
+        message?: string;
+        data: InventoryTransaction[];
+        pagination?: {
+          current_page?: number;
+          per_page?: number;
+          total?: number;
+          last_page?: number;
+        };
+      };
+    },
+    staleTime: 2 * 60 * 1000, // 2 分鐘
+  });
+}
+
 // ==================== 庫存轉移管理 (INVENTORY TRANSFERS) ====================
 
 /**
@@ -1097,9 +1104,9 @@ export function useInventoryTransferDetail(id: number) {
   return useQuery({
     queryKey: ['inventory', 'transfer', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/transfers/{id}', {
+      const { data, error } = await apiClient.GET('/api/inventory/transfers/{id}' as any, {
         params: { path: { id: id.toString() } },
-      });
+      } as any);
       if (error) {
         throw new Error('獲取庫存轉移詳情失敗');
       }
@@ -1220,9 +1227,9 @@ export function useStore(id: number) {
   return useQuery({
     queryKey: ['stores', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/stores/{id}', {
+      const { data, error } = await apiClient.GET('/api/stores/{id}' as any, {
         params: { path: { id } },
-      });
+      } as any);
       if (error) {
         throw new Error('獲取門市詳情失敗');
       }
@@ -1238,10 +1245,10 @@ export function useStore(id: number) {
 export function useCreateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (store: CreateStoreRequest) => {
-      const { data, error } = await apiClient.POST('/api/stores', {
+    mutationFn: async (store: any) => {
+      const { data, error } = await apiClient.POST('/api/stores' as any, {
         body: store,
-      });
+      } as any);
       if (error) {
         throw new Error('創建門市失敗');
       }
@@ -1259,11 +1266,11 @@ export function useCreateStore() {
 export function useUpdateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { id: number; data: UpdateStoreRequest }) => {
-      const { data, error } = await apiClient.PUT('/api/stores/{id}', {
+    mutationFn: async (params: { id: number; data: any }) => {
+      const { data, error } = await apiClient.PUT('/api/stores/{id}' as any, {
         params: { path: { id: params.id } },
         body: params.data,
-      });
+      } as any);
       if (error) {
         throw new Error('更新門市失敗');
       }
@@ -1312,8 +1319,25 @@ export function useProductVariants(params: {
     queryKey: ['product-variants', params],
     queryFn: async () => {
       try {
+        // 轉換為 Spatie QueryBuilder 期望的過濾器格式
+        const filterParams: Record<string, any> = {};
+        const regularParams: Record<string, any> = {};
+        
+        Object.entries(params).forEach(([key, value]) => {
+          if (key === 'product_id' || key === 'sku') {
+            // 這些是過濾器參數，需要特殊格式
+            if (!filterParams.filter) filterParams.filter = {};
+            filterParams.filter[key] = value;
+          } else {
+            // 其他參數（如 page, per_page）直接傳送
+            regularParams[key] = value;
+          }
+        });
+        
+        const queryParams = { ...regularParams, ...filterParams };
+        
         const response = await apiClient.GET('/api/products/variants', {
-          params: { query: params },
+          params: { query: queryParams },
         });
         
         // 直接使用響應，不需要類型斷言
@@ -1323,7 +1347,7 @@ export function useProductVariants(params: {
           console.error('Product variants API error:', error);
           
           // 使用類型安全的錯誤處理
-          const errorMessage = parseApiErrorMessage(error) || '獲取商品變體列表失敗';
+          const errorMessage = parseApiError(error) || '獲取商品變體列表失敗';
           throw new Error(errorMessage);
         }
         
@@ -1353,9 +1377,9 @@ export function useProductVariantDetail(id: number) {
   return useQuery({
     queryKey: ['product-variants', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/products/variants/{id}', {
+      const { data, error } = await apiClient.GET('/api/products/variants/{id}' as any, {
         params: { path: { id: id.toString() } },
-      });
+      } as any);
       if (error) {
         throw new Error('獲取商品變體詳情失敗');
       }
@@ -1393,7 +1417,7 @@ export function useUploadProductImage() {
             });
             
             if (error) {
-                const errorMessage = parseApiErrorMessage(error);
+                const errorMessage = parseApiError(error);
                 throw new Error(errorMessage || '圖片上傳失敗');
             }
             
@@ -1461,7 +1485,7 @@ export function useCreatePurchase() {
       });
       
       if (error) {
-        throw new Error(parseApiErrorMessage(error));
+        throw new Error(parseApiError(error));
       }
       
       return data;

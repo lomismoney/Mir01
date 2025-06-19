@@ -21,6 +21,7 @@ class CategoryResource extends JsonResource
      * - name: 分類名稱
      * - description: 分類描述
      * - parent_id: 父分類ID（用於階層結構）
+     * - products_count: 該分類的商品數量（當有載入統計時）
      *
      * @param Request $request HTTP 請求實例
      * @return array<string, mixed> 標準化的分類數據陣列
@@ -32,6 +33,8 @@ class CategoryResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'parent_id' => $this->parent_id,
+            'products_count' => $this->whenCounted('products'),
+            'total_products_count' => $this->total_products_count ?? $this->whenCounted('products', $this->products_count),
         ];
     }
 }

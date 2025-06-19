@@ -233,10 +233,12 @@ export function InventoryHistory({ inventoryId, productName, sku }: InventoryHis
                     
                     <div className="text-xs text-muted-foreground">
                       <span className="font-medium">額外資訊:</span> 
+                      <span>
                       {(() => {
                         if (!transaction.metadata) return '無';
+                          
                           // 處理 metadata，可能是字符串或對象
-                          let metadataObj = transaction.metadata;
+                          let metadataObj: any = transaction.metadata;
                           
                           // 如果是字符串，嘗試解析為 JSON
                           if (typeof metadataObj === 'string') {
@@ -244,7 +246,7 @@ export function InventoryHistory({ inventoryId, productName, sku }: InventoryHis
                               metadataObj = JSON.parse(metadataObj);
                             } catch (e) {
                               // 如果解析失敗，直接返回原始字符串
-                              return metadataObj;
+                              return String(metadataObj);
                             }
                           }
                           
@@ -264,12 +266,13 @@ export function InventoryHistory({ inventoryId, productName, sku }: InventoryHis
                                 .replace('Purchase Order', '採購單號')
                                 .replace('Transfer Id', '轉移編號');
                               
-                              return `${displayKey}: ${value}`;
+                              return `${displayKey}: ${String(value)}`;
                             }).join(', ');
                           }
                           
                           return '無';
                         })()}
+                      </span>
                       </div>
                   </div>
                 </div>

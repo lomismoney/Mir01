@@ -75,9 +75,47 @@ export function parseApiError(error: UnknownError): string {
     return ERROR_MESSAGES.HTML_RESPONSE;
   }
   
-  // 如果是自定義的 ApiError
+  // Laravel 表單驗證錯誤格式處理
+  if (errorObj.errors && typeof errorObj.errors === 'object') {
+    const errorsObj = errorObj.errors as Record<string, unknown>;
+    const errorMessages: string[] = [];
+    
+    // 遍歷所有錯誤欄位
+    Object.values(errorsObj).forEach(fieldErrors => {
+      if (Array.isArray(fieldErrors)) {
+        // Laravel 驗證錯誤格式：每個欄位的錯誤是字串陣列
+        fieldErrors.forEach(msg => {
+          if (typeof msg === 'string') {
+            errorMessages.push(msg);
+          }
+        });
+      } else if (typeof fieldErrors === 'string') {
+        // 單一錯誤訊息
+        errorMessages.push(fieldErrors);
+      }
+    });
+    
+    if (errorMessages.length > 0) {
+      // 如果有多個錯誤，用換行符號分隔；如果只有一個，直接返回
+      return errorMessages.length === 1 ? errorMessages[0] : errorMessages.join('\n');
+    }
+  }
+  
+  // 如果是自定義的 ApiError 或直接的錯誤訊息
   if (typeof errorObj.message === 'string') {
     return errorObj.message;
+  }
+  
+  // 檢查 detail 欄位（openapi-fetch 錯誤格式）
+  if (errorObj.detail) {
+    if (typeof errorObj.detail === 'string') {
+      return errorObj.detail;
+    }
+    if (Array.isArray(errorObj.detail) && errorObj.detail.length > 0) {
+      return Array.isArray(errorObj.detail[0]) 
+        ? errorObj.detail[0].join('\n')
+        : String(errorObj.detail[0]);
+    }
   }
   
   // 如果有 HTTP 狀態碼

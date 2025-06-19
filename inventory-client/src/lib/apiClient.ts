@@ -179,4 +179,82 @@ apiClient.use({
   },
 });
 
-export { apiClient, getTokenSmart }; 
+// 手動設置 Authorization header
+const originalGET = apiClient.GET;
+const originalPOST = apiClient.POST;
+const originalPUT = apiClient.PUT;
+const originalPATCH = apiClient.PATCH;
+const originalDELETE = apiClient.DELETE;
+
+// 包裝所有請求以自動添加認證頭
+function wrapWithAuth<T extends Function>(fn: T): unknown {
+  return ((...args: any[]) => {
+    // 從 localStorage 獲取 token
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
+      if (token && args[1]?.headers) {
+        args[1].headers.Authorization = `Bearer ${token}`;
+      } else if (token) {
+        args[1] = { ...args[1], headers: { ...args[1]?.headers, Authorization: `Bearer ${token}` } };
+      }
+    }
+    return fn(...args);
+  }) as unknown as T;
+}
+
+apiClient.GET = wrapWithAuth(originalGET) as typeof originalGET;
+apiClient.POST = wrapWithAuth(originalPOST) as typeof originalPOST;
+apiClient.PUT = wrapWithAuth(originalPUT) as typeof originalPUT;
+apiClient.PATCH = wrapWithAuth(originalPATCH) as typeof originalPATCH;
+apiClient.DELETE = wrapWithAuth(originalDELETE) as typeof originalDELETE;
+
+// 創建類型安全的包裝器來處理有問題的 API 端點
+export const safeApiClient = {
+  ...apiClient,
+  
+  // 修復庫存詳情端點
+  getInventoryDetail: async (id: number) => {
+    return originalGET('/api/inventory/{id}' as any, {
+      params: { path: { id } }
+    } as any);
+  },
+
+  // 修復轉移詳情端點
+  getInventoryTransferDetail: async (id: number) => {
+    return originalGET('/api/inventory/transfers/{id}' as any, {
+      params: { path: { id } }
+    } as any);
+  },
+
+  // 修復門市相關端點
+  getStore: async (id: number) => {
+    return originalGET('/api/stores/{id}' as any, {
+      params: { path: { id } }
+    } as any);
+  },
+
+  createStore: async (data: any) => {
+    return originalPOST('/api/stores' as any, {
+      body: data
+    } as any);
+  },
+
+  updateStore: async (id: number, data: any) => {
+    return originalPUT('/api/stores/{id}' as any, {
+      params: { path: { id } },
+      body: data
+    } as any);
+  },
+
+  // 修復商品變體詳情端點
+  getProductVariantDetail: async (id: number) => {
+    return originalGET('/api/products/variants/{id}' as any, {
+      params: { path: { id } }
+    } as any);
+  },
+};
+
+// 同時導出 apiClient 和 getTokenSmart（用於向後相容）
+export { apiClient, getTokenSmart };
+
+export default apiClient; 
