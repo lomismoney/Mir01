@@ -5,11 +5,12 @@ import Link from 'next/link'; // <-- 新增導入
 import { Button } from '@/components/ui/button'; // <-- 新增導入
 import { PlusCircle } from 'lucide-react'; // <-- 新增導入
 import { useOrders } from '@/hooks/queries/useEntityQueries';
+import { OrderPreviewModal } from '@/components/orders/OrderPreviewModal';
 import { useDebounce } from '@/hooks/use-debounce';
 import { DataTableSkeleton } from '@/components/ui/data-table-skeleton';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { columns } from './columns';
+import { createColumns } from './columns';
 import { Order } from '@/types/api-helpers';
 import {
   flexRender,
@@ -37,6 +38,9 @@ export function OrderClientComponent() {
   });
   const debouncedSearch = useDebounce(filters.search, 500); // 500ms 防抖
 
+  // 🎯 訂單預覽狀態管理
+  const [previewingOrderId, setPreviewingOrderId] = useState<number | null>(null);
+
   // 使用 useMemo 來避免在每次渲染時都重新創建查詢對象
   const queryFilters = useMemo(() => ({
     search: debouncedSearch || undefined,
@@ -51,8 +55,11 @@ export function OrderClientComponent() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   // 從響應中解析數據
-  const pageData = (response?.data || []) as Order[];
-  const meta = response?.meta;
+  const pageData = ((response as any)?.data || []) as Order[];
+  const meta = (response as any)?.meta;
+
+  // 🎯 創建包含預覽回調的 columns
+  const columns = useMemo(() => createColumns({ onPreview: setPreviewingOrderId }), []);
 
   // 配置表格
   const table = useReactTable({
@@ -190,6 +197,17 @@ export function OrderClientComponent() {
       </div>
       
       {/* 分頁邏輯將在後續實現 */}
+
+      {/* 🎯 訂單預覽模態 */}
+      <OrderPreviewModal
+        orderId={previewingOrderId}
+        open={!!previewingOrderId} // 當 ID 存在時，open 為 true
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setPreviewingOrderId(null); // 當面板關閉時，重置 ID
+          }
+        }}
+      />
     </div>
   );
 } 

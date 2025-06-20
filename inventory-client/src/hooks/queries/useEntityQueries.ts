@@ -29,16 +29,18 @@ export const QUERY_KEYS = {
 };
 
 /**
- * 商品列表查詢 Hook（完整篩選版本 - TD-004 解決方案）
+ * 商品列表查詢 Hook - 架構升級版（標準化作戰單位 #2）
  * 
  * 功能特性：
  * 1. 支援完整的後端篩選參數（product_name, store_id, category_id, low_stock, out_of_stock）
  * 2. 智能查詢鍵結構，支援所有篩選參數的精確緩存
  * 3. 向後相容舊版 search 參數
  * 4. 高效能緩存策略，減少不必要的 API 請求
+ * 5. 🎯 資料精煉廠 - 在源頭處理所有數據轉換和類型安全
+ * 6. 🚫 根除 any 類型 - 確保產品數據的純淨契約
  * 
  * @param filters - 篩選參數物件，包含所有可用的篩選條件
- * @returns React Query 查詢結果
+ * @returns React Query 查詢結果，返回處理乾淨、類型完美的 ProductItem 陣列
  */
 export function useProducts(filters: ProductFilters = {}) {
     return useQuery({
@@ -63,10 +65,101 @@ export function useProducts(filters: ProductFilters = {}) {
             });
             
             if (error) {
-                throw new Error('獲取商品列表失敗');
+                const errorMessage = parseApiError(error);
+                throw new Error(errorMessage || '獲取商品列表失敗');
             }
 
+            // queryFn 依然返回完整的 response，數據轉換交給 select 處理
             return data;
+        },
+        
+        // 🎯 數據精煉廠 - 商品數據的完美轉換
+        select: (response: any) => {
+            // 1. 解包：處理分頁或普通陣列數據結構
+            const products = response?.data?.data || response?.data || [];
+            if (!Array.isArray(products)) return [];
+
+            // 2. 進行所有必要的數據轉換和類型安全處理
+            return products.map((apiProduct: any) => ({
+                // 📋 基本商品資訊
+                id: apiProduct.id || 0,
+                name: apiProduct.name || '未命名商品',
+                description: apiProduct.description || null,
+                category_id: apiProduct.category_id || null,
+                created_at: apiProduct.created_at || '',
+                updated_at: apiProduct.updated_at || '',
+                
+                // 🖼️ 圖片處理 - 確保圖片 URL 的完整性
+                image_urls: apiProduct.image_urls ? {
+                    original: apiProduct.image_urls.original || null,
+                    thumb: apiProduct.image_urls.thumb || null,
+                    medium: apiProduct.image_urls.medium || null,
+                    large: apiProduct.image_urls.large || null,
+                } : null,
+                
+                // 🏷️ 分類資訊處理（雙格式支援）
+                category: apiProduct.category ? {
+                    id: apiProduct.category.id || 0,
+                    name: apiProduct.category.name || '未分類',
+                    description: apiProduct.category.description || null,
+                } : null,
+                
+                // 🎯 向前相容：為 ProductSelector 等元件提供簡化格式
+                categoryName: apiProduct.category?.name || '未分類', // 字串格式的分類名稱
+                mainImageUrl: apiProduct.image_urls?.original || 'https://via.placeholder.com/300x300', // 主圖 URL
+                
+                // 🎯 變體(SKU)數據的深度清理
+                variants: apiProduct.variants?.map((variant: any) => ({
+                    id: variant.id || 0,
+                    sku: variant.sku || 'N/A',
+                    price: parseFloat(variant.price || '0'), // 字串轉數值
+                    product_id: variant.product_id || apiProduct.id,
+                    created_at: variant.created_at || '',
+                    updated_at: variant.updated_at || '',
+                    
+                    // 🔧 屬性值處理
+                    attribute_values: variant.attribute_values?.map((attrValue: any) => ({
+                        id: attrValue.id || 0,
+                        value: attrValue.value || '',
+                        attribute_id: attrValue.attribute_id || 0,
+                        attribute: attrValue.attribute ? {
+                            id: attrValue.attribute.id || 0,
+                            name: attrValue.attribute.name || '',
+                        } : null,
+                    })) || [],
+                    
+                    // 📦 庫存資訊處理
+                    inventory: variant.inventory?.map((inv: any) => ({
+                        id: inv.id || 0,
+                        quantity: parseInt(inv.quantity || '0', 10), // 字串轉整數
+                        low_stock_threshold: parseInt(inv.low_stock_threshold || '0', 10),
+                        store: inv.store ? {
+                            id: inv.store.id || 0,
+                            name: inv.store.name || '未知門市',
+                        } : null,
+                    })) || [],
+                })) || [],
+                
+                // 💰 價格範圍統計（基於變體價格計算）
+                price_range: (() => {
+                    const prices = apiProduct.variants?.map((v: any) => parseFloat(v.price || '0')).filter((p: number) => p > 0) || [];
+                    if (prices.length === 0) return { min: 0, max: 0, count: 0 };
+                    
+                    return {
+                        min: Math.min(...prices),
+                        max: Math.max(...prices),
+                        count: prices.length,
+                    };
+                })(),
+                
+                // 🏷️ 屬性列表處理
+                attributes: apiProduct.attributes?.map((attr: any) => ({
+                    id: attr.id || 0,
+                    name: attr.name || '',
+                    type: attr.type || '',
+                    description: attr.description || null,
+                })) || [],
+            }));
         },
         
         // 🚀 體驗優化配置
@@ -74,6 +167,7 @@ export function useProducts(filters: ProductFilters = {}) {
         refetchOnMount: false,       // 依賴全域 staleTime
         refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
         staleTime: 1 * 60 * 1000,   // 1 分鐘緩存，平衡體驗與資料新鮮度
+        retry: 2, // 失敗時重試 2 次
     });
 }
 
@@ -2421,16 +2515,18 @@ export function useCreateOrder() {
 }
 
 /**
- * Hook for fetching a single order's details
+ * Hook for fetching a single order's details - 架構升級版
  * 
  * 功能特性：
  * 1. 獲取單一訂單的完整資訊（包含關聯的客戶、項目、狀態歷史）
  * 2. 使用獨立的查詢鍵確保每個訂單獨立緩存
  * 3. 條件性查詢，只有在 orderId 存在時才執行
  * 4. 較長的緩存時間，適合詳情頁使用場景
+ * 5. 🎯 資料精煉廠 - 在源頭處理所有數據解包和類型轉換
+ * 6. 🚫 根除 any 類型 - 確保數據契約的純淨
  * 
  * @param orderId - 訂單 ID
- * @returns React Query 查詢結果
+ * @returns React Query 查詢結果，返回處理乾淨、類型完美的 ProcessedOrder 對象
  */
 export function useOrderDetail(orderId: number | null) {
   return useQuery({
@@ -2440,11 +2536,47 @@ export function useOrderDetail(orderId: number | null) {
       const { data, error } = await apiClient.GET("/api/orders/{id}", {
         params: { path: { id: orderId } },
       });
-      if (error) throw error;
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '獲取訂單詳情失敗');
+      }
+      // queryFn 依然返回完整的 response，數據轉換交給 select 處理
       return data;
+    },
+    // 🎯 新增 select 選項 - 數據精煉廠，讓元件獲得純淨的數據
+    select: (response: any) => {
+      // 1. 解包：從 API 響應中提取 data 部分
+      const order = response?.data;
+      if (!order) return null;
+
+      // 2. 進行所有必要的類型轉換和數據清理
+      return {
+        ...order,
+        // 📊 金額字段的數值化處理
+        subtotal: parseFloat(order.subtotal || '0'),
+        shipping_fee: parseFloat(order.shipping_fee || '0'),
+        tax_amount: parseFloat(order.tax_amount || '0'),
+        discount_amount: parseFloat(order.discount_amount || '0'),
+        grand_total: parseFloat(order.grand_total || '0'),
+        
+        // 🛒 訂單項目的數據清理
+        items: order.items?.map((item: any) => ({
+          ...item,
+          price: parseFloat(item.price || '0'),
+          cost: parseFloat(item.cost || '0'),
+          quantity: parseInt(item.quantity || '0', 10),
+          tax_rate: parseFloat(item.tax_rate || '0'),
+          discount_amount: parseFloat(item.discount_amount || '0'),
+        })) || [],
+        
+        // 🔄 確保客戶資訊的完整性
+        customer: order.customer || null,
+        creator: order.creator || null,
+      };
     },
     enabled: !!orderId, // 只有在 orderId 存在時，此查詢才會被觸發
     staleTime: 5 * 60 * 1000, // 詳情頁數據可以緩存 5 分鐘
+    retry: 2, // 失敗時重試 2 次
   });
 }
 

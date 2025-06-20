@@ -34,7 +34,7 @@ export interface Variant {
 }
 
 /**
- * 商品介面
+ * 商品介面 - 匹配數據精煉廠的輸出格式
  * 
  * 代表一個商品主體，包含多個規格變體
  */
@@ -43,12 +43,41 @@ export interface Product {
   id: string | number;
   /** 商品名稱 */
   name: string;
-  /** 商品分類 */
-  category: string;
-  /** 商品主圖 URL */
+  /** 商品描述 */
+  description?: string | null;
+  /** 分類 ID */
+  category_id?: number | null;
+  /** 創建時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+  /** 圖片 URLs */
+  image_urls?: {
+    original?: string | null;
+    thumb?: string | null;
+    medium?: string | null;
+    large?: string | null;
+  } | null;
+  /** 商品分類物件 */
+  category?: {
+    id: number;
+    name: string;
+    description?: string | null;
+  } | null;
+  /** 商品分類名稱（簡化格式） */
+  categoryName: string;
+  /** 商品主圖 URL（簡化格式） */
   mainImageUrl: string;
   /** 商品的所有規格變體 */
   variants: Variant[];
+  /** 價格範圍 */
+  price_range?: {
+    min: number;
+    max: number;
+    count: number;
+  };
+  /** 屬性列表 */
+  attributes?: any[];
 }
 
 // Shadcn/UI Dialog 相關元件
@@ -135,45 +164,15 @@ export function ProductSelector({
     new Set(selectedIds)
   );
   
-  // 使用 useProducts Hook 獲取真實數據
+  // 🎯 直接消費「數據精煉廠」處理過的純淨數據
   const { 
-    data: productsData, 
+    data: products = [], // 直接將 data 解構為 products，並提供預設值
     isLoading, 
     error 
   } = useProducts({
     product_name: debouncedSearchQuery, // 將 debounced 搜尋字串作為 product_name 參數傳遞
     // 暫不傳遞 category，詳見戰術註記
   });
-
-  // 數據轉換適配器 - 將 API 返回的數據結構映射到前端介面
-  const products = useMemo(() => {
-    // 如果沒有數據，返回空陣列
-    if (!productsData?.data) return [];
-
-    // 遍歷 API 返回的每個產品，將其轉換為我們前端需要的格式
-    return productsData.data.map((apiProduct: any) => ({
-      // --- Product 層級映射 ---
-      id: apiProduct.id || 0,
-      name: apiProduct.name || '未命名商品',
-      // 安全地訪問可選的 category 名稱，若無則提供預設值
-      category: apiProduct.category?.name || '未分類',
-      // 安全地訪問可選的圖片 URL，若無則提供一個占位圖
-      mainImageUrl: apiProduct.image_urls?.original || 'https://via.placeholder.com/300x300',
-      
-      // --- Variants 陣列映射 ---
-      variants: apiProduct.variants?.map((v: any) => ({
-        id: v.id || 0,
-        sku: v.sku || 'N/A',
-        // 🎯 使用後端新添加的 specifications 字段
-        specifications: v.specifications || apiProduct.name || '標準',
-        price: v.price || 0,
-        // 🎯 使用後端新添加的 stock 字段（總庫存）
-        stock: v.stock ?? 0, // 使用 ?? 處理 null 和 undefined，比 || 更嚴謹
-        // 🎯 直接信任後端提供的 image_url
-        imageUrl: v.image_url, // 直接信任後端提供的 URL。如果它為 null，就讓它為 null，UI 會自然顯示占位圖。
-      })) || [] // 如果 product 沒有 variants，則返回一個空陣列
-    }));
-  }, [productsData]); // 僅在 productsData 發生變化時才重新計算
   
   // 過濾和排序狀態
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -232,7 +231,7 @@ export function ProductSelector({
   // 動態分類列表 - 根據當前商品資料自動生成
   const categories = useMemo(() => {
     if (products.length === 0) return [];
-    const allCategories = new Set(products.map(p => p.category));
+    const allCategories = new Set(products.map(p => p.categoryName));
     return ['all', ...Array.from(allCategories)];
   }, [products]);
 
@@ -242,7 +241,7 @@ export function ProductSelector({
 
     // 應用分類過濾
     if (categoryFilter !== 'all') {
-      items = items.filter(p => p.category === categoryFilter);
+      items = items.filter(p => p.categoryName === categoryFilter);
     }
 
     // 應用排序
@@ -379,7 +378,7 @@ export function ProductSelector({
                     
                     {/* 產品分類標籤 */}
                     <Badge variant="secondary" className="text-xs">
-                      {product.category}
+                      {product.categoryName}
                     </Badge>
                     
                     {/* 規格數量提示 */}

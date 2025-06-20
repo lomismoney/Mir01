@@ -559,3 +559,71 @@ export interface OrderItemData {
   price: number;
   quantity: number;
 }
+
+/**
+ * 經過數據精煉廠處理的訂單項目類型
+ * 
+ * 🎯 此類型反映了經過 useOrderDetail Hook select 函數處理後的純淨數據結構
+ * 所有字符串格式的數值字段都已轉換為 number 類型，確保組件可以直接使用
+ */
+export interface ProcessedOrderItem {
+  id: number;
+  product_variant_id: number | null;
+  is_stocked_sale: boolean;
+  status: string;
+  custom_specifications: Record<string, any> | null;
+  product_name: string;
+  sku: string;
+  price: number;        // 已精煉為 number
+  cost: number;         // 已精煉為 number
+  quantity: number;     // 已精煉為 number
+  tax_rate: number;     // 已精煉為 number
+  discount_amount: number;  // 已精煉為 number
+  custom_product_name: string | null;
+  custom_product_specs: string | null;
+  custom_product_image: string | null;
+  custom_product_category: string | null;
+  custom_product_brand: string | null;
+  created_at: string;
+  updated_at: string;
+  product_variant?: {
+    id: number;
+    sku: string;
+    price: string;
+    product?: {
+      id: number;
+      name: string;
+      description: string | null;
+    };
+  } | null;
+}
+
+/**
+ * 經過數據精煉廠處理的訂單類型
+ * 
+ * 🎯 此類型反映了經過 useOrderDetail Hook select 函數處理後的純淨數據結構
+ * 所有字符串格式的金額字段都已轉換為 number 類型，組件可以直接進行算術運算
+ */
+export interface ProcessedOrder {
+  id: number;
+  order_number: string;
+  customer_id: number;
+  customer: Customer; // 嵌套的客戶對象
+  creator_id: number;
+  creator: User;      // 嵌套的創建者對象
+  shipping_status: string;
+  payment_status: string;
+  shipping_fee: number | null;  // 已精煉為 number
+  shipping_address: string | null;
+  shipping_phone: string | null;
+  billing_address: string | null;
+  notes: string | null;
+  subtotal: number;      // 已精煉為 number
+  tax_amount: number;    // 已精煉為 number
+  discount_amount: number;  // 已精煉為 number
+  grand_total: number;   // 已精煉為 number
+  created_at: string;
+  updated_at: string;
+  items: ProcessedOrderItem[]; // 使用精煉後的訂單項目類型
+  status_histories?: OrderStatusHistory[]; // 狀態歷史記錄
+}

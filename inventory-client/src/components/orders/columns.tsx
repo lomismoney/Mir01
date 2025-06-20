@@ -10,14 +10,25 @@ import Link from 'next/link';
 import { Order } from '@/types/api-helpers';
 import { useDeleteOrder } from '@/hooks/queries/useEntityQueries';
 
-// 使用強類型 Order
-export const columns: ColumnDef<Order>[] = [
+// 創建 columns 函數，接受預覽回調
+export const createColumns = ({ onPreview }: { onPreview: (id: number) => void }): ColumnDef<Order>[] => [
   // Checkbox 列 (用於批量操作)
   // ...
 
   {
     accessorKey: 'order_number',
-    header: '訂單號碼',
+    header: '訂單編號',
+    cell: ({ row }) => {
+      const order = row.original;
+      return (
+        <button
+          onClick={() => onPreview(order.id)}
+          className="font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {order.order_number}
+        </button>
+      );
+    },
   },
   {
     accessorKey: 'customer.name', // 嵌套數據訪問
@@ -105,7 +116,7 @@ export const columns: ColumnDef<Order>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/orders/${order.id}`}>查看詳情</Link>
+                <Link href={`/orders/${order.id}`}>查看完整詳情</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 {/* 我們將在下一步創建 /edit 頁面 */}
