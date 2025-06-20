@@ -87,11 +87,24 @@ class StoreController extends Controller
         $allowedIncludes = ['users', 'inventories', 'purchases', 'sales', 'transfersOut', 'transfersIn'];
         
         if (request()->has('include')) {
-            $requestedIncludes = explode(',', request()->input('include'));
-            $includesToLoad = array_intersect($requestedIncludes, $allowedIncludes);
+            $includeParam = request()->input('include');
+            $requestedIncludes = [];
+            
+            // Handle both string and array formats for include parameter
+            if (is_string($includeParam) && !empty($includeParam)) {
+                // Handle comma-separated string: ?include=users,inventories
+                $requestedIncludes = explode(',', $includeParam);
+            } elseif (is_array($includeParam) && !empty($includeParam)) {
+                // Handle array format: ?include[]=users&include[]=inventories
+                $requestedIncludes = $includeParam;
+            }
+            
+            if (!empty($requestedIncludes)) {
+                $includesToLoad = array_intersect($requestedIncludes, $allowedIncludes);
 
-            if (!empty($includesToLoad)) {
-                $store->load($includesToLoad);
+                if (!empty($includesToLoad)) {
+                    $store->load($includesToLoad);
+                }
             }
         }
 
