@@ -666,4 +666,535 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['from_store_id']);
     }
+    
+    /** @test */
+    public function admin_can_update_transfer_from_pending_directly_to_completed()
+    {
+        $user = $this->createAdminUser();
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 35,
+            'status' => 'pending',
+            'notes' => '直接完成轉移測試'
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/status", [
+                'status' => 'completed',
+                'notes' => '已確認收到並完成'
+            ]);
+            
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => '庫存轉移狀態更新成功',
+                'transfer' => [
+                    'status' => 'completed',
+                    'notes' => '已確認收到並完成'
+                ]
+            ]);
+            
+        // 確認來源門市庫存已扣減
+        $this->assertDatabaseHas('inventories', [
+            'id' => $this->fromInventory->id,
+            'quantity' => 65 // 100 - 35 = 65
+        ]);
+        
+        // 確認目標門市庫存已增加
+        $this->assertDatabaseHas('inventories', [
+            'id' => $this->toInventory->id,
+            'quantity' => 35 // 0 + 35 = 35
+        ]);
+        
+        // 確認兩個交易記錄都已建立
+        $this->assertDatabaseHas('inventory_transactions', [
+            'inventory_id' => $this->fromInventory->id,
+            'type' => 'transfer_out',
+            'quantity' => -35
+        ]);
+        
+        $this->assertDatabaseHas('inventory_transactions', [
+            'inventory_id' => $this->toInventory->id,
+            'type' => 'transfer_in',
+            'quantity' => 35
+        ]);
+    }
+    
+    /** @test */
+    public function cannot_update_status_to_same_status()
+    {
+        $user = $this->createAdminUser();
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 20,
+            'status' => 'pending'
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/status", [
+                'status' => 'pending' // 相同狀態
+            ]);
+            
+        $response->assertStatus(200)
+            ->assertJson(['message' => '狀態未變更']);
+    }
+    
+    /** @test */
+    public function cannot_update_completed_transfer_status()
+    {
+        $user = $this->createAdminUser();
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 20,
+            'status' => 'completed'
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/status", [
+                'status' => 'in_transit'
+            ]);
+            
+        $response->assertStatus(400)
+            ->assertJson([
+                'message' => '已完成或已取消的轉移記錄不能更改狀態'
+            ]);
+    }
+    
+    /** @test */
+    public function cannot_update_cancelled_transfer_status()
+    {
+        $user = $this->createAdminUser();
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 20,
+            'status' => 'cancelled'
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/status", [
+                'status' => 'pending'
+            ]);
+            
+        $response->assertStatus(400)
+            ->assertJson([
+                'message' => '已完成或已取消的轉移記錄不能更改狀態'
+            ]);
+    }
+    
+    /** @test */
+    public function update_status_handles_insufficient_stock_error()
+    {
+        $user = $this->createAdminUser();
+        
+        // 設置來源庫存不足
+        $this->fromInventory->update(['quantity' => 5]);
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 20, // 超過可用庫存
+            'status' => 'pending'
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/status", [
+                'status' => 'in_transit'
+            ]);
+            
+        $response->assertStatus(400)
+            ->assertJson([
+                'message' => '來源門市庫存不足，無法開始轉移'
+            ]);
+            
+        // 確認狀態未改變
+        $this->assertDatabaseHas('inventory_transfers', [
+            'id' => $transfer->id,
+            'status' => 'pending'
+        ]);
+    }
+    
+    /** @test */
+    public function admin_can_filter_transfers_by_date_range()
+    {
+        $user = $this->createAdminUser();
+        
+        // 創建不同日期的轉移記錄
+        $oldDate = now()->subDays(10);
+        $recentDate = now()->subDays(2);
+        
+        $oldTransfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 10,
+            'status' => 'completed'
+        ]);
+        $oldTransfer->created_at = $oldDate;
+        $oldTransfer->save();
+        
+        $recentTransfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 15,
+            'status' => 'pending'
+        ]);
+        $recentTransfer->created_at = $recentDate;
+        $recentTransfer->save();
+        
+        $startDate = now()->subDays(5)->format('Y-m-d');
+        $endDate = now()->addDay()->format('Y-m-d'); // 確保包含今天和明天
+        
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/inventory/transfers?start_date={$startDate}&end_date={$endDate}");
+            
+        $response->assertStatus(200);
+        
+        $transfers = $response->json('data');
+        $this->assertCount(1, $transfers);
+        $this->assertEquals($recentTransfer->id, $transfers[0]['id']);
+    }
+    
+    /** @test */
+    public function admin_can_filter_transfers_by_product_name()
+    {
+        $user = $this->createAdminUser();
+        
+        // 創建另一個商品
+        $otherProduct = Product::factory()->create(['name' => '其他測試商品']);
+        $otherVariant = $otherProduct->variants()->create([
+            'sku' => 'OTHER-SKU-001',
+            'price' => 50.00
+        ]);
+        
+        // 創建轉移記錄
+        InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 10,
+            'status' => 'completed'
+        ]);
+        
+        InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $otherVariant->id,
+            'quantity' => 15,
+            'status' => 'pending'
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/inventory/transfers?product_name=轉移測試商品');
+            
+        $response->assertStatus(200);
+        
+        $transfers = $response->json('data');
+        $this->assertCount(1, $transfers);
+        $this->assertEquals($this->variant->id, $transfers[0]['product_variant_id']);
+    }
+    
+    /** @test */
+    public function admin_can_filter_transfers_by_target_store()
+    {
+        $user = $this->createAdminUser();
+        $thirdStore = Store::create(['name' => '第三門市', 'address' => '第三地址']);
+        
+        InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 10,
+            'status' => 'completed'
+        ]);
+        
+        InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $thirdStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 15,
+            'status' => 'pending'
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/inventory/transfers?to_store_id={$thirdStore->id}");
+            
+        $response->assertStatus(200);
+        
+        $transfers = $response->json('data');
+        $this->assertCount(1, $transfers);
+        $this->assertEquals($thirdStore->id, $transfers[0]['to_store_id']);
+    }
+    
+    /** @test */
+    public function show_returns_404_for_non_existent_transfer()
+    {
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/inventory/transfers/99999');
+            
+        $response->assertStatus(404);
+    }
+    
+    /** @test */
+    public function update_status_returns_404_for_non_existent_transfer()
+    {
+        $response = $this->actingAsAdmin()
+            ->patchJson('/api/inventory/transfers/99999/status', [
+                'status' => 'completed'
+            ]);
+            
+        $response->assertStatus(404);
+    }
+    
+    /** @test */
+    public function cancel_returns_404_for_non_existent_transfer()
+    {
+        $response = $this->actingAsAdmin()
+            ->patchJson('/api/inventory/transfers/99999/cancel', [
+                'reason' => '測試錯誤'
+            ]);
+            
+        $response->assertStatus(404);
+    }
+    
+    /** @test */
+    public function update_status_validates_status_field()
+    {
+        $user = $this->createAdminUser();
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 20,
+            'status' => 'pending'
+        ]);
+        
+        // 測試無效狀態值
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/status", [
+                'status' => 'invalid_status'
+            ]);
+            
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['status']);
+            
+        // 測試缺少必填的 status 欄位
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/status", [
+                'notes' => '只有備註'
+            ]);
+            
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['status']);
+    }
+    
+    /** @test */
+    public function cancel_validates_reason_field()
+    {
+        $user = $this->createAdminUser();
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 20,
+            'status' => 'pending'
+        ]);
+        
+        // 測試缺少必填的 reason 欄位
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/cancel", []);
+            
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['reason']);
+            
+        // 測試空的 reason 欄位
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/cancel", [
+                'reason' => ''
+            ]);
+            
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['reason']);
+    }
+    
+    /** @test */
+    public function cannot_cancel_already_cancelled_transfer()
+    {
+        $user = $this->createAdminUser();
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 20,
+            'status' => 'cancelled'
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/cancel", [
+                'reason' => '嘗試再次取消'
+            ]);
+            
+        $response->assertStatus(400)
+            ->assertJson([
+                'message' => '已完成或已取消的轉移記錄不能再次取消'
+            ]);
+    }
+    
+    /** @test */
+    public function index_works_with_pagination()
+    {
+        $user = $this->createAdminUser();
+        
+        // 創建多個轉移記錄
+        for ($i = 1; $i <= 20; $i++) {
+            InventoryTransfer::create([
+                'from_store_id' => $this->fromStore->id,
+                'to_store_id' => $this->toStore->id,
+                'user_id' => $user->id,
+                'product_variant_id' => $this->variant->id,
+                'quantity' => 5,
+                'status' => 'completed'
+            ]);
+        }
+        
+        // 測試預設分頁
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/inventory/transfers');
+            
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data',
+                'meta' => [
+                    'current_page',
+                    'from',
+                    'last_page',
+                    'per_page',
+                    'to',
+                    'total'
+                ]
+            ]);
+            
+        $this->assertEquals(15, $response->json('meta.per_page')); // 預設15個
+        
+        // 測試自訂每頁數量
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/inventory/transfers?per_page=5');
+            
+        $response->assertStatus(200);
+        $this->assertEquals(5, $response->json('meta.per_page'));
+        $this->assertCount(5, $response->json('data'));
+    }
+    
+    /** @test */
+    public function viewer_cannot_cancel_transfer()
+    {
+        $user = $this->createAdminUser();
+        
+        $transfer = InventoryTransfer::create([
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'user_id' => $user->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 20,
+            'status' => 'pending'
+        ]);
+        
+        $response = $this->actingAsUser()
+            ->patchJson("/api/inventory/transfers/{$transfer->id}/cancel", [
+                'reason' => '檢視者嘗試取消'
+            ]);
+            
+        $response->assertStatus(403);
+    }
+    
+    /** @test */
+    public function store_creates_inventory_records_if_not_exist()
+    {
+        // 刪除目標門市的庫存記錄，測試自動創建功能
+        $this->toInventory->delete();
+        
+        $transferData = [
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 25,
+            'notes' => '測試自動創建庫存記錄'
+        ];
+        
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/inventory/transfers', $transferData);
+            
+        $response->assertStatus(201);
+        
+        // 確認目標門市的庫存記錄已自動創建
+        $this->assertDatabaseHas('inventories', [
+            'product_variant_id' => $this->variant->id,
+            'store_id' => $this->toStore->id,
+            'quantity' => 25, // 轉移後的數量
+            'low_stock_threshold' => 5 // 預設值
+        ]);
+    }
+    
+    /** @test */
+    public function store_with_pending_status_does_not_modify_inventory()
+    {
+        $transferData = [
+            'from_store_id' => $this->fromStore->id,
+            'to_store_id' => $this->toStore->id,
+            'product_variant_id' => $this->variant->id,
+            'quantity' => 30,
+            'status' => 'pending', // 指定為待處理狀態
+            'notes' => '測試待處理狀態'
+        ];
+        
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/inventory/transfers', $transferData);
+            
+        $response->assertStatus(201)
+            ->assertJson([
+                'transfer' => [
+                    'status' => 'pending'
+                ]
+            ]);
+            
+        // 確認庫存未變動（待處理狀態不應該修改庫存）
+        $this->assertDatabaseHas('inventories', [
+            'id' => $this->fromInventory->id,
+            'quantity' => 100 // 原始數量未變
+        ]);
+        
+        $this->assertDatabaseHas('inventories', [
+            'id' => $this->toInventory->id,
+            'quantity' => 0 // 目標庫存未變
+        ]);
+    }
 }

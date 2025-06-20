@@ -179,7 +179,7 @@ class CustomerController extends Controller
      * 
      * @responseFile 200 storage/responses/customer.update.json
      */
-    public function update(UpdateCustomerRequest $request, Customer $customer): CustomerResource
+    public function update(UpdateCustomerRequest $request, Customer $customer)
     {
         try {
             // 1. 權限驗證 - 檢查使用者是否有權限更新此客戶

@@ -964,4 +964,511 @@ class ProductControllerTest extends TestCase
         $deletedInventoryCount = \App\Models\Inventory::whereIn('product_variant_id', [$variantB->id, $variantC->id])->count();
         $this->assertEquals(0, $deletedInventoryCount);
     }
+
+    /** @test */
+    public function admin_can_create_simple_product_with_store_simple_endpoint()
+    {
+        $category = Category::factory()->create();
+        
+        $productData = [
+            'name' => '簡單商品',
+            'sku' => 'SIMPLE-001',
+            'price' => 150.00,
+            'category_id' => $category->id,
+            'description' => '這是一個簡單商品的描述',
+        ];
+        
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products/simple', $productData);
+            
+        $response->assertStatus(201)
+            ->assertJson(function (AssertableJson $json) use ($productData) {
+                $json->has('data')
+                    ->where('data.name', $productData['name'])
+                    ->where('data.description', $productData['description'])
+                    ->where('data.category_id', $productData['category_id'])
+                    ->has('data.variants', 1) // 應該有一個變體
+                    ->etc();
+            });
+            
+        $this->assertDatabaseHas('products', [
+            'name' => $productData['name'],
+            'description' => $productData['description'],
+            'category_id' => $productData['category_id'],
+        ]);
+        
+        $this->assertDatabaseHas('product_variants', [
+            'sku' => $productData['sku'],
+            'price' => $productData['price'],
+        ]);
+    }
+    
+    /** @test */
+    public function admin_can_create_simple_product_without_category()
+    {
+        $productData = [
+            'name' => '無分類簡單商品',
+            'sku' => 'SIMPLE-002',
+            'price' => 75.50,
+            'description' => '沒有分類的商品',
+        ];
+        
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products/simple', $productData);
+            
+        $response->assertStatus(201);
+        
+        $this->assertDatabaseHas('products', [
+            'name' => $productData['name'],
+            'category_id' => null,
+        ]);
+    }
+    
+    /** @test */
+    public function simple_product_creation_requires_valid_data()
+    {
+        // 測試缺少必填欄位
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products/simple', []);
+            
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name', 'sku', 'price']);
+            
+        // 測試 SKU 重複
+        $existingProduct = Product::factory()->create();
+        $existingVariant = $existingProduct->variants()->create([
+            'sku' => 'EXISTING-SKU',
+            'price' => 100.00,
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products/simple', [
+                'name' => '測試商品',
+                'sku' => 'EXISTING-SKU',
+                'price' => 200.00,
+            ]);
+            
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['sku']);
+    }
+    
+    /** @test */
+    public function staff_cannot_create_simple_product()
+    {
+        $productData = [
+            'name' => '員工嘗試創建的簡單商品',
+            'sku' => 'STAFF-SIMPLE-001',
+            'price' => 100.00,
+        ];
+        
+        $response = $this->actingAsUser()
+            ->postJson('/api/products/simple', $productData);
+            
+        $response->assertStatus(403);
+        
+        $this->assertDatabaseMissing('products', [
+            'name' => $productData['name'],
+        ]);
+    }
+    
+    /** @test */
+    public function store_simple_handles_service_exceptions()
+    {
+        // 使用一個不存在的分類ID來觸發錯誤
+        $productData = [
+            'name' => '測試商品',
+            'sku' => 'ERROR-TEST-001',
+            'price' => 100.00,
+            'category_id' => 9999, // 不存在的分類ID
+        ];
+        
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products/simple', $productData);
+            
+        $response->assertStatus(422);
+    }
+    
+    /** @test */
+    public function admin_can_upload_product_image()
+    {
+        $product = Product::factory()->create();
+        
+        // 創建一個符合尺寸要求的測試圖片（300x300 像素）
+        $image = imagecreate(300, 300);
+        $backgroundColor = imagecolorallocate($image, 255, 255, 255);
+        $textColor = imagecolorallocate($image, 0, 0, 0);
+        imagestring($image, 5, 50, 50, 'Test Image', $textColor);
+        
+        $tempImagePath = tempnam(sys_get_temp_dir(), 'test_image') . '.png';
+        imagepng($image, $tempImagePath);
+        imagedestroy($image);
+        
+        $uploadedFile = new \Illuminate\Http\UploadedFile(
+            $tempImagePath,
+            'test-image.png',
+            'image/png',
+            null,
+            true
+        );
+        
+        $response = $this->actingAsAdmin()
+            ->postJson("/api/products/{$product->id}/upload-image", [
+                'image' => $uploadedFile
+            ]);
+            
+        $response->assertStatus(201)
+            ->assertJson([
+                'success' => true,
+                'message' => '商品圖片上傳成功',
+            ])
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'media_id',
+                    'file_name',
+                    'file_size',
+                    'mime_type',
+                    'image_urls',
+                    'conversions_generated'
+                ]
+            ]);
+            
+        // 清理臨時檔案
+        @unlink($tempImagePath);
+    }
+    
+    /** @test */
+    public function staff_cannot_upload_product_image()
+    {
+        $product = Product::factory()->create();
+        
+        // 創建一個符合尺寸要求的測試圖片（300x300 像素）
+        $image = imagecreate(300, 300);
+        $backgroundColor = imagecolorallocate($image, 255, 255, 255);
+        $textColor = imagecolorallocate($image, 0, 0, 0);
+        imagestring($image, 5, 50, 50, 'Test Image', $textColor);
+        
+        $tempImagePath = tempnam(sys_get_temp_dir(), 'test_image') . '.png';
+        imagepng($image, $tempImagePath);
+        imagedestroy($image);
+        
+        $uploadedFile = new \Illuminate\Http\UploadedFile(
+            $tempImagePath,
+            'test-image.png',
+            'image/png',
+            null,
+            true
+        );
+        
+        $response = $this->actingAsUser()
+            ->postJson("/api/products/{$product->id}/upload-image", [
+                'image' => $uploadedFile
+            ]);
+            
+        $response->assertStatus(403);
+        
+        @unlink($tempImagePath);
+    }
+    
+    /** @test */
+    public function upload_image_validates_file_requirements()
+    {
+        $product = Product::factory()->create();
+        
+        // 測試無檔案
+        $response = $this->actingAsAdmin()
+            ->postJson("/api/products/{$product->id}/upload-image", []);
+            
+        $response->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+                'message' => '圖片上傳驗證失敗',
+            ]);
+            
+        // 測試非圖片檔案
+        $textContent = 'This is not an image';
+        $tempTextPath = tempnam(sys_get_temp_dir(), 'test_text') . '.txt';
+        file_put_contents($tempTextPath, $textContent);
+        
+        $uploadedFile = new \Illuminate\Http\UploadedFile(
+            $tempTextPath,
+            'test-file.txt',
+            'text/plain',
+            null,
+            true
+        );
+        
+        $response = $this->actingAsAdmin()
+            ->postJson("/api/products/{$product->id}/upload-image", [
+                'image' => $uploadedFile
+            ]);
+            
+        $response->assertStatus(422);
+        
+        @unlink($tempTextPath);
+    }
+    
+    /** @test */
+    public function admin_can_sort_products_by_name()
+    {
+        Product::factory()->create(['name' => 'Z 產品']);
+        Product::factory()->create(['name' => 'A 產品']);
+        Product::factory()->create(['name' => 'M 產品']);
+        
+        // 升序排序
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?sort=name');
+            
+        $response->assertStatus(200);
+        
+        $products = $response->json('data');
+        $this->assertEquals('A 產品', $products[0]['name']);
+        $this->assertEquals('M 產品', $products[1]['name']);
+        $this->assertEquals('Z 產品', $products[2]['name']);
+        
+        // 降序排序
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?sort=-name');
+            
+        $response->assertStatus(200);
+        
+        $products = $response->json('data');
+        $this->assertEquals('Z 產品', $products[0]['name']);
+        $this->assertEquals('M 產品', $products[1]['name']);
+        $this->assertEquals('A 產品', $products[2]['name']);
+    }
+    
+    /** @test */
+    public function admin_can_sort_products_by_created_at()
+    {
+        $oldProduct = Product::factory()->create(['created_at' => now()->subDays(2)]);
+        $newProduct = Product::factory()->create(['created_at' => now()]);
+        $middleProduct = Product::factory()->create(['created_at' => now()->subDay()]);
+        
+        // 升序排序（最舊的先）
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?sort=created_at');
+            
+        $response->assertStatus(200);
+        
+        $products = $response->json('data');
+        $this->assertEquals($oldProduct->id, $products[0]['id']);
+        $this->assertEquals($middleProduct->id, $products[1]['id']);
+        $this->assertEquals($newProduct->id, $products[2]['id']);
+    }
+    
+    /** @test */
+    public function admin_can_search_products_with_search_filter()
+    {
+        Product::factory()->create(['name' => '紅色T恤']);
+        Product::factory()->create(['name' => '藍色褲子']);
+        Product::factory()->create(['name' => '綠色帽子']);
+        
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?filter[search]=紅色');
+            
+        $response->assertStatus(200);
+        
+        $products = $response->json('data');
+        $this->assertCount(1, $products);
+        $this->assertEquals('紅色T恤', $products[0]['name']);
+    }
+    
+    /** @test */
+    public function admin_can_paginate_products()
+    {
+        Product::factory()->count(20)->create();
+        
+        // 測試預設分頁
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products');
+            
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data',
+                'meta' => [
+                    'current_page',
+                    'from',
+                    'last_page',
+                    'per_page',
+                    'to',
+                    'total'
+                ],
+                'links'
+            ]);
+            
+        $this->assertEquals(15, $response->json('meta.per_page'));
+        
+        // 測試自訂每頁項目數
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?per_page=5');
+            
+        $response->assertStatus(200);
+        $this->assertEquals(5, $response->json('meta.per_page'));
+        $this->assertCount(5, $response->json('data'));
+    }
+    
+    /** @test */
+    public function store_method_handles_validation_errors()
+    {
+        $category = Category::factory()->create();
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $redValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        
+        // 創建一個會導致驗證錯誤的數據結構
+        $productData = [
+            'name' => '測試商品',
+            'description' => '測試描述',
+            'category_id' => $category->id,
+            'attributes' => [$colorAttribute->id],
+            'variants' => [
+                [
+                    'sku' => 'TEST001',
+                    'price' => 100.00,
+                    'attribute_value_ids' => [99999] // 不存在的屬性值ID
+                ]
+            ]
+        ];
+        
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products', $productData);
+            
+        // 驗證會在控制器之前失敗，返回 422
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['variants.0.attribute_value_ids.0']);
+    }
+    
+    /** @test */
+    public function update_method_handles_validation_errors()
+    {
+        $product = Product::factory()->create();
+        $category = Category::factory()->create();
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        
+        // 創建會導致驗證錯誤的更新數據
+        $updateData = [
+            'name' => '更新的商品',
+            'description' => '更新的描述',
+            'category_id' => $category->id,
+            'attributes' => [$colorAttribute->id],
+            'variants' => [
+                [
+                    'sku' => 'INVALID-UPDATE',
+                    'price' => 100.00,
+                    'attribute_value_ids' => [99999] // 不存在的屬性值ID
+                ]
+            ]
+        ];
+        
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/products/{$product->id}", $updateData);
+            
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['variants.0.attribute_value_ids.0']);
+    }
+    
+    /** @test */
+    public function admin_can_filter_by_empty_search_parameters()
+    {
+        Product::factory()->count(3)->create();
+        
+        // 測試空的搜索參數不會影響結果
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/products?product_name=&category_id=&store_id=');
+            
+        $response->assertStatus(200);
+        $this->assertCount(3, $response->json('data'));
+    }
+    
+    /** @test */
+    public function batch_delete_validates_request_data()
+    {
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products/batch-delete', []);
+            
+        $response->assertStatus(422);
+        
+        // 測試非陣列的 ids
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products/batch-delete', [
+                'ids' => 'not-an-array'
+            ]);
+            
+        $response->assertStatus(422);
+    }
+    
+    /** @test */
+    public function batch_delete_validates_existing_ids()
+    {
+        // 測試刪除不存在的商品ID會返回驗證錯誤
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/products/batch-delete', [
+                'ids' => [99999, 99998, 99997]
+            ]);
+            
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['ids.0', 'ids.1', 'ids.2']);
+    }
+    
+    /** @test */
+    public function show_method_loads_all_necessary_relationships()
+    {
+        $category = Category::factory()->create();
+        $product = Product::factory()->create(['category_id' => $category->id]);
+        
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $redValue = AttributeValue::factory()->create([
+            'attribute_id' => $colorAttribute->id,
+            'value' => '紅色'
+        ]);
+        
+        $product->attributes()->attach($colorAttribute->id);
+        
+        $variant = $product->variants()->create([
+            'sku' => 'TEST-SKU-001',
+            'price' => 100.00,
+        ]);
+        $variant->attributeValues()->attach($redValue->id);
+        
+        $store = \App\Models\Store::factory()->create();
+        \App\Models\Inventory::create([
+            'product_variant_id' => $variant->id,
+            'store_id' => $store->id,
+            'quantity' => 10,
+            'low_stock_threshold' => 5,
+        ]);
+        
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/products/{$product->id}");
+            
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'category_id',
+                    'category' => [
+                        'id',
+                        'name'
+                    ],
+                    'variants' => [
+                        '*' => [
+                            'id',
+                            'sku',
+                            'price',
+                            'inventory'
+                        ]
+                    ],
+                    'has_image',
+                    'image_urls',
+                    'created_at',
+                    'updated_at'
+                ]
+            ]);
+    }
 } 

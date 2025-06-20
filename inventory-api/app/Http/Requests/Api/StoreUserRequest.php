@@ -51,7 +51,7 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in([User::ROLE_ADMIN, User::ROLE_VIEWER])],
         ];
     }
@@ -78,6 +78,7 @@ class StoreUserRequest extends FormRequest
             'password.required' => '密碼為必填欄位',
             'password.string' => '密碼必須是文字格式',
             'password.min' => '密碼至少需要 8 個字元',
+            'password.confirmed' => '兩次輸入的密碼不一致',
             
             'role.required' => '角色為必填欄位',
             'role.in' => '角色必須是管理員 (admin) 或檢視者 (viewer)',
@@ -121,6 +122,11 @@ class StoreUserRequest extends FormRequest
             ],
             'password' => [
                 'description' => '用戶密碼（至少8個字元）',
+                'example' => 'password123',
+                'required' => true,
+            ],
+            'password_confirmation' => [
+                'description' => '確認密碼，必須與密碼欄位一致',
                 'example' => 'password123',
                 'required' => true,
             ],

@@ -40,6 +40,10 @@ _ide_helper*.php
 /tests/Browser/screenshots/
 /tests/Browser/console/
 
+# 測試覆蓋率報告
+/coverage-report/
+coverage.xml
+
 # 本地資料庫
 *.sqlite
 *.sqlite3
