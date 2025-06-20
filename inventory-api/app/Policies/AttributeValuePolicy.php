@@ -14,21 +14,6 @@ use Illuminate\Auth\Access\Response;
 class AttributeValuePolicy
 {
     /**
-     * 全域權限檢查
-     * 
-     * 在執行任何權限檢查之前，先檢查使用者是否為管理員
-     * 如果是管理員，直接允許所有操作；如果不是，繼續執行個別權限檢查
-     * 
-     * @param User $user
-     * @param string $ability
-     * @return bool|null
-     */
-    public function before(User $user, string $ability): ?bool
-    {
-        return $user->isAdmin() ? true : null;
-    }
-
-    /**
      * 檢查使用者是否可以查看屬性值列表
      * 
      * @param User $user
@@ -36,7 +21,7 @@ class AttributeValuePolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->isStaff() || $user->isAdmin();
     }
 
     /**
@@ -48,7 +33,7 @@ class AttributeValuePolicy
      */
     public function view(User $user, AttributeValue $attributeValue): bool
     {
-        return false;
+        return $user->isStaff() || $user->isAdmin();
     }
 
     /**
@@ -59,7 +44,7 @@ class AttributeValuePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
@@ -71,7 +56,7 @@ class AttributeValuePolicy
      */
     public function update(User $user, AttributeValue $attributeValue): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
@@ -83,7 +68,7 @@ class AttributeValuePolicy
      */
     public function delete(User $user, AttributeValue $attributeValue): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
@@ -91,7 +76,7 @@ class AttributeValuePolicy
      */
     public function restore(User $user, AttributeValue $attributeValue): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
@@ -99,6 +84,6 @@ class AttributeValuePolicy
      */
     public function forceDelete(User $user, AttributeValue $attributeValue): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 }

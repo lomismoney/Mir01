@@ -30,8 +30,8 @@ class UserStoreAssignRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'store_ids' => ['required', 'array'],
-            'store_ids.*' => ['required', 'exists:stores,id'],
+            'store_ids' => ['present', 'array'],
+            'store_ids.*' => ['integer', 'exists:stores,id'],
         ];
     }
 
@@ -43,9 +43,9 @@ class UserStoreAssignRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'store_ids.required' => '請選擇至少一間分店',
+            'store_ids.present' => 'store_ids 欄位為必填',
             'store_ids.array' => '分店必須以陣列形式提供',
-            'store_ids.*.required' => '請提供有效的分店ID',
+            'store_ids.*.integer' => '分店ID必須是整數',
             'store_ids.*.exists' => '選擇的分店不存在',
         ];
     }

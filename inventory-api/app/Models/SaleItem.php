@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SaleItem extends Model
 {
+    use HasFactory;
+    
     /**
      * 允許大量賦值的屬性設定
      */

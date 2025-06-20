@@ -14,6 +14,7 @@ class User extends Authenticatable
 
     // 角色常數定義
     public const ROLE_ADMIN = 'admin';
+    public const ROLE_STAFF = 'staff';
     public const ROLE_VIEWER = 'viewer';
 
     /**
@@ -68,6 +69,16 @@ class User extends Authenticatable
     }
 
     /**
+     * 檢查用戶是否為員工
+     *
+     * @return bool
+     */
+    public function isStaff(): bool
+    {
+        return $this->role === self::ROLE_STAFF;
+    }
+
+    /**
      * 檢查用戶是否為檢視者
      *
      * @return bool
@@ -97,6 +108,7 @@ class User extends Authenticatable
     {
         return [
             self::ROLE_ADMIN => '管理員',
+            self::ROLE_STAFF => '員工',
             self::ROLE_VIEWER => '檢視者',
         ];
     }

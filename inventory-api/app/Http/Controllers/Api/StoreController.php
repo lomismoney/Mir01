@@ -81,10 +81,32 @@ class StoreController extends Controller
      */
     public function show(Store $store): StoreResource
     {
-        $store = QueryBuilder::for(Store::class)
-            ->where('id', $store->id)
-            ->allowedIncludes(['users', 'inventories', 'purchases', 'sales', 'transfersOut', 'transfersIn'])
-            ->firstOrFail();
+        // The $store model is already resolved by route model binding.
+        // We can directly load the allowed relations onto the existing instance
+        // without making a redundant database query.
+        $allowedIncludes = ['users', 'inventories', 'purchases', 'sales', 'transfersOut', 'transfersIn'];
+        
+        if (request()->has('include')) {
+            $includeParam = request()->input('include');
+            $requestedIncludes = [];
+            
+            // Handle both string and array formats for include parameter
+            if (is_string($includeParam) && !empty($includeParam)) {
+                // Handle comma-separated string: ?include=users,inventories
+                $requestedIncludes = explode(',', $includeParam);
+            } elseif (is_array($includeParam) && !empty($includeParam)) {
+                // Handle array format: ?include[]=users&include[]=inventories
+                $requestedIncludes = $includeParam;
+            }
+            
+            if (!empty($requestedIncludes)) {
+                $includesToLoad = array_intersect($requestedIncludes, $allowedIncludes);
+
+                if (!empty($includesToLoad)) {
+                    $store->load($includesToLoad);
+                }
+            }
+        }
 
         return new StoreResource($store);
     }

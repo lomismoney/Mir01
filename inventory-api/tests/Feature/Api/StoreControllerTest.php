@@ -193,4 +193,76 @@ class StoreControllerTest extends TestCase
                      ->etc();
             });
     }
+
+    /** @test */
+    public function show_endpoint_handles_array_include_parameter()
+    {
+        $store = Store::factory()->create();
+        Inventory::factory()->create(['store_id' => $store->id]);
+
+        // Test with array parameter (e.g., ?include[]=inventories&include[]=users)
+        // Simulate the request with array query parameters
+        $response = $this->actingAs($this->admin)
+            ->getJson("/api/stores/{$store->id}?include[]=inventories&include[]=users");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) use ($store) {
+                $json->has('data')
+                     ->where('data.id', $store->id)
+                     ->has('data.inventories')
+                     ->has('data.users')
+                     ->etc();
+            });
+    }
+
+    /** @test */
+    public function show_endpoint_handles_malformed_include_parameter_gracefully()
+    {
+        $store = Store::factory()->create();
+
+        // Test with invalid array parameter (?include[]=invalid_relation)
+        $response = $this->actingAs($this->admin)
+            ->getJson("/api/stores/{$store->id}?include[]=invalid_relation");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) use ($store) {
+                $json->has('data')
+                     ->where('data.id', $store->id)
+                     ->etc();
+            });
+    }
+
+    /** @test */
+    public function show_endpoint_handles_empty_include_parameter()
+    {
+        $store = Store::factory()->create();
+
+        // Test with empty string
+        $response = $this->actingAs($this->admin)
+            ->getJson("/api/stores/{$store->id}?include=");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) use ($store) {
+                $json->has('data')
+                     ->where('data.id', $store->id)
+                     ->etc();
+            });
+    }
+
+    /** @test */
+    public function show_endpoint_handles_null_include_parameter()
+    {
+        $store = Store::factory()->create();
+
+        // Test with null parameter
+        $response = $this->actingAs($this->admin)
+            ->getJson("/api/stores/{$store->id}", ['include' => null]);
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) use ($store) {
+                $json->has('data')
+                     ->where('data.id', $store->id)
+                     ->etc();
+            });
+    }
 } 
