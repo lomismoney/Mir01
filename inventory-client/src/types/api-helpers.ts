@@ -622,6 +622,7 @@ export interface ProcessedOrder {
   tax_amount: number;    // 已精煉為 number
   discount_amount: number;  // 已精煉為 number
   grand_total: number;   // 已精煉為 number
+  paid_amount: number;   // 已精煉為 number - 已付金額
   created_at: string;
   updated_at: string;
   items: ProcessedOrderItem[]; // 使用精煉後的訂單項目類型

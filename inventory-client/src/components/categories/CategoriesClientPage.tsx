@@ -168,7 +168,7 @@ const CategoriesClientPage = () => {
     
     // 否則，顯示當前層級的分類
     const parentIdKey = currentParentId?.toString() || '';
-    const categoriesToShow = (groupedCategories as Record<string, Category[]>)?.[parentIdKey] || [];
+    const categoriesToShow = (groupedCategories as unknown as Record<string, Category[]>)?.[parentIdKey] || [];
     
     return [...categoriesToShow].sort((a, b) => a.name.localeCompare(b.name));
   }, [allCategories, debouncedSearchQuery, currentParentId, groupedCategories]);
@@ -425,7 +425,7 @@ const CategoriesClientPage = () => {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {displayedCategories.map((category) => {
             const hasChildCategories = hasChildren(category.id, groupedCategories);
-            const childCount = (groupedCategories as Record<string, any>)?.[category.id.toString()]?.length || 0;
+            const childCount = (groupedCategories as unknown as Record<string, any>)?.[category.id.toString()]?.length || 0;
             
             return (
               <Card 

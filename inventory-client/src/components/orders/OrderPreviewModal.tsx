@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useOrderDetail } from '@/hooks/queries/useEntityQueries';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
@@ -17,11 +17,17 @@ import { ProcessedOrder, ProcessedOrderItem } from '@/types/api-helpers';
  * @param orderId - 要顯示的訂單 ID，可為 null
  * @param open - 控制 Modal 開關狀態
  * @param onOpenChange - 當 Modal 開關狀態改變時的回調函數
+ * @param onShip - 執行出貨操作的回調函數
+ * @param onRecordPayment - 記錄收款操作的回調函數
+ * @param onRefund - 處理退款操作的回調函數
  */
 interface OrderPreviewModalProps {
   orderId: number | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onShip: (orderId: number) => void;
+  onRecordPayment: (order: ProcessedOrder) => void;
+  onRefund: (order: ProcessedOrder) => void; // 🎯 新增
 }
 
 /**
@@ -37,7 +43,7 @@ interface OrderPreviewModalProps {
  * @param props - 元件屬性
  * @returns 訂單預覽模態元件
  */
-export function OrderPreviewModal({ orderId, open, onOpenChange }: OrderPreviewModalProps) {
+export function OrderPreviewModal({ orderId, open, onOpenChange, onShip, onRecordPayment, onRefund }: OrderPreviewModalProps) {
   // 使用已升級的 hook 來獲取訂單詳情 - 現在直接返回純淨的 ProcessedOrder 對象
   const { data: order, isLoading, error } = useOrderDetail(orderId);
 
@@ -170,6 +176,42 @@ export function OrderPreviewModal({ orderId, open, onOpenChange }: OrderPreviewM
             </>
           )}
         </div>
+        
+        {/* 🎯 底部操作按鈕區域 */}
+        <DialogFooter className="p-6 pt-4 border-t sm:justify-between flex-wrap gap-2">
+          <div className="flex gap-2">
+            {order && (
+              <>
+                <Button 
+                  variant="default" 
+                  onClick={() => onRecordPayment(order)} 
+                  disabled={order.payment_status === 'paid'}
+                >
+                  記錄收款
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => onRefund(order)} 
+                  disabled={order.payment_status !== 'paid' && order.payment_status !== 'partial'}
+                >
+                  處理退款
+                </Button>
+              </>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {order && (
+              <Button 
+                variant="secondary" 
+                onClick={() => onShip(order.id)} 
+                disabled={order.payment_status !== 'paid' || order.shipping_status !== 'pending'}
+              >
+                執行出貨
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => onOpenChange(false)}>關閉</Button>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

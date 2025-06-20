@@ -8,12 +8,17 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Http\Requests\Api\StoreOrderRequest;
 use App\Http\Requests\Api\UpdateOrderRequest;
+use App\Http\Requests\Api\AddPaymentRequest;
+use App\Http\Requests\Api\CreateRefundRequest;
 use App\Services\OrderService;
+use App\Services\RefundService;
 
 class OrderController extends Controller
 {
-    public function __construct(protected OrderService $orderService)
-    {
+    public function __construct(
+        protected OrderService $orderService,
+        protected RefundService $refundService
+    ) {
     }
     /**
      * @group 訂單管理
@@ -36,6 +41,8 @@ class OrderController extends Controller
             'payment_status'  => 'nullable|string',
             'start_date'      => 'nullable|date_format:Y-m-d',
             'end_date'        => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
+            'page'            => 'sometimes|integer|min:1',
+            'per_page'        => 'sometimes|integer|min:1|max:100', // 限制每頁最大數量以保護伺服器
         ]);
 
         // 3. 構建查詢
@@ -65,10 +72,16 @@ class OrderController extends Controller
                 $query->whereDate('created_at', '<=', $request->input('end_date'));
             })
             // 4. 排序與分頁
-            ->latest() // 默認按創建時間倒序
-            ->paginate(15);
+            ->latest(); // 默認按創建時間倒序
 
-        // 5. 返回標準化的 API 資源集合
+        // 5. 動態分頁邏輯
+        $perPage = $request->input('per_page', 15); // 從請求獲取 per_page，若無則預設 15
+        $orders = $orders->paginate($perPage);
+
+        // 6. 追加查詢參數到分頁連結中，保留其他篩選條件
+        $orders->appends($request->except('page'));
+
+        // 7. 返回標準化的 API 資源集合
         return OrderResource::collection($orders);
     }
 
@@ -256,6 +269,90 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
+     * 新增部分付款記錄
+     * 
+     * 此端點用於為訂單新增部分付款記錄，支援訂金、分期付款等場景。
+     * 系統會自動計算已付金額，並根據付款進度更新訂單的付款狀態。
+     * 每次付款都會記錄詳細的付款歷史，便於追蹤和對帳。
+     * 
+     * @urlParam order integer required 要新增付款記錄的訂單 ID。Example: 1
+     * 
+     * @bodyParam amount numeric required 付款金額，必須大於 0.01 且不超過剩餘未付金額。Example: 1500.50
+     * @bodyParam payment_method string required 付款方式（cash, transfer, credit_card）。Example: cash
+     * @bodyParam payment_date datetime 付款日期（格式: Y-m-d H:i:s），不填則使用當前時間。Example: 2025-06-20 10:30:00
+     * @bodyParam notes string 付款備註，最多 500 字符。Example: 收到現金付款，找零 50 元
+     * 
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "order_number": "PO-20250619-001",
+     *     "payment_status": "partial",
+     *     "paid_amount": 1500.50,
+     *     "grand_total": 5000.00,
+     *     "payment_records": [
+     *       {
+     *         "id": 1,
+     *         "amount": 1500.50,
+     *         "payment_method": "cash",
+     *         "payment_date": "2025-06-20T10:30:00.000000Z",
+     *         "notes": "收到現金付款，找零 50 元",
+     *         "creator": {
+     *           "id": 1,
+     *           "name": "管理員"
+     *         }
+     *       }
+     *     ],
+     *     "updated_at": "2025-06-20T10:30:00.000000Z"
+     *   }
+     * }
+     * @response 422 scenario="付款金額超過剩餘未付金額" {
+     *   "message": "收款金額不能超過剩餘未付金額：3499.50",
+     *   "errors": {
+     *     "amount": ["收款金額不能超過剩餘未付金額：3499.50"]
+     *   }
+     * }
+     * @response 422 scenario="訂單已全額付清" {
+     *   "message": "此訂單已全額付清，無法再新增付款記錄",
+     *   "errors": {
+     *     "payment_status": ["訂單已全額付清"]
+     *   }
+     * }
+     */
+    public function addPayment(AddPaymentRequest $request, Order $order)
+    {
+        // 1. 權限驗證
+        // $this->authorize('update', $order);
+
+        // 2. 業務邏輯驗證：檢查訂單是否已全額付清
+        if ($order->payment_status === 'paid') {
+            return response()->json([
+                'message' => '此訂單已全額付清，無法再新增付款記錄',
+                'errors' => [
+                    'payment_status' => ['訂單已全額付清']
+                ]
+            ], 422);
+        }
+
+        try {
+            // 3. 委派給 Service 層處理業務邏輯
+            $updatedOrder = $this->orderService->addPartialPayment($order, $request->validated());
+
+            // 4. 返回更新後的訂單資源
+            return new OrderResource($updatedOrder);
+        } catch (\Exception $e) {
+            // 5. 處理業務邏輯錯誤（如金額超出限制）
+            return response()->json([
+                'message' => $e->getMessage(),
+                'errors' => [
+                    'amount' => [$e->getMessage()]
+                ]
+            ], 422);
+        }
+    }
+
+    /**
+     * @group 訂單管理
+     * @authenticated
      * 創建訂單出貨記錄
      * 
      * 此端點用於為訂單創建出貨記錄，將貨物狀態更新為「已出貨」。
@@ -368,6 +465,117 @@ class OrderController extends Controller
                 'message' => '此訂單的狀態不允許取消操作',
                 'errors' => [
                     'shipping_status' => [$e->getMessage()]
+                ]
+            ], 422);
+        }
+    }
+
+    /**
+     * @group 訂單管理
+     * @authenticated
+     * 創建訂單退款
+     * 
+     * 此端點用於為訂單創建品項級別的退款，支援部分品項退貨。
+     * 系統會自動計算退款金額、更新訂單狀態，並可選擇性回補庫存。
+     * 每筆退款都會記錄詳細的退貨明細和操作歷史。
+     * 
+     * @urlParam order integer required 要創建退款的訂單 ID。Example: 1
+     * 
+     * @bodyParam reason string required 退款原因，10-500 字符。Example: 商品品質不符合要求，客戶要求退貨
+     * @bodyParam notes string 退款備註，最多 1000 字符。Example: 商品外觀無損，已檢查確認可回庫
+     * @bodyParam should_restock boolean required 是否將退貨商品加回庫存。Example: true
+     * @bodyParam items array required 退款品項清單，至少包含一個品項。
+     * @bodyParam items.*.order_item_id integer required 訂單品項 ID，必須屬於當前訂單。Example: 1
+     * @bodyParam items.*.quantity integer required 退貨數量，必須大於 0 且不超過可退數量。Example: 2
+     * 
+     * @response 201 {
+     *   "data": {
+     *     "id": 1,
+     *     "order_id": 1,
+     *     "total_refund_amount": 3000.00,
+     *     "reason": "商品品質不符合要求，客戶要求退貨",
+     *     "notes": "商品外觀無損，已檢查確認可回庫",
+     *     "should_restock": true,
+     *     "creator": {
+     *       "id": 1,
+     *       "name": "管理員"
+     *     },
+     *     "refund_items": [
+     *       {
+     *         "id": 1,
+     *         "order_item_id": 1,
+     *         "quantity": 2,
+     *         "refund_subtotal": 3000.00,
+     *         "order_item": {
+     *           "id": 1,
+     *           "product_name": "標準辦公桌",
+     *           "sku": "DESK-001",
+     *           "price": 1500.00
+     *         }
+     *       }
+     *     ],
+     *     "created_at": "2025-06-20T15:30:00.000000Z"
+     *   }
+     * }
+     * @response 422 scenario="退貨數量超過可退數量" {
+     *   "message": "品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)",
+     *   "errors": {
+     *     "items.0.quantity": ["品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)"]
+     *   }
+     * }
+     * @response 422 scenario="訂單狀態不允許退款" {
+     *   "message": "未付款的訂單無法退款",
+     *   "errors": {
+     *     "payment_status": ["未付款的訂單無法退款"]
+     *   }
+     * }
+     */
+    public function createRefund(CreateRefundRequest $request, Order $order)
+    {
+        // 1. 權限驗證
+        // $this->authorize('update', $order);
+
+        try {
+            // 2. 委派給 RefundService 處理所有業務邏輯
+            $refund = $this->refundService->createRefund($order, $request->validated());
+
+            // 3. 返回創建的退款記錄，使用 201 Created 狀態碼
+            return response()->json([
+                'data' => [
+                    'id' => $refund->id,
+                    'order_id' => $refund->order_id,
+                    'total_refund_amount' => $refund->total_refund_amount,
+                    'reason' => $refund->reason,
+                    'notes' => $refund->notes,
+                    'should_restock' => $refund->should_restock,
+                    'creator' => [
+                        'id' => $refund->creator->id,
+                        'name' => $refund->creator->name,
+                    ],
+                    'refund_items' => $refund->refundItems->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'order_item_id' => $item->order_item_id,
+                            'quantity' => $item->quantity,
+                            'refund_subtotal' => $item->refund_subtotal,
+                            'order_item' => [
+                                'id' => $item->orderItem->id,
+                                'product_name' => $item->orderItem->product_name,
+                                'sku' => $item->orderItem->sku,
+                                'price' => $item->orderItem->price,
+                            ],
+                        ];
+                    }),
+                    'created_at' => $refund->created_at,
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            // 4. 處理業務邏輯錯誤
+            return response()->json([
+                'message' => $e->getMessage(),
+                'errors' => [
+                    'refund' => [$e->getMessage()]
                 ]
             ], 422);
         }

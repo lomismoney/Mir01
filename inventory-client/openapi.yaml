@@ -97,21 +97,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 20
+                    id: 3
                     name: 'Lonny Ankunding'
                     username: eloisa.harber
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-19T10:47:14.000000Z'
-                    updated_at: '2025-06-19T10:47:14.000000Z'
+                    created_at: '2025-06-20T08:50:45.000000Z'
+                    updated_at: '2025-06-20T08:50:45.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 20
+                        example: 3
                       name:
                         type: string
                         example: 'Lonny Ankunding'
@@ -129,10 +129,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
       tags:
         - Endpoints
       security: []
@@ -237,7 +237,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the category.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -391,18 +391,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 31
+                    id: 1
                     name: Mueller-Dibbert
                     address: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
-                    created_at: '2025-06-19T10:47:14.000000Z'
-                    updated_at: '2025-06-19T10:47:14.000000Z'
+                    created_at: '2025-06-20T08:50:45.000000Z'
+                    updated_at: '2025-06-20T08:50:45.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 31
+                        example: 1
                       name:
                         type: string
                         example: Mueller-Dibbert
@@ -411,10 +411,10 @@ paths:
                         example: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
                       created_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -451,30 +451,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 32
-                    name: 'Kunde Group'
-                    address: "62028 Trudie Mills\nNorth Cordie, IL 75592"
-                    created_at: '2025-06-19T10:47:14.000000Z'
-                    updated_at: '2025-06-19T10:47:14.000000Z'
+                    id: 2
+                    name: Moore-Emard
+                    address: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
+                    created_at: '2025-06-20T08:50:45.000000Z'
+                    updated_at: '2025-06-20T08:50:45.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 32
+                        example: 2
                       name:
                         type: string
-                        example: 'Kunde Group'
+                        example: Moore-Emard
                       address:
                         type: string
-                        example: "62028 Trudie Mills\nNorth Cordie, IL 75592"
+                        example: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
                       created_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -491,30 +491,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 33
-                    name: Moore-Emard
-                    address: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
-                    created_at: '2025-06-19T10:47:14.000000Z'
-                    updated_at: '2025-06-19T10:47:14.000000Z'
+                    id: 3
+                    name: 'Satterfield, Collins and Reynolds'
+                    address: "820 Smith Cove Apt. 644\nSouth Eloisaborough, IL 62645"
+                    created_at: '2025-06-20T08:50:45.000000Z'
+                    updated_at: '2025-06-20T08:50:45.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 33
+                        example: 3
                       name:
                         type: string
-                        example: Moore-Emard
+                        example: 'Satterfield, Collins and Reynolds'
                       address:
                         type: string
-                        example: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
+                        example: "820 Smith Cove Apt. 644\nSouth Eloisaborough, IL 62645"
                       created_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -549,7 +549,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the store.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -568,30 +568,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 34
-                    name: Hahn-Harber
-                    address: "6098 Kutch Loaf\nPort Eldonland, PA 73828-6765"
-                    created_at: '2025-06-19T10:47:14.000000Z'
-                    updated_at: '2025-06-19T10:47:14.000000Z'
+                    id: 4
+                    name: 'Reichel PLC'
+                    address: "283 Adell Mews Suite 313\nEast Lennie, CO 94046-7647"
+                    created_at: '2025-06-20T08:50:45.000000Z'
+                    updated_at: '2025-06-20T08:50:45.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 34
+                        example: 4
                       name:
                         type: string
-                        example: Hahn-Harber
+                        example: 'Reichel PLC'
                       address:
                         type: string
-                        example: "6098 Kutch Loaf\nPort Eldonland, PA 73828-6765"
+                        example: "283 Adell Mews Suite 313\nEast Lennie, CO 94046-7647"
                       created_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -608,21 +608,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 21
+                    id: 4
                     name: 'Dr. Cornelius Luettgen V'
                     username: russel.bert
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-19T10:47:14.000000Z'
-                    updated_at: '2025-06-19T10:47:14.000000Z'
+                    created_at: '2025-06-20T08:50:45.000000Z'
+                    updated_at: '2025-06-20T08:50:45.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 21
+                        example: 4
                       name:
                         type: string
                         example: 'Dr. Cornelius Luettgen V'
@@ -640,10 +640,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-19T10:47:14.000000Z'
+                        example: '2025-06-20T08:50:45.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -667,7 +667,7 @@ paths:
         in: path
         name: user_id
         description: 'The ID of the user.'
-        example: 1
+        example: 2
         required: true
         schema:
           type: integer
@@ -953,7 +953,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the attribute.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -1136,7 +1136,7 @@ paths:
         in: path
         name: product_id
         description: 'The ID of the product.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -4016,7 +4016,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the customer.'
-        example: 1
+        example: 2
         required: true
         schema:
           type: integer
@@ -4189,7 +4189,7 @@ paths:
         in: path
         name: attribute_id
         description: 'The ID of the attribute.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -4278,7 +4278,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the value.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer
@@ -4899,12 +4899,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-19T10:47:14'
+                  example: '2025-06-20T08:50:45'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2106-07-18'
+                  example: '2106-07-19'
                   nullable: true
                 product_name:
                   type: string
@@ -5546,7 +5546,7 @@ paths:
                 type:
                   type: string
                   description: ''
-                  example: addition
+                  example: transfer_out
                   nullable: true
                   enum:
                     - addition
@@ -5558,12 +5558,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-19T10:47:14'
+                  example: '2025-06-20T08:50:45'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2106-07-18'
+                  example: '2106-07-19'
                   nullable: true
                 per_page:
                   type: integer
@@ -6597,7 +6597,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the user.'
-        example: 1
+        example: 2
         required: true
         schema:
           type: integer
@@ -6710,12 +6710,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>.'
-                  example: '2025-06-19'
+                  example: '2025-06-20'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2106-07-18'
+                  example: '2106-07-19'
                   nullable: true
     post:
       summary: ''
@@ -7031,6 +7031,195 @@ paths:
         required: true
         schema:
           type: integer
+  '/api/orders/{order_id}/add-payment':
+    post:
+      summary: ''
+      operationId: postApiOrdersOrder_idAddPayment
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    order_number: PO-20250619-001
+                    payment_status: partial
+                    paid_amount: 1500.5
+                    grand_total: 5000.0
+                    payment_records:
+                      -
+                        id: 1
+                        amount: 1500.5
+                        payment_method: cash
+                        payment_date: '2025-06-20T10:30:00.000000Z'
+                        notes: '收到現金付款，找零 50 元'
+                        creator:
+                          id: 1
+                          name: 管理員
+                    updated_at: '2025-06-20T10:30:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      order_number:
+                        type: string
+                        example: PO-20250619-001
+                      payment_status:
+                        type: string
+                        example: partial
+                      paid_amount:
+                        type: number
+                        example: 1500.5
+                      grand_total:
+                        type: number
+                        example: 5000.0
+                      payment_records:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            amount: 1500.5
+                            payment_method: cash
+                            payment_date: '2025-06-20T10:30:00.000000Z'
+                            notes: '收到現金付款，找零 50 元'
+                            creator:
+                              id: 1
+                              name: 管理員
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            amount:
+                              type: number
+                              example: 1500.5
+                            payment_method:
+                              type: string
+                              example: cash
+                            payment_date:
+                              type: string
+                              example: '2025-06-20T10:30:00.000000Z'
+                            notes:
+                              type: string
+                              example: '收到現金付款，找零 50 元'
+                            creator:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  example: 1
+                                name:
+                                  type: string
+                                  example: 管理員
+                      updated_at:
+                        type: string
+                        example: '2025-06-20T10:30:00.000000Z'
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: 付款金額超過剩餘未付金額
+                    type: object
+                    example:
+                      message: 收款金額不能超過剩餘未付金額：3499.50
+                      errors:
+                        amount:
+                          - 收款金額不能超過剩餘未付金額：3499.50
+                    properties:
+                      message:
+                        type: string
+                        example: 收款金額不能超過剩餘未付金額：3499.50
+                      errors:
+                        type: object
+                        properties:
+                          amount:
+                            type: array
+                            example:
+                              - 收款金額不能超過剩餘未付金額：3499.50
+                            items:
+                              type: string
+                  -
+                    description: 訂單已全額付清
+                    type: object
+                    example:
+                      message: 此訂單已全額付清，無法再新增付款記錄
+                      errors:
+                        payment_status:
+                          - 訂單已全額付清
+                    properties:
+                      message:
+                        type: string
+                        example: 此訂單已全額付清，無法再新增付款記錄
+                      errors:
+                        type: object
+                        properties:
+                          payment_status:
+                            type: array
+                            example:
+                              - 訂單已全額付清
+                            items:
+                              type: string
+      tags:
+        - 訂單管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: numeric
+                  description: '付款金額，必須大於 0.01 且不超過剩餘未付金額。'
+                  example: '1500.50'
+                  nullable: false
+                payment_method:
+                  type: string
+                  description: '付款方式（cash, transfer, credit_card）。'
+                  example: cash
+                  nullable: false
+                payment_date:
+                  type: datetime
+                  description: '付款日期（格式: Y-m-d H:i:s），不填則使用當前時間。'
+                  example: '2025-06-20 10:30:00'
+                  nullable: false
+                notes:
+                  type: string
+                  description: '付款備註，最多 500 字符。'
+                  example: '收到現金付款，找零 50 元'
+                  nullable: true
+              required:
+                - amount
+                - payment_method
+    parameters:
+      -
+        in: path
+        name: order_id
+        description: 'The ID of the order.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: order
+        description: '要新增付款記錄的訂單 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
   '/api/orders/{order_id}/create-shipment':
     post:
       summary: ''
@@ -7147,6 +7336,328 @@ paths:
         in: path
         name: order
         description: '要創建出貨記錄的訂單 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/orders/{order_id}/refunds':
+    post:
+      summary: ''
+      operationId: postApiOrdersOrder_idRefunds
+      description: ''
+      parameters: []
+      responses:
+        201:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    order_id: 1
+                    total_refund_amount: 3000.0
+                    reason: 商品品質不符合要求，客戶要求退貨
+                    notes: 商品外觀無損，已檢查確認可回庫
+                    should_restock: true
+                    creator:
+                      id: 1
+                      name: 管理員
+                    refund_items:
+                      -
+                        id: 1
+                        order_item_id: 1
+                        quantity: 2
+                        refund_subtotal: 3000.0
+                        order_item:
+                          id: 1
+                          product_name: 標準辦公桌
+                          sku: DESK-001
+                          price: 1500.0
+                    created_at: '2025-06-20T15:30:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      order_id:
+                        type: integer
+                        example: 1
+                      total_refund_amount:
+                        type: number
+                        example: 3000.0
+                      reason:
+                        type: string
+                        example: 商品品質不符合要求，客戶要求退貨
+                      notes:
+                        type: string
+                        example: 商品外觀無損，已檢查確認可回庫
+                      should_restock:
+                        type: boolean
+                        example: true
+                      creator:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 管理員
+                      refund_items:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            order_item_id: 1
+                            quantity: 2
+                            refund_subtotal: 3000
+                            order_item:
+                              id: 1
+                              product_name: 標準辦公桌
+                              sku: DESK-001
+                              price: 1500
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            order_item_id:
+                              type: integer
+                              example: 1
+                            quantity:
+                              type: integer
+                              example: 2
+                            refund_subtotal:
+                              type: number
+                              example: 3000.0
+                            order_item:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  example: 1
+                                product_name:
+                                  type: string
+                                  example: 標準辦公桌
+                                sku:
+                                  type: string
+                                  example: DESK-001
+                                price:
+                                  type: number
+                                  example: 1500.0
+                      created_at:
+                        type: string
+                        example: '2025-06-20T15:30:00.000000Z'
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: 退貨數量超過可退數量
+                    type: object
+                    example:
+                      message: '品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)'
+                      errors:
+                        items.0.quantity:
+                          - '品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)'
+                    properties:
+                      message:
+                        type: string
+                        example: '品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)'
+                      errors:
+                        type: object
+                        properties:
+                          items.0.quantity:
+                            type: array
+                            example:
+                              - '品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)'
+                            items:
+                              type: string
+                  -
+                    description: 訂單狀態不允許退款
+                    type: object
+                    example:
+                      message: 未付款的訂單無法退款
+                      errors:
+                        payment_status:
+                          - 未付款的訂單無法退款
+                    properties:
+                      message:
+                        type: string
+                        example: 未付款的訂單無法退款
+                      errors:
+                        type: object
+                        properties:
+                          payment_status:
+                            type: array
+                            example:
+                              - 未付款的訂單無法退款
+                            items:
+                              type: string
+      tags:
+        - 訂單管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: '退款原因，10-500 字符。'
+                  example: 商品品質不符合要求，客戶要求退貨
+                  nullable: false
+                notes:
+                  type: string
+                  description: '退款備註，最多 1000 字符。'
+                  example: 商品外觀無損，已檢查確認可回庫
+                  nullable: true
+                should_restock:
+                  type: boolean
+                  description: 是否將退貨商品加回庫存。
+                  example: true
+                  nullable: false
+                items:
+                  type: array
+                  description: 退款品項清單，至少包含一個品項。
+                  items:
+                    type: object
+                    properties:
+                      order_item_id:
+                        type: integer
+                        description: 訂單品項ID
+                        example: 1
+                      quantity:
+                        type: integer
+                        description: 退貨數量
+                        example: 2
+                    required:
+                      - order_item_id
+                      - quantity
+                  example:
+                    - order_item_id: 1
+                      quantity: 2
+                    - order_item_id: 3
+                      quantity: 1
+              required:
+                - reason
+                - should_restock
+                - items
+    parameters:
+      -
+        in: path
+        name: order_id
+        description: 'The ID of the order.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: order
+        description: '要創建退款的訂單 ID。'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/orders/{order_id}/cancel':
+    post:
+      summary: ''
+      operationId: postApiOrdersOrder_idCancel
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 1
+                    order_number: PO-20250619-001
+                    shipping_status: cancelled
+                    payment_status: cancelled
+                    updated_at: '2025-06-19T12:00:00.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      order_number:
+                        type: string
+                        example: PO-20250619-001
+                      shipping_status:
+                        type: string
+                        example: cancelled
+                      payment_status:
+                        type: string
+                        example: cancelled
+                      updated_at:
+                        type: string
+                        example: '2025-06-19T12:00:00.000000Z'
+        422:
+          description: 訂單狀態不允許此操作
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 此訂單的狀態不允許取消操作
+                  errors:
+                    shipping_status:
+                      - 已出貨或已交付的訂單無法取消
+                properties:
+                  message:
+                    type: string
+                    example: 此訂單的狀態不允許取消操作
+                  errors:
+                    type: object
+                    properties:
+                      shipping_status:
+                        type: array
+                        example:
+                          - 已出貨或已交付的訂單無法取消
+                        items:
+                          type: string
+      tags:
+        - 訂單管理
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: 取消原因。
+                  example: 客戶要求取消
+                  nullable: true
+    parameters:
+      -
+        in: path
+        name: order_id
+        description: 'The ID of the order.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: order
+        description: '要取消的訂單 ID。'
         example: 1
         required: true
         schema:
@@ -7269,7 +7780,7 @@ paths:
         in: path
         name: order_item_id
         description: 'The ID of the order item.'
-        example: 1
+        example: 17
         required: true
         schema:
           type: integer

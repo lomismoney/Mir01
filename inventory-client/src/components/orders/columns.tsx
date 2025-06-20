@@ -2,16 +2,30 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Eye, FileText, DollarSign, Truck, Undo2, Ban, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuGroup } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Link from 'next/link';
-import { Order } from '@/types/api-helpers';
+import { Order, ProcessedOrder } from '@/types/api-helpers';
 import { useDeleteOrder } from '@/hooks/queries/useEntityQueries';
 
-// 創建 columns 函數，接受預覽回調
-export const createColumns = ({ onPreview }: { onPreview: (id: number) => void }): ColumnDef<Order>[] => [
+// 創建 columns 函數，接受預覽、出貨、收款、退款、取消和刪除回調
+export const createColumns = ({ 
+  onPreview, 
+  onShip,
+  onRecordPayment,
+  onRefund,
+  onCancel,
+  onDelete // 🎯 新增刪除回調
+}: { 
+  onPreview: (id: number) => void;
+  onShip: (id: number) => void;
+  onRecordPayment: (order: ProcessedOrder) => void;
+  onRefund: (order: ProcessedOrder) => void;
+  onCancel: (order: ProcessedOrder) => void;
+  onDelete: (id: number) => void; // 🎯 新增刪除回調類型
+}): ColumnDef<Order>[] => [
   // Checkbox 列 (用於批量操作)
   // ...
 
@@ -50,7 +64,8 @@ export const createColumns = ({ onPreview }: { onPreview: (id: number) => void }
         'pending': '待處理',
         'processing': '處理中',
         'shipped': '已出貨',
-        'delivered': '已完成'
+        'delivered': '已完成',
+        'cancelled': '已取消' // 🎯 新增已取消狀態
       }[status] || status;
       
       return <Badge variant={variant}>{statusText}</Badge>;
@@ -103,56 +118,107 @@ export const createColumns = ({ onPreview }: { onPreview: (id: number) => void }
     header: '操作',
     cell: ({ row }) => {
       const order = row.original;
-      const { mutate: deleteOrder, isPending } = useDeleteOrder(); // <-- 使用新 Hook
+      const { mutate: deleteOrder, isPending } = useDeleteOrder();
+      
+      // 🎯 權限判斷邏輯
+      const canCancel = !['shipped', 'delivered', 'cancelled'].includes(order.shipping_status);
 
       return (
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/orders/${order.id}`}>查看完整詳情</Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>操作</DropdownMenuLabel>
+            
+            {/* --- 檢視分組 --- */}
+            <DropdownMenuGroup>
+              <DropdownMenuItem onSelect={() => onPreview(order.id)}>
+                <Eye className="mr-2 h-4 w-4" />
+                <span>快速預覽</span>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                {/* 我們將在下一步創建 /edit 頁面 */}
-                <Link href={`/orders/${order.id}/edit`}>編輯</Link>
+                <Link href={`/orders/${order.id}`}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>查看完整詳情</span>
+                </Link>
               </DropdownMenuItem>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600"
-                  onSelect={(e) => e.preventDefault()} // 防止 DropdownMenu 立即關閉
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  刪除
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenuGroup>
+            
+            <DropdownMenuSeparator />
+            
+            {/* --- 核心流程分組 --- */}
+            <DropdownMenuGroup>
+              <DropdownMenuItem onSelect={() => onRecordPayment(order as unknown as ProcessedOrder)} disabled={order.payment_status === 'paid'}>
+                <DollarSign className="mr-2 h-4 w-4" />
+                <span>記錄收款</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onShip(order.id)} disabled={order.payment_status !== 'paid' || order.shipping_status !== 'pending'}>
+                <Truck className="mr-2 h-4 w-4" />
+                <span>執行出貨</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            
+            <DropdownMenuSeparator />
 
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>確定要刪除此訂單嗎？</AlertDialogTitle>
-              <AlertDialogDescription>
-                此操作無法撤銷。這將永久刪除訂單「{order.order_number}」。
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>取消</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => deleteOrder(order.id)}
-                disabled={isPending}
-              >
-                {isPending ? '刪除中...' : '確定刪除'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+            {/* --- 逆向流程分組 --- */}
+            <DropdownMenuGroup>
+              <DropdownMenuItem onSelect={() => onRefund(order as unknown as ProcessedOrder)} disabled={order.payment_status !== 'paid' && order.payment_status !== 'partial'}>
+                <Undo2 className="mr-2 h-4 w-4 text-destructive" />
+                <span className="text-destructive">處理退款</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onCancel(order as unknown as ProcessedOrder)} disabled={!canCancel}>
+                <Ban className="mr-2 h-4 w-4 text-destructive" />
+                <span className="text-destructive">取消訂單</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            
+            <DropdownMenuSeparator />
+            
+            {/* --- 編輯與刪除分組 --- */}
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href={`/orders/${order.id}/edit`}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  <span>編輯</span>
+                </Link>
+              </DropdownMenuItem>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem 
+                    className="text-destructive"
+                    onSelect={(e) => e.preventDefault()} // 防止 DropdownMenu 立即關閉
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>刪除</span>
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>確定要刪除此訂單嗎？</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      此操作無法撤銷。這將永久刪除訂單「{order.order_number}」。
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={() => deleteOrder(order.id)}
+                      disabled={isPending}
+                    >
+                      {isPending ? '刪除中...' : '確定刪除'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </DropdownMenuGroup>
+
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   }

@@ -244,10 +244,13 @@ Route::middleware('auth:sanctum')->group(function () {
      * 
      * 路由列表：
      * POST   /api/orders/{order}/confirm-payment   - 確認訂單付款
+     * POST   /api/orders/{order}/add-payment       - 新增部分付款記錄
      * POST   /api/orders/{order}/create-shipment   - 創建訂單出貨記錄
      */
     Route::post('/orders/{order}/confirm-payment', [App\Http\Controllers\Api\OrderController::class, 'confirmPayment']);
+    Route::post('/orders/{order}/add-payment', [App\Http\Controllers\Api\OrderController::class, 'addPayment']);
     Route::post('/orders/{order}/create-shipment', [App\Http\Controllers\Api\OrderController::class, 'createShipment']);
+    Route::post('/orders/{order}/refunds', [App\Http\Controllers\Api\OrderController::class, 'createRefund']);
     
     /**
      * 訂單項目管理路由

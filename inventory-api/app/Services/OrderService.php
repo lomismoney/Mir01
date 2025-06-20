@@ -316,6 +316,98 @@ class OrderService
     }
 
     /**
+     * 新增部分付款記錄
+     * 
+     * 依據藍圖三實現的核心業務邏輯：
+     * 1. 驗證金額不超過剩餘未付金額
+     * 2. 建立付款記錄
+     * 3. 更新訂單的已付金額和付款狀態
+     * 4. 寫入狀態變更歷史
+     * 
+     * @param Order $order 要新增付款記錄的訂單
+     * @param array $paymentData 付款資料
+     * @return Order 更新後的訂單
+     */
+    public function addPartialPayment(Order $order, array $paymentData): Order
+    {
+        return DB::transaction(function () use ($order, $paymentData) {
+            // 1. 驗證金額：確認傳入的 amount 不大於剩餘未付金額
+            $remainingAmount = $order->grand_total - $order->paid_amount;
+            if ($paymentData['amount'] > $remainingAmount) {
+                throw new \Exception("收款金額不能超過剩餘未付金額：{$remainingAmount}");
+            }
+            
+            // 2. 建立收款記錄：在 payment_records 資料表中創建新紀錄
+            $paymentRecord = $order->paymentRecords()->create([
+                'amount' => $paymentData['amount'],
+                'payment_method' => $paymentData['payment_method'],
+                'payment_date' => $paymentData['payment_date'] ?? now(),
+                'notes' => $paymentData['notes'] ?? null,
+                'creator_id' => auth()->id(),
+            ]);
+            
+            // 3. 更新訂單主體：重新計算並更新已付金額和付款狀態
+            $newPaidAmount = $order->paid_amount + $paymentData['amount'];
+            
+            // 記錄原始付款狀態（用於歷史記錄）
+            $originalPaymentStatus = $order->payment_status;
+            
+            // 根據新的已付金額更新付款狀態
+            $newPaymentStatus = 'partial'; // 預設為部分付款
+            if ($newPaidAmount >= $order->grand_total) {
+                $newPaymentStatus = 'paid';
+                $paidAt = now(); // 全額付清時設定付清時間
+            } else {
+                $paidAt = null; // 部分付款時不設定付清時間
+            }
+            
+            // 更新訂單
+            $updateData = [
+                'paid_amount' => $newPaidAmount,
+                'payment_status' => $newPaymentStatus,
+            ];
+            
+            if ($paidAt) {
+                $updateData['paid_at'] = $paidAt;
+            }
+            
+            $order->update($updateData);
+            
+            // 4. 寫入歷史記錄：描述此次收款事件
+            $paymentMethodText = [
+                'cash' => '現金',
+                'transfer' => '轉帳',
+                'credit_card' => '信用卡',
+            ][$paymentData['payment_method']] ?? $paymentData['payment_method'];
+            
+            $historyNotes = "記錄一筆 {$paymentData['amount']} 元的{$paymentMethodText}付款";
+            if (!empty($paymentData['notes'])) {
+                $historyNotes .= "，備註：{$paymentData['notes']}";
+            }
+            
+            // 如果付款狀態有變更，則記錄狀態歷史
+            if ($originalPaymentStatus !== $newPaymentStatus) {
+                $order->statusHistories()->create([
+                    'from_status' => $originalPaymentStatus,
+                    'to_status' => $newPaymentStatus,
+                    'status_type' => 'payment',
+                    'user_id' => auth()->id(),
+                    'notes' => $historyNotes,
+                ]);
+            }
+            
+            // 5. 返回結果：返回更新後的 Order 物件
+            return $order->load([
+                'items.productVariant', 
+                'customer', 
+                'creator', 
+                'statusHistories.user',
+                'paymentRecords.creator' // 載入付款記錄
+            ]);
+        });
+    }
+
+    /**
      * 創建訂單出貨記錄
      * 
      * 為訂單創建出貨記錄，更新貨物狀態為 shipped，

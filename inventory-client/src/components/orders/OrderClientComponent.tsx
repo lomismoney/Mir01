@@ -4,14 +4,19 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link'; // <-- 新增導入
 import { Button } from '@/components/ui/button'; // <-- 新增導入
 import { PlusCircle } from 'lucide-react'; // <-- 新增導入
-import { useOrders } from '@/hooks/queries/useEntityQueries';
+import { useOrders, useCancelOrder } from '@/hooks/queries/useEntityQueries'; // 🎯 新增 useCancelOrder
 import { OrderPreviewModal } from '@/components/orders/OrderPreviewModal';
+import { ShipmentFormModal } from '@/components/orders/ShipmentFormModal';
+import RecordPaymentModal from '@/components/orders/RecordPaymentModal';
+import RefundModal from '@/components/orders/RefundModal'; // 🎯 新增 RefundModal
 import { useDebounce } from '@/hooks/use-debounce';
 import { DataTableSkeleton } from '@/components/ui/data-table-skeleton';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createColumns } from './columns';
-import { Order } from '@/types/api-helpers';
+import { Order, ProcessedOrder } from '@/types/api-helpers';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
 import {
   flexRender,
   getCoreRowModel,
@@ -40,6 +45,20 @@ export function OrderClientComponent() {
 
   // 🎯 訂單預覽狀態管理
   const [previewingOrderId, setPreviewingOrderId] = useState<number | null>(null);
+  
+  // 🎯 出貨Modal狀態管理
+  const [shippingOrderId, setShippingOrderId] = useState<number | null>(null);
+  
+  // 🎯 部分收款Modal狀態管理
+  const [payingOrder, setPayingOrder] = useState<ProcessedOrder | null>(null);
+  
+  // 🎯 退款Modal狀態管理
+  const [refundingOrder, setRefundingOrder] = useState<ProcessedOrder | null>(null);
+  
+  // 🎯 新增：取消訂單狀態管理
+  const [cancellingOrder, setCancellingOrder] = useState<ProcessedOrder | null>(null);
+  const [cancelReason, setCancelReason] = useState<string>('');
+  const cancelOrderMutation = useCancelOrder();
 
   // 使用 useMemo 來避免在每次渲染時都重新創建查詢對象
   const queryFilters = useMemo(() => ({
@@ -57,9 +76,33 @@ export function OrderClientComponent() {
   // 從響應中解析數據
   const pageData = ((response as any)?.data || []) as Order[];
   const meta = (response as any)?.meta;
+  
+  // 🎯 建立確認取消的處理函式
+  const handleConfirmCancel = () => {
+    if (!cancellingOrder) return;
+    cancelOrderMutation.mutate(
+      { orderId: cancellingOrder.id, reason: cancelReason },
+      {
+        onSuccess: () => {
+          setCancellingOrder(null); // 成功後關閉對話框
+          setCancelReason(''); // 清空原因
+        },
+      }
+    );
+  };
 
-  // 🎯 創建包含預覽回調的 columns
-  const columns = useMemo(() => createColumns({ onPreview: setPreviewingOrderId }), []);
+  // 🎯 創建包含預覽、出貨、收款、退款和取消回調的 columns
+  const columns = useMemo(() => createColumns({ 
+    onPreview: setPreviewingOrderId,
+    onShip: setShippingOrderId,
+    onRecordPayment: setPayingOrder,
+    onRefund: setRefundingOrder, // 🎯 新增
+    onCancel: setCancellingOrder, // 🎯 新增
+    onDelete: (id: number) => {
+      // 目前使用 deleteOrder hook 在 columns 內部處理
+      // 未來可以在這裡添加確認對話框或其他邏輯
+    }
+  }), []);
 
   // 配置表格
   const table = useReactTable({
@@ -207,7 +250,74 @@ export function OrderClientComponent() {
             setPreviewingOrderId(null); // 當面板關閉時，重置 ID
           }
         }}
+        onShip={setShippingOrderId}
+        onRecordPayment={setPayingOrder}
+        onRefund={setRefundingOrder} // 🎯 新增
       />
+      
+      {/* 🎯 出貨表單模態 */}
+      <ShipmentFormModal
+        orderId={shippingOrderId!}
+        open={!!shippingOrderId}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setShippingOrderId(null);
+          }
+        }}
+      />
+      
+      {/* 🎯 部分收款模態 */}
+      <RecordPaymentModal
+        order={payingOrder}
+        open={!!payingOrder}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setPayingOrder(null);
+          }
+        }}
+      />
+      
+      {/* 🎯 退款模態 */}
+      <RefundModal
+        order={refundingOrder}
+        open={!!refundingOrder}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setRefundingOrder(null);
+          }
+        }}
+      />
+      
+      {/* 🎯 取消訂單確認對話框 */}
+      <AlertDialog
+        open={!!cancellingOrder}
+        onOpenChange={(isOpen) => !isOpen && setCancellingOrder(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認取消訂單？</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要取消訂單 <strong>{cancellingOrder?.order_number}</strong> 嗎？此操作不可撤銷。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <label htmlFor="cancel-reason" className="text-sm font-medium">取消原因 (可選)</label>
+            <Textarea
+              id="cancel-reason"
+              placeholder="例如：客戶要求取消..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>再想想</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmCancel} disabled={cancelOrderMutation.isPending}>
+              {cancelOrderMutation.isPending ? '處理中...' : '確認取消'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 } 

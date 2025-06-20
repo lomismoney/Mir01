@@ -22,6 +22,7 @@ class Order extends Model
         'tax',
         'discount_amount',
         'grand_total',
+        'paid_amount',
         'payment_method',
         'order_source',
         'shipping_address',
@@ -39,6 +40,30 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * 一個訂單包含多個訂單項目 (別名方法)
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * 一個訂單擁有多筆付款記錄 (One-to-Many)
+     */
+    public function paymentRecords(): HasMany
+    {
+        return $this->hasMany(PaymentRecord::class);
+    }
+
+    /**
+     * 一個訂單擁有多筆退款記錄 (One-to-Many)
+     */
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
     }
 
     /**

@@ -2427,7 +2427,7 @@ export function useDeletePurchase() {
  * 5. 🎯 100% 類型安全 - 使用精確的篩選參數類型
  * 
  * @param filters - 訂單篩選參數
- * @returns React Query 查詢結果
+ * @returns React Query 查詢結果，包含 data 和 meta
  */
 export function useOrders(filters: {
   search?: string;
@@ -2435,17 +2435,55 @@ export function useOrders(filters: {
   payment_status?: string;
   start_date?: string;
   end_date?: string;
+  page?: number;       // 🎯 新增分頁參數
+  per_page?: number;   // 🎯 新增每頁數量參數
 } = {}) {
   return useQuery({
-    // 遵循我們已建立的、扁平化的查詢鍵結構
+    // 遵循我們已建立的、扁平化的查詢鍵結構，包含分頁參數
     queryKey: [...QUERY_KEYS.ORDERS, filters],
     queryFn: async () => {
-      // 假設 apiClient 已能處理此端點
+      // 🚀 升級版 API 調用，傳遞完整的篩選和分頁參數
       const { data, error } = await apiClient.GET("/api/orders", {
-        params: { query: filters },
+        params: {
+          query: {
+            search: filters.search,
+            shipping_status: filters.shipping_status,
+            payment_status: filters.payment_status,
+            start_date: filters.start_date,
+            end_date: filters.end_date,
+            page: filters.page,             // 🎯 新增
+            per_page: filters.per_page,     // 🎯 新增
+          },
+        },
       });
       if (error) throw error;
       return data;
+    },
+    // 🎯 新增 select 選項 - 數據精煉廠，返回完整的分頁響應
+    select: (response: any) => {
+      // 1. 解包：從 API 響應中提取數據和分頁元數據
+      const orders = response?.data || [];
+      const meta = response?.meta || {}; // 提取分頁元數據
+      const links = response?.links || {}; // 提取分頁連結
+
+      // 2. 進行訂單數據的類型轉換和清理（如果需要）
+      const processedOrders = orders.map((order: any) => ({
+        ...order,
+        // 📊 金額字段的數值化處理
+        subtotal: parseFloat(order.subtotal || '0'),
+        shipping_fee: parseFloat(order.shipping_fee || '0'),
+        tax_amount: parseFloat(order.tax_amount || '0'),
+        discount_amount: parseFloat(order.discount_amount || '0'),
+        grand_total: parseFloat(order.grand_total || '0'),
+        paid_amount: parseFloat(order.paid_amount || '0'),
+      }));
+
+      // 3. 返回完整的分頁響應結構
+      return { 
+        data: processedOrders,
+        meta: meta,
+        links: links
+      };
     },
     staleTime: 1 * 60 * 1000, // 設置 1 分鐘的數據保鮮期
   });
@@ -2676,6 +2714,61 @@ export function useCreateOrderShipment() {
 }
 
 /**
+ * Hook for adding partial payment to an order
+ * 
+ * 功能特性：
+ * 1. 新增訂單部分付款記錄
+ * 2. 支援訂金、分期付款等場景
+ * 3. 自動計算已付金額和付款狀態
+ * 4. 完整的付款歷史追蹤
+ * 5. 🎯 100% 類型安全 - 使用精確的 API 類型定義
+ * 
+ * @returns React Query mutation 結果
+ */
+export function useAddOrderPayment() {
+  const queryClient = useQueryClient();
+  
+  // 🚀 使用 API 生成的精確類型定義
+  type AddPaymentRequestBody = import('@/types/api').paths["/api/orders/{order_id}/add-payment"]["post"]["requestBody"]["content"]["application/json"];
+  
+  return useMutation({
+    mutationFn: async (payload: { orderId: number; data: AddPaymentRequestBody }) => {
+      // 🚀 使用精確的 API 類型，完全移除 any 斷言
+      const { data, error } = await apiClient.POST("/api/orders/{order_id}/add-payment", {
+        params: { 
+          path: { 
+            order_id: payload.orderId
+          } 
+        },
+        body: payload.data,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, payload) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("付款記錄已成功新增", {
+          description: `已記錄 $${payload.data.amount} 的付款`
+        });
+      }
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(payload.orderId), refetchType: 'active' });
+    },
+    onError: (error) => {
+      const errorMessage = parseApiError(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("付款記錄新增失敗", { 
+          description: errorMessage || "請檢查付款金額是否正確" 
+        });
+      }
+    },
+  });
+}
+
+/**
  * Hook for updating an existing order
  */
 export function useUpdateOrder() {
@@ -2825,6 +2918,110 @@ export function useUpdateOrderItemStatus() {
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error('狀態更新失敗', { description: errorMessage });
+      }
+    },
+  });
+}
+
+/**
+ * Hook for creating an order refund
+ * 
+ * 功能特性：
+ * 1. 創建品項級別的訂單退款
+ * 2. 支援部分品項退貨
+ * 3. 自動計算退款金額
+ * 4. 可選擇性回補庫存
+ * 5. 🎯 100% 類型安全 - 使用精確的 API 類型定義
+ * 
+ * @returns React Query mutation 結果
+ */
+export function useCreateRefund() {
+  const queryClient = useQueryClient();
+  
+  // 🚀 使用 API 生成的精確類型定義
+  type CreateRefundRequestBody = import('@/types/api').paths["/api/orders/{order_id}/refunds"]["post"]["requestBody"]["content"]["application/json"];
+  
+  return useMutation({
+    mutationFn: async (payload: { orderId: number; data: CreateRefundRequestBody }) => {
+      // 🚀 使用精確的 API 類型，完全移除 any 斷言
+      const { data, error } = await apiClient.POST("/api/orders/{order_id}/refunds", {
+        params: { 
+          path: { 
+            order_id: payload.orderId
+          } 
+        },
+        body: payload.data,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, payload) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success("退款已成功處理", {
+          description: `退款金額：$${data?.data?.total_refund_amount || 0}`
+        });
+      }
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(payload.orderId), refetchType: 'active' });
+    },
+    onError: (error) => {
+      const errorMessage = parseApiError(error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error("退款處理失敗", { 
+          description: errorMessage || "請檢查退款資料是否正確" 
+        });
+      }
+    },
+  });
+}
+
+/**
+ * Hook for cancelling an order - 終止作戰計畫
+ * 
+ * 功能特性：
+ * 1. 取消訂單並返還庫存
+ * 2. 支援選填取消原因
+ * 3. 自動刷新相關緩存（列表和詳情）
+ * 4. 提供用戶友善的成功/錯誤提示
+ * 5. 🎯 100% 類型安全 - 使用精確的 API 類型定義
+ * 
+ * @returns React Query mutation 結果
+ */
+export function useCancelOrder() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ orderId, reason }: { orderId: number; reason?: string }) => {
+      const { error } = await apiClient.POST('/api/orders/{order}/cancel', {
+        params: { path: { order: orderId } },
+        body: { reason },
+      });
+
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '取消訂單失敗');
+      }
+    },
+    onSuccess: (_, { orderId }) => {
+      // 🔔 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('訂單已成功取消');
+      }
+      
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      // 使訂單列表和該訂單的詳細資料緩存失效，觸發 UI 自動更新
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(orderId), refetchType: 'active' });
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error(error.message);
       }
     },
   });

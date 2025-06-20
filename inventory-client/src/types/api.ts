@@ -46,7 +46,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 20 */
+                                /** @example 3 */
                                 id?: number;
                                 /** @example Lonny Ankunding */
                                 name?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-19T10:47:14.000000Z */
+                                /** @example 2025-06-20T08:50:45.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-19T10:47:14.000000Z */
+                                /** @example 2025-06-20T08:50:45.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -135,7 +135,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the category.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
             };
@@ -153,7 +153,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                 };
@@ -188,7 +188,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                 };
@@ -231,7 +231,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                 };
@@ -268,7 +268,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
             };
@@ -290,7 +290,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 1
+                 * @example 2
                  */
                 user_id: number;
             };
@@ -494,7 +494,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
                 /**
@@ -516,7 +516,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -550,7 +550,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -596,7 +596,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -677,7 +677,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the product.
-                 * @example 1
+                 * @example 17
                  */
                 product_id: number;
                 /**
@@ -705,7 +705,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the product.
-                     * @example 1
+                     * @example 17
                      */
                     product_id: number;
                     /**
@@ -2305,7 +2305,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the customer.
-                 * @example 1
+                 * @example 2
                  */
                 id: number;
                 /**
@@ -2324,7 +2324,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the customer.
-                     * @example 1
+                     * @example 2
                      */
                     id: number;
                     /**
@@ -2438,7 +2438,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the customer.
-                     * @example 1
+                     * @example 2
                      */
                     id: number;
                     /**
@@ -2472,7 +2472,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 1
+                 * @example 17
                  */
                 attribute_id: number;
                 /**
@@ -2494,7 +2494,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     attribute_id: number;
                     /**
@@ -2592,7 +2592,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 1
+                     * @example 17
                      */
                     attribute_id: number;
                     /**
@@ -2638,7 +2638,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the value.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
                 /**
@@ -2660,7 +2660,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -2691,7 +2691,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -2746,7 +2746,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 1
+                     * @example 17
                      */
                     id: number;
                     /**
@@ -3087,12 +3087,12 @@ export interface paths {
                         type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                         /**
                          * @description Must be a valid date.
-                         * @example 2025-06-19T10:47:14
+                         * @example 2025-06-20T08:50:45
                          */
                         start_date?: string | null;
                         /**
                          * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                         * @example 2106-07-18
+                         * @example 2106-07-19
                          */
                         end_date?: string | null;
                         /** @example consequatur */
@@ -4205,7 +4205,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 1
+                 * @example 2
                  */
                 id: number;
                 /**
@@ -4228,7 +4228,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 1
+                     * @example 2
                      */
                     id: number;
                     /**
@@ -4284,7 +4284,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 1
+                     * @example 2
                      */
                     id: number;
                     /**
@@ -4370,7 +4370,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 1
+                     * @example 2
                      */
                     id: number;
                     /**
@@ -4466,6 +4466,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/orders/{order_id}/add-payment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要新增付款記錄的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postApiOrdersOrder_idAddPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/orders/{order_id}/create-shipment": {
         parameters: {
             query?: never;
@@ -4493,6 +4520,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/orders/{order_id}/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要創建退款的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postApiOrdersOrder_idRefunds"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{order_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要取消的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postApiOrdersOrder_idCancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/order-items/{order_item_id}/status": {
         parameters: {
             query?: never;
@@ -4500,7 +4581,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order item.
-                 * @example 1
+                 * @example 17
                  */
                 order_item_id: number;
                 /**
@@ -4884,16 +4965,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 31 */
+                            /** @example 1 */
                             id?: number;
                             /** @example Mueller-Dibbert */
                             name?: string;
                             /** @example 87713 Brandy Roads Suite 202
                              *     Williamsonfort, CT 64474 */
                             address?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4908,7 +4989,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
             };
@@ -4923,16 +5004,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 32 */
+                            /** @example 2 */
                             id?: number;
-                            /** @example Kunde Group */
+                            /** @example Moore-Emard */
                             name?: string;
-                            /** @example 62028 Trudie Mills
-                             *     North Cordie, IL 75592 */
+                            /** @example 27319 Schmeler Fall Suite 958
+                             *     Carterland, NM 49546 */
                             address?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4947,7 +5028,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
             };
@@ -4977,16 +5058,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 33 */
+                            /** @example 3 */
                             id?: number;
-                            /** @example Moore-Emard */
+                            /** @example Satterfield, Collins and Reynolds */
                             name?: string;
-                            /** @example 27319 Schmeler Fall Suite 958
-                             *     Carterland, NM 49546 */
+                            /** @example 820 Smith Cove Apt. 644
+                             *     South Eloisaborough, IL 62645 */
                             address?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5001,7 +5082,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 1
+                 * @example 17
                  */
                 id: number;
             };
@@ -5017,7 +5098,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 1
+                 * @example 2
                  */
                 user_id: number;
             };
@@ -5032,16 +5113,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 34 */
+                            /** @example 4 */
                             id?: number;
-                            /** @example Hahn-Harber */
+                            /** @example Reichel PLC */
                             name?: string;
-                            /** @example 6098 Kutch Loaf
-                             *     Port Eldonland, PA 73828-6765 */
+                            /** @example 283 Adell Mews Suite 313
+                             *     East Lennie, CO 94046-7647 */
                             address?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5056,7 +5137,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 1
+                 * @example 2
                  */
                 user_id: number;
             };
@@ -5083,7 +5164,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 21 */
+                            /** @example 4 */
                             id?: number;
                             /** @example Dr. Cornelius Luettgen V */
                             name?: string;
@@ -5095,9 +5176,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-19T10:47:14.000000Z */
+                            /** @example 2025-06-20T08:50:45.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5672,18 +5753,18 @@ export interface operations {
                      */
                     store_id?: number | null;
                     /**
-                     * @example addition
+                     * @example transfer_out
                      * @enum {string|null}
                      */
                     type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2025-06-19T10:47:14
+                     * @example 2025-06-20T08:50:45
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2106-07-18
+                     * @example 2106-07-19
                      */
                     end_date?: string | null;
                     /**
@@ -5919,12 +6000,12 @@ export interface operations {
                     payment_status?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2025-06-19
+                     * @example 2025-06-20
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2106-07-18
+                     * @example 2106-07-19
                      */
                     end_date?: string | null;
                 };
@@ -6260,6 +6341,133 @@ export interface operations {
             };
         };
     };
+    postApiOrdersOrder_idAddPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要新增付款記錄的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 付款金額，必須大於 0.01 且不超過剩餘未付金額。
+                     * @example 1500.50
+                     */
+                    amount: Record<string, never>;
+                    /**
+                     * @description 付款方式（cash, transfer, credit_card）。
+                     * @example cash
+                     */
+                    payment_method: string;
+                    /**
+                     * @description 付款日期（格式: Y-m-d H:i:s），不填則使用當前時間。
+                     * @example 2025-06-20 10:30:00
+                     */
+                    payment_date?: Record<string, never>;
+                    /**
+                     * @description 付款備註，最多 500 字符。
+                     * @example 收到現金付款，找零 50 元
+                     */
+                    notes?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example PO-20250619-001 */
+                            order_number?: string;
+                            /** @example partial */
+                            payment_status?: string;
+                            /** @example 1500.5 */
+                            paid_amount?: number;
+                            /** @example 5000 */
+                            grand_total?: number;
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "amount": 1500.5,
+                             *         "payment_method": "cash",
+                             *         "payment_date": "2025-06-20T10:30:00.000000Z",
+                             *         "notes": "收到現金付款，找零 50 元",
+                             *         "creator": {
+                             *           "id": 1,
+                             *           "name": "管理員"
+                             *         }
+                             *       }
+                             *     ] */
+                            payment_records?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 1500.5 */
+                                amount?: number;
+                                /** @example cash */
+                                payment_method?: string;
+                                /** @example 2025-06-20T10:30:00.000000Z */
+                                payment_date?: string;
+                                /** @example 收到現金付款，找零 50 元 */
+                                notes?: string;
+                                creator?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 管理員 */
+                                    name?: string;
+                                };
+                            }[];
+                            /** @example 2025-06-20T10:30:00.000000Z */
+                            updated_at?: string;
+                        };
+                    };
+                };
+            };
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 收款金額不能超過剩餘未付金額：3499.50 */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "收款金額不能超過剩餘未付金額：3499.50"
+                             *     ] */
+                            amount?: string[];
+                        };
+                    } | {
+                        /** @example 此訂單已全額付清，無法再新增付款記錄 */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "訂單已全額付清"
+                             *     ] */
+                            payment_status?: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
     postApiOrdersOrder_idCreateShipment: {
         parameters: {
             query?: never;
@@ -6353,6 +6561,235 @@ export interface operations {
             };
         };
     };
+    postApiOrdersOrder_idRefunds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要創建退款的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 退款原因，10-500 字符。
+                     * @example 商品品質不符合要求，客戶要求退貨
+                     */
+                    reason: string;
+                    /**
+                     * @description 退款備註，最多 1000 字符。
+                     * @example 商品外觀無損，已檢查確認可回庫
+                     */
+                    notes?: string | null;
+                    /**
+                     * @description 是否將退貨商品加回庫存。
+                     * @example true
+                     */
+                    should_restock: boolean;
+                    /**
+                     * @description 退款品項清單，至少包含一個品項。
+                     * @example [
+                     *       {
+                     *         "order_item_id": 1,
+                     *         "quantity": 2
+                     *       },
+                     *       {
+                     *         "order_item_id": 3,
+                     *         "quantity": 1
+                     *       }
+                     *     ]
+                     */
+                    items: {
+                        /**
+                         * @description 訂單品項ID
+                         * @example 1
+                         */
+                        order_item_id: number;
+                        /**
+                         * @description 退貨數量
+                         * @example 2
+                         */
+                        quantity: number;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example 1 */
+                            order_id?: number;
+                            /** @example 3000 */
+                            total_refund_amount?: number;
+                            /** @example 商品品質不符合要求，客戶要求退貨 */
+                            reason?: string;
+                            /** @example 商品外觀無損，已檢查確認可回庫 */
+                            notes?: string;
+                            /** @example true */
+                            should_restock?: boolean;
+                            creator?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 管理員 */
+                                name?: string;
+                            };
+                            /** @example [
+                             *       {
+                             *         "id": 1,
+                             *         "order_item_id": 1,
+                             *         "quantity": 2,
+                             *         "refund_subtotal": 3000,
+                             *         "order_item": {
+                             *           "id": 1,
+                             *           "product_name": "標準辦公桌",
+                             *           "sku": "DESK-001",
+                             *           "price": 1500
+                             *         }
+                             *       }
+                             *     ] */
+                            refund_items?: {
+                                /** @example 1 */
+                                id?: number;
+                                /** @example 1 */
+                                order_item_id?: number;
+                                /** @example 2 */
+                                quantity?: number;
+                                /** @example 3000 */
+                                refund_subtotal?: number;
+                                order_item?: {
+                                    /** @example 1 */
+                                    id?: number;
+                                    /** @example 標準辦公桌 */
+                                    product_name?: string;
+                                    /** @example DESK-001 */
+                                    sku?: string;
+                                    /** @example 1500 */
+                                    price?: number;
+                                };
+                            }[];
+                            /** @example 2025-06-20T15:30:00.000000Z */
+                            created_at?: string;
+                        };
+                    };
+                };
+            };
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 品項 DESK-001 的退貨數量 (5) 超過可退數量 (3) */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)"
+                             *     ] */
+                            "items.0.quantity"?: string[];
+                        };
+                    } | {
+                        /** @example 未付款的訂單無法退款 */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "未付款的訂單無法退款"
+                             *     ] */
+                            payment_status?: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    postApiOrdersOrder_idCancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the order.
+                 * @example 1
+                 */
+                order_id: number;
+                /**
+                 * @description 要取消的訂單 ID。
+                 * @example 1
+                 */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 取消原因。
+                     * @example 客戶要求取消
+                     */
+                    reason?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 1 */
+                            id?: number;
+                            /** @example PO-20250619-001 */
+                            order_number?: string;
+                            /** @example cancelled */
+                            shipping_status?: string;
+                            /** @example cancelled */
+                            payment_status?: string;
+                            /** @example 2025-06-19T12:00:00.000000Z */
+                            updated_at?: string;
+                        };
+                    };
+                };
+            };
+            /** @description 訂單狀態不允許此操作 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 此訂單的狀態不允許取消操作 */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "已出貨或已交付的訂單無法取消"
+                             *     ] */
+                            shipping_status?: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
     patchApiOrderItemsOrder_item_idStatus: {
         parameters: {
             query?: never;
@@ -6360,7 +6797,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order item.
-                 * @example 1
+                 * @example 17
                  */
                 order_item_id: number;
                 /**
