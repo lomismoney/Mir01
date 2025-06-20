@@ -8,12 +8,23 @@ use App\Http\Resources\Api\StoreResource;
 use App\Http\Resources\Api\UserResource;
 use App\Models\Store;
 use App\Models\User;
+use App\Services\UserStoreService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
 
 class UserStoreController extends Controller
 {
+    /**
+     * @var UserStoreService
+     */
+    protected $userStoreService;
+
+    public function __construct(UserStoreService $userStoreService)
+    {
+        $this->userStoreService = $userStoreService;
+    }
+
     /**
      * @group User Store Management
      * @authenticated
@@ -53,34 +64,15 @@ class UserStoreController extends Controller
      */
     public function store(UserStoreAssignRequest $request, User $user): JsonResponse
     {
+        $this->authorize('assignStores', $user);
+
         try {
-            // 獲取驗證後的 store_ids
             $storeIds = $request->validated('store_ids');
-            
-            // 確保所有 ID 都是整數
-            $storeIds = array_map(function($id) {
-                return is_numeric($id) ? (int)$id : $id;
-            }, $storeIds);
-            
-            // 檢查所有店鋪 ID 是否存在
-            $storeCount = Store::whereIn('id', $storeIds)->count();
-            if ($storeCount !== count($storeIds)) {
-                Log::warning("嘗試分配不存在的店鋪: ", [
-                    'user_id' => $user->id,
-                    'store_ids' => $storeIds
-                ]);
-                return response()->json([
-                    'message' => '提供的部分分店ID不存在',
-                    'errors' => ['store_ids' => ['提供的部分分店ID不存在']]
-                ], 422);
-            }
-            
-            // 同步用戶的分店
-            $user->stores()->sync($storeIds);
+            $updatedUser = $this->userStoreService->assignStores($user, $storeIds);
             
             return response()->json([
                 'message' => '分店已成功分配給用戶',
-                'user' => new UserResource($user->load('stores')),
+                'user' => new UserResource($updatedUser),
             ]);
         } catch (\Exception $e) {
             Log::error("分配分店失敗: {$e->getMessage()}", [

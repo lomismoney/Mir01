@@ -1471,4 +1471,76 @@ class ProductControllerTest extends TestCase
                 ]
             ]);
     }
+
+    /**
+     * @test
+     * @dataProvider storeProductValidationProvider
+     */
+    public function store_product_validation_fails_for_invalid_data($data, $expectedErrors)
+    {
+        $category = Category::factory()->create();
+        $colorAttribute = Attribute::factory()->create(['name' => '顏色']);
+        $redValue = AttributeValue::factory()->create(['attribute_id' => $colorAttribute->id, 'value' => '紅色']);
+
+        // Base valid data
+        $validData = [
+            'name' => 'Valid Product Name',
+            'description' => 'Valid product description.',
+            'category_id' => $category->id,
+            'attributes' => [$colorAttribute->id],
+            'variants' => [
+                [
+                    'sku' => 'VALID-SKU-001',
+                    'price' => 99.99,
+                    'attribute_value_ids' => [$redValue->id],
+                ],
+            ],
+        ];
+
+        // Merge with invalid data
+        $payload = $validData;
+        foreach ($data as $key => $value) {
+            if ($key === 'variants' && is_array($value) && isset($value[0]) && is_array($value[0])) {
+                $payload['variants'][0] = array_merge($payload['variants'][0], $value[0]);
+            } else {
+                $payload[$key] = $value;
+            }
+        }
+
+        $response = $this->actingAsAdmin()->postJson('/api/products', $payload);
+
+        $response->assertStatus(422)
+                 ->assertJsonValidationErrors($expectedErrors);
+    }
+
+    public static function storeProductValidationProvider()
+    {
+        // To be lazy-loaded inside the provider
+        $getNonExistentId = fn() => 99999;
+
+        return [
+            'name is missing' => [['name' => ''], ['name']],
+            'name is not a string' => [['name' => 123], ['name']],
+            'name is too long' => [['name' => str_repeat('a', 256)], ['name']],
+            'description is not a string' => [['description' => 123], ['description']],
+            'category_id is not an integer' => [['category_id' => 'abc'], ['category_id']],
+            'category_id does not exist' => [['category_id' => $getNonExistentId], ['category_id']],
+            'attributes is missing' => [['attributes' => []], ['attributes']],
+            'attributes is not an array' => [['attributes' => 'not-an-array'], ['attributes']],
+            'attributes contains non-integer' => [['attributes' => ['abc']], ['attributes.0']],
+            'attributes contains non-existent id' => [['attributes' => [$getNonExistentId]], ['attributes.0']],
+            'variants is missing' => [['variants' => []], ['variants']],
+            'variants is not an array' => [['variants' => 'not-an-array'], ['variants']],
+            'variant sku is missing' => [['variants' => [['sku' => '']]], ['variants.0.sku']],
+            'variant sku is not a string' => [['variants' => [['sku' => 123]]], ['variants.0.sku']],
+            'variant sku is too long' => [['variants' => [['sku' => str_repeat('a', 256)]]], ['variants.0.sku']],
+            'variant price is missing' => [['variants' => [['price' => null]]], ['variants.0.price']],
+            'variant price is not numeric' => [['variants' => [['price' => 'abc']]], ['variants.0.price']],
+            'variant price is negative' => [['variants' => [['price' => -10]]], ['variants.0.price']],
+            'variant attribute_value_ids is missing' => [['variants' => [['attribute_value_ids' => []]]], ['variants.0.attribute_value_ids']],
+            'variant attribute_value_ids is not an array' => [['variants' => [['attribute_value_ids' => 'not-an-array']]], ['variants.0.attribute_value_ids']],
+            'variant attribute_value_ids contains non-integer' => [['variants' => [['attribute_value_ids' => ['abc']]]], ['variants.0.attribute_value_ids.0']],
+            'variant attribute_value_ids contains non-existent id' => [['variants' => [['attribute_value_ids' => [$getNonExistentId]]]], ['variants.0.attribute_value_ids.0']],
+        ];
+    }
 } 

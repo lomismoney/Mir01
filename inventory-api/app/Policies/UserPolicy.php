@@ -40,7 +40,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->id === $model->id;
     }
 
     /**
@@ -66,6 +66,20 @@ class UserPolicy
      * @return bool true: 管理員可以更新, false: 其他角色拒絕
      */
     public function update(User $user, User $model): bool
+    {
+        return $user->isAdmin();
+    }
+
+    /**
+     * 決定用戶是否可以為用戶分配分店
+     *
+     * 只有管理員可以分配分店
+     *
+     * @param User $user 當前登入的用戶
+     * @param User $model 目標用戶
+     * @return boolean
+     */
+    public function assignStores(User $user, User $model): bool
     {
         return $user->isAdmin();
     }

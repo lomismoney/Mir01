@@ -179,7 +179,7 @@ class CustomerController extends Controller
      * 
      * @responseFile 200 storage/responses/customer.update.json
      */
-    public function update(UpdateCustomerRequest $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, Customer $customer): JsonResponse
     {
         try {
             // 1. 權限驗證 - 檢查使用者是否有權限更新此客戶
@@ -189,7 +189,7 @@ class CustomerController extends Controller
             $updatedCustomer = $this->customerService->updateCustomer($customer, $request->validated());
 
             // 3. 返回標準化的單一資源
-            return new CustomerResource($updatedCustomer);
+            return (new CustomerResource($updatedCustomer))->response();
 
         } catch (\Illuminate\Database\QueryException $e) {
             // 資料庫錯誤處理

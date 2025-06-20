@@ -392,4 +392,129 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals($transaction1->id, $transactions->first()->id);
         $this->assertEquals($transaction2->id, $transactions->last()->id);
     }
+
+    /** @test */
+    public function of_type_scope_filters_transactions_by_type()
+    {
+        // 創建不同類型的交易記錄
+        $additionTransaction = InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $this->user->id,
+            'type' => InventoryTransaction::TYPE_ADDITION,
+            'quantity' => 10,
+            'before_quantity' => 50,
+            'after_quantity' => 60,
+        ]);
+
+        $reductionTransaction = InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $this->user->id,
+            'type' => InventoryTransaction::TYPE_REDUCTION,
+            'quantity' => -5,
+            'before_quantity' => 60,
+            'after_quantity' => 55,
+        ]);
+
+        $adjustmentTransaction = InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $this->user->id,
+            'type' => InventoryTransaction::TYPE_ADJUSTMENT,
+            'quantity' => 2,
+            'before_quantity' => 55,
+            'after_quantity' => 57,
+        ]);
+
+        // 測試過濾 addition 類型
+        $additionTransactions = InventoryTransaction::ofType(InventoryTransaction::TYPE_ADDITION)->get();
+        $this->assertCount(2, $additionTransactions); // 包含 setUp 中創建的 addition 交易
+        $this->assertTrue($additionTransactions->contains($additionTransaction));
+        $this->assertTrue($additionTransactions->contains($this->transaction));
+
+        // 測試過濾 reduction 類型
+        $reductionTransactions = InventoryTransaction::ofType(InventoryTransaction::TYPE_REDUCTION)->get();
+        $this->assertCount(1, $reductionTransactions);
+        $this->assertTrue($reductionTransactions->contains($reductionTransaction));
+
+        // 測試過濾 adjustment 類型
+        $adjustmentTransactions = InventoryTransaction::ofType(InventoryTransaction::TYPE_ADJUSTMENT)->get();
+        $this->assertCount(1, $adjustmentTransactions);
+        $this->assertTrue($adjustmentTransactions->contains($adjustmentTransaction));
+
+        // 測試過濾不存在的類型
+        $nonexistentTransactions = InventoryTransaction::ofType('nonexistent_type')->get();
+        $this->assertCount(0, $nonexistentTransactions);
+    }
+
+    /** @test */
+    public function between_dates_scope_filters_transactions_by_date_range()
+    {
+        // 清除所有現有的交易記錄，避免干擾
+        InventoryTransaction::query()->delete();
+        
+        // 簡化測試，使用絕對簡單的邏輯
+        $now = now()->startOfDay();
+        
+        // 創建 3 筆不同時間的交易記錄，使用正確的方式設定 created_at
+        $transaction1 = InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $this->user->id,
+            'type' => InventoryTransaction::TYPE_ADDITION,
+            'quantity' => 10,
+            'before_quantity' => 0,
+            'after_quantity' => 10,
+        ]);
+        // 使用 timestamps(false) 然後直接設定時間
+        $transaction1->timestamps = false;
+        $transaction1->created_at = $now->copy()->subDays(10); // 10天前
+        $transaction1->save();
+
+        $transaction2 = InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $this->user->id,
+            'type' => InventoryTransaction::TYPE_REDUCTION,
+            'quantity' => -5,
+            'before_quantity' => 10,
+            'after_quantity' => 5,
+        ]);
+        $transaction2->timestamps = false;
+        $transaction2->created_at = $now->copy()->subDays(5); // 5天前
+        $transaction2->save();
+
+        $transaction3 = InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $this->user->id,
+            'type' => InventoryTransaction::TYPE_ADJUSTMENT,
+            'quantity' => 3,
+            'before_quantity' => 5,
+            'after_quantity' => 8,
+        ]);
+        $transaction3->timestamps = false;
+        $transaction3->created_at = $now->copy()->subDays(2); // 2天前
+        $transaction3->save();
+
+        // 驗證基本功能：所有交易都被創建了
+        $allTransactions = InventoryTransaction::all();
+        $this->assertCount(3, $allTransactions);
+
+        // 測試範圍查詢：獲取過去 7 天的交易
+        $startDate = $now->copy()->subDays(7);
+        $endDate = $now->copy();
+        
+        $filtered = InventoryTransaction::betweenDates($startDate, $endDate)->get();
+        
+        // 5天前和2天前的交易應該在範圍內，10天前的不應該
+        $this->assertCount(2, $filtered, '應該有2筆交易在7天範圍內');
+        $this->assertTrue($filtered->contains($transaction2), '5天前的交易應該被包含');
+        $this->assertTrue($filtered->contains($transaction3), '2天前的交易應該被包含');
+        $this->assertFalse($filtered->contains($transaction1), '10天前的交易不應該被包含');
+
+        // 測試更窄的範圍：只獲取過去 3 天的交易
+        $recentFiltered = InventoryTransaction::betweenDates($now->copy()->subDays(3), $now->copy())->get();
+        
+        // 只有2天前的交易應該在範圍內
+        $this->assertCount(1, $recentFiltered, '應該有1筆交易在3天範圍內');
+        $this->assertTrue($recentFiltered->contains($transaction3), '2天前的交易應該被包含');
+        $this->assertFalse($recentFiltered->contains($transaction2), '5天前的交易不應該被包含');
+        $this->assertFalse($recentFiltered->contains($transaction1), '10天前的交易不應該被包含');
+    }
 }
