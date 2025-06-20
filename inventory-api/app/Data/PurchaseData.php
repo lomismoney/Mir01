@@ -19,14 +19,14 @@ class PurchaseData extends Data
         #[Exists('stores', 'id')]
         public int $store_id,
 
-        #[Rule(['required', 'string', 'max:255'])]
+        #[Rule(['required', 'string', 'max:255', 'unique:purchases,order_number'])]
         public string $order_number,
 
         #[WithCast(MoneyCast::class)]
         #[Rule(['required', 'numeric', 'min:0'])]
         public int $shipping_cost,
 
-        #[Rule(['required', 'array'])]
+        #[Rule(['required', 'array', 'min:1'])]
         #[DataCollectionOf(PurchaseItemData::class)]
         public DataCollection $items,
 

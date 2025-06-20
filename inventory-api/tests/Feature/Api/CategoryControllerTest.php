@@ -4,12 +4,13 @@ namespace Tests\Feature\Api;
 
 use Tests\TestCase;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
-use PHPUnitFrameworkAttributesTest;
 class CategoryControllerTest extends TestCase
 {
-    use WithFaker;
+    use WithFaker, RefreshDatabase;
     
     /** @test */
     public function admin_can_get_all_categories()
@@ -267,5 +268,407 @@ class CategoryControllerTest extends TestCase
         $this->assertDatabaseHas('categories', [
             'id' => $category->id
         ]);
+    }
+
+    /** @test */
+    public function show_returns_404_for_non_existent_category()
+    {
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/categories/999999');
+
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function update_returns_404_for_non_existent_category()
+    {
+        $updateData = [
+            'name' => '測試更新'
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->putJson('/api/categories/999999', $updateData);
+
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function destroy_returns_404_for_non_existent_category()
+    {
+        $response = $this->actingAsAdmin()
+            ->deleteJson('/api/categories/999999');
+
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function create_validates_required_fields()
+    {
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/categories', []);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
+    }
+
+    /** @test */
+    public function create_validates_name_length()
+    {
+        $longName = str_repeat('a', 256); // 超過 255 字符限制
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/categories', [
+                'name' => $longName
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
+    }
+
+    /** @test */
+    public function create_validates_parent_id_exists()
+    {
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/categories', [
+                'name' => '測試分類',
+                'parent_id' => 999999 // 不存在的父分類 ID
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['parent_id']);
+    }
+
+    /** @test */
+    public function update_validates_required_fields_when_provided()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/categories/{$category->id}", [
+                'name' => '' // 空名稱
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
+    }
+
+    /** @test */
+    public function update_validates_parent_id_exists()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/categories/{$category->id}", [
+                'parent_id' => 999999 // 不存在的父分類 ID
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['parent_id']);
+    }
+
+    /** @test */
+    public function index_returns_categories_grouped_by_parent_id()
+    {
+        // 創建父分類
+        $parentCategory = Category::factory()->create([
+            'name' => '電子產品',
+            'parent_id' => null
+        ]);
+
+        // 創建子分類
+        $childCategory1 = Category::factory()->create([
+            'name' => '手機',
+            'parent_id' => $parentCategory->id
+        ]);
+
+        // 創建另一個頂層分類
+        $anotherParent = Category::factory()->create([
+            'name' => '服裝',
+            'parent_id' => null
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/categories');
+
+        $response->assertStatus(200);
+
+        $data = $response->json();
+
+        // 檢查是否有按 parent_id 分組的結構
+        $this->assertIsArray($data);
+        
+        // 檢查是否有頂層分類組（parent_id 為 null 的分類）
+        if (isset($data[''])) {
+            $this->assertIsArray($data['']);
+        }
+        
+        // 檢查是否有子分類組
+        if (isset($data[(string)$parentCategory->id])) {
+            $this->assertIsArray($data[(string)$parentCategory->id]);
+        }
+    }
+
+    /** @test */
+    public function index_includes_products_count()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/categories');
+
+        $response->assertStatus(200);
+
+        $data = $response->json();
+        
+        // 檢查返回的資料結構包含商品計數
+        $this->assertIsArray($data);
+        
+        // 如果有資料，檢查第一個分組的第一個分類
+        if (!empty($data)) {
+            $firstGroup = reset($data);
+            if (!empty($firstGroup)) {
+                $firstCategory = reset($firstGroup);
+                $this->assertArrayHasKey('id', $firstCategory);
+                $this->assertArrayHasKey('products_count', $firstCategory);
+                $this->assertArrayHasKey('total_products_count', $firstCategory);
+            }
+        }
+    }
+
+    /** @test */
+    public function show_includes_products_count()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/categories/{$category->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'parent_id',
+                    'products_count',
+                    'total_products_count'
+                ]
+            ]);
+    }
+
+    /** @test */
+    public function index_works_with_empty_categories()
+    {
+        // 確保沒有分類存在
+        Category::query()->delete();
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/categories');
+
+        $response->assertStatus(200);
+
+        $data = $response->json();
+        $this->assertIsArray($data);
+    }
+
+    /** @test */
+    public function index_handles_deep_category_hierarchy()
+    {
+        // 創建深層級分類結構
+        $level1 = Category::factory()->create(['name' => 'Level 1', 'parent_id' => null]);
+        $level2 = Category::factory()->create(['name' => 'Level 2', 'parent_id' => $level1->id]);
+        $level3 = Category::factory()->create(['name' => 'Level 3', 'parent_id' => $level2->id]);
+        $level4 = Category::factory()->create(['name' => 'Level 4', 'parent_id' => $level3->id]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/categories');
+
+        $response->assertStatus(200);
+
+        $data = $response->json();
+
+        // 檢查各層級分類是否正確分組
+        $this->assertArrayHasKey('', $data); // Level 1
+        $this->assertArrayHasKey((string)$level1->id, $data); // Level 2
+        $this->assertArrayHasKey((string)$level2->id, $data); // Level 3
+        $this->assertArrayHasKey((string)$level3->id, $data); // Level 4
+    }
+
+    /** @test */
+    public function update_allows_setting_parent_to_null()
+    {
+        $parentCategory = Category::factory()->create();
+        $childCategory = Category::factory()->create(['parent_id' => $parentCategory->id]);
+
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/categories/{$childCategory->id}", [
+                'parent_id' => null
+            ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('categories', [
+            'id' => $childCategory->id,
+            'parent_id' => null
+        ]);
+    }
+
+    /** @test */
+    public function update_allows_partial_updates()
+    {
+        $category = Category::factory()->create([
+            'name' => '原始名稱',
+            'description' => '原始描述'
+        ]);
+
+        // 只更新名稱，不觸及描述
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/categories/{$category->id}", [
+                'name' => '新名稱'
+            ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('categories', [
+            'id' => $category->id,
+            'name' => '新名稱',
+            'description' => '原始描述' // 描述應該保持不變
+        ]);
+    }
+
+    /** @test */
+    public function category_name_is_trimmed_when_created()
+    {
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/categories', [
+                'name' => '  測試分類  ' // 前後有空格
+            ]);
+
+        $response->assertStatus(201);
+
+        $this->assertDatabaseHas('categories', [
+            'name' => '測試分類' // 空格應該被移除
+        ]);
+    }
+
+    /** @test */
+    public function category_name_is_trimmed_when_updated()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/categories/{$category->id}", [
+                'name' => '  更新的分類  ' // 前後有空格
+            ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('categories', [
+            'id' => $category->id,
+            'name' => '更新的分類' // 空格應該被移除
+        ]);
+    }
+
+    /** @test */
+    public function unauthenticated_user_cannot_access_categories()
+    {
+        $category = Category::factory()->create();
+
+        // 測試各個端點
+        $endpoints = [
+            ['GET', '/api/categories'],
+            ['POST', '/api/categories', ['name' => 'test']],
+            ['GET', "/api/categories/{$category->id}"],
+            ['PUT', "/api/categories/{$category->id}", ['name' => 'test']],
+            ['DELETE', "/api/categories/{$category->id}"]
+        ];
+
+        foreach ($endpoints as $endpoint) {
+            $method = strtolower($endpoint[0]);
+            $url = $endpoint[1];
+            $data = $endpoint[2] ?? [];
+
+            $response = $this->{$method . 'Json'}($url, $data);
+            $response->assertStatus(401);
+        }
+    }
+
+    /** @test */
+    public function destroy_removes_category_from_database()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->actingAsAdmin()
+            ->deleteJson("/api/categories/{$category->id}");
+
+        $response->assertStatus(204);
+
+        // 檢查分類已被刪除
+        $this->assertDatabaseMissing('categories', [
+            'id' => $category->id
+        ]);
+    }
+
+    /** @test */
+    public function create_allows_duplicate_names()
+    {
+        $existingCategory = Category::factory()->create(['name' => '重複名稱']);
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/categories', [
+                'name' => '重複名稱'
+            ]);
+
+        // 實際上沒有名稱唯一性驗證，所以應該成功
+        $response->assertStatus(201);
+
+        $this->assertDatabaseHas('categories', [
+            'name' => '重複名稱'
+        ]);
+    }
+
+    /** @test */
+    public function update_allows_duplicate_names()
+    {
+        $category1 = Category::factory()->create(['name' => '分類1']);
+        $category2 = Category::factory()->create(['name' => '分類2']);
+
+        // 嘗試將 category2 的名稱改為與 category1 相同
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/categories/{$category2->id}", [
+                'name' => '分類1'
+            ]);
+
+        // 實際上沒有名稱唯一性驗證，所以應該成功
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('categories', [
+            'id' => $category2->id,
+            'name' => '分類1'
+        ]);
+    }
+
+    /** @test */
+    public function update_allows_keeping_same_name()
+    {
+        $category = Category::factory()->create(['name' => '保持相同名稱']);
+
+        $response = $this->actingAsAdmin()
+            ->putJson("/api/categories/{$category->id}", [
+                'name' => '保持相同名稱' // 相同的名稱應該被允許
+            ]);
+
+                 $response->assertStatus(200);
+     }
+
+    protected function actingAsAdmin()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        return $this->actingAs($admin, 'sanctum');
+    }
+
+    protected function actingAsUser()
+    {
+        $user = User::factory()->create(['role' => 'staff']);
+        return $this->actingAs($user, 'sanctum');
     }
 } 

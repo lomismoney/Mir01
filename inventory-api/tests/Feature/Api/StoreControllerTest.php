@@ -2,43 +2,45 @@
 
 namespace Tests\Feature\Api;
 
-use Tests\TestCase;
 use App\Models\Store;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
-use PHPUnitFrameworkAttributesTest;
+use Tests\TestCase;
+use App\Models\Inventory;
+
 class StoreControllerTest extends TestCase
 {
-    use WithFaker;
-    
+    use RefreshDatabase, WithFaker;
+
+    protected User $admin;
+    protected User $staff;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $this->staff = User::factory()->create(['role' => 'staff']); // Assuming 'staff' is a valid role for these checks
+    }
+
     /** @test */
     public function admin_can_get_all_stores()
     {
-        // 手動創建商店，而不使用 factory
-        $stores = [];
-        for ($i = 0; $i < 3; $i++) {
-            $stores[] = Store::create([
-                'name' => 'Store ' . ($i + 1),
-                'address' => 'Address ' . ($i + 1)
-            ]);
-        }
-        
-        // 以管理員身份訪問 API
-        $response = $this->actingAsAdmin()
+        Store::factory()->count(3)->create();
+
+        $response = $this->actingAs($this->admin)
             ->getJson('/api/stores');
-            
-        // 檢查響應
+
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
                     '*' => ['id', 'name', 'address', 'created_at', 'updated_at']
                 ]
-            ]);
-            
-        // 確認數據庫中有三家店舖
-        $this->assertCount(3, $response->json('data'));
+            ])
+            ->assertJsonCount(3, 'data');
     }
-    
+
     /** @test */
     public function admin_can_create_store()
     {
@@ -46,10 +48,10 @@ class StoreControllerTest extends TestCase
             'name' => 'New Test Store',
             'address' => 'Test Address 123'
         ];
-        
-        $response = $this->actingAsAdmin()
+
+        $response = $this->actingAs($this->admin)
             ->postJson('/api/stores', $storeData);
-            
+
         $response->assertStatus(201)
             ->assertJson(function (AssertableJson $json) use ($storeData) {
                 $json->has('data')
@@ -57,21 +59,18 @@ class StoreControllerTest extends TestCase
                     ->where('data.address', $storeData['address'])
                     ->etc();
             });
-            
+
         $this->assertDatabaseHas('stores', $storeData);
     }
-    
+
     /** @test */
     public function admin_can_show_store_details()
     {
-        $store = Store::create([
-            'name' => 'Store to View',
-            'address' => 'Address to View'
-        ]);
-        
-        $response = $this->actingAsAdmin()
+        $store = Store::factory()->create();
+
+        $response = $this->actingAs($this->admin)
             ->getJson("/api/stores/{$store->id}");
-            
+
         $response->assertStatus(200)
             ->assertJson(function (AssertableJson $json) use ($store) {
                 $json->has('data')
@@ -81,23 +80,20 @@ class StoreControllerTest extends TestCase
                     ->etc();
             });
     }
-    
+
     /** @test */
     public function admin_can_update_store()
     {
-        $store = Store::create([
-            'name' => 'Store to Update',
-            'address' => 'Address to Update'
-        ]);
-        
+        $store = Store::factory()->create();
+
         $updatedData = [
             'name' => 'Updated Store Name',
             'address' => 'Updated Address'
         ];
-        
-        $response = $this->actingAsAdmin()
+
+        $response = $this->actingAs($this->admin)
             ->putJson("/api/stores/{$store->id}", $updatedData);
-            
+
         $response->assertStatus(200)
             ->assertJson(function (AssertableJson $json) use ($updatedData) {
                 $json->has('data')
@@ -105,32 +101,29 @@ class StoreControllerTest extends TestCase
                     ->where('data.address', $updatedData['address'])
                     ->etc();
             });
-            
+
         $this->assertDatabaseHas('stores', [
             'id' => $store->id,
             'name' => $updatedData['name'],
             'address' => $updatedData['address']
         ]);
     }
-    
+
     /** @test */
     public function admin_can_delete_store()
     {
-        $store = Store::create([
-            'name' => 'Store to Delete',
-            'address' => 'Address to Delete'
-        ]);
-        
-        $response = $this->actingAsAdmin()
+        $store = Store::factory()->create();
+
+        $response = $this->actingAs($this->admin)
             ->deleteJson("/api/stores/{$store->id}");
-            
+
         $response->assertStatus(204);
-        
+
         $this->assertDatabaseMissing('stores', [
             'id' => $store->id
         ]);
     }
-    
+
     /** @test */
     public function staff_cannot_create_store()
     {
@@ -138,55 +131,66 @@ class StoreControllerTest extends TestCase
             'name' => 'Store by Staff',
             'address' => 'Address by Staff'
         ];
-        
-        $response = $this->actingAsUser()
+
+        $response = $this->actingAs($this->staff)
             ->postJson('/api/stores', $storeData);
-            
+
         $response->assertStatus(403);
-        
+
         $this->assertDatabaseMissing('stores', $storeData);
     }
-    
+
     /** @test */
     public function staff_cannot_update_store()
     {
-        $store = Store::create([
-            'name' => 'Store not for Staff',
-            'address' => 'Address not for Staff'
-        ]);
-        
+        $store = Store::factory()->create();
+
         $updatedData = [
             'name' => 'Staff Updated Name',
             'address' => 'Staff Updated Address'
         ];
-        
-        $response = $this->actingAsUser()
+
+        $response = $this->actingAs($this->staff)
             ->putJson("/api/stores/{$store->id}", $updatedData);
-            
+
         $response->assertStatus(403);
-        
+
         $this->assertDatabaseHas('stores', [
             'id' => $store->id,
             'name' => $store->name,
             'address' => $store->address
         ]);
     }
-    
+
     /** @test */
     public function staff_cannot_delete_store()
     {
-        $store = Store::create([
-            'name' => 'Store not to Delete',
-            'address' => 'Address not to Delete'
-        ]);
-        
-        $response = $this->actingAsUser()
+        $store = Store::factory()->create();
+
+        $response = $this->actingAs($this->staff)
             ->deleteJson("/api/stores/{$store->id}");
-            
+
         $response->assertStatus(403);
-        
+
         $this->assertDatabaseHas('stores', [
             'id' => $store->id
         ]);
+    }
+
+    /** @test */
+    public function show_endpoint_can_include_relations()
+    {
+        $store = Store::factory()->create();
+        Inventory::factory()->create(['store_id' => $store->id]);
+
+        $response = $this->actingAs($this->admin)
+            ->getJson("/api/stores/{$store->id}?include=inventories,users");
+
+        $response->assertStatus(200)
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data.inventories')
+                     ->has('data.users')
+                     ->etc();
+            });
     }
 } 

@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Purchase extends Model
 {
+    use HasFactory;
+
     // 進貨單狀態常數
     const STATUS_PENDING = 'pending';                // 已下單（等待處理）
     const STATUS_CONFIRMED = 'confirmed';            // 已確認（廠商確認訂單）

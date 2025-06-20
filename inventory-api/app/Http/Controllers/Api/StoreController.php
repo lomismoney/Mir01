@@ -9,6 +9,7 @@ use App\Http\Resources\Api\StoreResource;
 use App\Models\Store;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class StoreController extends Controller
 {
@@ -28,13 +29,17 @@ class StoreController extends Controller
      * 
      * 獲取系統中的所有分店列表。
      * 
+     * @queryParam include string 可選的關聯，用逗號分隔。例如: users,inventories
      * @responseFile storage/responses/stores.index.json
      * 
      * @return AnonymousResourceCollection
      */
     public function index(): AnonymousResourceCollection
     {
-        $stores = Store::paginate(15);
+        $stores = QueryBuilder::for(Store::class)
+            ->allowedIncludes(['users', 'inventories', 'purchases', 'sales', 'transfersOut', 'transfersIn'])
+            ->paginate(15);
+            
         return StoreResource::collection($stores);
     }
 
@@ -69,11 +74,18 @@ class StoreController extends Controller
      * @apiResource App\Http\Resources\Api\StoreResource
      * @apiResourceModel App\Models\Store
      * 
+     * @urlParam store integer required 分店 ID. Example: 1
+     * @queryParam include string 可選的關聯，用逗號分隔。例如: users,inventories
      * @param Store $store
      * @return StoreResource
      */
     public function show(Store $store): StoreResource
     {
+        $store = QueryBuilder::for(Store::class)
+            ->where('id', $store->id)
+            ->allowedIncludes(['users', 'inventories', 'purchases', 'sales', 'transfersOut', 'transfersIn'])
+            ->firstOrFail();
+
         return new StoreResource($store);
     }
 

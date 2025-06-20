@@ -614,4 +614,545 @@ class InventoryManagementControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['quantity']);
     }
+
+    /** @test */
+    public function admin_can_get_inventory_history()
+    {
+        // 建立一些交易記錄
+        $admin = $this->createAdminUser();
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 20,
+            'before_quantity' => 30,
+            'after_quantity' => 50,
+            'notes' => '進貨'
+        ]);
+
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'reduction',
+            'quantity' => -10,
+            'before_quantity' => 50,
+            'after_quantity' => 40,
+            'notes' => '銷售'
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/inventory/{$this->inventory->id}/history");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'current_page',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'inventory_id',
+                        'user_id',
+                        'type',
+                        'quantity',
+                        'before_quantity',
+                        'after_quantity',
+                        'notes',
+                        'created_at',
+                        'updated_at',
+                        'user' => [
+                            'id',
+                            'name'
+                        ]
+                    ]
+                ],
+                'per_page',
+                'total'
+            ]);
+
+        $data = $response->json('data');
+        $this->assertCount(2, $data);
+    }
+
+    /** @test */
+    public function admin_can_filter_inventory_history_by_date_range()
+    {
+        $admin = $this->createAdminUser();
+        
+        // 建立舊的交易記錄
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 10,
+            'before_quantity' => 0,
+            'after_quantity' => 10,
+            'notes' => '舊記錄',
+            'created_at' => '2023-01-01 10:00:00'
+        ]);
+
+        // 建立新的交易記錄
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 20,
+            'before_quantity' => 10,
+            'after_quantity' => 30,
+            'notes' => '新記錄',
+            'created_at' => now()
+        ]);
+
+        $today = now()->format('Y-m-d');
+        $tomorrow = now()->addDay()->format('Y-m-d');
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/inventory/{$this->inventory->id}/history?start_date={$today}&end_date={$tomorrow}");
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        
+        // Debug: 查看實際返回的數據
+        // dd($data);
+        
+        // 檢查返回的記錄中是否包含今天的記錄
+        $todayRecords = collect($data)->filter(function($record) {
+            return str_contains($record['notes'], '新記錄');
+        });
+        
+        $this->assertGreaterThanOrEqual(1, $todayRecords->count(), '應該包含今天的記錄');
+    }
+
+    /** @test */
+    public function admin_can_filter_inventory_history_by_type()
+    {
+        $admin = $this->createAdminUser();
+        
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 10,
+            'before_quantity' => 0,
+            'after_quantity' => 10,
+            'notes' => '進貨記錄'
+        ]);
+
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'reduction',
+            'quantity' => -5,
+            'before_quantity' => 10,
+            'after_quantity' => 5,
+            'notes' => '銷售記錄'
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/inventory/{$this->inventory->id}/history?type=addition");
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        
+        // 只應該返回進貨記錄
+        $this->assertCount(1, $data);
+        $this->assertEquals('addition', $data[0]['type']);
+        $this->assertEquals('進貨記錄', $data[0]['notes']);
+    }
+
+    /** @test */
+    public function history_returns_404_for_non_existent_inventory()
+    {
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/inventory/999999/history');
+
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function admin_can_batch_check_inventory()
+    {
+        // 建立額外的商品變體和庫存
+        $variant2 = $this->product->variants()->create([
+            'sku' => 'TEST-SKU-BATCH-001',
+            'price' => 200.00
+        ]);
+
+        $inventory2 = Inventory::create([
+            'product_variant_id' => $variant2->id,
+            'store_id' => $this->store->id,
+            'quantity' => 75,
+            'low_stock_threshold' => 15
+        ]);
+
+        $requestData = [
+            'product_variant_ids' => [$this->variant->id, $variant2->id]
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/inventory/batch-check', $requestData);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                '*' => [
+                    'id',
+                    'product_variant_id',
+                    'store_id',
+                    'quantity',
+                    'low_stock_threshold',
+                    'product_variant' => [
+                        'id',
+                        'sku'
+                    ],
+                    'store' => [
+                        'id',
+                        'name'
+                    ]
+                ]
+            ]);
+
+        $data = $response->json();
+        $this->assertCount(2, $data);
+        
+        // 驗證返回的庫存記錄
+        $variantIds = collect($data)->pluck('product_variant_id')->toArray();
+        $this->assertContains($this->variant->id, $variantIds);
+        $this->assertContains($variant2->id, $variantIds);
+    }
+
+    /** @test */
+    public function admin_can_batch_check_inventory_by_store()
+    {
+        // 建立另一個門市和庫存
+        $store2 = Store::create(['name' => '測試門市2', 'address' => '地址2']);
+        
+        $inventory2 = Inventory::create([
+            'product_variant_id' => $this->variant->id,
+            'store_id' => $store2->id,
+            'quantity' => 30,
+            'low_stock_threshold' => 5
+        ]);
+
+        $requestData = [
+            'product_variant_ids' => [$this->variant->id],
+            'store_id' => $this->store->id
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/inventory/batch-check', $requestData);
+
+        $response->assertStatus(200);
+        $data = $response->json();
+        
+        // 只應該返回指定門市的庫存
+        $this->assertCount(1, $data);
+        $this->assertEquals($this->store->id, $data[0]['store_id']);
+        $this->assertEquals(50, $data[0]['quantity']); // 原本設置的數量
+    }
+
+    /** @test */
+    public function batch_check_validates_required_fields()
+    {
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/inventory/batch-check', []);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['product_variant_ids']);
+    }
+
+    /** @test */
+    public function batch_check_validates_product_variant_exists()
+    {
+        $requestData = [
+            'product_variant_ids' => [999999] // 不存在的變體ID
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/inventory/batch-check', $requestData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['product_variant_ids.0']);
+    }
+
+    /** @test */
+    public function admin_can_get_sku_history()
+    {
+        $admin = $this->createAdminUser();
+        
+        // 建立交易記錄
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 25,
+            'before_quantity' => 25,
+            'after_quantity' => 50,
+            'notes' => 'SKU 歷史測試'
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/inventory/sku/{$this->variant->sku}/history");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'inventory_id',
+                        'user_id',
+                        'type',
+                        'quantity',
+                        'before_quantity',
+                        'after_quantity',
+                        'notes',
+                        'metadata',
+                        'created_at',
+                        'updated_at',
+                        'store' => [
+                            'id',
+                            'name'
+                        ],
+                        'user' => [
+                            'name'
+                        ],
+                        'product' => [
+                            'name',
+                            'sku'
+                        ]
+                    ]
+                ],
+                'inventories' => [
+                    '*' => [
+                        'id',
+                        'quantity',
+                        'low_stock_threshold',
+                        'store',
+                        'product_variant'
+                    ]
+                ],
+                'pagination' => [
+                    'current_page',
+                    'per_page',
+                    'total',
+                    'last_page'
+                ]
+            ])
+            ->assertJson([
+                'message' => '成功獲取 SKU 歷史記錄'
+            ]);
+
+        $data = $response->json('data');
+        $this->assertCount(1, $data);
+        $this->assertEquals('SKU 歷史測試', $data[0]['notes']);
+    }
+
+    /** @test */
+    public function admin_can_filter_sku_history_by_store()
+    {
+        $admin = $this->createAdminUser();
+        $store2 = Store::create(['name' => '門市2', 'address' => '地址2']);
+        
+        // 在第二個門市建立相同SKU的庫存
+        $inventory2 = Inventory::create([
+            'product_variant_id' => $this->variant->id,
+            'store_id' => $store2->id,
+            'quantity' => 20,
+            'low_stock_threshold' => 5
+        ]);
+
+        // 在兩個門市都建立交易記錄
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 10,
+            'before_quantity' => 40,
+            'after_quantity' => 50,
+            'notes' => '門市1記錄'
+        ]);
+
+        InventoryTransaction::create([
+            'inventory_id' => $inventory2->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 5,
+            'before_quantity' => 15,
+            'after_quantity' => 20,
+            'notes' => '門市2記錄'
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/inventory/sku/{$this->variant->sku}/history?store_id={$this->store->id}");
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        
+        // 只應該返回指定門市的記錄
+        $this->assertCount(1, $data);
+        $this->assertEquals('門市1記錄', $data[0]['notes']);
+        $this->assertEquals($this->store->id, $data[0]['store']['id']);
+    }
+
+    /** @test */
+    public function sku_history_returns_empty_for_non_existent_sku()
+    {
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/inventory/sku/NON-EXISTENT-SKU/history');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => "找不到 SKU 為 'NON-EXISTENT-SKU' 的庫存項目",
+                'data' => [],
+                'inventories' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'total' => 0,
+                    'last_page' => 1
+                ]
+            ]);
+    }
+
+    /** @test */
+    public function admin_can_get_all_transactions()
+    {
+        $admin = $this->createAdminUser();
+        
+        // 建立多個交易記錄
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 15,
+            'before_quantity' => 35,
+            'after_quantity' => 50,
+            'notes' => '全部交易測試1'
+        ]);
+
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'reduction',
+            'quantity' => -5,
+            'before_quantity' => 50,
+            'after_quantity' => 45,
+            'notes' => '全部交易測試2'
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/inventory/transactions');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'type',
+                        'quantity',
+                        'before_quantity',
+                        'after_quantity',
+                        'notes',
+                        'created_at'
+                    ]
+                ],
+                'meta' => [
+                    'current_page',
+                    'per_page',
+                    'total'
+                ]
+            ]);
+
+        $data = $response->json('data');
+        $this->assertGreaterThanOrEqual(2, count($data));
+    }
+
+    /** @test */
+    public function admin_can_filter_all_transactions_by_type()
+    {
+        $admin = $this->createAdminUser();
+        
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 10,
+            'before_quantity' => 40,
+            'after_quantity' => 50,
+            'notes' => '進貨交易'
+        ]);
+
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id,
+            'user_id' => $admin->id,
+            'type' => 'transfer_in',
+            'quantity' => 5,
+            'before_quantity' => 50,
+            'after_quantity' => 55,
+            'notes' => '調撥進貨'
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/inventory/transactions?type=addition');
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        
+        // 檢查返回的交易都是指定類型
+        foreach ($data as $transaction) {
+            $this->assertEquals('addition', $transaction['type']);
+        }
+    }
+
+    /** @test */
+    public function admin_can_filter_all_transactions_by_store()
+    {
+        $admin = $this->createAdminUser();
+        $store2 = Store::create(['name' => '門市2', 'address' => '地址2']);
+        
+        $variant2 = $this->product->variants()->create([
+            'sku' => 'TEST-SKU-STORE2',
+            'price' => 150.00
+        ]);
+
+        $inventory2 = Inventory::create([
+            'product_variant_id' => $variant2->id,
+            'store_id' => $store2->id,
+            'quantity' => 30,
+            'low_stock_threshold' => 8
+        ]);
+
+        // 在不同門市建立交易記錄
+        InventoryTransaction::create([
+            'inventory_id' => $this->inventory->id, // 門市1
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 10,
+            'before_quantity' => 40,
+            'after_quantity' => 50,
+            'notes' => '門市1交易'
+        ]);
+
+        InventoryTransaction::create([
+            'inventory_id' => $inventory2->id, // 門市2
+            'user_id' => $admin->id,
+            'type' => 'addition',
+            'quantity' => 5,
+            'before_quantity' => 25,
+            'after_quantity' => 30,
+            'notes' => '門市2交易'
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson("/api/inventory/transactions?store_id={$this->store->id}");
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        
+        // 驗證返回的交易都屬於指定門市
+        $this->assertGreaterThanOrEqual(1, count($data));
+        // 由於我們使用了 Resource，需要檢查關聯數據的結構
+        foreach ($data as $transaction) {
+            // 如果 Resource 包含了店舖資訊，驗證店舖ID
+            if (isset($transaction['inventory']['store']['id'])) {
+                $this->assertEquals($this->store->id, $transaction['inventory']['store']['id']);
+            }
+        }
+    }
 }

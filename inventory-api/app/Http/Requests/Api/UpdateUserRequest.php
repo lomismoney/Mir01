@@ -49,7 +49,7 @@ class UpdateUserRequest extends FormRequest
             'name' => 'sometimes|required|string|max:255',
             // 驗證 username 唯一性時，必須忽略當前正在更新的用戶
             'username' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('users')->ignore($this->user)],
-            'password' => 'sometimes|string|min:8', // 密碼為可選更新，移除required使其真正可選
+            'password' => 'sometimes|required|string|min:8|confirmed', // 密碼為可選更新，但一旦提供，則必須通過驗證
             'role' => ['sometimes', 'required', Rule::in([User::ROLE_ADMIN, User::ROLE_VIEWER])],
         ];
     }
@@ -76,6 +76,7 @@ class UpdateUserRequest extends FormRequest
             'password.required' => '密碼不能為空',
             'password.string' => '密碼必須是文字格式',
             'password.min' => '密碼至少需要 8 個字元',
+            'password.confirmed' => '兩次輸入的密碼不一致',
             
             'role.required' => '角色不能為空',
             'role.in' => '角色必須是管理員 (admin) 或檢視者 (viewer)',
@@ -121,7 +122,11 @@ class UpdateUserRequest extends FormRequest
                 'description' => '用戶密碼（可選更新，如不提供則保持原密碼）',
                 'example' => 'newpassword123',
                 'required' => false,
-                'type' => 'string',
+            ],
+            'password_confirmation' => [
+                'description' => '確認密碼，如果提供新密碼，此欄位為必填',
+                'example' => 'newpassword123',
+                'required' => false,
             ],
             'role' => [
                 'description' => '用戶角色（可選更新）',
