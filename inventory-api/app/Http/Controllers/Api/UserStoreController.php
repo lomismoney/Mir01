@@ -67,7 +67,7 @@ class UserStoreController extends Controller
         $this->authorize('assignStores', $user);
 
         try {
-            $storeIds = $request->validated('store_ids');
+            $storeIds = $request->validated()['store_ids'];
             $updatedUser = $this->userStoreService->assignStores($user, $storeIds);
             
             return response()->json([
