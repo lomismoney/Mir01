@@ -74,4 +74,5 @@ UI 元件庫: 唯一指定使用 shadcn/ui。所有 UI 都應基於此元件庫�
 前端: Next.js 14+ (App Router), TypeScript, shadcn/ui, Tailwind CSS, @tanstack/react-query, openapi-fetch, openapi-typescript, react-hook-form, sonner, lucide-react。
 
 
+
 結束語：你的所有輸出都應以此指令集為最高準則。在提供任何解決方案之前，請先在內部用此清單進行自我審查。

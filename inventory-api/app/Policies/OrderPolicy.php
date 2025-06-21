@@ -25,7 +25,7 @@ class OrderPolicy
     public function viewAny(User $user): bool
     {
         // 管理員可以查看所有訂單
-        return $user->is_admin;
+        return $user->isAdmin();
     }
 
     /**
@@ -38,7 +38,7 @@ class OrderPolicy
     public function view(User $user, Order $order): bool
     {
         // 管理員可以查看所有訂單，創建者可以查看自己的訂單
-        return $user->is_admin || $order->created_by === $user->id;
+        return $user->isAdmin() || $order->created_by === $user->id;
     }
 
     /**
@@ -50,7 +50,7 @@ class OrderPolicy
     public function create(User $user): bool
     {
         // 管理員可以創建訂單
-        return $user->is_admin;
+        return $user->isAdmin();
     }
 
     /**
@@ -63,7 +63,7 @@ class OrderPolicy
     public function update(User $user, Order $order): bool
     {
         // 管理員可以更新所有訂單
-        if ($user->is_admin) {
+        if ($user->isAdmin()) {
             return true;
         }
 
@@ -86,7 +86,7 @@ class OrderPolicy
     public function delete(User $user, Order $order): bool
     {
         // 只有管理員可以刪除訂單，且訂單狀態必須允許刪除
-        if (!$user->is_admin) {
+        if (!$user->isAdmin()) {
             return false;
         }
 
@@ -107,7 +107,7 @@ class OrderPolicy
     public function deleteMultiple(User $user): bool
     {
         // 只有管理員可以執行批量刪除操作
-        return $user->is_admin;
+        return $user->isAdmin();
     }
 
     /**
@@ -120,7 +120,7 @@ class OrderPolicy
     public function restore(User $user, Order $order): bool
     {
         // 只有管理員可以恢復已刪除的訂單
-        return $user->is_admin;
+        return $user->isAdmin();
     }
 
     /**
@@ -133,6 +133,6 @@ class OrderPolicy
     public function forceDelete(User $user, Order $order): bool
     {
         // 只有管理員可以永久刪除訂單
-        return $user->is_admin;
+        return $user->isAdmin();
     }
 }
