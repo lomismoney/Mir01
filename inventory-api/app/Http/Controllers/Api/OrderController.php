@@ -12,6 +12,7 @@ use App\Http\Requests\Api\UpdateOrderRequest;
 use App\Http\Requests\Api\AddPaymentRequest;
 use App\Http\Requests\Api\CreateRefundRequest;
 use App\Http\Requests\Api\BatchDeleteOrdersRequest;
+use App\Http\Requests\Api\BatchUpdateStatusRequest;
 use App\Services\OrderService;
 use App\Services\RefundService;
 
@@ -666,6 +667,75 @@ class OrderController extends Controller
                 'message' => '部分訂單無法刪除',
                 'errors' => [
                     'orders' => [$e->getMessage()]
+                ]
+            ], 422);
+        }
+    }
+
+    /**
+     * @group 訂單管理
+     * @authenticated
+     * 批量更新訂單狀態
+     * 
+     * 此端點用於批量更新多個訂單的狀態，支援付款狀態和貨物狀態的批量變更。
+     * 系統會在事務中執行所有操作，確保資料一致性，並記錄每個訂單的狀態變更歷史。
+     * 注意：只有管理員可以執行批量狀態更新。
+     * 
+     * @bodyParam ids array required 要更新狀態的訂單 ID 清單，至少包含一個 ID。Example: [1, 2, 3]
+     * @bodyParam ids.* integer required 訂單 ID，必須存在於系統中。Example: 1
+     * @bodyParam status_type string required 要更新的狀態類型。Example: payment_status
+     * @bodyParam status_value string required 要更新成的目標狀態值。Example: paid
+     * @bodyParam notes string 批量操作備註，最多 500 字符。Example: 批量確認收款
+     * 
+     * @response 200 {
+     *   "message": "訂單狀態已成功批量更新",
+     *   "updated_count": 3,
+     *   "updated_ids": [1, 2, 3],
+     *   "status_type": "payment_status",
+     *   "status_value": "paid"
+     * }
+     * @response 422 scenario="驗證失敗" {
+     *   "message": "驗證失敗",
+     *   "errors": {
+     *     "status_type": ["狀態類型必須是付款狀態或貨物狀態"],
+     *     "status_value": ["請提供狀態值"]
+     *   }
+     * }
+     * @response 403 scenario="權限不足" {
+     *   "message": "您沒有權限執行此操作"
+     * }
+     */
+    public function updateMultipleStatus(BatchUpdateStatusRequest $request)
+    {
+        // 1. 權限驗證 - 只有管理員可以批量更新訂單狀態
+        $this->authorize('updateMultipleStatus', Order::class);
+
+        $validated = $request->validated();
+        
+        try {
+            // 2. 委派給 Service 層處理業務邏輯
+            $this->orderService->batchUpdateStatus(
+                $validated['ids'],
+                $validated['status_type'],
+                $validated['status_value'],
+                $validated['notes'] ?? null
+            );
+
+            // 3. 返回成功響應
+            return response()->json([
+                'message' => '訂單狀態已成功批量更新',
+                'updated_count' => count($validated['ids']),
+                'updated_ids' => $validated['ids'],
+                'status_type' => $validated['status_type'],
+                'status_value' => $validated['status_value']
+            ], 200);
+
+        } catch (\Exception $e) {
+            // 4. 處理業務邏輯錯誤
+            return response()->json([
+                'message' => '批量更新狀態失敗',
+                'errors' => [
+                    'status_update' => [$e->getMessage()]
                 ]
             ], 422);
         }

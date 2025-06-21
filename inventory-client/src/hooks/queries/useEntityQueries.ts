@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { getSession } from 'next-auth/react';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters, CustomerFilters, Customer, AttributePathParams, OrderFormData } from '@/types/api-helpers';
@@ -2161,28 +2162,43 @@ export function useUploadProductImage() {
   type UploadImageRequestBody = FormData;
   
   return useMutation({
-    mutationFn: async (payload: { productId: number; imageFile: File }) => {
+    mutationFn: async (payload: { productId: number; image: File }) => {
+      // --- 步驟一：從唯一權威來源獲取 Session ---
+      const session = await getSession();
+      const accessToken = session?.accessToken;
+
+      // --- 步驟二：驗證權限 ---
+      if (!accessToken) {
+        throw new Error('未經授權的操作，無法上傳圖片。');
+      }
+
+      // --- 步驟三：準備 FormData ---
       const formData = new FormData();
-      formData.append('image', payload.imageFile);
+      formData.append('image', payload.image);
 
-      // 注意：對於 multipart/form-data，openapi-fetch 需要特殊處理
-      // 使用 unknown 類型斷言是當前的最佳實踐，直到 openapi-fetch 
-      // 提供更好的 multipart/form-data 類型支援
-      const { data, error } = await apiClient.POST("/api/products/{product_id}/upload-image", {
-        params: {
-          path: { 
-            product_id: payload.productId,
-            id: payload.productId  // OpenAPI 定義中似乎有重複的參數，我們兩個都提供
+      // --- 步驟四：使用原生 fetch 並注入正確的 Token ---
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/products/${payload.productId}/upload-image`,
+        {
+          method: 'POST',
+          headers: {
+            // 確保 Authorization Header 來自 next-auth Session
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json',
+            // 再次強調：對於 FormData，不要手動設置 'Content-Type'
           },
-        },
-        body: formData as unknown as {
-          image: string;
-        },
-        // openapi-fetch 會自動處理 multipart/form-data 的 Content-Type，此處無需手動設置
-      });
+          body: formData,
+        }
+      );
 
-      if (error) throw error;
-      return data;
+      // --- 步驟五：處理響應 ---
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = parseApiError(errorData);
+        throw new Error(errorMessage || `圖片上傳失敗 (${response.status})`);
+      }
+
+      return response.json();
     },
     onSuccess: async (data, variables) => {
       // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
@@ -3096,6 +3112,75 @@ export function useBatchDeleteOrders() {
         const { toast } = require('sonner');
         toast.error('批量刪除失敗', { 
           description: error.message || '請檢查選擇的訂單是否允許刪除'
+        });
+      }
+    },
+  });
+}
+
+/**
+ * Hook for batch updating order status - 批量狀態更新武器
+ * 
+ * 功能特性：
+ * 1. 批量更新多個訂單的狀態（付款狀態或貨物狀態）
+ * 2. 支援靈活的狀態類型選擇（payment_status 或 shipping_status）
+ * 3. 事務化批量操作，確保資料一致性
+ * 4. 自動記錄每個訂單的狀態變更歷史
+ * 5. 🎯 100% 類型安全 - 嚴格的狀態類型約束
+ * 
+ * @returns React Query mutation 結果
+ */
+export function useBatchUpdateStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      ids: (number | string)[];
+      status_type: 'payment_status' | 'shipping_status';
+      status_value: string;
+      notes?: string;
+    }) => {
+      const { error } = await apiClient.POST('/api/orders/batch-update-status', {
+        body: {
+          ...payload,
+          ids: payload.ids.map(id => id.toString()),
+        },
+      });
+
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '批量更新狀態失敗');
+      }
+    },
+    onSuccess: (_, { status_type, status_value, ids }) => {
+      // 🔔 成功通知 - 顯示詳細的操作結果
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        const statusTypeName = status_type === 'payment_status' ? '付款狀態' : '貨物狀態';
+        toast.success('所選訂單狀態已成功更新', {
+          description: `已將 ${ids.length} 個訂單的${statusTypeName}更新為「${status_value}」`
+        });
+      }
+      
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      // 批量操作後，使整個訂單列表的緩存失效，以獲取最新數據
+      queryClient.invalidateQueries({ 
+        queryKey: QUERY_KEYS.ORDERS,
+        exact: false,
+        refetchType: 'active'
+      });
+      
+      // 同時失效可能受影響的單個訂單詳情緩存
+      ids.forEach(id => {
+        const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(numericId) });
+      });
+    },
+    onError: (error: Error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('批量狀態更新失敗', { 
+          description: error.message || '請檢查選擇的訂單和狀態設定'
         });
       }
     },

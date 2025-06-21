@@ -97,27 +97,27 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 3
-                    name: 'Lonny Ankunding'
-                    username: eloisa.harber
+                    id: 16
+                    name: 'Mrs. Justina Gaylord'
+                    username: lafayette.considine
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-20T08:50:45.000000Z'
-                    updated_at: '2025-06-20T08:50:45.000000Z'
+                    created_at: '2025-06-21T08:45:48.000000Z'
+                    updated_at: '2025-06-21T08:45:48.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 3
+                        example: 16
                       name:
                         type: string
-                        example: 'Lonny Ankunding'
+                        example: 'Mrs. Justina Gaylord'
                       username:
                         type: string
-                        example: eloisa.harber
+                        example: lafayette.considine
                       role:
                         type: string
                         example: viewer
@@ -129,10 +129,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
       tags:
         - Endpoints
       security: []
@@ -155,17 +155,17 @@ paths:
                 name:
                   type: string
                   description: 分類名稱。例如：電子產品
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 description:
                   type: string
                   description: 分類描述。例如：包含所有電子相關產品
-                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
+                  example: 'Eius et animi quos velit et.'
                   nullable: true
                 parent_id:
                   type: integer
                   description: 父分類ID，必須是存在的分類ID。例如：1
-                  example: 17
+                  example: 16
                   nullable: true
               required:
                 - name
@@ -185,10 +185,14 @@ paths:
                 type: object
                 example:
                   message: Unauthenticated.
+                  error: 'Authentication required to access this resource.'
                 properties:
                   message:
                     type: string
                     example: Unauthenticated.
+                  error:
+                    type: string
+                    example: 'Authentication required to access this resource.'
       tags:
         - Endpoints
       security: []
@@ -210,17 +214,17 @@ paths:
                 name:
                   type: string
                   description: 分類名稱。例如：電子產品
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 description:
                   type: string
                   description: 分類描述。例如：包含所有電子相關產品
-                  example: 'Dolores dolorum amet iste laborum eius est dolor.'
+                  example: 'Eius et animi quos velit et.'
                   nullable: true
                 parent_id:
                   type: integer
                   description: 父分類ID，必須是存在的分類ID且不能是自己。例如：1
-                  example: 17
+                  example: 16
                   nullable: true
       security: []
     delete:
@@ -237,7 +241,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the category.'
-        example: 17
+        example: 1
         required: true
         schema:
           type: integer
@@ -246,7 +250,18 @@ paths:
       summary: ''
       operationId: getApiStores
       description: ''
-      parameters: []
+      parameters:
+        -
+          in: query
+          name: include
+          description: '可選的關聯，用逗號分隔。例如: users,inventories'
+          example: architecto
+          required: false
+          schema:
+            type: string
+            description: '可選的關聯，用逗號分隔。例如: users,inventories'
+            example: architecto
+            nullable: false
       responses:
         200:
           description: ''
@@ -391,30 +406,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 1
-                    name: Mueller-Dibbert
-                    address: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
-                    created_at: '2025-06-20T08:50:45.000000Z'
-                    updated_at: '2025-06-20T08:50:45.000000Z'
+                    id: 11
+                    name: 'Bailey Ltd'
+                    address: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
+                    created_at: '2025-06-21T08:45:48.000000Z'
+                    updated_at: '2025-06-21T08:45:48.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 1
+                        example: 11
                       name:
                         type: string
-                        example: Mueller-Dibbert
+                        example: 'Bailey Ltd'
                       address:
                         type: string
-                        example: "87713 Brandy Roads Suite 202\nWilliamsonfort, CT 64474"
+                        example: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
                       created_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -427,12 +442,12 @@ paths:
                 name:
                   type: string
                   description: 分店名稱（唯一）。例如：台北總店
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 address:
                   type: string
                   description: 分店地址。例如：台北市信義區信義路五段7號
-                  example: consequatur
+                  example: architecto
                   nullable: true
               required:
                 - name
@@ -441,7 +456,18 @@ paths:
       summary: ''
       operationId: getApiStoresId
       description: ''
-      parameters: []
+      parameters:
+        -
+          in: query
+          name: include
+          description: '可選的關聯，用逗號分隔。例如: users,inventories'
+          example: architecto
+          required: false
+          schema:
+            type: string
+            description: '可選的關聯，用逗號分隔。例如: users,inventories'
+            example: architecto
+            nullable: false
       responses:
         200:
           description: ''
@@ -451,30 +477,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 2
-                    name: Moore-Emard
-                    address: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
-                    created_at: '2025-06-20T08:50:45.000000Z'
-                    updated_at: '2025-06-20T08:50:45.000000Z'
+                    id: 12
+                    name: "Rempel, Gulgowski and O'Kon"
+                    address: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
+                    created_at: '2025-06-21T08:45:48.000000Z'
+                    updated_at: '2025-06-21T08:45:48.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 2
+                        example: 12
                       name:
                         type: string
-                        example: Moore-Emard
+                        example: "Rempel, Gulgowski and O'Kon"
                       address:
                         type: string
-                        example: "27319 Schmeler Fall Suite 958\nCarterland, NM 49546"
+                        example: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
                       created_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -491,30 +517,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 3
-                    name: 'Satterfield, Collins and Reynolds'
-                    address: "820 Smith Cove Apt. 644\nSouth Eloisaborough, IL 62645"
-                    created_at: '2025-06-20T08:50:45.000000Z'
-                    updated_at: '2025-06-20T08:50:45.000000Z'
+                    id: 13
+                    name: Dach-Gaylord
+                    address: "7763 Adriel Fork\nAntoniobury, PA 31881"
+                    created_at: '2025-06-21T08:45:48.000000Z'
+                    updated_at: '2025-06-21T08:45:48.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 3
+                        example: 13
                       name:
                         type: string
-                        example: 'Satterfield, Collins and Reynolds'
+                        example: Dach-Gaylord
                       address:
                         type: string
-                        example: "820 Smith Cove Apt. 644\nSouth Eloisaborough, IL 62645"
+                        example: "7763 Adriel Fork\nAntoniobury, PA 31881"
                       created_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -527,12 +553,12 @@ paths:
                 name:
                   type: string
                   description: 分店名稱（唯一，會排除當前分店）。例如：台北信義店
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 address:
                   type: string
                   description: 分店地址。例如：台北市信義區信義路五段7號
-                  example: consequatur
+                  example: architecto
                   nullable: true
               required:
                 - name
@@ -549,7 +575,15 @@ paths:
         in: path
         name: id
         description: 'The ID of the store.'
-        example: 17
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: store
+        description: '分店 ID.'
+        example: 1
         required: true
         schema:
           type: integer
@@ -568,30 +602,30 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 4
-                    name: 'Reichel PLC'
-                    address: "283 Adell Mews Suite 313\nEast Lennie, CO 94046-7647"
-                    created_at: '2025-06-20T08:50:45.000000Z'
-                    updated_at: '2025-06-20T08:50:45.000000Z'
+                    id: 14
+                    name: 'Leuschke Inc'
+                    address: "427 Predovic Ridge\nBaileemouth, KS 32375-9947"
+                    created_at: '2025-06-21T08:45:48.000000Z'
+                    updated_at: '2025-06-21T08:45:48.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 4
+                        example: 14
                       name:
                         type: string
-                        example: 'Reichel PLC'
+                        example: 'Leuschke Inc'
                       address:
                         type: string
-                        example: "283 Adell Mews Suite 313\nEast Lennie, CO 94046-7647"
+                        example: "427 Predovic Ridge\nBaileemouth, KS 32375-9947"
                       created_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -608,27 +642,27 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 4
-                    name: 'Dr. Cornelius Luettgen V'
-                    username: russel.bert
+                    id: 17
+                    name: 'Ms. Elisabeth Okuneva'
+                    username: gulgowski.asia
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-20T08:50:45.000000Z'
-                    updated_at: '2025-06-20T08:50:45.000000Z'
+                    created_at: '2025-06-21T08:45:48.000000Z'
+                    updated_at: '2025-06-21T08:45:48.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 4
+                        example: 17
                       name:
                         type: string
-                        example: 'Dr. Cornelius Luettgen V'
+                        example: 'Ms. Elisabeth Okuneva'
                       username:
                         type: string
-                        example: russel.bert
+                        example: gulgowski.asia
                       role:
                         type: string
                         example: viewer
@@ -640,10 +674,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-20T08:50:45.000000Z'
+                        example: '2025-06-21T08:45:48.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -657,7 +691,7 @@ paths:
                   type: array
                   description: '要分配給用戶的分店ID列表。例如：[1, 2, 3]'
                   example:
-                    - consequatur
+                    - architecto
                   items:
                     type: string
               required:
@@ -667,7 +701,7 @@ paths:
         in: path
         name: user_id
         description: 'The ID of the user.'
-        example: 2
+        example: 1
         required: true
         schema:
           type: integer
@@ -889,7 +923,7 @@ paths:
                 name:
                   type: string
                   description: 屬性名稱（唯一）。例如：顏色
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - name
@@ -934,7 +968,7 @@ paths:
                 name:
                   type: string
                   description: 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - name
@@ -953,7 +987,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the attribute.'
-        example: 17
+        example: 1
         required: true
         schema:
           type: integer
@@ -987,7 +1021,7 @@ paths:
                   type: array
                   description: '要刪除的商品 ID 列表。例如：[1, 2, 3]'
                   example:
-                    - consequatur
+                    - architecto
                   items:
                     type: string
               required:
@@ -1136,13 +1170,13 @@ paths:
         in: path
         name: product_id
         description: 'The ID of the product.'
-        example: 17
+        example: 1
         required: true
         schema:
           type: integer
       -
         in: path
-        name: id
+        name: product
         description: '商品 ID'
         example: 1
         required: true
@@ -2407,7 +2441,7 @@ paths:
                         type: array
                         description: 'The <code>id</code> of an existing record in the attribute_values table.'
                         example:
-                          - 17
+                          - 16
                         items:
                           type: integer
                       '*':
@@ -3081,23 +3115,23 @@ paths:
                       id:
                         type: integer
                         description: 'The <code>id</code> of an existing record in the product_variants table.'
-                        example: 17
+                        example: 16
                         nullable: false
                       sku:
                         type: string
                         description: 'Must not be greater than 255 characters.'
-                        example: mqeopfuudtdsufvyvddqa
+                        example: 'n'
                         nullable: false
                       price:
                         type: number
                         description: 'Must be at least 0.'
-                        example: 45
+                        example: 84
                         nullable: false
                       attribute_value_ids:
                         type: array
                         description: 'The <code>id</code> of an existing record in the attribute_values table.'
                         example:
-                          - 17
+                          - 16
                         items:
                           type: integer
                       '*':
@@ -3617,10 +3651,14 @@ paths:
                 type: object
                 example:
                   message: Unauthenticated.
+                  error: 'Authentication required to access this resource.'
                 properties:
                   message:
                     type: string
                     example: Unauthenticated.
+                  error:
+                    type: string
+                    example: 'Authentication required to access this resource.'
       tags:
         - 商品變體管理
     parameters:
@@ -3628,7 +3666,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the variant.'
-        example: consequatur
+        example: architecto
         required: true
         schema:
           type: string
@@ -3828,7 +3866,7 @@ paths:
                   type: array
                   description: 'nullable 運送地址列表.'
                   example:
-                    - consequatur
+                    - architecto
                   items:
                     type: string
                     nullable: true
@@ -4016,7 +4054,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the customer.'
-        example: 2
+        example: 1
         required: true
         schema:
           type: integer
@@ -4180,7 +4218,7 @@ paths:
                 value:
                   type: string
                   description: 屬性值（在同一屬性下必須唯一）。例如：紅色
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - value
@@ -4189,7 +4227,7 @@ paths:
         in: path
         name: attribute_id
         description: 'The ID of the attribute.'
-        example: 17
+        example: 1
         required: true
         schema:
           type: integer
@@ -4269,7 +4307,7 @@ paths:
                 value:
                   type: string
                   description: 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - value
@@ -4278,7 +4316,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the value.'
-        example: 17
+        example: 1
         required: true
         schema:
           type: integer
@@ -4882,12 +4920,12 @@ paths:
                 store_id:
                   type: integer
                   description: 'The <code>id</code> of an existing record in the stores table.'
-                  example: 17
+                  example: 16
                   nullable: true
                 type:
                   type: string
                   description: ''
-                  example: reduction
+                  example: adjustment
                   nullable: true
                   enum:
                     - addition
@@ -4899,27 +4937,27 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-20T08:50:45'
+                  example: '2025-06-21T08:45:49'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2106-07-19'
+                  example: '2051-07-15'
                   nullable: true
                 product_name:
                   type: string
                   description: ''
-                  example: consequatur
+                  example: architecto
                   nullable: true
                 per_page:
                   type: integer
                   description: 'Must be at least 1. Must not be greater than 100.'
-                  example: 13
+                  example: 22
                   nullable: true
                 page:
                   type: integer
                   description: 'Must be at least 1.'
-                  example: 56
+                  example: 67
                   nullable: true
   '/api/inventory/{id}':
     get:
@@ -4936,10 +4974,14 @@ paths:
                 type: object
                 example:
                   message: Unauthenticated.
+                  error: 'Authentication required to access this resource.'
                 properties:
                   message:
                     type: string
                     example: Unauthenticated.
+                  error:
+                    type: string
+                    example: 'Authentication required to access this resource.'
       tags:
         - 庫存管理
     parameters:
@@ -4947,7 +4989,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the inventory.'
-        example: consequatur
+        example: architecto
         required: true
         schema:
           type: string
@@ -5541,7 +5583,7 @@ paths:
                 store_id:
                   type: integer
                   description: 'The <code>id</code> of an existing record in the stores table.'
-                  example: 17
+                  example: 16
                   nullable: true
                 type:
                   type: string
@@ -5558,17 +5600,17 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-20T08:50:45'
+                  example: '2025-06-21T08:45:49'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2106-07-19'
+                  example: '2051-07-15'
                   nullable: true
                 per_page:
                   type: integer
                   description: 'Must be at least 1. Must not be greater than 100.'
-                  example: 13
+                  example: 22
                   nullable: true
     parameters:
       -
@@ -6124,10 +6166,14 @@ paths:
                 type: object
                 example:
                   message: Unauthenticated.
+                  error: 'Authentication required to access this resource.'
                 properties:
                   message:
                     type: string
                     example: Unauthenticated.
+                  error:
+                    type: string
+                    example: 'Authentication required to access this resource.'
       tags:
         - 庫存轉移
     parameters:
@@ -6135,7 +6181,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the transfer.'
-        example: consequatur
+        example: architecto
         required: true
         schema:
           type: string
@@ -6421,22 +6467,22 @@ paths:
                 name:
                   type: string
                   description: 用戶姓名。例如：張三
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 username:
                   type: string
                   description: 用戶名（唯一）。例如：zhangsan
-                  example: consequatur
+                  example: architecto
                   nullable: false
                 password:
                   type: string
                   description: 用戶密碼（至少8個字元）。例如：password123
-                  example: 'O[2UZ5ij-e/dl4m{o,'
+                  example: '|]|{+-'
                   nullable: false
                 role:
                   type: string
                   description: '用戶角色，必須是 admin 或 viewer。例如：admin'
-                  example: consequatur
+                  example: architecto
                   nullable: false
               required:
                 - name
@@ -6581,6 +6627,7 @@ paths:
               required:
                 - name
                 - username
+                - password
                 - role
     delete:
       summary: 刪除指定用戶
@@ -6597,7 +6644,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the user.'
-        example: 2
+        example: 1
         required: true
         schema:
           type: integer
@@ -6609,6 +6656,223 @@ paths:
         required: true
         schema:
           type: integer
+  /api/orders/batch-delete:
+    post:
+      summary: ''
+      operationId: postApiOrdersBatchDelete
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 訂單已成功批量刪除
+                  deleted_count: 3
+                  deleted_ids:
+                    - 1
+                    - 2
+                    - 3
+                properties:
+                  message:
+                    type: string
+                    example: 訂單已成功批量刪除
+                  deleted_count:
+                    type: integer
+                    example: 3
+                  deleted_ids:
+                    type: array
+                    example:
+                      - 1
+                      - 2
+                      - 3
+                    items:
+                      type: integer
+        403:
+          description: 權限不足
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 您沒有權限執行此操作
+                properties:
+                  message:
+                    type: string
+                    example: 您沒有權限執行此操作
+        422:
+          description: 包含不可刪除的訂單
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 部分訂單無法刪除
+                  errors:
+                    orders:
+                      - '訂單 PO-20250619-001 已出貨，無法刪除'
+                      - '訂單 PO-20250619-002 已交付，無法刪除'
+                properties:
+                  message:
+                    type: string
+                    example: 部分訂單無法刪除
+                  errors:
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        example:
+                          - '訂單 PO-20250619-001 已出貨，無法刪除'
+                          - '訂單 PO-20250619-002 已交付，無法刪除'
+                        items:
+                          type: string
+      tags:
+        - 訂單管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  description: '要刪除的訂單 ID 清單，至少包含一個 ID。'
+                  example:
+                    - 1
+                    - 2
+                    - 3
+                  items:
+                    type: string
+              required:
+                - ids
+  /api/orders/batch-update-status:
+    post:
+      summary: ''
+      operationId: postApiOrdersBatchUpdateStatus
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 訂單狀態已成功批量更新
+                  updated_count: 3
+                  updated_ids:
+                    - 1
+                    - 2
+                    - 3
+                  status_type: payment_status
+                  status_value: paid
+                properties:
+                  message:
+                    type: string
+                    example: 訂單狀態已成功批量更新
+                  updated_count:
+                    type: integer
+                    example: 3
+                  updated_ids:
+                    type: array
+                    example:
+                      - 1
+                      - 2
+                      - 3
+                    items:
+                      type: integer
+                  status_type:
+                    type: string
+                    example: payment_status
+                  status_value:
+                    type: string
+                    example: paid
+        403:
+          description: 權限不足
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 您沒有權限執行此操作
+                properties:
+                  message:
+                    type: string
+                    example: 您沒有權限執行此操作
+        422:
+          description: 驗證失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 驗證失敗
+                  errors:
+                    status_type:
+                      - 狀態類型必須是付款狀態或貨物狀態
+                    status_value:
+                      - 請提供狀態值
+                properties:
+                  message:
+                    type: string
+                    example: 驗證失敗
+                  errors:
+                    type: object
+                    properties:
+                      status_type:
+                        type: array
+                        example:
+                          - 狀態類型必須是付款狀態或貨物狀態
+                        items:
+                          type: string
+                      status_value:
+                        type: array
+                        example:
+                          - 請提供狀態值
+                        items:
+                          type: string
+      tags:
+        - 訂單管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  description: '要更新狀態的訂單 ID 清單，至少包含一個 ID。'
+                  example:
+                    - 1
+                    - 2
+                    - 3
+                  items:
+                    type: string
+                status_type:
+                  type: string
+                  description: 要更新的狀態類型。
+                  example: payment_status
+                  nullable: false
+                status_value:
+                  type: string
+                  description: 要更新成的目標狀態值。
+                  example: paid
+                  nullable: false
+                notes:
+                  type: string
+                  description: '批量操作備註，最多 500 字符。'
+                  example: 批量確認收款
+                  nullable: true
+              required:
+                - ids
+                - status_type
+                - status_value
   /api/orders:
     get:
       summary: ''
@@ -6679,10 +6943,14 @@ paths:
                 type: object
                 example:
                   message: Unauthenticated.
+                  error: 'Authentication required to access this resource.'
                 properties:
                   message:
                     type: string
                     example: Unauthenticated.
+                  error:
+                    type: string
+                    example: 'Authentication required to access this resource.'
       tags:
         - 訂單管理
       requestBody:
@@ -6695,28 +6963,38 @@ paths:
                 search:
                   type: string
                   description: ''
-                  example: consequatur
+                  example: architecto
                   nullable: true
                 shipping_status:
                   type: string
                   description: ''
-                  example: consequatur
+                  example: architecto
                   nullable: true
                 payment_status:
                   type: string
                   description: ''
-                  example: consequatur
+                  example: architecto
                   nullable: true
                 start_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>.'
-                  example: '2025-06-20'
+                  example: '2025-06-21'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2106-07-19'
+                  example: '2051-07-15'
                   nullable: true
+                page:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 22
+                  nullable: false
+                per_page:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 100.'
+                  example: 7
+                  nullable: false
     post:
       summary: ''
       operationId: postApiOrders
@@ -6794,7 +7072,7 @@ paths:
                   type: array
                   description: 訂單項目清單。
                   example:
-                    - consequatur
+                    - architecto
                   items:
                     type: string
               required:
@@ -6902,28 +7180,28 @@ paths:
                 po_number:
                   type: string
                   description: 'Must not be greater than 50 characters.'
-                  example: mqeopfuudtdsufvyvddqa
+                  example: 'n'
                   nullable: true
                 reference_number:
                   type: string
                   description: 'Must not be greater than 50 characters.'
-                  example: mniihfqcoynlazghdtqtq
+                  example: g
                   nullable: true
                 subtotal:
                   type: number
                   description: 'Must be at least 0.'
-                  example: 80
+                  example: 12
                   nullable: true
                 grand_total:
                   type: number
                   description: 'Must be at least 0.'
-                  example: 6
+                  example: 77
                   nullable: true
                 items:
                   type: array
                   description: 訂單項目清單（提供此參數時會同步所有項目）。
                   example:
-                    - consequatur
+                    - architecto
                   items:
                     type: string
     delete:
@@ -6941,7 +7219,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the order.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -7019,7 +7297,7 @@ paths:
         in: path
         name: order_id
         description: 'The ID of the order.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -7208,7 +7486,7 @@ paths:
         in: path
         name: order_id
         description: 'The ID of the order.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -7328,7 +7606,7 @@ paths:
         in: path
         name: order_id
         description: 'The ID of the order.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -7528,25 +7806,10 @@ paths:
                 items:
                   type: array
                   description: 退款品項清單，至少包含一個品項。
-                  items:
-                    type: object
-                    properties:
-                      order_item_id:
-                        type: integer
-                        description: 訂單品項ID
-                        example: 1
-                      quantity:
-                        type: integer
-                        description: 退貨數量
-                        example: 2
-                    required:
-                      - order_item_id
-                      - quantity
                   example:
-                    - order_item_id: 1
-                      quantity: 2
-                    - order_item_id: 3
-                      quantity: 1
+                    - architecto
+                  items:
+                    type: string
               required:
                 - reason
                 - should_restock
@@ -7556,7 +7819,7 @@ paths:
         in: path
         name: order_id
         description: 'The ID of the order.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -7650,7 +7913,7 @@ paths:
         in: path
         name: order_id
         description: 'The ID of the order.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -7780,7 +8043,7 @@ paths:
         in: path
         name: order_item_id
         description: 'The ID of the order item.'
-        example: 17
+        example: 16
         required: true
         schema:
           type: integer
@@ -8008,10 +8271,14 @@ paths:
                 type: object
                 example:
                   message: Unauthenticated.
+                  error: 'Authentication required to access this resource.'
                 properties:
                   message:
                     type: string
                     example: Unauthenticated.
+                  error:
+                    type: string
+                    example: 'Authentication required to access this resource.'
       tags:
         - 進貨管理
     post:
@@ -8207,10 +8474,14 @@ paths:
                 type: object
                 example:
                   message: Unauthenticated.
+                  error: 'Authentication required to access this resource.'
                 properties:
                   message:
                     type: string
                     example: Unauthenticated.
+                  error:
+                    type: string
+                    example: 'Authentication required to access this resource.'
       tags:
         - 進貨管理
     put:

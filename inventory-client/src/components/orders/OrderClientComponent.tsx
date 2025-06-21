@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link'; // <-- 新增導入
 import { Button } from '@/components/ui/button'; // <-- 新增導入
 import { PlusCircle } from 'lucide-react'; // <-- 新增導入
-import { useOrders, useCancelOrder, useBatchDeleteOrders } from '@/hooks/queries/useEntityQueries'; // 🎯 新增 useCancelOrder & useBatchDeleteOrders
+import { useOrders, useCancelOrder, useBatchDeleteOrders, useBatchUpdateStatus } from '@/hooks/queries/useEntityQueries'; // 🎯 新增 useCancelOrder & useBatchDeleteOrders & useBatchUpdateStatus
 import { toast } from 'sonner'; // 🎯 新增 toast 導入
 import { OrderPreviewModal } from '@/components/orders/OrderPreviewModal';
 import { ShipmentFormModal } from '@/components/orders/ShipmentFormModal';
@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { createColumns } from './columns';
 import { Order, ProcessedOrder } from '@/types/api-helpers';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from '@/components/ui/textarea';
 import { DataTablePagination } from '@/components/ui/data-table-pagination'; // 🎯 新增分頁組件導入
 import {
@@ -78,6 +79,10 @@ export function OrderClientComponent() {
   const [isBatchDeleteConfirmOpen, setIsBatchDeleteConfirmOpen] = useState(false);
   const batchDeleteMutation = useBatchDeleteOrders();
 
+  // 🎯 新增：批量更新狀態管理 - 授旗儀式
+  const [batchUpdateConfig, setBatchUpdateConfig] = useState<{ status_type: 'payment_status' | 'shipping_status'; status_value: string; } | null>(null);
+  const batchUpdateMutation = useBatchUpdateStatus();
+
   // 🎯 分頁聯動到 useOrders Hook - 將分頁狀態納入查詢參數
   const queryFilters = useMemo(() => ({
     search: debouncedSearch || undefined,
@@ -130,6 +135,34 @@ export function OrderClientComponent() {
         },
       }
     );
+  };
+
+  // 🎯 建立批量更新狀態確認處理函式 - 授旗儀式核心
+  const handleConfirmBatchAction = () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    const selectedOrderIds = selectedRows.map(row => row.original.id);
+
+    if (selectedOrderIds.length === 0) {
+      toast.warning("沒有選擇任何訂單");
+      return;
+    }
+
+    // 根據 batchUpdateConfig 執行批量更新
+    if (batchUpdateConfig) {
+      batchUpdateMutation.mutate(
+        { 
+          ids: selectedOrderIds,
+          status_type: batchUpdateConfig.status_type,
+          status_value: batchUpdateConfig.status_value,
+        },
+        {
+          onSuccess: () => {
+            setBatchUpdateConfig(null); // 成功後關閉對話框
+            table.resetRowSelection(); // 清空選擇
+          },
+        }
+      );
+    }
   };
 
   // 🎯 創建包含預覽、出貨、收款、退款和取消回調的 columns
@@ -254,7 +287,30 @@ export function OrderClientComponent() {
             >
               批量刪除
             </Button>
-            <Button variant="outline" size="sm">批量更新狀態</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
+                  批量更新狀態
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>標記付款狀態為</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => setBatchUpdateConfig({ status_type: 'payment_status', status_value: 'paid' })}>
+                  已付款 (Paid)
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setBatchUpdateConfig({ status_type: 'payment_status', status_value: 'pending' })}>
+                  待付款 (Pending)
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>標記貨物狀態為</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => setBatchUpdateConfig({ status_type: 'shipping_status', status_value: 'shipped' })}>
+                  已出貨 (Shipped)
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setBatchUpdateConfig({ status_type: 'shipping_status', status_value: 'delivered' })}>
+                  已送達 (Delivered)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
@@ -396,27 +452,34 @@ export function OrderClientComponent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 🎯 批量刪除確認對話框 - 裁決行動最後防線 */}
+      {/* 🎯 通用批量操作確認對話框 - 裁決行動與授旗儀式最後防線 */}
       <AlertDialog
-        open={isBatchDeleteConfirmOpen}
-        onOpenChange={setIsBatchDeleteConfirmOpen}
+        open={isBatchDeleteConfirmOpen || !!batchUpdateConfig}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setIsBatchDeleteConfirmOpen(false);
+            setBatchUpdateConfig(null);
+          }
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>確認批量刪除？</AlertDialogTitle>
+            <AlertDialogTitle>確認批量操作？</AlertDialogTitle>
             <AlertDialogDescription>
-              您確定要永久刪除所選的 
-              <strong> {table.getFilteredSelectedRowModel().rows.length} </strong> 
-              筆訂單嗎？此操作不可撤銷，但相關庫存將會被返還。
+              您確定要對所選的 
+              <strong>{table.getFilteredSelectedRowModel().rows.length}</strong> 
+              筆訂單執行此操作嗎？
+              {isBatchDeleteConfirmOpen && " 此操作不可撤銷。"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmBatchDelete}
-              disabled={batchDeleteMutation.isPending}
+              onClick={isBatchDeleteConfirmOpen ? handleConfirmBatchDelete : handleConfirmBatchAction}
+              disabled={batchDeleteMutation.isPending || batchUpdateMutation.isPending}
+              className={isBatchDeleteConfirmOpen ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
             >
-              {batchDeleteMutation.isPending ? '刪除中...' : '確認刪除'}
+              { (batchDeleteMutation.isPending || batchUpdateMutation.isPending) ? '處理中...' : '確認執行' }
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

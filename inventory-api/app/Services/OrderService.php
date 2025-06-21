@@ -553,4 +553,87 @@ class OrderService
             return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);
         });
     }
+
+    /**
+     * 批量更新訂單狀態
+     * 
+     * 批量更新多個訂單的狀態，支援付款狀態和貨物狀態的批量變更。
+     * 系統會在事務中執行所有操作，確保資料一致性，並記錄每個訂單的狀態變更歷史。
+     * 
+     * @param array $ids 要更新的訂單 ID 陣列
+     * @param string $statusType 狀態類型 (payment_status 或 shipping_status)
+     * @param string $statusValue 目標狀態值
+     * @param string|null $notes 可選的批量操作備註
+     * @return void
+     * @throws \Exception 當更新失敗時拋出異常
+     */
+    public function batchUpdateStatus(array $ids, string $statusType, string $statusValue, ?string $notes): void
+    {
+        DB::transaction(function () use ($ids, $statusType, $statusValue, $notes) {
+            // 1. 獲取所有要更新的訂單
+            $orders = Order::whereIn('id', $ids)->get();
+            
+            // 2. 檢查是否找到所有訂單
+            if ($orders->count() !== count($ids)) {
+                $foundIds = $orders->pluck('id')->toArray();
+                $missingIds = array_diff($ids, $foundIds);
+                throw new \Exception("找不到以下訂單 ID：" . implode(', ', $missingIds));
+            }
+            
+            // 3. 逐一更新每個訂單
+            foreach ($orders as $order) {
+                // 記錄原始狀態
+                $originalStatus = $order->{$statusType};
+                
+                // 只有在狀態確實發生變更時才進行更新
+                if ($originalStatus !== $statusValue) {
+                    // 更新訂單狀態
+                    $order->update([
+                        $statusType => $statusValue,
+                    ]);
+                    
+                    // 記錄狀態變更歷史
+                    $this->addStatusHistory(
+                        $order,
+                        $originalStatus,
+                        $statusValue,
+                        $statusType,
+                        "批量操作：狀態更新為 {$statusValue}。" . ($notes ? " 備註：{$notes}" : "")
+                    );
+                }
+            }
+        });
+    }
+
+    /**
+     * 添加訂單狀態歷史記錄
+     * 
+     * 為訂單添加狀態變更歷史記錄，用於追蹤訂單狀態的變更軌跡。
+     * 
+     * @param Order $order 訂單實例
+     * @param string|null $fromStatus 原始狀態
+     * @param string $toStatus 目標狀態
+     * @param string $statusType 狀態類型 (payment_status 或 shipping_status)
+     * @param string $notes 變更備註
+     * @return void
+     */
+    protected function addStatusHistory(Order $order, ?string $fromStatus, string $toStatus, string $statusType, string $notes): void
+    {
+        // 確定狀態類型的簡化名稱
+        $statusTypeMap = [
+            'payment_status' => 'payment',
+            'shipping_status' => 'shipping',
+        ];
+        
+        $historyStatusType = $statusTypeMap[$statusType] ?? $statusType;
+        
+        // 創建狀態歷史記錄
+        $order->statusHistories()->create([
+            'from_status' => $fromStatus,
+            'to_status' => $toStatus,
+            'status_type' => $historyStatusType,
+            'user_id' => auth()->id(),
+            'notes' => $notes,
+        ]);
+    }
 } 

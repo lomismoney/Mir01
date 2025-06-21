@@ -393,7 +393,7 @@ class ProductController extends Controller
      * @group 商品管理
      * @authenticated
      * 
-     * @urlParam id integer required 商品 ID Example: 1
+     * @urlParam product integer required 商品 ID Example: 1
      * @bodyParam image file required 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
      * 
      * @response 200 {

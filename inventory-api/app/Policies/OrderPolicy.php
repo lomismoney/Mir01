@@ -135,4 +135,21 @@ class OrderPolicy
         // 只有管理員可以永久刪除訂單
         return $user->isAdmin();
     }
+
+    /**
+     * 檢查用戶是否可以批量更新訂單狀態
+     * 
+     * 批量狀態更新權限設計：
+     * 1. 只有管理員可以執行批量狀態更新
+     * 2. 具體的訂單狀態檢查和業務邏輯將在服務層進行
+     * 3. 確保批量操作的安全性和一致性
+     * 
+     * @param User $user
+     * @return bool
+     */
+    public function updateMultipleStatus(User $user): bool
+    {
+        // 只有管理員可以執行批量狀態更新操作
+        return $user->isAdmin();
+    }
 }

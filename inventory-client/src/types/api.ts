@@ -46,11 +46,11 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 3 */
+                                /** @example 16 */
                                 id?: number;
-                                /** @example Lonny Ankunding */
+                                /** @example Mrs. Justina Gaylord */
                                 name?: string;
-                                /** @example eloisa.harber */
+                                /** @example lafayette.considine */
                                 username?: string;
                                 /** @example viewer */
                                 role?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-20T08:50:45.000000Z */
+                                /** @example 2025-06-21T08:45:48.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-20T08:50:45.000000Z */
+                                /** @example 2025-06-21T08:45:48.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -104,17 +104,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Dolores dolorum amet iste laborum eius est dolor.
+                         * @example Eius et animi quos velit et.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID。例如：1
-                         * @example 17
+                         * @example 16
                          */
                         parent_id?: number | null;
                     };
@@ -135,7 +135,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the category.
-                 * @example 17
+                 * @example 1
                  */
                 id: number;
             };
@@ -153,7 +153,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                 };
@@ -169,6 +169,8 @@ export interface paths {
                         "application/json": {
                             /** @example Unauthenticated. */
                             message?: string;
+                            /** @example Authentication required to access this resource. */
+                            error?: string;
                         };
                     };
                 };
@@ -188,7 +190,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                 };
@@ -199,17 +201,17 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 分類名稱。例如：電子產品
-                         * @example consequatur
+                         * @example architecto
                          */
                         name?: string;
                         /**
                          * @description 分類描述。例如：包含所有電子相關產品
-                         * @example Dolores dolorum amet iste laborum eius est dolor.
+                         * @example Eius et animi quos velit et.
                          */
                         description?: string | null;
                         /**
                          * @description 父分類ID，必須是存在的分類ID且不能是自己。例如：1
-                         * @example 17
+                         * @example 16
                          */
                         parent_id?: number | null;
                     };
@@ -231,7 +233,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the category.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                 };
@@ -268,9 +270,14 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 17
+                 * @example 1
                  */
                 id: number;
+                /**
+                 * @description 分店 ID.
+                 * @example 1
+                 */
+                store: number;
             };
             cookie?: never;
         };
@@ -290,7 +297,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 2
+                 * @example 1
                  */
                 user_id: number;
             };
@@ -464,7 +471,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一）。例如：顏色
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                     };
@@ -494,7 +501,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 17
+                 * @example 1
                  */
                 id: number;
                 /**
@@ -516,7 +523,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -550,7 +557,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -566,7 +573,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性名稱（唯一，會排除當前屬性）。例如：尺寸
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                     };
@@ -596,7 +603,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -648,7 +655,7 @@ export interface paths {
                         /**
                          * @description 要刪除的商品 ID 列表。例如：[1, 2, 3]
                          * @example [
-                         *       "consequatur"
+                         *       "architecto"
                          *     ]
                          */
                         ids: string[];
@@ -677,14 +684,14 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the product.
-                 * @example 17
+                 * @example 1
                  */
                 product_id: number;
                 /**
                  * @description 商品 ID
                  * @example 1
                  */
-                id: number;
+                product: number;
             };
             cookie?: never;
         };
@@ -705,14 +712,14 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the product.
-                     * @example 17
+                     * @example 1
                      */
                     product_id: number;
                     /**
                      * @description 商品 ID
                      * @example 1
                      */
-                    id: number;
+                    product: number;
                 };
                 cookie?: never;
             };
@@ -1504,23 +1511,23 @@ export interface paths {
                         variants?: {
                             /**
                              * @description The <code>id</code> of an existing record in the product_variants table.
-                             * @example 17
+                             * @example 16
                              */
                             id?: number;
                             /**
                              * @description Must not be greater than 255 characters.
-                             * @example mqeopfuudtdsufvyvddqa
+                             * @example n
                              */
                             sku: string;
                             /**
                              * @description Must be at least 0.
-                             * @example 45
+                             * @example 84
                              */
                             price: number;
                             /**
                              * @description The <code>id</code> of an existing record in the attribute_values table.
                              * @example [
-                             *       17
+                             *       16
                              *     ]
                              */
                             attribute_value_ids?: number[];
@@ -2100,7 +2107,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the variant.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -2114,7 +2121,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the variant.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -2130,6 +2137,8 @@ export interface paths {
                         "application/json": {
                             /** @example Unauthenticated. */
                             message?: string;
+                            /** @example Authentication required to access this resource. */
+                            error?: string;
                         };
                     };
                 };
@@ -2201,7 +2210,7 @@ export interface paths {
                         /**
                          * @description nullable 運送地址列表.
                          * @example [
-                         *       "consequatur"
+                         *       "architecto"
                          *     ]
                          */
                         addresses?: (string | null)[];
@@ -2305,7 +2314,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the customer.
-                 * @example 2
+                 * @example 1
                  */
                 id: number;
                 /**
@@ -2324,7 +2333,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the customer.
-                     * @example 2
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -2438,7 +2447,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the customer.
-                     * @example 2
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -2472,7 +2481,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the attribute.
-                 * @example 17
+                 * @example 1
                  */
                 attribute_id: number;
                 /**
@@ -2494,7 +2503,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 17
+                     * @example 1
                      */
                     attribute_id: number;
                     /**
@@ -2592,7 +2601,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the attribute.
-                     * @example 17
+                     * @example 1
                      */
                     attribute_id: number;
                     /**
@@ -2608,7 +2617,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一）。例如：紅色
-                         * @example consequatur
+                         * @example architecto
                          */
                         value: string;
                     };
@@ -2638,7 +2647,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the value.
-                 * @example 17
+                 * @example 1
                  */
                 id: number;
                 /**
@@ -2660,7 +2669,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -2691,7 +2700,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -2707,7 +2716,7 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 屬性值（在同一屬性下必須唯一，會排除當前值）。例如：藍色
-                         * @example consequatur
+                         * @example architecto
                          */
                         value: string;
                     };
@@ -2746,7 +2755,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the value.
-                     * @example 17
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -3077,34 +3086,34 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description The <code>id</code> of an existing record in the stores table.
-                         * @example 17
+                         * @example 16
                          */
                         store_id?: number | null;
                         /**
-                         * @example reduction
+                         * @example adjustment
                          * @enum {string|null}
                          */
                         type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                         /**
                          * @description Must be a valid date.
-                         * @example 2025-06-20T08:50:45
+                         * @example 2025-06-21T08:45:49
                          */
                         start_date?: string | null;
                         /**
                          * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                         * @example 2106-07-19
+                         * @example 2051-07-15
                          */
                         end_date?: string | null;
-                        /** @example consequatur */
+                        /** @example architecto */
                         product_name?: string | null;
                         /**
                          * @description Must be at least 1. Must not be greater than 100.
-                         * @example 13
+                         * @example 22
                          */
                         per_page?: number | null;
                         /**
                          * @description Must be at least 1.
-                         * @example 56
+                         * @example 67
                          */
                         page?: number | null;
                     };
@@ -3214,7 +3223,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the inventory.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -3228,7 +3237,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the inventory.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -3244,6 +3253,8 @@ export interface paths {
                         "application/json": {
                             /** @example Unauthenticated. */
                             message?: string;
+                            /** @example Authentication required to access this resource. */
+                            error?: string;
                         };
                     };
                 };
@@ -3875,7 +3886,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the transfer.
-                 * @example consequatur
+                 * @example architecto
                  */
                 id: string;
             };
@@ -3889,7 +3900,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the transfer.
-                     * @example consequatur
+                     * @example architecto
                      */
                     id: string;
                 };
@@ -3905,6 +3916,8 @@ export interface paths {
                         "application/json": {
                             /** @example Unauthenticated. */
                             message?: string;
+                            /** @example Authentication required to access this resource. */
+                            error?: string;
                         };
                     };
                 };
@@ -4141,22 +4154,22 @@ export interface paths {
                     "application/json": {
                         /**
                          * @description 用戶姓名。例如：張三
-                         * @example consequatur
+                         * @example architecto
                          */
                         name: string;
                         /**
                          * @description 用戶名（唯一）。例如：zhangsan
-                         * @example consequatur
+                         * @example architecto
                          */
                         username: string;
                         /**
                          * @description 用戶密碼（至少8個字元）。例如：password123
-                         * @example O[2UZ5ij-e/dl4m{o,
+                         * @example |]|{+-
                          */
                         password: string;
                         /**
                          * @description 用戶角色，必須是 admin 或 viewer。例如：admin
-                         * @example consequatur
+                         * @example architecto
                          */
                         role: string;
                     };
@@ -4205,7 +4218,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 2
+                 * @example 1
                  */
                 id: number;
                 /**
@@ -4228,7 +4241,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 2
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -4284,7 +4297,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 2
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -4312,7 +4325,7 @@ export interface paths {
                          * @description 用戶密碼（可選更新，如不提供則保持原密碼）. Must be at least 8 characters.
                          * @example newpassword123
                          */
-                        password?: string;
+                        password: string;
                         /**
                          * @description 用戶角色（可選更新）.
                          * @example admin
@@ -4370,7 +4383,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the user.
-                     * @example 2
+                     * @example 1
                      */
                     id: number;
                     /**
@@ -4391,6 +4404,38 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/batch-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postApiOrdersBatchDelete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/batch-update-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postApiOrdersBatchUpdateStatus"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -4419,7 +4464,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
                 /**
@@ -4446,7 +4491,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -4473,7 +4518,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -4500,7 +4545,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -4527,7 +4572,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -4554,7 +4599,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -4581,7 +4626,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order item.
-                 * @example 17
+                 * @example 16
                  */
                 order_item_id: number;
                 /**
@@ -4850,7 +4895,13 @@ export interface operations {
     };
     getApiStores: {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description 可選的關聯，用逗號分隔。例如: users,inventories
+                 * @example architecto
+                 */
+                include?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4946,12 +4997,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一）。例如：台北總店
-                     * @example consequatur
+                     * @example architecto
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example consequatur
+                     * @example architecto
                      */
                     address?: string | null;
                 };
@@ -4965,16 +5016,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 1 */
+                            /** @example 11 */
                             id?: number;
-                            /** @example Mueller-Dibbert */
+                            /** @example Bailey Ltd */
                             name?: string;
-                            /** @example 87713 Brandy Roads Suite 202
-                             *     Williamsonfort, CT 64474 */
+                            /** @example 85625 Gaylord Knolls
+                             *     Cecilburgh, WI 02042 */
                             address?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -4984,14 +5035,25 @@ export interface operations {
     };
     getApiStoresId: {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description 可選的關聯，用逗號分隔。例如: users,inventories
+                 * @example architecto
+                 */
+                include?: string;
+            };
             header?: never;
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 17
+                 * @example 1
                  */
                 id: number;
+                /**
+                 * @description 分店 ID.
+                 * @example 1
+                 */
+                store: number;
             };
             cookie?: never;
         };
@@ -5004,16 +5066,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 2 */
+                            /** @example 12 */
                             id?: number;
-                            /** @example Moore-Emard */
+                            /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
-                            /** @example 27319 Schmeler Fall Suite 958
-                             *     Carterland, NM 49546 */
+                            /** @example 80841 Mya Lane Apt. 042
+                             *     Lyricberg, MO 42170-0432 */
                             address?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5028,9 +5090,14 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 17
+                 * @example 1
                  */
                 id: number;
+                /**
+                 * @description 分店 ID.
+                 * @example 1
+                 */
+                store: number;
             };
             cookie?: never;
         };
@@ -5039,12 +5106,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description 分店名稱（唯一，會排除當前分店）。例如：台北信義店
-                     * @example consequatur
+                     * @example architecto
                      */
                     name: string;
                     /**
                      * @description 分店地址。例如：台北市信義區信義路五段7號
-                     * @example consequatur
+                     * @example architecto
                      */
                     address?: string | null;
                 };
@@ -5058,16 +5125,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 3 */
+                            /** @example 13 */
                             id?: number;
-                            /** @example Satterfield, Collins and Reynolds */
+                            /** @example Dach-Gaylord */
                             name?: string;
-                            /** @example 820 Smith Cove Apt. 644
-                             *     South Eloisaborough, IL 62645 */
+                            /** @example 7763 Adriel Fork
+                             *     Antoniobury, PA 31881 */
                             address?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5082,9 +5149,14 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the store.
-                 * @example 17
+                 * @example 1
                  */
                 id: number;
+                /**
+                 * @description 分店 ID.
+                 * @example 1
+                 */
+                store: number;
             };
             cookie?: never;
         };
@@ -5098,7 +5170,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 2
+                 * @example 1
                  */
                 user_id: number;
             };
@@ -5113,16 +5185,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 4 */
+                            /** @example 14 */
                             id?: number;
-                            /** @example Reichel PLC */
+                            /** @example Leuschke Inc */
                             name?: string;
-                            /** @example 283 Adell Mews Suite 313
-                             *     East Lennie, CO 94046-7647 */
+                            /** @example 427 Predovic Ridge
+                             *     Baileemouth, KS 32375-9947 */
                             address?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5137,7 +5209,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 2
+                 * @example 1
                  */
                 user_id: number;
             };
@@ -5149,7 +5221,7 @@ export interface operations {
                     /**
                      * @description 要分配給用戶的分店ID列表。例如：[1, 2, 3]
                      * @example [
-                     *       "consequatur"
+                     *       "architecto"
                      *     ]
                      */
                     store_ids: string[];
@@ -5164,11 +5236,11 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 4 */
+                            /** @example 17 */
                             id?: number;
-                            /** @example Dr. Cornelius Luettgen V */
+                            /** @example Ms. Elisabeth Okuneva */
                             name?: string;
-                            /** @example russel.bert */
+                            /** @example gulgowski.asia */
                             username?: string;
                             /** @example viewer */
                             role?: string;
@@ -5176,9 +5248,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-20T08:50:45.000000Z */
+                            /** @example 2025-06-21T08:45:48.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5473,7 +5545,7 @@ export interface operations {
                         /**
                          * @description The <code>id</code> of an existing record in the attribute_values table.
                          * @example [
-                         *       17
+                         *       16
                          *     ]
                          */
                         attribute_value_ids?: number[];
@@ -5749,7 +5821,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description The <code>id</code> of an existing record in the stores table.
-                     * @example 17
+                     * @example 16
                      */
                     store_id?: number | null;
                     /**
@@ -5759,17 +5831,17 @@ export interface operations {
                     type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2025-06-20T08:50:45
+                     * @example 2025-06-21T08:45:49
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2106-07-19
+                     * @example 2051-07-15
                      */
                     end_date?: string | null;
                     /**
                      * @description Must be at least 1. Must not be greater than 100.
-                     * @example 13
+                     * @example 22
                      */
                     per_page?: number | null;
                 };
@@ -5956,6 +6028,178 @@ export interface operations {
             };
         };
     };
+    postApiOrdersBatchDelete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 要刪除的訂單 ID 清單，至少包含一個 ID。
+                     * @example [
+                     *       1,
+                     *       2,
+                     *       3
+                     *     ]
+                     */
+                    ids: string[];
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 訂單已成功批量刪除 */
+                        message?: string;
+                        /** @example 3 */
+                        deleted_count?: number;
+                        /** @example [
+                         *       1,
+                         *       2,
+                         *       3
+                         *     ] */
+                        deleted_ids?: number[];
+                    };
+                };
+            };
+            /** @description 權限不足 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 您沒有權限執行此操作 */
+                        message?: string;
+                    };
+                };
+            };
+            /** @description 包含不可刪除的訂單 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 部分訂單無法刪除 */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "訂單 PO-20250619-001 已出貨，無法刪除",
+                             *       "訂單 PO-20250619-002 已交付，無法刪除"
+                             *     ] */
+                            orders?: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    postApiOrdersBatchUpdateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description 要更新狀態的訂單 ID 清單，至少包含一個 ID。
+                     * @example [
+                     *       1,
+                     *       2,
+                     *       3
+                     *     ]
+                     */
+                    ids: string[];
+                    /**
+                     * @description 要更新的狀態類型。
+                     * @example payment_status
+                     */
+                    status_type: string;
+                    /**
+                     * @description 要更新成的目標狀態值。
+                     * @example paid
+                     */
+                    status_value: string;
+                    /**
+                     * @description 批量操作備註，最多 500 字符。
+                     * @example 批量確認收款
+                     */
+                    notes?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 訂單狀態已成功批量更新 */
+                        message?: string;
+                        /** @example 3 */
+                        updated_count?: number;
+                        /** @example [
+                         *       1,
+                         *       2,
+                         *       3
+                         *     ] */
+                        updated_ids?: number[];
+                        /** @example payment_status */
+                        status_type?: string;
+                        /** @example paid */
+                        status_value?: string;
+                    };
+                };
+            };
+            /** @description 權限不足 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 您沒有權限執行此操作 */
+                        message?: string;
+                    };
+                };
+            };
+            /** @description 驗證失敗 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 驗證失敗 */
+                        message?: string;
+                        errors?: {
+                            /** @example [
+                             *       "狀態類型必須是付款狀態或貨物狀態"
+                             *     ] */
+                            status_type?: string[];
+                            /** @example [
+                             *       "請提供狀態值"
+                             *     ] */
+                            status_value?: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
     getApiOrders: {
         parameters: {
             query?: {
@@ -5992,22 +6236,32 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @example consequatur */
+                    /** @example architecto */
                     search?: string | null;
-                    /** @example consequatur */
+                    /** @example architecto */
                     shipping_status?: string | null;
-                    /** @example consequatur */
+                    /** @example architecto */
                     payment_status?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2025-06-20
+                     * @example 2025-06-21
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2106-07-19
+                     * @example 2051-07-15
                      */
                     end_date?: string | null;
+                    /**
+                     * @description Must be at least 1.
+                     * @example 22
+                     */
+                    page?: number;
+                    /**
+                     * @description Must be at least 1. Must not be greater than 100.
+                     * @example 7
+                     */
+                    per_page?: number;
                 };
             };
         };
@@ -6020,6 +6274,8 @@ export interface operations {
                     "application/json": {
                         /** @example Unauthenticated. */
                         message?: string;
+                        /** @example Authentication required to access this resource. */
+                        error?: string;
                     };
                 };
             };
@@ -6088,7 +6344,7 @@ export interface operations {
                     /**
                      * @description 訂單項目清單。
                      * @example [
-                     *       "consequatur"
+                     *       "architecto"
                      *     ]
                      */
                     items: string[];
@@ -6113,7 +6369,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
                 /**
@@ -6143,7 +6399,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
                 /**
@@ -6214,28 +6470,28 @@ export interface operations {
                     notes?: string | null;
                     /**
                      * @description Must not be greater than 50 characters.
-                     * @example mqeopfuudtdsufvyvddqa
+                     * @example n
                      */
                     po_number?: string | null;
                     /**
                      * @description Must not be greater than 50 characters.
-                     * @example mniihfqcoynlazghdtqtq
+                     * @example g
                      */
                     reference_number?: string | null;
                     /**
                      * @description Must be at least 0.
-                     * @example 80
+                     * @example 12
                      */
                     subtotal?: number | null;
                     /**
                      * @description Must be at least 0.
-                     * @example 6
+                     * @example 77
                      */
                     grand_total?: number | null;
                     /**
                      * @description 訂單項目清單（提供此參數時會同步所有項目）。
                      * @example [
-                     *       "consequatur"
+                     *       "architecto"
                      *     ]
                      */
                     items?: string[];
@@ -6260,7 +6516,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 id: number;
                 /**
@@ -6289,7 +6545,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -6348,7 +6604,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -6475,7 +6731,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -6568,7 +6824,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -6600,28 +6856,10 @@ export interface operations {
                     /**
                      * @description 退款品項清單，至少包含一個品項。
                      * @example [
-                     *       {
-                     *         "order_item_id": 1,
-                     *         "quantity": 2
-                     *       },
-                     *       {
-                     *         "order_item_id": 3,
-                     *         "quantity": 1
-                     *       }
+                     *       "architecto"
                      *     ]
                      */
-                    items: {
-                        /**
-                         * @description 訂單品項ID
-                         * @example 1
-                         */
-                        order_item_id: number;
-                        /**
-                         * @description 退貨數量
-                         * @example 2
-                         */
-                        quantity: number;
-                    }[];
+                    items: string[];
                 };
             };
         };
@@ -6726,7 +6964,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 16
                  */
                 order_id: number;
                 /**
@@ -6797,7 +7035,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order item.
-                 * @example 17
+                 * @example 16
                  */
                 order_item_id: number;
                 /**
@@ -6948,6 +7186,8 @@ export interface operations {
                     "application/json": {
                         /** @example Unauthenticated. */
                         message?: string;
+                        /** @example Authentication required to access this resource. */
+                        error?: string;
                     };
                 };
             };
@@ -7105,6 +7345,8 @@ export interface operations {
                     "application/json": {
                         /** @example Unauthenticated. */
                         message?: string;
+                        /** @example Authentication required to access this resource. */
+                        error?: string;
                     };
                 };
             };
