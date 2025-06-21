@@ -39,7 +39,7 @@ export function CustomerClientComponent() {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   
   // API 查詢 Hook - 現在支援搜尋參數
-  const { data: response, isLoading, isError, error } = useCustomers({
+  const { data: customerResponse, isLoading, isError, error } = useCustomers({
     search: debouncedSearchQuery || undefined, // 僅在有值時傳遞
   });
   
@@ -51,9 +51,9 @@ export function CustomerClientComponent() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 
-  // 從響應中解析數據和分頁元數據（即使在 loading 狀態下也能安全訪問）
-  const pageData = (response?.data || []) as Customer[];
-  const meta = response?.meta;
+  // 🎯 純淨消費：直接從 Hook 返回的物件中解構出 data 和 meta
+  const customers = customerResponse?.data ?? [];
+  const pageMeta = customerResponse?.meta;
 
   // 【新增】表單提交處理邏輯
   const handleCreateSubmit = (values: any) => {
@@ -66,7 +66,7 @@ export function CustomerClientComponent() {
 
   // 配置表格（每次渲染都配置，確保 Hooks 順序一致）
   const table = useReactTable({
-    data: pageData,
+    data: customers,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

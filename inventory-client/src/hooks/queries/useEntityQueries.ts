@@ -573,14 +573,24 @@ export function useUsers(filters?: UserQueryParams) {
       return response.data;
     },
     
-    // 🎯 數據精煉廠 - 統一處理用戶數據格式
+    // 🎯 數據精煉廠 - 統一處理用戶數據格式（架構統一升級版）
     select: (response: any) => {
-      // 解包：處理分頁或普通陣列數據結構
-      const users = response?.data || response || [];
+      // 處理可能的巢狀或分頁數據
+      const users = response?.data?.data || response?.data || response || [];
+      
+      // 確保返回的是陣列
       if (!Array.isArray(users)) return [];
       
-      // 返回純淨的用戶數據陣列
-      return users;
+      // 🔧 數據轉換層：在此處理所有用戶數據的統一格式化
+      return users.map((user: any) => {
+        // 處理 stores 屬性，確保它總是存在且為陣列
+        const stores = user.stores || [];
+        
+        return {
+          ...user,
+          stores: Array.isArray(stores) ? stores : []
+        };
+      });
     },
     
     // 🚀 體驗優化配置（第二階段淨化行動）
@@ -830,10 +840,37 @@ export function useCreateCustomer() {
   // 使用 API 生成的類型定義
   type CreateCustomerRequestBody = import('@/types/api').paths['/api/customers']['post']['requestBody']['content']['application/json'];
   
+  // 🎯 定義前端表單數據結構
+  type CustomerFormData = {
+    name: string;
+    phone?: string;
+    email?: string;
+    contact_person?: string;
+    tax_id?: string;
+    contact_address?: string;
+    industry?: string;
+    payment_preference?: string;
+    addresses: { address: string; is_default?: boolean }[]; // 前端的豐富數據結構
+    notes?: string;
+  };
+  
   return useMutation({
-    mutationFn: async (customerData: CreateCustomerRequestBody) => {
+    mutationFn: async (formData: CustomerFormData) => {
+      // 🎯 數據精煉廠：在 Hook 內部進行數據轉換
+      const apiPayload: CreateCustomerRequestBody = {
+        name: formData.name,
+        phone: formData.phone || null,
+        tax_id: formData.tax_id || null,
+        contact_address: formData.contact_address || null,
+        is_company: !!formData.tax_id, // 如果有統編就是公司
+        industry_type: formData.industry || '其他', // 提供預設值
+        payment_type: formData.payment_preference || '現金', // 提供預設值
+        // 將前端的地址對象陣列轉換為 API 期望的字串陣列
+        addresses: formData.addresses?.map(addr => addr.address).filter(Boolean)
+      };
+      
       const { data, error } = await apiClient.POST('/api/customers', {
-        body: customerData,
+        body: apiPayload,
       });
       if (error) throw error;
       return data;
@@ -969,14 +1006,28 @@ export function useCustomers(filters?: CustomerFilters) {
       return data;
     },
     
-    // 🎯 數據精煉廠 - 統一處理客戶數據格式
+    // 🎯 數據精煉廠 - 統一處理客戶數據格式（架構統一升級版）
     select: (response: any) => {
-      // 解包：處理分頁或普通陣列數據結構
-      const customers = response?.data || response || [];
-      if (!Array.isArray(customers)) return [];
+      // 處理可能的巢狀或分頁數據
+      const data = response?.data?.data || response?.data || response || [];
       
-      // 返回純淨的客戶數據陣列（可在此處添加數據轉換邏輯）
-      return customers;
+      // 提取或構建 meta 資訊
+      const meta = response?.meta || response?.data?.meta || { 
+        // 如果沒有 meta，提供一個預設的 meta 物件
+        current_page: 1, 
+        last_page: 1,
+        per_page: Array.isArray(data) ? data.length : 0,
+        total: Array.isArray(data) ? data.length : 0
+      };
+      
+      // 確保 data 是陣列
+      const customers = Array.isArray(data) ? data : [];
+      
+      // 🔧 統一返回標準分頁結構
+      return { 
+        data: customers, 
+        meta: meta 
+      };
     },
     
     // 🚀 體驗優化配置

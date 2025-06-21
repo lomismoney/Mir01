@@ -63,7 +63,7 @@ export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   
   // 使用搜索功能的 useUsers hook（類型安全版本）
-  const { data: usersResponse, isLoading, error } = useUsers(
+  const { data: users = [], isLoading, error } = useUsers(
     searchQuery ? { "filter[search]": searchQuery } : undefined
   );
   const createUserMutation = useCreateUser();
@@ -216,7 +216,7 @@ export default function UsersPage() {
 
     updateUserMutation.mutate({
       path: { id: editingUser.id, user: editingUser.id },
-      body: updateData
+      body: updateData as any // 暫時使用 any 處理 API 類型定義問題
     }, {
       onSuccess: () => {
         toast.success('用戶更新成功！');
@@ -306,18 +306,6 @@ export default function UsersPage() {
 
   // 創建表格欄位定義
   const columns = createUsersColumns(userActions);
-
-  // 處理用戶資料，確保類型正確
-  const users = (usersResponse?.data || []).map((userData): UserItem => {
-    // 使用明確的類型定義和擴展屬性
-    const baseUser = userData;
-    const stores = (userData as UserItem & { stores?: StoreItem[] }).stores || [];
-    
-    return {
-      ...baseUser,
-      stores
-    };
-  });
 
   // 檢查管理員權限 - 使用 useAuth hook 來檢查權限
       if (!user?.isAdmin) {

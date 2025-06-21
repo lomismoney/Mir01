@@ -511,13 +511,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
           <CustomerForm
             isSubmitting={createCustomerMutation.isPending}
             onSubmit={(customerData) => {
-              // 轉換地址格式以符合 API 期望
-              const apiData = {
-                ...customerData,
-                addresses: customerData.addresses?.map(addr => addr.address) || []
-              };
-              
-              createCustomerMutation.mutate(apiData, {
+              // 🎯 純淨消費：直接將表單數據傳遞給 mutation
+              createCustomerMutation.mutate(customerData as any, {
                 onSuccess: (data) => {
                   handleCustomerCreated(data?.data || {});
                 },
