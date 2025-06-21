@@ -23,8 +23,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Plus, Loader2 } from "lucide-react";
+import { Trash2, Plus, Loader2, AlertCircle } from "lucide-react";
 import { ProductSelector } from "@/components/inventory/ProductSelector";
+import { useSession } from "next-auth/react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PurchaseFormData {
   store_id: string;
@@ -47,6 +49,7 @@ interface CreatePurchaseDialogProps {
 
 export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePurchaseDialogProps) {
   const { toast } = useToast();
+  const { data: session, status } = useSession();
   const createPurchaseMutation = useCreatePurchase();
   const { data: storesData, isLoading: isLoadingStores } = useStores();
 
@@ -154,140 +157,157 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* 基本資訊 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>基本資訊</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="store_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>門市 *</FormLabel>
-                        <Select disabled={isLoadingStores} onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="選擇入庫門市" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {storesData?.data?.map((store) => (
-                              <SelectItem key={store.id} value={store.id?.toString() || ''}>
-                                {store.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        {/* 身份驗證狀態提示 */}
+        {status === "unauthenticated" && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              您的登入已過期，請重新登入後再試。
+            </AlertDescription>
+          </Alert>
+        )}
 
-                  <FormField
-                    control={form.control}
-                    name="order_number"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>進貨單號 *</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="例：PO-20240101-001" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="purchased_at"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>進貨日期</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="date" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="shipping_cost"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>運費</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" min="0" step="0.01" placeholder="0.00" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>狀態</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="選擇狀態" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.entries(PURCHASE_STATUS_LABELS).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 商品項目 */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>商品項目</CardTitle>
-                  <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    新增商品
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="border rounded-lg p-4 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium">商品 {index + 1}</h4>
-                      {fields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+        {/* 檢查 session 狀態 */}
+        {status === "loading" ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">載入中...</span>
+          </div>
+        ) : status === "authenticated" ? (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* 基本資訊 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>基本資訊</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="store_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>門市 *</FormLabel>
+                          <Select disabled={isLoadingStores} onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="選擇入庫門市" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {storesData?.data?.map((store) => (
+                                <SelectItem key={store.id} value={store.id?.toString() || ''}>
+                                  {store.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </div>
+                    />
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                              <FormField
+                    <FormField
+                      control={form.control}
+                      name="order_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>進貨單號 *</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="例：PO-20240101-001" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="purchased_at"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>進貨日期</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="date" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="shipping_cost"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>運費</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" min="0" step="0.01" placeholder="0.00" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>狀態</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="選擇狀態" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.entries(PURCHASE_STATUS_LABELS).map(([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 商品項目 */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>商品項目</CardTitle>
+                    <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      新增商品
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">商品 {index + 1}</h4>
+                        {fields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => remove(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
                           control={form.control}
                           name={`items.${index}.product_variant_id`}
                           render={({ field }) => (
@@ -313,21 +333,21 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
                           )}
                         />
 
-                      <FormField
-                        control={form.control}
-                        name={`items.${index}.quantity`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>數量 *</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="number" min="1" placeholder="0" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                          control={form.control}
+                          name={`items.${index}.quantity`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>數量 *</FormLabel>
+                              <FormControl>
+                                <Input {...field} type="number" min="1" placeholder="0" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                                              <FormField
+                        <FormField
                           control={form.control}
                           name={`items.${index}.cost_price`}
                           render={({ field }) => (
@@ -340,38 +360,39 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
                             </FormItem>
                           )}
                         />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                {/* 總計顯示 */}
-                <div className="border-t pt-4">
-                  <div className="flex justify-end">
-                    <div className="text-right">
-                      <div className="text-sm text-muted-foreground">預估總金額</div>
-                      <div className="text-lg font-semibold">
-                        NT$ {calculateTotal().toLocaleString('zh-TW', { minimumFractionDigits: 2 })}
+                  {/* 總計顯示 */}
+                  <div className="border-t pt-4">
+                    <div className="flex justify-end">
+                      <div className="text-right">
+                        <div className="text-sm text-muted-foreground">預估總金額</div>
+                        <div className="text-lg font-semibold">
+                          NT$ {calculateTotal().toLocaleString('zh-TW', { minimumFractionDigits: 2 })}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* 操作按鈕 */}
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                取消
-              </Button>
-              <Button type="submit" disabled={createPurchaseMutation.isPending}>
-                {createPurchaseMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                建立進貨單
-              </Button>
-            </div>
-          </form>
-        </Form>
+              {/* 操作按鈕 */}
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  取消
+                </Button>
+                <Button type="submit" disabled={createPurchaseMutation.isPending}>
+                  {createPurchaseMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  建立進貨單
+                </Button>
+              </div>
+            </form>
+          </Form>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

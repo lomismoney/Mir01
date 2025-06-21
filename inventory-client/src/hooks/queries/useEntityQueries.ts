@@ -573,6 +573,16 @@ export function useUsers(filters?: UserQueryParams) {
       return response.data;
     },
     
+    // 🎯 數據精煉廠 - 統一處理用戶數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const users = response?.data || response || [];
+      if (!Array.isArray(users)) return [];
+      
+      // 返回純淨的用戶數據陣列
+      return users;
+    },
+    
     // 🚀 體驗優化配置（第二階段淨化行動）
     placeholderData: (previousData) => previousData, // 分頁時保持舊資料，避免載入閃爍
     refetchOnMount: false,       // 依賴全域 staleTime
@@ -959,6 +969,16 @@ export function useCustomers(filters?: CustomerFilters) {
       return data;
     },
     
+    // 🎯 數據精煉廠 - 統一處理客戶數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const customers = response?.data || response || [];
+      if (!Array.isArray(customers)) return [];
+      
+      // 返回純淨的客戶數據陣列（可在此處添加數據轉換邏輯）
+      return customers;
+    },
+    
     // 🚀 體驗優化配置
     placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
     refetchOnMount: false,       // 依賴全域 staleTime
@@ -1067,6 +1087,17 @@ export function useCategories(filters: { search?: string } = {}) {
       if (error) throw error;
       return data;
     },
+    
+    // 🎯 數據精煉廠 - 統一處理分類數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const categories = response?.data || response || [];
+      if (!Array.isArray(categories)) return [];
+      
+      // 返回純淨的分類數據陣列
+      return categories;
+    },
+    
     // 🚀 體驗優化配置
     placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
     refetchOnMount: false,       // 依賴全域 staleTime
@@ -1265,6 +1296,16 @@ export function useAttributes() {
         throw new Error('獲取屬性列表失敗');
       }
       return data;
+    },
+    
+    // 🎯 數據精煉廠 - 統一處理屬性數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const attributes = response?.data || response || [];
+      if (!Array.isArray(attributes)) return [];
+      
+      // 返回純淨的屬性數據陣列，包含屬性值
+      return attributes;
     },
   });
 }
@@ -1526,6 +1567,17 @@ export const useInventoryList = (filters: ProductFilters = {}) => {
       }
       return data;
     },
+    
+    // 🎯 數據精煉廠 - 統一處理庫存數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const inventory = response?.data || response || [];
+      if (!Array.isArray(inventory)) return [];
+      
+      // 返回純淨的庫存數據陣列
+      return inventory;
+    },
+    
     staleTime: 5 * 60 * 1000, // 5 分鐘
   });
 };
@@ -1613,8 +1665,8 @@ export function useInventoryHistory(params: {
   return useQuery({
     queryKey: ['inventory', 'history', params],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/{id}/history', {
-        params: { 
+      const { data, error } = await apiClient.GET('/api/inventory/{id}/history' as any, {
+        params: {
           path: { id: params.id },
           query: {
             start_date: params.start_date,
@@ -1623,13 +1675,24 @@ export function useInventoryHistory(params: {
             per_page: params.per_page,
             page: params.page,
           }
-        },
-      });
+        }
+      } as any);
       if (error) {
-        throw new Error('獲取庫存歷史失敗');
+        throw new Error('獲取庫存歷史記錄失敗');
       }
       return data;
     },
+    
+    // 🎯 數據精煉廠 - 統一處理庫存歷史數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const history = response?.data || response || [];
+      if (!Array.isArray(history)) return [];
+      
+      // 返回純淨的歷史記錄陣列
+      return history;
+    },
+    
     enabled: !!params.id,
   });
 }
@@ -1649,24 +1712,35 @@ export function useSkuInventoryHistory(params: {
   return useQuery({
     queryKey: ['inventory', 'sku-history', params],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/sku/{sku}/history', {
-        params: { 
+      const { data, error } = await apiClient.GET('/api/inventory/sku/{sku}/history' as any, {
+        params: {
           path: { sku: params.sku },
           query: {
-            store_id: params.store_id ? parseInt(params.store_id) : undefined,
+            store_id: params.store_id,
             type: params.type,
             start_date: params.start_date,
             end_date: params.end_date,
             per_page: params.per_page,
             page: params.page,
           }
-        },
-      });
+        }
+      } as any);
       if (error) {
-        throw new Error('獲取 SKU 庫存歷史失敗');
+        throw new Error('獲取 SKU 庫存歷史記錄失敗');
       }
       return data;
     },
+    
+    // 🎯 數據精煉廠 - 統一處理 SKU 歷史數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const history = response?.data || response || [];
+      if (!Array.isArray(history)) return [];
+      
+      // 返回純淨的歷史記錄陣列
+      return history;
+    },
+    
     enabled: !!params.sku,
   });
 }
@@ -1697,6 +1771,17 @@ export function useAllInventoryTransactions(filters: InventoryTransactionFilters
         };
       };
     },
+    
+    // 🎯 數據精煉廠 - 統一處理交易記錄數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const transactions = response?.data || response || [];
+      if (!Array.isArray(transactions)) return [];
+      
+      // 返回純淨的交易記錄陣列
+      return transactions;
+    },
+    
     staleTime: 2 * 60 * 1000, // 2 分鐘
   });
 }
@@ -1726,6 +1811,16 @@ export function useInventoryTransfers(params: {
         throw new Error('獲取庫存轉移列表失敗');
       }
       return data;
+    },
+    
+    // 🎯 數據精煉廠 - 統一處理轉移記錄數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const transfers = response?.data || response || [];
+      if (!Array.isArray(transfers)) return [];
+      
+      // 返回純淨的轉移記錄陣列
+      return transfers;
     },
   });
 }
@@ -1924,6 +2019,17 @@ export function useStores(params: {
       }
       return data;
     },
+    
+    // 🎯 數據精煉廠 - 統一處理門市數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const stores = response?.data || response || [];
+      if (!Array.isArray(stores)) return [];
+      
+      // 返回純淨的門市數據陣列
+      return stores;
+    },
+    
     staleTime: 10 * 60 * 1000,  // 10 分鐘內保持新鮮（門市資訊變化較少）
   });
 }
@@ -2107,6 +2213,26 @@ export function useProductVariants(params: {
       }
       return data;
     },
+    
+    // 🎯 數據精煉廠 - 統一處理變體數據格式
+    select: (response: any) => {
+      if (!response) return []; // 如果沒有響應，返回空陣列
+      
+      // 檢查數據是否在 .data 屬性中 (處理分頁或特定包裝結構)
+      if (response.data && Array.isArray(response.data)) {
+        return response.data;
+      }
+      
+      // 如果數據是直接的陣列，則直接返回
+      if (Array.isArray(response)) {
+        return response;
+      }
+      
+      // 如果結構不符預期，返回空陣列以防前端崩潰
+      console.warn('🚨 useProductVariants: 未預期的響應格式', response);
+      return [];
+    },
+    
     enabled: options?.enabled !== false,
     staleTime: 5 * 60 * 1000,   // 5 分鐘緩存時間
   });
@@ -2294,6 +2420,25 @@ export function usePurchases(params?: {
       // 對於分頁資料，我們返回整個 data 對象（包含 data, meta, links）
       return data
     },
+    
+    // 🎯 數據精煉廠 - 統一處理進貨單數據格式
+    select: (response: any) => {
+      // 特殊處理：如果需要保留分頁元數據，返回完整結構
+      if (response?.meta || response?.links) {
+        return {
+          data: response.data || [],
+          meta: response.meta,
+          links: response.links
+        };
+      }
+      
+      // 否則，解包並返回純淨的進貨單陣列
+      const purchases = response?.data || response || [];
+      if (!Array.isArray(purchases)) return [];
+      
+      return purchases;
+    },
+    
     placeholderData: keepPreviousData,
   })
 }

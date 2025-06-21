@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Check, ChevronDown, Search } from "lucide-react"
+import { Check, ChevronDown, Search, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
 import { useProducts, useProductVariants } from "@/hooks/queries/useEntityQueries"
+import { useSession } from "next-auth/react"
 
 interface ProductSelectorProps {
   value?: number // 選中的 product_variant_id
@@ -40,6 +41,7 @@ export function ProductSelector({
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
+  const { status: sessionStatus } = useSession()
   interface ProductVariant {
     id?: number // Allow id to be optional to match API response
     sku?: string
@@ -69,17 +71,17 @@ export function ProductSelector({
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
 
   // 獲取商品列表（支援搜尋）
-  const { data: productsData, isLoading: isLoadingProducts } = useProducts({
+  const { data: productsData, isLoading: isLoadingProducts, error: productsError } = useProducts({
     product_name: searchTerm,
   })
 
+
+
   // 獲取選中商品的變體列表
-  const { data: variantsData, isLoading: isLoadingVariants, error: variantsError } = useProductVariants(
+  const { data: variants = [], isLoading: isLoadingVariants, error: variantsError } = useProductVariants(
     selectedProductId ? { product_id: selectedProductId } : {},
     { enabled: !!selectedProductId }
   )
-
-
 
   // 當 selectedProductId 變化時，立即清除之前的變體選擇
   useEffect(() => {
@@ -91,8 +93,8 @@ export function ProductSelector({
 
   // 找到當前選中的變體
   useEffect(() => {
-    if (value && variantsData?.data) {
-      const variant = variantsData.data.find((v) => v.id === value)
+    if (value && variants.length > 0) {
+      const variant = variants.find((v: any) => v.id === value)
       if (variant) {
         // 確保變體屬於當前選中的商品
         if (variant.product_id === selectedProductId) {
@@ -123,7 +125,7 @@ export function ProductSelector({
       // 如果 value 為 0 或空，清除選擇
       setSelectedVariant(null);
     }
-  }, [value, variantsData, selectedProductId])
+  }, [value, variants, selectedProductId])
 
   // 處理商品選擇
   const handleProductSelect = (productId: number) => {
@@ -217,11 +219,11 @@ export function ProductSelector({
     }
   }
 
-  // 確保只顯示屬於當前選中商品的變體
+  // 過濾只顯示屬於當前選中商品的變體
   const filteredVariants = useMemo(() => {
-    if (!variantsData?.data || !selectedProductId) return [];
-    return variantsData.data.filter((variant: any) => variant.product_id === selectedProductId);
-  }, [variantsData, selectedProductId]);
+    if (!selectedProductId) return [];
+    return variants.filter((variant: any) => variant.product_id === selectedProductId);
+  }, [variants, selectedProductId]);
 
   return (
     <div className="space-y-2">
@@ -232,9 +234,13 @@ export function ProductSelector({
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between"
-            disabled={disabled}
+            disabled={disabled || sessionStatus === "unauthenticated"}
           >
-            <span className="truncate">{getDisplayText()}</span>
+            <span className="truncate">
+              {sessionStatus === "unauthenticated" 
+                ? "請先登入系統" 
+                : getDisplayText()}
+            </span>
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -245,15 +251,41 @@ export function ProductSelector({
               value={searchTerm}
               onValueChange={setSearchTerm}
             />
-            <CommandList>
+            <CommandList className="max-h-[400px] overflow-y-auto">
               <CommandEmpty>
-                {isLoadingProducts ? "載入中..." : "找不到商品"}
+                {isLoadingProducts ? (
+                  "載入中..."
+                ) : productsError ? (
+                  <div className="flex flex-col items-center gap-2 p-4 text-sm text-muted-foreground">
+                    <AlertCircle className="h-8 w-8 text-destructive" />
+                    <div className="text-center">
+                      {sessionStatus === "unauthenticated" 
+                        ? "請先登入系統才能搜尋商品" 
+                        : "載入商品失敗，請稍後再試"}
+                    </div>
+                  </div>
+                ) : !productsData || (Array.isArray(productsData) && productsData.length === 0) ? (
+                  <div className="flex flex-col items-center gap-2 p-4 text-sm text-muted-foreground">
+                    <div className="text-center">
+                      {searchTerm 
+                        ? `找不到包含「${searchTerm}」的商品` 
+                        : "暫無商品資料"}
+                    </div>
+                    {searchTerm && (
+                      <div className="text-xs">
+                        請確認商品名稱或嘗試其他關鍵字
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  "找不到商品"
+                )}
               </CommandEmpty>
               
               {/* 商品列表 */}
-              {!selectedProductId && (
+              {!selectedProductId && productsData && Array.isArray(productsData) && productsData.length > 0 && (
                 <CommandGroup heading="選擇商品">
-                  {productsData?.data?.map((product: any) => (
+                  {productsData.map((product: any) => (
                     <CommandItem
                       key={product.id}
                       onSelect={() => handleProductSelect(product.id)}
@@ -293,8 +325,6 @@ export function ProductSelector({
                     <CommandItem disabled className="text-red-500">
                       載入規格失敗: {variantsError.message}
                     </CommandItem>
-                  ) : !variantsData?.data ? (
-                    <CommandItem disabled>無變體數據</CommandItem>
                   ) : filteredVariants.length === 0 ? (
                     <CommandItem disabled>
                       此商品暫無規格 (商品ID: {selectedProductId})
