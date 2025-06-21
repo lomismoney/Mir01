@@ -1568,14 +1568,42 @@ export const useInventoryList = (filters: ProductFilters = {}) => {
       return data;
     },
     
-    // 🎯 數據精煉廠 - 統一處理庫存數據格式
+    // 🎯 數據精煉廠 - 統一處理庫存數據格式（支援分頁）
     select: (response: any) => {
-      // 解包：處理分頁或普通陣列數據結構
-      const inventory = response?.data || response || [];
-      if (!Array.isArray(inventory)) return [];
+      // 特殊處理：如果響應包含分頁元數據，保留完整結構
+      if (response?.meta || response?.links) {
+        return {
+          data: response.data || [],
+          meta: response.meta,
+          links: response.links
+        };
+      }
       
-      // 返回純淨的庫存數據陣列
-      return inventory;
+      // 否則，假設是直接的陣列或包裝在 data 中的陣列
+      const inventory = response?.data || response || [];
+      if (Array.isArray(inventory)) {
+        // 如果是純陣列，包裝成分頁格式
+        return {
+          data: inventory,
+          meta: {
+            current_page: 1,
+            last_page: 1,
+            per_page: inventory.length,
+            total: inventory.length
+          }
+        };
+      }
+      
+      // 預設返回空的分頁結構
+      return {
+        data: [],
+        meta: {
+          current_page: 1,
+          last_page: 1,
+          per_page: 0,
+          total: 0
+        }
+      };
     },
     
     staleTime: 5 * 60 * 1000, // 5 分鐘
