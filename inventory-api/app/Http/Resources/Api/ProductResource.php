@@ -37,6 +37,9 @@ class ProductResource extends JsonResource
             
             // 分類資訊（當已載入時）
             'category' => new CategoryResource($this->whenLoaded('category')),
+            
+            // 🔧 修復：添加屬性資訊輸出，解決編輯模式規格類型無法同步的問題
+            'attributes' => AttributeResource::collection($this->whenLoaded('attributes')),
         
             // 變體資訊（當已載入時）
             'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),

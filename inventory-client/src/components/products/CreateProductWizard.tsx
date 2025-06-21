@@ -661,7 +661,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
           
           await uploadImageMutation.mutateAsync({
             productId: productResult.data.id,
-            imageFile: formData.imageData.selectedFile
+            image: formData.imageData.selectedFile
           });
           
           toast.success('商品圖片上傳成功！', {

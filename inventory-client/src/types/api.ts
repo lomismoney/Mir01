@@ -46,7 +46,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 16 */
+                                /** @example 18 */
                                 id?: number;
                                 /** @example Mrs. Justina Gaylord */
                                 name?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-21T08:45:48.000000Z */
+                                /** @example 2025-06-21T09:22:26.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-21T08:45:48.000000Z */
+                                /** @example 2025-06-21T09:22:26.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -3090,13 +3090,13 @@ export interface paths {
                          */
                         store_id?: number | null;
                         /**
-                         * @example adjustment
+                         * @example transfer_in
                          * @enum {string|null}
                          */
                         type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                         /**
                          * @description Must be a valid date.
-                         * @example 2025-06-21T08:45:49
+                         * @example 2025-06-21T09:22:26
                          */
                         start_date?: string | null;
                         /**
@@ -5016,16 +5016,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 11 */
+                            /** @example 15 */
                             id?: number;
                             /** @example Bailey Ltd */
                             name?: string;
                             /** @example 85625 Gaylord Knolls
                              *     Cecilburgh, WI 02042 */
                             address?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5066,16 +5066,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 12 */
+                            /** @example 16 */
                             id?: number;
                             /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
                             /** @example 80841 Mya Lane Apt. 042
                              *     Lyricberg, MO 42170-0432 */
                             address?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5125,16 +5125,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 13 */
+                            /** @example 17 */
                             id?: number;
                             /** @example Dach-Gaylord */
                             name?: string;
                             /** @example 7763 Adriel Fork
                              *     Antoniobury, PA 31881 */
                             address?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5185,16 +5185,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 14 */
+                            /** @example 18 */
                             id?: number;
                             /** @example Leuschke Inc */
                             name?: string;
                             /** @example 427 Predovic Ridge
                              *     Baileemouth, KS 32375-9947 */
                             address?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5236,7 +5236,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 17 */
+                            /** @example 19 */
                             id?: number;
                             /** @example Ms. Elisabeth Okuneva */
                             name?: string;
@@ -5248,9 +5248,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T08:45:48.000000Z */
+                            /** @example 2025-06-21T09:22:26.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5825,13 +5825,13 @@ export interface operations {
                      */
                     store_id?: number | null;
                     /**
-                     * @example transfer_out
+                     * @example reduction
                      * @enum {string|null}
                      */
                     type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2025-06-21T08:45:49
+                     * @example 2025-06-21T09:22:26
                      */
                     start_date?: string | null;
                     /**

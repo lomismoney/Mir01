@@ -2140,6 +2140,19 @@ export function useProductVariantDetail(id: number) {
 
 
 /**
+ * 🎯 圖片上傳參數的嚴格類型定義
+ * 
+ * 透過明確的具名類型，確保：
+ * 1. 參數名稱錯誤能在開發階段立即被發現
+ * 2. TypeScript 編輯器提供準確的自動補全
+ * 3. 任何不符合契約的調用都會被標示為錯誤
+ */
+type UploadProductImagePayload = {
+  productId: number;
+  image: File;
+};
+
+/**
  * 上傳商品圖片的 Mutation Hook
  * 
  * 🖼️ 功能：為商品圖片上傳功能提供完整的 API 集成
@@ -2155,14 +2168,11 @@ export function useProductVariantDetail(id: number) {
  */
 export function useUploadProductImage() {
   const queryClient = useQueryClient();
-  
-  // 定義上傳圖片的請求體類型
-  // 注意：由於 openapi-fetch 對 multipart/form-data 的類型推斷限制，
-  // 我們需要使用 unknown 而非 any，這樣更安全且語義更清晰
-  type UploadImageRequestBody = FormData;
+
   
   return useMutation({
-    mutationFn: async (payload: { productId: number; image: File }) => {
+    // 🎯 使用嚴格的具名類型，確保參數正確性
+    mutationFn: async (payload: UploadProductImagePayload) => {
       // --- 步驟一：從唯一權威來源獲取 Session ---
       const session = await getSession();
       const accessToken = session?.accessToken;
