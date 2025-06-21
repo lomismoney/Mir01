@@ -1,160 +1,111 @@
 import createClient from "openapi-fetch";
 import type { paths } from "@/types/api";
+import { getSession } from 'next-auth/react';
 
 /**
- * 高性能 API 客戶端（零延遲版本）
+ * 統一認證 API 客戶端 - 密鑰統一作戰版本
  * 
- * 革命性改進：
- * 1. 消除每次請求的 getSession() 調用
- * 2. 雙重快取策略：內存緩存 + Promise 緩存
- * 3. 智能 token 刷新機制
- * 4. 教科書級別的性能優化設計
+ * 架構革命：
+ * ✅ 單一事實來源：next-auth Session 作為唯一權威
+ * ❌ 徹底移除：localStorage 混亂邏輯
+ * ✅ 簡潔高效：統一的認證攔截器
+ * ✅ 類型安全：完整的 TypeScript 支援
  * 
- * 技術亮點：
- * - 內存級 token 緩存，零延遲訪問
- * - Promise 緩存避免並發請求重複獲取
- * - 失敗自動清理，確保系統穩定性
- * - 支援 token 手動清理（登出場景）
+ * 核心原則：
+ * 1. Session.accessToken 是唯一且絕對的身份憑證來源
+ * 2. 所有 API 請求都透過統一攔截器處理認證
+ * 3. 零容忍政策：任何繞過 next-auth 的認證邏輯都被禁止
+ * 4. 錯誤處理優雅且詳細
  */
 
-// 全局 token 存儲（內存級別，極速訪問）
-let cachedToken: string | null = null;
-let tokenPromise: Promise<string | null> | null = null;
-
 /**
- * 智能 Token 管理器（教科書級別實作）
- * 
- * 核心優化邏輯：
- * 1. 如果有緩存的 token，立即返回（零延遲）
- * 2. 如果正在獲取 token，等待現有 Promise（避免重複請求）
- * 3. 開始新的 token 獲取流程，並緩存 Promise
- * 4. 成功後緩存結果，失敗後清理狀態
- * 
- * 這種設計完全消除了 getSession() 的累積延遲問題
- * 
- * @returns Promise<string | null> - API Token 或 null
- */
-async function getTokenSmart(): Promise<string | null> {
-  // 🚀 第一層優化：內存緩存直接返回
-  if (cachedToken) {
-    return cachedToken;
-  }
-  
-  // 🎯 第二層優化：Promise 緩存避免重複請求
-  if (tokenPromise) {
-    return tokenPromise;
-  }
-  
-  // 🔥 第三層：開始新的 token 獲取流程
-  tokenPromise = (async () => {
-    try {
-      // 動態導入，避免在服務端環境出錯
-      const { getSession } = await import("next-auth/react");
-      const session = await getSession();
-      
-      // 緩存獲取到的 token
-      cachedToken = session?.user?.apiToken || null;
-      
-      // 🛡️ 安全日誌（僅在開發環境）
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔑 Token 獲取狀態:', {
-          hasSession: !!session,
-          hasUser: !!session?.user,
-          hasApiToken: !!session?.user?.apiToken,
-          tokenPrefix: cachedToken ? cachedToken.substring(0, 10) + '...' : 'null',
-          sessionObject: session
-        });
-      }
-      
-      return cachedToken;
-    } catch (error) {
-      console.error('❌ Token 獲取失敗:', error);
-      return null;
-    } finally {
-      // ✅ 修正點：確保在 Promise 完成（無論成功或失敗）後，才清除 Promise 快取
-      tokenPromise = null;
-    }
-  })();
-  
-  return tokenPromise;
-}
-
-/**
- * Token 緩存清理函式
- * 
- * 使用場景：
- * 1. 用戶登出時
- * 2. Token 失效時
- * 3. 用戶切換時
- * 
- * 確保下次 API 調用會重新獲取有效的 token
- */
-export function clearTokenCache(): void {
-  cachedToken = null;
-  tokenPromise = null;
-  
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🧹 Token 緩存已清理');
-  }
-}
-
-/**
- * 高性能 API 客戶端實例
+ * 統一認證 API 客戶端實例
  * 
  * 基於 openapi-fetch 構建，提供完整的類型安全保證
- * 集成智能 token 管理，實現零延遲的認證機制
+ * 集成 next-auth Session 認證，確保權威統一
  */
 const apiClient = createClient<paths>({
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost",
 });
 
 /**
- * 高性能請求攔截器
+ * 統一認證攔截器 - 架構統一的核心
  * 
- * 核心改進：
- * 1. 使用 getTokenSmart() 替代每次的 getSession() 調用
- * 2. 大幅減少 API 請求的延遲時間
- * 3. 保持完整的認證功能
- * 4. 優雅的錯誤處理
+ * 職責：
+ * 1. 從 next-auth Session 中獲取 accessToken
+ * 2. 將 accessToken 注入到每個 API 請求的 Authorization header
+ * 3. 設定必要的 HTTP headers
+ * 4. 提供詳細的開發環境日誌
+ * 
+ * 安全保證：
+ * - 唯一認證來源：session.accessToken
+ * - 零 localStorage 依賴
+ * - 完整的錯誤處理
  */
 apiClient.use({
+  /**
+   * 請求攔截器 - 統一認證注入點
+   * 
+   * 在每個 API 請求發送前，自動從 next-auth Session 中
+   * 獲取有效的 accessToken 並注入到 Authorization header
+   */
   async onRequest({ request }) {
-    // 🚀 使用智能 token 管理器（零延遲或極低延遲）
-    const token = await getTokenSmart();
-    
-    // 開發環境中顯示詳細的認證資訊
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 API 請求認證狀態:', {
-        url: request.url,
-        method: request.method,
-        hasToken: !!token,
-        tokenPrefix: token ? token.substring(0, 10) + '...' : 'null',
-        authorizationHeader: request.headers.get('Authorization'),
-        timestamp: new Date().toISOString()
-      });
-    }
-    
-    if (token) {
-      request.headers.set("Authorization", `Bearer ${token}`);
-      // 再次確認 header 是否正確設置
+    try {
+      // 🎯 唯一權威：從 next-auth Session 獲取 accessToken
+      const session = await getSession();
+      const accessToken = session?.accessToken;
+
+      // 開發環境詳細日誌
       if (process.env.NODE_ENV === 'development') {
-        const authHeader = request.headers.get('Authorization');
-        console.log('🔐 Authorization header 已設置:', {
-          header: authHeader,
-          tokenLength: token.length,
-          headerLength: authHeader?.length
+        console.log('🔍 API 請求認證狀態:', {
+          url: request.url,
+          method: request.method,
+          hasSession: !!session,
+          hasAccessToken: !!accessToken,
+          tokenPrefix: accessToken ? accessToken.substring(0, 10) + '...' : 'null',
+          timestamp: new Date().toISOString()
         });
       }
+
+      // 注入認證憑證到 Authorization header
+      if (accessToken) {
+        request.headers.set('Authorization', `Bearer ${accessToken}`);
+        
+        // 確認注入成功（開發環境）
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔐 Authorization header 已注入:', {
+            tokenLength: accessToken.length,
+            headerSet: !!request.headers.get('Authorization')
+          });
+        }
+      } else {
+        console.warn('⚠️ 無有效 accessToken，請求將以未認證狀態發送');
+      }
+
+      // 設定必要的 HTTP headers
+      request.headers.set('Accept', 'application/json');
+      request.headers.set('Content-Type', 'application/json');
+
+      return request;
+    } catch (error) {
+      console.error('❌ 認證攔截器錯誤:', error);
+      
+      // 即使認證失敗，也要設定基本 headers 並繼續請求
+      request.headers.set('Accept', 'application/json');
+      request.headers.set('Content-Type', 'application/json');
+      
+      return request;
     }
-    
-    // 確保必要的標頭存在
-    request.headers.set("Accept", "application/json");
-    
-    return request;
   },
-  
+
+  /**
+   * 響應攔截器 - 錯誤監控與日誌
+   * 
+   * 監控 API 響應狀態，特別關注認證相關錯誤
+   * 提供詳細的開發環境日誌和錯誤分析
+   */
   async onResponse({ response }) {
-    // 添加響應日誌
+    // 開發環境響應日誌
     if (process.env.NODE_ENV === 'development') {
       console.log('📡 API 響應狀態:', {
         url: response.url,
@@ -162,85 +113,70 @@ apiClient.use({
         statusText: response.statusText,
         timestamp: new Date().toISOString()
       });
-      
-      // 如果是認證錯誤，記錄詳細資訊
+
+      // 認證錯誤特別處理
       if (response.status === 401) {
-        console.error('🚨 認證失敗:', {
+        console.error('🚨 認證失敗 - 可能的原因:', {
           url: response.url,
           status: response.status,
-          headers: Object.fromEntries(response.headers.entries()),
-          requestUrl: response.url,
+          可能原因: [
+            '1. Session 已過期',
+            '2. AccessToken 無效',
+            '3. 後端認證配置問題',
+            '4. CORS 設定問題'
+          ],
+          建議動作: [
+            '1. 檢查 next-auth Session 狀態',
+            '2. 確認後端 API 認證配置',
+            '3. 重新登入以刷新 Session'
+          ],
           timestamp: new Date().toISOString()
         });
       }
     }
-    
+
     return response;
   },
 });
 
-// 手動設置 Authorization header
-const originalGET = apiClient.GET;
-const originalPOST = apiClient.POST;
-const originalPUT = apiClient.PUT;
-const originalPATCH = apiClient.PATCH;
-const originalDELETE = apiClient.DELETE;
-
-// 包裝所有請求以自動添加認證頭
-function wrapWithAuth<T extends Function>(fn: T): unknown {
-  return ((...args: any[]) => {
-    // 從 localStorage 獲取 token
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token');
-      if (token && args[1]?.headers) {
-        args[1].headers.Authorization = `Bearer ${token}`;
-      } else if (token) {
-        args[1] = { ...args[1], headers: { ...args[1]?.headers, Authorization: `Bearer ${token}` } };
-      }
-    }
-    return fn(...args);
-  }) as unknown as T;
-}
-
-apiClient.GET = wrapWithAuth(originalGET) as typeof originalGET;
-apiClient.POST = wrapWithAuth(originalPOST) as typeof originalPOST;
-apiClient.PUT = wrapWithAuth(originalPUT) as typeof originalPUT;
-apiClient.PATCH = wrapWithAuth(originalPATCH) as typeof originalPATCH;
-apiClient.DELETE = wrapWithAuth(originalDELETE) as typeof originalDELETE;
-
-// 創建類型安全的包裝器來處理有問題的 API 端點
+/**
+ * 創建類型安全的 API 客戶端包裝器
+ * 
+ * 提供特定端點的安全包裝，處理類型不一致問題
+ * 同時保持統一的認證機制
+ */
 export const safeApiClient = {
   ...apiClient,
   
   // 修復庫存詳情端點
   getInventoryDetail: async (id: number) => {
-    return originalGET('/api/inventory/{id}' as any, {
+    return apiClient.GET('/api/inventory/{id}' as any, {
       params: { path: { id } }
     } as any);
   },
 
   // 修復轉移詳情端點
   getInventoryTransferDetail: async (id: number) => {
-    return originalGET('/api/inventory/transfers/{id}' as any, {
+    return apiClient.GET('/api/inventory/transfers/{id}' as any, {
       params: { path: { id } }
     } as any);
   },
 
   // 修復門市相關端點
   getStore: async (id: number) => {
-    return originalGET('/api/stores/{id}' as any, {
+    return apiClient.GET('/api/stores/{id}' as any, {
       params: { path: { id } }
     } as any);
   },
 
   createStore: async (data: any) => {
-    return originalPOST('/api/stores' as any, {
+    return apiClient.POST('/api/stores' as any, {
       body: data
     } as any);
   },
 
   updateStore: async (id: number, data: any) => {
-    return originalPUT('/api/stores/{id}' as any, {
+    return apiClient.PUT('/api/stores/{id}' as any, {
       params: { path: { id } },
       body: data
     } as any);
@@ -248,13 +184,30 @@ export const safeApiClient = {
 
   // 修復商品變體詳情端點
   getProductVariantDetail: async (id: number) => {
-    return originalGET('/api/products/variants/{id}' as any, {
+    return apiClient.GET('/api/products/variants/{id}' as any, {
       params: { path: { id } }
     } as any);
   },
 };
 
-// 同時導出 apiClient 和 getTokenSmart（用於向後相容）
-export { apiClient, getTokenSmart };
+/**
+ * Session 緩存清理函式 - 登出時使用
+ * 
+ * 當用戶登出或 Session 失效時，調用此函式
+ * 確保下次 API 調用會重新獲取有效的認證狀態
+ */
+export function clearAuthCache(): void {
+  // next-auth 會自動處理 Session 清理
+  // 這個函式為未來擴展預留接口
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🧹 認證緩存清理完成');
+  }
+}
+
+// 導出統一的 API 客戶端
+export { apiClient };
+
+// 向後兼容的導出（為了修復現有代碼中的導入）
+export const clearTokenCache = clearAuthCache;
 
 export default apiClient; 

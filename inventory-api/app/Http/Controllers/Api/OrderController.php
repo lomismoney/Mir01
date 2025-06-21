@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\OrderResource;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Api\StoreOrderRequest;
 use App\Http\Requests\Api\UpdateOrderRequest;
 use App\Http\Requests\Api\AddPaymentRequest;
 use App\Http\Requests\Api\CreateRefundRequest;
+use App\Http\Requests\Api\BatchDeleteOrdersRequest;
 use App\Services\OrderService;
 use App\Services\RefundService;
 
@@ -31,8 +33,8 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. 權限驗證 (暫時關閉以進行測試)
-        // $this->authorize('viewAny', Order::class);
+        // 1. 權限驗證
+        $this->authorize('viewAny', Order::class);
 
         // 2. 驗證請求參數
         $request->validate([
@@ -117,8 +119,8 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        // 1. 權限驗證 (可選)
-        // $this->authorize('create', Order::class);
+        // 1. 權限驗證
+        $this->authorize('create', Order::class);
 
         // 2. 將所有業務邏輯委派給 Service 層
         $order = $this->orderService->createOrder($request->validated());
@@ -138,7 +140,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         // 1. 權限驗證
-        // $this->authorize('view', $order);
+        $this->authorize('view', $order);
 
         // 2. 預加載所有需要的關聯數據，包括嵌套關聯，以優化性能
         $order->load([
@@ -192,7 +194,7 @@ class OrderController extends Controller
     public function update(UpdateOrderRequest $request, Order $order)
     {
         // 1. 權限驗證
-        // $this->authorize('update', $order);
+        $this->authorize('update', $order);
 
         // 2. 將所有業務邏輯委派給 Service 層
         $updatedOrder = $this->orderService->updateOrder($order, $request->validated());
@@ -210,7 +212,7 @@ class OrderController extends Controller
     public function destroy(Order $order)
     {
         // 1. 權限驗證
-        // $this->authorize('delete', $order);
+        $this->authorize('delete', $order);
 
         // 2. 委派給 Service 層處理，包含庫存返還邏輯
         $this->orderService->deleteOrder($order);
@@ -247,7 +249,7 @@ class OrderController extends Controller
     public function confirmPayment(Order $order)
     {
         // 1. 權限驗證
-        // $this->authorize('update', $order);
+        $this->authorize('update', $order);
 
         // 2. 業務邏輯驗證
         if ($order->payment_status === 'paid') {
@@ -321,7 +323,7 @@ class OrderController extends Controller
     public function addPayment(AddPaymentRequest $request, Order $order)
     {
         // 1. 權限驗證
-        // $this->authorize('update', $order);
+        $this->authorize('update', $order);
 
         // 2. 業務邏輯驗證：檢查訂單是否已全額付清
         if ($order->payment_status === 'paid') {
@@ -386,7 +388,7 @@ class OrderController extends Controller
     public function createShipment(Request $request, Order $order)
     {
         // 1. 權限驗證
-        // $this->authorize('update', $order);
+        $this->authorize('update', $order);
 
         // 2. 驗證請求參數
         $validated = $request->validate([
@@ -446,7 +448,7 @@ class OrderController extends Controller
     public function cancel(Request $request, Order $order)
     {
         // 1. 權限驗證
-        // $this->authorize('update', $order);
+        $this->authorize('update', $order);
 
         // 2. 驗證請求參數
         $validated = $request->validate([
@@ -533,7 +535,7 @@ class OrderController extends Controller
     public function createRefund(CreateRefundRequest $request, Order $order)
     {
         // 1. 權限驗證
-        // $this->authorize('update', $order);
+        $this->authorize('update', $order);
 
         try {
             // 2. 委派給 RefundService 處理所有業務邏輯
@@ -576,6 +578,94 @@ class OrderController extends Controller
                 'message' => $e->getMessage(),
                 'errors' => [
                     'refund' => [$e->getMessage()]
+                ]
+            ], 422);
+        }
+    }
+
+    /**
+     * @group 訂單管理
+     * @authenticated
+     * 批量刪除訂單
+     * 
+     * 此端點用於批量刪除多個訂單，同時處理庫存返還和相關清理操作。
+     * 系統會在事務中執行所有操作，確保資料一致性。
+     * 注意：只有管理員可以執行批量刪除，且已出貨或已交付的訂單不能刪除。
+     * 
+     * @bodyParam ids array required 要刪除的訂單 ID 清單，至少包含一個 ID。Example: [1, 2, 3]
+     * @bodyParam ids.* integer required 訂單 ID，必須存在於系統中。Example: 1
+     * 
+     * @response 200 {
+     *   "message": "訂單已成功批量刪除",
+     *   "deleted_count": 3,
+     *   "deleted_ids": [1, 2, 3]
+     * }
+     * @response 422 scenario="包含不可刪除的訂單" {
+     *   "message": "部分訂單無法刪除",
+     *   "errors": {
+     *     "orders": ["訂單 PO-20250619-001 已出貨，無法刪除", "訂單 PO-20250619-002 已交付，無法刪除"]
+     *   }
+     * }
+     * @response 403 scenario="權限不足" {
+     *   "message": "您沒有權限執行此操作"
+     * }
+     */
+    public function destroyMultiple(BatchDeleteOrdersRequest $request)
+    {
+        // 1. 權限驗證 - 只有管理員可以批量刪除訂單
+        $this->authorize('deleteMultiple', Order::class);
+
+        $ids = $request->validated()['ids'];
+        
+        try {
+            // 2. 事務處理，確保操作的原子性
+            $result = DB::transaction(function () use ($ids) {
+                // 2.1 預先檢查所有訂單的可刪除性
+                $orders = Order::whereIn('id', $ids)->get();
+                $undeletableOrders = [];
+                
+                foreach ($orders as $order) {
+                    // 檢查訂單狀態，已出貨或已完成的訂單不能刪除
+                    if (in_array($order->shipping_status, ['shipped', 'delivered'])) {
+                        $undeletableOrders[] = "訂單 {$order->order_number} 狀態為「{$order->shipping_status}」，無法刪除";
+                    }
+                }
+                
+                // 2.2 如果有不可刪除的訂單，拋出異常
+                if (!empty($undeletableOrders)) {
+                    throw new \Exception(implode('；', $undeletableOrders));
+                }
+                
+                // 2.3 委派給 OrderService 處理業務邏輯
+                // 包含庫存返還、關聯資料清理等操作
+                $deletedCount = 0;
+                $deletedIds = [];
+                
+                foreach ($orders as $order) {
+                    $this->orderService->deleteOrder($order);
+                    $deletedCount++;
+                    $deletedIds[] = $order->id;
+                }
+                
+                return [
+                    'deleted_count' => $deletedCount,
+                    'deleted_ids' => $deletedIds
+                ];
+            });
+
+            // 3. 返回成功響應
+            return response()->json([
+                'message' => '訂單已成功批量刪除',
+                'deleted_count' => $result['deleted_count'],
+                'deleted_ids' => $result['deleted_ids']
+            ], 200);
+
+        } catch (\Exception $e) {
+            // 4. 處理業務邏輯錯誤
+            return response()->json([
+                'message' => '部分訂單無法刪除',
+                'errors' => [
+                    'orders' => [$e->getMessage()]
                 ]
             ], 422);
         }

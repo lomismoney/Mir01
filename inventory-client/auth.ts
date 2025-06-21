@@ -118,30 +118,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return false; 
     },
     /**
-     * JWT 回呼函式
-     * 將自訂欄位加入到 JWT token 中
+     * JWT 回呼函式 - 密鑰統一作戰核心
+     * 
+     * 當一個 JWT 被創建或更新時調用
+     * 我們在這裡將從 provider 獲取的 accessToken 存入 token 物件
+     * 確保 API 認證權限的唯一來源
      */
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, account }) {
+      if (account && user) {
+        // 統一權力：將後端 API Token 儲存為 accessToken
+        token.accessToken = user.apiToken; // 從 authorize 回呼中獲取的 apiToken
+        token.userId = user.id;
         token.role = user.role;
         token.roleDisplay = user.roleDisplay;
         token.isAdmin = user.isAdmin;
         token.username = user.username;
-        token.apiToken = user.apiToken;
       }
       return token;
     },
     /**
-     * Session 回呼函式
-     * 將 JWT token 中的自訂欄位傳遞到 session 中
+     * Session 回呼函式 - 權威憑證分發中心
+     * 
+     * 當一個 session 被訪問時調用
+     * 我們在這裡將儲存在 token 中的 accessToken，暴露給客戶端的 session 物件
+     * 這是 API 客戶端獲取認證憑證的唯一權威來源
      */
     async session({ session, token }) {
-      if (session.user) {
+      if (token && session.user) {
+        // 🎯 關鍵：將 accessToken 暴露為 session.accessToken（統一權威）
+        session.accessToken = token.accessToken as string;
+        
+        // 保持用戶資訊的完整性
+        session.user.id = token.userId as string;
         session.user.role = token.role as string;
         session.user.roleDisplay = token.roleDisplay as string;
         session.user.isAdmin = token.isAdmin as boolean;
         session.user.username = token.username as string;
-        session.user.apiToken = token.apiToken as string;
       }
       return session;
     },

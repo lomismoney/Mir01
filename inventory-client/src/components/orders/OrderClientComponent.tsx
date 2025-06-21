@@ -4,7 +4,8 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link'; // <-- 新增導入
 import { Button } from '@/components/ui/button'; // <-- 新增導入
 import { PlusCircle } from 'lucide-react'; // <-- 新增導入
-import { useOrders, useCancelOrder } from '@/hooks/queries/useEntityQueries'; // 🎯 新增 useCancelOrder
+import { useOrders, useCancelOrder, useBatchDeleteOrders } from '@/hooks/queries/useEntityQueries'; // 🎯 新增 useCancelOrder & useBatchDeleteOrders
+import { toast } from 'sonner'; // 🎯 新增 toast 導入
 import { OrderPreviewModal } from '@/components/orders/OrderPreviewModal';
 import { ShipmentFormModal } from '@/components/orders/ShipmentFormModal';
 import RecordPaymentModal from '@/components/orders/RecordPaymentModal';
@@ -17,6 +18,7 @@ import { createColumns } from './columns';
 import { Order, ProcessedOrder } from '@/types/api-helpers';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { DataTablePagination } from '@/components/ui/data-table-pagination'; // 🎯 新增分頁組件導入
 import {
   flexRender,
   getCoreRowModel,
@@ -24,6 +26,9 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
+  PaginationState, // 🎯 新增分頁狀態類型
+  type RowSelectionState, // 🎯 新增
+  getFilteredRowModel, // 🎯 新增 (用於獲取已選項目)
 } from "@tanstack/react-table";
 import {
   Table,
@@ -35,6 +40,15 @@ import {
 } from "@/components/ui/table";
 
 export function OrderClientComponent() {
+  // 🎯 分頁狀態管理 - 分段進軍終章
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0, // 從 0 開始
+    pageSize: 15,
+  });
+
+  // 🎯 行選擇狀態管理 - 軍團作戰
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   // 篩選狀態管理
   const [filters, setFilters] = useState({
     search: '',
@@ -60,12 +74,18 @@ export function OrderClientComponent() {
   const [cancelReason, setCancelReason] = useState<string>('');
   const cancelOrderMutation = useCancelOrder();
 
-  // 使用 useMemo 來避免在每次渲染時都重新創建查詢對象
+  // 🎯 新增：批量刪除狀態管理 - 裁決行動
+  const [isBatchDeleteConfirmOpen, setIsBatchDeleteConfirmOpen] = useState(false);
+  const batchDeleteMutation = useBatchDeleteOrders();
+
+  // 🎯 分頁聯動到 useOrders Hook - 將分頁狀態納入查詢參數
   const queryFilters = useMemo(() => ({
     search: debouncedSearch || undefined,
     shipping_status: filters.shipping_status || undefined,
     payment_status: filters.payment_status || undefined,
-  }), [debouncedSearch, filters.shipping_status, filters.payment_status]);
+    page: pagination.pageIndex + 1, // API 從 1 開始
+    per_page: pagination.pageSize,
+  }), [debouncedSearch, filters.shipping_status, filters.payment_status, pagination.pageIndex, pagination.pageSize]);
 
   // 使用真實的數據獲取 Hook
   const { data: response, isLoading, isError, error } = useOrders(queryFilters);
@@ -91,6 +111,27 @@ export function OrderClientComponent() {
     );
   };
 
+  // 🎯 建立批量刪除確認處理函式 - 裁決核心
+  const handleConfirmBatchDelete = () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    const selectedOrderIds = selectedRows.map(row => row.original.id);
+
+    if (selectedOrderIds.length === 0) {
+      toast.warning("沒有選擇任何訂單");
+      return;
+    }
+
+    batchDeleteMutation.mutate(
+      { ids: selectedOrderIds },
+      {
+        onSuccess: () => {
+          setIsBatchDeleteConfirmOpen(false); // 成功後關閉對話框
+          table.resetRowSelection(); // 清空選擇
+        },
+      }
+    );
+  };
+
   // 🎯 創建包含預覽、出貨、收款、退款和取消回調的 columns
   const columns = useMemo(() => createColumns({ 
     onPreview: setPreviewingOrderId,
@@ -104,16 +145,27 @@ export function OrderClientComponent() {
     }
   }), []);
 
-  // 配置表格
+  // 🎯 配置表格以啟用手動分頁和行選擇 - 軍團作戰升級
   const table = useReactTable({
     data: pageData,
     columns,
-    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(), // 🎯 新增
+    
+    onSortingChange: setSorting,
+    onPaginationChange: setPagination,
+    onRowSelectionChange: setRowSelection, // 🎯 新增
+    
+    manualPagination: true, // 🎯 啟用手動分頁（後端分頁）
+    enableRowSelection: true, // 🎯 新增
+    pageCount: meta?.last_page ?? -1, // 🎯 從後端獲取總頁數
+    
     state: {
       sorting,
+      pagination, // 🎯 納入分頁狀態
+      rowSelection, // 🎯 新增
     },
   });
 
@@ -187,6 +239,27 @@ export function OrderClientComponent() {
         </Link>
       </div>
       
+      {/* --- 🎯 新增的批量操作欄 --- */}
+      <div className="flex items-center justify-between">
+        <div className="flex-1 text-sm text-muted-foreground">
+          已選擇 {table.getFilteredSelectedRowModel().rows.length} 筆 / 總計 {meta?.total ?? 0} 筆
+        </div>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => setIsBatchDeleteConfirmOpen(true)} // 🎯 解開主炮保險
+              disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+            >
+              批量刪除
+            </Button>
+            <Button variant="outline" size="sm">批量更新狀態</Button>
+          </div>
+        )}
+      </div>
+      {/* --- 批量操作欄結束 --- */}
+      
       {/* 表格容器 */}
       <div className="rounded-md border">
         <Table>
@@ -239,7 +312,11 @@ export function OrderClientComponent() {
         </Table>
       </div>
       
-      {/* 分頁邏輯將在後續實現 */}
+      {/* 🎯 分頁控制器 - 分段進軍終章完成 */}
+      <DataTablePagination 
+        table={table} 
+        totalCount={meta?.total} // 傳入後端返回的總數據量
+      />
 
       {/* 🎯 訂單預覽模態 */}
       <OrderPreviewModal
@@ -314,6 +391,32 @@ export function OrderClientComponent() {
             <AlertDialogCancel>再想想</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmCancel} disabled={cancelOrderMutation.isPending}>
               {cancelOrderMutation.isPending ? '處理中...' : '確認取消'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 🎯 批量刪除確認對話框 - 裁決行動最後防線 */}
+      <AlertDialog
+        open={isBatchDeleteConfirmOpen}
+        onOpenChange={setIsBatchDeleteConfirmOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認批量刪除？</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要永久刪除所選的 
+              <strong> {table.getFilteredSelectedRowModel().rows.length} </strong> 
+              筆訂單嗎？此操作不可撤銷，但相關庫存將會被返還。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmBatchDelete}
+              disabled={batchDeleteMutation.isPending}
+            >
+              {batchDeleteMutation.isPending ? '刪除中...' : '確認刪除'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

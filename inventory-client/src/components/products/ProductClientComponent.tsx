@@ -51,6 +51,7 @@ import { columns, type ExpandedProductItem } from "./columns";
 import VariantDetailsModal from "./VariantDetailsModal";
 import { ProductItem } from "@/types/api-helpers";
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 import { toast } from "sonner";
 
@@ -134,6 +135,33 @@ const ProductClientComponent = () => {
   const router = useRouter();
   const { user, isLoading, isAuthorized } = useAdminAuth();
   
+  // 🔍 添加認證狀態調試
+  const { data: session, status } = useSession();
+  
+  // 在開發環境中記錄認證狀態
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 ProductClientComponent 認證狀態調試:', {
+        sessionStatus: status,
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        hasAccessToken: !!session?.accessToken,
+        accessTokenPrefix: session?.accessToken ? session.accessToken.substring(0, 10) + '...' : null,
+        userInfo: {
+          id: session?.user?.id,
+          name: session?.user?.name,
+          isAdmin: session?.user?.isAdmin,
+        },
+        adminAuthState: {
+          isLoading,
+          isAuthorized,
+          userFromAdminAuth: user,
+        },
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [session, status, isLoading, isAuthorized, user]);
+  
   // 搜索狀態管理 - 使用防抖優化
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500); // 500ms 延遲
@@ -163,9 +191,9 @@ const ProductClientComponent = () => {
 
   // 轉換商品數據為巢狀顯示格式
   const expandedProducts = useMemo(() => {
-    const rawProducts = (productsResponse?.data || []) as ProductItem[];
+    const rawProducts = (productsResponse || []) as ProductItem[];
     return transformProductsForNestedDisplay(rawProducts);
-  }, [productsResponse?.data]);
+  }, [productsResponse]);
 
   // 初始化表格
   const table = useReactTable({

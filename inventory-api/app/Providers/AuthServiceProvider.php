@@ -6,6 +6,7 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\InventoryTransfer;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Store;
@@ -14,6 +15,7 @@ use App\Policies\AttributePolicy;
 use App\Policies\AttributeValuePolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\InventoryTransferPolicy;
+use App\Policies\OrderPolicy;
 use App\Policies\ProductPolicy;
 use App\Policies\PurchasePolicy;
 use App\Policies\StorePolicy;
@@ -44,6 +46,7 @@ class AuthServiceProvider extends ServiceProvider
         InventoryTransfer::class => InventoryTransferPolicy::class,
         Store::class => StorePolicy::class,
         Purchase::class => PurchasePolicy::class,
+        Order::class => OrderPolicy::class,
     ];
 
     /**

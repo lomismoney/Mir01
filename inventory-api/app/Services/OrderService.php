@@ -10,18 +10,24 @@ use Illuminate\Support\Arr;
 class OrderService
 {
     /**
-     * 注入庫存服務
+     * 注入庫存服務和訂單編號生成器
      * 
      * @param InventoryService $inventoryService
+     * @param OrderNumberGenerator $orderNumberGenerator
      */
-    public function __construct(protected InventoryService $inventoryService)
-    {
+    public function __construct(
+        protected InventoryService $inventoryService,
+        protected OrderNumberGenerator $orderNumberGenerator
+    ) {
     }
 
     public function createOrder(array $validatedData): Order
     {
         return DB::transaction(function () use ($validatedData) {
-            // 1. 首先檢查所有商品的庫存是否足夠
+            // 🎯 1. 生成新的訂單編號（格式：YYYYMM-XXXX）
+            $orderNumber = $this->orderNumberGenerator->generateNextNumber();
+            
+            // 2. 檢查所有商品的庫存是否足夠
             $stockCheckResults = $this->inventoryService->batchCheckStock($validatedData['items']);
             
             if (!empty($stockCheckResults)) {
@@ -33,20 +39,20 @@ class OrderService
                 throw new \Exception($errorMessage);
             }
 
-            // 2. 從訂單項目中計算商品總價
+            // 3. 從訂單項目中計算商品總價
             $subtotal = collect($validatedData['items'])->sum(function ($item) {
                 return $item['price'] * $item['quantity'];
             });
 
-            // 3. 計算最終總金額
+            // 4. 計算最終總金額
             $grandTotal = $subtotal 
                         + ($validatedData['shipping_fee'] ?? 0) 
                         + ($validatedData['tax'] ?? 0) 
                         - ($validatedData['discount_amount'] ?? 0);
 
-            // 4. 創建訂單主記錄
+            // 5. 創建訂單主記錄（使用新的訂單編號）
             $order = Order::create([
-                'order_number'      => 'PO-' . now()->format('Ymd') . '-' . Str::random(4),
+                'order_number'      => $orderNumber, // 🎯 使用新的訂單編號生成器
                 'customer_id'       => $validatedData['customer_id'],
                 'creator_user_id'   => auth()->id(), // 直接獲取當前登入用戶ID
                 'shipping_status'   => $validatedData['shipping_status'],
@@ -62,19 +68,19 @@ class OrderService
                 'notes'             => $validatedData['notes'] ?? null,
             ]);
 
-            // 5. 創建訂單項目
+            // 6. 創建訂單項目
             foreach ($validatedData['items'] as $itemData) {
                 $order->items()->create($itemData);
             }
             
-            // 6. 批量扣減庫存（整個交易內執行，確保原子性）
+            // 7. 批量扣減庫存（整個交易內執行，確保原子性）
             $this->inventoryService->batchDeductStock(
                 $validatedData['items'],
                 null, // 使用預設門市
                 ['order_number' => $order->order_number, 'order_id' => $order->id]
             );
 
-            // 5. 記錄初始狀態歷史
+            // 8. 記錄初始狀態歷史
             $order->statusHistories()->create([
                 'to_status' => $order->shipping_status,
                 'status_type' => 'shipping',

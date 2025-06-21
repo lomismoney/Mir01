@@ -226,6 +226,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('customers', App\Http\Controllers\Api\CustomerController::class);
 
     /**
+     * 訂單批量操作路由
+     * 提供訂單批量刪除功能，使用 POST 方法進行語義更明確的批量操作
+     * 
+     * 路由列表：
+     * POST   /api/orders/batch-delete   - 批量刪除訂單
+     */
+    Route::post('/orders/batch-delete', [App\Http\Controllers\Api\OrderController::class, 'destroyMultiple']);
+
+    /**
      * 訂單管理資源路由
      * 提供完整的訂單 CRUD 操作，支援多維度篩選功能
      * 

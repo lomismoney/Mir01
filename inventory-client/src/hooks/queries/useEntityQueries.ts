@@ -2769,12 +2769,24 @@ export function useAddOrderPayment() {
 }
 
 /**
- * Hook for updating an existing order
+ * Hook for updating an existing order - 契約淨化版本
+ * 
+ * 功能特性：
+ * 1. 完整的類型安全保證 - 根除 any 類型污染
+ * 2. 使用精確的 API 類型定義
+ * 3. 標準化的錯誤處理和緩存失效
+ * 4. 用戶友善的成功/錯誤通知
+ * 
+ * @returns React Query mutation 結果
  */
 export function useUpdateOrder() {
   const queryClient = useQueryClient();
+  
+  // 🎯 契約淨化：使用精確的 API 類型定義，徹底根除 any 污染
+  type UpdateOrderRequestBody = import('@/types/api').paths["/api/orders/{id}"]["put"]["requestBody"]["content"]["application/json"];
+  
   return useMutation({
-    mutationFn: async (payload: { id: number; data: any /* 暫定 any，後續應替換為 UpdateOrderRequestBody */ }) => {
+    mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
       const { data, error } = await apiClient.PUT("/api/orders/{id}", {
         params: { path: { id: payload.id } },
         body: payload.data,
@@ -3022,6 +3034,69 @@ export function useCancelOrder() {
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.error(error.message);
+      }
+    },
+  });
+}
+
+/**
+ * Hook for batch deleting orders - 裁決行動
+ * 
+ * 功能特性：
+ * 1. 批量刪除多個訂單，包含庫存返還邏輯
+ * 2. 使用事務確保操作的原子性
+ * 3. 支援預先檢查訂單狀態的安全機制
+ * 4. 「失效並強制重取」標準快取處理模式
+ * 5. 🎯 100% 類型安全 - 精確的批量操作類型定義
+ * 
+ * @returns React Query mutation 結果
+ */
+export function useBatchDeleteOrders() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ ids }: { ids: (number | string)[] }) => {
+      const { error } = await apiClient.POST('/api/orders/batch-delete', {
+        body: {
+          ids: ids.map(id => id.toString()), // 確保發送的是字串陣列，以匹配參考實現
+        },
+      });
+
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '批量刪除訂單失敗');
+      }
+    },
+    onSuccess: (_, { ids }) => {
+      // 🔔 成功通知 - 顯示操作結果
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('所選訂單已成功刪除', {
+          description: `已刪除 ${ids.length} 個訂單`
+        });
+      }
+      
+      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
+      // 批量操作後，使整個訂單列表的緩存失效，以獲取最新數據
+      queryClient.invalidateQueries({ 
+        queryKey: QUERY_KEYS.ORDERS,
+        exact: false,
+        refetchType: 'active'
+      });
+      
+      // 同時移除被刪除訂單的詳情緩存，避免殘留數據
+      ids.forEach(id => {
+        const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+        queryClient.removeQueries({ queryKey: QUERY_KEYS.ORDER(numericId) });
+      });
+    },
+    onError: (error: Error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('批量刪除失敗', { 
+          description: error.message || '請檢查選擇的訂單是否允許刪除'
+        });
       }
     },
   });

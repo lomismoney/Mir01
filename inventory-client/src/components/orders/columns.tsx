@@ -2,6 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from "@/components/ui/checkbox";
 import { MoreHorizontal, Eye, FileText, DollarSign, Truck, Undo2, Ban, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuGroup } from '@/components/ui/dropdown-menu';
@@ -26,8 +27,30 @@ export const createColumns = ({
   onCancel: (order: ProcessedOrder) => void;
   onDelete: (id: number) => void; // 🎯 新增刪除回調類型
 }): ColumnDef<Order>[] => [
-  // Checkbox 列 (用於批量操作)
-  // ...
+  // --- 🎯 新增的選擇欄 ---
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  // --- 選擇欄結束 ---
 
   {
     accessorKey: 'order_number',
