@@ -180,7 +180,10 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
           variant="ghost"
           size="sm"
           className="h-6 w-6 p-0"
-          onClick={() => row.toggleExpanded()}
+          onClick={(e) => {
+            e.stopPropagation(); // 防止觸發行點擊事件
+            row.toggleExpanded();
+          }}
         >
           {row.getIsExpanded() ? (
             <ChevronDown className="h-4 w-4" />

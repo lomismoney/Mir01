@@ -54,6 +54,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 /**
  * 將 SPU 商品數據轉換為支援巢狀顯示的擴展格式
@@ -435,19 +436,43 @@ const ProductClientComponent = () => {
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                      className={row.original.isVariantRow ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50"}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
+                  table.getRowModel().rows.map((row) => {
+                    // 檢查是否可以展開（不是變體行，且有多個變體）
+                    const canExpand = !row.original.isVariantRow && (row.original.variants?.length || 0) > 1;
+                    
+                    return (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        className={cn(
+                          row.original.isVariantRow ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50",
+                          canExpand && "cursor-pointer"
+                        )}
+                        onClick={(e) => {
+                          // 如果可以展開，且點擊目標不是互動元素
+                          if (canExpand) {
+                            const target = e.target as HTMLElement;
+                            const isInteractiveElement = 
+                              target.closest('button') || 
+                              target.closest('input') || 
+                              target.closest('[role="checkbox"]') ||
+                              target.closest('[role="button"]') ||
+                              target.closest('[data-radix-collection-item]');
+                            
+                            if (!isInteractiveElement) {
+                              row.toggleExpanded();
+                            }
+                          }
+                        }}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={columns.length} className="h-24 text-center">

@@ -252,8 +252,12 @@ export function InventoryNestedTable({
               
               return [
                 // SPU 主行
-                <TableRow key={`spu-${spuId}`} className="bg-muted/20 hover:bg-muted/50 transition-colors">
-                  <TableCell>
+                <TableRow 
+                  key={`spu-${spuId}`} 
+                  className="bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => toggleRow(spuId)}
+                >
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -288,7 +292,7 @@ export function InventoryNestedTable({
                       {spu.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <Button 
                       variant="outline" 
                       size="sm"
