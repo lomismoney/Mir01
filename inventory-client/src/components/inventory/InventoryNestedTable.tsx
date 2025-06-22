@@ -18,7 +18,8 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  History
+  History,
+  Settings
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -210,12 +211,12 @@ export function InventoryNestedTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50px]"></TableHead>
-            <TableHead className="w-[300px]">產品名稱</TableHead>
-            <TableHead className="text-center w-[120px]">總庫存</TableHead>
-            <TableHead className="text-center w-[120px]">規格數量</TableHead>
-            <TableHead className="text-center w-[120px]">狀態</TableHead>
-            <TableHead className="text-right w-[120px]">操作</TableHead>
+            <TableHead className="w-[50px] p-4"></TableHead>
+            <TableHead className="w-[300px] p-4">產品名稱</TableHead>
+            <TableHead className="text-right w-[120px] p-4">總庫存</TableHead>
+            <TableHead className="text-center w-[120px] p-4">規格數量</TableHead>
+            <TableHead className="text-center w-[120px] p-4">狀態</TableHead>
+            <TableHead className="text-center w-[120px] p-4">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -254,10 +255,10 @@ export function InventoryNestedTable({
                 // SPU 主行
                 <TableRow 
                   key={`spu-${spuId}`} 
-                  className="bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer"
                   onClick={() => toggleRow(spuId)}
                 >
-                  <TableCell onClick={(e) => e.stopPropagation()}>
+                  <TableCell onClick={(e) => e.stopPropagation()} className="p-4">
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -272,33 +273,42 @@ export function InventoryNestedTable({
                       <span className="sr-only">展開產品變體</span>
                     </Button>
                   </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center space-x-2">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                      <span>{spu.name || '未命名產品'}</span>
+                  <TableCell className="font-medium p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                        <Package className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <div className="font-semibold">{spu.name || '未命名產品'}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {spu.category?.name || '未分類'}
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center font-medium">
+                  <TableCell className="text-right font-mono font-medium p-4">
                     {spu.totalStock.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center p-4">
                     <Badge variant="outline">
                       {spu.skuCount} 個規格
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center p-4">
                     <Badge variant={getStatusBadgeVariant(spu.status)} className="gap-1">
                       {getStatusIcon(spu.status)}
                       {spu.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                  <TableCell className="text-center p-4" onClick={(e) => e.stopPropagation()}>
                     <Button 
-                      variant="outline" 
-                      size="sm"
+                      variant="ghost" 
+                      size="icon"
                       onClick={() => onManageProduct?.(spu.id || 0)}
+                      title="管理產品"
                     >
-                      管理產品
+                      <Settings className="h-4 w-4" />
+                      <span className="sr-only">管理產品</span>
                     </Button>
                   </TableCell>
                 </TableRow>,
@@ -307,27 +317,30 @@ export function InventoryNestedTable({
                 ...(isExpanded ? [
                   <TableRow key={`sku-header-${spuId}`} className="bg-background">
                     <TableCell colSpan={8} className="p-0">
-                      <div className="p-4 border-l-4 border-l-blue-200 bg-slate-50">
-                        <div className="mb-3">
-                          <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                            <ChevronsUpDown className="h-4 w-4" />
-                            產品變體詳情
+                      <div className="p-6 bg-secondary/50 border-l-4 border-l-primary">
+                        <div className="mb-4">
+                          <h4 className="text-base font-semibold flex items-center gap-2">
+                            <ChevronsUpDown className="h-5 w-5 text-primary" />
+                            產品規格詳情
                           </h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            此產品包含 {spu.enhancedSkus.length} 個規格變體
+                          </p>
                         </div>
                         
                         {/* SKU 詳情表格 */}
-                        <div className="rounded border bg-white">
+                        <div className="rounded-lg border border-border/50 bg-card overflow-hidden">
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="text-xs w-[120px]">SKU 編號</TableHead>
-                                <TableHead className="text-xs w-[200px]">規格屬性</TableHead>
-                                <TableHead className="text-xs text-center w-[100px]">總庫存</TableHead>
-                                <TableHead className="text-xs text-center w-[100px]">低庫存閾值</TableHead>
-                                <TableHead className="text-xs text-right w-[120px]">售價</TableHead>
-                                <TableHead className="text-xs text-right w-[120px]">平均成本</TableHead>
-                                <TableHead className="text-xs text-center w-[100px]">狀態</TableHead>
-                                <TableHead className="text-xs text-right w-[100px]">操作</TableHead>
+                                <TableHead className="text-xs w-[120px] p-3">SKU 編號</TableHead>
+                                <TableHead className="text-xs w-[200px] p-3">規格屬性</TableHead>
+                                <TableHead className="text-xs text-right w-[100px] p-3">總庫存</TableHead>
+                                <TableHead className="text-xs text-right w-[100px] p-3">低庫存閾值</TableHead>
+                                <TableHead className="text-xs text-right w-[120px] p-3">售價</TableHead>
+                                <TableHead className="text-xs text-right w-[120px] p-3">平均成本</TableHead>
+                                <TableHead className="text-xs text-center w-[100px] p-3">狀態</TableHead>
+                                <TableHead className="text-xs text-center w-[100px] p-3">操作</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -343,20 +356,20 @@ export function InventoryNestedTable({
                                   const uniqueKey = `spu-${spu.id}-sku-${sku.id || 'unknown'}-index-${index}-${sku.sku || 'no-sku'}`;
                                   
                                   return (
-                                    <TableRow key={uniqueKey} className="hover:bg-muted/30">
-                                      <TableCell className="font-mono text-xs">
+                                    <TableRow key={uniqueKey} className="hover:bg-muted/50">
+                                      <TableCell className="font-mono text-xs p-3">
                                         {sku.sku || 'N/A'}
                                       </TableCell>
-                                      <TableCell className="text-sm">
+                                      <TableCell className="text-sm p-3">
                                         {sku.attributes}
                                       </TableCell>
-                                      <TableCell className="text-center font-medium">
+                                      <TableCell className="text-right font-mono font-medium p-3">
                                         {sku.quantity.toLocaleString()}
                                       </TableCell>
-                                      <TableCell className="text-center text-muted-foreground">
+                                      <TableCell className="text-right font-mono text-muted-foreground p-3">
                                         {sku.threshold.toLocaleString()}
                                       </TableCell>
-                                      <TableCell className="text-right font-medium">
+                                      <TableCell className="text-right font-mono font-medium p-3">
                                         {typeof sku.price === 'string' && parseFloat(sku.price) > 0 
                                           ? `NT$ ${parseFloat(sku.price).toLocaleString()}` 
                                           : (sku.price && Number(sku.price) > 0)
@@ -364,13 +377,13 @@ export function InventoryNestedTable({
                                             : "—"
                                         }
                                       </TableCell>
-                                      <TableCell className="text-right font-medium">
+                                      <TableCell className="text-right font-mono font-medium p-3">
                                         {(sku as any)?.average_cost && (sku as any).average_cost > 0
                                           ? `NT$ ${(sku as any).average_cost.toLocaleString()}`
                                           : "—"
                                         }
                                       </TableCell>
-                                      <TableCell className="text-center">
+                                      <TableCell className="text-center p-3">
                                         <Badge 
                                           variant={getStatusBadgeVariant(sku.status)} 
                                           className="gap-1 text-xs"
@@ -379,8 +392,8 @@ export function InventoryNestedTable({
                                           {sku.status}
                                         </Badge>
                                       </TableCell>
-                                      <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-1">
+                                      <TableCell className="text-center p-3">
+                                        <div className="flex items-center justify-center gap-1">
                                           <Button
                                             variant="ghost"
                                             size="icon"
