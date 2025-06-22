@@ -13,14 +13,11 @@ import {
   FileText, 
   Settings, 
   DollarSign,
-  AlertTriangle,
-  Info,
   Shapes,
   CircleDollarSign,
-  Tag,
   Layers
 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+
 import { WizardFormData } from '../CreateProductWizard';
 import { useAttributes } from '@/hooks/queries/useEntityQueries';
 import { useCategories } from '@/hooks/queries/useEntityQueries';
@@ -321,94 +318,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
         </Card>
       </div>
 
-      {/* 提交前檢查清單 */}
-      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <AlertTriangle className="h-5 w-5" />
-            <span>提交前檢查</span>
-          </CardTitle>
-          <CardDescription>
-            請確認以下項目都已正確配置，以確保商品資訊的完整性。
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-start space-x-3">
-              <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <p className="font-medium">基本資訊完整</p>
-                <p className="text-sm text-muted-foreground">
-                  商品名稱已設定，描述和分類為選填項目
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <p className="font-medium">規格配置正確</p>
-                <p className="text-sm text-muted-foreground">
-                  {formData.specifications.isVariable 
-                    ? '多規格商品的屬性和屬性值都已配置'
-                    : '單規格商品配置完成'
-                  }
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <p className="font-medium">變體資訊完整</p>
-                <p className="text-sm text-muted-foreground">
-                  所有變體的 SKU 和價格都已設定
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* 原子化創建流程說明 */}
-      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Info className="h-5 w-5" />
-            <span>準備完成</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <p className="text-base font-medium text-primary">
-              ✅ 所有配置已完成，可以開始創建商品
-            </p>
-            <p className="text-sm text-muted-foreground">
-              點擊「創建商品」按鈕將會：
-            </p>
-            <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-              <li>• 創建商品主體和所有變體</li>
-              {formData.imageData.selectedFile && (
-                <li>• 自動上傳您選擇的商品圖片</li>
-              )}
-              <li>• 自動跳轉到商品列表頁面</li>
-            </ul>
-              <p className="text-sm text-muted-foreground">
-              商品創建後可隨時編輯修改，所有變更都會即時生效。
-              </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 提示訊息 */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <strong>溫馨提示：</strong>
-          商品創建後，您可以隨時在商品管理頁面編輯基本資訊、調整價格或新增變體。
-          所有變更都會即時生效，並保留完整的修改記錄。
-        </AlertDescription>
-      </Alert>
     </div>
   );
 } 
