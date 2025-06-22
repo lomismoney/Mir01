@@ -53,11 +53,12 @@ export function InventoryManagement() {
   }, [debouncedProductName])
 
   // 獲取基礎資料
-  const { data: storesData, isLoading: isLoadingStores } = useStores()
-  const { data: categoriesData, isLoading: isLoadingCategories } = useCategories()
+  const { data: storesResponse, isLoading: isLoadingStores } = useStores()
+  const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories()
 
-  // 從分組格式中提取所有分類
-  const allCategories = categoriesData ? Object.values(categoriesData).flat() : [];
+  // 🎯 標準化數據獲取 - 直接從 Hook 返回的結構中解構
+  const stores = storesResponse?.data ?? [];
+  const categories = categoriesResponse?.data ?? [];
 
   // 獲取庫存列表數據 
   const {
@@ -253,7 +254,7 @@ export function InventoryManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">所有門市</SelectItem>
-                  {storesData?.data?.map((store) => (
+                  {stores.map((store) => (
                     <SelectItem key={store.id} value={store.id?.toString() || ""}>
                       {store.name}
                     </SelectItem>
@@ -277,7 +278,7 @@ export function InventoryManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">所有分類</SelectItem>
-                  {allCategories.map((category) => (
+                  {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id?.toString() || ""}>
                       {category.name}
                     </SelectItem>

@@ -120,21 +120,22 @@ export default function SkuHistoryPage({
   }, [params, searchParams])
 
   // 直接使用新的 SKU 歷史查詢 API
-  const { data: skuHistoryData, isLoading: isLoadingHistory, error: historyError } = useSkuInventoryHistory({
+  const { data: skuHistoryResponse, isLoading: isLoadingHistory, error: historyError } = useSkuInventoryHistory({
     sku: sku || "",
     ...filters
   })
 
-  // 從 API 回應中取得庫存項目和交易記錄
+  // 🎯 標準化數據獲取 - 假設 Hook 返回的結構可能有所不同
+  // 如果 Hook 返回特殊格式，需要適應性解構
   const matchingInventories = useMemo(() => {
-    const data = skuHistoryData as any
+    const data = skuHistoryResponse as any
     return data?.inventories || []
-  }, [skuHistoryData])
+  }, [skuHistoryResponse])
 
   const allTransactions = useMemo(() => {
-    const data = skuHistoryData as any
+    const data = skuHistoryResponse as any
     return data?.data || []
-  }, [skuHistoryData])
+  }, [skuHistoryResponse])
 
   // 處理並合併轉移記錄
   const processedTransactions = useMemo(() => {

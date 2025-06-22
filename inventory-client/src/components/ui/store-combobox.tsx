@@ -35,10 +35,10 @@ export function StoreCombobox({
   className
 }: StoreComboboxProps) {
   const [open, setOpen] = React.useState(false)
-  const { data: storesData, isLoading } = useStores()
+  const { data: storesResponse, isLoading } = useStores()
   
-  // useStores 已經處理了資料結構，直接使用 data 並強制類型
-  const stores = (storesData?.data || []) as Store[]
+  // 🎯 標準化數據獲取 - 直接從 Hook 返回的結構中解構
+  const stores = (storesResponse?.data ?? []) as Store[]
 
   const selectedStore = value 
     ? stores.find((store) => store.id?.toString() === value)

@@ -39,7 +39,7 @@ const AttributesClientPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   
-  const { data: attributesResponse, isLoading: isAttributesLoading, error } = useAttributes();
+  const { data: hookResponse, isLoading: isAttributesLoading, error } = useAttributes();
   
   // API Mutation Hooks
   const createAttributeMutation = useCreateAttribute();
@@ -66,26 +66,11 @@ const AttributesClientPage = () => {
   const [showValueInput, setShowValueInput] = useState<{ [key: number]: boolean }>({});
 
   /**
-   * 處理 API 資料轉換
-   * 將 API 回應轉換為本地 Attribute 類型
+   * 🎯 標準化數據獲取 - 直接從 Hook 返回的結構中解構
+   * Hook 已經在 select 函數中處理好了數據結構
    */
-  const attributes = (attributesResponse?.data || [])
-    .filter((attr): attr is Required<typeof attr> => 
-      attr.id !== undefined && attr.name !== undefined
-    )
-    .map(attr => ({
-      id: attr.id!,
-      name: attr.name!,
-      created_at: attr.created_at,
-      updated_at: attr.updated_at,
-      values: attr.values?.map(val => ({
-        id: val.id!,
-        value: val.value!,
-        attribute_id: val.attribute_id!,
-        created_at: val.created_at,
-        updated_at: val.updated_at,
-      })) || []
-    })) as Attribute[];
+  const attributes = (hookResponse?.data ?? []) as Attribute[];
+  const meta = hookResponse?.meta;
 
   /**
    * 根據搜索條件過濾規格
