@@ -14,7 +14,11 @@ import {
   Settings, 
   DollarSign,
   AlertTriangle,
-  Info
+  Info,
+  Shapes,
+  CircleDollarSign,
+  Tag,
+  Layers
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WizardFormData } from '../CreateProductWizard';
@@ -250,45 +254,72 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       </Card>
 
       {/* 統計摘要 */}
-      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <DollarSign className="h-5 w-5" />
-            <span>統計摘要</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 rounded-lg border bg-muted/50">
-              <div className="text-2xl font-bold text-chart-1">
-                {statistics.totalVariants}
-              </div>
-              <div className="text-sm text-muted-foreground">個變體</div>
+      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-4 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs">
+        {/* 變體數量卡片 */}
+        <Card data-slot="card" className="@container/card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">總變體數量</CardTitle>
+            <Shapes className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold tracking-tighter">
+              {statistics.totalVariants}
             </div>
-            
-            <div className="text-center p-4 rounded-lg border bg-muted/50">
-              <div className="text-2xl font-bold text-chart-2">
-                ${statistics.totalValue.toFixed(2)}
-              </div>
-              <div className="text-sm text-muted-foreground">總價值</div>
+            <p className="text-xs text-muted-foreground mt-2">
+              個變體組合
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* 總價值卡片 */}
+        <Card data-slot="card" className="@container/card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">商品總價值</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold tracking-tighter">
+              ${statistics.totalValue.toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            
-            <div className="text-center p-4 rounded-lg border bg-muted/50">
-              <div className="text-2xl font-bold text-chart-3">
-                ${statistics.averagePrice.toFixed(2)}
-              </div>
-              <div className="text-sm text-muted-foreground">平均價格</div>
+            <p className="text-xs text-muted-foreground mt-2">
+              所有變體合計
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* 平均價格卡片 */}
+        <Card data-slot="card" className="@container/card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">平均價格</CardTitle>
+            <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold tracking-tighter">
+              ${statistics.averagePrice.toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            
-            <div className="text-center p-4 rounded-lg border bg-muted/50">
-              <div className="text-2xl font-bold text-chart-4">
-                {statistics.selectedAttributes}
-              </div>
-              <div className="text-sm text-muted-foreground">個屬性</div>
+            <p className="text-xs text-muted-foreground mt-2">
+              每個變體平均
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* 屬性數量卡片 */}
+        <Card data-slot="card" className="@container/card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">使用屬性</CardTitle>
+            <Layers className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-baseline space-x-2">
+              <span className="text-3xl font-bold tracking-tighter">{statistics.selectedAttributes}</span>
+              <Badge variant="secondary" className="text-xs">已選擇</Badge>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+            <p className="text-xs text-muted-foreground mt-2">
+              共 {statistics.totalAttributeValues} 個屬性值
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* 提交前檢查清單 */}
       <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">

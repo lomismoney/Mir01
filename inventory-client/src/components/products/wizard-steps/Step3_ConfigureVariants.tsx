@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertCircle, Package, DollarSign, Hash, Wand2 } from 'lucide-react';
+import { AlertCircle, Package, DollarSign, Hash, Wand2, Shapes, Barcode, CircleDollarSign, Wallet } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WizardFormData } from '../CreateProductWizard';
 import { useAttributes } from '@/hooks/queries/useEntityQueries';
@@ -411,56 +412,98 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
 
       {/* 配置摘要 */}
       {variants.length > 0 && (
-        <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Package className="h-5 w-5" />
-              <span>配置摘要</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 rounded-lg border bg-muted/50">
-                <div className="text-2xl font-bold text-chart-1">
-                  {variants.length}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  個變體
-                </div>
+        <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-4 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs">
+          {/* 變體數量卡片 */}
+          <Card data-slot="card" className="@container/card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">總變體數量</CardTitle>
+              <Shapes className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-baseline space-x-2">
+                <span className="text-3xl font-bold tracking-tighter">{variants.length}</span>
+                <Badge variant="secondary" className="text-xs">已生成</Badge>
               </div>
-              
-              <div className="text-center p-4 rounded-lg border bg-muted/50">
-                <div className="text-2xl font-bold text-chart-2">
-                  {variants.filter(v => v.sku.trim()).length}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  已設定 SKU
-                </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                所有變體已準備就緒
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* SKU 設定卡片 */}
+          <Card data-slot="card" className="@container/card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">SKU 配置進度</CardTitle>
+              <Barcode className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold tracking-tighter">
+                {Math.round((variants.filter(v => v.sku.trim()).length / variants.length) * 100)}%
               </div>
-              
-              <div className="text-center p-4 rounded-lg border bg-muted/50">
-                <div className="text-2xl font-bold text-chart-3">
-                  {variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  已設定價格
-                </div>
+              <Progress 
+                value={(variants.filter(v => v.sku.trim()).length / variants.length) * 100} 
+                className="h-2 mt-3" 
+              />
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-xs text-muted-foreground">{variants.filter(v => v.sku.trim()).length} 已完成</span>
+                <span className="text-xs text-muted-foreground">{variants.length} 總數</span>
               </div>
-              
-              <div className="text-center p-4 rounded-lg border bg-muted/50">
-                <div className="text-2xl font-bold text-chart-4">
-                  ${variants.reduce((sum, v) => {
-                    const price = parseFloat(v.price);
-                    return sum + (isNaN(price) ? 0 : price);
-                  }, 0).toFixed(2)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  總價值
-                </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {variants.filter(v => v.sku.trim()).length === variants.length 
+                  ? "所有 SKU 已設定完成" 
+                  : `還有 ${variants.length - variants.filter(v => v.sku.trim()).length} 個待設定`}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* 價格設定卡片 */}
+          <Card data-slot="card" className="@container/card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">價格配置進度</CardTitle>
+              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold tracking-tighter">
+                {Math.round((variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length / variants.length) * 100)}%
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <Progress 
+                value={(variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length / variants.length) * 100} 
+                className="h-2 mt-3" 
+              />
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-xs text-muted-foreground">{variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length} 已完成</span>
+                <span className="text-xs text-muted-foreground">{variants.length} 總數</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length === variants.length 
+                  ? "所有價格已設定完成" 
+                  : `還有 ${variants.length - variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length} 個待設定`}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* 總價值卡片 */}
+          <Card data-slot="card" className="@container/card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">商品總價值</CardTitle>
+              <Wallet className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold tracking-tighter">
+                ${variants.reduce((sum, v) => {
+                  const price = parseFloat(v.price);
+                  return sum + (isNaN(price) ? 0 : price);
+                }, 0).toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                預估庫存價值
+              </p>
+              <p className="text-xs text-muted-foreground">
+                基於當前定價計算
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* 進度提示 */}
