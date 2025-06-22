@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { StagewiseToolbar } from "@stagewise/toolbar-next";
+import { ReactPlugin } from "@stagewise-plugins/react";
 
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,6 +28,7 @@ export const metadata: Metadata = {
  * 2. Auth.js Session 管理 (SessionProvider)
  * 3. React Query 狀態管理 (QueryProvider)
  * 4. Toast 通知系統 (Toaster)
+ * 5. Stagewise 開發工具列 (StagewiseToolbar) - 僅在開發模式下顯示
  * 
  * @param children - 子頁面內容
  */
@@ -42,6 +45,11 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
+        <StagewiseToolbar
+          config={{
+            plugins: [ReactPlugin],
+          }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

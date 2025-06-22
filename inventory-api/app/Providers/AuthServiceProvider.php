@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Category;
+use App\Models\Customer;
 use App\Models\InventoryTransfer;
 use App\Models\Order;
 use App\Models\Product;
@@ -14,6 +15,7 @@ use App\Models\User;
 use App\Policies\AttributePolicy;
 use App\Policies\AttributeValuePolicy;
 use App\Policies\CategoryPolicy;
+use App\Policies\CustomerPolicy;
 use App\Policies\InventoryTransferPolicy;
 use App\Policies\OrderPolicy;
 use App\Policies\ProductPolicy;
@@ -41,6 +43,7 @@ class AuthServiceProvider extends ServiceProvider
         Product::class => ProductPolicy::class,
         User::class => UserPolicy::class,
         Category::class => CategoryPolicy::class,
+        Customer::class => CustomerPolicy::class,
         Attribute::class => AttributePolicy::class,
         AttributeValue::class => AttributeValuePolicy::class,
         InventoryTransfer::class => InventoryTransferPolicy::class,
