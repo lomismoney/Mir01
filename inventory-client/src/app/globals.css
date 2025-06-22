@@ -168,6 +168,24 @@
   .font-mono {
     font-family: var(--font-sans);
   }
+
+  /* 精煉輸入元件的觸感 */
+  input:focus-visible, 
+  textarea:focus-visible {
+    @apply ring-2 ring-primary/40 border-primary;
+  }
+  
+  /* 輸入元件基礎樣式優化 */
+  input,
+  textarea {
+    @apply transition-all duration-200;
+  }
+  
+  /* 柔化 placeholder 文字 */
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-muted-foreground/60;
+  }
 }
 
 

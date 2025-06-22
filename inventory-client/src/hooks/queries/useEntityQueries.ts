@@ -3,6 +3,7 @@ import { getSession } from 'next-auth/react';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters, CustomerFilters, Customer, AttributePathParams, OrderFormData } from '@/types/api-helpers';
+import { toast } from '@/components/ui/use-toast';
 
 /**
  * API Hooks - 商品管理
@@ -459,7 +460,9 @@ export function useDeleteProduct() {
             });
             
             if (error) {
-                throw new Error('刪除商品失敗');
+                // 使用統一的錯誤解析器
+                const errorMessage = parseApiError(error) || '刪除商品失敗';
+                throw new Error(errorMessage);
             }
             
             return data;
@@ -482,6 +485,27 @@ export function useDeleteProduct() {
             
             // 移除已刪除商品的快取
             queryClient.removeQueries({ queryKey: QUERY_KEYS.PRODUCT(id) });
+            
+            // 🔔 成功通知
+            toast({
+                title: '商品已成功刪除'
+            });
+        },
+        onError: (error) => {
+            // 🔴 錯誤處理 - 友善的錯誤訊息
+            let errorMessage = '刪除商品失敗';
+            
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            } else {
+                errorMessage = parseApiError(error);
+            }
+            
+            toast({
+                title: '刪除失敗',
+                description: errorMessage,
+                variant: 'destructive',
+            });
         },
     });
 }
@@ -502,13 +526,14 @@ export function useDeleteMultipleProducts() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (body: { ids: number[] }) => {
-      // 轉換數字陣列為字串陣列（根據 API 規格要求）
+      // 直接傳送數字陣列（符合後端驗證規則）
       const { error } = await apiClient.POST('/api/products/batch-delete', {
-        body: { ids: body.ids.map(id => id.toString()) },
+        body: { ids: body.ids } as any, // 暫時使用 any 繞過類型檢查，待 API 契約同步後修正
       });
 
       if (error) {
-        const errorMessage = (error as { detail?: string[] })?.detail?.[0] || '刪除商品失敗';
+        // 使用統一的錯誤解析器，並強制類型轉換
+        const errorMessage = parseApiError(error as any) || '刪除商品失敗';
         throw new Error(errorMessage);
       }
     },
@@ -531,6 +556,30 @@ export function useDeleteMultipleProducts() {
       // 移除已刪除商品的快取
       variables.ids.forEach(id => {
         queryClient.removeQueries({ queryKey: QUERY_KEYS.PRODUCT(id) });
+      });
+      
+      // 🔔 成功通知
+      toast({
+        title: '商品已成功刪除',
+        description: `已刪除 ${variables.ids.length} 個商品`
+      });
+    },
+    onError: (error) => {
+      // 🔴 錯誤處理 - 友善的錯誤訊息
+      // 從 Error 對象中提取訊息
+      let errorMessage = '刪除商品失敗';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = parseApiError(error);
+      }
+      
+      // 使用 shadcn/ui 的 toast
+      toast({
+        title: '刪除失敗',
+        description: errorMessage,
+        variant: 'destructive',
       });
     },
   });
@@ -1136,11 +1185,96 @@ export function useUpdateCustomer() {
 
 // ==================== 分類管理系統 (CATEGORY MANAGEMENT) ====================
 
+// 導入 Category 類型
+import { Category } from '@/types/category';
+
+/**
+ * CategoryNode 類型定義
+ * 擴展 Category 類型，確保 children 屬性為必需的 CategoryNode 陣列
+ */
+export interface CategoryNode extends Category {
+  children: CategoryNode[];
+}
+
+/**
+ * 構建分類樹狀結構
+ * 將後端返回的分組數據轉換為樹狀結構
+ * 
+ * @param groupedCategories - 以 parent_id 分組的分類對象
+ * @returns 樹狀結構的分類陣列
+ */
+function buildCategoryTree(groupedCategories: Record<string, any[]>): CategoryNode[] {
+  // 確保數據是有效的對象
+  if (!groupedCategories || typeof groupedCategories !== 'object') {
+    return [];
+  }
+
+  // 建立 ID 到節點的映射，方便查找
+  const nodeMap = new Map<number, CategoryNode>();
+  
+  // 第一步：將所有分類轉換為 CategoryNode，初始化 children 為空陣列
+  Object.values(groupedCategories).forEach(categoryGroup => {
+    if (Array.isArray(categoryGroup)) {
+      categoryGroup.forEach(cat => {
+        if (cat && typeof cat.id === 'number') {
+          const node: CategoryNode = {
+            id: cat.id,
+            name: cat.name || '',
+            description: cat.description || null,
+            parent_id: cat.parent_id || null,
+            created_at: cat.created_at || '',
+            updated_at: cat.updated_at || '',
+            products_count: cat.products_count || 0,
+            total_products_count: cat.total_products_count || 0,
+            children: []
+          };
+          nodeMap.set(cat.id, node);
+        }
+      });
+    }
+  });
+
+  // 第二步：根據 parent_id 分組關係建立樹狀結構
+  const rootNodes: CategoryNode[] = [];
+  
+  Object.entries(groupedCategories).forEach(([parentIdStr, categoryGroup]) => {
+    if (Array.isArray(categoryGroup)) {
+      const parentId = parentIdStr === '' || parentIdStr === 'null' ? null : Number(parentIdStr);
+      
+      categoryGroup.forEach(cat => {
+        const node = nodeMap.get(cat.id);
+        if (node) {
+          if (parentId === null) {
+            // 頂層分類
+            rootNodes.push(node);
+          } else {
+            // 子分類：找到父節點並添加到其 children
+            const parentNode = nodeMap.get(parentId);
+            if (parentNode) {
+              parentNode.children.push(node);
+            }
+          }
+        }
+      });
+    }
+  });
+
+  // 第三步：對每個層級進行排序
+  const sortNodes = (nodes: CategoryNode[]): CategoryNode[] => {
+    return nodes.sort((a, b) => a.name.localeCompare(b.name)).map(node => ({
+      ...node,
+      children: sortNodes(node.children)
+    }));
+  };
+
+  return sortNodes(rootNodes);
+}
+
 /**
  * 分類列表查詢 Hook
  * 
  * @param filters - 篩選參數
- * @returns React Query 查詢結果
+ * @returns React Query 查詢結果，返回樹狀結構的分類陣列
  */
 export function useCategories(filters: { search?: string } = {}) {
     return useQuery({
@@ -1161,38 +1295,19 @@ export function useCategories(filters: { search?: string } = {}) {
             
             return data;
         },
-        // 🎯 標準化數據精煉廠 - 處理分類數據的解包和轉換
-        select: (response: any) => {
-            // 處理可能的巢狀或分頁數據結構
-            const data = response?.data?.data || response?.data || response || [];
-            const meta = response?.data?.meta || {
-                total: Array.isArray(data) ? data.length : 0,
-                per_page: 100,
-                current_page: 1,
-                last_page: 1
-            };
+        // 🎯 新的數據精煉廠 - 返回已構建好的樹狀結構
+        select: (response: any): CategoryNode[] => {
+            // API 返回的是以 parent_id 分組的對象
+            const groupedData = response?.data || response || {};
             
-            // 確保數據的類型安全和結構一致性
-            const categories = Array.isArray(data) ? data.map((category: any) => ({
-                id: category.id || 0,
-                name: category.name || '未命名分類',
-                description: category.description || null,
-                parent_id: category.parent_id || null,
-                created_at: category.created_at || '',
-                updated_at: category.updated_at || '',
-                // 如果有子分類數據，也進行處理
-                children: category.children ? category.children.map((child: any) => ({
-                    id: child.id || 0,
-                    name: child.name || '未命名子分類',
-                    description: child.description || null,
-                    parent_id: child.parent_id || category.id,
-                    created_at: child.created_at || '',
-                    updated_at: child.updated_at || ''
-                })) : []
-            })) : [];
+            // 確保返回的是對象，如果不是則返回空陣列
+            if (typeof groupedData !== 'object' || Array.isArray(groupedData)) {
+                return [];
+            }
             
-            // 返回標準的分頁結構
-            return { data: categories, meta };
+            // 在 select 內部調用 buildCategoryTree
+            // 將原始、混亂的分組物件，直接轉換成乾淨的、巢狀的樹狀結構
+            return buildCategoryTree(groupedData);
         },
         staleTime: 5 * 60 * 1000, // 5 分鐘緩存
     });

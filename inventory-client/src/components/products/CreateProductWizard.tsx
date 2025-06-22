@@ -347,7 +347,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       // 判斷是否為多規格商品（有屬性或有多個變體）
       const hasAttributes = product.attributes && product.attributes.length > 0;
       const hasMultipleVariants = product.variants && product.variants.length > 1;
-      const hasAttributeValues = product.variants?.some(variant => 
+      const hasAttributeValues = product.variants?.some((variant: any) => 
         variant.attribute_values && variant.attribute_values.length > 0
       ) || false;
       const isVariable = hasAttributes || hasMultipleVariants || hasAttributeValues;
@@ -732,179 +732,136 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
   const progressPercentage = (step / STEPS.length) * 100;
 
   return (
-    <div className="bg-gray-50">
-      {/* 頁面標題 */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-              {isEditMode ? '編輯商品' : '新增商品'}
-            </h1>
-            <p className="text-sm text-gray-600">
-              {isEditMode 
-                ? '透過嚮導式流程，輕鬆更新您的商品資訊' 
-                : '透過嚮導式流程，輕鬆創建您的商品資訊'
-              }
-            </p>
-          </div>
-        </div>
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      {/* --- 頁面標題 --- */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">
+          {isEditMode ? '編輯商品' : '新增商品'}
+        </h1>
+        <p className="text-muted-foreground">
+          {isEditMode 
+            ? '透過引導式流程，輕鬆更新您的商品' 
+            : '透過引導式流程，輕鬆創建您的商品'
+          }
+        </p>
       </div>
 
-      {/* 主內容區域：響應式側邊欄 + 內容區 */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* 左側邊欄：步驟導航（桌面版）或頂部導航（移動版） */}
-          <div className="lg:w-72 lg:flex-shrink-0">
-            <Card className="lg:sticky lg:top-6">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between text-base">
-                  <span className="hidden lg:block">創建進度</span>
-                  <span className="lg:hidden">步驟 {step} / {STEPS.length}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {Math.round(progressPercentage)}% 完成
-                  </Badge>
-                </CardTitle>
-                <Progress value={progressPercentage} className="w-full h-2" />
-              </CardHeader>
-              
-              <CardContent className="space-y-3 pt-0">
-                {/* 步驟列表 - 移動版只顯示當前和下一步 */}
-                <div className="lg:hidden grid grid-cols-2 gap-2 mb-4">
-                  {STEPS.map((stepInfo, index) => {
-                    const stepNumber = index + 1;
-                    const isCompleted = stepNumber < step;
-                    const isCurrent = stepNumber === step;
-                    
-                    return (
-                      <div 
-                        key={stepInfo.id} 
-                        className={`p-2 rounded text-center text-xs ${
-                          isCurrent ? 'bg-blue-100 text-blue-700 font-medium' : 
-                          isCompleted ? 'bg-green-100 text-green-700' : 
-                          'bg-gray-100 text-gray-500'
-                        }`}
-                      >
-                        {stepInfo.title}
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                {/* 步驟列表 - 桌面版完整顯示 */}
-                <div className="hidden lg:block space-y-2">
-                {STEPS.map((stepInfo, index) => {
-                  const stepNumber = index + 1;
-                  const isCompleted = stepNumber < step;
-                  const isCurrent = stepNumber === step;
-                  
-                  return (
-                    <div 
-                      key={stepInfo.id} 
-                      className={`flex items-start space-x-3 p-2.5 rounded-md transition-colors ${
-                        isCurrent ? 'bg-blue-50 border border-blue-200' : 
-                        isCompleted ? 'bg-green-50 border border-green-200' : 
-                        'bg-gray-50 border border-gray-200'
-                      }`}
-                    >
-                      {/* 步驟圖標 */}
-                      <div className="flex-shrink-0 mt-1">
-                        {isCompleted ? (
-                          <CheckCircle className="h-6 w-6 text-green-500" />
-                        ) : isCurrent ? (
-                          <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center">
-                            <span className="text-white text-sm font-medium">{stepNumber}</span>
-                          </div>
-                        ) : (
-                          <div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span className="text-gray-600 text-sm font-medium">{stepNumber}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* 步驟資訊 */}
-                      <div className="flex-1 min-w-0">
-                        <div className={`text-sm font-medium ${
-                          isCurrent ? 'text-blue-700' : 
-                          isCompleted ? 'text-green-700' : 
-                          'text-gray-500'
-                        }`}>
-                          {stepInfo.title}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {stepInfo.description}
-                        </div>
-                        
-                        {/* 當前步驟標示 */}
-                        {isCurrent && (
-                          <div className="flex items-center mt-2 text-xs text-blue-600">
-                            <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mr-2 animate-pulse"></div>
-                            進行中
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* 右側主內容區 */}
-          <div className="flex-1 min-w-0">
-            {/* 內容卡片 */}
-            <Card>
-              <CardContent className="p-6">
-                {/* 當前步驟內容 */}
-                <div>
-                  {renderCurrentStep()}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 底部導航控制 */}
-            <div className="mt-4 flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
-              <Button
-                variant="outline"
-                onClick={handlePrevStep}
-                disabled={step === 1 || isSubmitting}
-                className="flex items-center space-x-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>上一步</span>
-              </Button>
-
-              <div className="text-sm text-gray-500">
-                步驟 {step} / {STEPS.length}
-              </div>
-
-              {step < STEPS.length ? (
-                <Button
-                  onClick={handleNextStep}
-                  disabled={!validateStep(step) || isSubmitting}
-                  className="flex items-center space-x-2"
-                >
-                  <span>下一步</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleFinalSubmit}
-                  disabled={!validateStep(step) || isSubmitting}
-                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
-                >
-                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <span>
-                    {isSubmitting 
-                      ? (isEditMode ? '更新中...' : '創建中...') 
-                      : (isEditMode ? '完成更新' : '完成創建')
-                    }
-                  </span>
-                </Button>
-              )}
+      {/* --- 統一的內容容器 --- */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        {/* --- 左欄：步驟指示器 --- */}
+        <aside className="md:col-span-1">
+          {/* 進度概覽 */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium">創建進度</span>
+              <Badge variant="outline" className="text-xs">
+                {Math.round(progressPercentage)}% 完成
+              </Badge>
             </div>
+            <Progress value={progressPercentage} className="w-full h-2" />
           </div>
-        </div>
+
+          {/* 步驟列表 */}
+          <div className="space-y-2">
+            {STEPS.map((stepInfo, index) => {
+              const stepNumber = index + 1;
+              const isCompleted = stepNumber < step;
+              const isCurrent = stepNumber === step;
+              
+              return (
+                <div 
+                  key={stepInfo.id} 
+                  className={`flex items-start space-x-3 p-3 rounded-lg transition-all ${
+                    isCurrent ? 'bg-primary/10 border border-primary/20' : 
+                    isCompleted ? 'bg-muted/50' : 
+                    'bg-transparent'
+                  }`}
+                >
+                  {/* 步驟圖標 */}
+                  <div className="flex-shrink-0 mt-0.5">
+                    {isCompleted ? (
+                      <CheckCircle className="h-5 w-5 text-primary" />
+                    ) : isCurrent ? (
+                      <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                        <span className="text-primary-foreground text-xs font-medium">{stepNumber}</span>
+                      </div>
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  
+                  {/* 步驟資訊 */}
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-sm font-medium ${
+                      isCurrent ? 'text-foreground' : 
+                      isCompleted ? 'text-muted-foreground' : 
+                      'text-muted-foreground'
+                    }`}>
+                      {stepInfo.title}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {stepInfo.description}
+                    </div>
+                    
+                    {/* 當前步驟標示 */}
+                    {isCurrent && (
+                      <div className="flex items-center mt-1.5 text-xs text-primary">
+                        <div className="h-1.5 w-1.5 bg-primary rounded-full mr-2 animate-pulse"></div>
+                        進行中
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </aside>
+        
+        {/* --- 右欄：表單內容區 --- */}
+        <main className="md:col-span-3">
+          {/* 當前步驟內容 - 讓每個步驟組件自行定義 Card 樣式 */}
+          {renderCurrentStep()}
+          
+          {/* 底部導航控制 */}
+          <div className="mt-6 flex items-center justify-between">
+            <Button
+              variant="outline"
+              onClick={handlePrevStep}
+              disabled={step === 1 || isSubmitting}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              上一步
+            </Button>
+
+            <div className="text-sm text-muted-foreground">
+              步驟 {step} / {STEPS.length}
+            </div>
+
+            {step < STEPS.length ? (
+              <Button
+                onClick={handleNextStep}
+                disabled={!validateStep(step) || isSubmitting}
+              >
+                下一步
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleFinalSubmit}
+                disabled={!validateStep(step) || isSubmitting}
+                variant="default"
+              >
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting 
+                  ? (isEditMode ? '更新中...' : '創建中...') 
+                  : (isEditMode ? '完成更新' : '完成創建')
+                }
+              </Button>
+            )}
+          </div>
+        </main>
+
       </div>
     </div>
   );

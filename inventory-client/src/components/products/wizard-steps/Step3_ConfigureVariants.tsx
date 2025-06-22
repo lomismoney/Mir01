@@ -268,7 +268,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
       {/* 步驟說明 */}
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold flex items-center space-x-2">
-          <Package className="h-6 w-6 text-blue-500" />
+                      <Package className="h-6 w-6 text-primary" />
           <span>設定變體</span>
         </h2>
         <p className="text-muted-foreground">
@@ -278,7 +278,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
 
       {/* 批量操作工具 */}
       {variants.length > 1 && (
-        <Card>
+        <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Wand2 className="h-5 w-5" />
@@ -323,7 +323,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
       )}
 
       {/* 變體配置表格 */}
-      <Card>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -411,7 +411,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
 
       {/* 配置摘要 */}
       {variants.length > 0 && (
-        <Card>
+        <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Package className="h-5 w-5" />
@@ -421,7 +421,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-4 rounded-lg border bg-muted/50">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-chart-1">
                   {variants.length}
                 </div>
                 <div className="text-sm text-muted-foreground">
@@ -430,7 +430,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
               </div>
               
               <div className="text-center p-4 rounded-lg border bg-muted/50">
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold text-chart-2">
                   {variants.filter(v => v.sku.trim()).length}
                 </div>
                 <div className="text-sm text-muted-foreground">
@@ -439,7 +439,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
               </div>
               
               <div className="text-center p-4 rounded-lg border bg-muted/50">
-                <div className="text-2xl font-bold text-orange-600">
+                <div className="text-2xl font-bold text-chart-3">
                   {variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length}
                 </div>
                 <div className="text-sm text-muted-foreground">
@@ -448,7 +448,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
               </div>
               
               <div className="text-center p-4 rounded-lg border bg-muted/50">
-                <div className="text-2xl font-bold text-purple-600">
+                <div className="text-2xl font-bold text-chart-4">
                   ${variants.reduce((sum, v) => {
                     const price = parseFloat(v.price);
                     return sum + (isNaN(price) ? 0 : price);

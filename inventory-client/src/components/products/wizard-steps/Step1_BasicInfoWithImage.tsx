@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, Package, FileText, FolderTree, HelpCircle, ImageIcon } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WizardFormData } from '../CreateProductWizard';
@@ -176,18 +177,20 @@ export function Step1_BasicInfoWithImage({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* 基本資訊區塊 */}
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            <Package className="h-5 w-5 text-blue-600" />
-            基本資訊
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            填寫商品的基本信息
-          </p>
-        </div>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
+        <CardContent className="p-6">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium flex items-center gap-2">
+                <Package className="h-5 w-5 text-primary" />
+                基本資訊
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                填寫商品的基本信息
+              </p>
+            </div>
         
         {/* 商品名稱 */}
         <div className="space-y-2">
@@ -198,7 +201,7 @@ export function Step1_BasicInfoWithImage({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                  <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>請輸入清晰、具描述性的商品名稱，有助於客戶快速理解商品</p>
@@ -213,7 +216,7 @@ export function Step1_BasicInfoWithImage({
             value={formData.basicInfo.name}
             onChange={(e) => handleFieldChange('name', e.target.value)}
             onBlur={handleNameBlur}
-            className={validationErrors.name ? 'border-red-500 focus:border-red-500' : ''}
+            className={`bg-background ${validationErrors.name ? 'border-red-500 focus:border-red-500' : ''}`}
             aria-describedby={validationErrors.name ? 'name-error' : undefined}
           />
           {validationErrors.name && (
@@ -234,7 +237,7 @@ export function Step1_BasicInfoWithImage({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                  <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>詳細描述商品特色、用途和優勢，幫助客戶做出購買決定</p>
@@ -249,10 +252,10 @@ export function Step1_BasicInfoWithImage({
             onChange={(e) => handleFieldChange('description', e.target.value)}
             onBlur={handleDescriptionBlur}
             rows={4}
-            className={validationErrors.description ? 'border-red-500 focus:border-red-500' : ''}
+            className={`bg-background ${validationErrors.description ? 'border-red-500 focus:border-red-500' : ''}`}
             aria-describedby={validationErrors.description ? 'description-error' : undefined}
           />
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>提供詳細的商品說明，有助於提升轉換率</span>
             <span>{formData.basicInfo.description.length}/1000</span>
           </div>
@@ -274,7 +277,7 @@ export function Step1_BasicInfoWithImage({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                  <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>選擇合適的商品分類，有助於客戶瀏覽和搜尋</p>
@@ -284,7 +287,7 @@ export function Step1_BasicInfoWithImage({
           </Label>
           
           {categoriesLoading ? (
-            <div className="h-10 bg-gray-100 rounded-md animate-pulse" />
+            <div className="h-10 bg-muted rounded-md animate-pulse" />
           ) : categoriesError ? (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -305,7 +308,7 @@ export function Step1_BasicInfoWithImage({
                   <SelectItem key={category.id} value={category.id?.toString() || ''}>
                     {category.name}
                     {category.description && (
-                      <span className="text-xs text-gray-500 ml-2">
+                      <span className="text-xs text-muted-foreground ml-2">
                         - {category.description}
                       </span>
                     )}
@@ -315,19 +318,23 @@ export function Step1_BasicInfoWithImage({
             </Select>
           )}
         </div>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
       
       {/* 圖片選擇區塊 */}
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            <ImageIcon className="h-5 w-5 text-green-600" />
-            商品圖片
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            選擇商品主圖片（可選，稍後也可以上傳）
-          </p>
-        </div>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
+        <CardContent className="p-6">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-primary" />
+                商品圖片
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                選擇商品主圖片（可選，稍後也可以上傳）
+              </p>
+            </div>
         
         {/* 整合的圖片選擇器 */}
         <ImageSelector
@@ -338,17 +345,19 @@ export function Step1_BasicInfoWithImage({
           acceptedFormats={['image/jpeg', 'image/png', 'image/webp']}
         />
         
-        {/* 圖片選擇提示 */}
-        <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded-md">
-          <p className="font-medium text-blue-800 mb-1">💡 圖片選擇說明</p>
-          <ul className="space-y-1 text-blue-700">
+                  {/* 圖片選擇提示 */}
+          <div className="text-xs bg-accent/10 p-3 rounded-md">
+                          <p className="font-medium text-primary mb-1">💡 圖片選擇說明</p>
+                <ul className="space-y-1 text-muted-foreground">
             <li>• 圖片將在商品創建完成後自動上傳</li>
             <li>• 支援 JPEG、PNG、WebP 格式，建議使用高品質圖片</li>
             <li>• 圖片大小限制為 5MB</li>
             <li>• 如果現在不選擇，稍後可以在編輯頁面上傳</li>
           </ul>
         </div>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 } 

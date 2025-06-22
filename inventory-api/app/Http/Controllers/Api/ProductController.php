@@ -352,8 +352,36 @@ class ProductController extends Controller
     {
         $this->authorize('delete', $product); // 檢查是否有權限刪除這個 $product
         
-        $product->delete();
-        return response()->noContent();
+        try {
+            // 檢查是否有商品存在相關聯的進貨單或訂單
+            $hasRelatedRecords = $product->variants()
+                ->where(function ($query) {
+                    $query->whereHas('purchaseItems')
+                          ->orWhereHas('orderItems');
+                })
+                ->exists();
+            
+            if ($hasRelatedRecords) {
+                throw new \Exception("無法刪除商品 [{$product->name}]，因為該商品已有相關的進貨單或訂單記錄。");
+            }
+            
+            $product->delete();
+            return response()->noContent();
+            
+        } catch (\Exception $e) {
+            // 記錄錯誤日誌
+            Log::error('刪除商品失敗', [
+                'user_id' => Auth::id(),
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+            ]);
+            
+            // 返回友好的錯誤訊息
+            return response()->json([
+                'message' => $e->getMessage(),
+                'error' => '刪除失敗'
+            ], 422);
+        }
     }
 
     /**
@@ -374,11 +402,44 @@ class ProductController extends Controller
         // 獲取要刪除的 ID 並轉換為整數陣列
         $ids = array_map('intval', $validatedData['ids']);
         
-        // 批量刪除所有指定 ID 的商品
-        Product::whereIn('id', $ids)->delete();
-        
-        // 返回 204 No Content
-        return response()->noContent();
+        try {
+            // 使用事務確保操作的原子性
+            DB::transaction(function () use ($ids) {
+                // 檢查是否有商品存在相關聯的進貨單或訂單
+                $productsWithDependencies = Product::whereIn('id', $ids)
+                    ->where(function ($query) {
+                        $query->whereHas('variants.purchaseItems')
+                              ->orWhereHas('variants.orderItems');
+                    })
+                    ->pluck('name', 'id');
+                
+                if ($productsWithDependencies->isNotEmpty()) {
+                    $productNames = $productsWithDependencies->values()->implode('、');
+                    throw new \Exception("無法刪除商品 [{$productNames}]，因為這些商品已有相關的進貨單或訂單記錄。");
+                }
+                
+                // 批量刪除所有指定 ID 的商品
+                Product::whereIn('id', $ids)->delete();
+            });
+            
+            // 返回 204 No Content
+            return response()->noContent();
+            
+        } catch (\Exception $e) {
+            // 記錄錯誤日誌
+            Log::error('批量刪除商品失敗', [
+                'user_id' => Auth::id(),
+                'product_ids' => $ids,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            // 返回友好的錯誤訊息
+            return response()->json([
+                'message' => $e->getMessage(),
+                'error' => '批量刪除失敗'
+            ], 422);
+        }
     }
 
     /**

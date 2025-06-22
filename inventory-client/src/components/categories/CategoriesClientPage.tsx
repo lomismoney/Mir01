@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useMemo, useCallback, memo } from 'react';
-import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/hooks/queries/useEntityQueries';
+import { useState, useMemo, useCallback } from 'react';
+import React from 'react';
+import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory, type CategoryNode } from '@/hooks/queries/useEntityQueries';
 import { useAdminAuth } from '@/hooks/use-admin-auth';
 import { useDebounce } from '@/hooks/use-debounce';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import {
   DropdownMenu,
@@ -17,9 +19,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, Plus, Search, Trash2, X, Edit, MoreVertical, Folder, FolderOpen, ChevronRight } from 'lucide-react';
+import { Loader2, Plus, Search, Trash2, X, Edit, MoreVertical, Folder, FolderOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Category } from '@/types/category';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,119 +31,75 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import React from 'react';
 
 /**
- * 將分組的分類資料轉換為平坦的陣列
+ * 遞迴尋找節點
  */
-function flattenCategories(groupedCategories: Record<string, any[]> | undefined): Category[] {
-  if (!groupedCategories) return [];
-  
-  const categories: Category[] = [];
-  Object.values(groupedCategories).forEach(categoryGroup => {
-    categoryGroup.forEach(cat => {
-      // 確保每個分類都有必要的屬性
-      if (cat && typeof cat.id === 'number') {
-        categories.push({
-          id: cat.id,
-          name: cat.name || '',
-          description: cat.description || null,
-          parent_id: cat.parent_id || null,
-          created_at: cat.created_at || '',
-          updated_at: cat.updated_at || '',
-          products_count: cat.products_count || 0,
-          total_products_count: cat.total_products_count || 0,
-        } as Category);
-      }
-    });
-  });
-  return categories;
+function findNode(nodes: CategoryNode[], id: number): CategoryNode | null {
+  for (const node of nodes) {
+    if (node.id === id) return node;
+    const found = findNode(node.children || [], id);
+    if (found) return found;
+  }
+  return null;
 }
 
 /**
- * 計算分類的層級深度
+ * 將樹狀結構平坦化
  */
-function getCategoryDepth(category: Category, allCategories: Category[]): number {
-  let depth = 0;
-  let currentCategory = category;
-  
-  while (currentCategory.parent_id) {
-    depth++;
-    const parent = allCategories.find(c => c.id === currentCategory.parent_id);
-    if (!parent) break;
-    currentCategory = parent;
-  }
-  
-  return depth;
+function flattenTree(nodes: CategoryNode[]): CategoryNode[] {
+  const result: CategoryNode[] = [];
+  const traverse = (nodes: CategoryNode[]) => {
+    nodes.forEach(node => {
+      result.push(node);
+      if (node.children && node.children.length > 0) {
+        traverse(node.children);
+      }
+    });
+  };
+  traverse(nodes);
+  return result;
 }
 
 /**
  * 取得分類的完整路徑
  */
-function getCategoryPath(category: Category, allCategories: Category[]): string {
-  const path: string[] = [category.name];
-  let currentCategory = category;
+function getCategoryPath(node: CategoryNode, allNodes: CategoryNode[]): string {
+  const path: string[] = [node.name];
+  let current = node;
   
-  while (currentCategory.parent_id) {
-    const parent = allCategories.find(c => c.id === currentCategory.parent_id);
+  while (current.parent_id) {
+    const parent = allNodes.find(n => n.id === current.parent_id);
     if (!parent) break;
     path.unshift(parent.name);
-    currentCategory = parent;
+    current = parent;
   }
   
   return path.join(' / ');
 }
 
 /**
- * 檢查是否有子分類
+ * 分類管理客戶端頁面組件（優化架構版本）
  */
-function hasChildren(categoryId: number, groupedCategories: Record<string, any[]> | undefined): boolean {
-  if (!groupedCategories) return false;
-  const children = groupedCategories[categoryId.toString()];
-  return children && children.length > 0;
-}
-
-/**
- * 分類管理客戶端頁面組件（緊湊卡片版本）
- * 
- * 設計理念：
- * 1. 使用卡片網格佈局，最大化空間利用
- * 2. 層級關係可視化（縮排和路徑顯示）
- * 3. 緊湊的視覺設計，減少留白
- * 4. 直觀的操作介面
- */
-const CategoriesClientPage = () => {
-  const { user, isLoading, isAuthorized } = useAdminAuth();
+export default function CategoriesClientPage() {
+  const { user, isLoading: isAuthLoading, isAuthorized } = useAdminAuth();
   
-  // 搜索狀態管理 - 使用防抖優化
+  // 視圖狀態
+  const [currentParentId, setCurrentParentId] = useState<number | null>(null);
+  const [breadcrumb, setBreadcrumb] = useState<{ id: number | null; name: string }[]>([
+    { id: null, name: '所有分類' }
+  ]);
+  
+  // 搜索狀態
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   
-  // 導覽狀態管理
-  const [currentParentId, setCurrentParentId] = useState<number | null>(null);
-  const [breadcrumb, setBreadcrumb] = useState<{ id: number | null; name: string }[]>([{ id: null, name: '所有分類' }]);
-  
-  // 資料獲取 - 直接使用 hook 返回的分組資料
-  const { data: groupedCategories, isLoading: isCategoriesLoading, error } = useCategories();
-  
-  // 資料轉換 - 將分組資料轉為平坦陣列
-  const allCategories = useMemo(() => {
-    return flattenCategories(groupedCategories || {});
-  }, [groupedCategories]);
-  
-  // API Mutation Hooks
-  const createMutation = useCreateCategory();
-  const updateMutation = useUpdateCategory();
-  const deleteMutation = useDeleteCategory();
-
-  // 對話框狀態管理
+  // 對話框狀態
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
-  const [parentIdForNewCategory, setParentIdForNewCategory] = useState<number | null>(null);
+  const [editingCategory, setEditingCategory] = useState<CategoryNode | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<CategoryNode | null>(null);
   
   // 表單狀態
   const [formData, setFormData] = useState({
@@ -151,11 +108,20 @@ const CategoriesClientPage = () => {
     parent_id: null as number | null,
   });
 
-  /**
-   * 根據當前導覽和搜索條件過濾分類
-   */
+  // 🎯 數據獲取：從 Hook 獲取已經構建好的完整分類樹
+  const { data: categoriesTree = [], isLoading: isCategoriesLoading } = useCategories();
+  
+  // API Mutation Hooks
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
+
+  // 🎯 衍生計算：平坦化的所有分類（用於搜索和表單選擇）
+  const allCategories = useMemo(() => flattenTree(categoriesTree), [categoriesTree]);
+
+  // 🎯 衍生計算：根據當前狀態，計算出需要顯示的分類列表
   const displayedCategories = useMemo(() => {
-    // 如果有搜索詞，則在所有分類中搜索，忽略層級
+    // 如果有搜索詞，在所有分類中搜索
     if (debouncedSearchQuery) {
       const searchLower = debouncedSearchQuery.toLowerCase();
       return allCategories.filter(category => {
@@ -163,30 +129,45 @@ const CategoriesClientPage = () => {
         const descMatch = category.description?.toLowerCase().includes(searchLower) || false;
         const pathMatch = getCategoryPath(category, allCategories).toLowerCase().includes(searchLower);
         return nameMatch || descMatch || pathMatch;
-      }).sort((a, b) => a.name.localeCompare(b.name));
+      });
     }
     
-    // 否則，顯示當前層級的分類
-    const parentIdKey = currentParentId?.toString() || '';
-    const categoriesToShow = (groupedCategories as unknown as Record<string, Category[]>)?.[parentIdKey] || [];
+    // 沒有搜索詞時，根據當前層級顯示
+    if (currentParentId === null) {
+      return categoriesTree; // 頂層分類
+    }
     
-    return [...categoriesToShow].sort((a, b) => a.name.localeCompare(b.name));
-  }, [allCategories, debouncedSearchQuery, currentParentId, groupedCategories]);
+    const parentNode = findNode(categoriesTree, currentParentId);
+    return parentNode?.children || [];
+  }, [categoriesTree, currentParentId, debouncedSearchQuery, allCategories]);
 
-  /**
-   * 重置表單
-   */
-  const resetForm = () => {
+  // 🎯 事件處理：重置表單
+  const resetForm = useCallback(() => {
     setFormData({
       name: '',
       description: '',
-      parent_id: currentParentId, // 預設父分類為當前層級
+      parent_id: currentParentId,
     });
-  };
+  }, [currentParentId]);
 
-  /**
-   * 處理新增分類
-   */
+  // 🎯 事件處理：點擊分類卡片
+  const handleCategoryClick = useCallback((category: CategoryNode) => {
+    if (category.children && category.children.length > 0) {
+      setCurrentParentId(category.id);
+      setBreadcrumb(prev => [...prev, { id: category.id, name: category.name }]);
+    } else {
+      toast.info(`分類「${category.name}」沒有子分類。`);
+    }
+  }, []);
+
+  // 🎯 事件處理：麵包屑導航
+  const navigateToCategory = useCallback((crumb: { id: number | null; name: string }, index: number) => {
+    setCurrentParentId(crumb.id);
+    setBreadcrumb(prev => prev.slice(0, index + 1));
+    setSearchQuery(''); // 清除搜索
+  }, []);
+
+  // 🎯 事件處理：新增分類
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
@@ -206,9 +187,7 @@ const CategoriesClientPage = () => {
     }
   };
 
-  /**
-   * 處理編輯分類
-   */
+  // 🎯 事件處理：編輯分類
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCategory || !formData.name.trim()) return;
@@ -232,9 +211,7 @@ const CategoriesClientPage = () => {
     }
   };
 
-  /**
-   * 處理刪除分類
-   */
+  // 🎯 事件處理：刪除分類
   const handleDelete = async () => {
     if (!categoryToDelete) return;
 
@@ -248,74 +225,8 @@ const CategoriesClientPage = () => {
     }
   };
 
-  /**
-   * 導覽到指定分類層級
-   */
-  const navigateToCategory = (category: { id: number | null; name: string }) => {
-    const newBreadcrumb = [];
-    for (const crumb of breadcrumb) {
-      newBreadcrumb.push(crumb);
-      if (crumb.id === category.id) break;
-    }
-    setBreadcrumb(newBreadcrumb);
-    setCurrentParentId(category.id);
-    setSearchQuery(''); // 清除搜索
-  };
-
-  /**
-   * 點擊分類卡片，進入子分類
-   */
-  const handleCategoryClick = (category: Category) => {
-    const hasChildCategories = hasChildren(category.id, groupedCategories);
-    if (hasChildCategories) {
-      setCurrentParentId(category.id);
-      setBreadcrumb([...breadcrumb, { id: category.id, name: category.name }]);
-    } else {
-      // 如果沒有子分類，可以顯示一個提示
-      toast.info(`分類「${category.name}」沒有子分類。`);
-    }
-  };
-
-  /**
-   * 開始新增分類（在當前層級）
-   */
-  const handleAddCategory = useCallback(() => {
-    setFormData({ name: '', description: '', parent_id: currentParentId });
-    setIsCreateDialogOpen(true);
-  }, [currentParentId]);
-
-  /**
-   * 開始新增子分類
-   */
-  const handleAddSubCategory = useCallback((parentId: number) => {
-    setParentIdForNewCategory(parentId);
-    setFormData(prev => ({ ...prev, parent_id: parentId }));
-    setIsCreateDialogOpen(true);
-  }, []);
-
-  /**
-   * 開始編輯分類
-   */
-  const handleEdit = useCallback((category: Category) => {
-    setEditingCategory(category);
-    setFormData({
-      name: category.name,
-      description: category.description || '',
-      parent_id: category.parent_id || null,
-    });
-    setIsEditDialogOpen(true);
-  }, []);
-
-  /**
-   * 開始刪除分類
-   */
-  const handleDeleteClick = useCallback((category: Category) => {
-    setCategoryToDelete(category);
-    setIsDeleteDialogOpen(true);
-  }, []);
-
   // 權限檢查
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -327,11 +238,11 @@ const CategoriesClientPage = () => {
     return (
       <Card className="border-destructive/50">
         <CardContent className="pt-6">
-        <div className="text-center">
+          <div className="text-center">
             <X className="h-12 w-12 mx-auto text-destructive mb-4" />
             <p className="text-lg font-medium text-destructive">權限不足</p>
             <p className="text-muted-foreground mt-2">您沒有權限訪問此頁面</p>
-        </div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -346,7 +257,13 @@ const CategoriesClientPage = () => {
           <p className="text-sm text-muted-foreground">組織和管理商品分類結構</p>
         </div>
         
-        <Button size="sm" onClick={handleAddCategory}>
+        <Button 
+          size="sm" 
+          onClick={() => {
+            resetForm();
+            setIsCreateDialogOpen(true);
+          }}
+        >
           <Plus className="mr-1.5 h-4 w-4" />
           新增分類
         </Button>
@@ -357,13 +274,16 @@ const CategoriesClientPage = () => {
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumb.map((crumb, index) => (
-              <React.Fragment key={crumb.id ?? `crumb-${index}`}>
+              <React.Fragment key={crumb.id ?? `root-${index}`}>
                 <BreadcrumbItem>
                   <BreadcrumbLink 
                     asChild
                     className={cn(index === breadcrumb.length - 1 ? 'text-foreground' : 'cursor-pointer')}
                   >
-                    <button onClick={() => navigateToCategory(crumb)} disabled={index === breadcrumb.length - 1}>
+                    <button 
+                      onClick={() => navigateToCategory(crumb, index)} 
+                      disabled={index === breadcrumb.length - 1}
+                    >
                       {crumb.name}
                     </button>
                   </BreadcrumbLink>
@@ -385,7 +305,7 @@ const CategoriesClientPage = () => {
         </div>
       </div>
 
-      {/* 分類列表 - 緊湊卡片網格 */}
+      {/* 🎯 分類列表 - 極其簡潔的渲染邏輯 */}
       {isCategoriesLoading ? (
         <div className="flex justify-center items-center min-h-[300px]">
           <Loader2 className="h-8 w-8 animate-spin" />
@@ -412,7 +332,13 @@ const CategoriesClientPage = () => {
                   <p className="text-sm text-muted-foreground mb-3">
                     您可以在此層級下新增一個分類
                   </p>
-                  <Button size="sm" onClick={handleAddCategory}>
+                  <Button 
+                    size="sm" 
+                    onClick={() => {
+                      resetForm();
+                      setIsCreateDialogOpen(true);
+                    }}
+                  >
                     <Plus className="mr-1.5 h-4 w-4" />
                     新增分類
                   </Button>
@@ -424,8 +350,8 @@ const CategoriesClientPage = () => {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {displayedCategories.map((category) => {
-            const hasChildCategories = hasChildren(category.id, groupedCategories);
-            const childCount = (groupedCategories as unknown as Record<string, any>)?.[category.id.toString()]?.length || 0;
+            const hasChildren = category.children && category.children.length > 0;
+            const childCount = category.children?.length || 0;
             
             return (
               <Card 
@@ -437,7 +363,7 @@ const CategoriesClientPage = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 overflow-hidden">
                       <div className="flex items-center gap-2 mb-1">
-                        {hasChildCategories ? (
+                        {hasChildren ? (
                           <FolderOpen className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                         ) : (
                           <Folder className="h-5 w-5 text-muted-foreground flex-shrink-0" />
@@ -448,18 +374,17 @@ const CategoriesClientPage = () => {
                       </div>
                       
                       {category.description && (
-                         <p className="text-sm text-muted-foreground truncate" title={category.description}>
+                        <p className="text-sm text-muted-foreground truncate" title={category.description}>
                           {category.description}
-                         </p>
+                        </p>
                       )}
                       
                       <div className="flex gap-2 mt-2">
-                        {hasChildCategories && (
+                        {hasChildren && (
                           <Badge variant="secondary" className="text-xs h-5 px-1.5">
                             {childCount} 子分類
                           </Badge>
                         )}
-                        {/* 商品數量顯示 */}
                         <Badge 
                           variant={(category.total_products_count ?? 0) > 0 ? "default" : "outline"} 
                           className="text-xs h-5 px-1.5"
@@ -469,75 +394,54 @@ const CategoriesClientPage = () => {
                       </div>
                     </div>
                     
-                    <AlertDialog open={isDeleteDialogOpen && categoryToDelete?.id === category.id} onOpenChange={(open) => {
-                      if (!open) {
-                        setIsDeleteDialogOpen(false);
-                        setCategoryToDelete(null);
-                      }
-                    }}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7 -mt-1 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => e.stopPropagation()} // 防止觸發卡片點擊
-                          >
-                            <MoreVertical className="h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenuItem onClick={() => handleAddSubCategory(category.id)}>
-                            <Plus className="mr-2 h-3.5 w-3.5" />
-                            新增子分類
-                          </DropdownMenuItem>
-                          
-                          <DropdownMenuSeparator />
-                          
-                          <DropdownMenuItem onClick={() => handleEdit(category)}>
-                            <Edit className="mr-2 h-3.5 w-3.5" />
-                            編輯分類
-                          </DropdownMenuItem>
-                          
-                          <DropdownMenuItem 
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => handleDeleteClick(category)}
-                          >
-                            <Trash2 className="mr-2 h-3.5 w-3.5" />
-                            刪除分類
-                          </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>確認刪除分類</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            您確定要刪除分類「{categoryToDelete?.name}」嗎？
-                            {hasChildCategories && (
-                              <span className="block mt-2 font-medium text-destructive">
-                                警告：此分類包含 {childCount} 個子分類，刪除後將一併移除。
-                              </span>
-                            )}
-                            此操作無法復原。
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>取消</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDelete}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            disabled={deleteMutation.isPending}
-                          >
-                            {deleteMutation.isPending && (
-                              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                            )}
-                            確認刪除
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-      </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7 -mt-1 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-3.5 w-3.5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuItem onClick={() => {
+                          setFormData({ name: '', description: '', parent_id: category.id });
+                          setIsCreateDialogOpen(true);
+                        }}>
+                          <Plus className="mr-2 h-3.5 w-3.5" />
+                          新增子分類
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem onClick={() => {
+                          setEditingCategory(category);
+                          setFormData({
+                            name: category.name,
+                            description: category.description || '',
+                            parent_id: category.parent_id || null,
+                          });
+                          setIsEditDialogOpen(true);
+                        }}>
+                          <Edit className="mr-2 h-3.5 w-3.5" />
+                          編輯分類
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => {
+                            setCategoryToDelete(category);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-3.5 w-3.5" />
+                          刪除分類
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </CardHeader>
               </Card>
             );
@@ -557,7 +461,7 @@ const CategoriesClientPage = () => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? '編輯分類' : (formData.parent_id ? '新增子分類' : '新增分類')}
+              {editingCategory ? '編輯分類' : '新增分類'}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={editingCategory ? handleUpdate : handleCreate} className="space-y-4 py-2">
@@ -591,7 +495,7 @@ const CategoriesClientPage = () => {
                 <SelectContent>
                   <SelectItem value="null">無（設為頂層分類）</SelectItem>
                   {allCategories
-                    .filter(cat => cat.id !== editingCategory?.id) // 防止將分類設為自身的子分類
+                    .filter(cat => cat.id !== editingCategory?.id)
                     .map(cat => (
                       <SelectItem key={cat.id} value={cat.id.toString()}>
                         {getCategoryPath(cat, allCategories)}
@@ -614,8 +518,42 @@ const CategoriesClientPage = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* 刪除分類對話框 */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsDeleteDialogOpen(false);
+          setCategoryToDelete(null);
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認刪除分類</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要刪除分類「{categoryToDelete?.name}」嗎？
+              {categoryToDelete?.children && categoryToDelete.children.length > 0 && (
+                <span className="block mt-2 font-medium text-destructive">
+                  警告：此分類包含 {categoryToDelete.children.length} 個子分類，刪除後將一併移除。
+                </span>
+              )}
+              此操作無法復原。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending && (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              )}
+              確認刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
-};
-
-export default memo(CategoriesClientPage); 
+} 

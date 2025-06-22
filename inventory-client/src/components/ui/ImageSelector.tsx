@@ -121,44 +121,62 @@ export function ImageSelector({
     <div className={cn('space-y-4', className)}>
       {!imageData.file ? (
         // 圖片選擇區域
-        <div
-          className={cn(
-            'border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors cursor-pointer',
-            'hover:border-gray-400 hover:bg-gray-50',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-            disabled && 'opacity-50 cursor-not-allowed hover:border-gray-300 hover:bg-transparent'
-          )}
-          onClick={handleClickUpload}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          tabIndex={disabled ? -1 : 0}
-          role="button"
-          aria-label="選擇圖片"
-          onKeyDown={(e) => {
-            if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
-              e.preventDefault();
-              handleClickUpload();
-            }
-          }}
-        >
-          <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-600">
-            點擊選擇圖片或拖拽圖片到此處
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            支援 {acceptedFormats.map(format => format.split('/')[1].toUpperCase()).join('、')} 格式，
-            最大 {formatFileSize(maxFileSize)}
-          </p>
+        <div className="flex items-center justify-center w-full">
+          <label
+            htmlFor="dropzone-file"
+            className={cn(
+              'flex flex-col items-center justify-center w-full h-64 border-2 border-border/60 border-dashed rounded-lg cursor-pointer',
+              'bg-muted/40 hover:bg-muted/80 dark:hover:bg-muted/30 transition-colors',
+              'focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+              disabled && 'opacity-50 cursor-not-allowed hover:bg-muted/40'
+            )}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+          >
+            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+              <svg 
+                className="w-8 h-8 mb-4 text-muted-foreground" 
+                aria-hidden="true" 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 20 16"
+              >
+                <path 
+                  stroke="currentColor" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth="2" 
+                  d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                />
+              </svg>
+              <p className="mb-2 text-sm text-muted-foreground">
+                <span className="font-semibold">點擊上傳</span> 或拖曳檔案至此
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {acceptedFormats.map(format => format.split('/')[1].toUpperCase()).join('、')} 
+                (最大 {formatFileSize(maxFileSize)})
+              </p>
+            </div>
+            <input 
+              id="dropzone-file" 
+              ref={fileInputRef}
+              type="file" 
+              className="hidden" 
+              accept={acceptedFormats.join(',')}
+              onChange={handleFileInputChange}
+              disabled={disabled}
+            />
+          </label>
         </div>
       ) : (
         // 圖片預覽區域
         <div className="relative">
-          <div className="relative overflow-hidden rounded-lg border border-gray-200">
+          <div className="relative w-full max-w-sm h-48 mx-auto overflow-hidden rounded-lg border border-border bg-muted/30">
             <img
               src={imageData.preview!}
               alt="商品圖片預覽"
-              className="w-full h-48 object-cover"
+              className="w-full h-full object-contain p-2"
             />
             {/* 清除按鈕 */}
             <Button
@@ -175,7 +193,7 @@ export function ImageSelector({
           </div>
           
           {/* 圖片信息 */}
-          <div className="mt-2 text-xs text-gray-500 space-y-1">
+          <div className="mt-2 text-xs text-muted-foreground space-y-1">
             <p>檔案名稱：{imageData.file.name}</p>
             <p>檔案大小：{formatFileSize(imageData.file.size)}</p>
             <p>檔案格式：{imageData.file.type}</p>

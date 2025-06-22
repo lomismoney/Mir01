@@ -236,12 +236,10 @@ const ProductClientComponent = () => {
 
     deleteProductMutation.mutate(productToDelete.id, {
       onSuccess: () => {
-        toast.success('商品刪除成功！');
+        // 成功的 toast 已經在 mutation 內部處理了
         setProductToDelete(null);
-      },
-      onError: (error) => {
-        toast.error(`刪除失敗：${error.message}`);
       }
+      // 移除 onError，讓 mutation 內部的錯誤處理生效
     });
   };
 
@@ -279,13 +277,11 @@ const ProductClientComponent = () => {
     
     deleteMultipleProductsMutation.mutate({ ids: selectedIds }, {
       onSuccess: () => {
-        toast.success(`成功刪除 ${selectedIds.length} 個商品！`);
+        // 成功的 toast 已經在 mutation 內部處理了
         setShowBatchDeleteDialog(false);
         setRowSelection({}); // 清空選中狀態
-      },
-      onError: (error) => {
-        toast.error(`批量刪除失敗：${error.message}`);
       }
+      // 移除 onError，讓 mutation 內部的錯誤處理生效
     });
   };
 

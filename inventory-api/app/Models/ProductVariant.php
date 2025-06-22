@@ -197,4 +197,26 @@ class ProductVariant extends Model
     {
         return $this->price - $this->average_cost;
     }
+
+    /**
+     * 獲取該變體的所有進貨單項目
+     * 一個 SKU 可能在多個進貨單中出現
+     * 
+     * @return HasMany<PurchaseItem>
+     */
+    public function purchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+    
+    /**
+     * 獲取該變體的所有訂單項目
+     * 一個 SKU 可能在多個訂單中出現
+     * 
+     * @return HasMany<OrderItem>
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }

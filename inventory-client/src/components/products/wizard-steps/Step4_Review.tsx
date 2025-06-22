@@ -98,7 +98,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       {/* 步驟說明 */}
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold flex items-center space-x-2">
-          <CheckCircle className="h-6 w-6 text-blue-500" />
+                      <CheckCircle className="h-6 w-6 text-primary" />
           <span>預覽確認</span>
         </h2>
         <p className="text-muted-foreground">
@@ -107,7 +107,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       </div>
 
       {/* 基本資訊預覽 */}
-      <Card>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <FileText className="h-5 w-5" />
@@ -139,7 +139,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       </Card>
 
       {/* 規格配置預覽 */}
-      <Card>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Settings className="h-5 w-5" />
@@ -201,7 +201,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       </Card>
 
       {/* 變體配置預覽 */}
-      <Card>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Package className="h-5 w-5" />
@@ -250,7 +250,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       </Card>
 
       {/* 統計摘要 */}
-      <Card>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <DollarSign className="h-5 w-5" />
@@ -259,29 +259,29 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 rounded-lg border bg-blue-50">
-              <div className="text-2xl font-bold text-blue-600">
+            <div className="text-center p-4 rounded-lg border bg-muted/50">
+              <div className="text-2xl font-bold text-chart-1">
                 {statistics.totalVariants}
               </div>
               <div className="text-sm text-muted-foreground">個變體</div>
             </div>
             
-            <div className="text-center p-4 rounded-lg border bg-green-50">
-              <div className="text-2xl font-bold text-green-600">
+            <div className="text-center p-4 rounded-lg border bg-muted/50">
+              <div className="text-2xl font-bold text-chart-2">
                 ${statistics.totalValue.toFixed(2)}
               </div>
               <div className="text-sm text-muted-foreground">總價值</div>
             </div>
             
-            <div className="text-center p-4 rounded-lg border bg-orange-50">
-              <div className="text-2xl font-bold text-orange-600">
+            <div className="text-center p-4 rounded-lg border bg-muted/50">
+              <div className="text-2xl font-bold text-chart-3">
                 ${statistics.averagePrice.toFixed(2)}
               </div>
               <div className="text-sm text-muted-foreground">平均價格</div>
             </div>
             
-            <div className="text-center p-4 rounded-lg border bg-purple-50">
-              <div className="text-2xl font-bold text-purple-600">
+            <div className="text-center p-4 rounded-lg border bg-muted/50">
+              <div className="text-2xl font-bold text-chart-4">
                 {statistics.selectedAttributes}
               </div>
               <div className="text-sm text-muted-foreground">個屬性</div>
@@ -291,7 +291,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       </Card>
 
       {/* 提交前檢查清單 */}
-      <Card>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <AlertTriangle className="h-5 w-5" />
@@ -304,7 +304,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-start space-x-3">
-              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+              <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
               <div>
                 <p className="font-medium">基本資訊完整</p>
                 <p className="text-sm text-muted-foreground">
@@ -314,7 +314,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
             </div>
             
             <div className="flex items-start space-x-3">
-              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+              <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
               <div>
                 <p className="font-medium">規格配置正確</p>
                 <p className="text-sm text-muted-foreground">
@@ -327,7 +327,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
             </div>
             
             <div className="flex items-start space-x-3">
-              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+              <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
               <div>
                 <p className="font-medium">變體資訊完整</p>
                 <p className="text-sm text-muted-foreground">
@@ -340,7 +340,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       </Card>
 
       {/* 原子化創建流程說明 */}
-      <Card>
+      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Info className="h-5 w-5" />
@@ -349,7 +349,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <p className="text-base font-medium text-green-600">
+            <p className="text-base font-medium text-primary">
               ✅ 所有配置已完成，可以開始創建商品
             </p>
             <p className="text-sm text-muted-foreground">

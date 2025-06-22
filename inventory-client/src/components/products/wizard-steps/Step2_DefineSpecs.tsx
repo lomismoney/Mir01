@@ -229,7 +229,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>根據您的商品特性，選擇單規格或多規格管理方式</p>
@@ -246,7 +246,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
               {formData.specifications.isVariable ? '多規格商品' : '單規格商品'}
             </Label>
           </div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-muted-foreground">
             {formData.specifications.isVariable ? (
               '適合有多種選項的商品（顏色、尺寸等）'
             ) : (
@@ -259,7 +259,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
       {formData.specifications.isVariable && (
         <>
           {/* 屬性選擇 */}
-          <Card>
+          <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Tag className="h-5 w-5" />
@@ -327,7 +327,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
 
           {/* 屬性值管理 */}
           {formData.specifications.selectedAttributes.length > 0 && (
-            <Card>
+            <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Plus className="h-5 w-5" />
@@ -411,7 +411,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
 
           {/* 變體預覽 */}
           {potentialVariantsCount > 0 && (
-            <Card>
+            <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Package className="h-5 w-5" />
@@ -424,7 +424,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
               <CardContent>
                 <div className="p-4 rounded-lg border bg-muted/50">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-primary">
                       {potentialVariantsCount}
                     </div>
                     <div className="text-sm text-muted-foreground">
