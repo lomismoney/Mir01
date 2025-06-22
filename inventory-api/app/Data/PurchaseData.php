@@ -19,8 +19,8 @@ class PurchaseData extends Data
         #[Exists('stores', 'id')]
         public int $store_id,
 
-        #[Rule(['required', 'string', 'max:255', 'unique:purchases,order_number'])]
-        public string $order_number,
+        #[Rule(['nullable', 'string', 'max:255', 'unique:purchases,order_number'])]
+        public ?string $order_number,
 
         #[WithCast(MoneyCast::class)]
         #[Rule(['required', 'numeric', 'min:0'])]

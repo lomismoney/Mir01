@@ -30,7 +30,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PurchaseFormData {
   store_id: string;
-  order_number: string;
   purchased_at: string;
   shipping_cost: string;
   status: string;
@@ -56,7 +55,6 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
   const form = useForm<PurchaseFormData>({
     defaultValues: {
       store_id: "",
-      order_number: "",
       purchased_at: new Date().toISOString().split('T')[0],
       shipping_cost: "0",
       status: PURCHASE_STATUS.PENDING,
@@ -98,7 +96,6 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
     // 轉換資料格式
     const purchaseData = {
       store_id: parseInt(data.store_id),
-      order_number: data.order_number,
       purchased_at: data.purchased_at ? `${data.purchased_at}T10:00:00+08:00` : undefined,
       shipping_cost: parseFloat(data.shipping_cost) || 0,
       status: data.status,
@@ -203,20 +200,6 @@ export function CreatePurchaseDialog({ open, onOpenChange, onSuccess }: CreatePu
                               ))}
                             </SelectContent>
                           </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="order_number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>進貨單號 *</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="例：PO-20240101-001" />
-                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}

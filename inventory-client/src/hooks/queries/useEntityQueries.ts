@@ -2775,23 +2775,20 @@ export function usePurchase(id: number | string) {
 /**
  * 🎯 創建進貨單請求的具名類型定義
  * 
- * 此類型反映進貨單表單的數據結構，包含供應商資訊、
- * 進貨項目明細等，確保前後端數據契約的一致性
+ * 此類型反映進貨單表單的數據結構，確保前後端數據契約的一致性
+ * 進貨單號現在由後端自動生成，無需前端提供
  */
 type CreatePurchasePayload = {
-  supplier_id: number;    // 供應商 ID（必填）
-  store_id: number;       // 門市 ID（必填）
-  purchase_date: string;  // 進貨日期 (YYYY-MM-DD 格式)
-  notes?: string;         // 備註
+  store_id: number;         // 門市 ID（必填）
+  order_number?: string;    // 進貨單號（可選，後端會自動生成）
+  purchased_at?: string;    // 進貨日期時間 (ISO 8601 格式)
+  shipping_cost: number;    // 運費
+  status?: string;          // 狀態
   items: {
     product_variant_id: number;  // 商品變體 ID
     quantity: number;            // 進貨數量
-    price: number;               // 進貨單價
-    subtotal?: number;           // 小計（可由前端計算）
+    cost_price: number;          // 進貨成本價
   }[];
-  // 以下欄位可能由後端自動生成
-  order_number?: string;  // 進貨單號
-  total_amount?: number;  // 總金額
 };
 
 // 創建進貨單
@@ -2801,7 +2798,7 @@ export function useCreatePurchase() {
   return useMutation({
     mutationFn: async (purchaseData: CreatePurchasePayload) => {
       const { data, error } = await apiClient.POST('/api/purchases', {
-        body: purchaseData
+        body: purchaseData as any
       })
       
       if (error) {

@@ -18,6 +18,58 @@ use Illuminate\Support\Carbon;
 class PurchaseService
 {
     /**
+     * 自動生成進貨單號（黃金標準實現）
+     * 
+     * 格式：PO-YYYY-MM-DD-XXX (XXX 為當日流水號)
+     * 使用獨立的計數器表、資料庫事務和悲觀鎖確保並發安全
+     * 
+     * @param \DateTime|null $date 日期，預設為今天
+     * @return string
+     * @throws \Exception 當生成失敗時
+     */
+    private function generateOrderNumber(\DateTime $date = null): string
+    {
+        return DB::transaction(function () use ($date) {
+            // 獲取日期
+            $date = $date ?? new \DateTime();
+            $dateStr = $date->format('Y-m-d');
+            
+            // 查詢並鎖定該日的計數器記錄
+            $counter = DB::table('daily_purchase_counters')
+                ->where('date', $dateStr)
+                ->lockForUpdate()
+                ->first();
+            
+            if (!$counter) {
+                // 如果記錄不存在，創建新記錄
+                DB::table('daily_purchase_counters')->insert([
+                    'date' => $dateStr,
+                    'last_sequence' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                
+                $newSequence = 1;
+            } else {
+                // 如果記錄存在，遞增序號
+                $newSequence = $counter->last_sequence + 1;
+                
+                DB::table('daily_purchase_counters')
+                    ->where('date', $dateStr)
+                    ->update([
+                        'last_sequence' => $newSequence,
+                        'updated_at' => now(),
+                    ]);
+            }
+            
+            // 格式化進貨單號
+            $orderNumber = sprintf('PO-%s-%03d', $dateStr, $newSequence);
+            
+            return $orderNumber;
+        });
+    }
+    
+    /**
      * 建立新的進貨單
      * 
      * @param PurchaseData $purchaseData 進貨單資料
@@ -38,10 +90,14 @@ class PurchaseService
             $totalAmount = $itemSubtotal + $purchaseData->shipping_cost;
 
             // 2. 建立進貨單主記錄 (Purchase)
+            // 自動生成進貨單號，基於進貨日期
+            $purchasedAt = $purchaseData->purchased_at ?? Carbon::now();
+            $orderNumber = $this->generateOrderNumber(new \DateTime($purchasedAt));
+            
             $purchase = Purchase::create([
                 'store_id' => $purchaseData->store_id,
-                'order_number' => $purchaseData->order_number,
-                'purchased_at' => $purchaseData->purchased_at ?? Carbon::now(),
+                'order_number' => $orderNumber,
+                'purchased_at' => $purchasedAt,
                 'total_amount' => $totalAmount,
                 'shipping_cost' => $purchaseData->shipping_cost,
                 'status' => $purchaseData->status ?? Purchase::STATUS_PENDING,

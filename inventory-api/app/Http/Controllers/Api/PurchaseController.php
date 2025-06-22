@@ -55,7 +55,7 @@ class PurchaseController extends Controller
      * @group 進貨管理
      * @authenticated
      * @bodyParam store_id integer required 門市ID Example: 1
-     * @bodyParam order_number string required 進貨單號 Example: PO-20240101-001
+     * @bodyParam order_number string 進貨單號（選填，系統會自動生成） Example: PO-20240101-001
      * @bodyParam purchased_at string 進貨日期 Example: 2024-01-01T10:00:00+08:00
      * @bodyParam shipping_cost number required 總運費成本 Example: 150.00
      * @bodyParam status string 進貨單狀態 Example: pending
