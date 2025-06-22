@@ -156,6 +156,7 @@ export function useProducts(filters: ProductFilters = {}) {
                             // 為 ProductSelector 添加必要欄位
                             specifications: specifications,
                             stock: totalStock,
+                            productName: apiProduct.name, // 添加商品名稱到變體中
                             
                             // 保留原始數據
                             attribute_values: attributeValues,

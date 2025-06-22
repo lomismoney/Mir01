@@ -94,7 +94,10 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
       quantity: 1, // 新增的品項數量預設為 1
       // 🎯 確保價格是數字類型，符合 Zod 驗證要求
       price: Number(variant.price) || 0,
-      product_name: variant.specifications, // 使用規格描述作為商品名稱
+      // 結合商品名稱和規格描述，提供完整的商品資訊
+      product_name: variant.productName 
+        ? `${variant.productName} - ${variant.specifications}`
+        : variant.specifications,
       sku: variant.sku,
       custom_specifications: undefined,
     }));

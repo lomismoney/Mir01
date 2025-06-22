@@ -31,6 +31,8 @@ export interface Variant {
   stock: number;
   /** 規格專屬圖片 URL (可選) */
   imageUrl?: string;
+  /** 商品名稱 */
+  productName?: string;
 }
 
 /**
@@ -204,11 +206,19 @@ export function ProductSelector({
    * 處理確認選擇
    */
   const handleConfirmSelection = () => {
-    // 將所有產品的規格 (variants) 攤平成一個單獨的陣列
-    const allVariants = products.flatMap(p => p.variants);
-
-    // 從攤平的陣列中，過濾出 ID 存在於 selectedVariants 集合中的規格物件
-    const selectedVariantObjects = allVariants.filter(v => selectedVariants.has(v.id));
+    // 收集選中的變體並添加商品名稱
+    const selectedVariantObjects: Variant[] = [];
+    
+    products.forEach(product => {
+      product.variants.forEach((variant: Variant) => {
+        if (selectedVariants.has(variant.id)) {
+          selectedVariantObjects.push({
+            ...variant,
+            productName: product.name // 添加商品名稱
+          });
+        }
+      });
+    });
 
     // 將包含完整資訊的物件陣列回傳給父元件
     onSelect(selectedVariantObjects);
