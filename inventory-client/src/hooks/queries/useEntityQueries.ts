@@ -111,38 +111,57 @@ export function useProducts(filters: ProductFilters = {}) {
                 mainImageUrl: (apiProduct.image_urls?.original || 'https://via.placeholder.com/300x300').replace('localhost', '127.0.0.1'), // 主圖 URL - 替換為 IPv4
                 
                                     // 🎯 變體(SKU)數據的深度清理
-                    variants: apiProduct.variants?.map((variant: any) => ({
-                        id: variant.id || 0,
-                        sku: variant.sku || 'N/A',
-                        price: parseFloat(variant.price || '0'), // 字串轉數值
-                        product_id: variant.product_id || apiProduct.id,
-                        created_at: variant.created_at || '',
-                        updated_at: variant.updated_at || '',
-                        // 如果變體有自己的圖片，也進行 URL 替換
-                        imageUrl: variant.image_url ? variant.image_url.replace('localhost', '127.0.0.1') : undefined,
-                    
-                    // 🔧 屬性值處理
-                    attribute_values: variant.attribute_values?.map((attrValue: any) => ({
-                        id: attrValue.id || 0,
-                        value: attrValue.value || '',
-                        attribute_id: attrValue.attribute_id || 0,
-                        attribute: attrValue.attribute ? {
-                            id: attrValue.attribute.id || 0,
-                            name: attrValue.attribute.name || '',
-                        } : null,
-                    })) || [],
-                    
-                    // 📦 庫存資訊處理
-                    inventory: variant.inventory?.map((inv: any) => ({
-                        id: inv.id || 0,
-                        quantity: parseInt(inv.quantity || '0', 10), // 字串轉整數
-                        low_stock_threshold: parseInt(inv.low_stock_threshold || '0', 10),
-                        store: inv.store ? {
-                            id: inv.store.id || 0,
-                            name: inv.store.name || '未知門市',
-                        } : null,
-                    })) || [],
-                })) || [],
+                    variants: apiProduct.variants?.map((variant: any) => {
+                        // 處理屬性值
+                        const attributeValues = variant.attribute_values?.map((attrValue: any) => ({
+                            id: attrValue.id || 0,
+                            value: attrValue.value || '',
+                            attribute_id: attrValue.attribute_id || 0,
+                            attribute: attrValue.attribute ? {
+                                id: attrValue.attribute.id || 0,
+                                name: attrValue.attribute.name || '',
+                            } : null,
+                        })) || [];
+                        
+                        // 處理庫存
+                        const inventoryList = variant.inventory?.map((inv: any) => ({
+                            id: inv.id || 0,
+                            quantity: parseInt(inv.quantity || '0', 10), // 字串轉整數
+                            low_stock_threshold: parseInt(inv.low_stock_threshold || '0', 10),
+                            store: inv.store ? {
+                                id: inv.store.id || 0,
+                                name: inv.store.name || '未知門市',
+                            } : null,
+                        })) || [];
+                        
+                        // 計算總庫存
+                        const totalStock = inventoryList.reduce((sum: number, inv: any) => sum + inv.quantity, 0);
+                        
+                        // 組合規格描述
+                        const specifications = attributeValues
+                            .map((av: any) => av.value)
+                            .filter(Boolean)
+                            .join(' / ') || '標準規格';
+                        
+                        return {
+                            id: variant.id || 0,
+                            sku: variant.sku || 'N/A',
+                            price: parseFloat(variant.price || '0'), // 字串轉數值
+                            product_id: variant.product_id || apiProduct.id,
+                            created_at: variant.created_at || '',
+                            updated_at: variant.updated_at || '',
+                            // 如果變體有自己的圖片，也進行 URL 替換
+                            imageUrl: variant.image_url ? variant.image_url.replace('localhost', '127.0.0.1') : undefined,
+                            
+                            // 為 ProductSelector 添加必要欄位
+                            specifications: specifications,
+                            stock: totalStock,
+                            
+                            // 保留原始數據
+                            attribute_values: attributeValues,
+                            inventory: inventoryList,
+                        };
+                    }) || [],
                 
                 // 💰 價格範圍統計（基於變體價格計算）
                 price_range: (() => {
