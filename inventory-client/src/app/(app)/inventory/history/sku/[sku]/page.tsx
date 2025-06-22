@@ -119,23 +119,20 @@ export default function SkuHistoryPage({
     resolveParams()
   }, [params, searchParams])
 
-  // 直接使用新的 SKU 歷史查詢 API
-  const { data: skuHistoryResponse, isLoading: isLoadingHistory, error: historyError } = useSkuInventoryHistory({
+  // 🎯 最終純化：直接使用標準化的 SKU 歷史查詢 API
+  const { data: skuHistoryData, isLoading: isLoadingHistory, error: historyError } = useSkuInventoryHistory({
     sku: sku || "",
     ...filters
   })
 
-  // 🎯 標準化數據獲取 - 假設 Hook 返回的結構可能有所不同
-  // 如果 Hook 返回特殊格式，需要適應性解構
+  // 🎯 最終的純淨形態：直接從 Hook 返回的結構中解構，無需任何手動處理
   const matchingInventories = useMemo(() => {
-    const data = skuHistoryResponse as any
-    return data?.inventories || []
-  }, [skuHistoryResponse])
+    return skuHistoryData?.inventories ?? []
+  }, [skuHistoryData])
 
   const allTransactions = useMemo(() => {
-    const data = skuHistoryResponse as any
-    return data?.data || []
-  }, [skuHistoryResponse])
+    return skuHistoryData?.data ?? []
+  }, [skuHistoryData])
 
   // 處理並合併轉移記錄
   const processedTransactions = useMemo(() => {

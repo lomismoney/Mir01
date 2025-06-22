@@ -1882,14 +1882,16 @@ export function useSkuInventoryHistory(params: {
       return data;
     },
     
-    // 🎯 數據精煉廠 - 統一處理 SKU 歷史數據格式
+    // 🎯 最終標準化數據精煉廠 - 處理這個特殊的數據結構
     select: (response: any) => {
-      // 解包：處理分頁或普通陣列數據結構
-      const history = response?.data || response || [];
-      if (!Array.isArray(history)) return [];
-      
-      // 返回純淨的歷史記錄陣列
-      return history;
+      // 此 API 返回特殊結構：{ data: transactions[], inventories: inventory[] }
+      // 我們保留整個結構，讓 UI 元件可以直接使用
+      return {
+        data: response?.data || [],           // 交易記錄陣列
+        inventories: response?.inventories || [], // 庫存項目陣列
+        message: response?.message,
+        pagination: response?.pagination
+      };
     },
     
     enabled: !!params.sku,
