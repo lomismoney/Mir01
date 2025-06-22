@@ -50,8 +50,8 @@ class OrderItemController extends Controller
     public function updateStatus(UpdateOrderItemStatusRequest $request, OrderItem $orderItem)
     {
         return DB::transaction(function () use ($request, $orderItem) {
-            // 1. 權限驗證 (可選，取決於業務需求)
-            // $this->authorize('update', $orderItem->order);
+            // 1. 權限驗證
+            $this->authorize('update', $orderItem->order);
             
             // 2. 記錄原始狀態
             $originalStatus = $orderItem->status;

@@ -821,58 +821,72 @@ export function useCustomerDetail(customerId: number | null) {
 }
 
 /**
- * 創建客戶的 Mutation Hook
+ * 創建客戶的精確前端契約類型
  * 
- * 🚀 戰術功能：為「新增客戶」按鈕提供完整的 API 集成
+ * 此類型精確反映前端 useForm 的數據結構，
+ * 確保類型安全並消除任何 `as any` 的使用需求
+ */
+type CreateCustomerPayload = {
+  name: string;
+  phone?: string;
+  is_company: boolean;
+  tax_id?: string;
+  industry_type: string;
+  payment_type: string;
+  contact_address?: string;
+  addresses?: {
+    id?: number;
+    address: string;
+    is_default: boolean;
+  }[];
+};
+
+/**
+ * 創建客戶的 Hook
  * 
- * 功能特性：
- * 1. 類型安全的 API 調用 - 使用生成的類型定義
- * 2. 成功後自動刷新客戶列表 - 「失效並強制重取」標準模式
- * 3. 用戶友善的成功/錯誤通知 - 使用 sonner toast
- * 4. 錯誤處理與訊息解析 - 統一的錯誤處理邏輯
- * 5. 支援完整的客戶資訊與地址管理
- * 
- * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ * 🎯 架構升級：使用精確的前端契約類型，
+ * 在 Hook 內部處理前端到後端的數據轉換邏輯
  */
 export function useCreateCustomer() {
   const queryClient = useQueryClient();
-  
-  // 使用 API 生成的類型定義
+
+  // API 契約類型（從 openapi-typescript 生成）
   type CreateCustomerRequestBody = import('@/types/api').paths['/api/customers']['post']['requestBody']['content']['application/json'];
-  
-  // 🎯 定義前端表單數據結構
-  type CustomerFormData = {
-    name: string;
-    phone?: string;
-    email?: string;
-    contact_person?: string;
-    tax_id?: string;
-    contact_address?: string;
-    industry?: string;
-    payment_preference?: string;
-    addresses: { address: string; is_default?: boolean }[]; // 前端的豐富數據結構
-    notes?: string;
-  };
-  
+
   return useMutation({
-    mutationFn: async (formData: CustomerFormData) => {
-      // 🎯 數據精煉廠：在 Hook 內部進行數據轉換
+    // 🎯 使用我們新定義的、代表前端表單數據的嚴格類型
+    mutationFn: async (payload: CreateCustomerPayload) => {
+      // 🎯 數據轉換邏輯：前端表單結構 → 後端 API 結構
       const apiPayload: CreateCustomerRequestBody = {
-        name: formData.name,
-        phone: formData.phone || null,
-        tax_id: formData.tax_id || null,
-        contact_address: formData.contact_address || null,
-        is_company: !!formData.tax_id, // 如果有統編就是公司
-        industry_type: formData.industry || '其他', // 提供預設值
-        payment_type: formData.payment_preference || '現金', // 提供預設值
-        // 將前端的地址對象陣列轉換為 API 期望的字串陣列
-        addresses: formData.addresses?.map(addr => addr.address).filter(Boolean)
+        name: payload.name,
+        phone: payload.phone,
+        // email 在表單中不存在，保持為 undefined
+        email: undefined,
+        // contact_person 在表單中不存在，保持為 undefined
+        contact_person: undefined,
+        tax_id: payload.tax_id,
+        contact_address: payload.contact_address,
+        // 欄位映射：industry_type → industry
+        industry: payload.industry_type,
+        // 欄位映射：payment_type → payment_preference
+        payment_preference: payload.payment_type,
+        // 轉換地址陣列：從對象陣列轉為字串陣列
+        addresses: payload.addresses?.map(addr => addr.address) || [],
+        // 計算預設地址索引
+        default_address_index: payload.addresses?.findIndex(addr => addr.is_default) ?? -1,
+        // notes 在表單中不存在，保持為 undefined
+        notes: undefined,
       };
       
       const { data, error } = await apiClient.POST('/api/customers', {
         body: apiPayload,
       });
-      if (error) throw error;
+
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '創建客戶失敗');
+      }
+
       return data;
     },
     onSuccess: async (data) => {

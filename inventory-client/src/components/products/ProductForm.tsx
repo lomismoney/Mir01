@@ -355,8 +355,6 @@ export function ProductForm({
       const submissionData: ProductSubmissionData = correctSubmissionData;
 
       // === 3. 調用實際的 API 端點 ===
-      console.log('準備提交的資料:', submissionData);
-      
       // 使用 createProductMutation 進行實際的 API 調用
       await createProductMutation.mutateAsync(submissionData);
       
@@ -367,7 +365,6 @@ export function ProductForm({
       router.push('/products');
 
     } catch (error) {
-      console.error('商品創建失敗：', error);
       toast.error(`商品創建失敗：${(error as Error).message}`);
     }
   };

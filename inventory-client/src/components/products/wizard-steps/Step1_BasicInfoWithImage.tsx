@@ -82,14 +82,6 @@ export function Step1_BasicInfoWithImage({
       category.name
     );
   }, [categoriesGrouped]);
-
-  // 除錯資訊
-  React.useEffect(() => {
-    console.log('Categories loading:', categoriesLoading);
-    console.log('Categories error:', categoriesError);
-    console.log('Categories grouped:', categoriesGrouped);
-    console.log('Categories list:', categoriesList);
-  }, [categoriesLoading, categoriesError, categoriesGrouped, categoriesList]);
   
   // 本地驗證狀態
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});

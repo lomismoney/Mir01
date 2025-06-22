@@ -512,7 +512,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
             isSubmitting={createCustomerMutation.isPending}
             onSubmit={(customerData) => {
               // 🎯 純淨消費：直接將表單數據傳遞給 mutation
-              createCustomerMutation.mutate(customerData as any, {
+              createCustomerMutation.mutate(customerData, {
                 onSuccess: (data) => {
                   handleCustomerCreated(data?.data || {});
                 },

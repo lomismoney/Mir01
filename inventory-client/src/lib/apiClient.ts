@@ -55,31 +55,13 @@ apiClient.use({
       const session = await getSession();
       const accessToken = session?.accessToken;
 
-      // 開發環境詳細日誌
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 API 請求認證狀態:', {
-          url: request.url,
-          method: request.method,
-          hasSession: !!session,
-          hasAccessToken: !!accessToken,
-          tokenPrefix: accessToken ? accessToken.substring(0, 10) + '...' : 'null',
-          timestamp: new Date().toISOString()
-        });
-      }
+
 
       // 注入認證憑證到 Authorization header
       if (accessToken) {
         request.headers.set('Authorization', `Bearer ${accessToken}`);
-        
-        // 確認注入成功（開發環境）
-        if (process.env.NODE_ENV === 'development') {
-          console.log('🔐 Authorization header 已注入:', {
-            tokenLength: accessToken.length,
-            headerSet: !!request.headers.get('Authorization')
-          });
-        }
       } else {
-        console.warn('⚠️ 無有效 accessToken，請求將以未認證狀態發送');
+        // 無有效 accessToken，請求將以未認證狀態發送
       }
 
       // 設定必要的 HTTP headers
@@ -88,7 +70,7 @@ apiClient.use({
 
       return request;
     } catch (error) {
-      console.error('❌ 認證攔截器錯誤:', error);
+      // 認證攔截器錯誤
       
       // 即使認證失敗，也要設定基本 headers 並繼續請求
       request.headers.set('Accept', 'application/json');
@@ -105,36 +87,6 @@ apiClient.use({
    * 提供詳細的開發環境日誌和錯誤分析
    */
   async onResponse({ response }) {
-    // 開發環境響應日誌
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📡 API 響應狀態:', {
-        url: response.url,
-        status: response.status,
-        statusText: response.statusText,
-        timestamp: new Date().toISOString()
-      });
-
-      // 認證錯誤特別處理
-      if (response.status === 401) {
-        console.error('🚨 認證失敗 - 可能的原因:', {
-          url: response.url,
-          status: response.status,
-          可能原因: [
-            '1. Session 已過期',
-            '2. AccessToken 無效',
-            '3. 後端認證配置問題',
-            '4. CORS 設定問題'
-          ],
-          建議動作: [
-            '1. 檢查 next-auth Session 狀態',
-            '2. 確認後端 API 認證配置',
-            '3. 重新登入以刷新 Session'
-          ],
-          timestamp: new Date().toISOString()
-        });
-      }
-    }
-
     return response;
   },
 });
@@ -199,9 +151,6 @@ export const safeApiClient = {
 export function clearAuthCache(): void {
   // next-auth 會自動處理 Session 清理
   // 這個函式為未來擴展預留接口
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🧹 認證緩存清理完成');
-  }
 }
 
 // 導出統一的 API 客戶端

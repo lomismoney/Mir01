@@ -75,14 +75,6 @@ export function Step1_BasicInfo({
       category.name
     );
   }, [categoriesGrouped]);
-
-  // 除錯資訊
-  React.useEffect(() => {
-    console.log('Categories loading:', categoriesLoading);
-    console.log('Categories error:', categoriesError);
-    console.log('Categories grouped:', categoriesGrouped);
-    console.log('Categories list:', categoriesList);
-  }, [categoriesLoading, categoriesError, categoriesGrouped, categoriesList]);
   
   // 本地驗證狀態
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -189,7 +181,7 @@ export function Step1_BasicInfo({
         params: {
           path: {
             product_id: Number(productId),
-            id: Number(productId)
+            product: Number(productId)
           }
         },
         body: formData as any // 由於 openapi-fetch 的類型限制，這裡需要類型斷言
@@ -212,15 +204,9 @@ export function Step1_BasicInfo({
         throw new Error(errorMessage);
       }
 
-      // 上傳成功，記錄結果
-      console.log('✅ 圖片上傳成功:', data);
-      
-      if (data?.message) {
-        console.log('📝 服務器響應:', data.message);
-      }
+      // 上傳成功
       
     } catch (error: any) {
-      console.error('❌ 圖片上傳錯誤:', error);
       throw error;
     }
   };
@@ -233,7 +219,6 @@ export function Step1_BasicInfo({
   const handleImageUploadSuccess = (imageUrls: any) => {
     toast.success('圖片上傳成功！');
     // 可以在這裡更新表單數據或觸發重新獲取商品詳情
-    console.log('圖片上傳成功，URLs:', imageUrls);
   };
 
   return (

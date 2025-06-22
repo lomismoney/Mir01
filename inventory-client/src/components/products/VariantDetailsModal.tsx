@@ -212,8 +212,7 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
       const variant = row.original;
 
       const handleEditVariant = () => {
-        // TODO: 實現 SKU 編輯功能
-        console.log('編輯 SKU:', variant);
+        // 編輯功能尚未實現
       };
 
       return (

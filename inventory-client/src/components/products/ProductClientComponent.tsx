@@ -138,28 +138,9 @@ const ProductClientComponent = () => {
   // 🔍 添加認證狀態調試
   const { data: session, status } = useSession();
   
-  // 在開發環境中記錄認證狀態
+  // 認證狀態同步
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 ProductClientComponent 認證狀態調試:', {
-        sessionStatus: status,
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        hasAccessToken: !!session?.accessToken,
-        accessTokenPrefix: session?.accessToken ? session.accessToken.substring(0, 10) + '...' : null,
-        userInfo: {
-          id: session?.user?.id,
-          name: session?.user?.name,
-          isAdmin: session?.user?.isAdmin,
-        },
-        adminAuthState: {
-          isLoading,
-          isAuthorized,
-          userFromAdminAuth: user,
-        },
-        timestamp: new Date().toISOString()
-      });
-    }
+    // 認證狀態變更時的任何必要處理可以在這裡添加
   }, [session, status, isLoading, isAuthorized, user]);
   
   // 搜索狀態管理 - 使用防抖優化

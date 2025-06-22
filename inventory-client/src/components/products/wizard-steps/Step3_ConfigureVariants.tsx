@@ -117,19 +117,11 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
     const currentVariants = formData.variants.items;
     const newVariants = generateVariants;
     
-    // 調試信息
-    console.log('Step3 useEffect 觸發');
-    console.log('當前變體數據:', currentVariants);
-    console.log('新生成的變體:', newVariants);
-    console.log('已初始化狀態:', isInitialized.current);
-    
     // 如果已有變體數據且包含價格信息，說明是編輯模式，不要覆蓋
     const hasExistingPriceData = currentVariants.some(v => v.price && v.price !== '');
-    console.log('是否有現有價格數據:', hasExistingPriceData);
     
     // 如果已經初始化過且存在價格數據，跳過自動更新
     if (isInitialized.current && hasExistingPriceData) {
-      console.log('跳過自動更新，保留現有價格數據');
       return;
     }
     
@@ -156,8 +148,6 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
       return newVariant;
     });
 
-    console.log('合併後的變體數據:', mergedVariants);
-
     // 如果啟用自動 SKU，生成 SKU（但不覆蓋已有的 SKU）
     if (autoSku) {
       mergedVariants.forEach((variant, index) => {
@@ -169,10 +159,8 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
 
     // 只有在數據真的需要更新時才更新
     const needsUpdate = JSON.stringify(mergedVariants) !== JSON.stringify(currentVariants);
-    console.log('是否需要更新:', needsUpdate);
     
     if (needsUpdate) {
-      console.log('更新變體數據:', mergedVariants);
       updateFormData('variants', {
         items: mergedVariants,
       });

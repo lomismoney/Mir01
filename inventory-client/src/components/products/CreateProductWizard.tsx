@@ -424,10 +424,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         },
       };
 
-      // 調試信息：檢查轉換後的變體數據
-      console.log('編輯模式 - 原始產品數據:', product);
-      console.log('編輯模式 - 轉換後的變體數據:', variantItems);
-      console.log('編輯模式 - 完整轉換數據:', transformedData);
+
       
       // 預填表單數據
       setFormData(transformedData);
@@ -604,7 +601,6 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       if (isEditMode && productId) {
         // 編輯模式：始終使用完整的多規格 API
         const apiPayload = transformWizardDataToApiPayload(formData, attributesData);
-        console.log('編輯模式 - API 請求資料：', apiPayload);
         
         toast.loading('正在更新商品資訊...', { id: 'submit-progress' });
         
@@ -626,7 +622,6 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         if (isSingleVariant) {
           // === 走「簡易創建」通道 ===
           const simplePayload = transformToSimplePayload(formData);
-          console.log('單規格創建模式 - API 請求資料：', simplePayload);
           
           toast.loading('正在創建單規格商品...', { id: 'submit-progress' });
           
@@ -640,7 +635,6 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         } else {
           // === 走「多規格創建」通道 ===
           const variantPayload = transformToVariantPayload(formData, attributesData);
-          console.log('多規格創建模式 - API 請求資料：', variantPayload);
           
           toast.loading('正在創建多規格商品...', { id: 'submit-progress' });
           
@@ -671,7 +665,6 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
           
         } catch (imageError) {
           // 圖片上傳失敗，但商品已創建成功
-          console.error('圖片上傳失敗:', imageError);
           
           toast.warning('商品創建成功，但圖片上傳失敗', {
             id: 'image-progress',
@@ -693,7 +686,6 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
 
     } catch (error) {
       // 主要錯誤處理
-      console.error(`商品${isEditMode ? '更新' : '創建'}失敗:`, error);
       
       toast.error(`商品${isEditMode ? '更新' : '創建'}失敗`, {
         id: 'submit-progress',

@@ -39,8 +39,8 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. 權限驗證 (可選，取決於您的權限策略)
-        // $this->authorize('viewAny', Customer::class);
+        // 1. 權限驗證
+        $this->authorize('viewAny', Customer::class);
 
         // 2. 驗證請求參數
         $request->validate([
@@ -98,7 +98,7 @@ class CustomerController extends Controller
     {
         try {
             // 1. 權限驗證 - 檢查使用者是否有權限創建客戶
-            // $this->authorize('create', Customer::class);
+            $this->authorize('create', Customer::class);
 
             // 2. 將驗證過的數據傳遞給 Service 層處理
             $customer = $this->customerService->createCustomer($request->validated());
@@ -149,8 +149,8 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        // 1. 權限驗證 (假設已定義 CustomerPolicy)
-        // $this->authorize('view', $customer);
+        // 1. 權限驗證
+        $this->authorize('view', $customer);
 
         // 2. 預加載所有需要的關聯數據，以優化性能
         $customer->load(['addresses', 'defaultAddress']);
@@ -183,7 +183,7 @@ class CustomerController extends Controller
     {
         try {
             // 1. 權限驗證 - 檢查使用者是否有權限更新此客戶
-            // $this->authorize('update', $customer);
+            $this->authorize('update', $customer);
 
             // 2. 將驗證過的數據傳遞給 Service 層處理
             $updatedCustomer = $this->customerService->updateCustomer($customer, $request->validated());
@@ -233,7 +233,7 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         // 1. 權限驗證
-        // $this->authorize('delete', $customer);
+        $this->authorize('delete', $customer);
 
         // 2. 執行刪除操作
         $customer->delete();

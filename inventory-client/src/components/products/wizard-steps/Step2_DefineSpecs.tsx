@@ -62,37 +62,8 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
       return attributesData as Attribute[];
     }
     
-    console.warn('Unexpected attributes data structure:', attributesData);
     return [];
   }, [attributesData]);
-  
-  // 除錯資訊
-  React.useEffect(() => {
-    console.log('=== Attributes Debug Info ===');
-    console.log('Session status:', status);
-    console.log('Session data:', session);
-    console.log('User API token:', session?.user?.apiToken ? '✅ 有 token' : '❌ 無 token');
-    console.log('Loading:', attributesLoading);
-    console.log('Error:', attributesError);
-    console.log('Raw API Data:', attributesData);
-    console.log('Data type:', typeof attributesData);
-    console.log('Is array:', Array.isArray(attributesData));
-    console.log('Has data property:', attributesData && typeof attributesData === 'object' && 'data' in attributesData);
-    console.log('Processed attributes:', attributes);
-    console.log('Attributes count:', attributes.length);
-    
-    // 詳細檢查每個屬性的值
-    attributes.forEach((attr, index) => {
-      console.log(`Attribute ${index + 1}:`, {
-        id: attr.id,
-        name: attr.name,
-        values: attr.values,
-        valuesCount: attr.values?.length || 0
-      });
-    });
-    
-    console.log('===============================');
-  }, [status, session, attributesLoading, attributesError, attributesData, attributes]);
   
   // 本地狀態：屬性值輸入框
   const [inputValues, setInputValues] = useState<Record<number, string>>({});
