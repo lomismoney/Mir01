@@ -240,7 +240,13 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       }
 
       // SPU 主行顯示縮圖
-      const imageUrl = item.image_urls?.thumb || item.image_urls?.original;
+      let imageUrl = item.image_urls?.thumb || item.image_urls?.original;
+      
+      // --- 🎯 新增的 URL 替換邏輯 ---
+      if (imageUrl) {
+        imageUrl = imageUrl.replace('localhost', '127.0.0.1');
+      }
+      // --- 替換邏輯結束 ---
       
       return (
         <div className="flex justify-center">

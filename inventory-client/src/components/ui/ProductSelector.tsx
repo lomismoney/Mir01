@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useProducts } from '@/hooks/queries/useEntityQueries';
@@ -362,10 +363,12 @@ export function ProductSelector({
                   <CardContent className="p-4">
                     {/* 產品圖片 */}
                     <div className="relative aspect-square mb-3">
-                      <img
+                      <Image
                         src={product.mainImageUrl}
                         alt={product.name}
-                        className="w-full h-full object-cover rounded-md"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover rounded-md"
                       />
                     </div>
                     
@@ -431,10 +434,12 @@ export function ProductSelector({
                         <TableCell>
                           {variant.imageUrl ? (
                             <div className="relative w-16 h-16">
-                              <img
+                              <Image
                                 src={variant.imageUrl}
                                 alt={variant.sku}
-                                className="w-full h-full object-cover rounded"
+                                fill
+                                sizes="64px"
+                                className="object-cover rounded"
                               />
                             </div>
                           ) : (

@@ -108,16 +108,18 @@ export function useProducts(filters: ProductFilters = {}) {
                 
                 // 🎯 向前相容：為 ProductSelector 等元件提供簡化格式
                 categoryName: apiProduct.category?.name || '未分類', // 字串格式的分類名稱
-                mainImageUrl: apiProduct.image_urls?.original || 'https://via.placeholder.com/300x300', // 主圖 URL
+                mainImageUrl: (apiProduct.image_urls?.original || 'https://via.placeholder.com/300x300').replace('localhost', '127.0.0.1'), // 主圖 URL - 替換為 IPv4
                 
-                // 🎯 變體(SKU)數據的深度清理
-                variants: apiProduct.variants?.map((variant: any) => ({
-                    id: variant.id || 0,
-                    sku: variant.sku || 'N/A',
-                    price: parseFloat(variant.price || '0'), // 字串轉數值
-                    product_id: variant.product_id || apiProduct.id,
-                    created_at: variant.created_at || '',
-                    updated_at: variant.updated_at || '',
+                                    // 🎯 變體(SKU)數據的深度清理
+                    variants: apiProduct.variants?.map((variant: any) => ({
+                        id: variant.id || 0,
+                        sku: variant.sku || 'N/A',
+                        price: parseFloat(variant.price || '0'), // 字串轉數值
+                        product_id: variant.product_id || apiProduct.id,
+                        created_at: variant.created_at || '',
+                        updated_at: variant.updated_at || '',
+                        // 如果變體有自己的圖片，也進行 URL 替換
+                        imageUrl: variant.image_url ? variant.image_url.replace('localhost', '127.0.0.1') : undefined,
                     
                     // 🔧 屬性值處理
                     attribute_values: variant.attribute_values?.map((attrValue: any) => ({

@@ -22,6 +22,14 @@ const nextConfig: NextConfig = {
         port: '8000',
         pathname: '/storage/**',
       },
+      // --- 🎯 新增此段，明確授權 IPv4 地址 ---
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '8000',
+        pathname: '/storage/**',
+      },
+      // --- 新增結束 ---
     ],
   },
 };

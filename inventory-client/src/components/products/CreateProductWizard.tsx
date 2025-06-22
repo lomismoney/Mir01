@@ -408,11 +408,12 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         imageData: {
           selectedFile: null,
           // 如果商品有圖片，使用原圖 URL 作為預覽
-          previewUrl: product.image_urls?.original 
+          previewUrl: (product.image_urls?.original 
             || product.image_urls?.large 
             || product.image_urls?.medium 
             || product.image_urls?.thumb
-            || null,
+            || '')
+            .replace('localhost', '127.0.0.1') || null,
         },
         specifications: {
           isVariable: isVariable,
