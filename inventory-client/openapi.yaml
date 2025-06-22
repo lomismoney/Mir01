@@ -97,21 +97,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 18
+                    id: 20
                     name: 'Mrs. Justina Gaylord'
                     username: lafayette.considine
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-21T09:22:26.000000Z'
-                    updated_at: '2025-06-21T09:22:26.000000Z'
+                    created_at: '2025-06-22T08:38:14.000000Z'
+                    updated_at: '2025-06-22T08:38:14.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 18
+                        example: 20
                       name:
                         type: string
                         example: 'Mrs. Justina Gaylord'
@@ -129,10 +129,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:14.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:14.000000Z'
       tags:
         - Endpoints
       security: []
@@ -406,18 +406,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 15
+                    id: 19
                     name: 'Bailey Ltd'
                     address: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
-                    created_at: '2025-06-21T09:22:26.000000Z'
-                    updated_at: '2025-06-21T09:22:26.000000Z'
+                    created_at: '2025-06-22T08:38:16.000000Z'
+                    updated_at: '2025-06-22T08:38:16.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 15
+                        example: 19
                       name:
                         type: string
                         example: 'Bailey Ltd'
@@ -426,10 +426,10 @@ paths:
                         example: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
                       created_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -477,18 +477,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 16
+                    id: 20
                     name: "Rempel, Gulgowski and O'Kon"
                     address: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
-                    created_at: '2025-06-21T09:22:26.000000Z'
-                    updated_at: '2025-06-21T09:22:26.000000Z'
+                    created_at: '2025-06-22T08:38:16.000000Z'
+                    updated_at: '2025-06-22T08:38:16.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 16
+                        example: 20
                       name:
                         type: string
                         example: "Rempel, Gulgowski and O'Kon"
@@ -497,10 +497,10 @@ paths:
                         example: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
                       created_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -517,18 +517,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 17
+                    id: 21
                     name: Dach-Gaylord
                     address: "7763 Adriel Fork\nAntoniobury, PA 31881"
-                    created_at: '2025-06-21T09:22:26.000000Z'
-                    updated_at: '2025-06-21T09:22:26.000000Z'
+                    created_at: '2025-06-22T08:38:16.000000Z'
+                    updated_at: '2025-06-22T08:38:16.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 17
+                        example: 21
                       name:
                         type: string
                         example: Dach-Gaylord
@@ -537,10 +537,10 @@ paths:
                         example: "7763 Adriel Fork\nAntoniobury, PA 31881"
                       created_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -602,18 +602,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 18
+                    id: 22
                     name: 'Leuschke Inc'
                     address: "427 Predovic Ridge\nBaileemouth, KS 32375-9947"
-                    created_at: '2025-06-21T09:22:26.000000Z'
-                    updated_at: '2025-06-21T09:22:26.000000Z'
+                    created_at: '2025-06-22T08:38:16.000000Z'
+                    updated_at: '2025-06-22T08:38:16.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 18
+                        example: 22
                       name:
                         type: string
                         example: 'Leuschke Inc'
@@ -622,10 +622,10 @@ paths:
                         example: "427 Predovic Ridge\nBaileemouth, KS 32375-9947"
                       created_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -642,21 +642,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 19
+                    id: 21
                     name: 'Ms. Elisabeth Okuneva'
                     username: gulgowski.asia
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-21T09:22:26.000000Z'
-                    updated_at: '2025-06-21T09:22:26.000000Z'
+                    created_at: '2025-06-22T08:38:16.000000Z'
+                    updated_at: '2025-06-22T08:38:16.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 19
+                        example: 21
                       name:
                         type: string
                         example: 'Ms. Elisabeth Okuneva'
@@ -674,10 +674,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-21T09:22:26.000000Z'
+                        example: '2025-06-22T08:38:16.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -1170,7 +1170,7 @@ paths:
         in: path
         name: product_id
         description: 'The ID of the product.'
-        example: 1
+        example: 8
         required: true
         schema:
           type: integer
@@ -1205,7 +1205,7 @@ paths:
                     updated_at: '2024-01-01T10:00:00.000000Z'
                     image_urls:
                       original: 'http://localhost/storage/1/office-chair-original.jpg'
-                      thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                      thumb: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
                       medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
                       large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                     variants:
@@ -1297,7 +1297,7 @@ paths:
                           original:
                             type: string
                             example: 'http://localhost/storage/1/office-chair-original.jpg'
-                          thumbnail:
+                          thumb:
                             type: string
                             example: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
                           medium:
@@ -2115,7 +2115,7 @@ paths:
                     updated_at: '2024-01-01T10:00:00.000000Z'
                     image_urls:
                       original: 'http://localhost/storage/1/office-chair-original.jpg'
-                      thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                      thumb: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
                       medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
                       large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                     variants:
@@ -2207,7 +2207,7 @@ paths:
                           original:
                             type: string
                             example: 'http://localhost/storage/1/office-chair-original.jpg'
-                          thumbnail:
+                          thumb:
                             type: string
                             example: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
                           medium:
@@ -2503,7 +2503,7 @@ paths:
                     updated_at: '2024-01-01T10:00:00.000000Z'
                     image_urls:
                       original: 'http://localhost/storage/1/office-chair-original.jpg'
-                      thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                      thumb: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
                       medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
                       large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                     variants:
@@ -2595,7 +2595,7 @@ paths:
                           original:
                             type: string
                             example: 'http://localhost/storage/1/office-chair-original.jpg'
-                          thumbnail:
+                          thumb:
                             type: string
                             example: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
                           medium:
@@ -2800,7 +2800,7 @@ paths:
                     updated_at: '2024-01-01T10:00:00.000000Z'
                     image_urls:
                       original: 'http://localhost/storage/1/office-chair-original.jpg'
-                      thumbnail: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
+                      thumb: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
                       medium: 'http://localhost/storage/1/conversions/office-chair-medium.jpg'
                       large: 'http://localhost/storage/1/conversions/office-chair-large.jpg'
                     variants:
@@ -2892,7 +2892,7 @@ paths:
                           original:
                             type: string
                             example: 'http://localhost/storage/1/office-chair-original.jpg'
-                          thumbnail:
+                          thumb:
                             type: string
                             example: 'http://localhost/storage/1/conversions/office-chair-thumb.jpg'
                           medium:
@@ -4925,7 +4925,7 @@ paths:
                 type:
                   type: string
                   description: ''
-                  example: transfer_in
+                  example: transfer_cancel
                   nullable: true
                   enum:
                     - addition
@@ -4937,12 +4937,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-21T09:22:26'
+                  example: '2025-06-22T08:38:16'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2051-07-15'
+                  example: '2051-07-16'
                   nullable: true
                 product_name:
                   type: string
@@ -5588,7 +5588,7 @@ paths:
                 type:
                   type: string
                   description: ''
-                  example: reduction
+                  example: transfer_in
                   nullable: true
                   enum:
                     - addition
@@ -5600,12 +5600,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-21T09:22:26'
+                  example: '2025-06-22T08:38:16'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2051-07-15'
+                  example: '2051-07-16'
                   nullable: true
                 per_page:
                   type: integer
@@ -6978,12 +6978,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>.'
-                  example: '2025-06-21'
+                  example: '2025-06-22'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2051-07-15'
+                  example: '2051-07-16'
                   nullable: true
                 page:
                   type: integer

@@ -18,7 +18,8 @@ import {
   Step1_BasicInfoWithImage,
   Step2_DefineSpecs, 
   Step3_ConfigureVariants, 
-  Step4_Review 
+  Step4_Review,
+  EditProductFormSkeleton 
 } from './wizard-steps';
 
 // 導入 API 類型
@@ -406,7 +407,12 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         },
         imageData: {
           selectedFile: null,
-          previewUrl: null,
+          // 如果商品有圖片，使用原圖 URL 作為預覽
+          previewUrl: product.image_urls?.original 
+            || product.image_urls?.large 
+            || product.image_urls?.medium 
+            || product.image_urls?.thumb
+            || null,
         },
         specifications: {
           isVariable: isVariable,
@@ -424,8 +430,6 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         },
       };
 
-
-      
       // 預填表單數據
       setFormData(transformedData);
     }
@@ -730,6 +734,40 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
    * 計算進度百分比
    */
   const progressPercentage = (step / STEPS.length) * 100;
+
+  // 編輯模式：處理載入狀態和錯誤狀態
+  if (isEditMode) {
+    // 載入中 - 使用骨架屏提供視覺連續性
+    if (isLoadingProduct) {
+      return <EditProductFormSkeleton />;
+    }
+    
+    // 載入錯誤或找不到商品
+    if (productError || !productDetail?.data) {
+      return (
+        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+          <Card className="border-destructive/50 bg-destructive/5">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center text-center">
+                <div className="rounded-full bg-destructive/10 p-3 mb-4">
+                  <svg className="h-6 w-6 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">無法載入商品</h3>
+                <p className="text-muted-foreground mb-4">
+                  {productError instanceof Error ? productError.message : '找不到指定的商品，請確認商品是否存在'}
+                </p>
+                <Button onClick={() => router.push('/products')} variant="outline">
+                  返回商品列表
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+  }
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">

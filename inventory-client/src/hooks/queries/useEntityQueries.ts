@@ -232,8 +232,7 @@ export function useProductDetail(productId: number | string | undefined) {
 
             return data;
         },
-        // 🎯 新增的數據精煉廠，負責解包
-        select: (response: any) => response?.data,
+        // 不需要 select，因為 API 響應已經是正確的格式
         enabled: !!numericId, // 只有當有效的 ID 存在時才執行查詢
         staleTime: 5 * 60 * 1000, // 5 分鐘緩存時間，編輯期間避免重複請求
         retry: 2, // 失敗時重試 2 次

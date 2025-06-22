@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Package, Search, Trash2, ChevronDown, Info } from "lucide-react";
+import { Loader2, Package, Search, Trash2, ChevronDown, Info, ListFilter } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -341,20 +341,19 @@ const ProductClientComponent = () => {
 
   return (
     <div className="space-y-4">
-      {/* 搜索和操作工具欄 */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+      {/* --- 搜尋與過濾控制區 --- */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="搜尋商品名稱..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-8 w-[300px]"
+              className="pl-8 max-w-sm"
             />
           </div>
         </div>
-        
         <div className="flex items-center space-x-2">
           {/* 批量刪除按鈕 - 只在有選中項目時顯示 */}
           {table.getFilteredSelectedRowModel().rows.length > 0 && (
@@ -371,8 +370,8 @@ const ProductClientComponent = () => {
           {/* 欄位顯示控制 */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <ChevronDown className="h-4 w-4 mr-2" />
+              <Button variant="outline">
+                <ListFilter className="mr-2 h-4 w-4" />
                 欄位顯示
               </Button>
             </DropdownMenuTrigger>
@@ -400,76 +399,65 @@ const ProductClientComponent = () => {
       </div>
 
       {/* 巢狀商品表格 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Package className="h-5 w-5" />
-            <span>商品列表</span>
-            <div className="text-sm text-muted-foreground font-normal">
-              （支援展開查看 SKU 變體詳情）
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isProductsLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span className="ml-2">載入商品資料中...</span>
-            </div>
-          ) : error ? (
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                載入商品資料時發生錯誤。請重新整理頁面。
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => {
-                        return (
-                          <TableHead key={header.id}>
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                          </TableHead>
-                        )
-                      })}
+      {isProductsLoading ? (
+        <div className="flex items-center justify-center h-32">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="ml-2">載入商品資料中...</span>
+        </div>
+      ) : error ? (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            載入商品資料時發生錯誤。請重新整理頁面。
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                        </TableHead>
+                      )
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      className={row.original.isVariantRow ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableHeader>
-                <TableBody>
-                  {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        data-state={row.getIsSelected() && "selected"}
-                        className={row.original.isVariantRow ? "bg-muted/30" : ""}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className="h-24 text-center">
-                        沒有找到商品資料。
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      沒有找到商品資料。
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
           
           {/* 分頁控制 */}
           <div className="flex items-center justify-end space-x-2 py-4">
@@ -496,8 +484,8 @@ const ProductClientComponent = () => {
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </>
+      )}
 
       {/* 刪除確認對話框 */}
       <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>

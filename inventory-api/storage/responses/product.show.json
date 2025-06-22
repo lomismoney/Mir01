@@ -8,7 +8,7 @@
     "updated_at": "2024-01-01T10:00:00.000000Z",
     "image_urls": {
       "original": "http://localhost/storage/1/office-chair-original.jpg",
-      "thumbnail": "http://localhost/storage/1/conversions/office-chair-thumb.jpg",
+      "thumb": "http://localhost/storage/1/conversions/office-chair-thumb.jpg",
       "medium": "http://localhost/storage/1/conversions/office-chair-medium.jpg",
       "large": "http://localhost/storage/1/conversions/office-chair-large.jpg"
     },

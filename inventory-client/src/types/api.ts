@@ -46,7 +46,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 18 */
+                                /** @example 20 */
                                 id?: number;
                                 /** @example Mrs. Justina Gaylord */
                                 name?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-21T09:22:26.000000Z */
+                                /** @example 2025-06-22T08:38:14.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-21T09:22:26.000000Z */
+                                /** @example 2025-06-22T08:38:14.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -684,7 +684,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the product.
-                 * @example 1
+                 * @example 8
                  */
                 product_id: number;
                 /**
@@ -712,7 +712,7 @@ export interface paths {
                 path: {
                     /**
                      * @description The ID of the product.
-                     * @example 1
+                     * @example 8
                      */
                     product_id: number;
                     /**
@@ -1290,7 +1290,7 @@ export interface paths {
                                     /** @example http://localhost/storage/1/office-chair-original.jpg */
                                     original?: string;
                                     /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
-                                    thumbnail?: string;
+                                    thumb?: string;
                                     /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
                                     medium?: string;
                                     /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
@@ -1587,7 +1587,7 @@ export interface paths {
                                     /** @example http://localhost/storage/1/office-chair-original.jpg */
                                     original?: string;
                                     /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
-                                    thumbnail?: string;
+                                    thumb?: string;
                                     /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
                                     medium?: string;
                                     /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
@@ -3090,18 +3090,18 @@ export interface paths {
                          */
                         store_id?: number | null;
                         /**
-                         * @example transfer_in
+                         * @example transfer_cancel
                          * @enum {string|null}
                          */
                         type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                         /**
                          * @description Must be a valid date.
-                         * @example 2025-06-21T09:22:26
+                         * @example 2025-06-22T08:38:16
                          */
                         start_date?: string | null;
                         /**
                          * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                         * @example 2051-07-15
+                         * @example 2051-07-16
                          */
                         end_date?: string | null;
                         /** @example architecto */
@@ -5016,16 +5016,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 15 */
+                            /** @example 19 */
                             id?: number;
                             /** @example Bailey Ltd */
                             name?: string;
                             /** @example 85625 Gaylord Knolls
                              *     Cecilburgh, WI 02042 */
                             address?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5066,16 +5066,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 16 */
+                            /** @example 20 */
                             id?: number;
                             /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
                             /** @example 80841 Mya Lane Apt. 042
                              *     Lyricberg, MO 42170-0432 */
                             address?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5125,16 +5125,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 17 */
+                            /** @example 21 */
                             id?: number;
                             /** @example Dach-Gaylord */
                             name?: string;
                             /** @example 7763 Adriel Fork
                              *     Antoniobury, PA 31881 */
                             address?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5185,16 +5185,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 18 */
+                            /** @example 22 */
                             id?: number;
                             /** @example Leuschke Inc */
                             name?: string;
                             /** @example 427 Predovic Ridge
                              *     Baileemouth, KS 32375-9947 */
                             address?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5236,7 +5236,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 19 */
+                            /** @example 21 */
                             id?: number;
                             /** @example Ms. Elisabeth Okuneva */
                             name?: string;
@@ -5248,9 +5248,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-21T09:22:26.000000Z */
+                            /** @example 2025-06-22T08:38:16.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5320,7 +5320,7 @@ export interface operations {
                                 /** @example http://localhost/storage/1/office-chair-original.jpg */
                                 original?: string;
                                 /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
-                                thumbnail?: string;
+                                thumb?: string;
                                 /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
                                 medium?: string;
                                 /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
@@ -5600,7 +5600,7 @@ export interface operations {
                                 /** @example http://localhost/storage/1/office-chair-original.jpg */
                                 original?: string;
                                 /** @example http://localhost/storage/1/conversions/office-chair-thumb.jpg */
-                                thumbnail?: string;
+                                thumb?: string;
                                 /** @example http://localhost/storage/1/conversions/office-chair-medium.jpg */
                                 medium?: string;
                                 /** @example http://localhost/storage/1/conversions/office-chair-large.jpg */
@@ -5825,18 +5825,18 @@ export interface operations {
                      */
                     store_id?: number | null;
                     /**
-                     * @example reduction
+                     * @example transfer_in
                      * @enum {string|null}
                      */
                     type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2025-06-21T09:22:26
+                     * @example 2025-06-22T08:38:16
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2051-07-15
+                     * @example 2051-07-16
                      */
                     end_date?: string | null;
                     /**
@@ -6244,12 +6244,12 @@ export interface operations {
                     payment_status?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2025-06-21
+                     * @example 2025-06-22
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2051-07-15
+                     * @example 2051-07-16
                      */
                     end_date?: string | null;
                     /**

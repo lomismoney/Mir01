@@ -8,4 +8,5 @@ export { Step1_BasicInfo } from './Step1_BasicInfo';
 export { Step1_BasicInfoWithImage } from './Step1_BasicInfoWithImage';
 export { Step2_DefineSpecs } from './Step2_DefineSpecs';
 export { Step3_ConfigureVariants } from './Step3_ConfigureVariants';
-export { Step4_Review } from './Step4_Review'; 
+export { Step4_Review } from './Step4_Review';
+export { EditProductFormSkeleton } from './EditProductFormSkeleton'; 

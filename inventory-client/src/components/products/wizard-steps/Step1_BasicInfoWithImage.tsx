@@ -89,13 +89,30 @@ export function Step1_BasicInfoWithImage({
   
   /**
    * 同步圖片選擇到父組件
+   * 遵循單一事實來源原則：所有狀態都來自 formData
    */
   useEffect(() => {
-    updateFormData('imageData', {
-      selectedFile: imageSelection.imageData.file,
-      previewUrl: imageSelection.imageData.preview,
-    });
+    // 只有在選擇了新文件時才更新
+    if (imageSelection.imageData.file) {
+      updateFormData('imageData', {
+        selectedFile: imageSelection.imageData.file,
+        previewUrl: imageSelection.imageData.preview,
+      });
+    }
   }, [imageSelection.imageData.file, imageSelection.imageData.preview, updateFormData]);
+  
+  /**
+   * 處理清除圖片
+   * 清除時同時清除 selectedFile 和 previewUrl
+   */
+  const handleClearImage = () => {
+    imageSelection.clearImage();
+    // 同時清除 formData 中的預覽 URL
+    updateFormData('imageData', {
+      selectedFile: null,
+      previewUrl: null,
+    });
+  };
   
   /**
    * 處理基本資訊欄位變更
@@ -336,23 +353,27 @@ export function Step1_BasicInfoWithImage({
               </p>
             </div>
         
-        {/* 整合的圖片選擇器 */}
+        {/* 整合的圖片選擇器 - 簡化邏輯，所有狀態來自 formData */}
         <ImageSelector
-          imageData={imageSelection.imageData}
+          imageData={{
+            file: formData.imageData.selectedFile,
+            preview: imageSelection.imageData.preview || formData.imageData.previewUrl,
+            isValid: true, // 默認為有效，因為驗證在 imageSelection 內部處理
+          }}
           onSelectImage={imageSelection.selectImage}
-          onClearImage={imageSelection.clearImage}
+          onClearImage={handleClearImage}
           maxFileSize={5 * 1024 * 1024} // 5MB
           acceptedFormats={['image/jpeg', 'image/png', 'image/webp']}
         />
         
-                  {/* 圖片選擇提示 */}
-          <div className="text-xs bg-accent/10 p-3 rounded-md">
-                          <p className="font-medium text-primary mb-1">💡 圖片選擇說明</p>
-                <ul className="space-y-1 text-muted-foreground">
-            <li>• 圖片將在商品創建完成後自動上傳</li>
+        {/* 圖片選擇提示 */}
+        <div className="text-xs bg-accent/10 p-3 rounded-md">
+          <p className="font-medium text-primary mb-1">💡 圖片選擇說明</p>
+          <ul className="space-y-1 text-muted-foreground">
+            <li>• 圖片將在商品{isEditMode ? '更新' : '創建'}完成後自動上傳</li>
             <li>• 支援 JPEG、PNG、WebP 格式，建議使用高品質圖片</li>
             <li>• 圖片大小限制為 5MB</li>
-            <li>• 如果現在不選擇，稍後可以在編輯頁面上傳</li>
+            {!isEditMode && <li>• 如果現在不選擇，稍後可以在編輯頁面上傳</li>}
           </ul>
         </div>
           </div>

@@ -119,7 +119,7 @@ export function ImageSelector({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {!imageData.file ? (
+      {!imageData.file && !imageData.preview ? (
         // 圖片選擇區域
         <div className="flex items-center justify-center w-full">
           <label
@@ -192,12 +192,14 @@ export function ImageSelector({
             </Button>
           </div>
           
-          {/* 圖片信息 */}
-          <div className="mt-2 text-xs text-muted-foreground space-y-1">
-            <p>檔案名稱：{imageData.file.name}</p>
-            <p>檔案大小：{formatFileSize(imageData.file.size)}</p>
-            <p>檔案格式：{imageData.file.type}</p>
-          </div>
+          {/* 圖片信息 - 只在有檔案時顯示 */}
+          {imageData.file && (
+            <div className="mt-2 text-xs text-muted-foreground space-y-1">
+              <p>檔案名稱：{imageData.file.name}</p>
+              <p>檔案大小：{formatFileSize(imageData.file.size)}</p>
+              <p>檔案格式：{imageData.file.type}</p>
+            </div>
+          )}
         </div>
       )}
       

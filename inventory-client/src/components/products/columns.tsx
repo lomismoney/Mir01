@@ -153,8 +153,8 @@ const formatInventories = (inventories?: Array<{ store_id: number; quantity: num
 
   return (
     <div className="text-sm">
-      <div className="font-medium">總庫存: {totalStock}</div>
-      <div className="text-muted-foreground">{storeCount} 個門市</div>
+      <div className="font-medium">{totalStock}</div>
+      <div className="text-xs text-muted-foreground">{storeCount} 個門市</div>
     </div>
   );
 };
@@ -227,6 +227,44 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     size: 40,
   },
 
+  // 縮圖欄位
+  {
+    accessorKey: "image_urls",
+    header: "商品圖片",
+    cell: ({ row }) => {
+      const item = row.original;
+      
+      if (item.isVariantRow) {
+        // SKU 變體行不顯示縮圖
+        return <div className="pl-8" />;
+      }
+
+      // SPU 主行顯示縮圖
+      const imageUrl = item.image_urls?.thumb || item.image_urls?.original;
+      
+      return (
+        <div className="flex justify-center">
+          {imageUrl ? (
+            <img
+              src={addImageCacheBuster(imageUrl, item.updated_at) || imageUrl}
+              alt={item.name}
+              className="h-12 w-12 rounded-md object-cover"
+              // 添加 key 屬性確保 React 重新渲染圖片元素
+              key={`product-${item.id}-${item.updated_at}`}
+            />
+          ) : (
+            <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center">
+              <ImageIcon className="h-6 w-6 text-muted-foreground/60" />
+            </div>
+          )}
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+    size: 100, // 可以給予一個略寬的尺寸以容納文字
+  },
+
   // 商品名稱/SKU 欄位
   {
     accessorKey: "name",
@@ -247,11 +285,20 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         );
       }
 
-      // SPU 主行顯示
+      // SPU 主行顯示 - 修改為兩行顯示
       const name = item.name;
+      const firstVariantSku = item.variants?.[0]?.sku;
+      
       return (
-        <div className="font-medium">
-          {name || <span className="text-muted-foreground">未命名商品</span>}
+        <div className="flex flex-col">
+          {/* 🎯 將商品名稱設為視覺主體，字體更重 */}
+          <span className="font-medium">
+            {name || <span className="text-muted-foreground">未命名商品</span>}
+          </span>
+          {/* 🎯 將 SKU 作為次要資訊，顏色更柔和 */}
+          <span className="text-xs text-muted-foreground">
+            {firstVariantSku || 'N/A'}
+          </span>
         </div>
       );
     },
@@ -305,60 +352,17 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     },
   },
 
-  // 縮圖欄位
-  {
-    id: "thumbnail",
-    header: "縮圖",
-    cell: ({ row }) => {
-      const item = row.original;
-      
-      if (item.isVariantRow) {
-        // SKU 變體行不顯示縮圖
-        return <div className="pl-8" />;
-      }
-
-      // SPU 主行顯示縮圖
-      const product = item;
-      
-      if (product.image_urls?.thumb) {
-        // 🚀 使用工具函數添加時間戳參數強制刷新圖片緩存
-        const cacheBustingUrl = addImageCacheBuster(
-          product.image_urls.thumb, 
-          product.updated_at
-        );
-        
-        return (
-          <img
-            src={cacheBustingUrl || product.image_urls.thumb}
-            alt={product.name}
-            className="h-16 w-16 rounded-md object-cover"
-            // 添加 key 屬性確保 React 重新渲染圖片元素
-            key={`product-${product.id}-${product.updated_at}`}
-          />
-        );
-      } else {
-        return (
-          <div className="flex h-16 w-16 items-center justify-center rounded-md bg-secondary">
-            <ImageIcon className="h-6 w-6 text-muted-foreground" />
-          </div>
-        );
-      }
-    },
-    enableSorting: false,
-    size: 80,
-  },
-
   // 價格欄位
   {
     id: "price",
-    header: "價格",
+    header: () => <div className="text-right">價格</div>,
     cell: ({ row }) => {
       const item = row.original;
       
       if (item.isVariantRow && item.variantInfo) {
         // SKU 變體行顯示具體價格
         return (
-          <div className="pl-8 font-medium">
+          <div className="pl-8 text-right font-medium">
             {formatPrice(item.variantInfo.price)}
           </div>
         );
@@ -367,7 +371,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       // SPU 主行顯示價格範圍
       const priceRange = item.price_range;
       return (
-        <div className="font-medium">
+        <div className="text-right font-medium">
           {formatPriceRange(priceRange)}
         </div>
       );
@@ -377,14 +381,14 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
   // 庫存/規格數量 欄位
   {
     id: "inventory_or_variant_count",
-    header: "庫存 / 規格數量",
+    header: () => <div className="text-right">庫存 / 規格數量</div>,
     cell: ({ row }) => {
       const item = row.original;
       
       if (item.isVariantRow && item.variantInfo) {
         // SKU 變體行顯示庫存資訊
         return (
-          <div className="pl-8">
+          <div className="pl-8 text-right">
             {formatInventories(item.variantInfo.inventories)}
           </div>
         );
@@ -393,7 +397,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       // SPU 主行顯示規格數量
       const variantCount = item.variants?.length || 0;
       return (
-        <div className="text-center">
+        <div className="text-right">
           <Badge variant={variantCount > 1 ? "default" : "secondary"}>
             {variantCount} 個規格
           </Badge>
