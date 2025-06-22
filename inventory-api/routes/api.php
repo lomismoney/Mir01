@@ -280,5 +280,16 @@ Route::middleware('auth:sanctum')->group(function () {
      * POST   /api/orders/{order}/cancel  - 取消訂單
      */
     Route::post('/orders/{order}/cancel', [App\Http\Controllers\Api\OrderController::class, 'cancel']);
+    
+    /**
+     * 報表與分析路由
+     * 提供各種統計數據和分析報表，支援數據可視化
+     * 
+     * 路由列表：
+     * GET    /api/reports/inventory-time-series  - 獲取商品變體的庫存時序數據
+     */
+    Route::prefix('reports')->group(function () {
+        Route::get('/inventory-time-series', [App\Http\Controllers\Api\ReportController::class, 'inventoryTimeSeries']);
+    });
 });
  

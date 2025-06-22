@@ -3672,3 +3672,73 @@ export function useBatchUpdateStatus() {
     },
   });
 }
+
+// ==================== 報表與分析 (REPORTS & ANALYTICS) ====================
+
+/**
+ * 獲取商品變體的庫存時序數據
+ * 
+ * 🎯 戰術功能：為庫存趨勢圖表提供時序數據 API 集成
+ * 
+ * 功能特性：
+ * 1. 返回指定商品變體的每日庫存水平數據
+ * 2. 支援自定義日期範圍查詢
+ * 3. 自動處理缺失日期的數據補全
+ * 4. 提供累積計算的準確庫存數值
+ * 5. 🎯 100% 類型安全 - 精確的時序數據類型定義
+ * 
+ * @param filters 查詢參數
+ * @param filters.product_variant_id 商品變體ID（必填）
+ * @param filters.start_date 開始日期 (YYYY-MM-DD)
+ * @param filters.end_date 結束日期 (YYYY-MM-DD)
+ * @returns React Query 查詢結果，包含時序數據陣列
+ */
+export function useInventoryTimeSeries(filters: {
+  product_variant_id: number | null;
+  start_date: string;
+  end_date: string;
+}) {
+  const { product_variant_id, start_date, end_date } = filters;
+
+  return useQuery({
+    queryKey: ['inventoryTimeSeries', filters],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/reports/inventory-time-series', {
+        params: {
+          query: { 
+            product_variant_id, 
+            start_date, 
+            end_date 
+          },
+        },
+      });
+
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '獲取庫存趨勢數據失敗');
+      }
+      return data;
+    },
+    
+    // 🎯 數據精煉廠 - 處理時序數據的標準化
+    select: (response: any) => {
+      // API 返回格式：{ data: [{ date: string, quantity: number }] }
+      const timeSeriesData = response?.data || [];
+      
+      // 確保返回的是標準陣列格式
+      if (!Array.isArray(timeSeriesData)) {
+        console.warn('🚨 useInventoryTimeSeries: 未預期的響應格式', response);
+        return [];
+      }
+      
+      // 標準化每個數據點的格式
+      return timeSeriesData.map((point: any) => ({
+        date: point.date || '',
+        quantity: point.quantity || 0
+      }));
+    },
+    
+    enabled: !!product_variant_id, // 只有在有 product_variant_id 時才觸發
+    staleTime: 5 * 60 * 1000, // 5 分鐘緩存時間
+  });
+}

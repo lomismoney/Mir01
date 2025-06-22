@@ -234,4 +234,75 @@ class InventoryService
         
         return $results;
     }
+    
+    /**
+     * 獲取商品變體的庫存時序數據
+     * 
+     * 返回指定商品變體在特定日期範圍內的每日庫存水平數據
+     * 
+     * @param int $productVariantId 商品變體ID
+     * @param string $startDate 開始日期 (Y-m-d)
+     * @param string $endDate 結束日期 (Y-m-d)
+     * @param int|null $storeId 門市ID（可選，不指定則返回所有門市總和）
+     * @return array 時序數據陣列 [['date' => '2025-01-01', 'quantity' => 100], ...]
+     */
+    public function getInventoryTimeSeries(int $productVariantId, string $startDate, string $endDate, ?int $storeId = null): array
+    {
+        // 1. 獲取開始日期之前的庫存基準值（初始庫存）
+        $baseQuantityQuery = DB::table('inventory_transactions')
+            ->join('inventories', 'inventory_transactions.inventory_id', '=', 'inventories.id')
+            ->where('inventories.product_variant_id', $productVariantId)
+            ->where('inventory_transactions.created_at', '<', $startDate);
+            
+        if ($storeId) {
+            $baseQuantityQuery->where('inventories.store_id', $storeId);
+        }
+        
+        // 計算基準日期之前的總變動量
+        $baseQuantity = $baseQuantityQuery->sum('inventory_transactions.quantity') ?? 0;
+        
+        // 2. 獲取日期範圍內的每日變動
+        $dailyChangesQuery = DB::table('inventory_transactions')
+            ->join('inventories', 'inventory_transactions.inventory_id', '=', 'inventories.id')
+            ->where('inventories.product_variant_id', $productVariantId)
+            ->whereBetween('inventory_transactions.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+            ->select(
+                DB::raw('DATE(inventory_transactions.created_at) as date'),
+                DB::raw('SUM(inventory_transactions.quantity) as daily_change')
+            )
+            ->groupBy('date')
+            ->orderBy('date');
+            
+        if ($storeId) {
+            $dailyChangesQuery->where('inventories.store_id', $storeId);
+        }
+        
+        $dailyChanges = $dailyChangesQuery->get()->keyBy('date');
+        
+        // 3. 生成完整的日期序列並計算每日庫存
+        $result = [];
+        $currentDate = new \DateTime($startDate);
+        $endDateTime = new \DateTime($endDate);
+        $currentQuantity = $baseQuantity;
+        
+        while ($currentDate <= $endDateTime) {
+            $dateStr = $currentDate->format('Y-m-d');
+            
+            // 獲取當天的變動量
+            $dailyChange = isset($dailyChanges[$dateStr]) ? $dailyChanges[$dateStr]->daily_change : 0;
+            
+            // 累計計算當天的庫存量
+            $currentQuantity += $dailyChange;
+            
+            $result[] = [
+                'date' => $dateStr,
+                'quantity' => max(0, $currentQuantity) // 確保庫存不為負數
+            ];
+            
+            // 移到下一天
+            $currentDate->modify('+1 day');
+        }
+        
+        return $result;
+    }
 } 
