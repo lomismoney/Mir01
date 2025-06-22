@@ -1137,44 +1137,65 @@ export function useUpdateCustomer() {
 // ==================== 分類管理系統 (CATEGORY MANAGEMENT) ====================
 
 /**
- * 獲取分類列表 Hook
+ * 分類列表查詢 Hook
  * 
- * 🎯 功能：為分類管理頁面提供分類列表查詢
- * 
- * 功能特性：
- * 1. 支援搜索篩選參數
- * 2. 智能查詢鍵結構，支援精確緩存失效
- * 3. 類型安全的 API 調用
- * 4. 標準化的錯誤處理
- * 
- * @param filters - 篩選參數，支援 search
+ * @param filters - 篩選參數
  * @returns React Query 查詢結果
  */
 export function useCategories(filters: { search?: string } = {}) {
-  return useQuery({
-    queryKey: [...QUERY_KEYS.CATEGORIES, filters],
-    queryFn: async () => {
-      const { data, error } = await apiClient.GET("/api/categories");
-      if (error) throw error;
-      return data;
-    },
-    
-    // 🎯 數據精煉廠 - 統一處理分類數據格式
-    select: (response: any) => {
-      // 解包：處理分頁或普通陣列數據結構
-      const categories = response?.data || response || [];
-      if (!Array.isArray(categories)) return [];
-      
-      // 返回純淨的分類數據陣列
-      return categories;
-    },
-    
-    // 🚀 體驗優化配置
-    placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
-    refetchOnMount: false,       // 依賴全域 staleTime
-    refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
-    staleTime: 5 * 60 * 1000,   // 5 分鐘緩存，分類資料相對穩定
-  });
+    return useQuery({
+        queryKey: [...QUERY_KEYS.CATEGORIES, filters],
+        queryFn: async () => {
+            const { data, error } = await apiClient.GET('/api/categories', {
+                params: { 
+                    query: {
+                        ...filters,
+                        per_page: 100 // 獲取所有分類
+                    }
+                }
+            });
+            
+            if (error) {
+                throw new Error('獲取分類列表失敗');
+            }
+            
+            return data;
+        },
+        // 🎯 標準化數據精煉廠 - 處理分類數據的解包和轉換
+        select: (response: any) => {
+            // 處理可能的巢狀或分頁數據結構
+            const data = response?.data?.data || response?.data || response || [];
+            const meta = response?.data?.meta || {
+                total: Array.isArray(data) ? data.length : 0,
+                per_page: 100,
+                current_page: 1,
+                last_page: 1
+            };
+            
+            // 確保數據的類型安全和結構一致性
+            const categories = Array.isArray(data) ? data.map((category: any) => ({
+                id: category.id || 0,
+                name: category.name || '未命名分類',
+                description: category.description || null,
+                parent_id: category.parent_id || null,
+                created_at: category.created_at || '',
+                updated_at: category.updated_at || '',
+                // 如果有子分類數據，也進行處理
+                children: category.children ? category.children.map((child: any) => ({
+                    id: child.id || 0,
+                    name: child.name || '未命名子分類',
+                    description: child.description || null,
+                    parent_id: child.parent_id || category.id,
+                    created_at: child.created_at || '',
+                    updated_at: child.updated_at || ''
+                })) : []
+            })) : [];
+            
+            // 返回標準的分頁結構
+            return { data: categories, meta };
+        },
+        staleTime: 5 * 60 * 1000, // 5 分鐘緩存
+    });
 }
 
 /**
@@ -1356,29 +1377,58 @@ export function useDeleteCategory() {
 // ==================== 屬性管理系統 (ATTRIBUTE MANAGEMENT) ====================
 
 /**
- * 獲取屬性列表
+ * 屬性列表查詢 Hook
+ * 
+ * @returns React Query 查詢結果
  */
 export function useAttributes() {
-  return useQuery({
-    queryKey: QUERY_KEYS.ATTRIBUTES,
-    queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/attributes');
-      if (error) {
-        throw new Error('獲取屬性列表失敗');
-      }
-      return data;
-    },
-    
-    // 🎯 數據精煉廠 - 統一處理屬性數據格式
-    select: (response: any) => {
-      // 解包：處理分頁或普通陣列數據結構
-      const attributes = response?.data || response || [];
-      if (!Array.isArray(attributes)) return [];
-      
-      // 返回純淨的屬性數據陣列，包含屬性值
-      return attributes;
-    },
-  });
+    return useQuery({
+        queryKey: QUERY_KEYS.ATTRIBUTES,
+        queryFn: async () => {
+            const { data, error } = await apiClient.GET('/api/attributes');
+            
+            if (error) {
+                throw new Error('獲取屬性列表失敗');
+            }
+            
+            return data;
+        },
+        // 🎯 標準化數據精煉廠 - 處理屬性數據的解包和轉換
+        select: (response: any) => {
+            // 處理可能的巢狀或分頁數據結構
+            const data = response?.data?.data || response?.data || response || [];
+            const meta = response?.data?.meta || {
+                total: Array.isArray(data) ? data.length : 0,
+                per_page: 100,
+                current_page: 1,
+                last_page: 1
+            };
+            
+            // 確保數據的類型安全和結構一致性
+            const attributes = Array.isArray(data) ? data.map((attribute: any) => ({
+                id: attribute.id || 0,
+                name: attribute.name || '未命名屬性',
+                type: attribute.type || 'text',
+                description: attribute.description || null,
+                created_at: attribute.created_at || '',
+                updated_at: attribute.updated_at || '',
+                // 如果有屬性值數據，也進行處理
+                values: attribute.values ? attribute.values.map((value: any) => ({
+                    id: value.id || 0,
+                    value: value.value || '',
+                    attribute_id: value.attribute_id || attribute.id,
+                    created_at: value.created_at || '',
+                    updated_at: value.updated_at || ''
+                })) : [],
+                // 維護向後兼容性
+                attribute_values: attribute.attribute_values || attribute.values || []
+            })) : [];
+            
+            // 返回標準的分頁結構
+            return { data: attributes, meta };
+        },
+        staleTime: 5 * 60 * 1000, // 5 分鐘緩存
+    });
 }
 
 /**
@@ -2123,14 +2173,34 @@ export function useStores(params: {
       return data;
     },
     
-    // 🎯 數據精煉廠 - 統一處理門市數據格式
+    // 🎯 標準化數據精煉廠 - 處理門市數據的解包和轉換
     select: (response: any) => {
-      // 解包：處理分頁或普通陣列數據結構
-      const stores = response?.data || response || [];
-      if (!Array.isArray(stores)) return [];
+      // 處理可能的巢狀或分頁數據結構
+      const data = response?.data?.data || response?.data || response || [];
+      const meta = response?.data?.meta || {
+        total: Array.isArray(data) ? data.length : 0,
+        per_page: params.per_page || 100,
+        current_page: params.page || 1,
+        last_page: 1
+      };
       
-      // 返回純淨的門市數據陣列
-      return stores;
+      // 確保數據的類型安全和結構一致性
+      const stores = Array.isArray(data) ? data.map((store: any) => ({
+        id: store.id || 0,
+        name: store.name || '未命名門市',
+        address: store.address || null,
+        phone: store.phone || null,
+        status: store.status || 'active',
+        created_at: store.created_at || '',
+        updated_at: store.updated_at || '',
+        // 如果有庫存統計數據，也進行處理
+        inventory_count: store.inventory_count || 0,
+        // 如果有用戶關聯數據，也進行處理
+        users_count: store.users_count || 0
+      })) : [];
+      
+      // 返回標準的分頁結構
+      return { data: stores, meta };
     },
     
     staleTime: 10 * 60 * 1000,  // 10 分鐘內保持新鮮（門市資訊變化較少）
@@ -2159,12 +2229,27 @@ export function useStore(id: number) {
 }
 
 /**
+ * 🎯 創建門市請求的具名類型定義
+ * 
+ * 此類型反映前端表單的數據結構，確保類型安全並提供
+ * 完善的開發體驗（IDE 自動補全、類型檢查等）
+ */
+type CreateStorePayload = {
+  name: string;           // 門市名稱（必填）
+  address?: string;       // 門市地址
+  phone?: string;         // 聯絡電話
+  status?: 'active' | 'inactive';  // 門市狀態
+  description?: string;   // 門市描述
+  // 可根據實際業務需求擴展其他欄位
+};
+
+/**
  * 創建門市
  */
 export function useCreateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (store: any) => {
+    mutationFn: async (store: CreateStorePayload) => {
       const { data, error } = await apiClient.POST('/api/stores' as any, {
         body: store,
       } as any);
@@ -2571,12 +2656,34 @@ export function usePurchase(id: number | string) {
   });
 }
 
+/**
+ * 🎯 創建進貨單請求的具名類型定義
+ * 
+ * 此類型反映進貨單表單的數據結構，包含供應商資訊、
+ * 進貨項目明細等，確保前後端數據契約的一致性
+ */
+type CreatePurchasePayload = {
+  supplier_id: number;    // 供應商 ID（必填）
+  store_id: number;       // 門市 ID（必填）
+  purchase_date: string;  // 進貨日期 (YYYY-MM-DD 格式)
+  notes?: string;         // 備註
+  items: {
+    product_variant_id: number;  // 商品變體 ID
+    quantity: number;            // 進貨數量
+    price: number;               // 進貨單價
+    subtotal?: number;           // 小計（可由前端計算）
+  }[];
+  // 以下欄位可能由後端自動生成
+  order_number?: string;  // 進貨單號
+  total_amount?: number;  // 總金額
+};
+
 // 創建進貨單
 export function useCreatePurchase() {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async (purchaseData: any) => {
+    mutationFn: async (purchaseData: CreatePurchasePayload) => {
       const { data, error } = await apiClient.POST('/api/purchases', {
         body: purchaseData
       })
