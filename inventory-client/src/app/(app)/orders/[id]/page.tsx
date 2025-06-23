@@ -13,15 +13,11 @@ export default function OrderDetailPage() {
     const orderId = Number(params.id);
 
     // 數據獲取邏輯上移到頁面組件
-    const { data: response, isLoading, isError, error } = useOrderDetail(orderId);
+    const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
     const { mutate: confirmPayment, isPending: isConfirming } = useConfirmOrderPayment();
     const { mutate: createShipment, isPending: isShipping } = useCreateOrderShipment();
 
-    // 🎯 使用我們定義的類型，移除 any 斷言
-    // 注意：由於 Scribe 生成的類型不正確（返回 text/plain），
-    // 我們暫時使用 api-helpers.ts 中定義的 Order 類型
-    const orderResponse = response as { data?: import('@/types/api-helpers').Order };
-    const order = orderResponse?.data;
+    // 🎯 useOrderDetail 的 select 函數已經處理好資料格式，直接使用純淨的訂單物件
 
     const handleConfirmPayment = () => {
         if (!orderId) return;

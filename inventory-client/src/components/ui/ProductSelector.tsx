@@ -619,8 +619,17 @@ export function ProductSelector({
                                      variant.stock <= 10 ? 'secondary' : 'default';
                     
                     return (
-                      <TableRow key={variant.id}>
-                        <TableCell>
+                      <TableRow 
+                        key={variant.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => {
+                          // 整行都可以點擊選擇
+                          if (!(!multiple && selectedVariants.size > 0 && !isSelected)) {
+                            handleVariantToggle(variant.id);
+                          }
+                        }}
+                      >
+                        <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={() => handleVariantToggle(variant.id)}

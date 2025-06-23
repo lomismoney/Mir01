@@ -14,7 +14,7 @@ interface OrderDetailComponentProps {
 }
 
 export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
-    const { data: response, isLoading, isError, error } = useOrderDetail(orderId);
+    const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
     const { mutate: updateItemStatus, isPending } = useUpdateOrderItemStatus();
     
     // 可用的項目狀態選項
@@ -45,8 +45,6 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
     if (isError) {
         return <div className="text-red-500">無法加載訂單詳情: {error?.message}</div>;
     }
-
-    const order = (response as any)?.data;
 
     if (!order) {
         return <div>找不到訂單資料。</div>;
