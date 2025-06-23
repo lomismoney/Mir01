@@ -1,13 +1,14 @@
 'use client'; // 因為使用了 useParams，此頁面需為客戶端組件
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { OrderDetailComponent } from '@/components/orders/OrderDetailComponent';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CreditCard, Truck, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, CreditCard, Truck, ChevronLeft, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { useOrderDetail, useConfirmOrderPayment, useCreateOrderShipment } from '@/hooks/queries/useEntityQueries';
 import { Badge } from '@/components/ui/badge';
+import RecordPaymentModal from '@/components/orders/RecordPaymentModal';
 
 export default function OrderDetailPage() {
     const params = useParams();
@@ -17,6 +18,9 @@ export default function OrderDetailPage() {
     const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
     const { mutate: confirmPayment, isPending: isConfirming } = useConfirmOrderPayment();
     const { mutate: createShipment, isPending: isShipping } = useCreateOrderShipment();
+    
+    // 🎯 新增：部分付款 Modal 狀態
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
     // 🎯 useOrderDetail 的 select 函數已經處理好資料格式，直接使用純淨的訂單物件
 
@@ -66,6 +70,49 @@ export default function OrderDetailPage() {
             default:
                 return <Badge variant="secondary">{displayText}</Badge>;
         }
+    };
+    
+    // 🎯 決定付款按鈕的顯示邏輯
+    const renderPaymentButton = () => {
+        if (!order) return null;
+        
+        // 已付清或已退款，不顯示付款按鈕
+        if (order.payment_status === 'paid' || order.payment_status === 'refunded') {
+            return null;
+        }
+        
+        // 待付款狀態
+        if (order.payment_status === 'pending') {
+            // 如果訂單金額等於剩餘未付金額，顯示「確認全額付款」
+            const remainingAmount = order.grand_total - order.paid_amount;
+            if (remainingAmount === order.grand_total) {
+                return (
+                    <Button 
+                        variant="outline"
+                        onClick={handleConfirmPayment} 
+                        disabled={isConfirming}
+                    >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        {isConfirming ? '確認中...' : '確認全額付款'}
+                    </Button>
+                );
+            }
+        }
+        
+        // 待付款或部分付款狀態，顯示「記錄付款」
+        if (order.payment_status === 'pending' || order.payment_status === 'partial') {
+            return (
+                <Button 
+                    variant="outline"
+                    onClick={() => setIsPaymentModalOpen(true)}
+                >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    記錄付款
+                </Button>
+            );
+        }
+        
+        return null;
     };
 
     // 載入和錯誤狀態處理
@@ -133,16 +180,7 @@ export default function OrderDetailPage() {
                 
                 {/* 主要操作按鈕 */}
                 <div className="flex items-center gap-2">
-                    {order?.payment_status === 'pending' && (
-                        <Button 
-                            variant="outline"
-                            onClick={handleConfirmPayment} 
-                            disabled={isConfirming}
-                        >
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            {isConfirming ? '確認中...' : '確認收款'}
-                        </Button>
-                    )}
+                    {renderPaymentButton()}
                     {order?.shipping_status === 'pending' && (
                         <Button 
                             onClick={handleCreateShipment} 
@@ -157,6 +195,13 @@ export default function OrderDetailPage() {
             
             {/* 訂單詳情組件 - 現在只負責展示 */}
             <OrderDetailComponent orderId={orderId} />
+            
+            {/* 🎯 記錄付款 Modal */}
+            <RecordPaymentModal
+                order={order || null}
+                open={isPaymentModalOpen}
+                onOpenChange={setIsPaymentModalOpen}
+            />
         </div>
     );
 } 
