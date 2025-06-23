@@ -13,6 +13,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useProducts } from '@/hooks/queries/useEntityQueries';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 /**
  * 商品規格（變體/SKU）介面
@@ -306,7 +307,12 @@ export function ProductSelector({
       }
       onOpenChange(newOpen);
     }}>
-      <DialogContent className="max-w-[90vw] w-[1400px] h-[85vh] flex flex-col">
+      <DialogContent className={cn(
+        "h-[85vh] flex flex-col",
+        selectedProduct === null 
+          ? "max-w-[800px] w-[90vw]" // 選擇商品時的寬度（較窄）
+          : "!max-w-[1400px] w-[90vw] [&>div]:max-w-full" // 選擇規格時的寬度（較寬）
+      )}>
         <DialogHeader>
           <DialogTitle>選擇商品</DialogTitle>
           <DialogDescription>

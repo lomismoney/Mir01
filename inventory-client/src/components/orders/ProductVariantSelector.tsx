@@ -75,7 +75,7 @@ export function ProductVariantSelector({ open, onOpenChange, onSelect }: Product
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[80vh] flex flex-col">
+      <DialogContent className="w-[90vw] max-w-[1400px] max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
