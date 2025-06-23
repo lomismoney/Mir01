@@ -296,18 +296,18 @@ export function OrderClientComponent() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>標記付款狀態為</DropdownMenuLabel>
                 <DropdownMenuItem onSelect={() => setBatchUpdateConfig({ status_type: 'payment_status', status_value: 'paid' })}>
-                  已付款 (Paid)
+                  已付款
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setBatchUpdateConfig({ status_type: 'payment_status', status_value: 'pending' })}>
-                  待付款 (Pending)
+                  待付款
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>標記貨物狀態為</DropdownMenuLabel>
                 <DropdownMenuItem onSelect={() => setBatchUpdateConfig({ status_type: 'shipping_status', status_value: 'shipped' })}>
-                  已出貨 (Shipped)
+                  已出貨
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setBatchUpdateConfig({ status_type: 'shipping_status', status_value: 'delivered' })}>
-                  已送達 (Delivered)
+                  已送達
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

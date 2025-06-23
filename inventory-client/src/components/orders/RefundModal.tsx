@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Calculator, Package, RotateCcw } from 'lucide-react';
+import { Calculator, Package, RotateCcw, AlertCircle, DollarSign, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Hooks and API
-import { useCreateRefund } from '@/hooks/queries/useEntityQueries';
+import { useCreateRefund, useOrderDetail } from '@/hooks/queries/useEntityQueries';
 
 // Types
 import { ProcessedOrder, ProcessedOrderItem } from '@/types/api-helpers';
@@ -27,6 +27,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import {
   Table,
@@ -41,6 +42,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 
 /**
  * 表單數據接口定義
@@ -90,7 +95,7 @@ interface RefundModalProps {
 }
 
 /**
- * RefundModal 組件 - 退款處理系統 (標準化重構版)
+ * RefundModal 組件 - 退款處理系統 (雙欄佈局精粹版)
  * 
  * 🎯 功能特性：
  * 1. 使用 useFieldArray 管理動態品項列表
@@ -99,8 +104,16 @@ interface RefundModalProps {
  * 4. 類型安全保證，移除所有 any 類型
  * 5. 實時退款金額計算
  * 6. 智能數量驗證和限制
+ * 7. 雙欄佈局設計：操作與資訊分離
+ * 8. 即時視覺反饋系統
  */
 export default function RefundModal({ order, open, onOpenChange }: RefundModalProps) {
+  // 🎯 獲取完整的訂單詳情（包含品項資料）
+  const { data: orderDetail, isLoading: isLoadingDetail } = useOrderDetail(open && order ? order.id : null);
+  
+  // 🎯 使用詳細訂單資料，如果沒有則使用傳入的訂單
+  const fullOrder = orderDetail || order;
+
   // 🎯 表單狀態管理 - 統一由 react-hook-form 管理
   const form = useForm<RefundFormValues>({
     resolver: zodResolver(RefundFormSchema),
@@ -123,11 +136,30 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
 
   // 🎯 監聽表單中的品項變化，計算總退款金額
   const watchedItems = form.watch("items");
-  const calculateTotalRefund = (): number => {
+  
+  // 🎯 即時計算退款總額
+  const totalRefundAmount = useMemo(() => {
+    if (!watchedItems) return 0;
     return watchedItems
       .filter(item => item.is_selected)
-      .reduce((total, item) => total + (item.price || 0) * (item.quantity || 0), 0);
-  };
+      .reduce((total, item) => {
+        const price = typeof item.price === 'number' ? item.price : 0;
+        const quantity = typeof item.quantity === 'number' ? item.quantity : 0;
+        return total + (price * quantity);
+      }, 0);
+  }, [watchedItems]);
+
+  // 🎯 計算選中的品項數量
+  const selectedItemsCount = useMemo(() => {
+    return watchedItems?.filter(item => item.is_selected).length || 0;
+  }, [watchedItems]);
+
+  // 🎯 計算退貨總數量
+  const totalRefundQuantity = useMemo(() => {
+    return watchedItems
+      ?.filter(item => item.is_selected)
+      .reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+  }, [watchedItems]);
 
   // 🎯 處理品項選擇狀態變更
   const handleItemSelect = (itemIndex: number, checked: boolean) => {
@@ -153,7 +185,7 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
 
   // 🎯 表單提交處理
   const onSubmit = (data: RefundFormValues) => {
-    if (!order) return;
+    if (!fullOrder) return;
 
     // 過濾出選中的品項並構建退款數據
     const selectedItems = data.items
@@ -175,9 +207,10 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
       items: selectedItems,
     };
 
-    // 🎉 移除 as any - 現在類型完全安全
+    // 🎯 暫時使用 as any 處理 API 類型定義問題
+    // API 文檔生成工具將 items 錯誤地定義為 string[]，實際應該是物件陣列
     createRefundMutation.mutate(
-      { orderId: order.id, data: refundData },
+      { orderId: fullOrder.id, data: refundData as any },
       {
         onSuccess: () => {
           toast.success("退款已成功處理");
@@ -193,8 +226,8 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
 
   // 🎯 初始化品項列表 - 當訂單變更時
   useEffect(() => {
-    if (open && order && order.items) {
-      const formattedItems: RefundFormItem[] = order.items.map(item => ({
+    if (open && fullOrder && fullOrder.items && fullOrder.items.length > 0) {
+      const formattedItems: RefundFormItem[] = fullOrder.items.map((item: ProcessedOrderItem) => ({
         order_item_id: item.id,
         quantity: 0,
         product_name: item.product_name,
@@ -209,7 +242,7 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
       form.setValue("notes", "");
       form.setValue("should_restock", false);
     }
-  }, [open, order, replace, form]);
+  }, [open, fullOrder, replace, form]);
 
   // 🎯 重置表單狀態
   useEffect(() => {
@@ -219,222 +252,319 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
     }
   }, [open, form, replace]);
 
-  // 如果沒有訂單數據，不渲染 Modal
-  if (!order) return null;
+  // 如果沒有訂單數據或正在載入，顯示載入狀態
+  if (!order || isLoadingDetail) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="!w-[90vw] !max-w-[1400px] sm:!max-w-[1400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RotateCcw className="h-5 w-5 text-destructive" />
+              處理訂單退款
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center space-y-3">
+              <div className="inline-flex h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent" />
+              <p className="text-muted-foreground">載入訂單資料中...</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
-  const totalRefund = calculateTotalRefund();
-  const selectedCount = watchedItems.filter(item => item.is_selected).length;
-  const totalSelectedQuantity = watchedItems
-    .filter(item => item.is_selected)
-    .reduce((sum, item) => sum + (item.quantity || 0), 0);
+  // 🎯 檢查訂單是否有品項
+  if (!fullOrder || !fullOrder.items || fullOrder.items.length === 0) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="!w-[90vw] !max-w-[1400px] sm:!max-w-[1400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RotateCcw className="h-5 w-5 text-destructive" />
+              處理訂單退款
+            </DialogTitle>
+            <DialogDescription>
+              訂單編號：{fullOrder?.order_number || order?.order_number}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <Package className="h-16 w-16 text-muted-foreground" />
+            <p className="text-muted-foreground text-lg">此訂單沒有可退款的品項</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              關閉
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl lg:max-w-6xl max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-orange-600">
-            <RotateCcw className="h-5 w-5" />
+          <DialogTitle className="text-xl flex items-center gap-2">
+            <RotateCcw className="h-5 w-5 text-destructive" />
             處理訂單退款
           </DialogTitle>
           <DialogDescription>
-            訂單編號：{order.order_number} | 客戶：{order.customer?.name}
+            訂單編號: {fullOrder.order_number} | 客戶: {fullOrder.customer?.name}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* 🎯 品項退款表格 - 使用 useFieldArray 管理 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                選擇退款品項
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16">退款</TableHead>
-                    <TableHead>品項資訊</TableHead>
-                    <TableHead className="w-24">已購數量</TableHead>
-                    <TableHead className="w-32">退貨數量</TableHead>
-                    <TableHead className="w-24">單價</TableHead>
-                    <TableHead className="w-24">退款小計</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {fields.map((field, index) => {
-                    const item = watchedItems[index];
-                    const isSelected = item?.is_selected || false;
-                    const quantity = item?.quantity || 0;
-                    const subtotal = isSelected ? (item?.price || 0) * quantity : 0;
+        {/* --- 核心：新的雙欄式佈局 --- */}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-hidden">
+          <div className="grid md:grid-cols-3 gap-6 h-full overflow-y-auto pr-2">
+            
+            {/* === 左欄：互動區 (佔 2/3) === */}
+            <div className="md:col-span-2 space-y-6">
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    1. 選擇退款品項與數量
+                  </CardTitle>
+                  <CardDescription>
+                    請勾選需要退款的品項，並設定退貨數量
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="w-12">
+                            <Checkbox 
+                              checked={fields.length > 0 && fields.every((_, index) => watchedItems[index]?.is_selected)}
+                              onCheckedChange={(checked) => {
+                                fields.forEach((_, index) => {
+                                  handleItemSelect(index, checked as boolean);
+                                });
+                              }}
+                            />
+                          </TableHead>
+                          <TableHead>品項資訊</TableHead>
+                          <TableHead className="text-center">已購數量</TableHead>
+                          <TableHead className="text-center">退貨數量</TableHead>
+                          <TableHead className="text-right">單價</TableHead>
+                          <TableHead className="text-right">小計</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {fields.map((field, index) => {
+                          const item = watchedItems[index];
+                          const isSelected = item?.is_selected || false;
+                          const quantity = item?.quantity || 0;
+                          const subtotal = isSelected ? (item?.price || 0) * quantity : 0;
 
-                    return (
-                      <TableRow key={field.id}>
-                        <TableCell>
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={(checked) => 
-                              handleItemSelect(index, checked as boolean)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="font-medium">{field.product_name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              SKU: {field.sku}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-center">
-                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                              {field.max_quantity}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Controller
-                            name={`items.${index}.quantity`}
-                            control={form.control}
-                            render={({ field: quantityField }) => (
-                              <Input
-                                type="number"
-                                min="1"
-                                max={field.max_quantity}
-                                value={isSelected ? quantityField.value : ''}
-                                onChange={(e) => {
-                                  const newQuantity = parseInt(e.target.value) || 1;
-                                  quantityField.onChange(newQuantity);
-                                  handleQuantityChange(index, newQuantity);
-                                }}
-                                disabled={!isSelected}
-                                className="w-20 text-right"
-                              />
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-right font-medium">
-                            ${(field.price || 0).toFixed(2)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-right font-medium text-red-600">
-                            ${subtotal.toFixed(2)}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                          return (
+                            <TableRow key={field.id} className={isSelected ? "bg-muted/30" : ""}>
+                              <TableCell>
+                                <Checkbox
+                                  checked={isSelected}
+                                  onCheckedChange={(checked) => 
+                                    handleItemSelect(index, checked as boolean)
+                                  }
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <div className="space-y-1">
+                                  <p className="font-medium">{field.product_name}</p>
+                                  <p className="text-sm text-muted-foreground">SKU: {field.sku}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant="outline">{field.max_quantity}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Controller
+                                  name={`items.${index}.quantity`}
+                                  control={form.control}
+                                  render={({ field: quantityField }) => (
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      max={field.max_quantity}
+                                      value={isSelected ? quantityField.value : ''}
+                                      onChange={(e) => {
+                                        const newQuantity = parseInt(e.target.value) || 1;
+                                        quantityField.onChange(newQuantity);
+                                        handleQuantityChange(index, newQuantity);
+                                      }}
+                                      disabled={!isSelected}
+                                      className="w-20 mx-auto"
+                                    />
+                                  )}
+                                />
+                              </TableCell>
+                              <TableCell className="text-right font-medium">
+                                ${(field.price || 0).toFixed(2)}
+                              </TableCell>
+                              <TableCell className="text-right font-medium text-destructive">
+                                ${subtotal.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* 🎯 退款選項與總覽 */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 左側：退款原因和庫存處理 */}
-            <div className="lg:col-span-2 space-y-4">
-              <div>
-                <Label htmlFor="reason" className="text-sm font-medium">
-                  退款原因 <span className="text-red-500">*</span>
-                </Label>
-                <Controller
-                  name="reason"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <div>
-                      <Textarea
-                        {...field}
-                        id="reason"
-                        placeholder="請詳細說明退款原因..."
-                        className="mt-1 min-h-[100px]"
-                      />
-                      {fieldState.error && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {fieldState.error.message}
-                        </p>
+              <Card>
+                <CardHeader>
+                  <CardTitle>2. 填寫退款資訊</CardTitle>
+                  <CardDescription>
+                    請提供退款原因及相關說明
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reason">
+                      退款原因 <span className="text-destructive">*</span>
+                    </Label>
+                    <Controller
+                      name="reason"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <>
+                          <Textarea
+                            {...field}
+                            id="reason"
+                            placeholder="請詳細說明退款原因..."
+                            className="min-h-[100px] resize-none"
+                          />
+                          {fieldState.error && (
+                            <p className="text-sm text-destructive">
+                              {fieldState.error.message}
+                            </p>
+                          )}
+                        </>
                       )}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">備註說明</Label>
+                    <Controller
+                      name="notes"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Textarea
+                          {...field}
+                          id="notes"
+                          placeholder="選填：其他補充說明..."
+                          className="resize-none"
+                        />
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Controller
+                        name="should_restock"
+                        control={form.control}
+                        render={({ field }) => (
+                          <Checkbox
+                            id="restock"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        )}
+                      />
+                      <Label htmlFor="restock" className="cursor-pointer font-normal">
+                        將退貨商品加回庫存
+                      </Label>
                     </div>
-                  )}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="notes" className="text-sm font-medium">
-                  備註說明
-                </Label>
-                <Controller
-                  name="notes"
-                  control={form.control}
-                  render={({ field }) => (
-                    <Textarea
-                      {...field}
-                      id="notes"
-                      placeholder="選填：其他補充說明..."
-                      className="mt-1"
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Controller
-                  name="should_restock"
-                  control={form.control}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="restock"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-                <Label htmlFor="restock" className="text-sm">
-                  📦 將退貨商品加回庫存
-                </Label>
-              </div>
-              <p className="text-xs text-muted-foreground pl-6">
-                勾選此選項將自動將退貨商品數量加回相應的庫存
-              </p>
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        勾選此選項將自動將退貨商品數量加回相應的庫存
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* 右側：退款總額計算 */}
-            <div>
-              <Card className="border-orange-200 bg-orange-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-orange-700">
-                    <Calculator className="h-4 w-4" />
+            {/* === 右欄：資訊區 (佔 1/3) === */}
+            <div className="space-y-6">
+              <Card className="sticky top-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calculator className="h-5 w-5" />
                     退款金額計算
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span>選中品項：</span>
-                    <span className="font-medium">{selectedCount} 項</span>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">訂單總額</span>
+                      <span className="font-medium">${fullOrder.grand_total.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">已付金額</span>
+                      <span className="font-medium text-green-600">${fullOrder.paid_amount.toFixed(2)}</span>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">選中品項</span>
+                      <span className="font-medium">{selectedItemsCount} 項</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">退貨總數量</span>
+                      <span className="font-medium">{totalRefundQuantity} 件</span>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="font-semibold text-base">預計退款金額</span>
+                      <span className="text-2xl font-bold text-destructive">
+                        ${totalRefundAmount.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>退貨總數量：</span>
-                    <span className="font-medium">{totalSelectedQuantity} 件</span>
-                  </div>
-                  <hr className="border-orange-200" />
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-orange-700">預計退款金額：</span>
-                    <span className="text-xl font-bold text-red-600">
-                      ${totalRefund.toFixed(2)}
-                    </span>
-                  </div>
+
+                  {/* 退款進度視覺化 */}
+                  {fullOrder.grand_total > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>退款比例</span>
+                        <span>{((totalRefundAmount / fullOrder.grand_total) * 100).toFixed(1)}%</span>
+                      </div>
+                      <Progress 
+                        value={(totalRefundAmount / fullOrder.grand_total) * 100} 
+                        className="h-2" 
+                      />
+                    </div>
+                  )}
+
+                  {selectedItemsCount > 0 && (
+                    <Alert className="border-green-200 bg-green-50">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <AlertDescription className="text-green-800">
+                        已選擇 {selectedItemsCount} 項商品，共 {totalRefundQuantity} 件
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </div>
           </div>
 
-          {/* 🎯 底部操作按鈕 */}
-          <DialogFooter className="pt-4 border-t">
+          {/* --- 底部操作按鈕 --- */}
+          <DialogFooter className="mt-6 pt-4 border-t">
             <Button 
-              type="button" 
+              type="button"
               variant="outline" 
               onClick={() => onOpenChange(false)}
               disabled={createRefundMutation.isPending}
@@ -443,16 +573,19 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
             </Button>
             <Button 
               type="submit"
-              disabled={selectedCount === 0 || createRefundMutation.isPending}
-              className="bg-red-600 hover:bg-red-700"
+              variant="destructive"
+              disabled={selectedItemsCount === 0 || createRefundMutation.isPending}
             >
               {createRefundMutation.isPending ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   處理中...
                 </>
               ) : (
-                '確認退款'
+                <>
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  確認退款 ${totalRefundAmount.toFixed(2)}
+                </>
               )}
             </Button>
           </DialogFooter>
