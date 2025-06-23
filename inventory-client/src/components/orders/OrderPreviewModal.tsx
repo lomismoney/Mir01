@@ -54,16 +54,37 @@ export function OrderPreviewModal({ orderId, open, onOpenChange, onShip, onRecor
    * @returns 對應狀態的 Badge 元件
    */
   const getStatusBadge = (status: string) => {
+    // 狀態中文對照表
+    const statusMap: Record<string, string> = {
+      // 付款狀態
+      'pending': '待付款',
+      'paid': '已付款',
+      'partial': '部分付款',
+      'refunded': '已退款',
+      // 出貨狀態
+      'processing': '處理中',
+      'shipped': '已出貨',
+      'delivered': '已送達',
+      'cancelled': '已取消',
+      'completed': '已完成'
+    };
+
+    const displayText = statusMap[status] || status;
+
     switch (status) {
       case 'completed':
       case 'paid':
       case 'shipped':
-        return <Badge variant="default" className="bg-green-100 text-green-800">{status}</Badge>;
+      case 'delivered':
+        return <Badge variant="default" className="bg-green-100 text-green-800">{displayText}</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive">{status}</Badge>;
+      case 'refunded':
+        return <Badge variant="destructive">{displayText}</Badge>;
       case 'pending':
+      case 'processing':
+      case 'partial':
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="secondary">{displayText}</Badge>;
     }
   };
 

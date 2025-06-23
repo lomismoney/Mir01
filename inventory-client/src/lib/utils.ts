@@ -73,3 +73,53 @@ export function addImageCacheBuster(
   
   return `${imageUrl}${separator}t=${timestampValue}`;
 }
+
+/**
+ * 🎯 訂單狀態中文翻譯函數
+ * 提供統一的狀態翻譯，確保整個系統的一致性
+ */
+export function getOrderStatusText(status: string): string {
+  const statusMap: Record<string, string> = {
+    // 付款狀態
+    'pending': '待付款',
+    'paid': '已付款',
+    'partial': '部分付款',
+    'refunded': '已退款',
+    // 出貨狀態
+    'processing': '處理中',
+    'shipped': '已出貨',
+    'delivered': '已送達',
+    'cancelled': '已取消',
+    'completed': '已完成',
+    // 項目狀態（用於訂單品項）
+    '待處理': '待處理',
+    '已叫貨': '已叫貨',
+    '已出貨': '已出貨',
+    '完成': '完成'
+  };
+  
+  return statusMap[status] || status;
+}
+
+/**
+ * 🎯 訂單狀態樣式函數
+ * 根據狀態返回對應的 Badge variant
+ */
+export function getOrderStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+  switch (status) {
+    case 'completed':
+    case 'paid':
+    case 'shipped':
+    case 'delivered':
+      return 'default';
+    case 'cancelled':
+    case 'refunded':
+      return 'destructive';
+    case 'processing':
+    case 'partial':
+      return 'secondary';
+    case 'pending':
+    default:
+      return 'outline';
+  }
+}
