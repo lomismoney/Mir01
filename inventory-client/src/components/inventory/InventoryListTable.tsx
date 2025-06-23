@@ -48,6 +48,16 @@ export function InventoryListTable({
     products.forEach(product => {
       product.variants?.forEach(variant => {
         variant.inventory?.forEach(inventory => {
+          // 驗證必要的 ID 欄位，如果任何一個無效就跳過這個項目
+          if (!inventory.id || !variant.id || !inventory.store?.id) {
+            console.warn('跳過無效的庫存項目：缺少必要的 ID', {
+              inventoryId: inventory.id,
+              variantId: variant.id,
+              storeId: inventory.store?.id
+            });
+            return;
+          }
+          
           const price = typeof variant.price === 'string' ? parseFloat(variant.price) : (variant.price || 0);
           const averageCost = (variant as any)?.average_cost || 0;
           const profitMargin = price > 0 && averageCost > 0 
@@ -55,12 +65,12 @@ export function InventoryListTable({
             : 0;
             
           flatItems.push({
-            inventoryId: inventory.id || 0,
-            productVariantId: variant.id || 0,
+            inventoryId: inventory.id,
+            productVariantId: variant.id,
             sku: variant.sku || `SKU-${variant.id}`,
             productName: product.name || `商品 ${product.id}`,
-            storeName: inventory.store?.name || `門市 ${inventory.store?.id}`,
-            storeId: inventory.store?.id || 0,
+            storeName: inventory.store.name || `門市 ${inventory.store.id}`,
+            storeId: inventory.store.id,
             quantity: inventory.quantity || 0,
             lowStockThreshold: inventory.low_stock_threshold || 0,
             price,
