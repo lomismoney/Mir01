@@ -441,9 +441,9 @@ const ProductClientComponent = () => {
                     const canExpand = !row.original.isVariantRow && (row.original.variants?.length || 0) > 1;
                     
                     return (
-                      <TableRow
-                        key={row.id}
-                        data-state={row.getIsSelected() && "selected"}
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
                         className={cn(
                           row.original.isVariantRow ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50",
                           canExpand && "cursor-pointer"
@@ -464,13 +464,13 @@ const ProductClientComponent = () => {
                             }
                           }
                         }}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
-                      </TableRow>
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
                     );
                   })
                 ) : (

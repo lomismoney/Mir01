@@ -28,7 +28,14 @@ class OrderService
             $orderNumber = $this->orderNumberGenerator->generateNextNumber();
             
             // 2. 檢查所有商品的庫存是否足夠
-            $stockCheckResults = $this->inventoryService->batchCheckStock($validatedData['items']);
+            // 過濾出需要檢查庫存的標準商品（排除訂製商品）
+            $standardItems = collect($validatedData['items'])->filter(function ($item) {
+                return !empty($item['product_variant_id']) && ($item['is_stocked_sale'] ?? true);
+            })->values()->all();
+            
+            // 只有在有標準商品時才進行庫存檢查
+            if (!empty($standardItems)) {
+                $stockCheckResults = $this->inventoryService->batchCheckStock($standardItems);
             
             if (!empty($stockCheckResults)) {
                 // 有商品庫存不足，組織錯誤訊息
@@ -37,6 +44,7 @@ class OrderService
                     $errorMessage .= "- {$result['product_name']} (SKU: {$result['sku']})：需求 {$result['requested_quantity']}，庫存 {$result['available_quantity']}\n";
                 }
                 throw new \Exception($errorMessage);
+                }
             }
 
             // 3. 從訂單項目中計算商品總價
@@ -70,15 +78,41 @@ class OrderService
 
             // 6. 創建訂單項目
             foreach ($validatedData['items'] as $itemData) {
-                $order->items()->create($itemData);
+                // 檢查是否為訂製商品
+                if (empty($itemData['product_variant_id']) || $itemData['product_variant_id'] === null) {
+                    // 訂製商品：確保必要的訂製資訊存在
+                    $orderItemData = [
+                        'order_id' => $order->id,
+                        'product_variant_id' => null,
+                        'is_stocked_sale' => false, // 訂製商品通常不是庫存銷售
+                        'status' => $itemData['status'] ?? '待處理',
+                        'product_name' => $itemData['product_name'],
+                        'sku' => $itemData['sku'],
+                        'price' => $itemData['price'],
+                        'quantity' => $itemData['quantity'],
+                        'custom_product_name' => $itemData['custom_product_name'] ?? $itemData['product_name'],
+                        'custom_specifications' => $itemData['custom_specifications'] ?? null,
+                        'tax_rate' => $itemData['tax_rate'] ?? 0,
+                        'discount_amount' => $itemData['discount_amount'] ?? 0,
+                        'cost' => $itemData['cost'] ?? 0,
+                    ];
+                } else {
+                    // 標準商品
+                    $orderItemData = array_merge($itemData, ['order_id' => $order->id]);
+                }
+                
+                $order->items()->create($orderItemData);
             }
             
             // 7. 批量扣減庫存（整個交易內執行，確保原子性）
+            // 只扣減標準商品的庫存
+            if (!empty($standardItems)) {
             $this->inventoryService->batchDeductStock(
-                $validatedData['items'],
+                    $standardItems,
                 null, // 使用預設門市
                 ['order_number' => $order->order_number, 'order_id' => $order->id]
             );
+            }
 
             // 8. 記錄初始狀態歷史
             $order->statusHistories()->create([

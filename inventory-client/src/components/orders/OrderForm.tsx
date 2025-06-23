@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { CustomerSelector } from './CustomerSelector';
 import { CustomerForm } from '@/components/customers/CustomerForm';
@@ -32,6 +33,7 @@ const orderFormSchema = z.object({
   notes: z.string().optional(),
   // ... 其他主體字段
   items: z.array(z.object({
+    id: z.number().optional(), // 🎯 訂單項目 ID（編輯模式使用）
     product_variant_id: z.number().nullable(), // 允許訂製商品
     is_stocked_sale: z.boolean(),
     status: z.string(),
@@ -83,28 +85,70 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
     name: "items",
   });
 
+  // 🎯 計算已選中的標準品項 ID（用於同步 ProductSelector 的狀態）
+  const selectedVariantIds = useMemo(
+    () => fields
+            .map(field => field.product_variant_id)
+            .filter((id): id is number => id !== null && id !== undefined),
+    [fields]
+  );
+
   // 處理從 ProductSelector 回傳的選擇結果
   const handleProductSelect = (selectedVariants: Variant[]) => {
-    // 將 ProductSelector 回傳的 Variant[] 陣列
-    // 轉換成 useFieldArray 需要的格式
-    const formItems = selectedVariants.map(variant => ({
-      product_variant_id: Number(variant.id),
-      is_stocked_sale: true,
-      status: 'pending',
-      quantity: 1, // 新增的品項數量預設為 1
-      // 🎯 確保價格是數字類型，符合 Zod 驗證要求
-      price: Number(variant.price) || 0,
-      // 結合商品名稱和規格描述，提供完整的商品資訊
-      product_name: variant.productName 
-        ? `${variant.productName} - ${variant.specifications}`
-        : variant.specifications,
-      sku: variant.sku,
-      custom_specifications: undefined,
-    }));
+    // 🎯 智能合併策略：將新選擇的品項與現有品項合併
+    const currentItems = fields;
+    const mergedItems = [...currentItems];
+    
+    selectedVariants.forEach(variant => {
+      // 檢查這個 variant 是否已存在於表單中
+      const existingIndex = currentItems.findIndex(
+        item => item.product_variant_id === Number(variant.id)
+      );
+      
+      if (existingIndex !== -1) {
+        // 如果已存在，保留原有的數量和其他資訊
+        // 只更新價格（以防價格有變動）
+        update(existingIndex, {
+          ...currentItems[existingIndex],
+          price: Number(variant.price) || 0,
+        });
+      } else {
+        // 如果不存在，新增到列表
+        append({
+          // id 欄位保持為 undefined（新品項沒有 order_item_id）
+          product_variant_id: Number(variant.id),
+          is_stocked_sale: true,
+          status: 'pending',
+          quantity: 1, // 新增的品項數量預設為 1
+          price: Number(variant.price) || 0,
+          product_name: variant.productName 
+            ? `${variant.productName} - ${variant.specifications}`
+            : variant.specifications,
+          sku: variant.sku,
+          custom_specifications: undefined,
+        });
+      }
+    });
+    
+    // 關閉選擇器
+    setIsSelectorOpen(false);
+  };
 
-    // 使用 useFieldArray 的 replace 方法，一次性替換整個品項列表
-    // 這比多次 append/remove 更高效
-    replace(formItems);
+  // 處理新增訂製商品
+  const handleAddCustomItem = (item: any) => {
+    // `append` 函式來自於你已有的 `useFieldArray` hook
+    append({
+      product_variant_id: item.product_variant_id, // 這裡會是 null
+      is_stocked_sale: false, // 訂製商品通常不是庫存銷售
+      status: 'pending',
+      quantity: item.quantity,
+      price: item.price,
+      product_name: item.custom_product_name, // 使用訂製名稱
+      sku: item.sku,
+      custom_specifications: item.custom_specifications, // 儲存訂製規格
+    });
+    // 關閉選擇器 Modal
+    setIsSelectorOpen(false);
   };
 
   function handleSubmit(values: OrderFormValues) {
@@ -199,7 +243,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                   <div className="col-span-2">SKU</div>
                   <div className="col-span-2 text-right">單價</div>
                   <div className="col-span-2 text-center">數量</div>
-                  <div className="col-span-2 text-right">小計</div>
+                  <div className="col-span-1 text-right">小計</div>
+                  <div className="col-span-1 text-center">操作</div>
                 </div>
 
                 {/* 遍歷渲染已添加的項目 */}
@@ -213,12 +258,37 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                     <div key={field.id} className="grid grid-cols-12 gap-2 items-center p-3 border rounded-md">
                       {/* 商品名稱 */}
                       <div className="col-span-4">
-                        <div className="font-medium">{form.watch(`items.${index}.product_name`)}</div>
+                        {field.product_variant_id ? (
+                          // --- 標準品項的渲染邏輯 ---
+                          <>
+                            <div className="font-medium">{form.watch(`items.${index}.product_name`)}</div>
+                            <div className="text-sm text-muted-foreground">{form.watch(`items.${index}.sku`)}</div>
+                          </>
+                        ) : (
+                          // --- 🎯 訂製品項的渲染邏輯 ---
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{form.watch(`items.${index}.product_name`)}</span>
+                              <Badge variant="outline" className="text-xs">訂製</Badge>
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {/* 將 JSON 規格轉換為可讀字串 */}
+                              {field.custom_specifications && 
+                                Object.entries(field.custom_specifications)
+                                  .map(([key, value]) => `${key}: ${value}`)
+                                  .join('; ')}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* SKU */}
                       <div className="col-span-2">
-                        <span className="font-mono text-sm">{form.watch(`items.${index}.sku`)}</span>
+                        {field.product_variant_id ? (
+                          <span className="font-mono text-sm">{form.watch(`items.${index}.sku`)}</span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
+                        )}
                       </div>
 
                       {/* 單價 */}
@@ -295,7 +365,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                           size="icon"
                           onClick={() => remove(index)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
                     </div>
@@ -530,9 +600,10 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
         open={isSelectorOpen}
         onOpenChange={setIsSelectorOpen}
         onSelect={handleProductSelect}
+        onCustomItemAdd={handleAddCustomItem} // 🎯 新增的數據管道
         multiple={true}
         // 將表單中已有的品項 ID 傳入，以便在選擇器中保持勾選狀態
-        selectedIds={fields.map(field => field.product_variant_id).filter(id => id !== null) as number[]}
+        selectedIds={selectedVariantIds}
       />
     </>
   );

@@ -74,10 +74,30 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                 {order.items?.map((item: any) => (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                            <div>{item.product_name}</div>
+                                            <div className="flex items-center gap-2">
+                                                <div>
+                                                    <div className="font-medium">{item.product_name}</div>
+                                                    {item.custom_specifications && (
+                                                        <Badge variant="outline" className="mt-1">訂製</Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {/* 🎯 優雅地顯示訂製規格 */}
                                             {item.custom_specifications && (
-                                                <div className="text-xs text-muted-foreground">
-                                                    訂製規格: {JSON.stringify(item.custom_specifications)}
+                                                <div className="mt-2 p-2 bg-muted rounded-md">
+                                                    <div className="text-xs font-medium text-muted-foreground">訂製規格：</div>
+                                                    <div className="text-sm mt-1">
+                                                        {Object.entries(
+                                                            typeof item.custom_specifications === 'string' 
+                                                                ? JSON.parse(item.custom_specifications) 
+                                                                : item.custom_specifications
+                                                        ).map(([key, value]) => (
+                                                            <div key={key} className="flex gap-2">
+                                                                <span className="font-medium">{key}:</span>
+                                                                <span>{value as string}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             )}
                                         </TableCell>

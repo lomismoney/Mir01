@@ -67,7 +67,7 @@ class RefundService
             // 📜 步驟 7：記錄歷史
             $this->recordRefundHistory($order, $refund);
             
-            return $refund->load('refundItems.orderItem.productVariant');
+            return $refund->load('refundItems.orderItem');
         });
     }
 
@@ -172,8 +172,13 @@ class RefundService
         $availableQuantity = $orderItem->quantity - $alreadyRefundedQuantity;
         
         if ($refundQuantity > $availableQuantity) {
+            // 🎯 根據是否為訂製商品，使用不同的識別方式
+            $itemIdentifier = $orderItem->product_variant_id 
+                ? $orderItem->productVariant->sku 
+                : $orderItem->sku; // 訂製商品直接使用訂單項目的 SKU
+                
             throw new Exception(
-                "品項 {$orderItem->productVariant->sku} 的退貨數量 ({$refundQuantity}) " .
+                "品項 {$itemIdentifier} 的退貨數量 ({$refundQuantity}) " .
                 "超過可退數量 ({$availableQuantity})"
             );
         }
@@ -192,17 +197,22 @@ class RefundService
     {
         foreach ($refund->refundItems as $refundItem) {
             $orderItem = $refundItem->orderItem;
-            $productVariant = $orderItem->productVariant;
             
-            // 通過庫存服務增加庫存
-            $this->inventoryService->adjustInventory(
-                productVariantId: $productVariant->id,
-                storeId: $refund->order->store_id ?? 1, // 假設有門市 ID，否則使用預設
-                quantityChange: $refundItem->quantity,
-                type: 'refund_restock',
-                notes: "退款回補庫存 - 退款單 #{$refund->id}",
-                reference: "refund:{$refund->id}"
-            );
+            // 🎯 只有當 product_variant_id 存在時（即為標準品），才執行庫存返還
+            if ($orderItem && $orderItem->product_variant_id) {
+                $productVariant = $orderItem->productVariant;
+                
+                // 通過庫存服務增加庫存
+                $this->inventoryService->adjustInventory(
+                    productVariantId: $productVariant->id,
+                    storeId: $refund->order->store_id ?? 1, // 假設有門市 ID，否則使用預設
+                    quantityChange: $refundItem->quantity,
+                    type: 'refund_restock',
+                    notes: "退款回補庫存 - 退款單 #{$refund->id}",
+                    reference: "refund:{$refund->id}"
+                );
+            }
+            // 如果是訂製商品（product_variant_id 為 null），則跳過庫存回補
         }
     }
 

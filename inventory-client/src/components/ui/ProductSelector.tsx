@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useProducts } from '@/hooks/queries/useEntityQueries';
+import { toast } from 'sonner';
 
 /**
  * 商品規格（變體/SKU）介面
@@ -97,6 +98,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 // Shadcn/UI Card 相關元件
 import {
@@ -135,6 +138,8 @@ interface ProductSelectorProps {
   onOpenChange: (open: boolean) => void;
   // 選擇商品後的回調函數 - 回傳完整的 Variant 物件陣列
   onSelect: (selectedVariants: Variant[]) => void;
+  // 新增訂製商品的回調函數
+  onCustomItemAdd: (item: any) => void;
   // 是否允許多選，預設為 true
   multiple?: boolean;
   // 已選擇的規格 (Variant) ID 列表，用於顯示已選狀態
@@ -151,6 +156,7 @@ export function ProductSelector({
   open,
   onOpenChange,
   onSelect,
+  onCustomItemAdd,
   multiple = true,
   selectedIds = [],
 }: ProductSelectorProps) {
@@ -165,6 +171,14 @@ export function ProductSelector({
   const [selectedVariants, setSelectedVariants] = useState<Set<string | number>>(
     new Set(selectedIds)
   );
+  
+  // 控制訂製表單的顯示
+  const [isAddingCustom, setIsAddingCustom] = useState(false);
+  
+  // 訂製表單狀態
+  const [customSpec, setCustomSpec] = useState('');
+  const [customPrice, setCustomPrice] = useState<number | ''>('');
+  const [customQuantity, setCustomQuantity] = useState<number | ''>(1);
   
   // 🎯 直接消費「數據精煉廠」處理過的純淨數據
   const { 
@@ -233,6 +247,7 @@ export function ProductSelector({
     setSelectedVariants(new Set(selectedIds));
     setSearchQuery('');
     setSelectedProduct(null);
+    setIsAddingCustom(false);
     setCategoryFilter('all');
     setSortOrder('default');
     onOpenChange(false);
@@ -281,8 +296,17 @@ export function ProductSelector({
   // 已移除模擬 API 資料獲取邏輯，改用 useProducts Hook
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[85vh] flex flex-col">
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      if (!newOpen) {
+        // 關閉時重置所有狀態
+        setIsAddingCustom(false);
+        setCustomSpec('');
+        setCustomPrice('');
+        setCustomQuantity(1);
+      }
+      onOpenChange(newOpen);
+    }}>
+      <DialogContent className="max-w-[90vw] w-[1400px] h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>選擇商品</DialogTitle>
           <DialogDescription>
@@ -407,23 +431,82 @@ export function ProductSelector({
           <div className="flex flex-col h-full">
             {/* 視圖標頭 */}
             <div className="flex items-center gap-4 p-6 border-b">
-              <Button variant="outline" size="icon" onClick={() => setSelectedProduct(null)}>
+              <Button variant="outline" size="icon" onClick={() => {
+                setSelectedProduct(null);
+                setIsAddingCustom(false);
+              }}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <h2 className="text-xl font-semibold">{selectedProduct.name}</h2>
             </div>
 
+            {/* 條件渲染：訂製表單 or 標準規格選擇 */}
+            {isAddingCustom ? (
+              /* --- 這裡是新的訂製表單 --- */
+              <div className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">為 {selectedProduct.name} 新增訂製規格</h3>
+                  <Button variant="ghost" size="sm" onClick={() => setIsAddingCustom(false)}>返回標準規格</Button>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="custom-spec">訂製規格描述</Label>
+                  <Textarea 
+                    id="custom-spec"
+                    placeholder="例如：尺寸 85cm x 120cm，金色拉絲邊框"
+                    value={customSpec}
+                    onChange={(e) => setCustomSpec(e.target.value)}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-quantity">數量</Label>
+                    <Input id="custom-quantity" type="number" value={customQuantity} onChange={(e) => setCustomQuantity(Number(e.target.value) || '')} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-price">單價</Label>
+                    <Input id="custom-price" type="number" value={customPrice} onChange={(e) => setCustomPrice(Number(e.target.value) || '')} />
+                  </div>
+                </div>
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    if (!selectedProduct || !customSpec || !customPrice || !customQuantity) {
+                      toast.error("所有欄位均為必填");
+                      return;
+                    }
+                    const customItem = {
+                      product_id: selectedProduct.id,
+                      product_variant_id: null, // 標示為訂製商品
+                      custom_product_name: `${selectedProduct.name} (訂製)`,
+                      custom_specifications: { '規格': customSpec },
+                      price: customPrice,
+                      quantity: customQuantity,
+                      sku: `CUSTOM-${selectedProduct.id}-${Date.now()}` // 生成一個臨時唯一 SKU
+                    };
+                    onCustomItemAdd(customItem);
+                    setIsAddingCustom(false); // 重置視圖
+                    setCustomSpec('');
+                    setCustomPrice('');
+                    setCustomQuantity(1);
+                  }}
+                >
+                  確認添加訂製商品
+                </Button>
+              </div>
+            ) : (
+              /* --- 這裡是原本的「規格選擇」視圖 --- */
+              <>
             {/* 表格區域 */}
-            <div className="flex-grow overflow-y-auto">
+            <div className="flex-grow overflow-y-auto overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">選擇</TableHead>
-                    <TableHead className="w-24">圖片</TableHead>
-                    <TableHead>SKU</TableHead>
-                    <TableHead>規格</TableHead>
-                    <TableHead>庫存</TableHead>
-                    <TableHead className="text-right">單價</TableHead>
+                    <TableHead className="w-[50px]">選擇</TableHead>
+                    <TableHead className="w-[80px]">圖片</TableHead>
+                    <TableHead className="w-[150px]">SKU</TableHead>
+                    <TableHead className="min-w-[300px]">規格</TableHead>
+                    <TableHead className="w-[100px]">庫存</TableHead>
+                    <TableHead className="w-[120px] text-right">單價</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -443,18 +526,18 @@ export function ProductSelector({
                         </TableCell>
                         <TableCell>
                           {variant.imageUrl ? (
-                            <div className="relative w-16 h-16">
+                            <div className="relative w-12 h-12">
                               <Image
                                 src={variant.imageUrl}
                                 alt={variant.sku}
                                 fill
-                                sizes="64px"
+                                sizes="48px"
                                 className="object-cover rounded"
                               />
                             </div>
                           ) : (
-                            <div className="w-16 h-16 bg-muted rounded flex items-center justify-center text-muted-foreground text-xs">
-                              無圖片
+                            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center text-muted-foreground text-xs">
+                              無圖
                             </div>
                           )}
                         </TableCell>
@@ -474,6 +557,15 @@ export function ProductSelector({
                 </TableBody>
               </Table>
             </div>
+                
+                {/* 新增訂製規格按鈕 */}
+                <div className="mt-4 p-4">
+                  <Button variant="outline" className="w-full" onClick={() => setIsAddingCustom(true)}>
+                    + 新增訂製規格
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -491,12 +583,18 @@ export function ProductSelector({
                 確認選擇 {selectedVariants.size > 0 && `(${selectedVariants.size})`}
               </Button>
             </>
+          ) : isAddingCustom ? (
+            // 訂製表單的按鈕（已在表單內部處理）
+            null
           ) : (
             // 詳細視圖的按鈕
             <>
               <Button 
                 variant="outline" 
-                onClick={() => setSelectedProduct(null)}
+                onClick={() => {
+                  setSelectedProduct(null);
+                  setIsAddingCustom(false);
+                }}
               >
                 返回列表
               </Button>

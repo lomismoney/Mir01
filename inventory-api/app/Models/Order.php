@@ -89,4 +89,19 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'creator_user_id');
     }
+
+    /**
+     * 🎯 判斷訂單是否包含訂製商品
+     * 
+     * @return bool
+     */
+    public function getHasCustomItemsAttribute(): bool
+    {
+        // 如果 items 關聯已加載，則在集合上操作以避免額外查詢
+        if ($this->relationLoaded('items')) {
+            return $this->items->contains(fn ($item) => is_null($item->product_variant_id));
+        }
+        // 否則，進行資料庫查詢
+        return $this->items()->whereNull('product_variant_id')->exists();
+    }
 }

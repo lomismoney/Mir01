@@ -58,12 +58,18 @@ export const createColumns = ({
     cell: ({ row }) => {
       const order = row.original;
       return (
-        <button
-          onClick={() => onPreview(order.id)}
-          className="font-medium text-primary underline-offset-4 hover:underline"
-        >
-          {order.order_number}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onPreview(order.id)}
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {order.order_number}
+          </button>
+          {/* 🎯 如果訂單包含訂製商品，顯示標籤 */}
+          {order.has_custom_items && (
+            <Badge variant="secondary" className="text-xs">含訂製品</Badge>
+          )}
+        </div>
       );
     },
   },

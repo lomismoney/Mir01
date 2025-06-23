@@ -55,7 +55,7 @@ class UpdateOrderRequest extends FormRequest
             
             // 訂製商品欄位（當非庫存銷售時使用）
             'items.*.custom_product_name'     => 'required_with:items|nullable|string|max:255',
-            'items.*.custom_product_specs'    => 'nullable|string',
+            'items.*.custom_specifications'   => 'nullable|json',
             'items.*.custom_product_image'    => 'nullable|string|max:2048',
             'items.*.custom_product_category' => 'nullable|string|max:100',
             'items.*.custom_product_brand'    => 'nullable|string|max:100',

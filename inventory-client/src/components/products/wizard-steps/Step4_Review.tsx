@@ -257,10 +257,10 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">總變體數量</CardTitle>
             <Shapes className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+        </CardHeader>
+        <CardContent>
             <div className="text-3xl font-bold tracking-tighter">
-              {statistics.totalVariants}
+                {statistics.totalVariants}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               個變體組合
@@ -281,32 +281,32 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
             <p className="text-xs text-muted-foreground mt-2">
               所有變體合計
             </p>
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
 
         {/* 平均價格卡片 */}
         <Card data-slot="card" className="@container/card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">平均價格</CardTitle>
             <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+        </CardHeader>
+        <CardContent>
             <div className="text-3xl font-bold tracking-tighter">
               ${statistics.averagePrice.toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               每個變體平均
             </p>
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
 
         {/* 屬性數量卡片 */}
         <Card data-slot="card" className="@container/card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">使用屬性</CardTitle>
             <Layers className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+        </CardHeader>
+        <CardContent>
             <div className="flex items-baseline space-x-2">
               <span className="text-3xl font-bold tracking-tighter">{statistics.selectedAttributes}</span>
               <Badge variant="secondary" className="text-xs">已選擇</Badge>
@@ -314,8 +314,8 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
             <p className="text-xs text-muted-foreground mt-2">
               共 {statistics.totalAttributeValues} 個屬性值
             </p>
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
       </div>
 
 

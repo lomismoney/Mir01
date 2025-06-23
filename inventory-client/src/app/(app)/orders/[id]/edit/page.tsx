@@ -33,6 +33,7 @@ export default function EditOrderPage() {
       ...values,
       items: values.items.map(item => ({
         ...item,
+        id: item.id,
         custom_specifications: item.custom_specifications ? 
           JSON.stringify(item.custom_specifications) : null
       }))
@@ -101,6 +102,7 @@ export default function EditOrderPage() {
     discount_amount: parseFloat(orderData.discount_amount || '0'),
     notes: orderData.notes || '',
     items: orderData.items?.map((item: any) => ({
+      id: item.id,
       product_variant_id: item.product_variant_id,
       is_stocked_sale: item.is_stocked_sale,
       status: item.status,

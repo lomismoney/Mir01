@@ -418,8 +418,8 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">總變體數量</CardTitle>
               <Shapes className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
+          </CardHeader>
+          <CardContent>
               <div className="flex items-baseline space-x-2">
                 <span className="text-3xl font-bold tracking-tighter">{variants.length}</span>
                 <Badge variant="secondary" className="text-xs">已生成</Badge>
@@ -439,7 +439,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
             <CardContent>
               <div className="text-3xl font-bold tracking-tighter">
                 {Math.round((variants.filter(v => v.sku.trim()).length / variants.length) * 100)}%
-              </div>
+                </div>
               <Progress 
                 value={(variants.filter(v => v.sku.trim()).length / variants.length) * 100} 
                 className="h-2 mt-3" 
@@ -465,7 +465,7 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
             <CardContent>
               <div className="text-3xl font-bold tracking-tighter">
                 {Math.round((variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length / variants.length) * 100)}%
-              </div>
+                </div>
               <Progress 
                 value={(variants.filter(v => v.price.trim() && !isNaN(parseFloat(v.price))).length / variants.length) * 100} 
                 className="h-2 mt-3" 
@@ -490,9 +490,9 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold tracking-tighter">
-                ${variants.reduce((sum, v) => {
-                  const price = parseFloat(v.price);
-                  return sum + (isNaN(price) ? 0 : price);
+                  ${variants.reduce((sum, v) => {
+                    const price = parseFloat(v.price);
+                    return sum + (isNaN(price) ? 0 : price);
                 }, 0).toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -501,8 +501,8 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
               <p className="text-xs text-muted-foreground">
                 基於當前定價計算
               </p>
-            </CardContent>
-          </Card>
+          </CardContent>
+        </Card>
         </div>
       )}
 

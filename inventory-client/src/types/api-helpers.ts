@@ -502,6 +502,7 @@ export interface Order {
   updated_at: string;
   items: OrderItem[]; // 訂單項目的陣列
   status_histories?: OrderStatusHistory[]; // 狀態歷史記錄
+  has_custom_items?: boolean; // 🎯 新增：是否包含訂製商品
 }
 
 /**

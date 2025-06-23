@@ -47,6 +47,7 @@ class InventoryManagementController extends Controller
             'category',
             'variants.attributeValues.attribute',
             'variants.inventory' => function ($query) use ($request) {
+                $query->whereNotNull('product_variant_id');
                 if ($request->has('store_id')) {
                     $query->where('store_id', $request->store_id);
                 }
@@ -55,7 +56,9 @@ class InventoryManagementController extends Controller
         ]);
 
         // 只查詢有庫存記錄的商品
-        $query->whereHas('variants.inventory');
+        $query->whereHas('variants.inventory', function ($q) use ($request) {
+            $q->whereNotNull('product_variant_id');
+        });
 
         // 按門市篩選 (如果請求中有 store_id，則 inventory 關聯已被限制)
         if ($request->has('store_id')) {
