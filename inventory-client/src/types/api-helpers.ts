@@ -601,6 +601,23 @@ export interface ProcessedOrderItem {
 }
 
 /**
+ * 付款記錄類型定義
+ * 
+ * 記錄訂單的每筆付款詳情
+ */
+export interface PaymentRecord {
+  id: number;
+  amount: number;
+  payment_method: string;
+  payment_date: string;
+  notes?: string;
+  creator?: {
+    id: number;
+    name: string;
+  };
+}
+
+/**
  * 經過數據精煉廠處理的訂單類型
  * 
  * 🎯 此類型反映了經過 useOrderDetail Hook select 函數處理後的純淨數據結構
@@ -693,4 +710,5 @@ export interface PurchasesResponse {
     prev?: string | null;
     next?: string | null;
   };
+  payment_records?: PaymentRecord[]; // 付款記錄
 }
