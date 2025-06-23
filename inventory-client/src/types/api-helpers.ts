@@ -81,12 +81,13 @@ export type ProductVariantItem = NonNullable<
   import('@/types/api').paths['/api/products/variants']['get']['responses'][200]['content']['application/json']['data']
 >[number];
 
-// 用戶項目型別（擴展版本，包含 stores 和 role 欄位）
+// 用戶項目型別（擴展版本，包含 stores、role 和 username 欄位）
 export type UserItem = NonNullable<
   import('@/types/api').paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
 >[number] & {
   stores?: StoreItem[];
   role?: 'admin' | 'staff' | 'viewer';
+  username?: string; // 添加 username 字段以解決 API 設計不一致問題
 };
 
 /**

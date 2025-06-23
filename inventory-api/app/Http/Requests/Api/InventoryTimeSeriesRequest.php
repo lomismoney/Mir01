@@ -8,6 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * 庫存時序數據查詢請求
  * 
  * 用於驗證獲取商品變體庫存時序數據的查詢參數
+ * 注意：此請求只接受查詢字符串參數（GET 請求）
  */
 class InventoryTimeSeriesRequest extends FormRequest
 {
@@ -19,6 +20,15 @@ class InventoryTimeSeriesRequest extends FormRequest
     public function authorize(): bool
     {
         return true; // 權限檢查在控制器中進行
+    }
+
+    /**
+     * 準備驗證數據 - 確保只使用查詢參數
+     */
+    protected function prepareForValidation(): void
+    {
+        // 對於 GET 請求，明確只使用查詢參數
+        $this->merge($this->query());
     }
 
     /**

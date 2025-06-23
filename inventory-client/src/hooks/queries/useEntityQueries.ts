@@ -3815,12 +3815,7 @@ export function useInventoryTimeSeries(filters: {
             end_date 
           },
         },
-        body: {
-          product_variant_id: product_variant_id!,
-          start_date,
-          end_date
-        },
-      });
+      } as any); // 暫時使用 any 繞過錯誤的 OpenAPI 類型定義，GET 請求不應該需要 body
 
       if (error) {
         const errorMessage = parseApiError(error);

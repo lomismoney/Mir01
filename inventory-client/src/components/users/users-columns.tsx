@@ -102,7 +102,7 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 font-medium"
         >
-          帳號
+          用戶名
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -110,7 +110,7 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
     cell: ({ row }) => {
       return (
         <div className="font-mono text-sm">
-          {row.getValue("username") || "未知帳號"}
+          {row.getValue("username") || "未知用戶名"}
         </div>
       )
     },
