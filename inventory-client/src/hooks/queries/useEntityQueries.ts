@@ -3113,23 +3113,25 @@ export function useOrderDetail(orderId: number | null) {
       return data;
     },
     // 🎯 新增 select 選項 - 數據精煉廠，讓元件獲得純淨的數據
-    select: (response: any) => {
+    select: (response: any): ProcessedOrder | null => {
       // 1. 解包：從 API 響應中提取 data 部分
       const order = response?.data;
       if (!order) return null;
 
       // 2. 進行所有必要的類型轉換和數據清理
-      return {
+      // 明確返回 ProcessedOrder 類型，確保所有消費端都能享受完美的類型推斷
+      const processedOrder: ProcessedOrder = {
         ...order,
-        // 📊 金額字段的數值化處理
+        // 📊 金額字段的數值化處理 - 絕對保證是 number
         subtotal: parseFloat(order.subtotal || '0'),
-        shipping_fee: parseFloat(order.shipping_fee || '0'),
+        shipping_fee: order.shipping_fee ? parseFloat(order.shipping_fee) : null,
         tax_amount: parseFloat(order.tax_amount || '0'),
         discount_amount: parseFloat(order.discount_amount || '0'),
         grand_total: parseFloat(order.grand_total || '0'),
+        paid_amount: parseFloat(order.paid_amount || '0'),
         
-        // 🛒 訂單項目的數據清理
-        items: order.items?.map((item: any) => ({
+        // 🛒 訂單項目的數據清理 - 每個項目都是 ProcessedOrderItem
+        items: order.items?.map((item: any): ProcessedOrderItem => ({
           ...item,
           price: parseFloat(item.price || '0'),
           cost: parseFloat(item.cost || '0'),
@@ -3142,6 +3144,8 @@ export function useOrderDetail(orderId: number | null) {
         customer: order.customer || null,
         creator: order.creator || null,
       };
+      
+      return processedOrder;
     },
     enabled: !!orderId, // 只有在 orderId 存在時，此查詢才會被觸發
     staleTime: 5 * 60 * 1000, // 詳情頁數據可以緩存 5 分鐘
