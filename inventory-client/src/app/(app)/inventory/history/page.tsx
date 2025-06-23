@@ -137,7 +137,17 @@ export default function InventoryHistoryPage() {
           id: (() => {
             // 安全的 ID 生成：確保總是產生有效的負數 ID
             const numericId = Number(transferId);
-            return isNaN(numericId) ? -Date.now() - Math.random() * 1000 : -Math.abs(numericId);
+            if (!isNaN(numericId)) {
+              return -Math.abs(numericId);
+            }
+            // 生成唯一的負數 ID：結合高精度時間戳、隨機數和交易特徵
+            const timestamp = performance.now(); // 使用高精度時間戳
+            const random = Math.floor(Math.random() * 1000000); // 擴大隨機範圍
+            const hashCode = transferId.split('').reduce((a, b) => {
+              a = ((a << 5) - a) + b.charCodeAt(0);
+              return a & a; // 轉為 32 位整數
+            }, 0);
+            return -(Math.abs(timestamp * 1000000 + random + Math.abs(hashCode)));
           })(),
           type: 'transfer',
           quantity: Math.abs(transfer.out.quantity || 0),

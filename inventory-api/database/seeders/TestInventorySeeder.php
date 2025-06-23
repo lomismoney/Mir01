@@ -171,7 +171,7 @@ class TestInventorySeeder extends Seeder
                 'description' => '最新款 iPhone，搭載 A17 Pro 晶片'
             ]
         );
-        $iphone->attributes()->sync([$attributes['color']->id, $attributes['capacity']->id]);
+        $iphone->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['capacity']->id]);
         
         // 建立 iPhone 變體
         foreach (['黑色', '白色', '金色'] as $colorName) {
@@ -200,7 +200,7 @@ class TestInventorySeeder extends Seeder
                 'description' => 'M3 晶片的專業級筆電'
             ]
         );
-        $macbook->attributes()->sync([$attributes['color']->id, $attributes['capacity']->id]);
+        $macbook->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['capacity']->id]);
 
         // 建立 MacBook 變體
         foreach (['銀色', '太空灰'] as $colorName) {
@@ -232,7 +232,7 @@ class TestInventorySeeder extends Seeder
                 'description' => '100% 純棉，舒適透氣'
             ]
         );
-        $tshirt->attributes()->sync([$attributes['color']->id, $attributes['size']->id, $attributes['material']->id]);
+        $tshirt->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['size']->id, $attributes['material']->id]);
         
         // 建立 T恤變體
         foreach (['黑色', '白色', '藍色', '紅色'] as $colorName) {
@@ -262,7 +262,7 @@ class TestInventorySeeder extends Seeder
                 'description' => '經典版型，百搭款式'
             ]
         );
-        $jeans->attributes()->sync([$attributes['color']->id, $attributes['size']->id]);
+        $jeans->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['size']->id]);
         
         // 建立牛仔褲變體
         foreach (['藍色', '黑色'] as $colorName) {
@@ -292,7 +292,7 @@ class TestInventorySeeder extends Seeder
                 'description' => '符合人體工學設計，久坐不累'
             ]
         );
-        $chair->attributes()->sync([$attributes['color']->id, $attributes['material']->id]);
+        $chair->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['material']->id]);
         
         // 建立辦公椅變體
         foreach (['黑色', '灰色'] as $colorName) {
@@ -322,7 +322,7 @@ class TestInventorySeeder extends Seeder
                 'description' => '舒適記憶棉材質，保護您的屁股'
             ]
         );
-        $cushion->attributes()->sync([$attributes['color']->id]);
+        $cushion->attributes()->syncWithoutDetaching([$attributes['color']->id]);
         
         // 建立坐墊變體
         foreach (['黑色', '藍色'] as $colorName) {

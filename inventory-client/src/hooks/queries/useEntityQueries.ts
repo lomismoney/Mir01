@@ -26,6 +26,8 @@ export const QUERY_KEYS = {
     CATEGORIES: ['categories'] as const,
     CATEGORY: (id: number) => ['categories', id] as const,
     ATTRIBUTES: ['attributes'] as const,
+    STORES: ['stores'] as const,
+    STORE: (id: number) => ['stores', id] as const,
     ORDERS: ['orders'] as const,
     ORDER: (id: number) => ['orders', id] as const,
 };
@@ -934,16 +936,17 @@ export function useCreateCustomer() {
     // 🎯 使用我們新定義的、代表前端表單數據的嚴格類型
     mutationFn: async (payload: CreateCustomerPayload) => {
       // 🎯 數據轉換邏輯：前端表單結構 → 後端 API 結構
+      // 注意：API 期望 addresses 是字串陣列
       const apiPayload = {
         name: payload.name,
-        phone: payload.phone,
+        phone: payload.phone || null,
         is_company: payload.is_company,
-        tax_id: payload.tax_id,
+        tax_id: payload.tax_id || null,
         industry_type: payload.industry_type,
         payment_type: payload.payment_type,
-        contact_address: payload.contact_address,
-        // 轉換地址陣列：從對象陣列轉為字串陣列
-        addresses: payload.addresses?.map(addr => addr.address) || [],
+        contact_address: payload.contact_address || null,
+        // 修復地址陣列：轉換為字串陣列
+        addresses: (payload.addresses || []).map(addr => addr.address),
       };
       
       const { data, error } = await apiClient.POST('/api/customers', {
@@ -2481,9 +2484,9 @@ export function useUpdateStore() {
 export function useDeleteStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (storeId: number) => {
       const { error } = await apiClient.DELETE('/api/stores/{id}', {
-        params: { path: { id, store: id } },
+        params: { path: { id: storeId, store: storeId } },
       });
       if (error) {
         throw new Error('刪除門市失敗');
@@ -2493,12 +2496,12 @@ export function useDeleteStore() {
       // 🚀 升級為標準的「失效並強制重取」模式
       await Promise.all([
         queryClient.invalidateQueries({ 
-          queryKey: ['stores'],
+          queryKey: QUERY_KEYS.STORES,
           exact: false,
           refetchType: 'active'
         }),
         queryClient.refetchQueries({ 
-          queryKey: ['stores'],
+          queryKey: QUERY_KEYS.STORES,
           exact: false
         })
       ]);
@@ -3560,7 +3563,7 @@ export function useCancelOrder() {
         params: { 
           path: { 
             order_id: orderId,
-            order: orderId 
+            order: orderId
           } 
         },
         body: { reason },

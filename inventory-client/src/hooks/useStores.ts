@@ -57,16 +57,16 @@ export function useStore(id: number) {
   return useQuery({
     queryKey: ["stores", id],
     queryFn: async () => {
-      // 使用正確的 API 類型
-      const { data, error } = await apiClient.GET(`/api/stores/{id}` as any, {
+      // 使用正確的 API 類型定義，傳入完整的路徑參數
+      const { data, error } = await apiClient.GET("/api/stores/{id}", {
         params: { path: { id, store: id } }
-      } as any);
+      });
 
       if (error) {
         throw new Error("取得門市詳情失敗");
       }
 
-      return { data: (data as any)?.data || data };
+      return { data: data?.data || data };
     },
     enabled: !!id,
   });
@@ -79,10 +79,10 @@ export function useCreateStore() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: any) => {
-      const { data: responseData, error } = await apiClient.POST("/api/stores" as any, {
+    mutationFn: async (data: CreateStoreBody) => {
+      const { data: responseData, error } = await apiClient.POST("/api/stores", {
         body: data,
-      } as any);
+      });
 
       if (error) {
         throw new Error("新增門市失敗");
@@ -103,11 +103,12 @@ export function useUpdateStore() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const { data: responseData, error } = await apiClient.PUT(`/api/stores/{id}` as any, {
+    mutationFn: async ({ id, data }: { id: number; data: UpdateStoreBody }) => {
+      // 使用正確的 API 類型定義，傳入完整的路徑參數
+      const { data: responseData, error } = await apiClient.PUT("/api/stores/{id}", {
         params: { path: { id, store: id } },
         body: data,
-      } as any);
+      });
 
       if (error) {
         throw new Error("更新門市失敗");
@@ -130,8 +131,8 @@ export function useDeleteStore() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      // 使用正確的 API 類型
-      const { error } = await apiClient.DELETE(`/api/stores/{id}`, {
+      // 使用正確的 API 類型定義，傳入完整的路徑參數
+      const { error } = await apiClient.DELETE("/api/stores/{id}", {
         params: { path: { id, store: id } }
       });
 
