@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { CustomerForm } from '@/components/customers/CustomerForm';
 import { ProductSelector, type Variant } from '@/components/ui/ProductSelector';
 import { useCreateCustomer } from '@/hooks/queries/useEntityQueries';
 import { Customer, ProductVariant, OrderFormData } from '@/types/api-helpers';
+import { useAppFieldArray } from '@/hooks/useAppFieldArray';  // 🎯 使用專案標準化的 Hook
 
 // 使用 Zod 提前定義表單驗證規則
 const orderFormSchema = z.object({
@@ -80,9 +81,9 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
   }, [initialData, form]);
 
   // 初始化 useFieldArray 來管理 items 字段
-  const { fields, append, remove, update, replace } = useFieldArray({
+  const { fields, append, remove, update, replace } = useAppFieldArray({
     control: form.control,
-    name: "items",
+    name: "items"
   });
 
   // 🎯 計算已選中的標準品項 ID（用於同步 ProductSelector 的狀態）
@@ -115,7 +116,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
       } else {
         // 如果不存在，新增到列表
         append({
-          // id 欄位保持為 undefined（新品項沒有 order_item_id）
+          // 明確不包含 id 欄位（新品項沒有 order_item_id）
           product_variant_id: Number(variant.id),
           is_stocked_sale: true,
           status: 'pending',
@@ -123,8 +124,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
           price: Number(variant.price) || 0,
           product_name: variant.productName 
             ? `${variant.productName} - ${variant.specifications}`
-            : variant.specifications,
-          sku: variant.sku,
+            : variant.specifications || `商品 ${variant.sku}`, // 確保永遠有值
+          sku: variant.sku || `SKU-${variant.id}`, // 確保永遠有值
           custom_specifications: undefined,
         });
       }
@@ -138,6 +139,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
   const handleAddCustomItem = (item: any) => {
     // `append` 函式來自於你已有的 `useFieldArray` hook
     append({
+      // 明確不包含 id 欄位
       product_variant_id: item.product_variant_id, // 這裡會是 null
       is_stocked_sale: false, // 訂製商品通常不是庫存銷售
       status: 'pending',
@@ -178,8 +180,6 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
     }
     setIsCustomerDialogOpen(false);
   };
-
-
 
   // 實時價格計算
   const items = form.watch('items');
@@ -225,6 +225,25 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
             )}
           />
 
+          {/* 運送地址欄位 - 新增 */}
+          <FormField
+            control={form.control}
+            name="shipping_address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>運送地址</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="請輸入運送地址..."
+                    className="resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* 訂單項目區塊 */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -255,7 +274,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                   const subtotal = quantity * price;
 
                   return (
-                    <div key={field.id} className="grid grid-cols-12 gap-2 items-center p-3 border rounded-md">
+                    <div key={field.key} className="grid grid-cols-12 gap-2 items-center p-3 border rounded-md">
                       {/* 商品名稱 */}
                       <div className="col-span-4">
                         {field.product_variant_id ? (
@@ -308,11 +327,9 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                                   value={field.value?.toString() || ''}
                                   onChange={(e) => {
                                     const value = e.target.value;
-                                    // 如果使用者清空了輸入框，我們傳遞一個 `undefined` 給 react-hook-form
-                                    // 讓 Zod 在驗證時處理這個空值（將其轉換為錯誤或要求填寫）
-                                    // 而不是在輸入時就強制變為 0
+                                    // 如果使用者清空了輸入框，設為 0 而不是 undefined
                                     if (value === '') {
-                                      field.onChange(undefined); 
+                                      field.onChange(0); 
                                     } else {
                                       const parsedValue = parseFloat(value);
                                       // 只有在轉換為數字有效時才更新
@@ -568,7 +585,10 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
             <Button type="button" variant="outline">
               取消
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+            >
               {isSubmitting ? '處理中...' : '提交訂單'}
             </Button>
           </div>

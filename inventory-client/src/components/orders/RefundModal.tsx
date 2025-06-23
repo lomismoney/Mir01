@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo } from 'react';
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Calculator, Package, RotateCcw, AlertCircle, DollarSign, CheckCircle } from 'lucide-react';
@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 
 // Hooks and API
 import { useCreateRefund, useOrderDetail } from '@/hooks/queries/useEntityQueries';
+import { useAppFieldArray } from '@/hooks/useAppFieldArray';
 
 // Types
 import { ProcessedOrder, ProcessedOrderItem } from '@/types/api-helpers';
@@ -126,9 +127,9 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
   });
 
   // 🎯 動態品項陣列管理 - 使用官方標準 useFieldArray
-  const { fields, replace, update } = useFieldArray({
+  const { fields, replace, update } = useAppFieldArray({
     control: form.control,
-    name: "items",
+    name: "items"
   });
 
   // 🎯 退款 Mutation Hook
@@ -362,7 +363,7 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
                           const subtotal = isSelected ? (item?.price || 0) * quantity : 0;
 
                           return (
-                            <TableRow key={field.id} className={isSelected ? "bg-muted/30" : ""}>
+                            <TableRow key={field.key} className={isSelected ? "bg-muted/30" : ""}>
                               <TableCell>
                                 <Checkbox
                                   checked={isSelected}

@@ -2,8 +2,9 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { usePurchase, useUpdatePurchase, useStores } from '@/hooks/queries/useEntityQueries'
+import { useAppFieldArray } from '@/hooks/useAppFieldArray'
 import { 
   PURCHASE_STATUS_LABELS, 
   PURCHASE_STATUS_COLORS, 
@@ -71,7 +72,7 @@ export default function PurchaseEditPage() {
     }
   })
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove } = useAppFieldArray({
     control: form.control,
     name: 'items'
   })
@@ -361,7 +362,7 @@ export default function PurchaseEditPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {fields.map((field, index) => (
-                  <div key={field.id} className="border rounded-lg p-4 space-y-4">
+                  <div key={field.key} className="border rounded-lg p-4 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">商品 {index + 1}</h4>
                       {fields.length > 1 && (

@@ -3153,6 +3153,12 @@ export function useOrderDetail(orderId: number | null) {
         // 🔄 確保客戶資訊的完整性
         customer: order.customer || null,
         creator: order.creator || null,
+        
+        // 💰 處理付款記錄 - 確保金額是 number 類型
+        payment_records: order.payment_records?.map((payment: any) => ({
+          ...payment,
+          amount: parseFloat(payment.amount || '0'),
+        })) || undefined,
       };
       
       return processedOrder;
@@ -3190,14 +3196,32 @@ export function useConfirmOrderPayment() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data, orderId) => {
+    onSuccess: async (data, orderId) => {
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.success("訂單款項已確認");
       }
-      // 標準化快取處理：同時刷新列表和詳情
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(orderId), refetchType: 'active' });
+      // 🚀 強化快取同步機制 - 確保頁面即時更新
+      await Promise.all([
+        // 1. 失效訂單列表快取
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ORDERS,
+          exact: false,
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
+        }),
+        // 2. 失效並強制重新獲取訂單詳情
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ORDER(orderId),
+          exact: false,
+          refetchType: 'all' // 改為 'all' 確保頁面即時更新
+        }),
+        // 3. 強制重新獲取當前訂單詳情（雙重保險）
+        queryClient.refetchQueries({
+          queryKey: QUERY_KEYS.ORDER(orderId),
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
+        })
+      ]);
     },
     onError: (error) => {
       if (typeof window !== 'undefined') {
@@ -3290,16 +3314,34 @@ export function useAddOrderPayment() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data, payload) => {
+    onSuccess: async (data, payload) => {
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.success("付款記錄已成功新增", {
           description: `已記錄 $${payload.data.amount} 的付款`
         });
       }
-      // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(payload.orderId), refetchType: 'active' });
+      // 🚀 強化快取同步機制 - 確保頁面即時更新
+      await Promise.all([
+        // 1. 失效訂單列表快取
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ORDERS,
+          exact: false,
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
+        }),
+        // 2. 失效並強制重新獲取訂單詳情
+        queryClient.invalidateQueries({ 
+          queryKey: QUERY_KEYS.ORDER(payload.orderId),
+          exact: false,
+          refetchType: 'all' // 改為 'all' 確保頁面即時更新
+        }),
+        // 3. 強制重新獲取當前訂單詳情（雙重保險）
+        queryClient.refetchQueries({
+          queryKey: QUERY_KEYS.ORDER(payload.orderId),
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
+        })
+      ]);
     },
     onError: (error) => {
       const errorMessage = parseApiError(error);

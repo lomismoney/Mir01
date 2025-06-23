@@ -7,7 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, DollarSign, Calendar, User, CreditCard } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { format } from 'date-fns';
 
 interface OrderDetailComponentProps {
   orderId: number;
@@ -76,6 +78,10 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
     // 🎯 計算總計資訊
     const subtotal = order.items?.reduce((acc: number, item: any) => 
         acc + (parseFloat(item.price) * item.quantity), 0) || 0;
+    
+    // 🎯 計算付款進度
+    const paymentProgress = order.grand_total > 0 ? (order.paid_amount / order.grand_total) * 100 : 0;
+    const remainingAmount = order.grand_total - order.paid_amount;
 
     return (
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
@@ -162,6 +168,56 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                         </Table>
                     </CardContent>
                 </Card>
+                
+                {/* 🎯 新增：付款歷史卡片 */}
+                {order.payment_records && order.payment_records.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <DollarSign className="h-5 w-5" />
+                                付款記錄
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {order.payment_records.map((payment: any) => (
+                                    <div key={payment.id} className="rounded-lg border p-4">
+                                        <div className="flex items-start justify-between">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-medium text-lg">
+                                                        ${payment.amount.toLocaleString()}
+                                                    </span>
+                                                    <Badge variant="outline">
+                                                        {payment.payment_method === 'cash' ? '現金' :
+                                                         payment.payment_method === 'transfer' ? '銀行轉帳' :
+                                                         payment.payment_method === 'credit_card' ? '信用卡' : 
+                                                         payment.payment_method}
+                                                    </Badge>
+                                                </div>
+                                                {payment.notes && (
+                                                    <p className="text-sm text-muted-foreground">{payment.notes}</p>
+                                                )}
+                                            </div>
+                                            <div className="text-right text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {format(new Date(payment.payment_date), 'yyyy/MM/dd HH:mm')}
+                                                </div>
+                                                {payment.creator && (
+                                                    <div className="flex items-center gap-1 mt-1">
+                                                        <User className="h-3 w-3" />
+                                                        {payment.creator.name}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
             
             {/* 右側邊欄，佔據 1/3 寬度 */}
@@ -199,22 +255,22 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                 <span className="text-muted-foreground">商品小計</span>
                                 <span>${subtotal.toLocaleString()}</span>
                             </div>
-                            {order.shipping_fee > 0 && (
+                            {order.shipping_fee && order.shipping_fee > 0 && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground">運費</span>
-                                    <span>${parseFloat(order.shipping_fee).toLocaleString()}</span>
+                                    <span>${order.shipping_fee.toLocaleString()}</span>
                                 </div>
                             )}
                             {order.discount_amount > 0 && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground">折扣</span>
-                                    <span className="text-green-600">-${parseFloat(order.discount_amount).toLocaleString()}</span>
+                                    <span className="text-green-600">-${order.discount_amount.toLocaleString()}</span>
                                 </div>
                             )}
-                            {order.tax > 0 && (
+                            {order.tax_amount > 0 && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground">稅額</span>
-                                    <span>${parseFloat(order.tax).toLocaleString()}</span>
+                                    <span>${order.tax_amount.toLocaleString()}</span>
                                 </div>
                             )}
                             <div className="flex items-center justify-between font-medium text-base pt-2 border-t">
@@ -223,9 +279,60 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                     style: 'currency', 
                                     currency: 'TWD', 
                                     minimumFractionDigits: 0 
-                                }).format(parseFloat(order.grand_total))}</span>
+                                }).format(order.grand_total)}</span>
                             </div>
                         </div>
+                    </CardContent>
+                </Card>
+                
+                {/* 🎯 新增：付款進度卡片 */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <CreditCard className="h-5 w-5" />
+                            付款進度
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {/* 進度條 */}
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">完成度</span>
+                                <span className="font-medium">{paymentProgress.toFixed(0)}%</span>
+                            </div>
+                            <Progress value={paymentProgress} className="h-2" />
+                        </div>
+                        
+                        {/* 金額明細 */}
+                        <div className="space-y-2 pt-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">已付金額</span>
+                                <span className="font-medium text-green-600">
+                                    ${order.paid_amount.toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">未付金額</span>
+                                <span className="font-medium text-red-600">
+                                    ${remainingAmount.toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between pt-2 border-t">
+                                <span className="text-muted-foreground">訂單總額</span>
+                                <span className="font-medium">
+                                    ${order.grand_total.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {/* 付款次數統計 */}
+                        {order.payment_records && order.payment_records.length > 0 && (
+                            <div className="pt-3 border-t">
+                                <p className="text-xs text-muted-foreground">
+                                    已收到 {order.payment_records.length} 筆付款
+                                </p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
