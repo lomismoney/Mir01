@@ -26,9 +26,20 @@ class ProductVariantController extends Controller
      * @queryParam sku string 按SKU搜尋變體. Example: TSHIRT-RED-S
      * @queryParam page integer 頁碼，預設為 1. Example: 1
      * @queryParam per_page integer 每頁項目數，預設為 15. Example: 15
+     * @queryParam include string 可選的關聯。例如: product,inventory
      * 
-     * @authenticated
-     * @responseFile storage/responses/product_variants.index.json
+     * @response 200 scenario="商品變體列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "sku": "PRODUCT-001",
+     *       "price": 299.99,
+     *       "product_id": 1,
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
      * 
      * @param Request $request
      * @return AnonymousResourceCollection

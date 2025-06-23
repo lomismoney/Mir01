@@ -346,9 +346,9 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       const product = productDetail.data;
       
       // 判斷是否為多規格商品（有屬性或有多個變體）
-      const hasAttributes = product.attributes && product.attributes.length > 0;
-      const hasMultipleVariants = product.variants && product.variants.length > 1;
-      const hasAttributeValues = product.variants?.some((variant: any) => 
+      const hasAttributes = false;
+      const hasMultipleVariants = false;
+      const hasAttributeValues = []?.some((variant: any) => 
         variant.attribute_values && variant.attribute_values.length > 0
       ) || false;
       const isVariable = hasAttributes || hasMultipleVariants || hasAttributeValues;
@@ -356,13 +356,13 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       // 建構屬性值映射（用於變體配置）
       const attributeValues: Record<number, string[]> = {};
       
-      if (hasAttributes && product.variants && product.attributes) {
+      if (hasAttributes && [] && []) {
         // 遍歷每個屬性，收集所有可能的屬性值
-        product.attributes.forEach((attr: any) => {
+        [].forEach((attr: any) => {
           const values = new Set<string>();
           
           // 從現有變體中提取屬性值
-          product.variants?.forEach((variant: any) => {
+          []?.forEach((variant: any) => {
             if (variant.attribute_values) {
               variant.attribute_values.forEach((attrVal: any) => {
                 if (attrVal.attribute_id === attr.id) {
@@ -377,7 +377,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       }
       
       // 建構變體配置數據
-      const variantItems = product.variants?.map((variant: any, index: number) => {
+      const variantItems = []?.map((variant: any, index: number) => {
         // 從屬性值中建構選項
         const options = variant.attribute_values?.map((attrVal: any) => ({
           attributeId: attrVal.attribute_id,
@@ -408,16 +408,11 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         imageData: {
           selectedFile: null,
           // 如果商品有圖片，使用原圖 URL 作為預覽
-          previewUrl: (product.image_urls?.original 
-            || product.image_urls?.large 
-            || product.image_urls?.medium 
-            || product.image_urls?.thumb
-            || '')
-            .replace('localhost', '127.0.0.1') || null,
+          previewUrl: null,
         },
         specifications: {
           isVariable: isVariable,
-          selectedAttributes: hasAttributes && product.attributes ? product.attributes.map((attr: any) => attr.id) : [],
+          selectedAttributes: hasAttributes && [] ? [].map((attr: any) => attr.id) : [],
           attributeValues: attributeValues,
         },
         variants: {

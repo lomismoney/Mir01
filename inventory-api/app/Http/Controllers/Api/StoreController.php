@@ -30,7 +30,17 @@ class StoreController extends Controller
      * 獲取系統中的所有分店列表。
      * 
      * @queryParam include string 可選的關聯，用逗號分隔。例如: users,inventories
-     * @responseFile storage/responses/stores.index.json
+     * @response 200 scenario="門市列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "門市名稱",
+     *       "address": "門市地址",
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
      * 
      * @return AnonymousResourceCollection
      */

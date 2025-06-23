@@ -137,7 +137,7 @@ export function TransferStatusEditDialog({
         <DialogHeader>
           <DialogTitle>編輯轉移狀態</DialogTitle>
           <DialogDescription>
-            轉移單號 #{transfer.id} - {transfer.product_variant?.product?.name}
+            轉移單號 #{transfer.id} - 產品 #{transfer.product_variant_id}
           </DialogDescription>
         </DialogHeader>
         

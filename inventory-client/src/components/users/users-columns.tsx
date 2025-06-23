@@ -119,7 +119,7 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
     accessorKey: "role",
     header: "角色",
     cell: ({ row }) => {
-      const isAdmin = row.original.is_admin || false
+      const isAdmin = false
       
       return (
         <Badge 
@@ -131,7 +131,7 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
           ) : (
             <Eye className="h-3 w-3" />
           )}
-          {row.original.role_display || (isAdmin ? "管理員" : "檢視者")}
+          {"檢視者"}
         </Badge>
       )
     },

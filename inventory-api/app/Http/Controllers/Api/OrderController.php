@@ -135,8 +135,20 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * @urlParam order integer required 訂單的 ID。 Example: 1
-     * @responseFile storage/responses/order.show.json
+     * @urlParam id integer required 訂單的 ID。 Example: 1
+     * 
+     * @response 200 scenario="訂單詳情" {
+     *   "data": {
+     *     "id": 1,
+     *     "order_number": "ORD-20250101-001",
+     *     "customer_id": 1,
+     *     "store_id": 1,
+     *     "total_amount": 299.99,
+     *     "status": "pending",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function show(Order $order)
     {

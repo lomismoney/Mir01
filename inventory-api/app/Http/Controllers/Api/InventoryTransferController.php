@@ -35,11 +35,30 @@ class InventoryTransferController extends Controller
      * @queryParam start_date date 起始日期. Example: 2023-01-01
      * @queryParam end_date date 結束日期. Example: 2023-12-31
      * @queryParam product_name string 按商品名稱搜尋. Example: T恤
-     * @queryParam per_page integer 每頁顯示數量，預設15. Example: 20
+     * @queryParam per_page integer 每頁項目數，預設 15
+     * 
+     * @response 200 scenario="庫存調撥列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "product_variant_id": 1,
+     *       "from_store_id": 1,
+     *       "to_store_id": 2,
+     *       "quantity": 10,
+     *       "status": "pending",
+     *       "notes": "調撥備註",
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ],
+     *   "meta": {
+     *     "current_page": 1,
+     *     "per_page": 15,
+     *     "total": 100
+     *   }
+     * }
      * 
      * @authenticated
-     * @responseFile storage/responses/inventory_transfers.index.json
-     * 
      * @param Request $request
      * @return AnonymousResourceCollection
      */

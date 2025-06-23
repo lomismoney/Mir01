@@ -61,7 +61,6 @@ class ProductController extends Controller
      * @queryParam out_of_stock boolean 只顯示缺貨商品。 Example: false
      * @queryParam sort_by string 排序欄位 (name, created_at)。 Example: name
      * @queryParam sort_order string 排序方向 (asc, desc)，預設為 asc。 Example: desc
-     * @responseFile storage/responses/products_index.json
      * 
      * @response scenario="商品列表" {
      *   "data": [
@@ -173,7 +172,16 @@ class ProductController extends Controller
      * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
      * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
      * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
-     * @responseFile status=201 storage/responses/product.show.json
+     * @response 201 scenario="商品創建成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "經典棉質T-shirt",
+     *     "description": "100% 純棉",
+     *     "category_id": 1,
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function store(StoreProductRequest $request)
     {
@@ -246,7 +254,18 @@ class ProductController extends Controller
      * @bodyParam price number required 商品價格。 Example: 299.99
      * @bodyParam category_id integer 商品分類 ID，可為空。 Example: 1
      * @bodyParam description string 商品描述，可為空。 Example: "100% 純棉材質，舒適透氣"
-     * @responseFile status=201 storage/responses/product.show.json
+     * @response 201 scenario="單規格商品創建成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "經典白色T恤",
+     *     "sku": "TSHIRT-WHITE-001",
+     *     "price": 299.99,
+     *     "category_id": 1,
+     *     "description": "100% 純棉材質，舒適透氣",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function storeSimple(StoreSimpleProductRequest $request)
     {
@@ -280,7 +299,16 @@ class ProductController extends Controller
      * 
      * @group 商品管理
      * @urlParam id integer required 商品的 ID。 Example: 1
-     * @responseFile status=200 storage/responses/product.show.json
+     * @response 200 scenario="商品詳情" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "商品名稱",
+     *     "description": "商品描述",
+     *     "category_id": 1,
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function show(Product $product)
     {
@@ -308,7 +336,15 @@ class ProductController extends Controller
      * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
      * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
      * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
-     * @responseFile status=200 storage/responses/product.show.json
+     * @response 200 scenario="商品更新成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "經典棉質T-shirt",
+     *     "description": "100% 純棉",
+     *     "category_id": 1,
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function update(UpdateProductRequest $request, Product $product)
     {

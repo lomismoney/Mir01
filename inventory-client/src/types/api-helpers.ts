@@ -614,12 +614,15 @@ export interface ProcessedOrder {
   creator: User;      // 嵌套的創建者對象
   shipping_status: string;
   payment_status: string;
+  payment_method: string;    // 付款方式
+  order_source: string;      // 訂單來源
   shipping_fee: number | null;  // 已精煉為 number
   shipping_address: string | null;
   shipping_phone: string | null;
   billing_address: string | null;
   notes: string | null;
   subtotal: number;      // 已精煉為 number
+  tax: number;           // 稅金 - 新增字段
   tax_amount: number;    // 已精煉為 number
   discount_amount: number;  // 已精煉為 number
   grand_total: number;   // 已精煉為 number

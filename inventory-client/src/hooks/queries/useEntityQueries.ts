@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { getSession } from 'next-auth/react';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
-import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters, CustomerFilters, Customer, AttributePathParams, OrderFormData, InventoryTransactionsResponse, InventoryTransfersResponse } from '@/types/api-helpers';
+import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters, CustomerFilters, Customer, AttributePathParams, OrderFormData, InventoryTransactionsResponse, InventoryTransfersResponse, ProcessedOrder, ProcessedOrderItem } from '@/types/api-helpers';
 import { toast } from '@/components/ui/use-toast';
 
 /**
@@ -1704,7 +1704,10 @@ export function useDeleteAttribute() {
 
 // 導入屬性值管理的精確類型定義
 type CreateAttributeValueRequestBody = import('@/types/api').paths["/api/attributes/{attribute_id}/values"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateAttributeValueRequestBody = import('@/types/api').paths["/api/values/{id}"]["put"]["requestBody"]["content"]["application/json"];
+// 暫時使用手動類型定義，直到 OpenAPI 規範修復
+type UpdateAttributeValueRequestBody = {
+  value: string;
+};
 type AttributeValuePathParams = import('@/types/api').paths["/api/values/{id}"]["get"]["parameters"]["path"];
 
 /**
@@ -1751,10 +1754,10 @@ export function useUpdateAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (variables: { valueId: number; body: UpdateAttributeValueRequestBody }) => {
-      const { data, error } = await apiClient.PUT('/api/values/{id}', {
+      const { data, error } = await apiClient.PUT('/api/values/{id}' as any, {
         params: { path: { id: variables.valueId, value: variables.valueId } },
         body: variables.body,
-      });
+      } as any);
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '更新選項失敗'); }
       return data;
     },

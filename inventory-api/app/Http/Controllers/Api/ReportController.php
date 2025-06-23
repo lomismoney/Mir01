@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\InventoryTimeSeriesRequest;
 use App\Services\InventoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 /**
  * @group 報表與分析
@@ -33,22 +33,17 @@ class ReportController extends Controller
      * 返回指定商品變體在特定日期範圍內的每日庫存水平數據，
      * 用於顯示庫存趨勢圖表。
      * 
+     * @group 報表與分析
+     * @authenticated
+     * 
      * @queryParam product_variant_id integer required 商品變體ID. Example: 1
      * @queryParam start_date date required 開始日期 (YYYY-MM-DD). Example: 2025-01-01
      * @queryParam end_date date required 結束日期 (YYYY-MM-DD). Example: 2025-01-31
      * 
-     * @authenticated
-     * 
-     * @response 200 {
+     * @response 200 scenario="成功獲取庫存趨勢數據" {
      *   "data": [
-     *     {
-     *       "date": "2025-01-01",
-     *       "quantity": 100
-     *     },
-     *     {
-     *       "date": "2025-01-02",
-     *       "quantity": 105
-     *     }
+     *     {"date": "2025-01-01", "quantity": 100},
+     *     {"date": "2025-01-02", "quantity": 105}
      *   ]
      * }
      * 
@@ -57,36 +52,25 @@ class ReportController extends Controller
      */
     public function inventoryTimeSeries(Request $request): JsonResponse
     {
-        // 驗證請求參數
-        $validator = Validator::make($request->all(), [
+        // 手動驗證查詢參數
+        $request->validate([
             'product_variant_id' => 'required|integer|exists:product_variants,id',
             'start_date' => 'required|date|date_format:Y-m-d',
             'end_date' => 'required|date|date_format:Y-m-d|after_or_equal:start_date',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => '驗證失敗',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        try {
-            // 調用服務層獲取時序數據
-            $timeSeriesData = $this->inventoryService->getInventoryTimeSeries(
-                $request->product_variant_id,
-                $request->start_date,
-                $request->end_date
-            );
-
-            return response()->json([
-                'data' => $timeSeriesData
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => '獲取庫存時序數據失敗',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $productVariantId = $request->query('product_variant_id');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+        
+        $timeSeries = $this->inventoryService->getInventoryTimeSeries(
+            $productVariantId,
+            $startDate,
+            $endDate
+        );
+        
+        return response()->json([
+            'data' => $timeSeries
+        ]);
     }
 } 

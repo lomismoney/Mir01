@@ -176,9 +176,9 @@ export default function UsersPage() {
   const handleEditUser = (userToEdit: UserItem) => {
     setEditingUser(userToEdit);
     setEditUserName(userToEdit.name || '');
-    setEditUsername(userToEdit.username || '');
+    setEditUsername(userToEdit.email || ''); // 使用 email 作為 username 的替代，或可以使用空字符串
     setEditPassword(''); // 密碼留空，表示不更改
-    setEditRole(userToEdit.role as 'admin' | 'viewer' || 'viewer');
+    setEditRole('viewer'); // 默認設置為 viewer，因為 UserItem 類型中沒有 role 字段
     setIsEditDialogOpen(true);
   };
 

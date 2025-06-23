@@ -108,7 +108,7 @@ export function TransferHistoryDialog({
         <DialogHeader>
           <DialogTitle>轉移歷史記錄</DialogTitle>
           <DialogDescription>
-            轉移單號 #{transfer.id} - {transfer.product_variant?.product?.name}
+            轉移單號 #{transfer.id} - 產品 #{transfer.product_variant_id}
           </DialogDescription>
         </DialogHeader>
         
@@ -120,11 +120,11 @@ export function TransferHistoryDialog({
           <CardContent className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <Badge variant="outline">
-                {transfer.from_store?.name || `門市 #${transfer.from_store_id}`}
+                門市 #{transfer.from_store_id}
               </Badge>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
               <Badge variant="outline">
-                {transfer.to_store?.name || `門市 #${transfer.to_store_id}`}
+                門市 #{transfer.to_store_id}
               </Badge>
               <span className="ml-2">數量: {transfer.quantity}</span>
             </div>

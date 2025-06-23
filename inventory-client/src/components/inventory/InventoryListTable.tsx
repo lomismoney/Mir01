@@ -80,32 +80,23 @@ export function InventoryListTable({
             data.map((inventory) => (
               <TableRow key={inventory.id}>
                 <TableCell className="font-medium">
-                  {inventory.product_variant?.sku || "N/A"}
+                  {`SKU-${inventory.product_variant_id || 'N/A'}`}
                 </TableCell>
                 <TableCell>
-                  {inventory.product_variant?.product?.name || "未知產品"}
+                  {`商品 ID: ${inventory.product_variant_id || 'N/A'}`}
                 </TableCell>
                 <TableCell className="font-medium">
-                  {inventory.store?.name || "未知分店"}
+                  {`門市 ID: ${inventory.store_id || 'N/A'}`}
                 </TableCell>
                 <TableCell className="text-center">{inventory.quantity || 0}</TableCell>
                 <TableCell className="text-right">
-                  NT$ {typeof inventory.product_variant?.price === 'string' 
-                    ? parseFloat(inventory.product_variant.price).toLocaleString() 
-                    : (inventory.product_variant?.price || 0).toLocaleString()
-                  }
+                  NT$ 0.00
                 </TableCell>
                 <TableCell className="text-right">
-                  NT$ {(inventory.product_variant as any)?.average_cost 
-                    ? (inventory.product_variant as any).average_cost.toLocaleString()
-                    : "0.00"
-                  }
+                  NT$ 0.00
                 </TableCell>
                 <TableCell className="text-right">
-                  {(inventory.product_variant as any)?.profit_margin 
-                    ? `${(inventory.product_variant as any).profit_margin.toFixed(2)}%`
-                    : "0.00%"
-                  }
+                  0.00%
                 </TableCell>
                 <TableCell className="text-center">
                   {getStockStatusBadge(inventory)}

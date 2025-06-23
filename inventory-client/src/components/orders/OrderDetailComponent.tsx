@@ -75,7 +75,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
 
     // 🎯 計算總計資訊
     const subtotal = order.items?.reduce((acc: number, item: any) => 
-        acc + (parseFloat(item.price) * item.quantity), 0) || 0;
+        acc + (item.price * item.quantity), 0) || 0;
 
     return (
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
@@ -130,9 +130,9 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                             )}
                                         </TableCell>
                                         <TableCell className="font-mono text-sm">{item.sku}</TableCell>
-                                        <TableCell className="text-right">${parseFloat(item.price).toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">${item.price.toLocaleString()}</TableCell>
                                         <TableCell className="text-center">{item.quantity}</TableCell>
-                                        <TableCell className="text-right font-medium">${(parseFloat(item.price) * item.quantity).toLocaleString()}</TableCell>
+                                        <TableCell className="text-right font-medium">${(item.price * item.quantity).toLocaleString()}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <Select
@@ -199,22 +199,22 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                 <span className="text-muted-foreground">商品小計</span>
                                 <span>${subtotal.toLocaleString()}</span>
                             </div>
-                            {order.shipping_fee > 0 && (
+                            {(order.shipping_fee && order.shipping_fee > 0) && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground">運費</span>
-                                    <span>${parseFloat(order.shipping_fee).toLocaleString()}</span>
+                                    <span>${order.shipping_fee.toLocaleString()}</span>
                                 </div>
                             )}
                             {order.discount_amount > 0 && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground">折扣</span>
-                                    <span className="text-green-600">-${parseFloat(order.discount_amount).toLocaleString()}</span>
+                                    <span className="text-green-600">-${order.discount_amount.toLocaleString()}</span>
                                 </div>
                             )}
                             {order.tax > 0 && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground">稅額</span>
-                                    <span>${parseFloat(order.tax).toLocaleString()}</span>
+                                    <span>${order.tax.toLocaleString()}</span>
                                 </div>
                             )}
                             <div className="flex items-center justify-between font-medium text-base pt-2 border-t">
@@ -223,7 +223,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                     style: 'currency', 
                                     currency: 'TWD', 
                                     minimumFractionDigits: 0 
-                                }).format(parseFloat(order.grand_total))}</span>
+                                }).format(order.grand_total)}</span>
                             </div>
                         </div>
                     </CardContent>

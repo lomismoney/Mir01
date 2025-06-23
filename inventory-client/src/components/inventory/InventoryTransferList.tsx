@@ -109,9 +109,9 @@ export const InventoryTransferList = () => {
                   <TableRow key={transfer.id}>
                     <TableCell>{transfer.id}</TableCell>
                     <TableCell>{formatDate(transfer.created_at || '')}</TableCell>
-                    <TableCell>{transfer.from_store?.name || `門市 #${transfer.from_store_id}`}</TableCell>
-                    <TableCell>{transfer.to_store?.name || `門市 #${transfer.to_store_id}`}</TableCell>
-                    <TableCell>{transfer.product_variant?.product?.name || `產品 #${transfer.product_variant_id}`}</TableCell>
+                    <TableCell>{`門市 #${transfer.from_store_id}`}</TableCell>
+                    <TableCell>{`門市 #${transfer.to_store_id}`}</TableCell>
+                    <TableCell>{`產品 #${transfer.product_variant_id}`}</TableCell>
                     <TableCell>{transfer.quantity}</TableCell>
                     <TableCell>{getStatusBadge(transfer.status || 'unknown')}</TableCell>
                     <TableCell>

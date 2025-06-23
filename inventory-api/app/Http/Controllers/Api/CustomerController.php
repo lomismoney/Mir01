@@ -35,7 +35,28 @@ class CustomerController extends Controller
      * @queryParam search string 關鍵字搜尋，將匹配姓名、電話、統一編號。Example: 設計公司
      * @queryParam start_date date 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
      * @queryParam end_date date 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
-     * @responseFile 200 storage/responses/customer.index.json
+     * 
+     * @response 200 scenario="客戶列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "客戶名稱",
+     *       "phone": "0912345678",
+     *       "is_company": false,
+     *       "tax_id": null,
+     *       "industry_type": "設計師",
+     *       "payment_type": "現金付款",
+     *       "contact_address": "台北市信義區",
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ],
+     *   "meta": {
+     *     "current_page": 1,
+     *     "per_page": 15,
+     *     "total": 100
+     *   }
+     * }
      */
     public function index(Request $request)
     {
@@ -92,7 +113,20 @@ class CustomerController extends Controller
      * @bodyParam addresses.*.address string required 地址內容. Example: 台北市大安區
      * @bodyParam addresses.*.is_default boolean required 是否為預設地址. Example: true
      * 
-     * @responseFile 201 storage/responses/customer.store.json
+     * @response 201 scenario="客戶創建成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "測試客戶",
+     *     "phone": "0987654321",
+     *     "is_company": false,
+     *     "tax_id": null,
+     *     "industry_type": "設計師",
+     *     "payment_type": "現金付款",
+     *     "contact_address": "台北市信義區",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function store(StoreCustomerRequest $request): JsonResponse
     {
@@ -124,13 +158,6 @@ class CustomerController extends Controller
             ], 500);
 
         } catch (\Exception $e) {
-            // 記錄異常詳情
-            \Log::error('客戶創建失敗', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->validated()
-            ]);
-
             return response()->json([
                 'message' => '客戶創建失敗',
                 'error' => '系統錯誤，請稍後再試',
@@ -145,7 +172,20 @@ class CustomerController extends Controller
      * @authenticated
      * @urlParam customer integer required 客戶的 ID。 Example: 1
      * 
-     * @responseFile 200 storage/responses/customer.show.json
+     * @response 200 scenario="客戶詳情" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "客戶名稱",
+     *     "phone": "0912345678",
+     *     "is_company": false,
+     *     "tax_id": null,
+     *     "industry_type": "設計師",
+     *     "payment_type": "現金付款",
+     *     "contact_address": "台北市信義區",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function show(Customer $customer)
     {
@@ -177,7 +217,20 @@ class CustomerController extends Controller
      * @bodyParam addresses.*.address string required 地址內容. Example: 台北市大安區
      * @bodyParam addresses.*.is_default boolean required 是否為預設地址. Example: true
      * 
-     * @responseFile 200 storage/responses/customer.update.json
+     * @response 200 scenario="客戶更新成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "測試客戶（已更新）",
+     *     "phone": "0987654321",
+     *     "is_company": false,
+     *     "tax_id": null,
+     *     "industry_type": "設計師",
+     *     "payment_type": "現金付款",
+     *     "contact_address": "台北市信義區",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T12:00:00.000000Z"
+     *   }
+     * }
      */
     public function update(UpdateCustomerRequest $request, Customer $customer): JsonResponse
     {
@@ -207,14 +260,6 @@ class CustomerController extends Controller
             ], 500);
 
         } catch (\Exception $e) {
-            // 記錄異常詳情
-            \Log::error('客戶更新失敗', [
-                'customer_id' => $customer->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->validated()
-            ]);
-
             return response()->json([
                 'message' => '客戶更新失敗',
                 'error' => '系統錯誤，請稍後再試',
