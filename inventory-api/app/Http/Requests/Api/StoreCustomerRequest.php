@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Knuckles\Scribe\Attributes\BodyParam;
 
 class StoreCustomerRequest extends FormRequest
 {
@@ -65,6 +66,66 @@ class StoreCustomerRequest extends FormRequest
             'addresses.*.address.max' => '地址內容不得超過 255 個字元',
             'addresses.*.is_default.required' => '必須指定是否為預設地址',
             'addresses.*.is_default.boolean' => '預設地址標記必須為布林值',
+        ];
+    }
+
+    /**
+     * 定義請求參數文檔（用於 Scribe API 文檔生成）
+     *
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'name' => [
+                'description' => '客戶名稱或公司抬頭',
+                'example' => '測試客戶',
+            ],
+            'phone' => [
+                'description' => '手機號碼',
+                'example' => '0987654321',
+            ],
+            'is_company' => [
+                'description' => '是否為公司戶',
+                'example' => false,
+            ],
+            'tax_id' => [
+                'description' => '統一編號 (is_company為true時必填)',
+                'example' => '12345678',
+            ],
+            'industry_type' => [
+                'description' => '行業別',
+                'example' => '設計師',
+            ],
+            'payment_type' => [
+                'description' => '付款類別',
+                'example' => '現金付款',
+            ],
+            'contact_address' => [
+                'description' => '主要聯絡地址',
+                'example' => '台北市信義區',
+            ],
+            'addresses' => [
+                'description' => '運送地址列表',
+                'example' => [
+                    [
+                        'address' => '台北市大安區復興南路一段100號',
+                        'is_default' => true,
+                    ],
+                    [
+                        'address' => '台北市信義區市府路45號',
+                        'is_default' => false,
+                    ],
+                ],
+            ],
+            'addresses.*.address' => [
+                'description' => '詳細地址',
+                'example' => '台北市大安區復興南路一段100號',
+            ],
+            'addresses.*.is_default' => [
+                'description' => '是否為預設地址',
+                'example' => true,
+            ],
         ];
     }
 }

@@ -4026,22 +4026,12 @@ paths:
                   nullable: true
                 addresses:
                   type: array
-                  description: '運送地址列表'
-                  nullable: true
+                  description: 'nullable 運送地址列表.'
+                  example:
+                    - architecto
                   items:
-                    type: object
-                    required:
-                      - address
-                      - is_default
-                    properties:
-                      address:
-                        type: string
-                        description: '詳細地址'
-                        example: '台北市信義區市府路1號'
-                      is_default:
-                        type: boolean
-                        description: '是否為預設地址'
-                        example: true
+                    type: string
+                    nullable: true
               required:
                 - name
                 - is_company

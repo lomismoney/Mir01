@@ -241,4 +241,28 @@ class CustomerController extends Controller
         // 3. 返回 204 No Content 響應，這是 RESTful API 中成功刪除操作的標準實踐
         return response()->noContent();
     }
+
+    /**
+     * 檢查客戶名稱是否存在
+     *
+     * @group 客戶管理
+     * @authenticated
+     * @queryParam name string required 要檢查的客戶名稱。Example: 測試客戶
+     * @response 200 scenario="檢查成功" {"exists": true}
+     * @response 200 scenario="名稱不存在" {"exists": false}
+     */
+    public function checkExistence(Request $request): JsonResponse
+    {
+        // 1. 權限驗證 - 檢查使用者是否有權限查看客戶
+        $this->authorize('viewAny', Customer::class);
+
+        // 2. 驗證請求參數
+        $request->validate(['name' => 'required|string|max:255']);
+
+        // 3. 檢查客戶名稱是否存在
+        $exists = Customer::where('name', $request->input('name'))->exists();
+
+        // 4. 返回結果
+        return response()->json(['exists' => $exists]);
+    }
 }
