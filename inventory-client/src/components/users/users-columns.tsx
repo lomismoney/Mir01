@@ -119,19 +119,37 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
     accessorKey: "role",
     header: "角色",
     cell: ({ row }) => {
-      const isAdmin = false
+      const user = row.original
+      const role = user.role || "viewer"
+      
+      // 角色映射表
+      const roleConfig = {
+        admin: {
+          label: "管理員",
+          variant: "default" as const,
+          icon: <Shield className="h-3 w-3" />
+        },
+        staff: {
+          label: "員工",
+          variant: "destructive" as const,
+          icon: <Eye className="h-3 w-3" />
+        },
+        viewer: {
+          label: "檢視者",
+          variant: "secondary" as const,
+          icon: <Eye className="h-3 w-3" />
+        }
+      }
+      
+      const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.viewer
       
       return (
         <Badge 
-          variant={isAdmin ? "default" : "secondary"}
+          variant={config.variant}
           className="flex w-fit items-center gap-1"
         >
-          {isAdmin ? (
-            <Shield className="h-3 w-3" />
-          ) : (
-            <Eye className="h-3 w-3" />
-          )}
-          {"檢視者"}
+          {config.icon}
+          {config.label}
         </Badge>
       )
     },

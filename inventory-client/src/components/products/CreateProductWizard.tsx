@@ -345,10 +345,13 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
     if (isEditMode && productDetail?.data) {
       const product = productDetail.data;
       
+      // 使用類型安全的方式訪問商品數據
+      const productData = product as any; // 臨時類型斷言以處理缺失的類型定義
+      
       // 判斷是否為多規格商品（有屬性或有多個變體）
-      const hasAttributes = false;
-      const hasMultipleVariants = false;
-      const hasAttributeValues = []?.some((variant: any) => 
+      const hasAttributes = productData.attributes && productData.attributes.length > 0;
+      const hasMultipleVariants = productData.variants && productData.variants.length > 1;
+      const hasAttributeValues = productData.variants?.some((variant: any) => 
         variant.attribute_values && variant.attribute_values.length > 0
       ) || false;
       const isVariable = hasAttributes || hasMultipleVariants || hasAttributeValues;
@@ -356,13 +359,13 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       // 建構屬性值映射（用於變體配置）
       const attributeValues: Record<number, string[]> = {};
       
-      if (hasAttributes && [] && []) {
+      if (hasAttributes && productData.attributes && productData.variants) {
         // 遍歷每個屬性，收集所有可能的屬性值
-        [].forEach((attr: any) => {
+        productData.attributes.forEach((attr: any) => {
           const values = new Set<string>();
           
           // 從現有變體中提取屬性值
-          []?.forEach((variant: any) => {
+          productData.variants?.forEach((variant: any) => {
             if (variant.attribute_values) {
               variant.attribute_values.forEach((attrVal: any) => {
                 if (attrVal.attribute_id === attr.id) {
@@ -377,7 +380,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
       }
       
       // 建構變體配置數據
-      const variantItems = []?.map((variant: any, index: number) => {
+      const variantItems = productData.variants?.map((variant: any, index: number) => {
         // 從屬性值中建構選項
         const options = variant.attribute_values?.map((attrVal: any) => ({
           attributeId: attrVal.attribute_id,
@@ -408,11 +411,11 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
         imageData: {
           selectedFile: null,
           // 如果商品有圖片，使用原圖 URL 作為預覽
-          previewUrl: null,
+          previewUrl: productData.image_url || productData.thumbnail_url || null,
         },
         specifications: {
           isVariable: isVariable,
-          selectedAttributes: hasAttributes && [] ? [].map((attr: any) => attr.id) : [],
+          selectedAttributes: hasAttributes && productData.attributes ? productData.attributes.map((attr: any) => attr.id) : [],
           attributeValues: attributeValues,
         },
         variants: {
