@@ -9,7 +9,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useProducts } from '@/hooks/queries/useEntityQueries';
 import { toast } from 'sonner';
@@ -309,9 +309,9 @@ export function ProductSelector({
     }}>
       <DialogContent className={cn(
         "h-[85vh] flex flex-col",
-        selectedProduct === null 
-          ? "max-w-[800px] w-[90vw]" // 選擇商品時的寬度（較窄）
-          : "!max-w-[1400px] w-[90vw] [&>div]:max-w-full" // 選擇規格時的寬度（較寬）
+        selectedProduct === null || isAddingCustom
+          ? "max-w-[800px] w-[90vw]" // 選擇商品或訂製規格時的寬度（較窄）
+          : "!max-w-[1400px] w-[90vw] [&>div]:max-w-full" // 選擇 SKU 規格時的寬度（較寬）
       )}>
         <DialogHeader>
           <DialogTitle>選擇商品</DialogTitle>
@@ -435,69 +435,166 @@ export function ProductSelector({
         ) : (
           // 詳細視圖 - 規格選擇列表
           <div className="flex flex-col h-full">
-            {/* 視圖標頭 */}
-            <div className="flex items-center gap-4 p-6 border-b">
-              <Button variant="outline" size="icon" onClick={() => {
-                setSelectedProduct(null);
-                setIsAddingCustom(false);
-              }}>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <h2 className="text-xl font-semibold">{selectedProduct.name}</h2>
-            </div>
+            {/* 視圖標頭 - 只在非訂製模式下顯示 */}
+            {!isAddingCustom && (
+              <div className="flex items-center justify-between px-6 py-4 border-b">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <Button variant="outline" size="icon" onClick={() => {
+                    setSelectedProduct(null);
+                    setIsAddingCustom(false);
+                  }}>
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl font-semibold truncate">{selectedProduct.name}</h2>
+                    <p className="text-sm text-muted-foreground">選擇規格</p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setIsAddingCustom(true)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  新增訂製規格
+                </Button>
+              </div>
+            )}
 
             {/* 條件渲染：訂製表單 or 標準規格選擇 */}
             {isAddingCustom ? (
               /* --- 這裡是新的訂製表單 --- */
-              <div className="p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">為 {selectedProduct.name} 新增訂製規格</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setIsAddingCustom(false)}>返回標準規格</Button>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="custom-spec">訂製規格描述</Label>
-                  <Textarea 
-                    id="custom-spec"
-                    placeholder="例如：尺寸 85cm x 120cm，金色拉絲邊框"
-                    value={customSpec}
-                    onChange={(e) => setCustomSpec(e.target.value)}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="custom-quantity">數量</Label>
-                    <Input id="custom-quantity" type="number" value={customQuantity} onChange={(e) => setCustomQuantity(Number(e.target.value) || '')} />
+              <div className="flex flex-col h-full">
+                {/* 訂製表單標題區 */}
+                <div className="border-b">
+                  <div className="px-6 py-4">
+                    <div className="flex items-center gap-4">
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        onClick={() => setIsAddingCustom(false)}
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                      <div className="flex-1 min-w-0">
+                        <div className="space-y-1">
+                          <h3 className="text-base font-medium text-muted-foreground">
+                            為 <span className="font-semibold text-foreground">{selectedProduct.name}</span>
+                          </h3>
+                          <h2 className="text-xl font-bold">
+                            新增訂製規格
+                          </h2>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          請填寫訂製商品的詳細規格資訊
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="custom-price">單價</Label>
-                    <Input id="custom-price" type="number" value={customPrice} onChange={(e) => setCustomPrice(Number(e.target.value) || '')} />
+                </div>
+
+                {/* 表單內容區 */}
+                <div className="flex-1 overflow-y-auto px-6 py-8">
+                  <div className="max-w-xl mx-auto space-y-6">
+                    {/* 訂製規格描述 */}
+                    <div className="space-y-3">
+                      <Label htmlFor="custom-spec" className="text-base font-medium">
+                        訂製規格描述 <span className="text-destructive">*</span>
+                      </Label>
+                      <Textarea 
+                        id="custom-spec"
+                        placeholder="例如：尺寸 85cm x 120cm，金色拉絲邊框"
+                        value={customSpec}
+                        onChange={(e) => setCustomSpec(e.target.value)}
+                        className="min-h-[120px] resize-none"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        請詳細描述商品的訂製規格，包含尺寸、顏色、材質等資訊
+                      </p>
+                    </div>
+
+                    {/* 數量和單價 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="custom-quantity" className="text-base font-medium">
+                          數量 <span className="text-destructive">*</span>
+                        </Label>
+                        <Input 
+                          id="custom-quantity" 
+                          type="number" 
+                          min="1"
+                          value={customQuantity} 
+                          onChange={(e) => setCustomQuantity(Number(e.target.value) || '')}
+                          placeholder="請輸入數量"
+                          className="h-11"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="custom-price" className="text-base font-medium">
+                          單價 (NT$) <span className="text-destructive">*</span>
+                        </Label>
+                        <Input 
+                          id="custom-price" 
+                          type="number" 
+                          min="0"
+                          step="0.01"
+                          value={customPrice} 
+                          onChange={(e) => setCustomPrice(Number(e.target.value) || '')}
+                          placeholder="請輸入單價"
+                          className="h-11"
+                        />
+                      </div>
+                    </div>
+
+                    {/* 小計顯示 */}
+                    {customPrice && customQuantity && (
+                      <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">單價</span>
+                          <span>NT$ {Number(customPrice).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">數量</span>
+                          <span>{customQuantity}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-base pt-2 border-t">
+                          <span>小計</span>
+                          <span className="text-primary">
+                            NT$ {(Number(customPrice) * Number(customQuantity)).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <Button 
-                  className="w-full" 
-                  onClick={() => {
-                    if (!selectedProduct || !customSpec || !customPrice || !customQuantity) {
-                      toast.error("所有欄位均為必填");
-                      return;
-                    }
-                    const customItem = {
-                      product_id: selectedProduct.id,
-                      product_variant_id: null, // 標示為訂製商品
-                      custom_product_name: `${selectedProduct.name} (訂製)`,
-                      custom_specifications: { '規格': customSpec },
-                      price: customPrice,
-                      quantity: customQuantity,
-                      sku: `CUSTOM-${selectedProduct.id}-${Date.now()}` // 生成一個臨時唯一 SKU
-                    };
-                    onCustomItemAdd(customItem);
-                    setIsAddingCustom(false); // 重置視圖
-                    setCustomSpec('');
-                    setCustomPrice('');
-                    setCustomQuantity(1);
-                  }}
-                >
-                  確認添加訂製商品
-                </Button>
+
+                {/* 底部操作按鈕 */}
+                <div className="border-t p-6 bg-background">
+                  <div className="max-w-xl mx-auto">
+                    <Button 
+                      className="w-full h-11 text-base" 
+                      size="lg"
+                      onClick={() => {
+                        if (!selectedProduct || !customSpec || !customPrice || !customQuantity) {
+                          toast.error("請填寫所有必填欄位");
+                          return;
+                        }
+                        const customItem = {
+                          product_id: selectedProduct.id,
+                          product_variant_id: null, // 標示為訂製商品
+                          custom_product_name: `${selectedProduct.name} (訂製)`,
+                          custom_specifications: { '規格': customSpec },
+                          price: customPrice,
+                          quantity: customQuantity,
+                          sku: `CUSTOM-${selectedProduct.id}-${Date.now()}` // 生成一個臨時唯一 SKU
+                        };
+                        onCustomItemAdd(customItem);
+                        setIsAddingCustom(false); // 重置視圖
+                        setCustomSpec('');
+                        setCustomPrice('');
+                        setCustomQuantity(1);
+                      }}
+                    >
+                      確認添加訂製商品
+                    </Button>
+                  </div>
+                </div>
               </div>
             ) : (
               /* --- 這裡是原本的「規格選擇」視圖 --- */
@@ -563,13 +660,6 @@ export function ProductSelector({
                 </TableBody>
               </Table>
             </div>
-                
-                {/* 新增訂製規格按鈕 */}
-                <div className="mt-4 p-4">
-                  <Button variant="outline" className="w-full" onClick={() => setIsAddingCustom(true)}>
-                    + 新增訂製規格
-                  </Button>
-                </div>
               </>
             )}
           </div>
