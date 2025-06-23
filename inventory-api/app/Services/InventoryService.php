@@ -32,9 +32,9 @@ class InventoryService
     public function deductStock(int $productVariantId, int $quantity, ?int $storeId = null, ?string $notes = null, array $metadata = []): bool
     {
         return DB::transaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
-            // 如果沒有指定門市，使用預設門市 (ID: 1)
+            // 確保提供了有效的門市ID
             if (!$storeId) {
-                $storeId = 1; // TODO: 從配置或用戶設定中獲取預設門市
+                throw new \InvalidArgumentException('必須提供有效的門市ID');
             }
 
             // 獲取或創建庫存記錄
@@ -57,7 +57,11 @@ class InventoryService
             }
 
             // 扣減庫存
-            $userId = Auth::id() ?? 1; // 如果沒有登入用戶，使用系統用戶
+            $userId = Auth::id();
+            if (!$userId) {
+                throw new \InvalidArgumentException('用戶必須經過認證才能執行庫存操作');
+            }
+            
             $notes = $notes ?? '訂單扣減庫存';
             
             $result = $inventory->reduceStock($quantity, $userId, $notes, $metadata);
@@ -84,9 +88,9 @@ class InventoryService
     public function returnStock(int $productVariantId, int $quantity, ?int $storeId = null, ?string $notes = null, array $metadata = []): bool
     {
         return DB::transaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
-            // 如果沒有指定門市，使用預設門市
+            // 確保提供了有效的門市ID
             if (!$storeId) {
-                $storeId = 1;
+                throw new \InvalidArgumentException('必須提供有效的門市ID');
             }
 
             // 獲取或創建庫存記錄
@@ -103,7 +107,11 @@ class InventoryService
                 );
 
             // 返還庫存
-            $userId = Auth::id() ?? 1;
+            $userId = Auth::id();
+            if (!$userId) {
+                throw new \InvalidArgumentException('用戶必須經過認證才能執行庫存操作');
+            }
+            
             $notes = $notes ?? '訂單取消/退款返還庫存';
             
             $result = $inventory->addStock($quantity, $userId, $notes, $metadata);
@@ -181,7 +189,7 @@ class InventoryService
     public function checkStock(int $productVariantId, int $quantity, ?int $storeId = null): bool
     {
         if (!$storeId) {
-            $storeId = 1;
+            throw new \InvalidArgumentException('必須提供有效的門市ID');
         }
 
         $inventory = Inventory::where('product_variant_id', $productVariantId)
@@ -216,8 +224,13 @@ class InventoryService
                 
                 if (!$isAvailable) {
                     $variant = ProductVariant::find($item['product_variant_id']);
+                    $effectiveStoreId = $storeId;
+                    if (!$effectiveStoreId) {
+                        throw new \InvalidArgumentException('必須提供有效的門市ID');
+                    }
+                    
                     $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])
-                        ->where('store_id', $storeId ?? 1)
+                        ->where('store_id', $effectiveStoreId)
                         ->first();
                     
                     $results[] = [

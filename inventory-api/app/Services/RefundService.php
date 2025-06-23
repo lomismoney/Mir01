@@ -202,14 +202,18 @@ class RefundService
             if ($orderItem && $orderItem->product_variant_id) {
                 $productVariant = $orderItem->productVariant;
                 
-                // 通過庫存服務增加庫存
-                $this->inventoryService->adjustInventory(
-                    productVariantId: $productVariant->id,
-                    storeId: $refund->order->store_id ?? 1, // 假設有門市 ID，否則使用預設
-                    quantityChange: $refundItem->quantity,
-                    type: 'refund_restock',
-                    notes: "退款回補庫存 - 退款單 #{$refund->id}",
-                    reference: "refund:{$refund->id}"
+                // 通過庫存服務返還庫存
+                $storeId = $refund->order->store_id;
+                if (!$storeId) {
+                    throw new \InvalidArgumentException('訂單必須有有效的門市ID才能進行庫存回補');
+                }
+                
+                $this->inventoryService->returnStock(
+                    $productVariant->id,
+                    $refundItem->quantity,
+                    $storeId,
+                    "退款回補庫存 - 退款單 #{$refund->id}",
+                    ['refund_id' => $refund->id]
                 );
             }
             // 如果是訂製商品（product_variant_id 為 null），則跳過庫存回補

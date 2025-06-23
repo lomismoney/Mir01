@@ -94,9 +94,15 @@ class PurchaseService
             $purchasedAt = $purchaseData->purchased_at ?? Carbon::now();
             $orderNumber = $this->generateOrderNumber(new \DateTime($purchasedAt));
             
+            // 確保用戶已認證
+            $userId = Auth::id();
+            if (!$userId) {
+                throw new \InvalidArgumentException('用戶必須經過認證才能建立進貨單');
+            }
+            
             $purchase = Purchase::create([
                 'store_id' => $purchaseData->store_id,
-                'user_id' => Auth::id() ?? 1, // 使用當前用戶或預設為ID 1
+                'user_id' => $userId,
                 'order_number' => $orderNumber,
                 'purchased_at' => $purchasedAt,
                 'total_amount' => $totalAmount,
@@ -232,9 +238,14 @@ class PurchaseService
             );
 
             // 使用庫存模型的方法來增加庫存
+            $userId = Auth::id();
+            if (!$userId) {
+                throw new \InvalidArgumentException('用戶必須經過認證才能處理庫存操作');
+            }
+            
             $inventory->addStock(
                 $item->quantity, 
-                Auth::id() ?? 1, 
+                $userId, 
                 "進貨單 #{$purchase->order_number}",
                 ['purchase_id' => $purchase->id]
             );
@@ -262,9 +273,14 @@ class PurchaseService
                 ->first();
 
             if ($inventory) {
+                $userId = Auth::id();
+                if (!$userId) {
+                    throw new \InvalidArgumentException('用戶必須經過認證才能處理庫存操作');
+                }
+                
                 $inventory->subtractStock(
                     $item->quantity,
-                    Auth::id() ?? 1,
+                    $userId,
                     "進貨單 #{$purchase->order_number} 狀態變更回退",
                     ['purchase_id' => $purchase->id, 'action' => 'revert']
                 );

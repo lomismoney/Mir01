@@ -134,7 +134,11 @@ export default function InventoryHistoryPage() {
         }
         
         processed.push({
-          id: parseInt(`99${transferId}`), // 使用特殊 ID 格式避免衝突
+          id: (() => {
+            // 安全的 ID 生成：確保總是產生有效的負數 ID
+            const numericId = Number(transferId);
+            return isNaN(numericId) ? -Date.now() - Math.random() * 1000 : -Math.abs(numericId);
+          })(),
           type: 'transfer',
           quantity: Math.abs(transfer.out.quantity || 0),
           product: transfer.out.product || transfer.in.product,
