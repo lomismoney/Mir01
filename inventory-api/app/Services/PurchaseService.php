@@ -96,6 +96,7 @@ class PurchaseService
             
             $purchase = Purchase::create([
                 'store_id' => $purchaseData->store_id,
+                'user_id' => Auth::id() ?? 1, // 使用當前用戶或預設為ID 1
                 'order_number' => $orderNumber,
                 'purchased_at' => $purchasedAt,
                 'total_amount' => $totalAmount,

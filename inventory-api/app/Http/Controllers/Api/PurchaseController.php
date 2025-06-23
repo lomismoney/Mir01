@@ -41,7 +41,7 @@ class PurchaseController extends Controller
             ])
             ->allowedSorts(['order_number', 'purchased_at', 'total_amount', 'created_at'])
             ->defaultSort('-purchased_at')
-            ->with(['store', 'items'])
+            ->with(['store', 'items.productVariant.product'])
             ->withCount('items')
             ->withSum('items', 'quantity')
             ->paginate(request('per_page', 20));
@@ -70,7 +70,7 @@ class PurchaseController extends Controller
     {
         $this->authorize('create', Purchase::class);
         $purchase = $purchaseService->createPurchase($purchaseData);
-        return new PurchaseResource($purchase->load(['store', 'items']));
+        return new PurchaseResource($purchase->load(['store', 'items.productVariant.product']));
     }
 
     /**
@@ -113,7 +113,7 @@ class PurchaseController extends Controller
         }
 
         $updatedPurchase = $purchaseService->updatePurchase($purchase, $purchaseData);
-        return new PurchaseResource($updatedPurchase->load(['store', 'items']));
+        return new PurchaseResource($updatedPurchase->load(['store', 'items.productVariant.product']));
     }
 
     /**
@@ -142,7 +142,7 @@ class PurchaseController extends Controller
         }
 
         $purchase->update(['status' => $newStatus]);
-        return new PurchaseResource($purchase->fresh()->load('store', 'items'));
+        return new PurchaseResource($purchase->fresh()->load('store', 'items.productVariant.product'));
     }
 
     /**
@@ -162,7 +162,7 @@ class PurchaseController extends Controller
         }
 
         $purchase->update(['status' => Purchase::STATUS_CANCELLED]);
-        return new PurchaseResource($purchase->fresh()->load('store', 'items'));
+        return new PurchaseResource($purchase->fresh()->load('store', 'items.productVariant.product'));
     }
 
     /**

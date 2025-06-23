@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: 'Laravel API Documentation'
+  title: '庫存管理系統 API Documentation'
   description: ''
   version: 1.0.0
 servers:
   -
-    url: 'http://localhost:8000'
+    url: 'http://localhost'
 tags:
   -
     name: Endpoints
@@ -17,6 +17,9 @@ tags:
     name: 'User Store Management'
     description: ''
   -
+    name: 分類管理
+    description: ''
+  -
     name: 商品屬性管理
     description: ''
   -
@@ -25,6 +28,9 @@ tags:
   -
     name: 商品變體管理
     description: "\n商品變體 API 端點，用於管理商品的各種變體（SKU）"
+  -
+    name: 報表與分析
+    description: "\n報表與分析 API 端點，提供各種統計數據和分析報表"
   -
     name: 客戶管理
     description: ''
@@ -97,21 +103,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 20
+                    id: 12
                     name: 'Mrs. Justina Gaylord'
                     username: lafayette.considine
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-22T08:38:14.000000Z'
-                    updated_at: '2025-06-22T08:38:14.000000Z'
+                    created_at: '2025-06-23T05:17:13.000000Z'
+                    updated_at: '2025-06-23T05:17:13.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 20
+                        example: 12
                       name:
                         type: string
                         example: 'Mrs. Justina Gaylord'
@@ -129,10 +135,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-22T08:38:14.000000Z'
+                        example: '2025-06-23T05:17:13.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-22T08:38:14.000000Z'
+                        example: '2025-06-23T05:17:13.000000Z'
       tags:
         - Endpoints
       security: []
@@ -170,6 +176,160 @@ paths:
               required:
                 - name
       security: []
+    get:
+      summary: 顯示分類列表
+      operationId: ''
+      description: "優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、\n高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。\n\n範例：\n- json[''] 或 json[null] 就是所有頂層分類\n- json['1'] 就是 id 為 1 的分類下的所有子分類"
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  '':
+                    -
+                      id: 1
+                      name: 辦公用品
+                      description: 各種辦公室所需用品
+                      parent_id: null
+                      products_count: 5
+                    -
+                      id: 3
+                      name: 電腦周邊
+                      description: 電腦相關配件
+                      parent_id: null
+                      products_count: 12
+                  '1':
+                    -
+                      id: 2
+                      name: 辦公椅
+                      description: 各式辦公椅系列
+                      parent_id: 1
+                      products_count: 3
+                    -
+                      id: 4
+                      name: 文具用品
+                      description: 各種文具
+                      parent_id: 1
+                      products_count: 2
+                  '3':
+                    -
+                      id: 5
+                      name: 滑鼠
+                      description: 各式滑鼠
+                      parent_id: 3
+                      products_count: 8
+                    -
+                      id: 6
+                      name: 鍵盤
+                      description: 各式鍵盤
+                      parent_id: 3
+                      products_count: 4
+                properties:
+                  '':
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 辦公用品
+                        description: 各種辦公室所需用品
+                        parent_id: null
+                        products_count: 5
+                      -
+                        id: 3
+                        name: 電腦周邊
+                        description: 電腦相關配件
+                        parent_id: null
+                        products_count: 12
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 辦公用品
+                        description:
+                          type: string
+                          example: 各種辦公室所需用品
+                        parent_id:
+                          type: string
+                          example: null
+                        products_count:
+                          type: integer
+                          example: 5
+                  1:
+                    type: array
+                    example:
+                      -
+                        id: 2
+                        name: 辦公椅
+                        description: 各式辦公椅系列
+                        parent_id: 1
+                        products_count: 3
+                      -
+                        id: 4
+                        name: 文具用品
+                        description: 各種文具
+                        parent_id: 1
+                        products_count: 2
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 2
+                        name:
+                          type: string
+                          example: 辦公椅
+                        description:
+                          type: string
+                          example: 各式辦公椅系列
+                        parent_id:
+                          type: integer
+                          example: 1
+                        products_count:
+                          type: integer
+                          example: 3
+                  3:
+                    type: array
+                    example:
+                      -
+                        id: 5
+                        name: 滑鼠
+                        description: 各式滑鼠
+                        parent_id: 3
+                        products_count: 8
+                      -
+                        id: 6
+                        name: 鍵盤
+                        description: 各式鍵盤
+                        parent_id: 3
+                        products_count: 4
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 5
+                        name:
+                          type: string
+                          example: 滑鼠
+                        description:
+                          type: string
+                          example: 各式滑鼠
+                        parent_id:
+                          type: integer
+                          example: 3
+                        products_count:
+                          type: integer
+                          example: 8
+      tags:
+        - 分類管理
   '/api/categories/{id}':
     get:
       summary: 顯示指定的分類資源
@@ -406,18 +566,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 19
+                    id: 3
                     name: 'Bailey Ltd'
                     address: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
-                    created_at: '2025-06-22T08:38:16.000000Z'
-                    updated_at: '2025-06-22T08:38:16.000000Z'
+                    created_at: '2025-06-23T05:17:15.000000Z'
+                    updated_at: '2025-06-23T05:17:15.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 19
+                        example: 3
                       name:
                         type: string
                         example: 'Bailey Ltd'
@@ -426,10 +586,10 @@ paths:
                         example: "85625 Gaylord Knolls\nCecilburgh, WI 02042"
                       created_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -477,18 +637,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 20
+                    id: 4
                     name: "Rempel, Gulgowski and O'Kon"
                     address: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
-                    created_at: '2025-06-22T08:38:16.000000Z'
-                    updated_at: '2025-06-22T08:38:16.000000Z'
+                    created_at: '2025-06-23T05:17:15.000000Z'
+                    updated_at: '2025-06-23T05:17:15.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 20
+                        example: 4
                       name:
                         type: string
                         example: "Rempel, Gulgowski and O'Kon"
@@ -497,10 +657,10 @@ paths:
                         example: "80841 Mya Lane Apt. 042\nLyricberg, MO 42170-0432"
                       created_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
       tags:
         - 'Store Management'
     put:
@@ -517,18 +677,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 21
+                    id: 5
                     name: Dach-Gaylord
                     address: "7763 Adriel Fork\nAntoniobury, PA 31881"
-                    created_at: '2025-06-22T08:38:16.000000Z'
-                    updated_at: '2025-06-22T08:38:16.000000Z'
+                    created_at: '2025-06-23T05:17:15.000000Z'
+                    updated_at: '2025-06-23T05:17:15.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 21
+                        example: 5
                       name:
                         type: string
                         example: Dach-Gaylord
@@ -537,10 +697,10 @@ paths:
                         example: "7763 Adriel Fork\nAntoniobury, PA 31881"
                       created_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
       tags:
         - 'Store Management'
       requestBody:
@@ -602,18 +762,18 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 22
+                    id: 6
                     name: 'Leuschke Inc'
                     address: "427 Predovic Ridge\nBaileemouth, KS 32375-9947"
-                    created_at: '2025-06-22T08:38:16.000000Z'
-                    updated_at: '2025-06-22T08:38:16.000000Z'
+                    created_at: '2025-06-23T05:17:15.000000Z'
+                    updated_at: '2025-06-23T05:17:15.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 22
+                        example: 6
                       name:
                         type: string
                         example: 'Leuschke Inc'
@@ -622,10 +782,10 @@ paths:
                         example: "427 Predovic Ridge\nBaileemouth, KS 32375-9947"
                       created_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
       tags:
         - 'User Store Management'
     post:
@@ -642,21 +802,21 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 21
+                    id: 13
                     name: 'Ms. Elisabeth Okuneva'
                     username: gulgowski.asia
                     role: viewer
                     role_display: 檢視者
                     is_admin: false
-                    created_at: '2025-06-22T08:38:16.000000Z'
-                    updated_at: '2025-06-22T08:38:16.000000Z'
+                    created_at: '2025-06-23T05:17:15.000000Z'
+                    updated_at: '2025-06-23T05:17:15.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 21
+                        example: 13
                       name:
                         type: string
                         example: 'Ms. Elisabeth Okuneva'
@@ -674,10 +834,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
                       updated_at:
                         type: string
-                        example: '2025-06-22T08:38:16.000000Z'
+                        example: '2025-06-23T05:17:15.000000Z'
       tags:
         - 'User Store Management'
       requestBody:
@@ -1170,7 +1330,7 @@ paths:
         in: path
         name: product_id
         description: 'The ID of the product.'
-        example: 8
+        example: 1
         required: true
         schema:
           type: integer
@@ -3670,7 +3830,401 @@ paths:
         required: true
         schema:
           type: string
+  /api/reports/inventory-time-series:
+    get:
+      summary: 獲取商品變體的庫存時序數據
+      operationId: ''
+      description: "返回指定商品變體在特定日期範圍內的每日庫存水平數據，\n用於顯示庫存趨勢圖表。"
+      parameters:
+        -
+          in: query
+          name: product_variant_id
+          description: 商品變體ID.
+          example: 1
+          required: true
+          schema:
+            type: integer
+            description: 商品變體ID.
+            example: 1
+            nullable: false
+        -
+          in: query
+          name: start_date
+          description: 'date 開始日期 (YYYY-MM-DD).'
+          example: '2025-01-01'
+          required: true
+          schema:
+            type: string
+            description: 'date 開始日期 (YYYY-MM-DD).'
+            example: '2025-01-01'
+            nullable: false
+        -
+          in: query
+          name: end_date
+          description: 'date 結束日期 (YYYY-MM-DD).'
+          example: '2025-01-31'
+          required: true
+          schema:
+            type: string
+            description: 'date 結束日期 (YYYY-MM-DD).'
+            example: '2025-01-31'
+            nullable: false
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      date: '2025-01-01'
+                      quantity: 100
+                    -
+                      date: '2025-01-02'
+                      quantity: 105
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        date: '2025-01-01'
+                        quantity: 100
+                      -
+                        date: '2025-01-02'
+                        quantity: 105
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          example: '2025-01-01'
+                        quantity:
+                          type: integer
+                          example: 100
+      tags:
+        - 報表與分析
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_variant_id:
+                  type: integer
+                  description: 'The <code>id</code> of an existing record in the product_variants table.'
+                  example: 16
+                  nullable: false
+                start_date:
+                  type: string
+                  description: 'Must be a valid date. Must be a valid date in the format <code>Y-m-d</code>.'
+                  example: '2025-06-23'
+                  nullable: false
+                end_date:
+                  type: string
+                  description: 'Must be a valid date. Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.'
+                  example: '2051-07-17'
+                  nullable: false
+              required:
+                - product_variant_id
+                - start_date
+                - end_date
   /api/customers:
+    get:
+      summary: ''
+      operationId: getApiCustomers
+      description: ''
+      parameters:
+        -
+          in: query
+          name: search
+          description: 關鍵字搜尋，將匹配姓名、電話、統一編號。
+          example: 設計公司
+          required: false
+          schema:
+            type: string
+            description: 關鍵字搜尋，將匹配姓名、電話、統一編號。
+            example: 設計公司
+            nullable: false
+        -
+          in: query
+          name: start_date
+          description: 'date 按創建日期篩選的開始日期 (格式: Y-m-d)。'
+          example: '2025-01-01'
+          required: false
+          schema:
+            type: string
+            description: 'date 按創建日期篩選的開始日期 (格式: Y-m-d)。'
+            example: '2025-01-01'
+            nullable: false
+        -
+          in: query
+          name: end_date
+          description: 'date 按創建日期篩選的結束日期 (格式: Y-m-d)。'
+          example: '2025-06-18'
+          required: false
+          schema:
+            type: string
+            description: 'date 按創建日期篩選的結束日期 (格式: Y-m-d)。'
+            example: '2025-06-18'
+            nullable: false
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 1
+                      name: 測試客戶一
+                      phone: '0987654321'
+                      is_company: false
+                      tax_id: null
+                      industry_type: 設計師
+                      payment_type: 現金付款
+                      contact_address: 台北市信義區信義路一段100號
+                      created_at: '2024-01-01T10:00:00.000000Z'
+                      updated_at: '2024-01-01T10:00:00.000000Z'
+                      default_address:
+                        id: 1
+                        customer_id: 1
+                        address: 台北市信義區信義路一段100號
+                        is_default: true
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                    -
+                      id: 2
+                      name: ABC設計公司
+                      phone: '0912345678'
+                      is_company: true
+                      tax_id: '12345678'
+                      industry_type: 設計公司
+                      payment_type: 轉帳付款
+                      contact_address: 台北市大安區仁愛路四段200號
+                      created_at: '2024-01-02T14:30:00.000000Z'
+                      updated_at: '2024-01-02T14:30:00.000000Z'
+                      default_address:
+                        id: 2
+                        customer_id: 2
+                        address: 台北市大安區仁愛路四段200號
+                        is_default: true
+                        created_at: '2024-01-02T14:30:00.000000Z'
+                        updated_at: '2024-01-02T14:30:00.000000Z'
+                  links:
+                    first: 'http://localhost/api/customers?page=1'
+                    last: 'http://localhost/api/customers?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    links:
+                      -
+                        url: null
+                        label: '&laquo; Previous'
+                        active: false
+                      -
+                        url: 'http://localhost/api/customers?page=1'
+                        label: '1'
+                        active: true
+                      -
+                        url: null
+                        label: 'Next &raquo;'
+                        active: false
+                    path: 'http://localhost/api/customers'
+                    per_page: 15
+                    to: 2
+                    total: 2
+                properties:
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 測試客戶一
+                        phone: '0987654321'
+                        is_company: false
+                        tax_id: null
+                        industry_type: 設計師
+                        payment_type: 現金付款
+                        contact_address: 台北市信義區信義路一段100號
+                        created_at: '2024-01-01T10:00:00.000000Z'
+                        updated_at: '2024-01-01T10:00:00.000000Z'
+                        default_address:
+                          id: 1
+                          customer_id: 1
+                          address: 台北市信義區信義路一段100號
+                          is_default: true
+                          created_at: '2024-01-01T10:00:00.000000Z'
+                          updated_at: '2024-01-01T10:00:00.000000Z'
+                      -
+                        id: 2
+                        name: ABC設計公司
+                        phone: '0912345678'
+                        is_company: true
+                        tax_id: '12345678'
+                        industry_type: 設計公司
+                        payment_type: 轉帳付款
+                        contact_address: 台北市大安區仁愛路四段200號
+                        created_at: '2024-01-02T14:30:00.000000Z'
+                        updated_at: '2024-01-02T14:30:00.000000Z'
+                        default_address:
+                          id: 2
+                          customer_id: 2
+                          address: 台北市大安區仁愛路四段200號
+                          is_default: true
+                          created_at: '2024-01-02T14:30:00.000000Z'
+                          updated_at: '2024-01-02T14:30:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 測試客戶一
+                        phone:
+                          type: string
+                          example: '0987654321'
+                        is_company:
+                          type: boolean
+                          example: false
+                        tax_id:
+                          type: string
+                          example: null
+                        industry_type:
+                          type: string
+                          example: 設計師
+                        payment_type:
+                          type: string
+                          example: 現金付款
+                        contact_address:
+                          type: string
+                          example: 台北市信義區信義路一段100號
+                        created_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2024-01-01T10:00:00.000000Z'
+                        default_address:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            customer_id:
+                              type: integer
+                              example: 1
+                            address:
+                              type: string
+                              example: 台北市信義區信義路一段100號
+                            is_default:
+                              type: boolean
+                              example: true
+                            created_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2024-01-01T10:00:00.000000Z'
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: 'http://localhost/api/customers?page=1'
+                      last:
+                        type: string
+                        example: 'http://localhost/api/customers?page=1'
+                      prev:
+                        type: string
+                        example: null
+                      next:
+                        type: string
+                        example: null
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      links:
+                        type: array
+                        example:
+                          -
+                            url: null
+                            label: '&laquo; Previous'
+                            active: false
+                          -
+                            url: 'http://localhost/api/customers?page=1'
+                            label: '1'
+                            active: true
+                          -
+                            url: null
+                            label: 'Next &raquo;'
+                            active: false
+                        items:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              example: null
+                            label:
+                              type: string
+                              example: '&laquo; Previous'
+                            active:
+                              type: boolean
+                              example: false
+                      path:
+                        type: string
+                        example: 'http://localhost/api/customers'
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 2
+                      total:
+                        type: integer
+                        example: 2
+      tags:
+        - 客戶管理
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                search:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                start_date:
+                  type: string
+                  description: 'Must be a valid date in the format <code>Y-m-d</code>.'
+                  example: '2025-06-23'
+                  nullable: true
+                end_date:
+                  type: string
+                  description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.'
+                  example: '2051-07-17'
+                  nullable: true
     post:
       summary: 創建新客戶
       operationId: ''
@@ -4054,7 +4608,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the customer.'
-        example: 1
+        example: 16
         required: true
         schema:
           type: integer
@@ -4925,7 +5479,7 @@ paths:
                 type:
                   type: string
                   description: ''
-                  example: transfer_cancel
+                  example: adjustment
                   nullable: true
                   enum:
                     - addition
@@ -4937,12 +5491,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-22T08:38:16'
+                  example: '2025-06-23T05:17:15'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2051-07-16'
+                  example: '2051-07-17'
                   nullable: true
                 product_name:
                   type: string
@@ -5588,7 +6142,7 @@ paths:
                 type:
                   type: string
                   description: ''
-                  example: transfer_in
+                  example: transfer_out
                   nullable: true
                   enum:
                     - addition
@@ -5600,12 +6154,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date.'
-                  example: '2025-06-22T08:38:16'
+                  example: '2025-06-23T05:17:15'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2051-07-16'
+                  example: '2051-07-17'
                   nullable: true
                 per_page:
                   type: integer
@@ -6978,12 +7532,12 @@ paths:
                 start_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>.'
-                  example: '2025-06-22'
+                  example: '2025-06-23'
                   nullable: true
                 end_date:
                   type: string
                   description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.'
-                  example: '2051-07-16'
+                  example: '2051-07-17'
                   nullable: true
                 page:
                   type: integer
@@ -8409,7 +8963,7 @@ paths:
                   nullable: false
                 order_number:
                   type: string
-                  description: 進貨單號
+                  description: 進貨單號（選填，系統會自動生成）
                   example: PO-20240101-001
                   nullable: false
                 purchased_at:
@@ -8456,7 +9010,6 @@ paths:
                       - cost_price
               required:
                 - store_id
-                - order_number
                 - shipping_cost
                 - items
   '/api/purchases/{id}':

@@ -58,7 +58,7 @@ export function InventoryManagement() {
 
   // 🎯 標準化數據獲取 - 直接從 Hook 返回的結構中解構
   const stores = storesResponse?.data ?? [];
-  const categories = categoriesResponse?.data ?? [];
+  const categories = categoriesResponse ?? [];
 
   // 獲取庫存列表數據 
   const {

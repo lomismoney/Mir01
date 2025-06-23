@@ -629,3 +629,64 @@ export interface ProcessedOrder {
   items: ProcessedOrderItem[]; // 使用精煉後的訂單項目類型
   status_histories?: OrderStatusHistory[]; // 狀態歷史記錄
 }
+
+/**
+ * 庫存交易 API 響應類型定義
+ * 對應 /api/inventory/transactions 端點的響應格式
+ */
+export interface InventoryTransactionsResponse {
+  message?: string;
+  data: InventoryTransaction[];
+  pagination?: {
+    current_page?: number;
+    per_page?: number;
+    total?: number;
+    last_page?: number;
+  };
+}
+
+/**
+ * 庫存轉移 API 響應類型定義
+ * 對應 /api/inventory/transfers 端點的響應格式
+ */
+export interface InventoryTransfersResponse {
+  data: InventoryTransferItem[];
+  meta?: {
+    current_page?: number;
+    from?: number;
+    last_page?: number;
+    path?: string;
+    per_page?: number;
+    to?: number;
+    total?: number;
+  };
+  links?: {
+    first?: string;
+    last?: string;
+    prev?: string | null;
+    next?: string | null;
+  };
+}
+
+/**
+ * 進貨單 API 響應類型定義
+ * 對應 /api/purchases 端點的響應格式
+ */
+export interface PurchasesResponse {
+  data: any[]; // 進貨單數據陣列
+  meta?: {
+    current_page?: number;
+    from?: number;
+    last_page?: number;
+    path?: string;
+    per_page?: number;
+    to?: number;
+    total?: number;
+  };
+  links?: {
+    first?: string;
+    last?: string;
+    prev?: string | null;
+    next?: string | null;
+  };
+}

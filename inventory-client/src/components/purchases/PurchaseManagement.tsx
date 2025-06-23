@@ -20,6 +20,7 @@ import {
 } from "@/types/purchase"
 import { useDebounce } from "@/hooks/use-debounce"
 import { toast } from "sonner"
+import { PurchasesResponse } from "@/types/api-helpers"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -94,14 +95,14 @@ export function PurchaseManagement() {
   // API 查詢
   const { data: storesData } = useStores()
   const { 
-    data: purchasesData, 
+    data: purchasesResponse, 
     isLoading, 
     error,
     refetch 
   } = usePurchases({
     ...filters,
     order_number: debouncedOrderNumber || undefined
-  })
+  }) as { data: PurchasesResponse | undefined, isLoading: boolean, error: any, refetch: () => void }
 
   // Mutations
   const updateStatusMutation = useUpdatePurchaseStatus()
@@ -167,7 +168,7 @@ export function PurchaseManagement() {
    * 計算統計數據
    */
   const getStatistics = () => {
-    const purchases = (purchasesData as any)?.data || []
+    const purchases = purchasesResponse?.data || []
     const today = new Date().toDateString()
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 
@@ -178,7 +179,7 @@ export function PurchaseManagement() {
       weeklyCount: purchases.filter((p: any) => 
         new Date(p.created_at || '') >= weekAgo
       ).length,
-      total: (purchasesData as any)?.meta?.total || 0,
+      total: purchasesResponse?.meta?.total || 0,
       pendingCount: purchases.filter((p: any) => p.status === 'pending').length,
     }
   }
@@ -385,9 +386,9 @@ export function PurchaseManagement() {
                 </div>
               ))}
             </div>
-          ) : (purchasesData as any)?.data && (purchasesData as any).data.length > 0 ? (
+          ) : purchasesResponse?.data && purchasesResponse.data.length > 0 ? (
             <div className="space-y-4">
-              {(purchasesData as any).data.map((purchase: any) => {
+              {purchasesResponse.data.map((purchase: any) => {
                 const permissions = getPurchasePermissions(purchase.status as PurchaseStatus)
                 const statusTransitions = getValidStatusTransitions(purchase.status as PurchaseStatus)
                 
@@ -530,25 +531,26 @@ export function PurchaseManagement() {
               })}
 
               {/* 分頁控制 */}
-              {(purchasesData as any).meta && (purchasesData as any).meta.last_page > 1 && (
+              {purchasesResponse?.meta && purchasesResponse.meta.last_page && purchasesResponse.meta.last_page > 1 && (
                 <div className="flex items-center justify-between pt-4 border-t">
                   <div className="text-sm text-muted-foreground">
-                    第 {(purchasesData as any).meta.current_page} 頁，共 {(purchasesData as any).meta.last_page} 頁
+                    第 {purchasesResponse.meta.current_page} 頁，共 {purchasesResponse.meta.last_page} 頁
+                    （總計 {purchasesResponse.meta.total} 筆記錄）
                   </div>
                   <div className="flex items-center gap-2">
                     <Button 
                       variant="outline" 
                       size="sm"
-                      disabled={(purchasesData as any).meta.current_page <= 1}
-                      onClick={() => handleFilterChange('page', ((purchasesData as any).meta?.current_page || 1) - 1)}
+                      disabled={(purchasesResponse.meta.current_page || 1) <= 1}
+                      onClick={() => handleFilterChange('page', (purchasesResponse.meta?.current_page || 1) - 1)}
                     >
                       上一頁
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
-                      disabled={(purchasesData as any).meta.current_page >= (purchasesData as any).meta.last_page}
-                      onClick={() => handleFilterChange('page', ((purchasesData as any).meta?.current_page || 1) + 1)}
+                      disabled={(purchasesResponse.meta.current_page || 1) >= (purchasesResponse.meta.last_page || 1)}
+                      onClick={() => handleFilterChange('page', (purchasesResponse.meta?.current_page || 1) + 1)}
                     >
                       下一頁
                     </Button>

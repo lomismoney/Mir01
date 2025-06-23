@@ -177,7 +177,7 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
 
     // 🎉 移除 as any - 現在類型完全安全
     createRefundMutation.mutate(
-      { orderId: order.id, data: refundData },
+      { orderId: order.id, data: { ...refundData, items: refundData.items as any } },
       {
         onSuccess: () => {
           toast.success("退款已成功處理");

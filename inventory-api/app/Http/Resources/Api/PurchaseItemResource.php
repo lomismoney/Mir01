@@ -19,7 +19,12 @@ class PurchaseItemResource extends JsonResource
             'id' => $this->id,
             'product_variant_id' => $this->product_variant_id,
             'sku' => $this->whenLoaded('productVariant', fn() => $this->productVariant->sku),
-            'product_name' => $this->whenLoaded('productVariant.product', fn() => $this->productVariant->product->name),
+            'product_name' => $this->relationLoaded('productVariant') && 
+                $this->productVariant && 
+                $this->productVariant->relationLoaded('product') && 
+                $this->productVariant->product
+                ? $this->productVariant->product->name
+                : null,
             'quantity' => $this->quantity,
             'unit_price' => $this->unit_price,
             'cost_price' => $this->cost_price,

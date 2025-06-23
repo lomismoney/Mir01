@@ -59,7 +59,7 @@ export function useStore(id: number) {
     queryFn: async () => {
       // 使用正確的 API 類型
       const { data, error } = await apiClient.GET(`/api/stores/{id}` as any, {
-        params: { path: { id } }
+        params: { path: { id, store: id } }
       } as any);
 
       if (error) {
@@ -105,7 +105,7 @@ export function useUpdateStore() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const { data: responseData, error } = await apiClient.PUT(`/api/stores/{id}` as any, {
-        params: { path: { id } },
+        params: { path: { id, store: id } },
         body: data,
       } as any);
 
@@ -132,7 +132,7 @@ export function useDeleteStore() {
     mutationFn: async (id: number) => {
       // 使用正確的 API 類型
       const { error } = await apiClient.DELETE(`/api/stores/{id}`, {
-        params: { path: { id } }
+        params: { path: { id, store: id } }
       });
 
       if (error) {

@@ -160,9 +160,9 @@ export default function RecordPaymentModal({
     try {
       // 準備 API 請求資料
       const paymentData = {
-        amount: data.amount,
+        amount: data.amount as any, // 暫時使用any解決類型問題
         payment_method: data.payment_method,
-        payment_date: data.payment_date,
+        payment_date: data.payment_date as any,
         notes: data.notes || undefined,
       };
 

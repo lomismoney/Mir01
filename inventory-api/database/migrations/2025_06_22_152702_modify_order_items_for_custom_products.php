@@ -15,9 +15,18 @@ return new class extends Migration
             // 2.1 讓 product_variant_id 可以為空，用於區分標準品與訂製品
             $table->unsignedBigInteger('product_variant_id')->nullable()->change();
 
-            // 2.2 新增欄位，儲存訂製資訊
-            $table->string('custom_product_name')->nullable()->after('product_variant_id');
-            $table->json('custom_specifications')->nullable()->after('custom_product_name');
+            // 2.2 新增欄位，儲存訂製資訊 - 檢查欄位是否已存在
+            if (!Schema::hasColumn('order_items', 'custom_product_name')) {
+                $table->string('custom_product_name')->nullable()->after('product_variant_id');
+            }
+            if (!Schema::hasColumn('order_items', 'custom_specifications')) {
+                // 確保 custom_specifications 位置正確，不管 custom_product_name 是否已存在
+                if (Schema::hasColumn('order_items', 'custom_product_name')) {
+                    $table->json('custom_specifications')->nullable()->after('custom_product_name');
+                } else {
+                    $table->json('custom_specifications')->nullable()->after('product_variant_id');
+                }
+            }
         });
     }
 

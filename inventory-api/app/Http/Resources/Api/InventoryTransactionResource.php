@@ -24,11 +24,19 @@ class InventoryTransactionResource extends JsonResource
             'metadata' => $this->metadata,
             'created_at' => $this->created_at,
             'user' => new UserResource($this->whenLoaded('user')),
-            'store' => new StoreResource($this->whenLoaded('inventory.store')),
-            'product' => [
-                'name' => $this->whenLoaded('inventory.productVariant.product', fn() => $this->inventory->productVariant->product->name),
-                'sku' => $this->whenLoaded('inventory.productVariant', fn() => $this->inventory->productVariant->sku),
-            ],
+            'store' => $this->when(
+                $this->relationLoaded('inventory') && $this->inventory?->relationLoaded('store'),
+                fn() => new StoreResource($this->inventory->store)
+            ),
+            'product' => $this->when(
+                $this->relationLoaded('inventory') && 
+                $this->inventory?->relationLoaded('productVariant') && 
+                $this->inventory?->productVariant?->relationLoaded('product'),
+                fn() => [
+                    'name' => $this->inventory->productVariant->product->name,
+                    'sku' => $this->inventory->productVariant->sku,
+                ]
+            ),
         ];
     }
 }

@@ -209,55 +209,70 @@ export default function PurchaseDetailPage() {
           <CardContent>
             {purchaseData.items && purchaseData.items.length > 0 ? (
               <div className="space-y-4">
-                {purchaseData.items.map((item: any, index: number) => (
-                  <div key={item.id || index} className="border rounded-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="md:col-span-2">
-                        <h4 className="font-medium">
-                          {item.product_name || '未知商品'}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          SKU: {item.sku || '未知'}
-                        </p>
+                {purchaseData.items.map((item: any, index: number) => {
+                  const quantity = item.quantity || 0
+                  const costPrice = Number(item.cost_price || 0)
+                  const allocatedShippingCost = Number(item.allocated_shipping_cost || 0)
+                  const subtotal = quantity * costPrice
+                  const totalCost = subtotal + allocatedShippingCost
+                  const averageCostPerUnit = quantity > 0 ? (totalCost / quantity) : 0
+
+                  return (
+                    <div key={item.id || index} className="border rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="md:col-span-2">
+                          <h4 className="font-medium">
+                            {item.product_name || '未知商品'}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            SKU: {item.sku || '未知'}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-sm text-muted-foreground">數量</p>
+                          <p className="font-medium">{quantity}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-sm text-muted-foreground">進貨價</p>
+                          <p className="font-medium">
+                            NT$ {costPrice.toLocaleString()}
+                          </p>
+                        </div>
                       </div>
 
-                      <div>
-                        <p className="text-sm text-muted-foreground">數量</p>
-                        <p className="font-medium">{item.quantity || 0}</p>
-                      </div>
+                      <Separator className="my-3" />
 
-                      <div>
-                        <p className="text-sm text-muted-foreground">進貨價</p>
-                        <p className="font-medium">
-                          NT$ {Number(item.cost_price || 0).toLocaleString()}
-                        </p>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">商品小計：</span>
+                          <span className="font-medium ml-2">
+                            NT$ {subtotal.toLocaleString()}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">攤銷運費：</span>
+                          <span className="font-medium ml-2">
+                            NT$ {allocatedShippingCost.toLocaleString()}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">總成本：</span>
+                          <span className="font-medium ml-2">
+                            NT$ {totalCost.toLocaleString()}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">單件平均成本：</span>
+                          <span className="font-medium ml-2 text-blue-600">
+                            NT$ {averageCostPerUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
                       </div>
                     </div>
-
-                    <Separator className="my-3" />
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">小計：</span>
-                        <span className="font-medium ml-2">
-                          NT$ {((item.quantity || 0) * (item.cost_price || 0)).toLocaleString()}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">攤銷運費：</span>
-                        <span className="font-medium ml-2">
-                          NT$ {Number(item.allocated_shipping_cost || 0).toLocaleString()}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">總成本：</span>
-                        <span className="font-medium ml-2">
-                          NT$ {Number(item.total_cost_price || 0).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
 
                 {/* 總計 */}
                 <div className="border-t pt-4">
