@@ -24,7 +24,7 @@ export default function EditOrderPage() {
   const params = useParams();
   const orderId = Number(params.id);
 
-  const { data: response, isLoading, isError, error } = useOrderDetail(orderId);
+  const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
   const { mutate: updateOrder, isPending: isUpdating } = useUpdateOrder();
 
   const handleUpdateSubmit = (values: OrderFormValues) => {
@@ -88,20 +88,19 @@ export default function EditOrderPage() {
     );
   }
 
-  // 轉換 API 數據為表單所需格式
-  const orderData = (response as any)?.data;
-  const initialData = orderData ? {
-    customer_id: orderData.customer_id,
-    shipping_address: orderData.shipping_address,
-    payment_method: orderData.payment_method,
-    order_source: orderData.order_source,
-    shipping_status: orderData.shipping_status,
-    payment_status: orderData.payment_status,
-    shipping_fee: parseFloat(orderData.shipping_fee || '0'),
-    tax: parseFloat(orderData.tax || '0'),
-    discount_amount: parseFloat(orderData.discount_amount || '0'),
-    notes: orderData.notes || '',
-    items: orderData.items?.map((item: any) => ({
+  // 🎯 直接使用 order，不需要再從 response.data 解包
+  const initialData = order ? {
+    customer_id: order.customer_id,
+    shipping_address: order.shipping_address,
+    payment_method: order.payment_method,
+    order_source: order.order_source,
+    shipping_status: order.shipping_status,
+    payment_status: order.payment_status,
+    shipping_fee: parseFloat(order.shipping_fee || '0'),
+    tax: parseFloat(order.tax || '0'),
+    discount_amount: parseFloat(order.discount_amount || '0'),
+    notes: order.notes || '',
+    items: order.items?.map((item: any) => ({
       id: item.id,
       product_variant_id: item.product_variant_id,
       is_stocked_sale: item.is_stocked_sale,
@@ -127,7 +126,7 @@ export default function EditOrderPage() {
         <div>
           <h1 className="text-2xl font-bold">編輯訂單</h1>
           <p className="text-muted-foreground">
-            正在修改訂單號：{orderData?.order_number}
+            正在修改訂單號：{order?.order_number}
           </p>
         </div>
       </div>

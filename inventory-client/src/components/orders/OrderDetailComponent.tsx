@@ -14,8 +14,31 @@ interface OrderDetailComponentProps {
 }
 
 export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
-    const { data: response, isLoading, isError, error } = useOrderDetail(orderId);
+    const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
     const { mutate: updateItemStatus, isPending } = useUpdateOrderItemStatus();
+    
+    // 🎯 狀態中文對照表
+    const getStatusText = (status: string) => {
+        const statusMap: Record<string, string> = {
+            // 付款狀態
+            'pending': '待付款',
+            'paid': '已付款',
+            'partial': '部分付款',
+            'refunded': '已退款',
+            // 出貨狀態
+            'processing': '處理中',
+            'shipped': '已出貨',
+            'delivered': '已送達',
+            'cancelled': '已取消',
+            'completed': '已完成',
+            // 項目狀態
+            '待處理': '待處理',
+            '已叫貨': '已叫貨',
+            '已出貨': '已出貨',
+            '完成': '完成'
+        };
+        return statusMap[status] || status;
+    };
     
     // 可用的項目狀態選項
     const statusOptions = [
@@ -46,18 +69,23 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
         return <div className="text-red-500">無法加載訂單詳情: {error?.message}</div>;
     }
 
-    const order = (response as any)?.data;
-
     if (!order) {
         return <div>找不到訂單資料。</div>;
     }
 
+    // 🎯 計算總計資訊
+    const subtotal = order.items?.reduce((acc: number, item: any) => 
+        acc + (parseFloat(item.price) * item.quantity), 0) || 0;
+
     return (
-        <div className="grid gap-6 md:grid-cols-3">
-            <div className="md:col-span-2 space-y-6">
-                {/* 訂單項目卡片 */}
+        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
+            {/* 左側主欄，佔據 2/3 寬度 */}
+            <div className="grid gap-4 lg:col-span-2">
+                {/* 訂單項目卡片 - 主要內容 */}
                 <Card>
-                    <CardHeader><CardTitle>訂單項目</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle>訂單品項</CardTitle>
+                    </CardHeader>
                     <CardContent>
                         <Table>
                             <TableHeader>
@@ -101,10 +129,10 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                                 </div>
                                             )}
                                         </TableCell>
-                                        <TableCell>{item.sku}</TableCell>
+                                        <TableCell className="font-mono text-sm">{item.sku}</TableCell>
                                         <TableCell className="text-right">${parseFloat(item.price).toLocaleString()}</TableCell>
                                         <TableCell className="text-center">{item.quantity}</TableCell>
-                                        <TableCell className="text-right">${(parseFloat(item.price) * item.quantity).toLocaleString()}</TableCell>
+                                        <TableCell className="text-right font-medium">${(parseFloat(item.price) * item.quantity).toLocaleString()}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <Select
@@ -135,33 +163,102 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                     </CardContent>
                 </Card>
             </div>
-            <div className="space-y-6">
+            
+            {/* 右側邊欄，佔據 1/3 寬度 */}
+            <div className="grid gap-4">
                 {/* 訂單摘要卡片 */}
                 <Card>
-                    <CardHeader><CardTitle>訂單摘要</CardTitle></CardHeader>
-                    <CardContent className="space-y-2">
-                        <div className="flex justify-between"><span>訂單號碼:</span> <span>{order.order_number}</span></div>
-                        <div className="flex justify-between"><span>下單時間:</span> <span>{new Date(order.created_at).toLocaleString('zh-TW')}</span></div>
-                        <div className="flex justify-between"><span>貨物狀態:</span> <Badge>{order.shipping_status}</Badge></div>
-                        <div className="flex justify-between"><span>付款狀態:</span> <Badge>{order.payment_status}</Badge></div>
-                        <div className="flex justify-between font-bold"><span>訂單總額:</span> <span>{new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', minimumFractionDigits: 0 }).format(parseFloat(order.grand_total))}</span></div>
+                    <CardHeader>
+                        <CardTitle>訂單摘要</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid gap-2 text-sm">
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">訂單號碼</span>
+                            <span className="font-medium">{order.order_number}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">下單時間</span>
+                            <span>{new Date(order.created_at).toLocaleString('zh-TW')}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">貨物狀態</span>
+                            <Badge variant={order.shipping_status === 'shipped' ? 'default' : 'secondary'}>
+                                {getStatusText(order.shipping_status)}
+                            </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">付款狀態</span>
+                            <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>
+                                {getStatusText(order.payment_status)}
+                            </Badge>
+                        </div>
+                        
+                        {/* 金額明細 */}
+                        <div className="pt-3 mt-3 border-t space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">商品小計</span>
+                                <span>${subtotal.toLocaleString()}</span>
+                            </div>
+                            {order.shipping_fee > 0 && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">運費</span>
+                                    <span>${parseFloat(order.shipping_fee).toLocaleString()}</span>
+                                </div>
+                            )}
+                            {order.discount_amount > 0 && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">折扣</span>
+                                    <span className="text-green-600">-${parseFloat(order.discount_amount).toLocaleString()}</span>
+                                </div>
+                            )}
+                            {order.tax > 0 && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">稅額</span>
+                                    <span>${parseFloat(order.tax).toLocaleString()}</span>
+                                </div>
+                            )}
+                            <div className="flex items-center justify-between font-medium text-base pt-2 border-t">
+                                <span className="text-muted-foreground">訂單總額</span>
+                                <span>{new Intl.NumberFormat('zh-TW', { 
+                                    style: 'currency', 
+                                    currency: 'TWD', 
+                                    minimumFractionDigits: 0 
+                                }).format(parseFloat(order.grand_total))}</span>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
                 {/* 客戶資訊卡片 */}
                 <Card>
-                    <CardHeader><CardTitle>客戶資訊</CardTitle></CardHeader>
-                    <CardContent className="space-y-2">
-                        <p><strong>客戶名稱:</strong> {order.customer?.name}</p>
-                        <p><strong>聯絡電話:</strong> {order.customer?.phone}</p>
-                        <p><strong>運送地址:</strong> {order.shipping_address || '未提供'}</p>
+                    <CardHeader>
+                        <CardTitle>客戶資訊</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid gap-2 text-sm">
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">客戶名稱</span>
+                            <span className="font-medium">{order.customer?.name || '未提供'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">聯絡電話</span>
+                            <span>{order.customer?.phone || '未提供'}</span>
+                        </div>
+                        {order.shipping_address && (
+                            <div className="pt-2 mt-2 border-t">
+                                <p className="text-muted-foreground mb-1">運送地址</p>
+                                <p className="text-sm">{order.shipping_address}</p>
+                            </div>
+                        )}
                         {order.billing_address && (
-                            <p><strong>帳單地址:</strong> {order.billing_address}</p>
+                            <div className="pt-2 mt-2 border-t">
+                                <p className="text-muted-foreground mb-1">帳單地址</p>
+                                <p className="text-sm">{order.billing_address}</p>
+                            </div>
                         )}
                         {order.notes && (
-                            <div>
-                                <strong>備註:</strong>
-                                <p className="text-sm text-muted-foreground mt-1">{order.notes}</p>
+                            <div className="pt-2 mt-2 border-t">
+                                <p className="text-muted-foreground mb-1">備註</p>
+                                <p className="text-sm whitespace-pre-wrap">{order.notes}</p>
                             </div>
                         )}
                     </CardContent>

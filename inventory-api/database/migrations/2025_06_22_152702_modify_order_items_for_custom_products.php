@@ -36,9 +36,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-            // 移除新增的欄位
-            $table->dropColumn('custom_product_name');
-            $table->dropColumn('custom_specifications');
+            // 移除新增的欄位（如果存在）
+            if (Schema::hasColumn('order_items', 'custom_product_name')) {
+                $table->dropColumn('custom_product_name');
+            }
+            if (Schema::hasColumn('order_items', 'custom_specifications')) {
+                $table->dropColumn('custom_specifications');
+            }
             
             // 還原 product_variant_id 為非空欄位
             $table->unsignedBigInteger('product_variant_id')->nullable(false)->change();

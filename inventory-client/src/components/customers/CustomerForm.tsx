@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,7 +9,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, PlusCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Trash2, PlusCircle, AlertCircle } from 'lucide-react';
+import { useDebounce } from '@/hooks/use-debounce';
+import { useCheckCustomerExistence } from '@/hooks/queries/useEntityQueries';
 // 假設 Customer 類型已在 api-helpers 中定義
 import { Customer } from '@/types/api-helpers';
 
@@ -57,6 +60,21 @@ export function CustomerForm({ initialData, isSubmitting, onSubmit }: CustomerFo
   });
 
   const isCompany = form.watch('is_company');
+  
+  // 監聽姓名和電話欄位的變化
+  const [name, phone] = form.watch(['name', 'phone']);
+  const debouncedName = useDebounce(name, 500); // 對姓名進行防抖
+
+  // 使用客戶名稱檢查 Hook
+  const { data: existenceData, refetch } = useCheckCustomerExistence(debouncedName);
+
+  // 使用 useEffect 觸發檢查
+  useEffect(() => {
+    // 只有在「姓名有值」且「電話為空」時，才觸發檢查
+    if (debouncedName && !phone) {
+      refetch();
+    }
+  }, [debouncedName, phone, refetch]);
 
   // 在 isCompany 之後添加 useFieldArray
   const { fields, append, remove } = useFieldArray({
@@ -70,19 +88,29 @@ export function CustomerForm({ initialData, isSubmitting, onSubmit }: CustomerFo
         {/* 基本資訊區塊 */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* 客戶名稱/公司抬頭 */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{isCompany ? '公司抬頭' : '客戶姓名'}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={isCompany ? '請輸入公司全名' : '請輸入客戶姓名'} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div>
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{isCompany ? '公司抬頭' : '客戶姓名'}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={isCompany ? '請輸入公司全名' : '請輸入客戶姓名'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {existenceData?.exists && (
+                <Alert variant="destructive" className="mt-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    警告：系統中已存在同名客戶。建議填寫電話號碼以作區分，或確認是否為同一人。
+                  </AlertDescription>
+                </Alert>
               )}
-            />
+            </div>
 
             {/* 聯絡電話 */}
             <FormField

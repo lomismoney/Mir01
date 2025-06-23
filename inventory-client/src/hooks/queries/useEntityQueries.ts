@@ -926,15 +926,15 @@ type CreateCustomerPayload = {
  */
 export function useCreateCustomer() {
   const queryClient = useQueryClient();
-
-  // API 契約類型（從 openapi-typescript 生成）
+  
+  // 🎯 使用 API 生成的類型定義
   type CreateCustomerRequestBody = import('@/types/api').paths['/api/customers']['post']['requestBody']['content']['application/json'];
 
   return useMutation({
     // 🎯 使用我們新定義的、代表前端表單數據的嚴格類型
     mutationFn: async (payload: CreateCustomerPayload) => {
       // 🎯 數據轉換邏輯：前端表單結構 → 後端 API 結構
-      const apiPayload: CreateCustomerRequestBody = {
+      const apiPayload = {
         name: payload.name,
         phone: payload.phone,
         is_company: payload.is_company,
@@ -1048,6 +1048,35 @@ export function useDeleteCustomer() {
 }
 
 // ==================== 客戶管理系統 (CUSTOMER MANAGEMENT) ====================
+
+/**
+ * 檢查客戶名稱是否存在 Hook
+ * 
+ * 🎯 功能：在新增客戶時檢查名稱是否重複，提供智能預警功能
+ * 
+ * @param name - 要檢查的客戶名稱
+ * @returns React Query 查詢結果，包含 exists 布林值
+ */
+export function useCheckCustomerExistence(name: string) {
+  return useQuery({
+    queryKey: ['customerExistence', name],
+    queryFn: async () => {
+      // @ts-expect-error 新端點尚未同步到類型定義
+      const { data, error } = await apiClient.GET('/api/customers/check-existence', {
+        params: { query: { name } },
+      });
+      if (error) {
+        // 在此場景下，查詢失敗可以靜默處理，不打擾使用者
+        console.error("客戶名稱檢查失敗", error);
+        return { exists: false }; // 返回安全預設值
+      }
+      // 確保返回正確的數據結構
+      return data ?? { exists: false };
+    },
+    enabled: false, // 🎯 預設禁用，我們將手動觸發
+    retry: 1,
+  });
+}
 
 /**
  * 客戶查詢參數類型
