@@ -1,15 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useOrderDetail, useUpdateOrderItemStatus } from '@/hooks/queries/useEntityQueries';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, DollarSign, Calendar, User, CreditCard } from "lucide-react";
+import { Loader2, DollarSign, Calendar, User, CreditCard, Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { format } from 'date-fns';
+import { Button } from "@/components/ui/button";
+import RecordPaymentModal from '@/components/orders/RecordPaymentModal';
 
 interface OrderDetailComponentProps {
   orderId: number;
@@ -18,6 +20,9 @@ interface OrderDetailComponentProps {
 export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
     const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
     const { mutate: updateItemStatus, isPending } = useUpdateOrderItemStatus();
+    
+    // 🎯 新增：部分付款 Modal 狀態
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     
     // 🎯 狀態中文對照表
     const getStatusText = (status: string) => {
@@ -84,6 +89,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
     const remainingAmount = order.grand_total - order.paid_amount;
 
     return (
+        <>
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
             {/* 左側主欄，佔據 2/3 寬度 */}
             <div className="grid gap-4 lg:col-span-2">
@@ -288,10 +294,23 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                 {/* 🎯 新增：付款進度卡片 */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <CreditCard className="h-5 w-5" />
-                            付款進度
-                        </CardTitle>
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="flex items-center gap-2">
+                                <CreditCard className="h-5 w-5" />
+                                付款進度
+                            </CardTitle>
+                            {/* 🎯 新增：在卡片頭部加入記錄付款按鈕 */}
+                            {order.payment_status !== 'paid' && order.payment_status !== 'refunded' && (
+                                <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => setIsPaymentModalOpen(true)}
+                                >
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    記錄付款
+                                </Button>
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {/* 進度條 */}
@@ -372,5 +391,13 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                 </Card>
             </div>
         </div>
+        
+        {/* 🎯 記錄付款 Modal */}
+        <RecordPaymentModal
+            order={order || null}
+            open={isPaymentModalOpen}
+            onOpenChange={setIsPaymentModalOpen}
+        />
+        </>
     );
 } 

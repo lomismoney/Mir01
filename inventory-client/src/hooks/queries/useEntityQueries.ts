@@ -3318,7 +3318,7 @@ export function useAddOrderPayment() {
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.success("付款記錄已成功新增", {
-          description: `已記錄 $${payload.data.amount} 的付款`
+          description: `已記錄 $${(payload.data as any).amount} 的付款`
         });
       }
       // 🚀 強化快取同步機制 - 確保頁面即時更新

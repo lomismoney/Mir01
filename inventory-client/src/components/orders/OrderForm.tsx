@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { CustomerSelector } from './CustomerSelector';
 import { CustomerForm } from '@/components/customers/CustomerForm';
@@ -200,397 +201,434 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-          
-          {/* 客戶選擇區塊 */}
-          <FormField
-            control={form.control}
-            name="customer_id"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>選擇客戶</FormLabel>
-                <CustomerSelector
-                  selectedCustomerId={field.value}
-                  onSelectCustomer={(customer) => {
-                    if (customer) {
-                      // 同時更新 customer_id 和 shipping_address
-                      form.setValue('customer_id', customer.id!);
-                      form.setValue('shipping_address', customer.contact_address || '');
-                    }
-                  }}
-                  onAddNewCustomer={handleAddNewCustomer}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          {/* --- 頂層按鈕區 --- */}
+          <div className="flex items-center gap-4">
+            <h1 className="flex-1 text-2xl font-semibold">
+              {initialData ? '編輯訂單' : '新增訂單'}
+            </h1>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? '儲存中...' : '儲存訂單'}
+            </Button>
+          </div>
 
-          {/* 運送地址欄位 - 新增 */}
-          <FormField
-            control={form.control}
-            name="shipping_address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>運送地址</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="請輸入運送地址..."
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* --- 🎯 新的雙欄式網格佈局 --- */}
+          <div className="grid gap-6 md:grid-cols-3">
 
-          {/* 訂單項目區塊 */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">訂單項目</h3>
-              <Button type="button" variant="outline" onClick={(e) => { e.preventDefault(); setIsSelectorOpen(true); }}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                新增項目
-              </Button>
-            </div>
-
-            {fields.length > 0 ? (
-              <>
-                {/* 項目列表的表頭 */}
-                <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground border-b pb-2">
-                  <div className="col-span-4">商品名稱</div>
-                  <div className="col-span-2">SKU</div>
-                  <div className="col-span-2 text-right">單價</div>
-                  <div className="col-span-2 text-center">數量</div>
-                  <div className="col-span-1 text-right">小計</div>
-                  <div className="col-span-1 text-center">操作</div>
-                </div>
-
-                {/* 遍歷渲染已添加的項目 */}
-                {fields.map((field, index) => {
-                  const quantity = form.watch(`items.${index}.quantity`) || 0;
-                  // 🎯 正確處理價格的 undefined 狀態
-                  const price = form.watch(`items.${index}.price`) ?? 0;
-                  const subtotal = quantity * price;
-
-                  return (
-                    <div key={field.key} className="grid grid-cols-12 gap-2 items-center p-3 border rounded-md">
-                      {/* 商品名稱 */}
-                      <div className="col-span-4">
-                        {field.product_variant_id ? (
-                          // --- 標準品項的渲染邏輯 ---
-                          <>
-                            <div className="font-medium">{form.watch(`items.${index}.product_name`)}</div>
-                            <div className="text-sm text-muted-foreground">{form.watch(`items.${index}.sku`)}</div>
-                          </>
-                        ) : (
-                          // --- 🎯 訂製品項的渲染邏輯 ---
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{form.watch(`items.${index}.product_name`)}</span>
-                              <Badge variant="outline" className="text-xs">訂製</Badge>
-                            </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {/* 將 JSON 規格轉換為可讀字串 */}
-                              {field.custom_specifications && 
-                                Object.entries(field.custom_specifications)
-                                  .map(([key, value]) => `${key}: ${value}`)
-                                  .join('; ')}
-                            </div>
-                          </div>
-                        )}
+            {/* === 左側主欄 (互動核心) === */}
+            <div className="md:col-span-2 space-y-6">
+              
+              {/* --- 訂單品項卡片 --- */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>訂單品項</CardTitle>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      setIsSelectorOpen(true); 
+                    }}
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    新增項目
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {fields.length > 0 ? (
+                    <>
+                      {/* === 網格化表頭 === */}
+                      <div className="grid grid-cols-12 gap-x-4 border-b pb-2 text-sm font-medium text-muted-foreground">
+                        <div className="col-span-5">商品名稱</div>
+                        <div className="col-span-2">SKU</div>
+                        <div className="col-span-2 text-right">單價</div>
+                        <div className="col-span-1 text-center">數量</div>
+                        <div className="col-span-1 text-right">小計</div>
+                        <div className="col-span-1 text-center">操作</div>
                       </div>
 
-                      {/* SKU */}
-                      <div className="col-span-2">
-                        {field.product_variant_id ? (
-                          <span className="font-mono text-sm">{form.watch(`items.${index}.sku`)}</span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </div>
+                      {/* === 網格化品項行 === */}
+                      <div className="mt-4 space-y-3">
+                        {fields.map((field, index) => {
+                          const quantity = form.watch(`items.${index}.quantity`) || 0;
+                          const price = form.watch(`items.${index}.price`) ?? 0;
+                          const subtotal = quantity * price;
 
-                      {/* 單價 */}
-                      <div className="col-span-2">
-                        <FormField
-                          control={form.control}
-                          name={`items.${index}.price`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  className="text-right"
-                                  // 🎯 確保顯示值是字符串，避免表單控制問題
-                                  value={field.value?.toString() || ''}
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-                                    // 如果使用者清空了輸入框，設為 0 而不是 undefined
-                                    if (value === '') {
-                                      field.onChange(0); 
-                                    } else {
-                                      const parsedValue = parseFloat(value);
-                                      // 只有在轉換為數字有效時才更新
-                                      if (!isNaN(parsedValue)) {
-                                        field.onChange(parsedValue);
-                                      }
-                                    }
-                                  }}
-                                  onBlur={field.onBlur}
-                                  name={field.name}
-                                  ref={field.ref}
+                          return (
+                            <div 
+                              key={field.key} 
+                              className="grid grid-cols-12 gap-x-4 p-3 rounded-md border bg-background hover:bg-muted/50 transition-colors"
+                            >
+                              
+                              {/* --- 商品名稱 (5/12 寬度) --- */}
+                              <div className="col-span-5 flex flex-col justify-center min-w-0">
+                                <p className="font-medium truncate">
+                                  {form.watch(`items.${index}.product_name`)}
+                                </p>
+                                {field.product_variant_id === null ? (
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                    <Badge variant="outline" className="text-xs">訂製</Badge>
+                                    <span className="truncate">
+                                      {field.custom_specifications && 
+                                        Object.entries(field.custom_specifications)
+                                          .map(([k, v]) => `${k}: ${v}`)
+                                          .join('; ')}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    貨號：{form.watch(`items.${index}.sku`)}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* --- SKU (2/12 寬度) --- */}
+                              <div className="col-span-2 flex items-center">
+                                <p className="text-sm font-mono text-muted-foreground truncate">
+                                  {form.watch(`items.${index}.sku`)}
+                                </p>
+                              </div>
+
+                              {/* --- 單價 (2/12 寬度) --- */}
+                              <div className="col-span-2 flex items-center justify-end">
+                                <FormField
+                                  control={form.control}
+                                  name={`items.${index}.price`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          step="0.01"
+                                          min="0"
+                                          className="w-24 text-right h-8"
+                                          placeholder="0.00"
+                                          value={field.value?.toString() || ''}
+                                          onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === '') {
+                                              field.onChange(0); 
+                                            } else {
+                                              const parsedValue = parseFloat(value);
+                                              if (!isNaN(parsedValue)) {
+                                                field.onChange(parsedValue);
+                                              }
+                                            }
+                                          }}
+                                          onBlur={field.onBlur}
+                                          name={field.name}
+                                          ref={field.ref}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
                                 />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                              </div>
 
-                      {/* 數量 */}
-                      <div className="col-span-2">
-                        <FormField
-                          control={form.control}
-                          name={`items.${index}.quantity`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  className="text-center"
-                                  {...field}
-                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                              {/* --- 數量 (1/12 寬度) --- */}
+                              <div className="col-span-1 flex items-center justify-center">
+                                <FormField
+                                  control={form.control}
+                                  name={`items.${index}.quantity`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min="1"
+                                          className="w-16 text-center h-8"
+                                          {...field}
+                                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
                                 />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                              </div>
 
-                      {/* 小計 */}
-                      <div className="col-span-1 text-right font-medium">
-                        ${subtotal.toFixed(2)}
-                      </div>
+                              {/* --- 小計 (1/12 寬度) --- */}
+                              <div className="col-span-1 flex items-center justify-end font-medium">
+                                ${subtotal.toFixed(2)}
+                              </div>
 
-                      {/* 刪除按鈕 */}
-                      <div className="col-span-1 text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                              {/* --- 操作 (1/12 寬度) --- */}
+                              <div className="col-span-1 flex items-center justify-center">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8"
+                                  onClick={() => remove(index)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
+                                </Button>
+                              </div>
+
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-8 border-2 border-dashed rounded-lg text-center">
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium text-muted-foreground">
+                          📦 尚未添加任何項目
+                        </h3>
+                        <p className="text-muted-foreground">
+                          點擊「新增項目」按鈕來選擇商品
+                        </p>
                       </div>
                     </div>
-                  );
-                })}
-              </>
-            ) : (
-              <div className="p-8 border-2 border-dashed rounded-lg text-center">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-muted-foreground">
-                    📦 尚未添加任何項目
-                  </h3>
-                  <p className="text-muted-foreground">
-                    點擊「新增項目」按鈕來選擇商品
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+                  )}
+                </CardContent>
+              </Card>
 
-          {/* 其他信息區塊 */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">其他信息</h3>
-            
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="payment_method"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>付款方式</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="選擇付款方式" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="現金">現金</SelectItem>
-                        <SelectItem value="轉帳">轉帳</SelectItem>
-                        <SelectItem value="刷卡">刷卡</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* --- 價格計算摘要卡片 --- */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>價格摘要</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* 運費、稅金、折扣輸入欄位 */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="shipping_fee"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>運費</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-              <FormField
-                control={form.control}
-                name="order_source"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>客戶來源</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="選擇客戶來源" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="現場客戶">現場客戶</SelectItem>
-                        <SelectItem value="網站客戶">網站客戶</SelectItem>
-                        <SelectItem value="LINE客戶">LINE客戶</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <FormField
+                      control={form.control}
+                      name="tax"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>稅金</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>訂單備註</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="輸入此訂單的內部備註..."
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <FormField
+                      control={form.control}
+                      name="discount_amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>折扣金額</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* 價格計算明細 */}
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>小計：</span>
+                      <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    </div>
+                    
+                    {shippingFee > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>運費：</span>
+                        <span className="font-medium">${shippingFee.toFixed(2)}</span>
+                      </div>
+                    )}
+                    
+                    {tax > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>稅金：</span>
+                        <span className="font-medium">${tax.toFixed(2)}</span>
+                      </div>
+                    )}
+                    
+                    {discountAmount > 0 && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>折扣：</span>
+                        <span className="font-medium">-${discountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between text-lg font-bold border-t pt-2">
+                      <span>總計：</span>
+                      <span className="text-primary">${grandTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* --- 訂單備註卡片 --- */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>訂單備註</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            placeholder="輸入此訂單的內部備註..."
+                            className="resize-none min-h-[100px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
             </div>
-          </div>
 
-          {/* 價格計算摘要區塊 */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">價格摘要</h3>
-            
-            <div className="bg-muted/50 rounded-lg p-6 space-y-4">
-              {/* 運費、稅金、折扣輸入欄位 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="shipping_fee"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>運費</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+            {/* === 右側邊欄 (資訊配置) === */}
+            <div className="md:col-span-1 space-y-6">
+
+              {/* --- 客戶資訊卡片 --- */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>客戶資訊</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* 選擇客戶 */}
+                  <FormField
+                    control={form.control}
+                    name="customer_id"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>選擇客戶</FormLabel>
+                        <CustomerSelector
+                          selectedCustomerId={field.value}
+                          onSelectCustomer={(customer) => {
+                            if (customer) {
+                              form.setValue('customer_id', customer.id!);
+                              form.setValue('shipping_address', customer.contact_address || '');
+                            }
+                          }}
+                          onAddNewCustomer={handleAddNewCustomer}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="tax"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>稅金</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  {/* 運送地址 */}
+                  <FormField
+                    control={form.control}
+                    name="shipping_address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>運送地址</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="請輸入運送地址..."
+                            className="resize-none min-h-[80px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
 
-                <FormField
-                  control={form.control}
-                  name="discount_amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>折扣金額</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {/* --- 其他資訊卡片 --- */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>其他資訊</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* 付款方式 */}
+                  <FormField
+                    control={form.control}
+                    name="payment_method"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>付款方式</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="選擇付款方式" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="現金">現金</SelectItem>
+                            <SelectItem value="轉帳">轉帳</SelectItem>
+                            <SelectItem value="刷卡">刷卡</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* 價格計算明細 */}
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>小計：</span>
-                  <span className="font-medium">${subtotal.toFixed(2)}</span>
-                </div>
-                
-                {shippingFee > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span>運費：</span>
-                    <span className="font-medium">${shippingFee.toFixed(2)}</span>
-                  </div>
-                )}
-                
-                {tax > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span>稅金：</span>
-                    <span className="font-medium">${tax.toFixed(2)}</span>
-                  </div>
-                )}
-                
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-sm text-green-600">
-                    <span>折扣：</span>
-                    <span className="font-medium">-${discountAmount.toFixed(2)}</span>
-                  </div>
-                )}
-                
-                <div className="flex justify-between text-lg font-bold border-t pt-2">
-                  <span>總計：</span>
-                  <span className="text-primary">${grandTotal.toFixed(2)}</span>
-                </div>
-              </div>
+                  {/* 客戶來源 */}
+                  <FormField
+                    control={form.control}
+                    name="order_source"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>客戶來源</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="選擇客戶來源" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="現場客戶">現場客戶</SelectItem>
+                            <SelectItem value="網站客戶">網站客戶</SelectItem>
+                            <SelectItem value="LINE客戶">LINE客戶</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+              
             </div>
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            <Button type="button" variant="outline">
-              取消
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? '處理中...' : '提交訂單'}
-            </Button>
           </div>
         </form>
       </Form>
@@ -604,7 +642,6 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
           <CustomerForm
             isSubmitting={createCustomerMutation.isPending}
             onSubmit={(customerData) => {
-              // 🎯 純淨消費：直接將表單數據傳遞給 mutation
               createCustomerMutation.mutate(customerData, {
                 onSuccess: (data) => {
                   handleCustomerCreated(data?.data || {});
@@ -620,9 +657,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
         open={isSelectorOpen}
         onOpenChange={setIsSelectorOpen}
         onSelect={handleProductSelect}
-        onCustomItemAdd={handleAddCustomItem} // 🎯 新增的數據管道
+        onCustomItemAdd={handleAddCustomItem}
         multiple={true}
-        // 將表單中已有的品項 ID 傳入，以便在選擇器中保持勾選狀態
         selectedIds={selectedVariantIds}
       />
     </>

@@ -141,6 +141,11 @@ export default function RecordPaymentModal({
 
   // 初始化 mutation hook
   const addPayment = useAddOrderPayment();
+  
+  // 🎯 新增：快速填入剩餘金額
+  const handleFillRemainingAmount = () => {
+    form.setValue('amount', remainingAmount);
+  };
 
   /**
    * 表單提交處理函式
@@ -166,10 +171,10 @@ export default function RecordPaymentModal({
         notes: data.notes || undefined,
       };
 
-      // 調用 API
+      // 調用 API（使用類型斷言處理 API 文檔生成錯誤）
       await addPayment.mutateAsync({
         orderId: order.id,
-        data: paymentData,
+        data: paymentData as any, // TODO: API 文檔生成錯誤，amount 應該是 number 而非 Record<string, never>
       });
 
       // 成功處理
@@ -260,18 +265,37 @@ export default function RecordPaymentModal({
                     收款金額 *
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="請輸入收款金額"
-                      step="0.01"
-                      min="0.01"
-                      max={remainingAmount}
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      className="text-right"
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        placeholder="請輸入收款金額"
+                        step="0.01"
+                        min="0.01"
+                        max={remainingAmount}
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        className="text-right flex-1"
+                      />
+                      {/* 🎯 新增：快速填入按鈕 */}
+                      {remainingAmount > 0 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleFillRemainingAmount}
+                        >
+                          填入剩餘金額
+                        </Button>
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
+                  {/* 🎯 新增：提示文字 */}
+                  {remainingAmount > 0 && field.value === remainingAmount && (
+                    <p className="text-sm text-green-600 mt-1">
+                      ✓ 此金額將會完成全額付款
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
