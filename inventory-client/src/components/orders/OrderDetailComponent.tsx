@@ -101,13 +101,13 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                     <CardContent>
                         <Table>
                             <TableHeader>
-                                <TableRow>
-                                    <TableHead>商品名稱</TableHead>
-                                    <TableHead>SKU</TableHead>
-                                    <TableHead className="text-right">單價</TableHead>
-                                    <TableHead className="text-center">數量</TableHead>
-                                    <TableHead className="text-right">小計</TableHead>
-                                    <TableHead>項目狀態</TableHead>
+                                <TableRow className="border-b hover:bg-transparent">
+                                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">商品名稱</TableHead>
+                                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">SKU</TableHead>
+                                    <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">單價</TableHead>
+                                    <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">數量</TableHead>
+                                    <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">小計</TableHead>
+                                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">項目狀態</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>

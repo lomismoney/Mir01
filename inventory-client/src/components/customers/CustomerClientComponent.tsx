@@ -125,10 +125,10 @@ export function CustomerClientComponent() {
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-b hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                       {header.isPlaceholder
                         ? null
                         : flexRender(

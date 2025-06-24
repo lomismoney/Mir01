@@ -83,16 +83,16 @@ export const InventoryTransferList = () => {
           <>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>單號</TableHead>
-                  <TableHead>日期</TableHead>
-                  <TableHead>來源門市</TableHead>
-                  <TableHead>目標門市</TableHead>
-                  <TableHead>產品</TableHead>
-                  <TableHead>數量</TableHead>
-                  <TableHead>狀態</TableHead>
-                  <TableHead>備註</TableHead>
-                  <TableHead className="w-[80px]">操作</TableHead>
+                <TableRow className="border-b hover:bg-transparent">
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">單號</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">日期</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">來源門市</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">目標門市</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">產品</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">數量</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">狀態</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">備註</TableHead>
+                  <TableHead className="w-[80px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

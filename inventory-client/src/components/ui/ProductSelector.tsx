@@ -603,13 +603,13 @@ export function ProductSelector({
             <div className="flex-grow overflow-y-auto overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">選擇</TableHead>
-                    <TableHead className="w-[80px]">圖片</TableHead>
-                    <TableHead className="w-[150px]">SKU</TableHead>
-                    <TableHead className="min-w-[300px]">規格</TableHead>
-                    <TableHead className="w-[100px]">庫存</TableHead>
-                    <TableHead className="w-[120px] text-right">單價</TableHead>
+                  <TableRow className="border-b hover:bg-transparent">
+                    <TableHead className="w-[50px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">選擇</TableHead>
+                    <TableHead className="w-[80px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">圖片</TableHead>
+                    <TableHead className="w-[150px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">SKU</TableHead>
+                    <TableHead className="min-w-[300px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">規格</TableHead>
+                    <TableHead className="w-[100px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">庫存</TableHead>
+                    <TableHead className="w-[120px] text-right h-12 px-4 align-middle font-medium text-muted-foreground">單價</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

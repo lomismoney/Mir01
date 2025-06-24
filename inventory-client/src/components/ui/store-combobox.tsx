@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, Search } from "lucide-react"
+import { Check, ChevronsUpDown, Building2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,7 +17,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { useStores, type Store } from "@/hooks/useStores"
+import { useStores } from "@/hooks/queries/useEntityQueries"
+import { Skeleton } from "@/components/ui/skeleton"
+
+// Store 類型定義
+type Store = {
+  id: number;
+  name: string;
+  address: string | null;
+  phone?: string | null;
+  status?: string;
+  created_at: string;
+  updated_at: string;
+  inventory_count?: number;
+  users_count?: number;
+};
 
 interface StoreComboboxProps {
   value?: string

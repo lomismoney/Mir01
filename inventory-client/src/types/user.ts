@@ -5,7 +5,18 @@
  * 單一事實來源（Single Source of Truth）
  */
 
-import { Store } from '@/hooks/useStores';
+// Store 類型定義
+type Store = {
+  id: number;
+  name: string;
+  address: string | null;
+  phone?: string | null;
+  status?: string;
+  created_at: string;
+  updated_at: string;
+  inventory_count?: number;
+  users_count?: number;
+};
 
 /**
  * 用戶實體類型

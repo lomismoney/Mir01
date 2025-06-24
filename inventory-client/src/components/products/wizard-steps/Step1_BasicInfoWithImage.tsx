@@ -360,7 +360,7 @@ export function Step1_BasicInfoWithImage({
             )}
 
           </div>
-          
+      
           {/* 隱藏的文件輸入 */}
           <input
             ref={fileInputRef}
@@ -371,7 +371,7 @@ export function Step1_BasicInfoWithImage({
           />
         </div>
           
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
   );
 } 

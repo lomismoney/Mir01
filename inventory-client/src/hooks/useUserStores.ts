@@ -1,7 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import { handleApiError } from "@/lib/errorHandler";
-import { Store } from "./useStores";
+
+// Store 類型定義
+type Store = {
+  id: number;
+  name: string;
+  address: string | null;
+  phone?: string | null;
+  status?: string;
+  created_at: string;
+  updated_at: string;
+  inventory_count?: number;
+  users_count?: number;
+};
 
 /**
  * 用戶分店關聯請求主體類型定義

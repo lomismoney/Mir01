@@ -219,10 +219,10 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
 
           {/* --- 🎯 新的雙欄式網格佈局 --- */}
           <div className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
 
-              {/* === 左側主欄 (互動核心) === */}
-              <div className="md:col-span-2 space-y-6">
+            {/* === 左側主欄 (互動核心) === */}
+            <div className="md:col-span-2 space-y-6">
               
               {/* --- 訂單品項卡片 --- */}
               <Card>
@@ -246,21 +246,21 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                     <div className="text-sm">
                       <Table>
                         <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-2/5 px-3 py-2">商品資訊</TableHead>
-                            <TableHead className="w-[100px] px-3 py-2">單價</TableHead>
-                            <TableHead className="w-[80px] px-3 py-2">數量</TableHead>
-                            <TableHead className="w-[100px] px-3 py-2">小計</TableHead>
-                            <TableHead className="w-[60px] px-3 py-2">操作</TableHead>
+                          <TableRow className="border-b hover:bg-transparent">
+                            <TableHead className="w-2/5 px-4 h-12 text-left align-middle font-medium text-muted-foreground">商品資訊</TableHead>
+                            <TableHead className="w-[100px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">單價</TableHead>
+                            <TableHead className="w-[80px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">數量</TableHead>
+                            <TableHead className="w-[100px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">小計</TableHead>
+                            <TableHead className="w-[60px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">操作</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {fields.map((field, index) => {
-                            const quantity = form.watch(`items.${index}.quantity`) || 0;
-                            const price = form.watch(`items.${index}.price`) ?? 0;
-                            const subtotal = quantity * price;
+                        {fields.map((field, index) => {
+                          const quantity = form.watch(`items.${index}.quantity`) || 0;
+                          const price = form.watch(`items.${index}.price`) ?? 0;
+                          const subtotal = quantity * price;
 
-                            return (
+                          return (
                               <TableRow key={field.key} className="hover:bg-muted/50">
                                 <TableCell className="px-3 py-2 align-middle">
                                   <div className="flex items-center gap-3">
@@ -279,95 +279,95 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                                         <ImageIcon className="h-6 w-6 text-muted-foreground" />
                                       )}
                                     </div>
-                                    
+                              
                                     {/* --- 原有的文字資訊區 --- */}
                                     <div className="min-w-0">
                                       <div className="font-medium text-gray-900 dark:text-gray-50 truncate">{form.watch(`items.${index}.product_name`)}</div>
                                       <div className="text-xs text-gray-500 dark:text-gray-400">SKU: {form.watch(`items.${index}.sku`)}</div>
                                       {field.product_variant_id === null && (
                                         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                          <Badge variant="outline" className="text-xs">訂製</Badge>
-                                          <span className="truncate">
+                                    <Badge variant="outline" className="text-xs">訂製</Badge>
+                                    <span className="truncate">
                                             {field.custom_specifications && Object.entries(field.custom_specifications).map(([k, v]) => `${k}: ${v}`).join('; ')}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-
+                                    </span>
                                   </div>
+                                )}
+                              </div>
+
+                              </div>
                                 </TableCell>
                                 <TableCell className="px-3 py-2 align-middle">
-                                  <FormField 
-                                    control={form.control} 
-                                    name={`items.${index}.price`} 
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormControl>
-                                          <Input 
-                                            type="number" 
-                                            step="0.01"
-                                            min="0"
+                                <FormField
+                                  control={form.control}
+                                  name={`items.${index}.price`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          step="0.01"
+                                          min="0"
                                             className="w-full" 
-                                            placeholder="0.00"
-                                            value={field.value?.toString() || ''}
-                                            onChange={(e) => {
-                                              const value = e.target.value;
-                                              if (value === '') {
-                                                field.onChange(0); 
-                                              } else {
-                                                const parsedValue = parseFloat(value);
-                                                if (!isNaN(parsedValue)) {
-                                                  field.onChange(parsedValue);
-                                                }
+                                          placeholder="0.00"
+                                          value={field.value?.toString() || ''}
+                                          onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === '') {
+                                              field.onChange(0); 
+                                            } else {
+                                              const parsedValue = parseFloat(value);
+                                              if (!isNaN(parsedValue)) {
+                                                field.onChange(parsedValue);
                                               }
-                                            }}
-                                            onBlur={field.onBlur}
-                                            name={field.name}
-                                            ref={field.ref}
-                                          />
-                                        </FormControl>
-                                      </FormItem>
-                                    )} 
-                                  />
+                                            }
+                                          }}
+                                          onBlur={field.onBlur}
+                                          name={field.name}
+                                          ref={field.ref}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
                                 </TableCell>
                                 <TableCell className="px-3 py-2 align-middle">
-                                  <FormField 
-                                    control={form.control} 
-                                    name={`items.${index}.quantity`} 
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormControl>
-                                          <Input 
-                                            type="number" 
-                                            min="1"
+                                <FormField
+                                  control={form.control}
+                                  name={`items.${index}.quantity`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min="1"
                                             className="w-full" 
-                                            {...field}
-                                            onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                                          />
-                                        </FormControl>
-                                      </FormItem>
-                                    )} 
-                                  />
+                                          {...field}
+                                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
                                 </TableCell>
                                 <TableCell className="px-3 py-2 align-middle font-mono">
                                   ${ subtotal.toFixed(2) }
                                 </TableCell>
                                 <TableCell className="px-3 py-2 align-middle">
-                                  <Button 
-                                    type="button"
-                                    variant="ghost" 
+                                <Button
+                                  type="button"
+                                  variant="ghost"
                                     size="icon" 
-                                    onClick={() => remove(index)}
-                                  >
+                                  onClick={() => remove(index)}
+                                >
                                     <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                                  </Button>
+                                </Button>
                                 </TableCell>
                               </TableRow>
-                            );
-                          })}
+                          );
+                        })}
                         </TableBody>
                       </Table>
-                    </div>
+                      </div>
                   ) : (
                     <div className="p-8 border-2 border-dashed rounded-lg text-center">
                       <div className="space-y-4">
@@ -507,46 +507,46 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                     <div className="space-y-4">
                     <div className="text-sm font-medium text-muted-foreground">客戶資訊</div>
                     
-                    {/* 選擇客戶 */}
-                    <FormField
-                      control={form.control}
-                      name="customer_id"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>選擇客戶</FormLabel>
-                          <CustomerSelector
-                            selectedCustomerId={field.value}
-                            onSelectCustomer={(customer) => {
-                              if (customer) {
-                                form.setValue('customer_id', customer.id!);
-                                form.setValue('shipping_address', customer.contact_address || '');
-                              }
-                            }}
-                            onAddNewCustomer={handleAddNewCustomer}
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  {/* 選擇客戶 */}
+                  <FormField
+                    control={form.control}
+                    name="customer_id"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>選擇客戶</FormLabel>
+                        <CustomerSelector
+                          selectedCustomerId={field.value}
+                          onSelectCustomer={(customer) => {
+                            if (customer) {
+                              form.setValue('customer_id', customer.id!);
+                              form.setValue('shipping_address', customer.contact_address || '');
+                            }
+                          }}
+                          onAddNewCustomer={handleAddNewCustomer}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    {/* 運送地址 */}
-                    <FormField
-                      control={form.control}
-                      name="shipping_address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>運送地址</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="請輸入運送地址..."
-                              className="resize-none min-h-[80px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  {/* 運送地址 */}
+                  <FormField
+                    control={form.control}
+                    name="shipping_address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>運送地址</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="請輸入運送地址..."
+                            className="resize-none min-h-[80px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   </div>
 
                   {/* 分隔線 */}
@@ -556,53 +556,53 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                   <div className="space-y-4">
                     <div className="text-sm font-medium text-muted-foreground">付款與來源</div>
                     
-                    {/* 付款方式 */}
-                    <FormField
-                      control={form.control}
-                      name="payment_method"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>付款方式</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="選擇付款方式" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="現金">現金</SelectItem>
-                              <SelectItem value="轉帳">轉帳</SelectItem>
-                              <SelectItem value="刷卡">刷卡</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  {/* 付款方式 */}
+                  <FormField
+                    control={form.control}
+                    name="payment_method"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>付款方式</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="選擇付款方式" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="現金">現金</SelectItem>
+                            <SelectItem value="轉帳">轉帳</SelectItem>
+                            <SelectItem value="刷卡">刷卡</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    {/* 客戶來源 */}
-                    <FormField
-                      control={form.control}
-                      name="order_source"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>客戶來源</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="選擇客戶來源" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="現場客戶">現場客戶</SelectItem>
-                              <SelectItem value="網站客戶">網站客戶</SelectItem>
-                              <SelectItem value="LINE客戶">LINE客戶</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  {/* 客戶來源 */}
+                  <FormField
+                    control={form.control}
+                    name="order_source"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>客戶來源</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="選擇客戶來源" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="現場客戶">現場客戶</SelectItem>
+                            <SelectItem value="網站客戶">網站客戶</SelectItem>
+                            <SelectItem value="LINE客戶">LINE客戶</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   </div>
                   </div>
                 </CardContent>

@@ -2,21 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Store as StoreIcon, Check, ChevronsUpDown } from "lucide-react";
+import { Store as StoreIcon, Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { useStores, Store } from "@/hooks/useStores";
+import { useStores } from "@/hooks/queries/useEntityQueries";
 import { useUserStores, useAssignUserStores } from "@/hooks/useUserStores";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 // 內嵌 ScrollArea 元件定義
 const ScrollArea = React.forwardRef<
@@ -58,6 +59,19 @@ const ScrollAreaScrollbar = React.forwardRef<
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ));
 ScrollAreaScrollbar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
+
+// Store 類型定義
+type Store = {
+  id: number;
+  name: string;
+  address: string | null;
+  phone?: string | null;
+  status?: string;
+  created_at: string;
+  updated_at: string;
+  inventory_count?: number;
+  users_count?: number;
+};
 
 interface UserStoresDialogProps {
   userId: number;
@@ -161,7 +175,7 @@ export function UserStoresDialog({
         <div className="py-6 space-y-4">
           {isLoadingStores || isLoadingUserStores ? (
             <div className="flex justify-center py-4">
-              <p>載入中...</p>
+              <Loader2 className="animate-spin h-4 w-4" />
             </div>
           ) : (
             <>

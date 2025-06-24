@@ -87,7 +87,9 @@ const formatPrice = (price?: number) => {
 
   const formatter = new Intl.NumberFormat('zh-TW', { 
     style: 'currency', 
-    currency: 'TWD' 
+    currency: 'TWD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   });
 
   return formatter.format(price);
@@ -106,7 +108,9 @@ const formatPriceRange = (priceRange?: { min?: number; max?: number; count?: num
 
   const formatter = new Intl.NumberFormat('zh-TW', { 
     style: 'currency', 
-    currency: 'TWD' 
+    currency: 'TWD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   });
 
   // 如果最低價和最高價相同，只顯示一個價格
