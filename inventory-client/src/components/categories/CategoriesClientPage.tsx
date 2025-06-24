@@ -2,17 +2,26 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { 
+  VisibilityState,
+} from "@tanstack/react-table"
 import { useCategories, useDeleteCategory, type CategoryNode } from "@/hooks/queries/useEntityQueries"
 import { CategoriesDataTable } from "./categories-data-table"
 import { createCategoryColumns } from "./categories-columns"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { PlusCircle, Search, Loader2 } from "lucide-react"
+import { PlusCircle, Search, Loader2, ChevronDown } from "lucide-react"
 import { CreateCategoryModal } from "./CreateCategoryModal"
 import { UpdateCategoryModal } from "./UpdateCategoryModal"
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 /**
  * 分類管理客戶端組件
@@ -25,6 +34,12 @@ export function CategoriesClientPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<CategoryNode | null>(null)
   const [categoryToDelete, setCategoryToDelete] = useState<CategoryNode | null>(null)
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    name: true,
+    description: true,
+    statistics: true,
+    actions: true,
+  })
   
   // 資料查詢
   const { data: categories = [], isLoading } = useCategories()
@@ -125,30 +140,74 @@ export function CategoriesClientPage() {
       {/* 主要內容區 */}
       <Card>
         <CardHeader>
-          <CardTitle>分類列表</CardTitle>
+          <div className="flex items-center gap-4">
+            <CardTitle>分類列表</CardTitle>
+            
+            {/* 搜尋欄 */}
+            <div className="relative w-96">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="搜尋分類名稱或描述..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {/* 欄位顯示控制 - 真正實作 */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  欄位 <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuCheckboxItem 
+                  checked={columnVisibility.name} 
+                  disabled
+                >
+                  分類名稱
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                  checked={columnVisibility.description}
+                  onCheckedChange={(checked) => 
+                    setColumnVisibility(prev => ({ ...prev, description: checked }))
+                  }
+                >
+                  描述
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                  checked={columnVisibility.statistics}
+                  onCheckedChange={(checked) => 
+                    setColumnVisibility(prev => ({ ...prev, statistics: checked }))
+                  }
+                >
+                  統計
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                  checked={columnVisibility.actions} 
+                  disabled
+                >
+                  操作
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 搜尋欄 */}
-          <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-              placeholder="搜尋分類名稱或描述..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-          />
-      </div>
-
+        <CardContent>
           {/* 資料表格 */}
           <CategoriesDataTable 
             columns={columns}
             data={filteredCategories}
             showAddButton={false} // 因為標題列已有新增按鈕
+            showToolbar={false} // 隱藏內部工具列
             isLoading={isLoading}
             getSubRows={(row) => row.children} // 告訴表格如何找到子行
+            columnVisibility={columnVisibility} // 傳遞欄位可見性狀態
+            onColumnVisibilityChange={setColumnVisibility} // 傳遞更新函數
           />
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
       
       {/* 新增分類 Modal */}
       <CreateCategoryModal

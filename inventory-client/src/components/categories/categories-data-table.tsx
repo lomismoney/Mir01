@@ -50,6 +50,12 @@ interface CategoriesDataTableProps<TData, TValue> {
   isLoading?: boolean
   /** 獲取子行的函數 */
   getSubRows?: (row: TData) => TData[] | undefined
+  /** 是否顯示工具列 */
+  showToolbar?: boolean
+  /** 外部控制的欄位可見性狀態 */
+  columnVisibility?: VisibilityState
+  /** 欄位可見性變更處理器 */
+  onColumnVisibilityChange?: (visibility: VisibilityState) => void
 }
 
 /**
@@ -77,11 +83,28 @@ export function CategoriesDataTable<TData, TValue>({
   onAddCategory,
   isLoading = false,
   getSubRows,
+  showToolbar = true,
+  columnVisibility: externalColumnVisibility,
+  onColumnVisibilityChange: externalOnColumnVisibilityChange,
 }: CategoriesDataTableProps<TData, TValue>) {
   // 表格狀態管理
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [internalColumnVisibility, setInternalColumnVisibility] = React.useState<VisibilityState>({})
   const [expanded, setExpanded] = React.useState<ExpandedState>({})
+
+  // 使用外部或內部的欄位可見性狀態
+  const columnVisibility = externalColumnVisibility ?? internalColumnVisibility
+  const setColumnVisibility = React.useCallback((updaterOrValue: VisibilityState | ((old: VisibilityState) => VisibilityState)) => {
+    if (externalOnColumnVisibilityChange) {
+      // 如果是 updater 函數，先計算新值
+      const newValue = typeof updaterOrValue === 'function' 
+        ? updaterOrValue(columnVisibility)
+        : updaterOrValue
+      externalOnColumnVisibilityChange(newValue)
+    } else {
+      setInternalColumnVisibility(updaterOrValue)
+    }
+  }, [columnVisibility, externalOnColumnVisibilityChange])
 
   // 初始化表格實例
   const table = useReactTable({
@@ -89,7 +112,7 @@ export function CategoriesDataTable<TData, TValue>({
     columns,
     state: {
       sorting,
-      columnVisibility,
+      columnVisibility, // 使用正確的狀態
       expanded, // 🎯 傳入展開狀態
     },
     getSubRows, // 🎯 告訴表格如何找到子行
@@ -99,60 +122,62 @@ export function CategoriesDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(), // 🎯 啟用展開模型
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: setColumnVisibility, // 使用正確的處理器
     autoResetPageIndex: false, // 🎯 斬斷循環：禁用分頁自動重設
   })
 
   return (
     <div className="w-full space-y-4">
       {/* 工具列 */}
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          {/* 可以在這裡添加搜尋或其他過濾器 */}
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          {/* 欄位顯示控制 */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                欄位 <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id === "name" && "分類名稱"}
-                      {column.id === "description" && "描述"}
-                      {column.id === "statistics" && "統計"}
-                      {column.id === "actions" && "操作"}
-                      {!["name", "description", "statistics", "actions"].includes(column.id) && column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      {showToolbar && (
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            {/* 可以在這裡添加搜尋或其他過濾器 */}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            {/* 欄位顯示控制 */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  欄位 <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id === "name" && "分類名稱"}
+                        {column.id === "description" && "描述"}
+                        {column.id === "statistics" && "統計"}
+                        {column.id === "actions" && "操作"}
+                        {!["name", "description", "statistics", "actions"].includes(column.id) && column.id}
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          {/* 新增分類按鈕 */}
-          {showAddButton && onAddCategory && (
-            <Button onClick={onAddCategory}>
-              <Plus className="mr-2 h-4 w-4" />
-              新增分類
-            </Button>
-          )}
+            {/* 新增分類按鈕 */}
+            {showAddButton && onAddCategory && (
+              <Button onClick={onAddCategory}>
+                <Plus className="mr-2 h-4 w-4" />
+                新增分類
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 資料表格 */}
       <div className="rounded-md border">

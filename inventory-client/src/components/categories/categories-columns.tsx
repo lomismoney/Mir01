@@ -31,39 +31,48 @@ export const createCategoryColumns = (
     {
       accessorKey: "name",
       header: "分類名稱",
-      cell: ({ row }) => (
-        <div 
-          style={{ paddingLeft: `${row.depth * 2}rem` }} // 🎯 根據層級深度，動態計算縮排
-          className="flex items-center gap-2"
-        >
-          {/* 展開/收合按鈕或等寬空白 */}
-          {row.getCanExpand() ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={row.getToggleExpandedHandler()}
-              className="h-6 w-6"
-            >
-              <ChevronRight
-                className={`h-4 w-4 transition-transform ${row.getIsExpanded() ? 'rotate-90' : ''}`} // 🎯 展開時旋轉圖標
-              />
-            </Button>
-          ) : (
-            // 沒有子分類時，添加等寬的空白區域
-            <div className="h-6 w-6" />
-          )}
-          
-          {/* 資料夾圖標 */}
-          {row.original.children && row.original.children.length > 0 ? (
-            <FolderOpen className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          ) : (
-            <Folder className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          )}
-          
-          {/* 分類名稱 */}
-          <span className="font-medium">{row.original.name}</span>
-        </div>
-      )
+      cell: ({ row }) => {
+        const canExpand = row.getCanExpand()
+        const toggleExpanded = row.getToggleExpandedHandler()
+        
+        return (
+          <div 
+            style={{ paddingLeft: `${row.depth * 2}rem` }} // 🎯 根據層級深度，動態計算縮排
+            className={`flex items-center gap-2 ${canExpand ? 'cursor-pointer' : ''}`}
+            onClick={canExpand ? toggleExpanded : undefined} // 整個區域都可以點擊展開
+          >
+            {/* 展開/收合按鈕或等寬空白 */}
+            {canExpand ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation() // 防止觸發兩次
+                  toggleExpanded()
+                }}
+                className="h-6 w-6"
+              >
+                <ChevronRight
+                  className={`h-4 w-4 transition-transform ${row.getIsExpanded() ? 'rotate-90' : ''}`} // 🎯 展開時旋轉圖標
+                />
+              </Button>
+            ) : (
+              // 沒有子分類時，添加等寬的空白區域
+              <div className="h-6 w-6" />
+            )}
+            
+            {/* 資料夾圖標 */}
+            {row.original.children && row.original.children.length > 0 ? (
+              <FolderOpen className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            ) : (
+              <Folder className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            )}
+            
+            {/* 分類名稱 */}
+            <span className="font-medium">{row.original.name}</span>
+          </div>
+        )
+      }
     },
     {
       accessorKey: "description",
