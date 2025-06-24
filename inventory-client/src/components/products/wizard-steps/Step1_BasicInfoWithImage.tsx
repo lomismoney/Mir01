@@ -11,19 +11,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, Package, FileText, FolderTree, HelpCircle, ImageIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, Plus, X } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WizardFormData } from '../CreateProductWizard';
 import { useCategories } from '@/hooks/queries/useEntityQueries';
 import { Category } from '@/types/category';
-import { ImageSelector } from '@/components/ui/ImageSelector';
 import { useImageSelection } from '@/hooks/useImageSelection';
 
 /**
@@ -193,38 +187,41 @@ export function Step1_BasicInfoWithImage({
     validateDescription(formData.basicInfo.description);
   };
 
+  // 文件輸入 ref
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  /**
+   * 處理文件選擇
+   */
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      imageSelection.selectImage(file);
+    }
+    // 清空 input 值，允許重複選擇同一文件
+    event.target.value = '';
+  };
+
+  /**
+   * 觸發文件選擇對話框
+   */
+  const triggerFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <div className="space-y-6">
-      {/* 基本資訊區塊 */}
-      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <Package className="h-5 w-5 text-primary" />
-                基本資訊
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                填寫商品的基本信息
-              </p>
-            </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>基本資訊</CardTitle>
+        <CardDescription>填寫商品的基礎銷售資訊。</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
         
-        {/* 商品名稱 */}
+        {/* --- 商品名稱 --- */}
         <div className="space-y-2">
-          <Label htmlFor="product-name" className="text-sm font-medium flex items-center gap-1">
-            <Package className="h-4 w-4" />
+          <Label htmlFor="product-name" className="text-sm font-medium">
             商品名稱
-            <span className="text-red-500">*</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>請輸入清晰、具描述性的商品名稱，有助於客戶快速理解商品</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <span className="text-red-500 ml-1">*</span>
           </Label>
           <Input
             id="product-name"
@@ -233,7 +230,7 @@ export function Step1_BasicInfoWithImage({
             value={formData.basicInfo.name}
             onChange={(e) => handleFieldChange('name', e.target.value)}
             onBlur={handleNameBlur}
-            className={`bg-background ${validationErrors.name ? 'border-red-500 focus:border-red-500' : ''}`}
+            className={validationErrors.name ? 'border-red-500 focus:border-red-500' : ''}
             aria-describedby={validationErrors.name ? 'name-error' : undefined}
           />
           {validationErrors.name && (
@@ -246,21 +243,10 @@ export function Step1_BasicInfoWithImage({
           )}
         </div>
 
-        {/* 商品描述 */}
+        {/* --- 商品描述 --- */}
         <div className="space-y-2">
-          <Label htmlFor="product-description" className="text-sm font-medium flex items-center gap-1">
-            <FileText className="h-4 w-4" />
+          <Label htmlFor="product-description" className="text-sm font-medium">
             商品描述
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>詳細描述商品特色、用途和優勢，幫助客戶做出購買決定</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
           </Label>
           <Textarea
             id="product-description"
@@ -269,7 +255,7 @@ export function Step1_BasicInfoWithImage({
             onChange={(e) => handleFieldChange('description', e.target.value)}
             onBlur={handleDescriptionBlur}
             rows={4}
-            className={`bg-background ${validationErrors.description ? 'border-red-500 focus:border-red-500' : ''}`}
+            className={validationErrors.description ? 'border-red-500 focus:border-red-500' : ''}
             aria-describedby={validationErrors.description ? 'description-error' : undefined}
           />
           <div className="flex justify-between text-xs text-muted-foreground">
@@ -286,21 +272,10 @@ export function Step1_BasicInfoWithImage({
           )}
         </div>
 
-        {/* 商品分類 */}
+        {/* --- 商品分類 --- */}
         <div className="space-y-2">
-          <Label htmlFor="product-category" className="text-sm font-medium flex items-center gap-1">
-            <FolderTree className="h-4 w-4" />
+          <Label htmlFor="product-category" className="text-sm font-medium">
             商品分類
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>選擇合適的商品分類，有助於客戶瀏覽和搜尋</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
           </Label>
           
           {categoriesLoading ? (
@@ -335,50 +310,68 @@ export function Step1_BasicInfoWithImage({
             </Select>
           )}
         </div>
+
+        {/* --- 🎯 行內緊湊型圖片上傳器 --- */}
+        <div className="space-y-2">
+          <Label>商品圖片</Label>
+          <div className="flex items-start gap-4">
+            
+            {(formData.imageData.selectedFile || formData.imageData.previewUrl) ? (
+              /* 已上傳圖片的預覽區 */
+              <div className="relative">
+                <div className="w-24 h-24 border rounded-md overflow-hidden bg-muted">
+                  <img
+                    src={imageSelection.imageData.preview || formData.imageData.previewUrl || ''}
+                    alt="商品圖片預覽"
+                    className="w-full h-full object-cover"
+                  />
+                  {/* 移除按鈕 */}
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute -top-2 -right-2 h-6 w-6"
+                    onClick={handleClearImage}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* 上傳按鈕 - 只在沒有圖片時顯示 */}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex flex-col items-center justify-center w-24 h-24 border-dashed shrink-0"
+                  onClick={triggerFileSelect}
+                >
+                  <Plus className="h-6 w-6" />
+                  <span className="text-xs mt-1">上傳圖片</span>
+                </Button>
+                
+                {/* 圖片說明文字 - 只在沒有圖片時顯示 */}
+                <div className="text-xs text-muted-foreground self-center">
+                  <p>支援 JPG、PNG、WebP 格式</p>
+                  <p>建議尺寸 800x800 像素</p>
+                  <p>最多可上傳 1 張圖片</p>
+                </div>
+              </>
+            )}
+
           </div>
-        </CardContent>
-      </Card>
-      
-      {/* 圖片選擇區塊 */}
-      <Card className="bg-card text-card-foreground border border-border/40 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-primary" />
-                商品圖片
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                選擇商品主圖片（可選，稍後也可以上傳）
-              </p>
-            </div>
-        
-        {/* 整合的圖片選擇器 - 簡化邏輯，所有狀態來自 formData */}
-        <ImageSelector
-          imageData={{
-            file: formData.imageData.selectedFile,
-            preview: imageSelection.imageData.preview || formData.imageData.previewUrl,
-            isValid: true, // 默認為有效，因為驗證在 imageSelection 內部處理
-          }}
-          onSelectImage={imageSelection.selectImage}
-          onClearImage={handleClearImage}
-          maxFileSize={5 * 1024 * 1024} // 5MB
-          acceptedFormats={['image/jpeg', 'image/png', 'image/webp']}
-        />
-        
-        {/* 圖片選擇提示 */}
-        <div className="text-xs bg-accent/10 p-3 rounded-md">
-          <p className="font-medium text-primary mb-1">💡 圖片選擇說明</p>
-          <ul className="space-y-1 text-muted-foreground">
-            <li>• 圖片將在商品{isEditMode ? '更新' : '創建'}完成後自動上傳</li>
-            <li>• 支援 JPEG、PNG、WebP 格式，建議使用高品質圖片</li>
-            <li>• 圖片大小限制為 5MB</li>
-            {!isEditMode && <li>• 如果現在不選擇，稍後可以在編輯頁面上傳</li>}
-          </ul>
+          
+          {/* 隱藏的文件輸入 */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
         </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          
+      </CardContent>
+    </Card>
   );
 } 
