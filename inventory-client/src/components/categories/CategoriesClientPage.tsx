@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { 
   VisibilityState,
+  ExpandedState
 } from "@tanstack/react-table"
 import { useCategories, useDeleteCategory, type CategoryNode } from "@/hooks/queries/useEntityQueries"
 import { CategoriesDataTable } from "./categories-data-table"
@@ -21,6 +22,9 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 
 /**
@@ -40,6 +44,7 @@ export function CategoriesClientPage() {
     statistics: true,
     actions: true,
   })
+  const [expanded, setExpanded] = useState<ExpandedState>({})
   
   // 資料查詢
   const { data: categories = [], isLoading } = useCategories()
@@ -199,12 +204,14 @@ export function CategoriesClientPage() {
           <CategoriesDataTable 
             columns={columns}
             data={filteredCategories}
-            showAddButton={false} // 因為標題列已有新增按鈕
-            showToolbar={false} // 隱藏內部工具列
+            showAddButton={false} // 已經在 CardHeader 中了
+            showToolbar={false} // 工具列功能已移到 CardHeader
             isLoading={isLoading}
-            getSubRows={(row) => row.children} // 告訴表格如何找到子行
+            getSubRows={(row) => row.children} // 🎯 告訴表格如何找到子行
             columnVisibility={columnVisibility} // 傳遞欄位可見性狀態
             onColumnVisibilityChange={setColumnVisibility} // 傳遞更新函數
+            expanded={expanded}
+            onExpandedChange={setExpanded}
           />
         </CardContent>
       </Card>

@@ -1609,11 +1609,12 @@ export function useCreateAttribute() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
         })
       ]);
       
@@ -1687,11 +1688,12 @@ export function useDeleteAttribute() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
         })
       ]);
       
@@ -1729,11 +1731,18 @@ export function useCreateAttributeValue() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
+        }),
+        // 同時失效屬性值的快取
+        queryClient.invalidateQueries({ 
+          queryKey: ['attributeValues'],
+          exact: false,
+          refetchType: 'all'
         })
       ]);
       
@@ -1766,11 +1775,18 @@ export function useUpdateAttributeValue() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
+        }),
+        // 同時失效屬性值的快取
+        queryClient.invalidateQueries({ 
+          queryKey: ['attributeValues'],
+          exact: false,
+          refetchType: 'all'
         })
       ]);
       
@@ -1801,11 +1817,18 @@ export function useDeleteAttributeValue() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
+        }),
+        // 同時失效屬性值的快取
+        queryClient.invalidateQueries({ 
+          queryKey: ['attributeValues'],
+          exact: false,
+          refetchType: 'all'
         })
       ]);
       
@@ -1815,6 +1838,66 @@ export function useDeleteAttributeValue() {
         toast.success("屬性值已成功刪除");
       }
     },
+  });
+}
+
+/**
+ * 獲取指定屬性的所有屬性值
+ * 
+ * 🎯 功能：根據屬性 ID 獲取其下的所有屬性值
+ * 
+ * 功能特性：
+ * 1. 只在 attributeId 有效時發起請求
+ * 2. 使用標準化的數據精煉廠模式
+ * 3. 返回統一的分頁結構
+ * 4. 支援錯誤處理
+ * 
+ * @param attributeId - 屬性 ID，可為 null
+ * @returns React Query 查詢結果，包含屬性值列表
+ */
+export function useAttributeValues(attributeId: number | null) {
+  return useQuery({
+    queryKey: ['attributeValues', attributeId],
+    queryFn: async () => {
+      // 只有在 attributeId 有效時才發起請求
+      if (!attributeId) return null;
+
+      const { data, error } = await apiClient.GET('/api/attributes/{attribute_id}/values', {
+        params: { path: { attribute_id: attributeId, attribute: attributeId } },
+      });
+
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '獲取屬性值失敗');
+      }
+      return data;
+    },
+    // 只有在 attributeId 為真值時，這個查詢才會被啟用
+    enabled: !!attributeId,
+    // 🎯 數據精煉廠：確保返回的是一個標準的分頁結構或空陣列
+    select: (response: any) => {
+      if (!response) return { data: [], meta: null };
+      
+      const data = response?.data?.data || response?.data || response || [];
+      const meta = response?.meta || response?.data?.meta || {
+        total: Array.isArray(data) ? data.length : 0,
+        per_page: 100,
+        current_page: 1,
+        last_page: 1
+      };
+      
+      // 確保數據的類型安全
+      const values = Array.isArray(data) ? data.map((value: any) => ({
+        id: value.id || 0,
+        value: value.value || '',
+        attribute_id: value.attribute_id || attributeId,
+        created_at: value.created_at || '',
+        updated_at: value.updated_at || ''
+      })) : [];
+      
+      return { data: values, meta };
+    },
+    staleTime: 5 * 60 * 1000, // 5 分鐘緩存
   });
 }
 

@@ -56,6 +56,10 @@ interface CategoriesDataTableProps<TData, TValue> {
   columnVisibility?: VisibilityState
   /** 欄位可見性變更處理器 */
   onColumnVisibilityChange?: (visibility: VisibilityState) => void
+  /** 外部控制的展開狀態 */
+  expanded?: ExpandedState
+  /** 展開狀態變更處理器 */
+  onExpandedChange?: (expanded: ExpandedState) => void
 }
 
 /**
@@ -86,11 +90,13 @@ export function CategoriesDataTable<TData, TValue>({
   showToolbar = true,
   columnVisibility: externalColumnVisibility,
   onColumnVisibilityChange: externalOnColumnVisibilityChange,
+  expanded: externalExpanded,
+  onExpandedChange: externalOnExpandedChange,
 }: CategoriesDataTableProps<TData, TValue>) {
   // 表格狀態管理
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [internalColumnVisibility, setInternalColumnVisibility] = React.useState<VisibilityState>({})
-  const [expanded, setExpanded] = React.useState<ExpandedState>({})
+  const [internalExpanded, setInternalExpanded] = React.useState<ExpandedState>({})
 
   // 使用外部或內部的欄位可見性狀態
   const columnVisibility = externalColumnVisibility ?? internalColumnVisibility
@@ -106,6 +112,20 @@ export function CategoriesDataTable<TData, TValue>({
     }
   }, [columnVisibility, externalOnColumnVisibilityChange])
 
+  // 使用外部或內部的展開狀態
+  const expandedState = externalExpanded ?? internalExpanded
+  const setExpanded = React.useCallback((updaterOrValue: ExpandedState | ((old: ExpandedState) => ExpandedState)) => {
+    if (externalOnExpandedChange) {
+      // 如果是 updater 函數，先計算新值
+      const newValue = typeof updaterOrValue === 'function' 
+        ? updaterOrValue(expandedState)
+        : updaterOrValue
+      externalOnExpandedChange(newValue)
+    } else {
+      setInternalExpanded(updaterOrValue)
+    }
+  }, [expandedState, externalOnExpandedChange])
+
   // 初始化表格實例
   const table = useReactTable({
     data,
@@ -113,7 +133,7 @@ export function CategoriesDataTable<TData, TValue>({
     state: {
       sorting,
       columnVisibility, // 使用正確的狀態
-      expanded, // 🎯 傳入展開狀態
+      expanded: expandedState, // 🎯 傳入展開狀態
     },
     getSubRows, // 🎯 告訴表格如何找到子行
     onExpandedChange: setExpanded, // 🎯 當展開狀態改變時，更新 state
