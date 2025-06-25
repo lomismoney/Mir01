@@ -12,6 +12,8 @@ export interface Attribute {
   updated_at?: string;
   /** 屬性值陣列 */
   values?: AttributeValue[];
+  /** 關聯商品數量 */
+  products_count?: number;
 }
 
 /**

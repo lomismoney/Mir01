@@ -29,6 +29,8 @@ class AttributeResource extends JsonResource
             // 使用 whenLoaded 來避免 N+1 查詢問題
             // 只有當關聯已載入時才包含屬性值資料
             'values' => AttributeValueResource::collection($this->whenLoaded('values')),
+            // 關聯商品數量（使用 accessor 計算）
+            'products_count' => $this->products_count,
         ];
     }
 }

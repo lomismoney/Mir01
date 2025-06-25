@@ -123,7 +123,7 @@ export function AttributeValuesManager({
           <CardHeader>
             <CardDescription>關聯商品數</CardDescription>
             <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-              --
+              {attribute.products_count ?? 0}
             </CardTitle>
           </CardHeader>
         </Card>

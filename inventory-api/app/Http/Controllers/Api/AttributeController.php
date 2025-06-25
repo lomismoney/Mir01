@@ -40,8 +40,16 @@ class AttributeController extends Controller
      */
     public function index()
     {
-        // Eager load values to prevent N+1 queries when using the resource
-        return AttributeResource::collection(Attribute::with('values')->get());
+        // 獲取所有屬性並加載關聯
+        $attributes = Attribute::with('values')->get();
+        
+        // 確保每個屬性都有 products_count
+        // 強制調用 accessor 來確保值被計算
+        $attributes->each(function ($attribute) {
+            $attribute->append('products_count');
+        });
+        
+        return AttributeResource::collection($attributes);
     }
 
     /**

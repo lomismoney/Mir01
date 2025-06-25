@@ -1602,7 +1602,9 @@ export function useAttributes() {
                     updated_at: value.updated_at || ''
                 })) : [],
                 // 維護向後兼容性
-                attribute_values: attribute.attribute_values || attribute.values || []
+                attribute_values: attribute.attribute_values || attribute.values || [],
+                // 添加關聯商品數量
+                products_count: attribute.products_count ?? 0
             })) : [];
             
             // 返回標準的分頁結構

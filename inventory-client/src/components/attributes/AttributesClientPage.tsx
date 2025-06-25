@@ -76,6 +76,8 @@ const AttributesClientPage = () => {
   const attributes = (hookResponse?.data ?? []) as Attribute[];
   const meta = hookResponse?.meta;
 
+
+
   /**
    * 根據搜索條件過濾規格
    */

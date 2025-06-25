@@ -46,7 +46,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             data?: {
-                                /** @example 26 */
+                                /** @example 30 */
                                 id?: number;
                                 /** @example Mrs. Justina Gaylord */
                                 name?: string;
@@ -58,9 +58,9 @@ export interface paths {
                                 role_display?: string;
                                 /** @example false */
                                 is_admin?: boolean;
-                                /** @example 2025-06-23T06:47:27.000000Z */
+                                /** @example 2025-06-25T04:25:49.000000Z */
                                 created_at?: string;
-                                /** @example 2025-06-23T06:47:27.000000Z */
+                                /** @example 2025-06-25T04:25:49.000000Z */
                                 updated_at?: string;
                             };
                         };
@@ -2197,12 +2197,12 @@ export interface paths {
                         product_variant_id: number;
                         /**
                          * @description Must be a valid date. Must be a valid date in the format <code>Y-m-d</code>.
-                         * @example 2025-06-23
+                         * @example 2025-06-25
                          */
                         start_date: string;
                         /**
                          * @description Must be a valid date. Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.
-                         * @example 2051-07-17
+                         * @example 2051-07-19
                          */
                         end_date: string;
                     };
@@ -2356,19 +2356,13 @@ export interface paths {
                          * @example 台北市信義區
                          */
                         contact_address?: string | null;
-                        /** @description 運送地址列表 */
-                        addresses?: {
-                            /**
-                             * @description 詳細地址
-                             * @example 台北市信義區市府路1號
-                             */
-                            address: string;
-                            /**
-                             * @description 是否為預設地址
-                             * @example true
-                             */
-                            is_default: boolean;
-                        }[] | null;
+                        /**
+                         * @description nullable 運送地址列表.
+                         * @example [
+                         *       "architecto"
+                         *     ]
+                         */
+                        addresses?: (string | null)[];
                     };
                 };
             };
@@ -3251,12 +3245,12 @@ export interface paths {
                         type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                         /**
                          * @description Must be a valid date.
-                         * @example 2025-06-23T06:47:28
+                         * @example 2025-06-25T04:25:50
                          */
                         start_date?: string | null;
                         /**
                          * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                         * @example 2051-07-17
+                         * @example 2051-07-19
                          */
                         end_date?: string | null;
                         /** @example architecto */
@@ -4619,7 +4613,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 id: number;
                 /**
@@ -4646,7 +4640,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -4673,7 +4667,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -4700,7 +4694,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -4727,7 +4721,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -4754,7 +4748,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -4781,7 +4775,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the order item.
-                 * @example 1
+                 * @example 2
                  */
                 order_item_id: number;
                 /**
@@ -5171,16 +5165,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 31 */
+                            /** @example 39 */
                             id?: number;
                             /** @example Bailey Ltd */
                             name?: string;
                             /** @example 85625 Gaylord Knolls
                              *     Cecilburgh, WI 02042 */
                             address?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5221,16 +5215,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 32 */
+                            /** @example 40 */
                             id?: number;
                             /** @example Rempel, Gulgowski and O'Kon */
                             name?: string;
                             /** @example 80841 Mya Lane Apt. 042
                              *     Lyricberg, MO 42170-0432 */
                             address?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5280,16 +5274,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 33 */
+                            /** @example 41 */
                             id?: number;
                             /** @example Dach-Gaylord */
                             name?: string;
                             /** @example 7763 Adriel Fork
                              *     Antoniobury, PA 31881 */
                             address?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5340,16 +5334,16 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 34 */
+                            /** @example 42 */
                             id?: number;
                             /** @example Leuschke Inc */
                             name?: string;
                             /** @example 427 Predovic Ridge
                              *     Baileemouth, KS 32375-9947 */
                             address?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5391,7 +5385,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data?: {
-                            /** @example 27 */
+                            /** @example 31 */
                             id?: number;
                             /** @example Ms. Elisabeth Okuneva */
                             name?: string;
@@ -5403,9 +5397,9 @@ export interface operations {
                             role_display?: string;
                             /** @example false */
                             is_admin?: boolean;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             created_at?: string;
-                            /** @example 2025-06-23T06:47:28.000000Z */
+                            /** @example 2025-06-25T04:25:50.000000Z */
                             updated_at?: string;
                         };
                     };
@@ -5980,18 +5974,18 @@ export interface operations {
                      */
                     store_id?: number | null;
                     /**
-                     * @example transfer_out
+                     * @example adjustment
                      * @enum {string|null}
                      */
                     type?: "addition" | "reduction" | "adjustment" | "transfer_in" | "transfer_out" | "transfer_cancel" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2025-06-23T06:47:28
+                     * @example 2025-06-25T04:25:50
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2051-07-17
+                     * @example 2051-07-19
                      */
                     end_date?: string | null;
                     /**
@@ -6399,12 +6393,12 @@ export interface operations {
                     payment_status?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2025-06-23
+                     * @example 2025-06-25
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2051-07-17
+                     * @example 2051-07-19
                      */
                     end_date?: string | null;
                     /**
@@ -6524,7 +6518,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 id: number;
                 /**
@@ -6554,7 +6548,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 id: number;
                 /**
@@ -6671,7 +6665,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 id: number;
                 /**
@@ -6700,7 +6694,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -6759,7 +6753,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -6886,7 +6880,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -6979,7 +6973,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -7119,7 +7113,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order.
-                 * @example 1
+                 * @example 2
                  */
                 order_id: number;
                 /**
@@ -7190,7 +7184,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the order item.
-                 * @example 1
+                 * @example 2
                  */
                 order_item_id: number;
                 /**

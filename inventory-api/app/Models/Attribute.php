@@ -35,6 +35,11 @@ class Attribute extends Model
     ];
 
     /**
+     * 將 products_count 加入到可訪問的屬性
+     */
+    protected $appends = ['products_count'];
+
+    /**
      * 獲取該屬性的所有可能值
      * 一個屬性（如顏色）可以有多個值（如紅色、藍色、綠色）
      * 
@@ -54,5 +59,22 @@ class Attribute extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_attribute');
+    }
+
+    /**
+     * 獲取實際使用此屬性的不重複商品數量
+     * 通過屬性值 -> 商品變體 -> 商品的關聯鏈計算
+     * 
+     * @return int
+     */
+    public function getProductsCountAttribute(): int
+    {
+        // 始終使用資料庫查詢來獲取準確的計數
+        return \DB::table('attribute_value_product_variant')
+            ->join('attribute_values', 'attribute_values.id', '=', 'attribute_value_product_variant.attribute_value_id')
+            ->join('product_variants', 'product_variants.id', '=', 'attribute_value_product_variant.product_variant_id')
+            ->where('attribute_values.attribute_id', $this->id)
+            ->distinct('product_variants.product_id')
+            ->count('product_variants.product_id');
     }
 }
