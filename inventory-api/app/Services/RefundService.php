@@ -174,7 +174,7 @@ class RefundService
         if ($refundQuantity > $availableQuantity) {
             // 🎯 根據是否為訂製商品，使用不同的識別方式
             $itemIdentifier = $orderItem->product_variant_id 
-                ? $orderItem->productVariant->sku 
+                ? ($orderItem->productVariant ? $orderItem->productVariant->sku : "變體ID:{$orderItem->product_variant_id}")
                 : $orderItem->sku; // 訂製商品直接使用訂單項目的 SKU
                 
             throw new Exception(
@@ -201,6 +201,13 @@ class RefundService
             // 🎯 只有當 product_variant_id 存在時（即為標準品），才執行庫存返還
             if ($orderItem && $orderItem->product_variant_id) {
                 $productVariant = $orderItem->productVariant;
+                
+                // 🔒 確保 ProductVariant 記錄存在
+                if (!$productVariant) {
+                    throw new \InvalidArgumentException(
+                        "訂單品項 {$orderItem->id} 關聯的商品變體 {$orderItem->product_variant_id} 不存在，無法進行庫存回補"
+                    );
+                }
                 
                 // 通過庫存服務返還庫存
                 $storeId = $refund->order->store_id;

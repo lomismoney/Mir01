@@ -650,6 +650,7 @@ export interface ProcessedOrder {
   updated_at: string;
   items: ProcessedOrderItem[]; // 使用精煉後的訂單項目類型
   status_histories?: OrderStatusHistory[]; // 狀態歷史記錄
+  payment_records?: PaymentRecord[]; // 付款記錄
 }
 
 /**
