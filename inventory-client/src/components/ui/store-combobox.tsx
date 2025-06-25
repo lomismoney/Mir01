@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown, Building2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { Check, ChevronsUpDown, Building2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -11,14 +11,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { useStores } from "@/hooks/queries/useEntityQueries"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@/components/ui/popover";
+import { useStores } from "@/hooks/queries/useEntityQueries";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Store 類型定義
 type Store = {
@@ -34,11 +34,11 @@ type Store = {
 };
 
 interface StoreComboboxProps {
-  value?: string
-  onValueChange: (value: string) => void
-  placeholder?: string
-  emptyText?: string
-  className?: string
+  value?: string;
+  onValueChange: (value: string) => void;
+  placeholder?: string;
+  emptyText?: string;
+  className?: string;
 }
 
 export function StoreCombobox({
@@ -46,77 +46,93 @@ export function StoreCombobox({
   onValueChange,
   placeholder = "選擇分店...",
   emptyText = "未找到分店",
-  className
+  className,
 }: StoreComboboxProps) {
-  const [open, setOpen] = React.useState(false)
-  const { data: storesResponse, isLoading } = useStores()
-  
-  // 🎯 標準化數據獲取 - 直接從 Hook 返回的結構中解構
-  const stores = (storesResponse?.data ?? []) as Store[]
+  const [open, setOpen] = React.useState(false);
+  const { data: storesResponse, isLoading } = useStores();
 
-  const selectedStore = value 
+  // 🎯 標準化數據獲取 - 直接從 Hook 返回的結構中解構
+  const stores = (storesResponse?.data ?? []) as Store[];
+
+  const selectedStore = value
     ? stores.find((store) => store.id?.toString() === value)
-    : null
+    : null;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen} data-oid="t64_--w">
+      <PopoverTrigger asChild data-oid="9ynqgs:">
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
           disabled={isLoading}
+          data-oid="6vxuqhf"
         >
           {selectedStore ? selectedStore.name : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown
+            className="ml-2 h-4 w-4 shrink-0 opacity-50"
+            data-oid="ujugikd"
+          />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput 
-            placeholder="搜尋分店名稱..." 
+      <PopoverContent className="w-full p-0" align="start" data-oid="3m5s:qw">
+        <Command data-oid="1e1i4if">
+          <CommandInput
+            placeholder="搜尋分店名稱..."
             className="h-9"
+            data-oid="qfew0so"
           />
-          <CommandList>
-            <CommandEmpty>{emptyText}</CommandEmpty>
-            <CommandGroup>
+
+          <CommandList data-oid="e9yfmbw">
+            <CommandEmpty data-oid="0:4ghzw">{emptyText}</CommandEmpty>
+            <CommandGroup data-oid="wygcwu4">
               {/* 全部選項 */}
               <CommandItem
                 value=""
                 onSelect={() => {
-                  onValueChange("")
-                  setOpen(false)
+                  onValueChange("");
+                  setOpen(false);
                 }}
+                data-oid=":ps6y27"
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === "" ? "opacity-100" : "opacity-0"
+                    value === "" ? "opacity-100" : "opacity-0",
                   )}
+                  data-oid="m1bi33-"
                 />
                 全部分店
               </CommandItem>
-              
+
               {/* 分店選項 */}
               {stores.map((store) => (
                 <CommandItem
                   key={store.id}
-                  value={store.name || ''}
+                  value={store.name || ""}
                   onSelect={() => {
-                    onValueChange(store.id?.toString() || '')
-                    setOpen(false)
+                    onValueChange(store.id?.toString() || "");
+                    setOpen(false);
                   }}
+                  data-oid="-9:b_n_"
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === store.id?.toString() ? "opacity-100" : "opacity-0"
+                      value === store.id?.toString()
+                        ? "opacity-100"
+                        : "opacity-0",
                     )}
+                    data-oid="siivg3z"
                   />
+
                   {store.name}
                   {store.address && (
-                    <span className="ml-2 text-xs text-muted-foreground">
+                    <span
+                      className="ml-2 text-xs text-muted-foreground"
+                      data-oid="wi8i.4s"
+                    >
                       {store.address}
                     </span>
                   )}
@@ -127,5 +143,5 @@ export function StoreCombobox({
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

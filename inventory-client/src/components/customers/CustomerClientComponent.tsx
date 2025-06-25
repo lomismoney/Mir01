@@ -1,12 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useCustomers, useCreateCustomer } from '@/hooks/queries/useEntityQueries';
-import { useDebounce } from '@/hooks/use-debounce';
-import { DataTableSkeleton } from '@/components/ui/data-table-skeleton';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import React, { useState } from "react";
+import {
+  useCustomers,
+  useCreateCustomer,
+} from "@/hooks/queries/useEntityQueries";
+import { useDebounce } from "@/hooks/use-debounce";
+import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   flexRender,
   getCoreRowModel,
@@ -26,30 +35,38 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Customer } from '@/types/api-helpers';
-import { columns } from './columns';
-import { CustomerForm } from './CustomerForm';
+import { Customer } from "@/types/api-helpers";
+import { columns } from "./columns";
+import { CustomerForm } from "./CustomerForm";
 
 export function CustomerClientComponent() {
   // 【升級】搜尋功能實現
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = React.useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  
+
   // 【新增】模態框狀態管理
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-  
+
   // API 查詢 Hook - 現在支援搜尋參數
-  const { data: customerResponse, isLoading, isError, error } = useCustomers({
+  const {
+    data: customerResponse,
+    isLoading,
+    isError,
+    error,
+  } = useCustomers({
     search: debouncedSearchQuery || undefined, // 僅在有值時傳遞
   });
-  
+
   // 【新增】創建客戶的 Mutation Hook
   const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
 
   // 狀態管理 Hooks
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
 
   // 🎯 純淨消費：直接從 Hook 返回的物件中解構出 data 和 meta
   const customers = customerResponse?.data ?? [];
@@ -89,7 +106,11 @@ export function CustomerClientComponent() {
   }
 
   if (isError) {
-    return <div className="text-red-500">無法加載客戶資料: {error?.message || '未知錯誤'}</div>;
+    return (
+      <div className="text-red-500">
+        無法加載客戶資料: {error?.message || "未知錯誤"}
+      </div>
+    );
   }
 
   return (
@@ -102,7 +123,7 @@ export function CustomerClientComponent() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
         />
-        
+
         {/* 【新增】新增客戶按鈕與對話框 */}
         <Dialog open={isCreateModalOpen} onOpenChange={setCreateModalOpen}>
           <DialogTrigger asChild>
@@ -119,24 +140,30 @@ export function CustomerClientComponent() {
           </DialogContent>
         </Dialog>
       </div>
-      
+
       {/* 表格容器 */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-b hover:bg-transparent">
+              <TableRow
+                key={headerGroup.id}
+                className="border-b hover:bg-transparent"
+              >
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    <TableHead
+                      key={header.id}
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -152,7 +179,7 @@ export function CustomerClientComponent() {
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -171,8 +198,8 @@ export function CustomerClientComponent() {
           </TableBody>
         </Table>
       </div>
-      
+
       {/* 分頁邏輯將在後續與 meta 對象連接 */}
     </div>
   );
-} 
+}

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Dialog,
@@ -6,23 +6,27 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { useCategories, useCreateCategory, type CategoryNode } from "@/hooks/queries/useEntityQueries"
-import { CategoryForm, type FormValues } from "./CategoryForm"
-import { toast } from "sonner"
+} from "@/components/ui/dialog";
+import {
+  useCategories,
+  useCreateCategory,
+  type CategoryNode,
+} from "@/hooks/queries/useEntityQueries";
+import { CategoryForm, type FormValues } from "./CategoryForm";
+import { toast } from "sonner";
 
 /**
  * 新增分類 Modal 組件屬性
  */
 interface CreateCategoryModalProps {
   /** Modal 開啟狀態 */
-  open: boolean
+  open: boolean;
   /** Modal 開啟狀態變更處理函數 */
-  onOpenChange: (open: boolean) => void
+  onOpenChange: (open: boolean) => void;
   /** 父分類（新增子分類時使用） */
-  parentCategory?: CategoryNode | null
+  parentCategory?: CategoryNode | null;
   /** 成功新增後的回調函數 */
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 /**
@@ -33,60 +37,64 @@ export function CreateCategoryModal({
   open,
   onOpenChange,
   parentCategory,
-  onSuccess
+  onSuccess,
 }: CreateCategoryModalProps) {
-  const { data: categories = [] } = useCategories()
-  const createCategory = useCreateCategory()
-  
+  const { data: categories = [] } = useCategories();
+  const createCategory = useCreateCategory();
+
   /**
    * 處理表單提交
    */
   const handleSubmit = (data: FormValues) => {
-    createCategory.mutate({
-      name: data.name,
-      description: data.description || "",
-      parent_id: data.parent_id ? Number(data.parent_id) : null,
-    }, {
-      onSuccess: () => {
-        toast.success(parentCategory ? "子分類已成功新增" : "分類已成功新增")
-        onSuccess?.()
-        onOpenChange(false)
+    createCategory.mutate(
+      {
+        name: data.name,
+        description: data.description || "",
+        parent_id: data.parent_id ? Number(data.parent_id) : null,
       },
-      onError: (error) => {
-        toast.error(`新增失敗: ${error.message}`)
-      }
-    })
-  }
-  
+      {
+        onSuccess: () => {
+          toast.success(parentCategory ? "子分類已成功新增" : "分類已成功新增");
+          onSuccess?.();
+          onOpenChange(false);
+        },
+        onError: (error) => {
+          toast.error(`新增失敗: ${error.message}`);
+        },
+      },
+    );
+  };
+
   // 將樹狀結構扁平化為列表，供 CategoryForm 使用
   const flatCategories = categories.reduce<CategoryNode[]>((acc, category) => {
     const flatten = (cat: CategoryNode): CategoryNode[] => {
-      const result = [cat]
+      const result = [cat];
       if (cat.children) {
-        cat.children.forEach(child => {
-          result.push(...flatten(child))
-        })
+        cat.children.forEach((child) => {
+          result.push(...flatten(child));
+        });
       }
-      return result
-    }
-    return [...acc, ...flatten(category)]
-  }, [])
-  
+      return result;
+    };
+    return [...acc, ...flatten(category)];
+  }, []);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {parentCategory ? `新增子分類 - ${parentCategory.name}` : "新增分類"}
+            {parentCategory
+              ? `新增子分類 - ${parentCategory.name}`
+              : "新增分類"}
           </DialogTitle>
           <DialogDescription>
-            {parentCategory 
+            {parentCategory
               ? `在「${parentCategory.name}」下新增子分類`
-              : "建立新的商品分類"
-            }
+              : "建立新的商品分類"}
           </DialogDescription>
         </DialogHeader>
-        
+
         <CategoryForm
           onSubmit={handleSubmit}
           isLoading={createCategory.isPending}
@@ -95,5 +103,5 @@ export function CreateCategoryModal({
         />
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}

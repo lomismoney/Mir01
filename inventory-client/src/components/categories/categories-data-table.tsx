@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   SortingState,
@@ -12,16 +12,16 @@ import {
   getSortedRowModel,
   getExpandedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { ChevronDown, Plus } from "lucide-react"
+} from "@tanstack/react-table";
+import { ChevronDown, Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -29,45 +29,45 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
 /**
  * 分類資料表格組件的屬性介面
- * 
+ *
  * @template TData - 表格資料的類型
  * @template TValue - 表格值的類型
  */
 interface CategoriesDataTableProps<TData, TValue> {
   /** 表格欄位定義 */
-  columns: ColumnDef<TData, TValue>[]
+  columns: ColumnDef<TData, TValue>[];
   /** 表格資料 */
-  data: TData[]
+  data: TData[];
   /** 是否顯示新增分類按鈕 */
-  showAddButton?: boolean
+  showAddButton?: boolean;
   /** 新增分類按鈕點擊處理器 */
-  onAddCategory?: () => void
+  onAddCategory?: () => void;
   /** 是否正在載入資料 */
-  isLoading?: boolean
+  isLoading?: boolean;
   /** 獲取子行的函數 */
-  getSubRows?: (row: TData) => TData[] | undefined
+  getSubRows?: (row: TData) => TData[] | undefined;
   /** 是否顯示工具列 */
-  showToolbar?: boolean
+  showToolbar?: boolean;
   /** 外部控制的欄位可見性狀態 */
-  columnVisibility?: VisibilityState
+  columnVisibility?: VisibilityState;
   /** 欄位可見性變更處理器 */
-  onColumnVisibilityChange?: (visibility: VisibilityState) => void
+  onColumnVisibilityChange?: (visibility: VisibilityState) => void;
   /** 外部控制的展開狀態 */
-  expanded?: ExpandedState
+  expanded?: ExpandedState;
   /** 展開狀態變更處理器 */
-  onExpandedChange?: (expanded: ExpandedState) => void
+  onExpandedChange?: (expanded: ExpandedState) => void;
 }
 
 /**
  * 分類管理專用的資料表格組件
- * 
+ *
  * 基於 shadcn/ui 和 TanStack React Table 構建的專業資料表格，
  * 專門為分類管理功能設計，支援樹狀結構展開。
- * 
+ *
  * 功能特色：
  * 1. 樹狀結構 - 支援多層級分類展開/收合
  * 2. 響應式設計 - 適應不同螢幕尺寸
@@ -76,7 +76,7 @@ interface CategoriesDataTableProps<TData, TValue> {
  * 5. 分頁功能 - 大量資料的分頁顯示
  * 6. 載入狀態 - 優雅的載入動畫
  * 7. 空狀態處理 - 無資料時的友善提示
- * 
+ *
  * @param props - 組件屬性
  * @returns 分類資料表格組件
  */
@@ -94,37 +94,54 @@ export function CategoriesDataTable<TData, TValue>({
   onExpandedChange: externalOnExpandedChange,
 }: CategoriesDataTableProps<TData, TValue>) {
   // 表格狀態管理
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [internalColumnVisibility, setInternalColumnVisibility] = React.useState<VisibilityState>({})
-  const [internalExpanded, setInternalExpanded] = React.useState<ExpandedState>({})
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [internalColumnVisibility, setInternalColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [internalExpanded, setInternalExpanded] = React.useState<ExpandedState>(
+    {},
+  );
 
   // 使用外部或內部的欄位可見性狀態
-  const columnVisibility = externalColumnVisibility ?? internalColumnVisibility
-  const setColumnVisibility = React.useCallback((updaterOrValue: VisibilityState | ((old: VisibilityState) => VisibilityState)) => {
-    if (externalOnColumnVisibilityChange) {
-      // 如果是 updater 函數，先計算新值
-      const newValue = typeof updaterOrValue === 'function' 
-        ? updaterOrValue(columnVisibility)
-        : updaterOrValue
-      externalOnColumnVisibilityChange(newValue)
-    } else {
-      setInternalColumnVisibility(updaterOrValue)
-    }
-  }, [columnVisibility, externalOnColumnVisibilityChange])
+  const columnVisibility = externalColumnVisibility ?? internalColumnVisibility;
+  const setColumnVisibility = React.useCallback(
+    (
+      updaterOrValue:
+        | VisibilityState
+        | ((old: VisibilityState) => VisibilityState),
+    ) => {
+      if (externalOnColumnVisibilityChange) {
+        // 如果是 updater 函數，先計算新值
+        const newValue =
+          typeof updaterOrValue === "function"
+            ? updaterOrValue(columnVisibility)
+            : updaterOrValue;
+        externalOnColumnVisibilityChange(newValue);
+      } else {
+        setInternalColumnVisibility(updaterOrValue);
+      }
+    },
+    [columnVisibility, externalOnColumnVisibilityChange],
+  );
 
   // 使用外部或內部的展開狀態
-  const expandedState = externalExpanded ?? internalExpanded
-  const setExpanded = React.useCallback((updaterOrValue: ExpandedState | ((old: ExpandedState) => ExpandedState)) => {
-    if (externalOnExpandedChange) {
-      // 如果是 updater 函數，先計算新值
-      const newValue = typeof updaterOrValue === 'function' 
-        ? updaterOrValue(expandedState)
-        : updaterOrValue
-      externalOnExpandedChange(newValue)
-    } else {
-      setInternalExpanded(updaterOrValue)
-    }
-  }, [expandedState, externalOnExpandedChange])
+  const expandedState = externalExpanded ?? internalExpanded;
+  const setExpanded = React.useCallback(
+    (
+      updaterOrValue: ExpandedState | ((old: ExpandedState) => ExpandedState),
+    ) => {
+      if (externalOnExpandedChange) {
+        // 如果是 updater 函數，先計算新值
+        const newValue =
+          typeof updaterOrValue === "function"
+            ? updaterOrValue(expandedState)
+            : updaterOrValue;
+        externalOnExpandedChange(newValue);
+      } else {
+        setInternalExpanded(updaterOrValue);
+      }
+    },
+    [expandedState, externalOnExpandedChange],
+  );
 
   // 初始化表格實例
   const table = useReactTable({
@@ -144,17 +161,15 @@ export function CategoriesDataTable<TData, TValue>({
     getExpandedRowModel: getExpandedRowModel(), // 🎯 啟用展開模型
     onColumnVisibilityChange: setColumnVisibility, // 使用正確的處理器
     autoResetPageIndex: false, // 🎯 斬斷循環：禁用分頁自動重設
-  })
+  });
 
   return (
     <div className="w-full space-y-4">
       {/* 工具列 */}
       {showToolbar && (
         <div className="flex items-center justify-between">
-          <div className="flex-1">
-            {/* 可以在這裡添加搜尋或其他過濾器 */}
-          </div>
-          
+          <div className="flex-1">{/* 可以在這裡添加搜尋或其他過濾器 */}</div>
+
           <div className="flex items-center space-x-2">
             {/* 欄位顯示控制 */}
             <DropdownMenu>
@@ -181,9 +196,14 @@ export function CategoriesDataTable<TData, TValue>({
                         {column.id === "description" && "描述"}
                         {column.id === "statistics" && "統計"}
                         {column.id === "actions" && "操作"}
-                        {!["name", "description", "statistics", "actions"].includes(column.id) && column.id}
+                        {![
+                          "name",
+                          "description",
+                          "statistics",
+                          "actions",
+                        ].includes(column.id) && column.id}
                       </DropdownMenuCheckboxItem>
-                    )
+                    );
                   })}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -204,18 +224,24 @@ export function CategoriesDataTable<TData, TValue>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-b hover:bg-transparent">
+              <TableRow
+                key={headerGroup.id}
+                className="border-b hover:bg-transparent"
+              >
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    <TableHead
+                      key={header.id}
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -224,7 +250,10 @@ export function CategoriesDataTable<TData, TValue>({
             {isLoading ? (
               // 載入狀態
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   <div className="flex items-center justify-center space-x-2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
                     <span>載入中...</span>
@@ -240,7 +269,10 @@ export function CategoriesDataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -248,13 +280,18 @@ export function CategoriesDataTable<TData, TValue>({
             ) : (
               // 無資料狀態
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   <div className="flex flex-col items-center justify-center space-y-2">
-                    <div className="text-muted-foreground">
-                      尚無分類資料
-                    </div>
+                    <div className="text-muted-foreground">尚無分類資料</div>
                     {showAddButton && onAddCategory && (
-                      <Button variant="outline" onClick={onAddCategory} className="mt-2">
+                      <Button
+                        variant="outline"
+                        onClick={onAddCategory}
+                        className="mt-2"
+                      >
                         <Plus className="mr-2 h-4 w-4" />
                         建立第一個分類
                       </Button>
@@ -283,8 +320,8 @@ export function CategoriesDataTable<TData, TValue>({
           </Button>
           <div className="flex items-center space-x-1">
             <span className="text-sm text-muted-foreground">
-              第 {table.getState().pagination.pageIndex + 1} 頁，
-              共 {table.getPageCount()} 頁
+              第 {table.getState().pagination.pageIndex + 1} 頁， 共{" "}
+              {table.getPageCount()} 頁
             </span>
           </div>
           <Button
@@ -298,5 +335,5 @@ export function CategoriesDataTable<TData, TValue>({
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

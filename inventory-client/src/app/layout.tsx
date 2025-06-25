@@ -19,33 +19,27 @@ export const metadata: Metadata = {
 
 /**
  * 根佈局組件（Auth.js 完整版本）
- * 
+ *
  * 提供全局的應用程式架構，包含：
  * 1. 主題管理 (ThemeProvider)
  * 2. Auth.js Session 管理 (SessionProvider)
  * 3. React Query 狀態管理 (QueryProvider)
  * 4. Toast 通知系統 (Toaster)
- * 
+ *
  * @param children - 子頁面內容
  */
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-TW" suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
+          fontSans.variable,
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SessionProvider>
             <QueryProvider>
               {children}

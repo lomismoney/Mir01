@@ -1,14 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Check, ChevronsUpDown, PlusCircle, UserCircle2, Search } from 'lucide-react';
-import { useCustomers } from '@/hooks/queries/useEntityQueries';
-import { useDebounce } from '@/hooks/use-debounce';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Input } from '@/components/ui/input';
-import { Customer } from '@/types/api-helpers';
+import React, { useState, useEffect } from "react";
+import {
+  Check,
+  ChevronsUpDown,
+  PlusCircle,
+  UserCircle2,
+  Search,
+} from "lucide-react";
+import { useCustomers } from "@/hooks/queries/useEntityQueries";
+import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Customer } from "@/types/api-helpers";
 
 interface CustomerSelectorProps {
   selectedCustomerId: number | null;
@@ -16,21 +26,31 @@ interface CustomerSelectorProps {
   onAddNewCustomer?: () => void; // 新增客戶回調
 }
 
-export function CustomerSelector({ selectedCustomerId, onSelectCustomer, onAddNewCustomer }: CustomerSelectorProps) {
+export function CustomerSelector({
+  selectedCustomerId,
+  onSelectCustomer,
+  onAddNewCustomer,
+}: CustomerSelectorProps) {
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
 
   // 儲存已選擇的客戶資訊
-  const [cachedSelectedCustomer, setCachedSelectedCustomer] = useState<Customer | null>(null);
+  const [cachedSelectedCustomer, setCachedSelectedCustomer] =
+    useState<Customer | null>(null);
 
-  const { data: response, isLoading } = useCustomers({ search: debouncedSearch });
+  const { data: response, isLoading } = useCustomers({
+    search: debouncedSearch,
+  });
   // 安全地處理 API 響應，確保類型安全
-  const customers: Customer[] = (response && 'data' in response && Array.isArray(response.data)) 
-    ? response.data as Customer[] 
-    : [];
+  const customers: Customer[] =
+    response && "data" in response && Array.isArray(response.data)
+      ? (response.data as Customer[])
+      : [];
 
-  const selectedCustomer = customers.find((c) => c.id === selectedCustomerId) || cachedSelectedCustomer;
+  const selectedCustomer =
+    customers.find((c) => c.id === selectedCustomerId) ||
+    cachedSelectedCustomer;
 
   // 更新快取的選中客戶
   useEffect(() => {
@@ -40,7 +60,7 @@ export function CustomerSelector({ selectedCustomerId, onSelectCustomer, onAddNe
   }, [selectedCustomer, selectedCustomerId]);
 
   // 過濾客戶列表
-  const filteredCustomers = customers.filter(customer => {
+  const filteredCustomers = customers.filter((customer) => {
     const searchLower = searchQuery.toLowerCase();
     return (
       customer.name?.toLowerCase().includes(searchLower) ||
@@ -49,30 +69,53 @@ export function CustomerSelector({ selectedCustomerId, onSelectCustomer, onAddNe
   });
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="outline" 
-          role="combobox" 
-          aria-expanded={open} 
+    <Popover open={open} onOpenChange={setOpen} data-oid="tuqb7_p">
+      <PopoverTrigger asChild data-oid="guf95f7">
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
           className="w-full h-10 px-3 justify-between text-left font-normal hover:bg-accent/50"
+          data-oid="3nqt387"
         >
           {selectedCustomer ? (
-            <div className="flex items-center gap-2 overflow-hidden">
-              <UserCircle2 className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">{selectedCustomer.name}</span>
+            <div
+              className="flex items-center gap-2 overflow-hidden"
+              data-oid="qnqsjcn"
+            >
+              <UserCircle2
+                className="h-4 w-4 text-muted-foreground shrink-0"
+                data-oid="ftuhq4p"
+              />
+
+              <span className="truncate" data-oid="4qnijra">
+                {selectedCustomer.name}
+              </span>
             </div>
           ) : (
-            <span className="text-muted-foreground">請選擇客戶...</span>
+            <span className="text-muted-foreground" data-oid="9ai.ppg">
+              請選擇客戶...
+            </span>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown
+            className="ml-2 h-4 w-4 shrink-0 opacity-50"
+            data-oid="23t2i59"
+          />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-2" align="start">
-        <div className="flex flex-col gap-2">
+      <PopoverContent
+        className="w-[--radix-popover-trigger-width] p-2"
+        align="start"
+        data-oid="sflss62"
+      >
+        <div className="flex flex-col gap-2" data-oid="ghj9u9c">
           {/* 搜尋框 */}
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative" data-oid="tzh6b27">
+            <Search
+              className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              data-oid="g4oupl5"
+            />
+
             <Input
               type="text"
               placeholder="搜尋客戶名稱或電話..."
@@ -80,21 +123,34 @@ export function CustomerSelector({ selectedCustomerId, onSelectCustomer, onAddNe
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8"
               autoFocus
+              data-oid="7b1w17-"
             />
           </div>
 
           {/* 客戶列表 */}
-          <div className="max-h-[300px] overflow-y-auto py-1">
+          <div
+            className="max-h-[300px] overflow-y-auto py-1"
+            data-oid="vlwus_l"
+          >
             {isLoading ? (
-              <div className="py-6 text-center text-sm text-muted-foreground">
+              <div
+                className="py-6 text-center text-sm text-muted-foreground"
+                data-oid="vfh48o5"
+              >
                 載入中...
               </div>
             ) : filteredCustomers.length === 0 && searchQuery ? (
-              <div className="py-6 text-center text-sm text-muted-foreground">
+              <div
+                className="py-6 text-center text-sm text-muted-foreground"
+                data-oid="z99faj_"
+              >
                 找不到符合的客戶
               </div>
             ) : customers.length === 0 ? (
-              <div className="py-6 text-center text-sm text-muted-foreground">
+              <div
+                className="py-6 text-center text-sm text-muted-foreground"
+                data-oid="w58eqnu"
+              >
                 尚無客戶資料
               </div>
             ) : (
@@ -107,17 +163,29 @@ export function CustomerSelector({ selectedCustomerId, onSelectCustomer, onAddNe
                       setOpen(false);
                     }}
                     className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-accent text-left transition-colors w-full"
+                    data-oid="6.j1slj"
                   >
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <PlusCircle className="h-4 w-4 text-primary" />
+                    <div
+                      className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"
+                      data-oid="slng-8r"
+                    >
+                      <PlusCircle
+                        className="h-4 w-4 text-primary"
+                        data-oid="zxnrlge"
+                      />
                     </div>
-                    <span className="text-primary font-medium">新增客戶</span>
+                    <span
+                      className="text-primary font-medium"
+                      data-oid="dk11p_7"
+                    >
+                      新增客戶
+                    </span>
                   </button>
                 )}
-                
+
                 {/* 分隔線 */}
                 {onAddNewCustomer && filteredCustomers.length > 0 && (
-                  <div className="my-1 mx-3 border-t" />
+                  <div className="my-1 mx-3 border-t" data-oid="e1:n5o3" />
                 )}
 
                 {/* 客戶項目 */}
@@ -130,23 +198,43 @@ export function CustomerSelector({ selectedCustomerId, onSelectCustomer, onAddNe
                     }}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-accent text-left transition-colors relative w-full",
-                      selectedCustomerId === customer.id && "bg-accent"
+                      selectedCustomerId === customer.id && "bg-accent",
                     )}
+                    data-oid="o.u9yn3"
                   >
                     {selectedCustomerId === customer.id && (
-                      <div className="absolute left-1 top-1/2 -translate-y-1/2">
-                        <Check className="h-3 w-3 text-primary" />
+                      <div
+                        className="absolute left-1 top-1/2 -translate-y-1/2"
+                        data-oid="veir5sq"
+                      >
+                        <Check
+                          className="h-3 w-3 text-primary"
+                          data-oid="-f5_d8i"
+                        />
                       </div>
                     )}
-                    
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                      <UserCircle2 className="h-5 w-5 text-muted-foreground" />
+
+                    <div
+                      className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0"
+                      data-oid="soo7hak"
+                    >
+                      <UserCircle2
+                        className="h-5 w-5 text-muted-foreground"
+                        data-oid="7slgs38"
+                      />
                     </div>
-                    
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-medium truncate">{customer.name}</span>
+
+                    <div className="flex flex-col min-w-0" data-oid="cmxds.q">
+                      <span className="font-medium truncate" data-oid=".bpso:1">
+                        {customer.name}
+                      </span>
                       {customer.phone && (
-                        <span className="text-xs text-muted-foreground">{customer.phone}</span>
+                        <span
+                          className="text-xs text-muted-foreground"
+                          data-oid=".0auvo0"
+                        >
+                          {customer.phone}
+                        </span>
                       )}
                     </div>
                   </button>
@@ -158,4 +246,4 @@ export function CustomerSelector({ selectedCustomerId, onSelectCustomer, onAddNe
       </PopoverContent>
     </Popover>
   );
-} 
+}

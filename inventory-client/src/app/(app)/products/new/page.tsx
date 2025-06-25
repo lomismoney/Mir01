@@ -1,15 +1,15 @@
-import { Suspense } from 'react';
-import { DataTableSkeleton } from '@/components/ui/data-table-skeleton';
-import { CreateProductWizard } from '@/components/products/CreateProductWizard';
+import { Suspense } from "react";
+import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
+import { CreateProductWizard } from "@/components/products/CreateProductWizard";
 
 /**
  * 新增商品頁面（嚮導式流程版本）
- * 
+ *
  * 安全特性：
  * - 由 Auth.js 中間件統一保護，無需頁面級認證檢查
  * - 在 Edge Runtime 中執行認證，效能更佳
  * - 自動重導向機制，用戶體驗更流暢
- * 
+ *
  * 功能概述：
  * - 提供多步驟嚮導式商品創建流程
  * - 步驟1：基本資訊（名稱、描述、分類）
@@ -21,11 +21,14 @@ import { CreateProductWizard } from '@/components/products/CreateProductWizard';
 export default function NewProductPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
-    <div>
+    <div data-oid="x920a7m">
       {/* 商品創建嚮導 */}
-      <Suspense fallback={<DataTableSkeleton />}>
-        <CreateProductWizard />
+      <Suspense
+        fallback={<DataTableSkeleton data-oid="xv2_hrp" />}
+        data-oid="nzb7v-r"
+      >
+        <CreateProductWizard data-oid="v5f5i-d" />
       </Suspense>
     </div>
   );
-} 
+}

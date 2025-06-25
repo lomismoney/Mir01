@@ -13,10 +13,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { 
-  MoreHorizontal, Edit, Trash2, Eye, ChevronRight, ChevronDown, 
-  Package, Image as ImageIcon, Tag, DollarSign, Box, Calendar,
-  CheckCircle, Pencil, Archive
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Eye,
+  ChevronRight,
+  ChevronDown,
+  Package,
+  Image as ImageIcon,
+  Tag,
+  DollarSign,
+  Box,
+  Calendar,
+  CheckCircle,
+  Pencil,
+  Archive,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -28,7 +40,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 /**
  * 商品表格欄位定義 (SPU+SKU 巢狀架構)
- * 
+ *
  * @description
  * 定義商品管理表格的所有欄位結構，採用 SPU+SKU 巢狀顯示架構：
  * - 展開/收合欄位（控制 SKU 變體顯示）
@@ -38,7 +50,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
  * - 規格詳情（SPU 顯示數量，SKU 顯示具體規格）
  * - 庫存資訊（SKU 層級顯示）
  * - 操作欄位（編輯、刪除、查看規格）
- * 
+ *
  * 使用 TanStack Table 的 ColumnDef 類型，確保類型安全
  * 使用統一的 ProductItem 類型，支援 SPU+SKU 架構
  */
@@ -49,7 +61,7 @@ export type Product = ProductItem;
 /**
  * 擴展的商品項目類型，支援巢狀顯示
  */
-export interface ExpandedProductItem extends Omit<ProductItem, 'id'> {
+export interface ExpandedProductItem extends Omit<ProductItem, "id"> {
   // 使用字符串 ID 來支援變體行的複合 ID
   id: string;
   // 原始數字 ID（僅 SPU 主行使用）
@@ -86,7 +98,7 @@ export interface ExpandedProductItem extends Omit<ProductItem, 'id'> {
 
 /**
  * 安全的價格格式化函數
- * 
+ *
  * @param price - 價格數值
  * @returns 格式化的價格字串
  */
@@ -95,11 +107,11 @@ const formatPrice = (price?: number) => {
     return <span className="text-muted-foreground">N/A</span>;
   }
 
-  const formatter = new Intl.NumberFormat('zh-TW', { 
-    style: 'currency', 
-    currency: 'TWD',
+  const formatter = new Intl.NumberFormat("zh-TW", {
+    style: "currency",
+    currency: "TWD",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   });
 
   return formatter.format(price);
@@ -107,20 +119,24 @@ const formatPrice = (price?: number) => {
 
 /**
  * 安全的價格範圍格式化函數
- * 
+ *
  * @param priceRange - 價格範圍物件，包含 min, max, count
  * @returns 格式化的價格範圍字串
  */
-const formatPriceRange = (priceRange?: { min?: number; max?: number; count?: number }) => {
+const formatPriceRange = (priceRange?: {
+  min?: number;
+  max?: number;
+  count?: number;
+}) => {
   if (!priceRange || priceRange.count === 0 || priceRange.min === undefined) {
     return <span className="text-muted-foreground">N/A</span>;
   }
 
-  const formatter = new Intl.NumberFormat('zh-TW', { 
-    style: 'currency', 
-    currency: 'TWD',
+  const formatter = new Intl.NumberFormat("zh-TW", {
+    style: "currency",
+    currency: "TWD",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   });
 
   // 如果最低價和最高價相同，只顯示一個價格
@@ -134,11 +150,13 @@ const formatPriceRange = (priceRange?: { min?: number; max?: number; count?: num
 
 /**
  * 格式化規格屬性顯示
- * 
+ *
  * @param attributeValues - 屬性值陣列
  * @returns 格式化的屬性字串
  */
-const formatAttributes = (attributeValues?: { value?: string; attribute?: { name?: string } }[]) => {
+const formatAttributes = (
+  attributeValues?: { value?: string; attribute?: { name?: string } }[],
+) => {
   if (!attributeValues || attributeValues.length === 0) {
     return <span className="text-muted-foreground text-sm">無規格</span>;
   }
@@ -146,7 +164,11 @@ const formatAttributes = (attributeValues?: { value?: string; attribute?: { name
   return (
     <div className="flex flex-wrap gap-1">
       {attributeValues.map((attr, index) => (
-        <Badge key={index} variant="outline" className="text-xs h-5 px-2">
+        <Badge
+          key={index}
+          variant="outline"
+          className="text-xs h-5 px-2"
+        >
           <span className="text-muted-foreground">{attr.attribute?.name}:</span>
           <span className="ml-1 font-medium">{attr.value}</span>
         </Badge>
@@ -157,19 +179,21 @@ const formatAttributes = (attributeValues?: { value?: string; attribute?: { name
 
 /**
  * 格式化庫存資訊顯示
- * 
+ *
  * @param inventories - 庫存陣列
  * @returns 格式化的庫存資訊
  */
-const formatInventories = (inventories?: Array<{ 
-  store_id?: number; 
-  id?: number;
-  quantity?: number; 
-  store?: { 
+const formatInventories = (
+  inventories?: Array<{
+    store_id?: number;
     id?: number;
-    name?: string;
-  } 
-}>) => {
+    quantity?: number;
+    store?: {
+      id?: number;
+      name?: string;
+    };
+  }>,
+) => {
   if (!inventories || inventories.length === 0) {
     return (
       <Badge variant="secondary" className="font-normal">
@@ -179,7 +203,10 @@ const formatInventories = (inventories?: Array<{
     );
   }
 
-  const totalStock = inventories.reduce((sum, inv) => sum + (inv.quantity || 0), 0);
+  const totalStock = inventories.reduce(
+    (sum, inv) => sum + (inv.quantity || 0),
+    0,
+  );
   const storeCount = inventories.length;
 
   // 使用 Badge 組件顯示庫存狀態
@@ -231,6 +258,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         className="translate-y-[2px]"
       />
     ),
+
     cell: ({ row }) => {
       if (row.original.isVariantRow) return null;
       return (
@@ -295,7 +323,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     header: "商品",
     cell: ({ row }) => {
       const item = row.original;
-      
+
       if (item.isVariantRow && item.variantInfo) {
         // SKU 變體行顯示
         return (
@@ -314,44 +342,49 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       // SPU 主行顯示
       let imageUrl = item.image_urls?.thumb || item.image_urls?.original;
       if (imageUrl) {
-        imageUrl = imageUrl.replace('localhost', '127.0.0.1');
+        imageUrl = imageUrl.replace("localhost", "127.0.0.1");
       }
-      
+
       return (
         <div className="flex items-center gap-4">
           {/* 圖片縮圖 */}
           <div className="h-12 w-12 flex-shrink-0 bg-muted rounded-md flex items-center justify-center overflow-hidden">
             {imageUrl ? (
-              <Image 
-                src={addImageCacheBuster(imageUrl, item.updated_at) || ''} 
-                alt={item.name || '商品圖片'} 
-                width={48} 
-                height={48} 
+              <Image
+                src={addImageCacheBuster(imageUrl, item.updated_at) || ""}
+                alt={item.name || "商品圖片"}
+                width={48}
+                height={48}
                 className="object-cover"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.parentElement?.classList.add('image-error');
+                  target.style.display = "none";
+                  target.parentElement?.classList.add("image-error");
                 }}
               />
             ) : (
               <ImageIcon className="h-6 w-6 text-muted-foreground" />
             )}
           </div>
-          
+
           {/* 名稱與 SKU */}
           <div className="min-w-0">
-            <Link 
-              href={`/products/${item.originalId}`} 
+            <Link
+              href={`/products/${item.originalId}`}
               className="font-medium truncate hover:underline inline-block max-w-[200px]"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
             >
-              {item.name || '未命名商品'}
+              {item.name || "未命名商品"}
             </Link>
-            {item.variants && item.variants.length > 0 && item.variants[0].sku && (
-              <div className="text-sm text-muted-foreground truncate">
-                SKU: {item.variants[0].sku}
-              </div>
-            )}
+            {item.variants &&
+              item.variants.length > 0 &&
+              item.variants[0].sku && (
+                <div className="text-sm text-muted-foreground truncate">
+                  SKU: {item.variants[0].sku}
+                </div>
+              )}
           </div>
         </div>
       );
@@ -365,7 +398,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     header: "規格/分類",
     cell: ({ row }) => {
       const item = row.original;
-      
+
       if (item.isVariantRow && item.variantInfo) {
         // SKU 變體行顯示規格
         return formatAttributes(item.variantInfo.attribute_values);
@@ -374,7 +407,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       // SPU 主行顯示分類
       const category = item.category;
       const variantCount = item.variants?.length || 0;
-      
+
       return (
         <div className="flex flex-col gap-2">
           {category?.name && (
@@ -400,9 +433,10 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         <span>價格</span>
       </div>
     ),
+
     cell: ({ row }) => {
       const item = row.original;
-      
+
       if (item.isVariantRow && item.variantInfo) {
         // SKU 變體行顯示具體價格
         return (
@@ -424,56 +458,59 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     header: "狀態",
     cell: ({ row }) => {
       const item = row.original;
-      
+
       // 變體行不顯示狀態
       if (item.isVariantRow) {
         return null;
       }
-      
+
       // 計算每個變體的庫存狀態
-      const variantsWithStock = item.variants?.filter((v: any) => {
-        const totalStock = v.inventory?.reduce((sum: number, inv: any) => 
-          sum + (inv.quantity || 0), 0
-        ) || 0;
-        return totalStock > 0;
-      }) || [];
-      
+      const variantsWithStock =
+        item.variants?.filter((v: any) => {
+          const totalStock =
+            v.inventory?.reduce(
+              (sum: number, inv: any) => sum + (inv.quantity || 0),
+              0,
+            ) || 0;
+          return totalStock > 0;
+        }) || [];
+
       const totalVariants = item.variants?.length || 0;
       const variantsWithStockCount = variantsWithStock.length;
-      
+
       // 判斷庫存狀態
-      let status: 'full_stock' | 'partial_stock' | 'no_stock';
+      let status: "full_stock" | "partial_stock" | "no_stock";
       if (variantsWithStockCount === 0) {
-        status = 'no_stock';
+        status = "no_stock";
       } else if (variantsWithStockCount === totalVariants) {
-        status = 'full_stock';
+        status = "full_stock";
       } else {
-        status = 'partial_stock';
+        status = "partial_stock";
       }
-      
+
       const statusConfig = {
-        full_stock: { 
-          text: '有庫存', 
-          variant: 'secondary' as const, 
-          icon: <CheckCircle className="h-3 w-3 mr-1.5" />
+        full_stock: {
+          text: "有庫存",
+          variant: "secondary" as const,
+          icon: <CheckCircle className="h-3 w-3 mr-1.5" />,
         },
-        partial_stock: { 
-          text: '部分庫存', 
-          variant: 'outline' as const, 
-          icon: <Package className="h-3 w-3 mr-1.5" />
+        partial_stock: {
+          text: "部分庫存",
+          variant: "outline" as const,
+          icon: <Package className="h-3 w-3 mr-1.5" />,
         },
-        no_stock: { 
-          text: '無庫存', 
-          variant: 'destructive' as const, 
-          icon: <Box className="h-3 w-3 mr-1.5" />
-        }
+        no_stock: {
+          text: "無庫存",
+          variant: "destructive" as const,
+          icon: <Box className="h-3 w-3 mr-1.5" />,
+        },
       };
 
       const config = statusConfig[status];
 
       return (
-        <Badge 
-          variant={config.variant} 
+        <Badge
+          variant={config.variant}
           className="flex items-center w-fit"
         >
           {config.icon}
@@ -489,23 +526,32 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     header: "庫存",
     cell: ({ row }) => {
       const item = row.original;
-      
+
       if (item.isVariantRow && item.variantInfo) {
         // SKU 變體行顯示庫存資訊
-        const totalStock = item.variantInfo.inventory?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) || 0;
+        const totalStock =
+          item.variantInfo.inventory?.reduce(
+            (sum, inv) => sum + (inv.quantity || 0),
+            0,
+          ) || 0;
         const lowStockThreshold = 10;
-        const progress = Math.min((totalStock / (lowStockThreshold * 2)) * 100, 100);
-        
+        const progress = Math.min(
+          (totalStock / (lowStockThreshold * 2)) * 100,
+          100,
+        );
+
         return (
           <div className="flex flex-col gap-1 w-32">
             <span className="text-sm">{totalStock} 件可用</span>
-            <Progress 
-              value={progress} 
+            <Progress
+              value={progress}
               className={cn(
                 "h-1.5",
-                totalStock === 0 ? "[&>div]:bg-destructive" : 
-                totalStock <= lowStockThreshold ? "[&>div]:bg-muted-foreground" : 
-                "[&>div]:bg-primary"
+                totalStock === 0
+                  ? "[&>div]:bg-destructive"
+                  : totalStock <= lowStockThreshold
+                    ? "[&>div]:bg-muted-foreground"
+                    : "[&>div]:bg-primary",
               )}
             />
           </div>
@@ -514,30 +560,39 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
 
       // SPU 主行：檢查是否為單一規格
       const variantCount = item.variants?.length || 0;
-      
+
       if (variantCount === 1 && item.variants?.[0]) {
         // 單一規格商品，直接顯示庫存
         const singleVariant = item.variants[0];
-        const totalStock = singleVariant.inventory?.reduce((sum: number, inv: any) => sum + (inv.quantity || 0), 0) || 0;
+        const totalStock =
+          singleVariant.inventory?.reduce(
+            (sum: number, inv: any) => sum + (inv.quantity || 0),
+            0,
+          ) || 0;
         const lowStockThreshold = 10;
-        const progress = Math.min((totalStock / (lowStockThreshold * 2)) * 100, 100);
-        
+        const progress = Math.min(
+          (totalStock / (lowStockThreshold * 2)) * 100,
+          100,
+        );
+
         return (
           <div className="flex flex-col gap-1 w-32">
             <span className="text-sm">{totalStock} 件可用</span>
-            <Progress 
-              value={progress} 
+            <Progress
+              value={progress}
               className={cn(
                 "h-1.5",
-                totalStock === 0 ? "[&>div]:bg-destructive" : 
-                totalStock <= lowStockThreshold ? "[&>div]:bg-muted-foreground" : 
-                "[&>div]:bg-primary"
+                totalStock === 0
+                  ? "[&>div]:bg-destructive"
+                  : totalStock <= lowStockThreshold
+                    ? "[&>div]:bg-muted-foreground"
+                    : "[&>div]:bg-primary",
               )}
             />
           </div>
         );
       }
-      
+
       // 多規格商品，提示查看變體
       return (
         <Badge variant="outline" className="flex items-center w-fit">
@@ -557,22 +612,29 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         <span>建立時間</span>
       </div>
     ),
+
     cell: ({ row }) => {
       const item = row.original;
-      
+
       if (item.isVariantRow) {
         return null;
       }
 
       const createdAt = item.created_at;
-      if (!createdAt) return <span className="text-muted-foreground">N/A</span>;
-      
+      if (!createdAt)
+        return (
+          <span className="text-muted-foreground">N/A</span>
+        );
+
       const date = new Date(createdAt);
       return (
         <div className="text-sm">
-          <div>{date.toLocaleDateString('zh-TW')}</div>
+          <div>{date.toLocaleDateString("zh-TW")}</div>
           <div className="text-xs text-muted-foreground">
-            {date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
+            {date.toLocaleTimeString("zh-TW", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </div>
         </div>
       );
@@ -582,36 +644,42 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
   // 操作欄位
   {
     id: "actions",
-    header: "操作",
-    enableHiding: false,
+    header: "",
     cell: ({ row }) => {
       const item = row.original;
-      
+
       if (item.isVariantRow) {
         return null;
       }
 
-      // SPU 主行顯示完整操作選單
       function ActionsComponent() {
         const router = useRouter();
 
         const handleEdit = () => {
-          window.dispatchEvent(new CustomEvent('editProduct', { detail: { id: item.originalId } }));
+          window.dispatchEvent(
+            new CustomEvent("editProduct", { detail: { id: item.originalId } }),
+          );
         };
 
         const handleDelete = () => {
-          window.dispatchEvent(new CustomEvent('deleteProduct', { detail: { id: item.originalId, name: item.name } }));
+          window.dispatchEvent(
+            new CustomEvent("deleteProduct", {
+              detail: { id: item.originalId, name: item.name },
+            }),
+          );
         };
 
         const handleViewVariants = () => {
-          window.dispatchEvent(new CustomEvent('viewVariants', { detail: item }));
+          window.dispatchEvent(
+            new CustomEvent("viewVariants", { detail: item }),
+          );
         };
 
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="h-8 w-8 p-0 hover:bg-muted data-[state=open]:bg-muted"
               >
                 <span className="sr-only">開啟選單</span>
@@ -630,7 +698,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
                 查看規格
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={handleDelete}
                 className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
               >
@@ -646,4 +714,4 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     },
     size: 80,
   },
-]; 
+];

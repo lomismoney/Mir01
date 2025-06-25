@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ThemeProvider as NextThemesProvider } from "next-themes"
+import * as React from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 /**
  * Theme Provider 組件
@@ -12,5 +12,9 @@ export function ThemeProvider({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
-} 
+  return (
+    <NextThemesProvider {...props} data-oid="o6tz0np">
+      {children}
+    </NextThemesProvider>
+  );
+}

@@ -14,8 +14,12 @@ import { useState } from "react";
 export function SimpleProductTest() {
   const { data: session, status } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: products, isLoading, error } = useProducts({ 
-    product_name: searchTerm 
+  const {
+    data: products,
+    isLoading,
+    error,
+  } = useProducts({
+    product_name: searchTerm,
   });
 
   return (
@@ -27,7 +31,9 @@ export function SimpleProductTest() {
         {/* 登入狀態 */}
         <div className="p-4 border rounded">
           <h3 className="font-semibold mb-2">登入狀態</h3>
-          <Badge variant={status === "authenticated" ? "default" : "destructive"}>
+          <Badge
+            variant={status === "authenticated" ? "default" : "destructive"}
+          >
             {status}
           </Badge>
           {session?.user?.email && (
@@ -69,7 +75,8 @@ export function SimpleProductTest() {
               <strong>是陣列:</strong> {Array.isArray(products) ? "是" : "否"}
             </div>
             <div>
-              <strong>商品數量:</strong> {Array.isArray(products) ? products.length : "N/A"}
+              <strong>商品數量:</strong>{" "}
+              {Array.isArray(products) ? products.length : "N/A"}
             </div>
           </div>
         </div>
@@ -105,17 +112,21 @@ export function SimpleProductTest() {
         )}
 
         {/* 無數據提示 */}
-        {!isLoading && !error && (!products || (Array.isArray(products) && products.length === 0)) && (
-          <div className="p-4 border rounded bg-yellow-50">
-            <h3 className="font-semibold mb-2 text-yellow-800">暫無商品資料</h3>
-            <p className="text-sm text-yellow-700">
-              {searchTerm 
-                ? `找不到包含「${searchTerm}」的商品` 
-                : "系統中沒有商品資料"}
-            </p>
-          </div>
-        )}
+        {!isLoading &&
+          !error &&
+          (!products || (Array.isArray(products) && products.length === 0)) && (
+            <div className="p-4 border rounded bg-yellow-50">
+              <h3 className="font-semibold mb-2 text-yellow-800">
+                暫無商品資料
+              </h3>
+              <p className="text-sm text-yellow-700">
+                {searchTerm
+                  ? `找不到包含「${searchTerm}」的商品`
+                  : "系統中沒有商品資料"}
+              </p>
+            </div>
+          )}
       </CardContent>
     </Card>
   );
-} 
+}
