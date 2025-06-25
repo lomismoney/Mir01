@@ -33,6 +33,7 @@ class CategoryResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'parent_id' => $this->parent_id,
+            'sort_order' => $this->sort_order,
             'products_count' => $this->whenCounted('products'),
             'total_products_count' => $this->total_products_count ?? $this->whenCounted('products', $this->products_count),
         ];

@@ -44,7 +44,7 @@ export function TransferHistoryDialog({
   })
 
   // 篩選出與此轉移相關的交易記錄
-  const relatedTransactions = transactionsData?.data?.filter(transaction => {
+  const relatedTransactions = transactionsData?.data?.filter((transaction: any) => {
     if (!transaction.metadata) return false
     
     let metadataObj = transaction.metadata
@@ -96,7 +96,7 @@ export function TransferHistoryDialog({
   }
 
   // 按照轉移邏輯對交易記錄進行分組和排序
-  const processedTransactions = relatedTransactions.sort((a, b) => {
+  const processedTransactions = relatedTransactions.sort((a: any, b: any) => {
     const dateA = new Date(a.created_at || 0).getTime()
     const dateB = new Date(b.created_at || 0).getTime()
     return dateA - dateB // 升序排列，顯示時間順序
@@ -176,7 +176,7 @@ export function TransferHistoryDialog({
               </div>
             ) : (
               <div className="space-y-3">
-                {processedTransactions.map((transaction, index) => (
+                {processedTransactions.map((transaction: any, index: any) => (
                   <div key={transaction.id} className="flex items-start space-x-4 p-3 border rounded-lg">
                     <div className="p-2 bg-muted rounded-lg">
                       {getTransactionIcon(transaction.type || '', transaction.quantity || 0)}

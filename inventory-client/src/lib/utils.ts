@@ -123,3 +123,28 @@ export function getOrderStatusVariant(status: string): "default" | "secondary" |
       return 'outline';
   }
 }
+
+/**
+ * 格式化價格顯示
+ * 
+ * @param price - 價格數值
+ * @returns 格式化的價格字串
+ * 
+ * @example
+ * formatPrice(1000) // "NT$1,000"
+ * formatPrice(1500.5) // "NT$1,501"
+ */
+export function formatPrice(price?: number | null): string {
+  if (price === undefined || price === null) {
+    return 'N/A';
+  }
+
+  const formatter = new Intl.NumberFormat('zh-TW', { 
+    style: 'currency', 
+    currency: 'TWD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+
+  return formatter.format(price);
+}

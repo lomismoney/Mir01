@@ -25,7 +25,8 @@ class UpdateCustomerRequest extends FormRequest
     public function rules(): array
     {
         // 獲取路由中正在更新的 customer ID
-        $customerId = $this->route('customer')->id;
+        $customer = $this->route('customer');
+        $customerId = $customer ? $customer->id : null;
 
         return [
             // 客戶基本資訊驗證
@@ -109,6 +110,71 @@ class UpdateCustomerRequest extends FormRequest
             'addresses.*.address.max' => '地址不能超過 255 個字元',
             'addresses.*.is_default.required' => '請指定是否為預設地址',
             'addresses.*.is_default.boolean' => '預設地址設定格式錯誤',
+        ];
+    }
+
+    /**
+     * 定義請求參數文檔（用於 Scribe API 文檔生成）
+     *
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'name' => [
+                'description' => '客戶名稱或公司抬頭',
+                'example' => '測試客戶',
+            ],
+            'phone' => [
+                'description' => '手機號碼',
+                'example' => '0987654321',
+            ],
+            'is_company' => [
+                'description' => '是否為公司戶',
+                'example' => false,
+            ],
+            'tax_id' => [
+                'description' => '統一編號 (is_company為true時必填)',
+                'example' => '12345678',
+            ],
+            'industry_type' => [
+                'description' => '行業別',
+                'example' => '設計師',
+            ],
+            'payment_type' => [
+                'description' => '付款類別',
+                'example' => '現金付款',
+            ],
+            'contact_address' => [
+                'description' => '主要聯絡地址',
+                'example' => '台北市信義區',
+            ],
+            'addresses' => [
+                'description' => '客戶地址列表',
+                'example' => [
+                    [
+                        'id' => 1,
+                        'address' => '台北市大安區復興南路一段100號',
+                        'is_default' => true,
+                    ],
+                    [
+                        'address' => '台北市信義區市府路45號',
+                        'is_default' => false,
+                    ],
+                ],
+            ],
+            'addresses.*.id' => [
+                'description' => '地址 ID（更新現有地址時提供）',
+                'example' => 1,
+            ],
+            'addresses.*.address' => [
+                'description' => '詳細地址',
+                'example' => '台北市大安區復興南路一段100號',
+            ],
+            'addresses.*.is_default' => [
+                'description' => '是否為預設地址',
+                'example' => true,
+            ],
         ];
     }
 }

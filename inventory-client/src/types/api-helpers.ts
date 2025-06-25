@@ -81,13 +81,11 @@ export type ProductVariantItem = NonNullable<
   import('@/types/api').paths['/api/products/variants']['get']['responses'][200]['content']['application/json']['data']
 >[number];
 
-// 用戶項目型別（擴展版本，包含 stores、role 和 username 欄位）
+// 用戶項目型別（擴展版本，包含 stores 欄位）
 export type UserItem = NonNullable<
   import('@/types/api').paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
 >[number] & {
   stores?: StoreItem[];
-  role?: 'admin' | 'staff' | 'viewer';
-  username?: string; // 添加 username 字段以解決 API 設計不一致問題
 };
 
 /**
@@ -633,15 +631,14 @@ export interface ProcessedOrder {
   creator: User;      // 嵌套的創建者對象
   shipping_status: string;
   payment_status: string;
-  payment_method: string;    // 付款方式
-  order_source: string;      // 訂單來源
+  payment_method: string;     // 付款方式
+  order_source: string;       // 訂單來源
   shipping_fee: number | null;  // 已精煉為 number
   shipping_address: string | null;
   shipping_phone: string | null;
   billing_address: string | null;
   notes: string | null;
   subtotal: number;      // 已精煉為 number
-  tax: number;           // 稅金 - 新增字段
   tax_amount: number;    // 已精煉為 number
   discount_amount: number;  // 已精煉為 number
   grand_total: number;   // 已精煉為 number
@@ -650,67 +647,5 @@ export interface ProcessedOrder {
   updated_at: string;
   items: ProcessedOrderItem[]; // 使用精煉後的訂單項目類型
   status_histories?: OrderStatusHistory[]; // 狀態歷史記錄
-  payment_records?: PaymentRecord[]; // 付款記錄
-}
-
-/**
- * 庫存交易 API 響應類型定義
- * 對應 /api/inventory/transactions 端點的響應格式
- */
-export interface InventoryTransactionsResponse {
-  message?: string;
-  data: InventoryTransaction[];
-  pagination?: {
-    current_page?: number;
-    per_page?: number;
-    total?: number;
-    last_page?: number;
-  };
-}
-
-/**
- * 庫存轉移 API 響應類型定義
- * 對應 /api/inventory/transfers 端點的響應格式
- */
-export interface InventoryTransfersResponse {
-  data: InventoryTransferItem[];
-  meta?: {
-    current_page?: number;
-    from?: number;
-    last_page?: number;
-    path?: string;
-    per_page?: number;
-    to?: number;
-    total?: number;
-  };
-  links?: {
-    first?: string;
-    last?: string;
-    prev?: string | null;
-    next?: string | null;
-  };
-}
-
-/**
- * 進貨單 API 響應類型定義
- * 對應 /api/purchases 端點的響應格式
- */
-export interface PurchasesResponse {
-  data: any[]; // 進貨單數據陣列
-  meta?: {
-    current_page?: number;
-    from?: number;
-    last_page?: number;
-    path?: string;
-    per_page?: number;
-    to?: number;
-    total?: number;
-  };
-  links?: {
-    first?: string;
-    last?: string;
-    prev?: string | null;
-    next?: string | null;
-  };
   payment_records?: PaymentRecord[]; // 付款記錄
 }

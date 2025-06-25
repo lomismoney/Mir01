@@ -7,7 +7,7 @@ import {
   ExpandedState
 } from "@tanstack/react-table"
 import { useCategories, useDeleteCategory, type CategoryNode } from "@/hooks/queries/useEntityQueries"
-import { CategoriesDataTable } from "./categories-data-table"
+import { DraggableCategoriesTable } from "./DraggableCategoriesTable"
 import { createCategoryColumns } from "./categories-columns"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,8 +29,8 @@ import {
 
 /**
  * 分類管理客戶端組件
- * 使用 CategoriesDataTable 展示層級結構的分類資料
- * 支援新增、編輯、刪除操作
+ * 使用 DraggableCategoriesTable 展示層級結構的分類資料
+ * 支援新增、編輯、刪除和拖曳排序操作
  */
 export function CategoriesClientPage() {
   const router = useRouter()
@@ -200,16 +200,13 @@ export function CategoriesClientPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* 資料表格 */}
-          <CategoriesDataTable 
+          {/* 使用支援拖曳的資料表格 */}
+          <DraggableCategoriesTable 
             columns={columns}
             data={filteredCategories}
-            showAddButton={false} // 已經在 CardHeader 中了
-            showToolbar={false} // 工具列功能已移到 CardHeader
             isLoading={isLoading}
-            getSubRows={(row) => row.children} // 🎯 告訴表格如何找到子行
-            columnVisibility={columnVisibility} // 傳遞欄位可見性狀態
-            onColumnVisibilityChange={setColumnVisibility} // 傳遞更新函數
+            columnVisibility={columnVisibility}
+            onColumnVisibilityChange={setColumnVisibility}
             expanded={expanded}
             onExpandedChange={setExpanded}
           />

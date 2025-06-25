@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { InventoryTransferItem, InventoryTransfersResponse } from "@/types/api-helpers"
+import { InventoryTransferItem } from "@/types/api-helpers"
 import { useInventoryTransfers } from "@/hooks/queries/useEntityQueries"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDate } from "@/lib/utils"
@@ -28,7 +28,7 @@ export const InventoryTransferList = () => {
   const [editingTransfer, setEditingTransfer] = useState<InventoryTransferItem | null>(null)
   const [viewingHistoryTransfer, setViewingHistoryTransfer] = useState<InventoryTransferItem | null>(null)
 
-  const { data: transfersResponse, isLoading, error, refetch } = useInventoryTransfers({ page, per_page: perPage })
+  const { data, isLoading, error, refetch } = useInventoryTransfers({ page, per_page: perPage })
 
   if (error) {
     toast({
@@ -96,7 +96,7 @@ export const InventoryTransferList = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transfersResponse?.data && transfersResponse.data.length === 0 ? (
+                {data && data.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="h-24 text-center">
                       <div className="flex flex-col items-center justify-center space-y-3 py-6">
@@ -105,13 +105,13 @@ export const InventoryTransferList = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : transfersResponse?.data?.map((transfer: InventoryTransferItem) => (
+                ) : data?.map((transfer: any) => (
                   <TableRow key={transfer.id}>
                     <TableCell>{transfer.id}</TableCell>
-                    <TableCell>{formatDate(transfer.created_at || '')}</TableCell>
-                    <TableCell>{`門市 #${transfer.from_store_id}`}</TableCell>
-                    <TableCell>{`門市 #${transfer.to_store_id}`}</TableCell>
-                    <TableCell>{`產品 #${transfer.product_variant_id}`}</TableCell>
+                    <TableCell>{formatDate(transfer.created_at)}</TableCell>
+                    <TableCell>{transfer.from_store?.name || `門市 #${transfer.from_store_id}`}</TableCell>
+                    <TableCell>{transfer.to_store?.name || `門市 #${transfer.to_store_id}`}</TableCell>
+                    <TableCell>{transfer.product_variant?.product?.name || `產品 #${transfer.product_variant_id}`}</TableCell>
                     <TableCell>{transfer.quantity}</TableCell>
                     <TableCell>{getStatusBadge(transfer.status || 'unknown')}</TableCell>
                     <TableCell>
@@ -161,7 +161,7 @@ export const InventoryTransferList = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setPage((prev) => prev + 1)}
-                disabled={!transfersResponse?.meta || (transfersResponse.meta.current_page || 1) >= (transfersResponse.meta.last_page || 1)}
+                disabled={!data || data.length < perPage}
               >
                 下一頁
               </Button>

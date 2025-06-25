@@ -198,7 +198,7 @@ export function IncomingManagement() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">今日入庫</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {transactionsData?.data?.filter(t => {
+                  {transactionsData?.data?.filter((t: any) => {
                     const today = new Date().toDateString()
                     const transactionDate = new Date(t.created_at || '').toDateString()
                     return transactionDate === today
@@ -216,7 +216,7 @@ export function IncomingManagement() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">本週入庫</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {transactionsData?.data?.filter(t => {
+                  {transactionsData?.data?.filter((t: any) => {
                     const now = new Date()
                     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
                     const transactionDate = new Date(t.created_at || '')
@@ -375,7 +375,7 @@ export function IncomingManagement() {
             </div>
           ) : transactionsData?.data && transactionsData.data.length > 0 ? (
             <div className="space-y-4">
-              {transactionsData.data.map((transaction) => (
+              {transactionsData.data.map((transaction: any) => (
                 <div key={transaction.id} className="flex items-start space-x-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="mt-1">
                     {(() => {

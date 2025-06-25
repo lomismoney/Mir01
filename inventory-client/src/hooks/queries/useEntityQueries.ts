@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { getSession } from 'next-auth/react';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
-import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters, CustomerFilters, Customer, AttributePathParams, OrderFormData, InventoryTransactionsResponse, InventoryTransfersResponse, ProcessedOrder, ProcessedOrderItem } from '@/types/api-helpers';
+import { CreateStoreRequest, UpdateStoreRequest, ProductFilters, ProductItem, ProductVariant, InventoryProductItem, InventoryTransaction, InventoryTransactionFilters, CustomerFilters, Customer, AttributePathParams, OrderFormData, ProcessedOrder, ProcessedOrderItem } from '@/types/api-helpers';
 import { toast } from '@/components/ui/use-toast';
 
 /**
@@ -26,8 +26,6 @@ export const QUERY_KEYS = {
     CATEGORIES: ['categories'] as const,
     CATEGORY: (id: number) => ['categories', id] as const,
     ATTRIBUTES: ['attributes'] as const,
-    STORES: ['stores'] as const,
-    STORE: (id: number) => ['stores', id] as const,
     ORDERS: ['orders'] as const,
     ORDER: (id: number) => ['orders', id] as const,
 };
@@ -209,7 +207,7 @@ export function useProduct(id: number) {
         queryKey: QUERY_KEYS.PRODUCT(id),
         queryFn: async () => {
             const { data, error } = await apiClient.GET('/api/products/{id}', {
-                params: { path: { id } }
+                params: { path: { id, product: id } }
             });
             
             if (error) {
@@ -247,7 +245,7 @@ export function useProductDetail(productId: number | string | undefined) {
             }
 
             const { data, error } = await apiClient.GET('/api/products/{id}', {
-                params: { path: { id: numericId } }
+                params: { path: { id: numericId, product: numericId } }
             });
             
             if (error) {
@@ -424,7 +422,7 @@ export function useUpdateProduct() {
     return useMutation({
         mutationFn: async ({ id, ...productData }: { id: number } & UpdateProductRequestBody) => {
             const { data, error } = await apiClient.PUT('/api/products/{id}', {
-                params: { path: { id } },
+                params: { path: { id, product: id } },
                 body: productData
             });
             
@@ -458,12 +456,11 @@ export function useUpdateProduct() {
             // 這樣可以提供更靈活的用戶反饋控制
         },
         onError: (error) => {
-            // 🔴 錯誤處理 - 友善的錯誤訊息
-            const errorMessage = parseApiError(error);
+            // 錯誤處理並顯示錯誤訊息
             if (typeof window !== 'undefined') {
                 const { toast } = require('sonner');
                 toast.error('商品更新失敗', {
-                    description: errorMessage || '請檢查輸入資料並重試。'
+                    description: error.message || '請檢查輸入資料並重試。'
                 });
             }
         },
@@ -481,7 +478,7 @@ export function useDeleteProduct() {
     return useMutation({
         mutationFn: async (id: number) => {
             const { data, error } = await apiClient.DELETE('/api/products/{id}', {
-                params: { path: { id } }
+                params: { path: { id, product: id } }
             });
             
             if (error) {
@@ -938,17 +935,16 @@ export function useCreateCustomer() {
     // 🎯 使用我們新定義的、代表前端表單數據的嚴格類型
     mutationFn: async (payload: CreateCustomerPayload) => {
       // 🎯 數據轉換邏輯：前端表單結構 → 後端 API 結構
-      // 注意：API 期望 addresses 是字串陣列
       const apiPayload = {
         name: payload.name,
-        phone: payload.phone || null,
+        phone: payload.phone || undefined,
         is_company: payload.is_company,
-        tax_id: payload.tax_id || null,
+        tax_id: payload.tax_id || undefined,
         industry_type: payload.industry_type,
         payment_type: payload.payment_type,
-        contact_address: payload.contact_address || null,
-        // 修復地址陣列：轉換為字串陣列
-        addresses: (payload.addresses || []).map(addr => addr.address),
+        contact_address: payload.contact_address || undefined,
+        // 保持原始的 addresses 物件陣列格式
+        addresses: payload.addresses || [],
       };
       
       const { data, error } = await apiClient.POST('/api/customers', {
@@ -1188,24 +1184,21 @@ export function useCustomers(filters?: CustomerFilters) {
 export function useUpdateCustomer() {
   const queryClient = useQueryClient();
   
-  // 注意：根據 API 類型定義，/api/customers/{id} 端點只支持 GET 和 DELETE 操作
-  // 如果需要更新客戶資料，可能需要使用其他端點或請後端添加 PUT 支持
+  // 使用 API 生成的類型定義
+  type UpdateCustomerRequestBody = any;
   type UpdateCustomerPayload = {
     id: number;
-    data: any; // 暫時使用 any，直到確認正確的更新端點
+    data: UpdateCustomerRequestBody;
   };
   
   return useMutation({
     mutationFn: async ({ id, data }: UpdateCustomerPayload) => {
-      // 暫時註釋掉，因為 API 類型定義中沒有 PUT 支持
-      throw new Error('客戶更新功能尚未實現 - 需要後端添加 PUT /api/customers/{id} 支持');
-      
-      // const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}', {
-      //   params: { path: { id, customer: id } },
-      //   body: data,
-      // });
-      // if (error) throw error;
-      // return responseData;
+      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}' as any, {
+        params: { path: { id, customer: id } },
+        body: data,
+      } as any);
+      if (error) throw error;
+      return responseData;
     },
     onSuccess: async (data, variables) => {
       // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
@@ -1231,12 +1224,14 @@ export function useUpdateCustomer() {
         })
       ]);
       
-              // 🔔 成功通知 - 提升用戶體驗（移除對 data.data.name 的訪問）
-        if (typeof window !== 'undefined') {
-          const { toast } = require('sonner');
-          toast.success('客戶資料已成功更新');
-        }
-      },
+      // 🔔 成功通知 - 提升用戶體驗
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('客戶資料已成功更新', {
+          description: `客戶「${data?.data?.name}」的資料已更新`
+        });
+      }
+    },
     onError: (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
       const errorMessage = parseApiError(error);
@@ -1287,6 +1282,7 @@ function buildCategoryTree(groupedCategories: Record<string, any[]>): CategoryNo
             name: cat.name || '',
             description: cat.description || null,
             parent_id: cat.parent_id || null,
+            sort_order: cat.sort_order || 0,
             created_at: cat.created_at || '',
             updated_at: cat.updated_at || '',
             products_count: cat.products_count || 0,
@@ -1324,15 +1320,16 @@ function buildCategoryTree(groupedCategories: Record<string, any[]>): CategoryNo
     }
   });
 
-  // 第三步：對每個層級進行排序
-  const sortNodes = (nodes: CategoryNode[]): CategoryNode[] => {
-    return nodes.sort((a, b) => a.name.localeCompare(b.name)).map(node => ({
+  // 第三步：保持原始排序（已由後端按 sort_order 排序）
+  // 只需要遞迴處理子節點，不再重新排序
+  const processNodes = (nodes: CategoryNode[]): CategoryNode[] => {
+    return nodes.map(node => ({
       ...node,
-      children: sortNodes(node.children)
+      children: processNodes(node.children)
     }));
   };
 
-  return sortNodes(rootNodes);
+  return processNodes(rootNodes);
 }
 
 /**
@@ -1560,6 +1557,58 @@ export function useDeleteCategory() {
   });
 }
 
+/**
+ * 批量重新排序分類的 Mutation Hook
+ * 
+ * 🔄 功能：為分類拖曳排序功能提供完整的 API 集成
+ * 
+ * 功能特性：
+ * 1. 樂觀更新 - 在 API 請求前立即更新快取，實現零延遲
+ * 2. 錯誤回滾 - API 失敗時自動恢復原始順序
+ * 3. 最終一致性 - 無論成功或失敗都會同步伺服器數據
+ * 4. 用戶友善的通知 - 即時反饋操作結果
+ * 
+ * @returns React Query mutation 結果，包含 mutate 函數和狀態
+ */
+export function useReorderCategories() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    // 調用後端 API
+    mutationFn: async (items: { id: number; sort_order: number }[]) => {
+      const { error } = await apiClient.POST('/api/categories/batch-reorder', {
+        body: { items },
+      });
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '更新分類順序失敗');
+      }
+    },
+    
+    // 成功時顯示通知並同步數據
+    onSuccess: async () => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('分類順序已成功更新');
+      }
+      
+      // 立即失效快取，確保獲取最新數據
+      await queryClient.invalidateQueries({ 
+        queryKey: QUERY_KEYS.CATEGORIES,
+        refetchType: 'all'
+      });
+    },
+    
+    // 錯誤處理（由組件層面處理恢復）
+    onError: (err) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error(`更新失敗: ${err.message}`);
+      }
+    }
+  });
+}
+
 // ==================== 屬性管理系統 (ATTRIBUTE MANAGEMENT) ====================
 
 /**
@@ -1740,10 +1789,7 @@ export function useDeleteAttribute() {
 
 // 導入屬性值管理的精確類型定義
 type CreateAttributeValueRequestBody = import('@/types/api').paths["/api/attributes/{attribute_id}/values"]["post"]["requestBody"]["content"]["application/json"];
-// 暫時使用手動類型定義，直到 OpenAPI 規範修復
-type UpdateAttributeValueRequestBody = {
-  value: string;
-};
+type UpdateAttributeValueRequestBody = import('@/types/api').paths["/api/values/{id}"]["put"]["requestBody"]["content"]["application/json"];
 type AttributeValuePathParams = import('@/types/api').paths["/api/values/{id}"]["get"]["parameters"]["path"];
 
 /**
@@ -1797,10 +1843,10 @@ export function useUpdateAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (variables: { valueId: number; body: UpdateAttributeValueRequestBody }) => {
-      const { data, error } = await apiClient.PUT('/api/values/{id}' as any, {
+      const { data, error } = await apiClient.PUT('/api/values/{id}', {
         params: { path: { id: variables.valueId, value: variables.valueId } },
         body: variables.body,
-      } as any);
+      });
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '更新選項失敗'); }
       return data;
     },
@@ -2213,21 +2259,26 @@ export function useAllInventoryTransactions(filters: InventoryTransactionFilters
       if (error) {
         throw new Error('獲取庫存交易記錄失敗');
       }
-      return data as InventoryTransactionsResponse;
+      return data as {
+        message?: string;
+        data: InventoryTransaction[];
+        pagination?: {
+          current_page?: number;
+          per_page?: number;
+          total?: number;
+          last_page?: number;
+        };
+      };
     },
     
-    // 🎯 修復數據精煉廠 - 保留完整的響應結構包含分頁資訊
-    select: (response: any): InventoryTransactionsResponse => {
-      // Laravel標準分頁響應通常使用 meta 而不是 pagination
+    // 🎯 數據精煉廠 - 統一處理交易記錄數據格式
+    select: (response: any) => {
+      // 返回完整的響應結構，包含 data 和 pagination
+      if (!response) return { data: [], pagination: null };
+      
       return {
-        data: response?.data || [],
-        pagination: response?.meta || response?.pagination || {
-          current_page: 1,
-          last_page: 1,
-          total: Array.isArray(response?.data) ? response.data.length : 0,
-          per_page: 20
-        },
-        message: response?.message
+        data: response.data || [],
+        pagination: response.pagination || null
       };
     },
     
@@ -2274,16 +2325,17 @@ export function useInventoryTransfers(params: {
       if (error) {
         throw new Error('獲取庫存轉移列表失敗');
       }
-      return data as InventoryTransfersResponse;
+      return data;
     },
     
-    // 🎯 修復數據精煉廠 - 保留完整的響應結構包含分頁資訊
-    select: (response: InventoryTransfersResponse): InventoryTransfersResponse => {
-      return {
-        data: response?.data || [],
-        meta: response?.meta || undefined,
-        links: response?.links || undefined
-      };
+    // 🎯 數據精煉廠 - 統一處理轉移記錄數據格式
+    select: (response: any) => {
+      // 解包：處理分頁或普通陣列數據結構
+      const transfers = response?.data || response || [];
+      if (!Array.isArray(transfers)) return [];
+      
+      // 返回純淨的轉移記錄陣列
+      return transfers;
     },
   });
 }
@@ -2645,9 +2697,9 @@ export function useUpdateStore() {
 export function useDeleteStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (storeId: number) => {
+    mutationFn: async (id: number) => {
       const { error } = await apiClient.DELETE('/api/stores/{id}', {
-        params: { path: { id: storeId, store: storeId } },
+        params: { path: { id, store: id } },
       });
       if (error) {
         throw new Error('刪除門市失敗');
@@ -2657,12 +2709,12 @@ export function useDeleteStore() {
       // 🚀 升級為標準的「失效並強制重取」模式
       await Promise.all([
         queryClient.invalidateQueries({ 
-          queryKey: QUERY_KEYS.STORES,
+          queryKey: ['stores'],
           exact: false,
           refetchType: 'active'
         }),
         queryClient.refetchQueries({ 
-          queryKey: QUERY_KEYS.STORES,
+          queryKey: ['stores'],
           exact: false
         })
       ]);
@@ -2927,17 +2979,20 @@ export function usePurchases(params?: {
     
     // 🎯 數據精煉廠 - 統一處理進貨單數據格式
     select: (response: any) => {
-      // 標準化分頁響應結構，確保始終返回完整的分頁信息
-      return {
-        data: response?.data || [],
-        meta: response?.meta || {
-          current_page: 1,
-          last_page: 1,
-          total: Array.isArray(response?.data) ? response.data.length : 0,
-          per_page: 20
-        },
-        links: response?.links || {}
-      };
+      // 特殊處理：如果需要保留分頁元數據，返回完整結構
+      if (response?.meta || response?.links) {
+        return {
+          data: response.data || [],
+          meta: response.meta,
+          links: response.links
+        };
+      }
+      
+      // 否則，解包並返回純淨的進貨單陣列
+      const purchases = response?.data || response || [];
+      if (!Array.isArray(purchases)) return [];
+      
+      return purchases;
     },
     
     placeholderData: keepPreviousData,
@@ -3413,8 +3468,7 @@ export function useCreateOrderShipment() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/create-shipment", {
         params: { 
           path: { 
-            order_id: payload.orderId,
-            order: payload.orderId
+            order_id: payload.orderId
           } 
         },
         body: payload.data,
@@ -3464,8 +3518,7 @@ export function useAddOrderPayment() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/add-payment", {
         params: { 
           path: { 
-            order_id: payload.orderId,
-            order: payload.orderId
+            order_id: payload.orderId
           } 
         },
         body: payload.data,
@@ -3529,29 +3582,12 @@ export function useUpdateOrder() {
   const queryClient = useQueryClient();
   
   // 🎯 契約淨化：使用精確的 API 類型定義，徹底根除 any 污染
-  type UpdateOrderRequestBody = {
-    customer_id?: number;
-    shipping_status?: string;
-    payment_status?: string;
-    shipping_fee?: Record<string, never> | null;
-    tax?: Record<string, never> | null;
-    discount_amount?: Record<string, never> | null;
-    payment_method?: string | null;
-    shipping_address?: string | null;
-    billing_address?: string | null;
-    customer_address_id?: string | null;
-    notes?: string | null;
-    po_number?: string | null;
-    reference_number?: string | null;
-    subtotal?: number | null;
-    grand_total?: number | null;
-    items?: string[];
-  };
-
+  type UpdateOrderRequestBody = import('@/types/api').paths["/api/orders/{id}"]["put"]["requestBody"]["content"]["application/json"];
+  
   return useMutation({
     mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
       const { data, error } = await apiClient.PUT("/api/orders/{id}", {
-        params: { path: { id: payload.id, order: payload.id } },
+        params: { path: { id: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -3583,7 +3619,7 @@ export function useDeleteOrder() {
   return useMutation({
     mutationFn: async (orderId: number) => {
       const { data, error } = await apiClient.DELETE("/api/orders/{id}", {
-        params: { path: { id: orderId, order: orderId } },
+        params: { path: { id: orderId } },
       });
       if (error) throw error;
       return data;
@@ -3641,7 +3677,7 @@ export function useUpdateOrderItemStatus() {
       };
       
       const { data, error } = await apiClient.PATCH('/api/order-items/{order_item_id}/status', {
-        params: { path: { order_item_id: orderItemId, order_item: orderItemId } },
+        params: { path: { order_item_id: orderItemId } },
         body: requestBody,
       });
       
@@ -3722,8 +3758,7 @@ export function useCreateRefund() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/refunds", {
         params: { 
           path: { 
-            order_id: payload.orderId,
-            order: payload.orderId
+            order_id: payload.orderId
           } 
         },
         body: payload.data,
@@ -3771,13 +3806,8 @@ export function useCancelOrder() {
   
   return useMutation({
     mutationFn: async ({ orderId, reason }: { orderId: number; reason?: string }) => {
-      const { error } = await apiClient.POST('/api/orders/{order_id}/cancel', {
-        params: { 
-          path: { 
-            order_id: orderId,
-            order: orderId
-          } 
-        },
+      const { error } = await apiClient.POST('/api/orders/{order}/cancel', {
+        params: { path: { order: orderId } },
         body: { reason },
       });
 
@@ -3973,12 +4003,12 @@ export function useInventoryTimeSeries(filters: {
       const { data, error } = await apiClient.GET('/api/reports/inventory-time-series', {
         params: {
           query: { 
-            product_variant_id: product_variant_id!, 
+            product_variant_id, 
             start_date, 
             end_date 
           },
         },
-      } as any); // 暫時使用 any 繞過錯誤的 OpenAPI 類型定義，GET 請求不應該需要 body
+      });
 
       if (error) {
         const errorMessage = parseApiError(error);

@@ -25,6 +25,8 @@ export interface Category {
   description?: string | null;
   /** 父分類 ID，null 表示頂層分類 */
   parent_id?: number | null;
+  /** 排序順序 */
+  sort_order?: number;
   /** 該分類的商品數量（當有載入統計時） */
   products_count?: number;
   /** 包含所有子分類的商品總數 */
