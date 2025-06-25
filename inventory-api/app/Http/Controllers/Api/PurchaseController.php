@@ -41,7 +41,7 @@ class PurchaseController extends Controller
             ])
             ->allowedSorts(['order_number', 'purchased_at', 'total_amount', 'created_at'])
             ->defaultSort('-purchased_at')
-            ->with(['store', 'items'])
+            ->with(['store', 'items.productVariant.product'])
             ->withCount('items')
             ->withSum('items', 'quantity')
             ->paginate(request('per_page', 20));
@@ -63,14 +63,26 @@ class PurchaseController extends Controller
      * @bodyParam items[].product_variant_id integer required 商品變體ID Example: 1
      * @bodyParam items[].quantity integer required 數量 Example: 10
      * @bodyParam items[].cost_price number required 成本價格 Example: 150.00
+     * @bodyParam notes string 進貨備註
      * 
-     * @responseFile 201 storage/responses/purchase-store-response.json
+     * @response 201 scenario="進貨單創建成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "purchase_number": "PO-20250101-001",
+     *     "supplier": "供應商名稱",
+     *     "total_amount": 1500.00,
+     *     "status": "pending",
+     *     "notes": "進貨備註",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function store(PurchaseData $purchaseData, PurchaseService $purchaseService)
     {
         $this->authorize('create', Purchase::class);
         $purchase = $purchaseService->createPurchase($purchaseData);
-        return new PurchaseResource($purchase->load(['store', 'items']));
+        return new PurchaseResource($purchase->load(['store', 'items.productVariant.product']));
     }
 
     /**
@@ -113,7 +125,7 @@ class PurchaseController extends Controller
         }
 
         $updatedPurchase = $purchaseService->updatePurchase($purchase, $purchaseData);
-        return new PurchaseResource($updatedPurchase->load(['store', 'items']));
+        return new PurchaseResource($updatedPurchase->load(['store', 'items.productVariant.product']));
     }
 
     /**
@@ -142,7 +154,7 @@ class PurchaseController extends Controller
         }
 
         $purchase->update(['status' => $newStatus]);
-        return new PurchaseResource($purchase->fresh()->load('store', 'items'));
+        return new PurchaseResource($purchase->fresh()->load('store', 'items.productVariant.product'));
     }
 
     /**
@@ -162,7 +174,7 @@ class PurchaseController extends Controller
         }
 
         $purchase->update(['status' => Purchase::STATUS_CANCELLED]);
-        return new PurchaseResource($purchase->fresh()->load('store', 'items'));
+        return new PurchaseResource($purchase->fresh()->load('store', 'items.productVariant.product'));
     }
 
     /**

@@ -14,6 +14,8 @@ use App\Models\AttributeValue;
 use App\Models\Product;
 use App\Models\InventoryTransfer;
 use App\Models\InventoryTransaction;
+use App\Models\Purchase;
+use App\Models\PurchaseItem;
 
 class TestInventorySeeder extends Seeder
 {
@@ -36,6 +38,9 @@ class TestInventorySeeder extends Seeder
         
         // 建立庫存變動記錄（包括轉移記錄）
         $this->createInventoryTransactions($products);
+        
+        // 建立進貨單資料
+        $this->createPurchases($products);
         
         echo "測試資料建立完成！\n";
     }
@@ -166,7 +171,7 @@ class TestInventorySeeder extends Seeder
                 'description' => '最新款 iPhone，搭載 A17 Pro 晶片'
             ]
         );
-        $iphone->attributes()->attach([$attributes['color']->id, $attributes['capacity']->id]);
+        $iphone->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['capacity']->id]);
         
         // 建立 iPhone 變體
         foreach (['黑色', '白色', '金色'] as $colorName) {
@@ -186,12 +191,16 @@ class TestInventorySeeder extends Seeder
         $products[] = $iphone;
         
         // MacBook Pro
-        $macbook = Product::create([
-            'name' => 'MacBook Pro 14"',
-            'description' => 'M3 晶片的專業級筆電',
-            'category_id' => $categories['laptops']->id
-        ]);
-        $macbook->attributes()->attach([$attributes['color']->id, $attributes['capacity']->id]);
+        $macbook = Product::firstOrCreate(
+            [
+                'name' => 'MacBook Pro 14"',
+                'category_id' => $categories['laptops']->id
+            ],
+            [
+                'description' => 'M3 晶片的專業級筆電'
+            ]
+        );
+        $macbook->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['capacity']->id]);
 
         // 建立 MacBook 變體
         foreach (['銀色', '太空灰'] as $colorName) {
@@ -214,12 +223,16 @@ class TestInventorySeeder extends Seeder
         $products[] = $macbook;
 
         // 基本款 T恤
-        $tshirt = Product::create([
-            'name' => '純棉圓領T恤',
-            'description' => '100% 純棉，舒適透氣',
-            'category_id' => $categories['tshirts']->id
-        ]);
-        $tshirt->attributes()->attach([$attributes['color']->id, $attributes['size']->id, $attributes['material']->id]);
+        $tshirt = Product::firstOrCreate(
+            [
+                'name' => '純棉圓領T恤',
+                'category_id' => $categories['tshirts']->id
+            ],
+            [
+                'description' => '100% 純棉，舒適透氣'
+            ]
+        );
+        $tshirt->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['size']->id, $attributes['material']->id]);
         
         // 建立 T恤變體
         foreach (['黑色', '白色', '藍色', '紅色'] as $colorName) {
@@ -240,12 +253,16 @@ class TestInventorySeeder extends Seeder
         $products[] = $tshirt;
         
         // 牛仔褲
-        $jeans = Product::create([
-            'name' => '經典直筒牛仔褲',
-            'description' => '經典版型，百搭款式',
-            'category_id' => $categories['pants']->id
-        ]);
-        $jeans->attributes()->attach([$attributes['color']->id, $attributes['size']->id]);
+        $jeans = Product::firstOrCreate(
+            [
+                'name' => '經典直筒牛仔褲',
+                'category_id' => $categories['pants']->id
+            ],
+            [
+                'description' => '經典版型，百搭款式'
+            ]
+        );
+        $jeans->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['size']->id]);
         
         // 建立牛仔褲變體
         foreach (['藍色', '黑色'] as $colorName) {
@@ -266,12 +283,16 @@ class TestInventorySeeder extends Seeder
         $products[] = $jeans;
 
         // 人體工學椅
-        $chair = Product::create([
-            'name' => '人體工學辦公椅',
-            'description' => '符合人體工學設計，久坐不累',
-            'category_id' => $categories['chairs']->id
-        ]);
-        $chair->attributes()->attach([$attributes['color']->id, $attributes['material']->id]);
+        $chair = Product::firstOrCreate(
+            [
+                'name' => '人體工學辦公椅',
+                'category_id' => $categories['chairs']->id
+            ],
+            [
+                'description' => '符合人體工學設計，久坐不累'
+            ]
+        );
+        $chair->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['material']->id]);
         
         // 建立辦公椅變體
         foreach (['黑色', '灰色'] as $colorName) {
@@ -292,12 +313,16 @@ class TestInventorySeeder extends Seeder
         $products[] = $chair;
         
         // 屁股相關產品 - 坐墊
-        $cushion = Product::create([
-            'name' => '記憶棉坐墊',
-            'description' => '舒適記憶棉材質，保護您的屁股',
-            'category_id' => $categories['buttCategory']->id
-        ]);
-        $cushion->attributes()->attach([$attributes['color']->id]);
+        $cushion = Product::firstOrCreate(
+            [
+                'name' => '記憶棉坐墊',
+                'category_id' => $categories['buttCategory']->id
+            ],
+            [
+                'description' => '舒適記憶棉材質，保護您的屁股'
+            ]
+        );
+        $cushion->attributes()->syncWithoutDetaching([$attributes['color']->id]);
         
         // 建立坐墊變體
         foreach (['黑色', '藍色'] as $colorName) {
@@ -679,5 +704,179 @@ class TestInventorySeeder extends Seeder
         ];
         
         return $notes[array_rand($notes)];
+    }
+    
+    /**
+     * 建立進貨單資料
+     */
+    private function createPurchases($products): void
+    {
+        $stores = Store::all();
+        $user = User::first();
+        
+        if ($stores->isEmpty() || !$user) {
+            echo "警告：需要門市和用戶資料才能建立進貨單\n";
+            return;
+        }
+        
+        $purchaseCount = 0;
+        $itemCount = 0;
+        
+        // 建立不同狀態的進貨單
+        $statuses = [
+            Purchase::STATUS_PENDING,
+            Purchase::STATUS_CONFIRMED, 
+            Purchase::STATUS_IN_TRANSIT,
+            Purchase::STATUS_RECEIVED,
+            Purchase::STATUS_COMPLETED,
+            Purchase::STATUS_CANCELLED
+        ];
+        
+        // 為每個門市建立一些進貨單
+        foreach ($stores as $store) {
+            $purchasesForStore = rand(3, 8); // 每個門市3-8個進貨單
+            
+            for ($i = 0; $i < $purchasesForStore; $i++) {
+                // 隨機選擇狀態，但確保有一些已完成的進貨單
+                if ($i < 2) {
+                    $status = Purchase::STATUS_COMPLETED; // 前兩個設為已完成
+                } else {
+                    $status = $statuses[array_rand($statuses)];
+                }
+                
+                // 設定進貨日期（過去30天內）
+                $purchasedAt = now()->subDays(rand(0, 30))->subHours(rand(0, 23));
+                $createdAt = $purchasedAt->copy()->subHours(rand(1, 48)); // 建立時間稍早於進貨時間
+                
+                // 計算運費
+                $shippingCost = rand(50, 500) * 100; // 50-500元（以分為單位）
+                
+                $purchase = Purchase::create([
+                    'store_id' => $store->id,
+                    'user_id' => $user->id,
+                    'order_number' => $this->generateOrderNumber($createdAt),
+                    'purchased_at' => $purchasedAt,
+                    'shipping_cost' => $shippingCost,
+                    'status' => $status,
+                    'notes' => $this->getPurchaseNotes($status),
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
+                
+                $purchaseCount++;
+                
+                // 為進貨單添加進貨項目
+                $itemsCount = rand(1, 5); // 每個進貨單1-5個項目
+                $totalAmount = $shippingCost; // 從運費開始計算
+                
+                // 隨機選擇一些商品變體作為進貨項目
+                $availableVariants = collect($products)->flatMap(function($product) {
+                    return $product->variants;
+                })->shuffle()->take($itemsCount);
+                
+                foreach ($availableVariants as $variant) {
+                    $quantity = rand(5, 50);
+                    $costPrice = $variant->cost_price ?: (int)($variant->price * 0.6); // 如果沒有成本價，用售價的60%
+                    $itemTotalCost = $costPrice * $quantity;
+                    $totalAmount += $itemTotalCost;
+                    
+                    PurchaseItem::create([
+                        'purchase_id' => $purchase->id,
+                        'product_variant_id' => $variant->id,
+                        'quantity' => $quantity,
+                        'cost_price' => $costPrice,
+                        'created_at' => $createdAt,
+                        'updated_at' => $createdAt,
+                    ]);
+                    
+                    $itemCount++;
+                    
+                    // 如果進貨單狀態為已完成，更新庫存
+                    if ($status === Purchase::STATUS_COMPLETED) {
+                        $inventory = Inventory::firstOrCreate(
+                            [
+                                'product_variant_id' => $variant->id,
+                                'store_id' => $store->id
+                            ],
+                            [
+                                'quantity' => 0,
+                                'low_stock_threshold' => rand(5, 20)
+                            ]
+                        );
+                        
+                        // 增加庫存
+                        $inventory->addStock(
+                            $quantity,
+                            $user->id,
+                            "進貨入庫 - {$purchase->order_number}",
+                            [
+                                'purchase_id' => $purchase->id,
+                                'purchase_order_number' => $purchase->order_number,
+                                'cost_price' => $costPrice
+                            ]
+                        );
+                    }
+                }
+                
+                // 更新進貨單總金額
+                $purchase->update(['total_amount' => $totalAmount]);
+            }
+        }
+        
+        echo "建立了 {$purchaseCount} 筆進貨單，{$itemCount} 筆進貨項目\n";
+    }
+    
+    /**
+     * 生成進貨單號
+     */
+    private function generateOrderNumber($date): string
+    {
+        $prefix = 'PO';
+        $dateStr = $date->format('Y-m-d');
+        $randomSuffix = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+        
+        return "{$prefix}-{$dateStr}-{$randomSuffix}";
+    }
+    
+    /**
+     * 獲取進貨單備註
+     */
+    private function getPurchaseNotes($status): string
+    {
+        $notes = [
+            Purchase::STATUS_PENDING => [
+                '等待供應商確認',
+                '採購申請已提交',
+                '等待報價確認'
+            ],
+            Purchase::STATUS_CONFIRMED => [
+                '已確認進貨，等待出貨',
+                '供應商已確認訂單',
+                '預計3-5天到貨'
+            ],
+            Purchase::STATUS_IN_TRANSIT => [
+                '貨物運輸中',
+                '已發貨，預計明天到達',
+                '物流配送中'
+            ],
+            Purchase::STATUS_RECEIVED => [
+                '貨物已到達，待入庫',
+                '已收貨，正在驗收',
+                '部分商品已到達'
+            ],
+            Purchase::STATUS_COMPLETED => [
+                '進貨完成，已入庫',
+                '所有商品已驗收入庫',
+                '進貨流程完成'
+            ],
+            Purchase::STATUS_CANCELLED => [
+                '已取消 - 供應商缺貨',
+                '已取消 - 價格變動',
+                '已取消 - 需求變更'
+            ]
+        ];
+        
+        $statusNotes = $notes[$status] ?? ['進貨單處理中'];
+        return $statusNotes[array_rand($statusNotes)];
     }
 } 

@@ -102,7 +102,7 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 font-medium"
         >
-          帳號
+          用戶名
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -110,7 +110,7 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
     cell: ({ row }) => {
       return (
         <div className="font-mono text-sm">
-          {row.getValue("username") || "未知帳號"}
+          {row.getValue("username") || "未知用戶名"}
         </div>
       )
     },
@@ -119,19 +119,37 @@ export const createUsersColumns = (actions: UserActions = {}): ColumnDef<UserIte
     accessorKey: "role",
     header: "角色",
     cell: ({ row }) => {
-      const isAdmin = row.original.is_admin || false
+      const user = row.original
+      const role = user.role || "viewer"
+      
+      // 角色映射表
+      const roleConfig = {
+        admin: {
+          label: "管理員",
+          variant: "default" as const,
+          icon: <Shield className="h-3 w-3" />
+        },
+        staff: {
+          label: "員工",
+          variant: "destructive" as const,
+          icon: <Eye className="h-3 w-3" />
+        },
+        viewer: {
+          label: "檢視者",
+          variant: "secondary" as const,
+          icon: <Eye className="h-3 w-3" />
+        }
+      }
+      
+      const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.viewer
       
       return (
         <Badge 
-          variant={isAdmin ? "default" : "secondary"}
+          variant={config.variant}
           className="flex w-fit items-center gap-1"
         >
-          {isAdmin ? (
-            <Shield className="h-3 w-3" />
-          ) : (
-            <Eye className="h-3 w-3" />
-          )}
-          {row.original.role_display || (isAdmin ? "管理員" : "檢視者")}
+          {config.icon}
+          {config.label}
         </Badge>
       )
     },

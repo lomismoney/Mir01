@@ -82,7 +82,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
 
     // 🎯 計算總計資訊
     const subtotal = order.items?.reduce((acc: number, item: any) => 
-        acc + (parseFloat(item.price) * item.quantity), 0) || 0;
+        acc + (Number(item.price) * item.quantity), 0) || 0;
     
     // 🎯 計算付款進度
     const paymentProgress = order.grand_total > 0 ? (order.paid_amount / order.grand_total) * 100 : 0;
@@ -142,9 +142,9 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                                             )}
                                         </TableCell>
                                         <TableCell className="font-mono text-sm">{item.sku}</TableCell>
-                                        <TableCell className="text-right">${parseFloat(item.price).toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">${Number(item.price).toLocaleString()}</TableCell>
                                         <TableCell className="text-center">{item.quantity}</TableCell>
-                                        <TableCell className="text-right font-medium">${(parseFloat(item.price) * item.quantity).toLocaleString()}</TableCell>
+                                        <TableCell className="text-right font-medium">${(Number(item.price) * item.quantity).toLocaleString()}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <Select

@@ -36,7 +36,24 @@ class InventoryManagementController extends Controller
      * @queryParam per_page integer 每頁顯示數量，預設15. Example: 25
      * 
      * @authenticated
-     * @responseFile storage/responses/inventory_management.index.json
+     * @response 200 scenario="庫存列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "product_variant_id": 1,
+     *       "store_id": 1,
+     *       "quantity": 100,
+     *       "low_stock_threshold": 10,
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ],
+     *   "meta": {
+     *     "current_page": 1,
+     *     "per_page": 15,
+     *     "total": 100
+     *   }
+     * }
      * 
      * @param Request $request
      * @return AnonymousResourceCollection
@@ -307,7 +324,19 @@ class InventoryManagementController extends Controller
      * @queryParam per_page integer 每頁顯示數量，預設20，最大100. Example: 50
      * @queryParam page integer 頁碼. Example: 1
      * 
-     * @responseFile storage/responses/inventory.sku.history.json
+     * @response 200 scenario="SKU 庫存歷史" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "type": "purchase",
+     *       "quantity_change": 10,
+     *       "quantity_after": 110,
+     *       "reference_type": "purchase",
+     *       "reference_id": 1,
+     *       "created_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
      * 
      * @param Request $request
      * @param string $sku

@@ -1,64 +1,64 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useAllInventoryTransactions } from "@/hooks/queries/useEntityQueries"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { InventoryTransaction, InventoryTransactionsResponse } from "@/types/api-helpers"
 import { StoreCombobox } from "@/components/ui/store-combobox"
-import { Button } from "@/components/ui/button"
-import { 
-  Search, 
-  History, 
-  Package, 
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  RotateCw as RefreshIcon,
-  User,
-  Calendar,
-  TrendingUp,
-  TrendingDown,
-  MoreHorizontal,
-  ArrowRight
-} from "lucide-react"
-import { InventoryTransaction, InventoryTransactionFilters } from "@/types/api-helpers"
-import { useDebounce } from "@/hooks/use-debounce"
 import { format } from "date-fns"
 import { zhTW } from "date-fns/locale"
+import { useDebounce } from "@/hooks/use-debounce"
+import { 
+  ArrowRight, 
+  Calendar, 
+  ChevronLeft, 
+  ChevronRight, 
+  Filter, 
+  History, 
+  Package, 
+  Search, 
+  TrendingUp, 
+  TrendingDown, 
+  User,
+  RefreshCw
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function InventoryHistoryPage() {
-  const [filters, setFilters] = useState<InventoryTransactionFilters>({
+  const [filters, setFilters] = useState({
+    store_id: undefined as number | undefined,
+    type: undefined as string | undefined,
     page: 1,
-    per_page: 20
+    per_page: 20,
   })
-  const [searchTerm, setSearchTerm] = useState("")
   
-  // 對搜尋關鍵字進行防抖處理
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+  // 🎯 新增商品名稱搜尋功能
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
-  const { 
-    data: transactionsData, 
-    isLoading, 
-    error,
-    refetch 
-  } = useAllInventoryTransactions({
-    ...filters,
+  // 查詢庫存交易記錄
+  const { data: transactionsResponse, isLoading, error, refetch } = useAllInventoryTransactions({
+    store_id: filters.store_id,
+    type: filters.type,
+    page: filters.page,
+    per_page: filters.per_page,
     product_name: debouncedSearchTerm || undefined,
   })
 
   // 處理並合併轉移記錄
   const processedTransactions = useMemo(() => {
-    if (!transactionsData?.data) return []
+    if (!transactionsResponse?.data) return []
     
-    const processed: any[] = []
-    const transferMap = new Map<string, any>()
+    const processed: InventoryTransaction[] = []
+    const transferMap = new Map<string, { out: InventoryTransaction | null, in: InventoryTransaction | null }>()
     
     // 首先收集所有轉移記錄
-    transactionsData.data.forEach((transaction: InventoryTransaction) => {
+    transactionsResponse.data.forEach((transaction: InventoryTransaction) => {
       if (transaction.type === 'transfer_out' || transaction.type === 'transfer_in') {
         // 從 metadata 獲取 transfer_id
         let transferId = null;
@@ -79,10 +79,12 @@ export default function InventoryHistoryPage() {
             transferMap.set(transferId, { out: null, in: null })
           }
           const transfer = transferMap.get(transferId)
-          if (transaction.type === 'transfer_out') {
-            transfer.out = transaction
-          } else {
-            transfer.in = transaction
+          if (transfer) {
+            if (transaction.type === 'transfer_out') {
+              transfer.out = transaction
+            } else {
+              transfer.in = transaction
+            }
           }
         } else {
           // 沒有 transfer_id 的轉移記錄，單獨顯示
@@ -132,7 +134,7 @@ export default function InventoryHistoryPage() {
         }
         
         processed.push({
-          id: `transfer-${transferId}`,
+          id: -Math.abs(Date.now() + Math.floor(Math.random() * 10000)),
           type: 'transfer',
           quantity: Math.abs(transfer.out.quantity || 0),
           product: transfer.out.product || transfer.in.product,
@@ -144,6 +146,10 @@ export default function InventoryHistoryPage() {
           metadata: transfer.out.metadata,
           // 保留原始記錄以備需要
           _original: { out: transfer.out, in: transfer.in }
+        } as InventoryTransaction & { 
+          from_store: { id: number | null, name: string },
+          to_store: { id: number | null, name: string },
+          _original: { out: InventoryTransaction, in: InventoryTransaction }
         })
       } else {
         // 沒有配對的轉移記錄，單獨顯示
@@ -158,7 +164,7 @@ export default function InventoryHistoryPage() {
       const dateB = new Date(b.created_at || 0).getTime()
       return dateB - dateA // 降序排列
     })
-  }, [transactionsData?.data])
+  }, [transactionsResponse?.data])
 
   const handleStoreChange = (value: string) => {
     const storeId = value === "all" ? undefined : parseInt(value)
@@ -243,7 +249,7 @@ export default function InventoryHistoryPage() {
     )
   }
 
-  const pagination = transactionsData?.pagination
+  const pagination = transactionsResponse?.pagination
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -263,7 +269,7 @@ export default function InventoryHistoryPage() {
           variant="outline"
           className="flex items-center gap-2"
         >
-          <RefreshIcon className="h-4 w-4" />
+          <RefreshCw className="h-4 w-4" />
           重新整理
         </Button>
       </div>
@@ -355,7 +361,7 @@ export default function InventoryHistoryPage() {
             </div>
           ) : processedTransactions && processedTransactions.length > 0 ? (
             <div className="space-y-3">
-              {processedTransactions.map((transaction: any, index: number) => {
+              {processedTransactions.map((transaction: InventoryTransaction & { from_store?: { id: number | null, name: string }, to_store?: { id: number | null, name: string }, _original?: { out: InventoryTransaction, in: InventoryTransaction } }, index: number) => {
                 // 處理合併的轉移記錄
                 if (transaction.type === 'transfer') {
                   return (
@@ -385,23 +391,23 @@ export default function InventoryHistoryPage() {
                           
                           <div className="flex items-center gap-2 text-sm">
                             <Badge variant="outline">
-                              {transaction.from_store.name}
+                              {transaction.from_store?.name || '未知門市'}
                             </Badge>
                             <ArrowRight className="h-4 w-4 text-muted-foreground" />
                             <Badge variant="outline">
-                              {transaction.to_store.name}
+                              {transaction.to_store?.name || '未知門市'}
                             </Badge>
                           </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             {transaction._original?.out && (
                               <div>
-                                <span className="font-medium">{transaction.from_store.name} 轉出後:</span> {transaction._original.out.after_quantity ?? '未知'}
+                                <span className="font-medium">{transaction.from_store?.name || '未知門市'} 轉出後:</span> {transaction._original.out.after_quantity ?? '未知'}
                               </div>
                             )}
                             {transaction._original?.in && (
                               <div>
-                                <span className="font-medium">{transaction.to_store.name} 轉入後:</span> {transaction._original.in.after_quantity ?? '未知'}
+                                <span className="font-medium">{transaction.to_store?.name || '未知門市'} 轉入後:</span> {transaction._original.in.after_quantity ?? '未知'}
                               </div>
                             )}
                           </div>

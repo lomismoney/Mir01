@@ -36,7 +36,20 @@ class AttributeController extends Controller
      * 使用 Eager Loading 避免 N+1 查詢問題
      * 
      * @authenticated
-     * @responseFile storage/responses/attributes.index.json
+     * @queryParam filter[attribute_name] string 對屬性名稱進行篩選。 Example: 顏色
+     * @queryParam include string 可選的關聯，用逗號分隔。例如: values
+     * 
+     * @response 200 scenario="屬性列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "顏色",
+     *       "description": "商品顏色屬性",
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
      */
     public function index()
     {

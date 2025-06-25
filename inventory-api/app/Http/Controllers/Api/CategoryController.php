@@ -40,7 +40,19 @@ class CategoryController extends Controller
      * 
      * @group 分類管理
      * @authenticated
-     * @responseFile storage/responses/categories.index.json
+     * @queryParam include string 可選的關聯，用逗號分隔。例如: products
+     * 
+     * @response 200 scenario="分類列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "分類名稱",
+     *       "description": "分類描述",
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
      * 
      * @return \Illuminate\Http\JsonResponse
      */

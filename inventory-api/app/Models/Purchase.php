@@ -43,6 +43,14 @@ class Purchase extends Model
     }
 
     /**
+     * 獲取創建該進貨單的用戶
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * 獲取該進貨單的所有項目
      */
     public function items()

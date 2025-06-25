@@ -7,7 +7,7 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { useToast } from "@/components/ui/use-toast"
 import { InventoryNestedTable } from "@/components/inventory/InventoryNestedTable"
 import { ProductFilters } from "@/types/api-helpers"
-import { Category } from "@/types/category"
+import { CategoryNode } from "@/hooks/queries/useEntityQueries"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -56,9 +56,9 @@ export function InventoryManagement() {
   const { data: storesResponse, isLoading: isLoadingStores } = useStores()
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories()
 
-  // 🎯 標準化數據獲取 - 直接從 Hook 返回的結構中解構
+  // 🎯 標準化數據獲取 - 統一處理 API 回傳的結構化資料
   const stores = storesResponse?.data ?? [];
-  const categories = categoriesResponse?.data ?? [];
+  const categories = categoriesResponse ?? [];
 
   // 獲取庫存列表數據 
   const {

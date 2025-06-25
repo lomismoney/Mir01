@@ -77,14 +77,14 @@ export default function UsersPage() {
   const [newUserName, setNewUserName] = useState('');
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState<'admin' | 'viewer'>('viewer'); // 預設角色
+  const [newRole, setNewRole] = useState<'admin' | 'staff' | 'viewer'>('viewer'); // 預設角色
 
   // 編輯用戶狀態
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [editUserName, setEditUserName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editPassword, setEditPassword] = useState('');
-  const [editRole, setEditRole] = useState<'admin' | 'viewer'>('viewer');
+  const [editRole, setEditRole] = useState<'admin' | 'staff' | 'viewer'>('viewer');
 
   // 刪除確認對話框狀態
   const [userToDelete, setUserToDelete] = useState<UserItem | null>(null);
@@ -176,9 +176,11 @@ export default function UsersPage() {
   const handleEditUser = (userToEdit: UserItem) => {
     setEditingUser(userToEdit);
     setEditUserName(userToEdit.name || '');
-    setEditUsername(userToEdit.username || '');
+    // 使用 username 字段，如果不存在則使用 email 作為後備
+    // 注意：API 設計問題 - /api/users 響應可能不包含 username，但創建/更新時需要
+    setEditUsername(userToEdit.username || userToEdit.email || '');
     setEditPassword(''); // 密碼留空，表示不更改
-    setEditRole(userToEdit.role as 'admin' | 'viewer' || 'viewer');
+    setEditRole(userToEdit.role || 'viewer'); // 使用用戶實際的角色，並提供默認值
     setIsEditDialogOpen(true);
   };
 
@@ -201,7 +203,7 @@ export default function UsersPage() {
     const updateData: {
       name: string;
       username: string;
-      role: 'admin' | 'viewer';
+      role: 'admin' | 'staff' | 'viewer';
       password?: string;
     } = {
       name: editUserName,
@@ -382,11 +384,11 @@ export default function UsersPage() {
             {/* 帳號欄位 */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="username" className="text-right font-medium">
-                帳號 <span className="text-red-500">*</span>
+                用戶名 <span className="text-red-500">*</span>
               </Label>
               <Input 
                 id="username" 
-                placeholder="輸入登入帳號"
+                placeholder="輸入用戶名"
                 value={newUsername} 
                 onChange={(e) => setNewUsername(e.target.value)} 
                 className="col-span-3" 
@@ -419,7 +421,7 @@ export default function UsersPage() {
               </Label>
               <Select 
                 value={newRole} 
-                onValueChange={(value: 'admin' | 'viewer') => setNewRole(value)}
+                onValueChange={(value: 'admin' | 'staff' | 'viewer') => setNewRole(value)}
                 disabled={createUserMutation.isPending}
               >
                 <SelectTrigger className="col-span-3">
@@ -430,6 +432,12 @@ export default function UsersPage() {
                     <div className="flex items-center gap-2">
                       <Shield className="w-4 h-4" />
                       管理員
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="staff">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      員工
                     </div>
                   </SelectItem>
                   <SelectItem value="viewer">
@@ -504,11 +512,11 @@ export default function UsersPage() {
             {/* 帳號欄位 */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-username" className="text-right font-medium">
-                帳號 <span className="text-red-500">*</span>
+                用戶名 <span className="text-red-500">*</span>
               </Label>
               <Input 
                 id="edit-username" 
-                placeholder="輸入登入帳號"
+                placeholder="輸入用戶名"
                 value={editUsername} 
                 onChange={(e) => setEditUsername(e.target.value)} 
                 className="col-span-3" 
@@ -539,7 +547,7 @@ export default function UsersPage() {
               </Label>
               <Select 
                 value={editRole} 
-                onValueChange={(value: 'admin' | 'viewer') => setEditRole(value)}
+                onValueChange={(value: 'admin' | 'staff' | 'viewer') => setEditRole(value)}
                 disabled={updateUserMutation.isPending}
               >
                 <SelectTrigger className="col-span-3">
@@ -550,6 +558,12 @@ export default function UsersPage() {
                     <div className="flex items-center gap-2">
                       <Shield className="w-4 h-4" />
                       管理員
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="staff">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      員工
                     </div>
                   </SelectItem>
                   <SelectItem value="viewer">

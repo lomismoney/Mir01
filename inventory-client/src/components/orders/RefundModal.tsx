@@ -208,10 +208,16 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
       items: selectedItems,
     };
 
+    // 🎯 確保訂單存在後再執行 API 調用
+    if (!fullOrder) {
+      toast.error("訂單資料不存在，無法處理退款");
+      return;
+    }
+
     // 🎯 暫時使用 as any 處理 API 類型定義問題
     // API 文檔生成工具將 items 錯誤地定義為 string[]，實際應該是物件陣列
     createRefundMutation.mutate(
-      { orderId: fullOrder.id, data: refundData as any },
+      { orderId: fullOrder.id, data: { ...refundData, items: refundData.items as any } },
       {
         onSuccess: () => {
           toast.success("退款已成功處理");

@@ -59,7 +59,26 @@ class UserController extends Controller
      * @queryParam filter[name] string 對用戶名稱進行模糊搜尋。 Example: admin
      * @queryParam filter[username] string 對用戶帳號進行模糊搜尋。 Example: superadmin
      * @queryParam filter[search] string 對名稱或帳號進行全域模糊搜尋。 Example: admin
-     * @responseFile storage/responses/users.index.json
+     * @queryParam user_name string 按用戶名稱篩選
+     * @queryParam email string 按電子郵件篩選
+     * @queryParam per_page integer 每頁項目數量，預設 15
+     * 
+     * @response 200 scenario="成功獲取用戶列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "用戶名稱",
+     *       "email": "user@example.com",
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ],
+     *   "meta": {
+     *     "current_page": 1,
+     *     "per_page": 15,
+     *     "total": 100
+     *   }
+     * }
      */
     public function index()
     {
@@ -84,7 +103,19 @@ class UserController extends Controller
      * 權限檢查：需要通過 UserPolicy::create() 方法（僅管理員可執行）
      * 
      * @param \App\Http\Requests\Api\StoreUserRequest $request 已驗證的請求資料
-     * @responseFile status=201 storage/responses/user.show.json
+     * @bodyParam name string required 用戶名稱
+     * @bodyParam email string required 電子郵件地址
+     * @bodyParam password string required 密碼
+     * 
+     * @response 201 scenario="用戶創建成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "新用戶",
+     *     "email": "newuser@example.com",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      * @return \App\Http\Resources\Api\UserResource 新建立的用戶資源
      */
     public function store(StoreUserRequest $request)
@@ -110,7 +141,17 @@ class UserController extends Controller
      * 
      * @param \App\Models\User $user 要查看的用戶模型實例（透過路由模型綁定自動解析）
      * @urlParam user integer required 用戶的 ID。 Example: 1
-     * @responseFile storage/responses/user.show.json
+     * @urlParam id integer required 用戶的 ID。 Example: 1
+     * 
+     * @response 200 scenario="用戶詳情" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "用戶名稱",
+     *     "email": "user@example.com",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      * @return \App\Http\Resources\Api\UserResource 用戶資源
      */
     public function show(User $user)
@@ -133,7 +174,17 @@ class UserController extends Controller
      * @param \App\Http\Requests\Api\UpdateUserRequest $request 已驗證的請求資料
      * @param \App\Models\User $user 要更新的用戶模型實例（透過路由模型綁定自動解析）
      * @urlParam user integer required 用戶的 ID。 Example: 1
-     * @responseFile storage/responses/user.show.json
+     * @bodyParam name string required 用戶名稱
+     * @bodyParam email string required 電子郵件地址
+     * 
+     * @response 200 scenario="用戶更新成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "更新後的用戶名稱",
+     *     "email": "updated@example.com",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      * @return \App\Http\Resources\Api\UserResource 更新後的用戶資源
      */
     public function update(UpdateUserRequest $request, User $user)

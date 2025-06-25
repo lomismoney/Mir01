@@ -29,9 +29,21 @@ class AttributeValueController extends Controller
      * 返回指定屬性下的所有屬性值列表
      * 
      * @urlParam attribute int required 屬性 ID Example: 1
+     * @queryParam filter[value] string 對屬性值進行篩選。 Example: 紅色
+     * @queryParam include string 可選的關聯，用逗號分隔。例如: attribute
      * 
      * @authenticated
-     * @responseFile storage/responses/attribute_values.index.json
+     * @response 200 scenario="屬性值列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "value": "紅色",
+     *       "attribute_id": 1,
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
      */
     public function index(Attribute $attribute)
     {
@@ -64,7 +76,15 @@ class AttributeValueController extends Controller
      * 
      * @urlParam value int required 屬性值 ID Example: 1
      * 
-     * @response App\Http\Resources\Api\V1\AttributeValueResource
+     * @response 200 scenario="屬性值詳情" {
+     *   "data": {
+     *     "id": 1,
+     *     "value": "紅色",
+     *     "attribute_id": 1,
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *   }
+     * }
      */
     public function show(AttributeValue $value)
     {

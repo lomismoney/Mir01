@@ -91,14 +91,14 @@ export default function EditOrderPage() {
   // 🎯 直接使用 order，不需要再從 response.data 解包
   const initialData = order ? {
     customer_id: order.customer_id,
-    shipping_address: order.shipping_address,
+    shipping_address: order.shipping_address || undefined,
     payment_method: order.payment_method,
     order_source: order.order_source,
     shipping_status: order.shipping_status,
     payment_status: order.payment_status,
-    shipping_fee: parseFloat(order.shipping_fee || '0'),
-    tax: parseFloat(order.tax || '0'),
-    discount_amount: parseFloat(order.discount_amount || '0'),
+    shipping_fee: order.shipping_fee || 0,
+    tax: order.tax || 0,
+    discount_amount: order.discount_amount || 0,
     notes: order.notes || '',
     items: order.items?.map((item: any) => ({
       id: item.id,
@@ -106,7 +106,7 @@ export default function EditOrderPage() {
       is_stocked_sale: item.is_stocked_sale,
       status: item.status,
       quantity: item.quantity,
-      price: parseFloat(item.price || '0'),
+      price: item.price || 0,
       product_name: item.product_name,
       sku: item.sku,
       custom_specifications: item.custom_specifications ? 

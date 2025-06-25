@@ -11,6 +11,25 @@ import { format } from 'date-fns';
 import { ProcessedOrder } from '@/types/api-helpers';
 import { useAddOrderPayment } from '@/hooks/queries/useEntityQueries';
 
+/**
+ * 正確的付款記錄請求類型定義
+ * 
+ * 此類型覆蓋了 OpenAPI 生成的錯誤類型定義，確保類型安全：
+ * 1. amount: number - 付款金額（API 生成為 Record<string, never>，實際應為 number）
+ * 2. payment_method: string - 付款方式
+ * 3. payment_date: string - ISO 8601 格式的日期時間字符串（API 生成為 Record<string, never>，實際應為 string）
+ * 4. notes: string | undefined - 備註（可選）
+ * 
+ * 注意：我們使用受控的類型斷言來繞過 OpenAPI 生成器的類型錯誤，
+ * 這是一個臨時解決方案，直到 API 契約類型生成問題被修復。
+ */
+interface CorrectAddPaymentRequestBody {
+  amount: number;
+  payment_method: string;
+  payment_date?: string;
+  notes?: string;
+}
+
 import {
   Dialog,
   DialogContent,
@@ -163,18 +182,18 @@ export default function RecordPaymentModal({
     }
 
     try {
-      // 準備 API 請求資料
-      const paymentData = {
+      // 準備 API 請求資料 - 使用正確的類型轉換
+      const paymentData: CorrectAddPaymentRequestBody = {
         amount: data.amount,
         payment_method: data.payment_method,
-        payment_date: data.payment_date,
+        payment_date: data.payment_date?.toISOString(),
         notes: data.notes || undefined,
       };
 
-      // 調用 API（使用類型斷言處理 API 文檔生成錯誤）
+      // 調用 API - 使用類型斷言覆蓋錯誤的 OpenAPI 生成類型
       await addPayment.mutateAsync({
         orderId: order.id,
-        data: paymentData as any, // TODO: API 文檔生成錯誤，amount 應該是 number 而非 Record<string, never>
+        data: paymentData as any, // 僅此處使用 any 來覆蓋錯誤的 OpenAPI 類型
       });
 
       // 成功處理
