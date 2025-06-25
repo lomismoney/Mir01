@@ -52,6 +52,7 @@ test-*.tsx
 # auto-generated API types
 src/types/api.ts
 openapi.yaml
+openapi-backend.yaml
 debug-*.js
 debug-*.ts
 debug-*.tsx
