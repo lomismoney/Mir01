@@ -58,7 +58,8 @@ export function useProducts(filters: ProductFilters = {}) {
             if (filters.category_id !== undefined) queryParams.category_id = filters.category_id;
             if (filters.low_stock !== undefined) queryParams.low_stock = filters.low_stock;
             if (filters.out_of_stock !== undefined) queryParams.out_of_stock = filters.out_of_stock;
-            if (filters.search) queryParams.search = filters.search; // 向後相容性
+            // 修正：使用 Spatie QueryBuilder 的格式
+            if (filters.search) queryParams['filter[search]'] = filters.search;
             if (filters.page !== undefined) queryParams.page = filters.page;
             if (filters.per_page !== undefined) queryParams.per_page = filters.per_page;
 
@@ -632,7 +633,8 @@ export function useUsers(filters?: UserQueryParams) {
     
     queryFn: async ({ queryKey }) => {
       const [, queryFilters] = queryKey;
-      // 移除 include=stores 參數，降低後端負載（按照淨化行動要求）
+      // 🚀 使用傳入的 UserQueryParams，保持原有格式
+      // 注意：UserQueryParams 可能已經包含了 filter[...] 格式
       const queryParams: UserQueryParams = {
         ...(queryFilters as UserQueryParams),
       };
@@ -1103,9 +1105,26 @@ export function useCustomers(filters?: CustomerFilters) {
     queryKey: [...QUERY_KEYS.CUSTOMERS, filters],
     queryFn: async ({ queryKey }) => {
       const [, queryFilters] = queryKey;
-      const queryParams: CustomerQueryParams = {
-        ...(queryFilters as CustomerFilters),
-      };
+      // 🚀 構建符合 Spatie QueryBuilder 的查詢參數格式
+      const queryParams: Record<string, any> = {};
+      
+      // 使用 filter[...] 格式進行篩選參數
+      if ((queryFilters as CustomerFilters)?.search) {
+        queryParams['filter[search]'] = (queryFilters as CustomerFilters).search;
+      }
+      if ((queryFilters as CustomerFilters)?.start_date) {
+        queryParams['filter[start_date]'] = (queryFilters as CustomerFilters).start_date;
+      }
+      if ((queryFilters as CustomerFilters)?.end_date) {
+        queryParams['filter[end_date]'] = (queryFilters as CustomerFilters).end_date;
+      }
+      // 分頁參數不需要 filter 前綴
+      if ((queryFilters as CustomerFilters)?.page) {
+        queryParams.page = (queryFilters as CustomerFilters).page;
+      }
+      if ((queryFilters as CustomerFilters)?.per_page) {
+        queryParams.per_page = (queryFilters as CustomerFilters).per_page;
+      }
       
       const { data, error } = await apiClient.GET('/api/customers', {
         params: { query: queryParams },
@@ -1326,7 +1345,20 @@ export function useCategories(filters: { search?: string } = {}) {
     return useQuery({
         queryKey: [...QUERY_KEYS.CATEGORIES, filters],
         queryFn: async () => {
-            const { data, error } = await apiClient.GET('/api/categories');
+            // 🚀 構建符合 Spatie QueryBuilder 的查詢參數格式
+            const queryParams: Record<string, any> = {};
+            
+            // 使用 filter[...] 格式進行篩選參數
+            if (filters.search) queryParams['filter[search]'] = filters.search;
+            
+            // 固定的參數
+            queryParams.per_page = 100; // 獲取所有分類
+            
+            const { data, error } = await apiClient.GET('/api/categories', {
+                params: { 
+                    query: queryParams
+                }
+            });
             
             if (error) {
                 throw new Error('獲取分類列表失敗');
@@ -1607,11 +1639,12 @@ export function useCreateAttribute() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
         })
       ]);
       
@@ -1685,11 +1718,12 @@ export function useDeleteAttribute() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
         })
       ]);
       
@@ -1730,11 +1764,18 @@ export function useCreateAttributeValue() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
+        }),
+        // 同時失效屬性值的快取
+        queryClient.invalidateQueries({ 
+          queryKey: ['attributeValues'],
+          exact: false,
+          refetchType: 'all'
         })
       ]);
       
@@ -1767,11 +1808,18 @@ export function useUpdateAttributeValue() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
+        }),
+        // 同時失效屬性值的快取
+        queryClient.invalidateQueries({ 
+          queryKey: ['attributeValues'],
+          exact: false,
+          refetchType: 'all'
         })
       ]);
       
@@ -1802,11 +1850,18 @@ export function useDeleteAttributeValue() {
         queryClient.invalidateQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
           exact: false,
-          refetchType: 'active'
+          refetchType: 'all' // 改為 'all' 確保所有快取都更新
         }),
         queryClient.refetchQueries({ 
           queryKey: QUERY_KEYS.ATTRIBUTES,
-          exact: false
+          exact: false,
+          type: 'active' // 只重新獲取活躍的查詢
+        }),
+        // 同時失效屬性值的快取
+        queryClient.invalidateQueries({ 
+          queryKey: ['attributeValues'],
+          exact: false,
+          refetchType: 'all'
         })
       ]);
       
@@ -1816,6 +1871,66 @@ export function useDeleteAttributeValue() {
         toast.success("屬性值已成功刪除");
       }
     },
+  });
+}
+
+/**
+ * 獲取指定屬性的所有屬性值
+ * 
+ * 🎯 功能：根據屬性 ID 獲取其下的所有屬性值
+ * 
+ * 功能特性：
+ * 1. 只在 attributeId 有效時發起請求
+ * 2. 使用標準化的數據精煉廠模式
+ * 3. 返回統一的分頁結構
+ * 4. 支援錯誤處理
+ * 
+ * @param attributeId - 屬性 ID，可為 null
+ * @returns React Query 查詢結果，包含屬性值列表
+ */
+export function useAttributeValues(attributeId: number | null) {
+  return useQuery({
+    queryKey: ['attributeValues', attributeId],
+    queryFn: async () => {
+      // 只有在 attributeId 有效時才發起請求
+      if (!attributeId) return null;
+
+      const { data, error } = await apiClient.GET('/api/attributes/{attribute_id}/values', {
+        params: { path: { attribute_id: attributeId, attribute: attributeId } },
+      });
+
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '獲取屬性值失敗');
+      }
+      return data;
+    },
+    // 只有在 attributeId 為真值時，這個查詢才會被啟用
+    enabled: !!attributeId,
+    // 🎯 數據精煉廠：確保返回的是一個標準的分頁結構或空陣列
+    select: (response: any) => {
+      if (!response) return { data: [], meta: null };
+      
+      const data = response?.data?.data || response?.data || response || [];
+      const meta = response?.meta || response?.data?.meta || {
+        total: Array.isArray(data) ? data.length : 0,
+        per_page: 100,
+        current_page: 1,
+        last_page: 1
+      };
+      
+      // 確保數據的類型安全
+      const values = Array.isArray(data) ? data.map((value: any) => ({
+        id: value.id || 0,
+        value: value.value || '',
+        attribute_id: value.attribute_id || attributeId,
+        created_at: value.created_at || '',
+        updated_at: value.updated_at || ''
+      })) : [];
+      
+      return { data: values, meta };
+    },
+    staleTime: 5 * 60 * 1000, // 5 分鐘緩存
   });
 }
 
@@ -1973,16 +2088,22 @@ export function useInventoryHistory(params: {
   return useQuery({
     queryKey: ['inventory', 'history', params],
     queryFn: async () => {
+      // 🚀 構建符合 Spatie QueryBuilder 的查詢參數格式
+      const queryParams: Record<string, any> = {};
+      
+      // 使用 filter[...] 格式進行篩選參數
+      if (params.start_date) queryParams['filter[start_date]'] = params.start_date;
+      if (params.end_date) queryParams['filter[end_date]'] = params.end_date;
+      if (params.type) queryParams['filter[type]'] = params.type;
+      
+      // 分頁參數不需要 filter 前綴
+      if (params.per_page) queryParams.per_page = params.per_page;
+      if (params.page) queryParams.page = params.page;
+      
       const { data, error } = await apiClient.GET('/api/inventory/{id}/history' as any, {
         params: {
           path: { id: params.id },
-          query: {
-            start_date: params.start_date,
-            end_date: params.end_date,
-            type: params.type,
-            per_page: params.per_page,
-            page: params.page,
-          }
+          query: queryParams
         }
       } as any);
       if (error) {
@@ -2020,17 +2141,23 @@ export function useSkuInventoryHistory(params: {
   return useQuery({
     queryKey: ['inventory', 'sku-history', params],
     queryFn: async () => {
+      // 🚀 構建符合 Spatie QueryBuilder 的查詢參數格式
+      const queryParams: Record<string, any> = {};
+      
+      // 使用 filter[...] 格式進行篩選參數
+      if (params.store_id) queryParams['filter[store_id]'] = params.store_id;
+      if (params.type) queryParams['filter[type]'] = params.type;
+      if (params.start_date) queryParams['filter[start_date]'] = params.start_date;
+      if (params.end_date) queryParams['filter[end_date]'] = params.end_date;
+      
+      // 分頁參數不需要 filter 前綴
+      if (params.per_page) queryParams.per_page = params.per_page;
+      if (params.page) queryParams.page = params.page;
+      
       const { data, error } = await apiClient.GET('/api/inventory/sku/{sku}/history' as any, {
         params: {
           path: { sku: params.sku },
-          query: {
-            store_id: params.store_id,
-            type: params.type,
-            start_date: params.start_date,
-            end_date: params.end_date,
-            per_page: params.per_page,
-            page: params.page,
-          }
+          query: queryParams
         }
       } as any);
       if (error) {
@@ -2061,10 +2188,24 @@ export function useSkuInventoryHistory(params: {
 export function useAllInventoryTransactions(filters: InventoryTransactionFilters = {}) {
   return useQuery({
     queryKey: ['inventory', 'transactions', filters],
-    queryFn: async (): Promise<InventoryTransactionsResponse> => {
+    queryFn: async () => {
+      // 🚀 構建符合 Spatie QueryBuilder 的查詢參數格式
+      const queryParams: Record<string, any> = {};
+      
+      // 使用 filter[...] 格式進行篩選參數
+      if (filters.product_name) queryParams['filter[product_name]'] = filters.product_name;
+      if (filters.store_id) queryParams['filter[store_id]'] = filters.store_id;
+      if (filters.type) queryParams['filter[type]'] = filters.type;
+      if (filters.start_date) queryParams['filter[start_date]'] = filters.start_date;
+      if (filters.end_date) queryParams['filter[end_date]'] = filters.end_date;
+      
+      // 分頁參數不需要 filter 前綴
+      if (filters.per_page) queryParams.per_page = filters.per_page;
+      if (filters.page) queryParams.page = filters.page;
+      
       const { data, error } = await apiClient.GET('/api/inventory/transactions' as any, {
         params: {
-          query: filters
+          query: queryParams
         }
       } as any);
       if (error) {
@@ -2109,9 +2250,24 @@ export function useInventoryTransfers(params: {
 } = {}) {
   return useQuery({
     queryKey: ['inventory', 'transfers', params],
-    queryFn: async (): Promise<InventoryTransfersResponse> => {
+    queryFn: async () => {
+      // 🚀 構建符合 Spatie QueryBuilder 的查詢參數格式
+      const queryParams: Record<string, any> = {};
+      
+      // 使用 filter[...] 格式進行篩選參數
+      if (params.from_store_id) queryParams['filter[from_store_id]'] = params.from_store_id;
+      if (params.to_store_id) queryParams['filter[to_store_id]'] = params.to_store_id;
+      if (params.status) queryParams['filter[status]'] = params.status;
+      if (params.start_date) queryParams['filter[start_date]'] = params.start_date;
+      if (params.end_date) queryParams['filter[end_date]'] = params.end_date;
+      if (params.product_name) queryParams['filter[product_name]'] = params.product_name;
+      
+      // 分頁參數不需要 filter 前綴
+      if (params.per_page) queryParams.per_page = params.per_page;
+      if (params.page) queryParams.page = params.page;
+      
       const { data, error } = await apiClient.GET('/api/inventory/transfers', {
-        params: { query: params },
+        params: { query: queryParams },
       });
       if (error) {
         throw new Error('獲取庫存轉移列表失敗');
@@ -2976,18 +3132,23 @@ export function useOrders(filters: {
     // 遵循我們已建立的、扁平化的查詢鍵結構，包含分頁參數
     queryKey: [...QUERY_KEYS.ORDERS, filters],
     queryFn: async () => {
-      // 🚀 升級版 API 調用，傳遞完整的篩選和分頁參數
+      // 🚀 構建符合 Spatie QueryBuilder 的查詢參數格式
+      const queryParams: Record<string, any> = {};
+      
+      // 使用 filter[...] 格式進行篩選參數
+      if (filters.search) queryParams['filter[search]'] = filters.search;
+      if (filters.shipping_status) queryParams['filter[shipping_status]'] = filters.shipping_status;
+      if (filters.payment_status) queryParams['filter[payment_status]'] = filters.payment_status;
+      if (filters.start_date) queryParams['filter[start_date]'] = filters.start_date;
+      if (filters.end_date) queryParams['filter[end_date]'] = filters.end_date;
+      
+      // 分頁參數不需要 filter 前綴
+      if (filters.page) queryParams.page = filters.page;
+      if (filters.per_page) queryParams.per_page = filters.per_page;
+      
       const { data, error } = await apiClient.GET("/api/orders", {
         params: {
-          query: {
-            search: filters.search,
-            shipping_status: filters.shipping_status,
-            payment_status: filters.payment_status,
-            start_date: filters.start_date,
-            end_date: filters.end_date,
-            page: filters.page,             // 🎯 新增
-            per_page: filters.per_page,     // 🎯 新增
-          },
+          query: queryParams,
         },
       });
       if (error) throw error;

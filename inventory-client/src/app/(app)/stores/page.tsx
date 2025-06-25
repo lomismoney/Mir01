@@ -5,32 +5,37 @@ import { toast } from "sonner";
 import { 
   Store as StoreIcon, 
   PlusSquare, 
-  Search, 
-  MoreHorizontal, 
   Edit, 
   Trash
 } from "lucide-react";
-import { useStores, useCreateStore, useUpdateStore, useDeleteStore, Store } from "@/hooks/useStores";
+import { useStores, useCreateStore, useUpdateStore, useDeleteStore } from "@/hooks/queries/useEntityQueries";
 import { useSession } from "next-auth/react";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { createStoresColumns, StoreActions } from "@/components/stores/stores-columns";
+import { StoresDataTable } from "@/components/stores/stores-data-table";
+
+// Store 類型定義
+type Store = {
+  id: number;
+  name: string;
+  address: string | null;
+  phone?: string | null;
+  status?: string;
+  created_at: string;
+  updated_at: string;
+  inventory_count?: number;
+  users_count?: number;
+};
 
 /**
  * 分店管理頁面
+ * 
+ * 使用與用戶管理相同的 DataTable 架構，提供統一的使用體驗
  */
 export default function StoresPage() {
   const { data: session } = useSession();
@@ -38,7 +43,7 @@ export default function StoresPage() {
   const isAdmin = user?.isAdmin || false;
   
   // API Hooks
-  const { data: storesData, isLoading } = useStores();
+  const { data: storesResponse, isLoading } = useStores();
   const createStoreMutation = useCreateStore();
   const updateStoreMutation = useUpdateStore();
   const deleteStoreMutation = useDeleteStore();
@@ -75,7 +80,7 @@ export default function StoresPage() {
     try {
       await createStoreMutation.mutateAsync({
         name: newStoreName.trim(),
-        address: newStoreAddress.trim() || null
+        address: newStoreAddress.trim() || undefined
       });
       
       toast.success('分店新增成功');
@@ -111,7 +116,7 @@ export default function StoresPage() {
         id: editingStore.id,
         data: {
           name: editStoreName.trim(),
-          address: editStoreAddress.trim() || null
+          address: editStoreAddress.trim() || undefined
         }
       });
       
@@ -142,6 +147,7 @@ export default function StoresPage() {
       await deleteStoreMutation.mutateAsync(storeToDelete.id);
       toast.success('分店刪除成功');
       setIsDeleteDialogOpen(false);
+      setStoreToDelete(null);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : '刪除失敗';
       toast.error(`刪除失敗: ${errorMessage}`);
@@ -165,19 +171,17 @@ export default function StoresPage() {
     setEditStoreAddress('');
   };
   
-  // 處理載入狀態和錯誤
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="flex justify-center">
-          <p>載入中...</p>
-        </div>
-      </div>
-    );
-  }
+  // 從響應中提取 stores 數據
+  const stores = storesResponse?.data || [];
   
-  // 確保stores是一個數組
-  const stores = storesData?.data ?? [];
+  // 分店動作定義
+  const storeActions: StoreActions = {
+    onEdit: handleEditStore,
+    onDelete: handleDeleteStore,
+  };
+
+  // 創建表格欄位定義
+  const columns = createStoresColumns(storeActions, isAdmin);
   
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -187,75 +191,18 @@ export default function StoresPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">分店管理</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">管理系統中的分店資料</p>
         </div>
-        
-        {isAdmin && (
-          <Button onClick={handleAddStore}>
-            <PlusSquare className="mr-2 h-4 w-4" />
-            新增分店
-          </Button>
-        )}
       </div>
       
-      {/* 分店列表 */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">ID</TableHead>
-                <TableHead>名稱</TableHead>
-                <TableHead className="max-w-[300px]">地址</TableHead>
-                <TableHead>建立時間</TableHead>
-                {isAdmin && <TableHead className="w-[80px] text-right">操作</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Array.isArray(stores) && stores.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={isAdmin ? 5 : 4} className="text-center py-8 text-gray-500">
-                    尚無分店資料
-                  </TableCell>
-                </TableRow>
-              ) : (
-                Array.isArray(stores) && stores.map((storeData) => {
-                  const store = storeData as Store;
-                  return (
-                  <TableRow key={store.id}>
-                    <TableCell>{store.id}</TableCell>
-                    <TableCell className="font-medium">{store.name}</TableCell>
-                    <TableCell className="max-w-[300px] truncate">{store.address || '-'}</TableCell>
-                    <TableCell>
-                      {new Date(store.created_at).toLocaleDateString('zh-TW')}
-                    </TableCell>
-                    {isAdmin && (
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditStore(store)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              編輯
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteStore(store)}>
-                              <Trash className="mr-2 h-4 w-4" />
-                              刪除
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* 分店資料表格 */}
+      <div className="space-y-4">
+        <StoresDataTable
+          columns={columns}
+          data={stores}
+          isLoading={isLoading}
+          showAddButton={isAdmin}
+          onAddStore={handleAddStore}
+        />
+      </div>
       
       {/* 新增分店對話框 */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -296,7 +243,7 @@ export default function StoresPage() {
             </div>
           </div>
           
-          <div className="flex justify-end gap-2">
+          <DialogFooter>
             <Button 
               variant="outline" 
               onClick={() => {
@@ -313,7 +260,7 @@ export default function StoresPage() {
             >
               {createStoreMutation.isPending ? '處理中...' : '確定新增'}
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       
@@ -358,7 +305,7 @@ export default function StoresPage() {
             </div>
           )}
           
-          <div className="flex justify-end gap-2">
+          <DialogFooter>
             <Button 
               variant="outline" 
               onClick={() => {
@@ -375,7 +322,7 @@ export default function StoresPage() {
             >
               {updateStoreMutation.isPending ? '處理中...' : '儲存變更'}
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       
@@ -413,4 +360,4 @@ export default function StoresPage() {
       </AlertDialog>
     </div>
   );
-} 
+}                           

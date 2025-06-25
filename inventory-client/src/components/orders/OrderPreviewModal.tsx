@@ -152,10 +152,10 @@ export function OrderPreviewModal({ orderId, open, onOpenChange, onShip, onRecor
                 <CardContent>
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>品項 (SKU)</TableHead>
-                        <TableHead className="text-center">數量</TableHead>
-                        <TableHead className="text-right">小計</TableHead>
+                      <TableRow className="border-b hover:bg-transparent">
+                        <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">品項 (SKU)</TableHead>
+                        <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">數量</TableHead>
+                        <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">小計</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

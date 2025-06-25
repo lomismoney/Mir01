@@ -103,16 +103,16 @@ export function InventoryListTable({
     <div className="rounded-md border">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">SKU</TableHead>
-            <TableHead>產品名稱</TableHead>
-            <TableHead className="w-[120px]">所在分店</TableHead>
-            <TableHead className="text-center">數量</TableHead>
-            <TableHead className="text-right">售價</TableHead>
-            <TableHead className="text-right">平均成本</TableHead>
-            <TableHead className="text-right">利潤率</TableHead>
-            <TableHead className="text-center">狀態</TableHead>
-            <TableHead className="text-right">操作</TableHead>
+          <TableRow className="border-b hover:bg-transparent">
+            <TableHead className="w-[100px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">SKU</TableHead>
+            <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">產品名稱</TableHead>
+            <TableHead className="w-[120px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">所在分店</TableHead>
+            <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">數量</TableHead>
+            <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">售價</TableHead>
+            <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">平均成本</TableHead>
+            <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">利潤率</TableHead>
+            <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">狀態</TableHead>
+            <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

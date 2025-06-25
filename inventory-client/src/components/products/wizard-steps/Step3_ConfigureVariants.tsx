@@ -350,12 +350,12 @@ export function Step3_ConfigureVariants({ formData, updateFormData }: Step3Props
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    {formData.specifications.isVariable && (
-                      <TableHead>變體組合</TableHead>
-                    )}
-                    <TableHead>SKU 編號</TableHead>
-                    <TableHead>價格 (NT$)</TableHead>
+                  <TableRow className="border-b hover:bg-transparent">
+                    {/* 變體組合 */}
+                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">變體組合</TableHead>
+                    {/* SKU */}
+                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">SKU 編號</TableHead>
+                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">價格 (NT$)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

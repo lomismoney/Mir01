@@ -343,8 +343,8 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
                   <div className="rounded-md border">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-muted/50">
-                          <TableHead className="w-12">
+                        <TableRow className="border-b hover:bg-transparent">
+                          <TableHead className="w-12 h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                             <Checkbox 
                               checked={fields.length > 0 && fields.every((_, index) => watchedItems[index]?.is_selected)}
                               onCheckedChange={(checked) => {
@@ -354,11 +354,11 @@ export default function RefundModal({ order, open, onOpenChange }: RefundModalPr
                               }}
                             />
                           </TableHead>
-                          <TableHead>品項資訊</TableHead>
-                          <TableHead className="text-center">已購數量</TableHead>
-                          <TableHead className="text-center">退貨數量</TableHead>
-                          <TableHead className="text-right">單價</TableHead>
-                          <TableHead className="text-right">小計</TableHead>
+                          <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">品項資訊</TableHead>
+                          <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">已購數量</TableHead>
+                          <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">退貨數量</TableHead>
+                          <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">單價</TableHead>
+                          <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">小計</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, memo, useEffect } from 'react';
-import { useAttributes, useCreateAttribute, useUpdateAttribute, useDeleteAttribute, useCreateAttributeValue, useUpdateAttributeValue, useDeleteAttributeValue } from '@/hooks/queries/useEntityQueries';
+import { useAttributes, useCreateAttribute, useUpdateAttribute, useDeleteAttribute, useCreateAttributeValue, useUpdateAttributeValue, useDeleteAttributeValue, useAttributeValues } from '@/hooks/queries/useEntityQueries';
 import { useAdminAuth } from '@/hooks/use-admin-auth';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Button } from '@/components/ui/button';
@@ -17,20 +17,22 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, Plus, Search, Trash2, X, Edit, MoreVertical, Package } from 'lucide-react';
+import { Loader2, Plus, Search, Trash2, X, Edit, MoreVertical, Package, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Attribute } from '@/types/attribute';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { AttributeValuesManager } from './AttributeValuesManager';
 
 /**
- * 規格管理客戶端頁面組件（緊湊卡片版本）
+ * 規格管理客戶端頁面組件（雙面板版本）
  * 
  * 設計理念：
- * 1. 使用卡片網格佈局，最大化空間利用
- * 2. 規格值直接展示，無需展開操作
- * 3. 行內編輯，減少彈窗操作
- * 4. 緊湊的視覺設計，減少留白
+ * 1. 左側面板：屬性導航列表
+ * 2. 右側面板：選中屬性的值管理
+ * 3. 可調整面板寬度
+ * 4. 保留原有的所有功能
  */
 const AttributesClientPage = () => {
   const { user, isLoading, isAuthorized } = useAdminAuth();
@@ -38,6 +40,9 @@ const AttributesClientPage = () => {
   // 搜索狀態管理 - 使用防抖優化
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  
+  // 選中的屬性
+  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null);
   
   const { data: hookResponse, isLoading: isAttributesLoading, error } = useAttributes();
   
@@ -57,13 +62,12 @@ const AttributesClientPage = () => {
   
   // 表單資料狀態
   const [attributeName, setAttributeName] = useState('');
-  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null);
   const [selectedValueId, setSelectedValueId] = useState<number | null>(null);
   const [selectedValueName, setSelectedValueName] = useState<string>('');
   
-  // 規格值新增狀態 - 為每個規格維護獨立的新增狀態
-  const [newValueInputs, setNewValueInputs] = useState<{ [key: number]: string }>({});
-  const [showValueInput, setShowValueInput] = useState<{ [key: number]: boolean }>({});
+  // 規格值新增狀態
+  const [newValueInput, setNewValueInput] = useState('');
+  const [showValueInput, setShowValueInput] = useState(false);
 
   /**
    * 🎯 標準化數據獲取 - 直接從 Hook 返回的結構中解構
@@ -76,8 +80,7 @@ const AttributesClientPage = () => {
    * 根據搜索條件過濾規格
    */
   const filteredAttributes = attributes.filter(attr => 
-    attr.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-    attr.values?.some(val => val.value.toLowerCase().includes(debouncedSearchQuery.toLowerCase()))
+    attr.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
   );
 
   /**
@@ -112,7 +115,6 @@ const AttributesClientPage = () => {
       });
       toast.success('規格更新成功！');
       setAttributeName('');
-      setSelectedAttribute(null);
       setIsEditDialogOpen(false);
     } catch (error) {
       toast.error('更新規格失敗');
@@ -142,7 +144,6 @@ const AttributesClientPage = () => {
    * 開始編輯規格
    */
   const startEditAttribute = (attribute: Attribute) => {
-    setSelectedAttribute(attribute);
     setAttributeName(attribute.name);
     setIsEditDialogOpen(true);
   };
@@ -151,26 +152,23 @@ const AttributesClientPage = () => {
    * 開始刪除規格
    */
   const startDeleteAttribute = (attribute: Attribute) => {
-    setSelectedAttribute(attribute);
     setIsDeleteDialogOpen(true);
   };
 
   /**
    * 處理新增規格值
    */
-  const handleCreateValue = async (attributeId: number) => {
-    const newValue = newValueInputs[attributeId];
-    if (!newValue?.trim()) return;
+  const handleCreateValue = async () => {
+    if (!selectedAttribute || !newValueInput.trim()) return;
 
     try {
       await createValueMutation.mutateAsync({
-        attributeId: attributeId,
-        body: { value: newValue.trim() }
+        attributeId: selectedAttribute.id,
+        body: { value: newValueInput.trim() }
       });
       toast.success('規格值新增成功！');
-      // 清空該規格的輸入框
-      setNewValueInputs(prev => ({ ...prev, [attributeId]: '' }));
-      setShowValueInput(prev => ({ ...prev, [attributeId]: false }));
+      setNewValueInput('');
+      setShowValueInput(false);
     } catch (error) {
       toast.error('新增規格值失敗');
     }
@@ -202,24 +200,6 @@ const AttributesClientPage = () => {
     setIsValueDeleteDialogOpen(true);
   };
 
-  /**
-   * 更新規格值輸入框的值
-   */
-  const updateNewValueInput = (attributeId: number, value: string) => {
-    setNewValueInputs(prev => ({ ...prev, [attributeId]: value }));
-  };
-
-  /**
-   * 切換新增值輸入框顯示狀態
-   */
-  const toggleValueInput = (attributeId: number) => {
-    setShowValueInput(prev => ({ ...prev, [attributeId]: !prev[attributeId] }));
-    if (!showValueInput[attributeId]) {
-      // 如果要顯示輸入框，清空之前的輸入
-      setNewValueInputs(prev => ({ ...prev, [attributeId]: '' }));
-    }
-  };
-
   // 權限檢查
   if (isLoading) {
     return (
@@ -245,11 +225,11 @@ const AttributesClientPage = () => {
 
   return (
     <div className="space-y-4">
-      {/* 頁面標題和操作區 - 更緊湊 */}
+      {/* 頁面標題和操作區 */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">規格管理</h1>
-          <p className="text-sm text-muted-foreground">管理商品規格屬性</p>
+          <p className="text-sm text-muted-foreground">管理商品規格屬性和規格值</p>
         </div>
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -303,208 +283,104 @@ const AttributesClientPage = () => {
         </Dialog>
       </div>
 
-      {/* 搜索區 - 更緊湊 */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-          placeholder="搜索規格名稱或規格值..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 h-9"
-            />
-          </div>
-
-      {/* 規格列表 - 緊湊卡片網格 */}
-          {isAttributesLoading ? (
-        <div className="flex justify-center items-center min-h-[300px]">
-              <Loader2 className="h-8 w-8 animate-spin" />
+      {/* 雙面板佈局 */}
+      <div className="h-[calc(100vh-10rem)] rounded-lg border flex">
+        {/* --- 左側面板：屬性導航欄 --- */}
+        <aside className="w-1/4 min-w-[240px] max-w-[360px] border-r bg-muted/10">
+          <div className="flex h-full flex-col">
+            {/* 側邊欄標頭 */}
+            <div className="p-4 pb-2">
+              <h2 className="text-lg font-semibold">規格類型</h2>
             </div>
-          ) : filteredAttributes.length === 0 ? (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center">
-              {searchQuery ? (
-                <>
-                  <Search className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                  <h3 className="font-semibold mb-1">找不到符合的規格</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    請嘗試使用不同的搜索關鍵字
+            
+            {/* 搜索區 */}
+            <div className="px-4 pb-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="搜索規格..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-9 bg-background"
+                />
+              </div>
+            </div>
+            
+            {/* 內容區 */}
+            <ScrollArea className="flex-1 px-2">
+              <div className="p-2">
+              
+              {/* 規格列表 - 符合 shadcn 規範 */}
+              {isAttributesLoading ? (
+                <div className="flex justify-center items-center min-h-[200px]">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : filteredAttributes.length === 0 ? (
+                <div className="text-center py-8">
+                  <Package className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {searchQuery ? '找不到符合的規格' : '尚未建立任何規格'}
                   </p>
-                  <Button variant="outline" size="sm" onClick={() => setSearchQuery('')}>
-                    清除搜索
-                  </Button>
-                </>
+                </div>
               ) : (
-                <>
-                  <Package className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                  <h3 className="font-semibold mb-1">尚未建立任何規格</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    規格用於定義商品的不同變體
-              </p>
-                  <Button size="sm" onClick={() => setIsCreateDialogOpen(true)}>
-                    <Plus className="mr-1.5 h-4 w-4" />
-                    新增第一個規格
-              </Button>
-                </>
+                <nav className="space-y-1" role="navigation" aria-label="規格類型列表">
+                  {filteredAttributes.map((attribute) => (
+                    <Button
+                      key={attribute.id}
+                      variant="ghost"
+                      onClick={() => setSelectedAttribute(attribute)}
+                      className={cn(
+                        "w-full justify-start px-3 py-2 h-auto font-normal",
+                        selectedAttribute?.id === attribute.id && "bg-muted hover:bg-muted"
+                      )}
+                      aria-current={selectedAttribute?.id === attribute.id ? "page" : undefined}
+                    >
+                      <Tag className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-left">{attribute.name}</span>
+                      <Badge 
+                        variant={selectedAttribute?.id === attribute.id ? "default" : "secondary"} 
+                        className="ml-auto text-xs"
+                      >
+                        {attribute.values?.length || 0}
+                      </Badge>
+                    </Button>
+                  ))}
+                </nav>
+              )}
+              </div>
+            </ScrollArea>
+          </div>
+        </aside>
+
+        {/* --- 右側面板：規格值工作區 --- */}
+        <main className="flex-1 bg-background">
+          <ScrollArea className="h-full">
+            <div className="p-6">
+              {selectedAttribute ? (
+                <AttributeValuesManager 
+                  attribute={selectedAttribute}
+                  onEdit={() => startEditAttribute(selectedAttribute)}
+                  onDelete={() => startDeleteAttribute(selectedAttribute)}
+                  onCreateValue={handleCreateValue}
+                  onDeleteValue={startDeleteValue}
+                  newValueInput={newValueInput}
+                  setNewValueInput={setNewValueInput}
+                  showValueInput={showValueInput}
+                  setShowValueInput={setShowValueInput}
+                  createValuePending={createValueMutation.isPending}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <div className="text-center">
+                    <Tag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">請從左側選擇一個規格類型進行管理</p>
+                  </div>
+                </div>
               )}
             </div>
-          </CardContent>
-        </Card>
-          ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {filteredAttributes.map((attribute) => (
-            <Card key={attribute.id} className="relative group">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-base font-medium">
-                      {attribute.name}
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {attribute.values?.length || 0} 個規格值
-                    </p>
-                      </div>
-                  
-                  <AlertDialog open={isDeleteDialogOpen && selectedAttribute?.id === attribute.id} onOpenChange={(open) => {
-                    if (!open) {
-                      setIsDeleteDialogOpen(false);
-                      setSelectedAttribute(null);
-                    }
-                  }}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-7 w-7 -mt-1 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <MoreVertical className="h-3.5 w-3.5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => startEditAttribute(attribute)}>
-                          <Edit className="mr-2 h-3.5 w-3.5" />
-                          編輯名稱
-                        </DropdownMenuItem>
-                        
-                        <DropdownMenuSeparator />
-                        
-                          <DropdownMenuItem 
-                          className="text-destructive focus:text-destructive"
-                          onClick={() => startDeleteAttribute(attribute)}
-                          >
-                          <Trash2 className="mr-2 h-3.5 w-3.5" />
-                          刪除規格
-                          </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>確認刪除規格</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          您確定要刪除規格「{selectedAttribute?.name}」嗎？
-                          此操作將同時刪除該規格下的所有規格值，且無法復原。
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>取消</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={handleDeleteAttribute}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          disabled={deleteAttributeMutation.isPending}
-                        >
-                          {deleteAttributeMutation.isPending && (
-                            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                          )}
-                          確認刪除
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="pt-0">
-                {/* 規格值列表 */}
-                <div className="space-y-2">
-                  {attribute.values && attribute.values.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {attribute.values.map((value) => (
-                        <Badge 
-                          key={value.id} 
-                          variant="secondary" 
-                          className="text-xs h-6 px-2 pr-1"
-                        >
-                          <span>{value.value}</span>
-                          <button
-                            onClick={() => startDeleteValue(value.id, value.value)} 
-                            className="ml-1 p-0.5 hover:bg-muted-foreground/20 rounded-full transition-colors"
-                          >
-                            <X className="h-2.5 w-2.5" />
-                          </button>
-                        </Badge>
-                      ))}
-                  </div>
-                  )}
-                  
-                  {/* 新增值按鈕或輸入框 */}
-                  {showValueInput[attribute.id] ? (
-                    <div className="flex gap-1.5">
-                        <Input
-                        placeholder="輸入新值"
-                          value={newValueInputs[attribute.id] || ''}
-                          onChange={(e) => updateNewValueInput(attribute.id, e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleCreateValue(attribute.id);
-                            }
-                          if (e.key === 'Escape') {
-                            toggleValueInput(attribute.id);
-                          }
-                          }}
-                        className="h-7 text-sm"
-                        autoFocus
-                        />
-                        <Button 
-                          onClick={() => handleCreateValue(attribute.id)}
-                          disabled={createValueMutation.isPending || !newValueInputs[attribute.id]?.trim()}
-                          size="sm"
-                        className="h-7 px-2"
-                        >
-                          {createValueMutation.isPending ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                          <Plus className="h-3.5 w-3.5" />
-                          )}
-                        </Button>
-                      <Button
-                        onClick={() => toggleValueInput(attribute.id)}
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2"
-                              >
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                        </div>
-                      ) : (
-                    <Button
-                      onClick={() => toggleValueInput(attribute.id)}
-                      variant="ghost"
-                      size="sm"
-                      className="w-full h-7 text-xs justify-start px-2 hover:bg-muted"
-                    >
-                      <Plus className="mr-1 h-3 w-3" />
-                      新增值
-                    </Button>
-                      )}
-                    </div>
-        </CardContent>
-      </Card>
-          ))}
-        </div>
-      )}
+          </ScrollArea>
+        </main>
+      </div>
 
       {/* 編輯規格對話框 */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -532,7 +408,6 @@ const AttributesClientPage = () => {
                 onClick={() => {
                   setIsEditDialogOpen(false);
                   setAttributeName('');
-                  setSelectedAttribute(null);
                 }}
               >
                 取消
@@ -545,12 +420,38 @@ const AttributesClientPage = () => {
                 {updateAttributeMutation.isPending && (
                   <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
                 )}
-                更新
+                保存
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* 刪除規格確認對話框 */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認刪除規格</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要刪除規格「{selectedAttribute?.name}」嗎？
+              此操作將同時刪除該規格下的所有規格值，且無法復原。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAttribute}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteAttributeMutation.isPending}
+            >
+              {deleteAttributeMutation.isPending && (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              )}
+              確認刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* 刪除規格值確認對話框 */}
       <AlertDialog open={isValueDeleteDialogOpen} onOpenChange={setIsValueDeleteDialogOpen}>
@@ -558,16 +459,12 @@ const AttributesClientPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>確認刪除規格值</AlertDialogTitle>
             <AlertDialogDescription>
-              您確定要刪除規格值「{selectedValueName}」嗎？此操作無法復原。
+              您確定要刪除規格值「{selectedValueName}」嗎？
+              此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setSelectedValueId(null);
-              setSelectedValueName('');
-            }}>
-              取消
-            </AlertDialogCancel>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteValue}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -585,4 +482,4 @@ const AttributesClientPage = () => {
   );
 };
 
-export default memo(AttributesClientPage); 
+export default AttributesClientPage; 

@@ -26,6 +26,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductItem, ProductVariant } from "@/types/api-helpers";
 import { InventoryModificationDialog } from "./InventoryModificationDialog";
+import Image from 'next/image'
+import { ImageIcon } from 'lucide-react'
+import { useDebounce } from '@/hooks/use-debounce'
 
 /**
  * SKU 庫存狀態類型
@@ -210,13 +213,13 @@ export function InventoryNestedTable({
     <div className="rounded-md border">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="w-[50px] p-4"></TableHead>
-            <TableHead className="w-[300px] p-4">產品名稱</TableHead>
-            <TableHead className="text-right w-[120px] p-4">總庫存</TableHead>
-            <TableHead className="text-center w-[120px] p-4">規格數量</TableHead>
-            <TableHead className="text-center w-[120px] p-4">狀態</TableHead>
-            <TableHead className="text-center w-[120px] p-4">操作</TableHead>
+          <TableRow className="border-b hover:bg-transparent">
+            <TableHead className="w-[50px] p-4 h-12 text-left align-middle font-medium text-muted-foreground"></TableHead>
+            <TableHead className="w-[300px] p-4 h-12 text-left align-middle font-medium text-muted-foreground">產品名稱</TableHead>
+            <TableHead className="text-right w-[120px] p-4 h-12 align-middle font-medium text-muted-foreground">總庫存</TableHead>
+            <TableHead className="text-center w-[120px] p-4 h-12 align-middle font-medium text-muted-foreground">規格數量</TableHead>
+            <TableHead className="text-center w-[120px] p-4 h-12 align-middle font-medium text-muted-foreground">狀態</TableHead>
+            <TableHead className="text-center w-[120px] p-4 h-12 align-middle font-medium text-muted-foreground">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -273,17 +276,26 @@ export function InventoryNestedTable({
                       <span className="sr-only">展開產品變體</span>
                     </Button>
                   </TableCell>
-                  <TableCell className="font-medium p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                        <Package className="h-5 w-5 text-muted-foreground" />
+                  <TableCell className="font-medium text-nowrap">
+                    <div className="flex items-center gap-3">
+                      {/* 商品圖片 */}
+                      <div className="relative h-12 w-12 overflow-hidden rounded-md border bg-muted">
+                        {spu.image_urls?.thumb || spu.image_urls?.medium || spu.image_urls?.original ? (
+                          <Image
+                            src={spu.image_urls?.thumb || spu.image_urls?.medium || spu.image_urls?.original || ''}
+                            alt={spu.name || ''}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                            <ImageIcon className="h-6 w-6" />
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <div className="font-semibold">{spu.name || '未命名產品'}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {spu.category?.name || '未分類'}
-                        </div>
-                      </div>
+                      {/* 商品名稱 */}
+                      <span>{spu.name}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-mono font-medium p-4">
@@ -332,15 +344,15 @@ export function InventoryNestedTable({
                         <div className="rounded-lg border border-border/50 bg-card overflow-hidden">
                           <Table>
                             <TableHeader>
-                              <TableRow>
-                                <TableHead className="text-xs w-[120px] p-3">SKU 編號</TableHead>
-                                <TableHead className="text-xs w-[200px] p-3">規格屬性</TableHead>
-                                <TableHead className="text-xs text-right w-[100px] p-3">總庫存</TableHead>
-                                <TableHead className="text-xs text-right w-[100px] p-3">低庫存閾值</TableHead>
-                                <TableHead className="text-xs text-right w-[120px] p-3">售價</TableHead>
-                                <TableHead className="text-xs text-right w-[120px] p-3">平均成本</TableHead>
-                                <TableHead className="text-xs text-center w-[100px] p-3">狀態</TableHead>
-                                <TableHead className="text-xs text-center w-[100px] p-3">操作</TableHead>
+                              <TableRow className="border-b hover:bg-transparent">
+                                <TableHead className="text-xs w-[120px] p-3 h-12 text-left align-middle font-medium text-muted-foreground">SKU 編號</TableHead>
+                                <TableHead className="text-xs w-[200px] p-3 h-12 text-left align-middle font-medium text-muted-foreground">規格屬性</TableHead>
+                                <TableHead className="text-xs text-right w-[100px] p-3 h-12 align-middle font-medium text-muted-foreground">總庫存</TableHead>
+                                <TableHead className="text-xs text-right w-[100px] p-3 h-12 align-middle font-medium text-muted-foreground">低庫存閾值</TableHead>
+                                <TableHead className="text-xs text-right w-[120px] p-3 h-12 align-middle font-medium text-muted-foreground">售價</TableHead>
+                                <TableHead className="text-xs text-right w-[120px] p-3 h-12 align-middle font-medium text-muted-foreground">平均成本</TableHead>
+                                <TableHead className="text-xs text-center w-[100px] p-3 h-12 align-middle font-medium text-muted-foreground">狀態</TableHead>
+                                <TableHead className="text-xs text-center w-[100px] p-3 h-12 align-middle font-medium text-muted-foreground">操作</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>

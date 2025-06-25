@@ -12,7 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, ImageIcon } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import Image from 'next/image';
 import { CustomerSelector } from './CustomerSelector';
 import { CustomerForm } from '@/components/customers/CustomerForm';
 
@@ -44,6 +46,7 @@ const orderFormSchema = z.object({
     product_name: z.string().min(1, '商品名稱為必填'),
     sku: z.string().min(1, 'SKU 為必填'),
     custom_specifications: z.record(z.string()).optional(), // 訂製規格
+    imageUrl: z.string().optional().nullable(), // 🎯 商品圖片 URL
     // ... 其他項目字段
   })).min(1, '訂單至少需要一個品項'),
 });
@@ -128,6 +131,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
             : variant.specifications || `商品 ${variant.sku}`, // 確保永遠有值
           sku: variant.sku || `SKU-${variant.id}`, // 確保永遠有值
           custom_specifications: undefined,
+          imageUrl: variant.imageUrl || null, // 🎯 加入商品圖片 URL
         });
       }
     });
@@ -149,6 +153,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
       product_name: item.custom_product_name, // 使用訂製名稱
       sku: item.sku,
       custom_specifications: item.custom_specifications, // 儲存訂製規格
+      imageUrl: item.imageUrl || null, // 🎯 訂製商品預設沒有圖片
     });
     // 關閉選擇器 Modal
     setIsSelectorOpen(false);
@@ -213,6 +218,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
           </div>
 
           {/* --- 🎯 新的雙欄式網格佈局 --- */}
+          <div className="space-y-6">
           <div className="grid gap-6 md:grid-cols-3">
 
             {/* === 左側主欄 (互動核心) === */}
@@ -237,61 +243,60 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                 </CardHeader>
                 <CardContent>
                   {fields.length > 0 ? (
-                    <>
-                      {/* === 網格化表頭 === */}
-                      <div className="grid grid-cols-12 gap-x-4 border-b pb-2 text-sm font-medium text-muted-foreground">
-                        <div className="col-span-5">商品名稱</div>
-                        <div className="col-span-2">SKU</div>
-                        <div className="col-span-2 text-right">單價</div>
-                        <div className="col-span-1 text-center">數量</div>
-                        <div className="col-span-1 text-right">小計</div>
-                        <div className="col-span-1 text-center">操作</div>
-                      </div>
-
-                      {/* === 網格化品項行 === */}
-                      <div className="mt-4 space-y-3">
+                    <div className="text-sm">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-b hover:bg-transparent">
+                            <TableHead className="w-2/5 px-4 h-12 text-left align-middle font-medium text-muted-foreground">商品資訊</TableHead>
+                            <TableHead className="w-[100px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">單價</TableHead>
+                            <TableHead className="w-[80px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">數量</TableHead>
+                            <TableHead className="w-[100px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">小計</TableHead>
+                            <TableHead className="w-[60px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">操作</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
                         {fields.map((field, index) => {
                           const quantity = form.watch(`items.${index}.quantity`) || 0;
                           const price = form.watch(`items.${index}.price`) ?? 0;
                           const subtotal = quantity * price;
 
                           return (
-                            <div 
-                              key={field.key} 
-                              className="grid grid-cols-12 gap-x-4 p-3 rounded-md border bg-background hover:bg-muted/50 transition-colors"
-                            >
+                              <TableRow key={field.key} className="hover:bg-muted/50">
+                                <TableCell className="px-3 py-2 align-middle">
+                                  <div className="flex items-center gap-3">
+                                    
+                                    {/* --- 🎯 新增的圖片/佔位符 --- */}
+                                    <div className="h-12 w-12 flex-shrink-0 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                                      {field.imageUrl ? (
+                                        <Image
+                                          src={field.imageUrl}
+                                          alt={form.watch(`items.${index}.product_name`) || 'Product Image'}
+                                          width={48}
+                                          height={48}
+                                          className="h-full w-full object-cover"
+                                        />
+                                      ) : (
+                                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                                      )}
+                                    </div>
                               
-                              {/* --- 商品名稱 (5/12 寬度) --- */}
-                              <div className="col-span-5 flex flex-col justify-center min-w-0">
-                                <p className="font-medium truncate">
-                                  {form.watch(`items.${index}.product_name`)}
-                                </p>
-                                {field.product_variant_id === null ? (
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                    {/* --- 原有的文字資訊區 --- */}
+                                    <div className="min-w-0">
+                                      <div className="font-medium text-gray-900 dark:text-gray-50 truncate">{form.watch(`items.${index}.product_name`)}</div>
+                                      <div className="text-xs text-gray-500 dark:text-gray-400">SKU: {form.watch(`items.${index}.sku`)}</div>
+                                      {field.product_variant_id === null && (
+                                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
                                     <Badge variant="outline" className="text-xs">訂製</Badge>
                                     <span className="truncate">
-                                      {field.custom_specifications && 
-                                        Object.entries(field.custom_specifications)
-                                          .map(([k, v]) => `${k}: ${v}`)
-                                          .join('; ')}
+                                            {field.custom_specifications && Object.entries(field.custom_specifications).map(([k, v]) => `${k}: ${v}`).join('; ')}
                                     </span>
                                   </div>
-                                ) : (
-                                  <p className="text-xs text-muted-foreground mt-0.5">
-                                    貨號：{form.watch(`items.${index}.sku`)}
-                                  </p>
                                 )}
                               </div>
 
-                              {/* --- SKU (2/12 寬度) --- */}
-                              <div className="col-span-2 flex items-center">
-                                <p className="text-sm font-mono text-muted-foreground truncate">
-                                  {form.watch(`items.${index}.sku`)}
-                                </p>
                               </div>
-
-                              {/* --- 單價 (2/12 寬度) --- */}
-                              <div className="col-span-2 flex items-center justify-end">
+                                </TableCell>
+                                <TableCell className="px-3 py-2 align-middle">
                                 <FormField
                                   control={form.control}
                                   name={`items.${index}.price`}
@@ -302,7 +307,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                                           type="number"
                                           step="0.01"
                                           min="0"
-                                          className="w-24 text-right h-8"
+                                            className="w-full" 
                                           placeholder="0.00"
                                           value={field.value?.toString() || ''}
                                           onChange={(e) => {
@@ -324,10 +329,8 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                                     </FormItem>
                                   )}
                                 />
-                              </div>
-
-                              {/* --- 數量 (1/12 寬度) --- */}
-                              <div className="col-span-1 flex items-center justify-center">
+                                </TableCell>
+                                <TableCell className="px-3 py-2 align-middle">
                                 <FormField
                                   control={form.control}
                                   name={`items.${index}.quantity`}
@@ -337,7 +340,7 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                                         <Input
                                           type="number"
                                           min="1"
-                                          className="w-16 text-center h-8"
+                                            className="w-full" 
                                           {...field}
                                           onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                                         />
@@ -345,31 +348,26 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                                     </FormItem>
                                   )}
                                 />
-                              </div>
-
-                              {/* --- 小計 (1/12 寬度) --- */}
-                              <div className="col-span-1 flex items-center justify-end font-medium">
-                                ${subtotal.toFixed(2)}
-                              </div>
-
-                              {/* --- 操作 (1/12 寬度) --- */}
-                              <div className="col-span-1 flex items-center justify-center">
+                                </TableCell>
+                                <TableCell className="px-3 py-2 align-middle font-mono">
+                                  ${ subtotal.toFixed(2) }
+                                </TableCell>
+                                <TableCell className="px-3 py-2 align-middle">
                                 <Button
                                   type="button"
                                   variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8"
+                                    size="icon" 
                                   onClick={() => remove(index)}
                                 >
-                                  <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
+                                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                                 </Button>
-                              </div>
-
-                            </div>
+                                </TableCell>
+                              </TableRow>
                           );
                         })}
+                        </TableBody>
+                      </Table>
                       </div>
-                    </>
                   ) : (
                     <div className="p-8 border-2 border-dashed rounded-lg text-center">
                       <div className="space-y-4">
@@ -493,42 +491,22 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                 </CardContent>
               </Card>
 
-              {/* --- 訂單備註卡片 --- */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>訂單備註</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Textarea
-                            placeholder="輸入此訂單的內部備註..."
-                            className="resize-none min-h-[100px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
             </div>
 
             {/* === 右側邊欄 (資訊配置) === */}
-            <div className="md:col-span-1 space-y-6">
+            <div className="md:col-span-1">
 
-              {/* --- 客戶資訊卡片 --- */}
+              {/* --- 訂單資訊整合卡片 --- */}
               <Card>
                 <CardHeader>
-                  <CardTitle>客戶資訊</CardTitle>
+                  <CardTitle>訂單資訊</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
+                  <div className="space-y-6">
+                    {/* === 客戶資訊區塊 === */}
+                    <div className="space-y-4">
+                    <div className="text-sm font-medium text-muted-foreground">客戶資訊</div>
+                    
                   {/* 選擇客戶 */}
                   <FormField
                     control={form.control}
@@ -569,15 +547,15 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                       </FormItem>
                     )}
                   />
-                </CardContent>
-              </Card>
+                  </div>
 
-              {/* --- 其他資訊卡片 --- */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>其他資訊</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  {/* 分隔線 */}
+                  <div className="border-t"></div>
+
+                  {/* === 付款與來源資訊區塊 === */}
+                  <div className="space-y-4">
+                    <div className="text-sm font-medium text-muted-foreground">付款與來源</div>
+                    
                   {/* 付款方式 */}
                   <FormField
                     control={form.control}
@@ -625,10 +603,38 @@ export function OrderForm({ initialData, onSubmit, isSubmitting }: OrderFormProp
                       </FormItem>
                     )}
                   />
+                  </div>
+                  </div>
                 </CardContent>
               </Card>
               
             </div>
+          </div>
+
+          {/* --- 訂單備註卡片（獨立於主要網格） --- */}
+          <Card>
+            <CardHeader>
+              <CardTitle>訂單備註</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        placeholder="輸入此訂單的內部備註..."
+                        className="resize-none min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
           </div>
         </form>
       </Form>

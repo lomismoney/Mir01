@@ -1,3 +1,17 @@
+/**
+ * @deprecated 此文件已廢棄，請使用 @/hooks/queries/useEntityQueries 中的標準化 hooks
+ * 
+ * 遷移指南：
+ * 1. 將 import { useStores } from "@/hooks/useStores" 
+ *    改為 import { useStores } from "@/hooks/queries/useEntityQueries"
+ * 
+ * 2. 新版 useStores 返回標準化的 { data, meta } 結構，而非 { data: [] }
+ * 
+ * 3. Store 類型定義請直接在使用處定義，或創建共用的類型文件
+ * 
+ * 此文件將在後續版本中移除
+ */
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import { handleApiError } from "@/lib/errorHandler";

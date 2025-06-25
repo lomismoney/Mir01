@@ -621,10 +621,10 @@ export function ProductForm({
           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>規格</TableHead>
-                  <TableHead>SKU 編號</TableHead>
-                  <TableHead>價格</TableHead>
+                <TableRow className="border-b hover:bg-transparent">
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">規格</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">SKU 編號</TableHead>
+                  <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">價格</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

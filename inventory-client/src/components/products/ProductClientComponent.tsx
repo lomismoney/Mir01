@@ -88,9 +88,9 @@ function transformProductsForNestedDisplay(products: ProductItem[]): ExpandedPro
                 name: attr.attribute.name || '',
               } : undefined,
             })),
-            inventories: Array.isArray(variant.inventory) 
+            inventory: Array.isArray(variant.inventory) 
               ? variant.inventory.map(inv => ({
-                  store_id: inv.store?.id || 0,
+                  store_id: inv.store?.id || inv.id || 0,  // 優先使用 store.id，如果沒有則使用 inv.id
                   quantity: inv.quantity || 0,
                   store: inv.store ? {
                     id: inv.store.id || 0,
@@ -171,11 +171,32 @@ const ProductClientComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
 
+  // 欄位名稱映射
+  const columnNameMap: Record<string, string> = {
+    select: '選擇',
+    expander: '展開',
+    product: '商品',
+    specs: '規格/分類',
+    price: '價格',
+    status: '狀態',
+    inventory: '庫存',
+    created_at: '建立時間',
+    actions: '操作'
+  };
+
   // 轉換商品數據為巢狀顯示格式
   const expandedProducts = useMemo(() => {
     const rawProducts = (productsResponse || []) as ProductItem[];
+    
+    // 🔍 調試：查看搜尋結果
+    if (debouncedSearchQuery) {
+      console.log('搜尋關鍵字:', debouncedSearchQuery);
+      console.log('API 返回的商品數量:', rawProducts.length);
+      console.log('API 返回的商品:', rawProducts.map(p => ({ name: p.name, sku: p.variants?.[0]?.sku })));
+    }
+    
     return transformProductsForNestedDisplay(rawProducts);
-  }, [productsResponse]);
+  }, [productsResponse, debouncedSearchQuery]);
 
   // 初始化表格
   const table = useReactTable({
@@ -341,87 +362,99 @@ const ProductClientComponent = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {/* --- 搜尋與過濾控制區 --- */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="搜尋商品名稱..."
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-8 max-w-sm"
-            />
+    <div className="space-y-6">
+      {/* 整合所有功能在單一卡片中 */}
+      <div className="rounded-lg border bg-card shadow-sm">
+        {/* --- 搜尋與過濾控制區 --- */}
+        <div className="border-b p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="relative max-w-md">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="搜尋商品名稱、SKU..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="pl-8 h-10 bg-background"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* 批量刪除按鈕 - 只在有選中項目時顯示 */}
+              {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="default"
+                  onClick={handleBatchDelete}
+                  className="gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  刪除選中 ({table.getFilteredSelectedRowModel().rows.length})
+                </Button>
+              )}
+              
+              {/* 欄位顯示控制 */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <ListFilter className="h-4 w-4" />
+                    欄位顯示
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => {
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={column.id}
+                          className="capitalize"
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) =>
+                            column.toggleVisibility(!!value)
+                          }
+                        >
+                          {columnNameMap[column.id] || column.id}
+                        </DropdownMenuCheckboxItem>
+                      )
+                    })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          {/* 批量刪除按鈕 - 只在有選中項目時顯示 */}
-          {table.getFilteredSelectedRowModel().rows.length > 0 && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleBatchDelete}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              刪除選中 ({table.getFilteredSelectedRowModel().rows.length})
-            </Button>
-          )}
-          
-          {/* 欄位顯示控制 */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <ListFilter className="mr-2 h-4 w-4" />
-                欄位顯示
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
 
-      {/* 巢狀商品表格 */}
-      {isProductsLoading ? (
-        <div className="flex items-center justify-center h-32">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="ml-2">載入商品資料中...</span>
-        </div>
-      ) : error ? (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            載入商品資料時發生錯誤。請重新整理頁面。
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <>
-          <div className="rounded-md border">
+        {/* 巢狀商品表格 */}
+        {isProductsLoading ? (
+          <div className="flex items-center justify-center h-[400px]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-3 text-lg">載入商品資料中...</span>
+          </div>
+        ) : error ? (
+          <div className="p-6">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                載入商品資料時發生錯誤。請重新整理頁面。
+              </AlertDescription>
+            </Alert>
+          </div>
+        ) : (
+          <>
             <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className="border-b bg-muted/50 hover:bg-muted/50">
                     {headerGroup.headers.map((header) => {
+                      const isCompact = ["expander", "select"].includes(header.column.id as string);
+                      const baseClass = "h-14 align-middle font-medium";
+                      const className = isCompact
+                        ? `${baseClass} p-0 text-center w-[40px]`
+                        : `${baseClass} px-4 text-left`;
+
                       return (
-                        <TableHead key={header.id}>
+                        <TableHead key={header.id} className={className}>
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -445,8 +478,12 @@ const ProductClientComponent = () => {
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
                         className={cn(
-                          row.original.isVariantRow ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50",
-                          canExpand && "cursor-pointer"
+                          row.original.isVariantRow 
+                            ? "bg-muted/30 hover:bg-muted/40 transition-colors" 
+                            : "hover:bg-muted/10 border-b transition-all",
+                          canExpand && "cursor-pointer",
+                          // 為展開的行添加動畫效果
+                          row.original.isVariantRow && "animate-in fade-in-50 slide-in-from-top-1 duration-200"
                         )}
                         onClick={(e) => {
                           // 如果可以展開，且點擊目標不是互動元素
@@ -465,52 +502,62 @@ const ProductClientComponent = () => {
                           }
                         }}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
+                      {row.getVisibleCells().map((cell) => {
+                        const isCompactCol = ["expander", "select"].includes(cell.column.id as string);
+                        const cellClass = isCompactCol ? "p-0 text-center w-[40px]" : "py-3";
+
+                        return (
+                          <TableCell key={cell.id} className={cellClass}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                     );
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      沒有找到商品資料。
+                    <TableCell colSpan={columns.length} className="h-32 text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <Package className="h-8 w-8 text-muted-foreground" />
+                        <p className="text-lg text-muted-foreground">沒有找到商品資料</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
-          </div>
-          
-          {/* 分頁控制 */}
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <div className="flex-1 text-sm text-muted-foreground">
-              已選擇 {table.getFilteredSelectedRowModel().rows.length} 個商品，
-              共 {table.getFilteredRowModel().rows.filter(row => !row.original.isVariantRow).length} 個商品
+            
+            {/* 分頁控制 */}
+            <div className="border-t p-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  已選擇 <span className="font-medium text-foreground">{table.getFilteredSelectedRowModel().rows.length}</span> 個商品，
+                  共 <span className="font-medium text-foreground">{table.getFilteredRowModel().rows.filter(row => !row.original.isVariantRow).length}</span> 個商品
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                  >
+                    上一頁
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                  >
+                    下一頁
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                上一頁
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                下一頁
-              </Button>
-            </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
 
       {/* 刪除確認對話框 */}
       <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>

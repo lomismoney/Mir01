@@ -103,15 +103,15 @@ export function ProductVariantSelector({ open, onOpenChange, onSelect }: Product
         <div className="flex-1 overflow-auto border rounded-md">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">選擇</TableHead>
-                <TableHead>商品名稱</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>規格</TableHead>
-                <TableHead>分類</TableHead>
-                <TableHead className="text-right">單價</TableHead>
-                <TableHead className="text-center">庫存</TableHead>
-                <TableHead className="text-center">狀態</TableHead>
+              <TableRow className="border-b hover:bg-transparent">
+                <TableHead className="w-12 h-12 px-4 text-left align-middle font-medium text-muted-foreground">選擇</TableHead>
+                <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">商品名稱</TableHead>
+                <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">SKU</TableHead>
+                <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">規格</TableHead>
+                <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">分類</TableHead>
+                <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">單價</TableHead>
+                <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">庫存</TableHead>
+                <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">狀態</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
