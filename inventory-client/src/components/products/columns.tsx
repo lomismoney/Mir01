@@ -128,13 +128,8 @@ const formatPriceRange = (priceRange?: { min?: number; max?: number; count?: num
     return <span className="font-medium">{formatter.format(priceRange.min)}</span>;
   }
 
-  // 顯示價格範圍
-  return (
-    <div className="flex items-baseline gap-1">
-      <span className="text-xs text-muted-foreground">從</span>
-      <span className="font-medium">{formatter.format(priceRange.min)}</span>
-    </div>
-  );
+  // 顯示最低價格（不加"從"字）
+  return <span className="font-medium">{formatter.format(priceRange.min)}</span>;
 };
 
 /**
