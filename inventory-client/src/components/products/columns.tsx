@@ -430,45 +430,54 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         return null;
       }
       
-      // 根據庫存情況判斷狀態
-      const hasStock = item.variants?.some((v: any) => {
+      // 計算每個變體的庫存狀態
+      const variantsWithStock = item.variants?.filter((v: any) => {
         const totalStock = v.inventory?.reduce((sum: number, inv: any) => 
           sum + (inv.quantity || 0), 0
         ) || 0;
         return totalStock > 0;
-      });
+      }) || [];
       
-      // 假設有庫存的是上架中，無庫存的是草稿
-      const status = hasStock ? 'active' : 'draft';
+      const totalVariants = item.variants?.length || 0;
+      const variantsWithStockCount = variantsWithStock.length;
+      
+      // 判斷庫存狀態
+      let status: 'full_stock' | 'partial_stock' | 'no_stock';
+      if (variantsWithStockCount === 0) {
+        status = 'no_stock';
+      } else if (variantsWithStockCount === totalVariants) {
+        status = 'full_stock';
+      } else {
+        status = 'partial_stock';
+      }
       
       const statusConfig = {
-        active: { 
+        full_stock: { 
           text: '有庫存', 
           variant: 'secondary' as const, 
           icon: <CheckCircle className="h-3 w-3 mr-1.5" />
         },
-        draft: { 
-          text: '無庫存', 
+        partial_stock: { 
+          text: '部分庫存', 
           variant: 'outline' as const, 
-          icon: <Pencil className="h-3 w-3 mr-1.5" />
+          icon: <Package className="h-3 w-3 mr-1.5" />
         },
-        archived: { 
-          text: '預留', 
-          variant: 'outline' as const, 
-          icon: <Archive className="h-3 w-3 mr-1.5" />
+        no_stock: { 
+          text: '無庫存', 
+          variant: 'destructive' as const, 
+          icon: <Box className="h-3 w-3 mr-1.5" />
         }
-      }[status] || { 
-        text: '未知', 
-        variant: 'destructive' as const
       };
+
+      const config = statusConfig[status];
 
       return (
         <Badge 
-          variant={statusConfig.variant} 
+          variant={config.variant} 
           className="flex items-center w-fit"
         >
-          {statusConfig.icon}
-          {statusConfig.text}
+          {config.icon}
+          {config.text}
         </Badge>
       );
     },
