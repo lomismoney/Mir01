@@ -23,13 +23,52 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useDeleteCustomer } from '@/hooks/queries/useEntityQueries';
 import Link from 'next/link';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ArrowUpDown } from 'lucide-react';
 
 export const columns: ColumnDef<Customer>[] = [
-  // 後續可在此處添加用於批量操作的 Checkbox 列
-  // { id: 'select', ... }
+  // 選擇欄位
   {
-    accessorKey: 'name',
-    header: '客戶名稱/公司抬頭',
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="全選"
+        className="translate-y-[2px]"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="選擇客戶"
+        className="translate-y-[2px]"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    size: 40,
+  },
+  
+  // 名稱欄位
+  {
+    accessorKey: "name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          客戶名稱
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
   },
   {
     accessorKey: 'phone',

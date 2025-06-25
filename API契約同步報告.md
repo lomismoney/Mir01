@@ -9,7 +9,7 @@ Error: 獲取庫存列表失敗，請檢查網路連線或稍後再試
 ## 問題分析
 
 ### 1. 後端 API 檢查 ✅
-- API 健康檢查正常：`http://localhost/api/health`
+- API 健康檢查正常：`http://localhost/api/health` 
 - 登入 API 正常：`POST /api/login`
 - 庫存 API 正常：`GET /api/inventory`（使用正確的 Bearer token）
 
