@@ -89,6 +89,8 @@ php artisan scribe:generate
 cd ../inventory-client
 npm install
 cp .env.example .env.local
+# 自動產生並設定 NextAuth Secret
+echo "AUTH_SECRET=$(openssl rand -hex 32)" >> .env.local
 
 # 7. 啟動服務
 # 後端（在 inventory-api 目錄）
@@ -129,6 +131,8 @@ docker run --rm \
 # 7. 前端設定（新終端）
 cd ../inventory-client
 npm install
+cp .env.example .env.local
+echo "AUTH_SECRET=$(openssl rand -hex 32)" >> .env.local
 npm run dev
 ```
 
@@ -186,15 +190,29 @@ FRONTEND_URL=http://localhost:3000
 
 ### 3. 前端配置
 
-創建 `inventory-client/.env.local` 文件：
+在 `inventory-client` 目錄下，首先從範例檔案建立您的本地環境設定檔：
+
+```bash
+cp .env.example .env.local
+```
+
+此指令會創建一個 `.env.local` 檔案。接下來，您需要為 NextAuth 設定一個安全的密鑰。執行以下指令可以自動產生一個密鑰並附加到您的 `.env.local` 檔案中：
+
+```bash
+echo "AUTH_SECRET=$(openssl rand -hex 32)" >> .env.local
+```
+
+完成後，請確保 `inventory-client/.env.local` 檔案中至少包含以下變數：
 
 ```env
-# API 端點
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# API 端點 (URL應與後端 inventory-api/.env 中的 APP_URL 一致)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 
 # NextAuth 設定
+# 通常是您前端應用的 URL
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=你的密鑰（使用 openssl rand -base64 32 生成）
+# 這是您剛剛產生的密鑰
+AUTH_SECRET=...
 ```
 
 ### 4. 初始化數據
