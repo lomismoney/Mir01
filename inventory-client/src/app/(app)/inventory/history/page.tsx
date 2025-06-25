@@ -140,14 +140,25 @@ export default function InventoryHistoryPage() {
             if (!isNaN(numericId)) {
               return -Math.abs(numericId);
             }
-            // 生成唯一的負數 ID：結合高精度時間戳、隨機數和交易特徵
-            const timestamp = performance.now(); // 使用高精度時間戳
-            const random = Math.floor(Math.random() * 1000000); // 擴大隨機範圍
-            const hashCode = transferId.split('').reduce((a, b) => {
-              a = ((a << 5) - a) + b.charCodeAt(0);
-              return a & a; // 轉為 32 位整數
-            }, 0);
-            return -(Math.abs(timestamp * 1000000 + random + Math.abs(hashCode)));
+            
+            // 為字符串 transferId 生成安全的負數 ID
+            // 使用簡單但有效的哈希函數，確保在安全整數範圍內
+            let hash = 0;
+            for (let i = 0; i < transferId.length; i++) {
+              const char = transferId.charCodeAt(i);
+              hash = ((hash << 5) - hash) + char;
+              hash = hash & hash; // 轉為 32 位整數
+            }
+            
+            // 使用當前時間的秒數部分（而非毫秒）來增加唯一性
+            // 只取時間戳的低位部分以避免數值過大
+            const timeComponent = Math.floor(Date.now() / 1000) % 1000000; // 只取6位數
+            const randomComponent = Math.floor(Math.random() * 1000); // 3位數隨機數
+            
+            // 確保結果在安全範圍內：組合哈希值、時間和隨機數
+            // 限制在合理範圍內，遠小於 MAX_SAFE_INTEGER
+            const safeId = (Math.abs(hash) % 1000000) * 1000000 + timeComponent * 1000 + randomComponent;
+            return -Math.abs(safeId);
           })(),
           type: 'transfer',
           quantity: Math.abs(transfer.out.quantity || 0),
