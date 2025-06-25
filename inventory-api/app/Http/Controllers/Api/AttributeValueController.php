@@ -98,7 +98,7 @@ class AttributeValueController extends Controller
      * @authenticated
      * @urlParam value integer required 要更新的屬性值的 ID。 Example: 1
      * @bodyParam value string required 新的屬性值。 Example: "深藍色"
-     * @responseFile storage/responses/attribute_value.show.json
+     * @response 200 App\Http\Resources\Api\AttributeValueResource
      */
     public function update(UpdateAttributeValueRequest $request, AttributeValue $value)
     {

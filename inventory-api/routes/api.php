@@ -293,5 +293,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('reports')->group(function () {
         Route::get('/inventory-time-series', [App\Http\Controllers\Api\ReportController::class, 'inventoryTimeSeries']);
     });
+
+    /**
+     * 安裝管理路由
+     * 提供安裝單的創建、管理和狀態追蹤功能，支援與訂單系統的鬆耦合整合
+     * 
+     * 路由列表：
+     * GET    /api/installations                            - 獲取安裝單列表（支援狀態/師傅/日期篩選）
+     * POST   /api/installations                            - 創建新安裝單
+     * POST   /api/installations/create-from-order          - 從訂單創建安裝單
+     * GET    /api/installations/schedule                   - 獲取安裝師傅的行程
+     * GET    /api/installations/{installation}             - 獲取指定安裝單詳情
+     * PUT    /api/installations/{installation}             - 更新指定安裝單
+     * DELETE /api/installations/{installation}             - 刪除指定安裝單
+     * POST   /api/installations/{installation}/assign      - 分配安裝師傅
+     * POST   /api/installations/{installation}/status      - 更新安裝單狀態
+     */
+    Route::post('/installations/create-from-order', [App\Http\Controllers\Api\InstallationController::class, 'createFromOrder']);
+    Route::get('/installations/schedule', [App\Http\Controllers\Api\InstallationController::class, 'getSchedule']);
+    Route::apiResource('installations', App\Http\Controllers\Api\InstallationController::class);
+    Route::post('/installations/{installation}/assign', [App\Http\Controllers\Api\InstallationController::class, 'assignInstaller']);
+    Route::post('/installations/{installation}/status', [App\Http\Controllers\Api\InstallationController::class, 'updateStatus']);
 });
  

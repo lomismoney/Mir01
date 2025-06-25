@@ -16,6 +16,7 @@ class User extends Authenticatable
     public const ROLE_ADMIN = 'admin';
     public const ROLE_STAFF = 'staff';
     public const ROLE_VIEWER = 'viewer';
+    public const ROLE_INSTALLER = 'installer';
 
     /**
      * The attributes that are mass assignable.
@@ -100,6 +101,17 @@ class User extends Authenticatable
     }
 
     /**
+     * 檢查用戶是否具有任何指定的角色
+     *
+     * @param array $roles
+     * @return bool
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        return in_array($this->role, $roles);
+    }
+
+    /**
      * 獲取所有可用的角色
      *
      * @return array
@@ -110,6 +122,7 @@ class User extends Authenticatable
             self::ROLE_ADMIN => '管理員',
             self::ROLE_STAFF => '員工',
             self::ROLE_VIEWER => '檢視者',
+            self::ROLE_INSTALLER => '安裝師傅',
         ];
     }
 }

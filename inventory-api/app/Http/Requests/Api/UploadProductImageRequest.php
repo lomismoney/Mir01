@@ -189,4 +189,21 @@ class UploadProductImageRequest extends FormRequest
             ]);
         }
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'image' => [
+                'description' => '要上傳的圖片檔案（支援 JPEG、JPG、PNG、GIF、WebP 格式，最大 5MB）',
+                'example' => 'no-example',
+            ],
+        ];
+    }
 } 

@@ -76,4 +76,85 @@ class UpdateOrderRequest extends FormRequest
             'items.*.status.in' => '訂單項目狀態必須是：pending、confirmed、processing、completed 或 cancelled',
         ];
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'customer_id' => [
+                'description' => '客戶 ID',
+                'example' => 1,
+            ],
+            'shipping_status' => [
+                'description' => '運送狀態（pending: 待處理, processing: 處理中, shipped: 已出貨, delivered: 已送達）',
+                'example' => 'pending',
+            ],
+            'payment_status' => [
+                'description' => '付款狀態（pending: 待付款, paid: 已付款, failed: 付款失敗, refunded: 已退款）',
+                'example' => 'pending',
+            ],
+            'shipping_fee' => [
+                'description' => '運費',
+                'example' => 100,
+            ],
+            'tax' => [
+                'description' => '稅額',
+                'example' => 500,
+            ],
+            'discount_amount' => [
+                'description' => '折扣金額',
+                'example' => 200,
+            ],
+            'payment_method' => [
+                'description' => '付款方式',
+                'example' => '現金',
+            ],
+            'shipping_address' => [
+                'description' => '運送地址',
+                'example' => '台北市信義區信義路五段7號',
+            ],
+            'billing_address' => [
+                'description' => '帳單地址',
+                'example' => '台北市信義區信義路五段7號',
+            ],
+            'customer_address_id' => [
+                'description' => '客戶地址 ID',
+                'example' => 1,
+            ],
+            'notes' => [
+                'description' => '訂單備註',
+                'example' => '請小心處理',
+            ],
+            'po_number' => [
+                'description' => '採購單號',
+                'example' => 'PO-2025-001',
+            ],
+            'reference_number' => [
+                'description' => '參考編號',
+                'example' => 'REF-2025-001',
+            ],
+            'items' => [
+                'description' => '訂單項目陣列',
+                'example' => [
+                    [
+                        'id' => 1,
+                        'product_variant_id' => 1,
+                        'is_stocked_sale' => true,
+                        'status' => 'pending',
+                        'quantity' => 2,
+                        'price' => 1000,
+                        'cost' => 800,
+                        'tax_rate' => 5,
+                        'discount_amount' => 100,
+                    ],
+                ],
+            ],
+        ];
+    }
 }

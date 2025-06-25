@@ -91,6 +91,14 @@ class Order extends Model
     }
 
     /**
+     * 一個訂單可能有多個相關的安裝單 (One-to-Many)
+     */
+    public function installations(): HasMany
+    {
+        return $this->hasMany(Installation::class);
+    }
+
+    /**
      * 🎯 判斷訂單是否包含訂製商品
      * 
      * @return bool

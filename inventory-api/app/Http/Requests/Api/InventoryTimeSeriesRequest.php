@@ -65,4 +65,29 @@ class InventoryTimeSeriesRequest extends FormRequest
             'end_date.after_or_equal' => '結束日期不能早於開始日期',
         ];
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'product_variant_id' => [
+                'description' => '商品變體 ID',
+                'example' => 1,
+            ],
+            'start_date' => [
+                'description' => '開始日期（格式：Y-m-d）',
+                'example' => '2025-06-01',
+            ],
+            'end_date' => [
+                'description' => '結束日期（格式：Y-m-d）',
+                'example' => '2025-06-24',
+            ],
+        ];
+    }
 } 
