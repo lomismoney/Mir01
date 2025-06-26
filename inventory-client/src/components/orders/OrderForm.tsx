@@ -260,20 +260,20 @@ export function OrderForm({
                       <div className="text-sm">
                         <Table>
                           <TableHeader>
-                            <TableRow className="border-b hover:bg-transparent">
-                              <TableHead className="w-2/5 px-4 h-12 text-left align-middle font-medium text-muted-foreground">
+                            <TableRow>
+                              <TableHead className="w-2/5">
                                 商品資訊
                               </TableHead>
-                              <TableHead className="w-[100px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">
+                              <TableHead className="w-[100px]">
                                 單價
                               </TableHead>
-                              <TableHead className="w-[80px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">
+                              <TableHead className="w-[80px]">
                                 數量
                               </TableHead>
-                              <TableHead className="w-[120px] px-4 h-12 text-right align-middle font-medium text-muted-foreground">
+                              <TableHead className="w-[120px] text-right">
                                 小計
                               </TableHead>
-                              <TableHead className="w-[60px] px-4 h-12 text-left align-middle font-medium text-muted-foreground">
+                              <TableHead className="w-[60px]">
                                 操作
                               </TableHead>
                             </TableRow>
@@ -289,9 +289,9 @@ export function OrderForm({
                               return (
                                 <TableRow
                                   key={field.key}
-                                  className="hover:bg-muted/50"
+
                                 >
-                                  <TableCell className="px-3 py-2 align-middle">
+                                  <TableCell>
                                     <div className="flex items-center gap-3">
                                       <div className="h-12 w-12 flex-shrink-0 bg-muted rounded-md flex items-center justify-center overflow-hidden">
                                         {field.imageUrl ? (
@@ -342,7 +342,7 @@ export function OrderForm({
                                       </div>
                                     </div>
                                   </TableCell>
-                                  <TableCell className="px-3 py-2 align-middle">
+                                  <TableCell>
                                     <FormField
                                       control={form.control}
                                       name={`items.${index}.price`}
@@ -379,7 +379,7 @@ export function OrderForm({
                                       )}
                                     />
                                   </TableCell>
-                                  <TableCell className="px-3 py-2 align-middle">
+                                  <TableCell>
                                     <FormField
                                       control={form.control}
                                       name={`items.${index}.quantity`}
@@ -402,10 +402,10 @@ export function OrderForm({
                                       )}
                                     />
                                   </TableCell>
-                                  <TableCell className="px-3 py-2 align-middle font-mono text-right w-[120px]">
+                                  <TableCell className="font-mono text-right w-[120px]">
                                     ${subtotal.toFixed(2)}
                                   </TableCell>
-                                  <TableCell className="px-3 py-2 align-middle">
+                                  <TableCell>
                                     <Button
                                       type="button"
                                       variant="ghost"

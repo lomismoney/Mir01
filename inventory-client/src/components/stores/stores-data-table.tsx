@@ -162,7 +162,7 @@ export function StoresDataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
-                className="border-b hover:bg-transparent"
+
                 data-oid="j-7qe7-"
               >
                 {headerGroup.headers.map((header) => {
