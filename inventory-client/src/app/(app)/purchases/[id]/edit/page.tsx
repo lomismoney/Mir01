@@ -111,20 +111,20 @@ export default function PurchaseEditPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 md:p-8" data-oid="8k-4qfc">
-        <div className="space-y-6" data-oid="q_26ive">
-          <div className="animate-pulse" data-oid="tgunsaa">
+      <div className="container mx-auto p-4 md:p-8" data-oid="0rgmml8">
+        <div className="space-y-6" data-oid="lh7d-qk">
+          <div className="animate-pulse" data-oid="ee8us.4">
             <div
               className="h-8 bg-muted rounded w-1/3 mb-4"
-              data-oid="zoie_0:"
+              data-oid="8ct-es4"
             ></div>
             <div
               className="h-4 bg-muted rounded w-1/2 mb-8"
-              data-oid="yr2l5j1"
+              data-oid="zxva6y7"
             ></div>
-            <div className="space-y-4" data-oid="kpv4npi">
-              <div className="h-32 bg-muted rounded" data-oid="279jhbx"></div>
-              <div className="h-48 bg-muted rounded" data-oid="mq.-hcl"></div>
+            <div className="space-y-4" data-oid="zv71_5i">
+              <div className="h-32 bg-muted rounded" data-oid="amz:.lh"></div>
+              <div className="h-48 bg-muted rounded" data-oid="o1qk36t"></div>
             </div>
           </div>
         </div>
@@ -134,19 +134,19 @@ export default function PurchaseEditPage() {
 
   if (error || !purchase) {
     return (
-      <div className="container mx-auto p-4 md:p-8" data-oid="qm3mwc4">
-        <div className="text-center py-12" data-oid="hk4lyxb">
+      <div className="container mx-auto p-4 md:p-8" data-oid="ech-oq3">
+        <div className="text-center py-12" data-oid="z_o55xz">
           <h1
             className="text-2xl font-bold text-destructive mb-4"
-            data-oid="v6j_:n:"
+            data-oid="ovh0nx0"
           >
             找不到進貨單
           </h1>
-          <p className="text-muted-foreground mb-6" data-oid="0285rvs">
+          <p className="text-muted-foreground mb-6" data-oid="ivh1e07">
             進貨單不存在或已被刪除
           </p>
-          <Button onClick={() => router.back()} data-oid=":7uaqll">
-            <ArrowLeft className="h-4 w-4 mr-2" data-oid="ojxbcmq" />
+          <Button onClick={() => router.back()} data-oid="lckaazf">
+            <ArrowLeft className="h-4 w-4 mr-2" data-oid="v-rxdz." />
             返回
           </Button>
         </div>
@@ -164,21 +164,21 @@ export default function PurchaseEditPage() {
 
   if (!permissions.canModify) {
     return (
-      <div className="container mx-auto p-4 md:p-8" data-oid="7_1xcso">
-        <div className="text-center py-12" data-oid="6ve2ra4">
+      <div className="container mx-auto p-4 md:p-8" data-oid="nnn0hva">
+        <div className="text-center py-12" data-oid="d4tupn1">
           <h1
             className="text-2xl font-bold text-destructive mb-4"
-            data-oid="g-h95h-"
+            data-oid="h7uh9kx"
           >
             無法編輯
           </h1>
-          <p className="text-muted-foreground mb-6" data-oid=".he34.c">
+          <p className="text-muted-foreground mb-6" data-oid="i36nkzu">
             進貨單狀態為「
             {PURCHASE_STATUS_LABELS[purchaseData.status as PurchaseStatus]}
             」，無法編輯
           </p>
-          <Button onClick={() => router.back()} data-oid="uxluczx">
-            <ArrowLeft className="h-4 w-4 mr-2" data-oid="zebamjc" />
+          <Button onClick={() => router.back()} data-oid="blulwld">
+            <ArrowLeft className="h-4 w-4 mr-2" data-oid="q3mocxe" />
             返回
           </Button>
         </div>
@@ -247,35 +247,35 @@ export default function PurchaseEditPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8" data-oid="r8::-r0">
-      <div className="space-y-6" data-oid="a9ikujh">
+    <div className="container mx-auto p-4 md:p-8" data-oid="7nivnpr">
+      <div className="space-y-6" data-oid="5k35ltl">
         {/* 頁面標題區 */}
-        <div className="flex items-center gap-4" data-oid="wsqh43h">
+        <div className="flex items-center gap-4" data-oid="meu99ma">
           <Button
             variant="outline"
             onClick={() => router.back()}
-            data-oid="71ogeg4"
+            data-oid=".rghu5j"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" data-oid="y772gee" />
+            <ArrowLeft className="h-4 w-4 mr-2" data-oid="ektlcme" />
             返回
           </Button>
-          <div data-oid="h2v4um6">
+          <div data-oid="ykb3ncz">
             <h1
               className="text-2xl font-bold flex items-center gap-2"
-              data-oid="k.jr0b9"
+              data-oid="i5z7xnl"
             >
-              <Package className="h-7 w-7 text-blue-600" data-oid="tk1_:am" />
+              <Package className="h-7 w-7 text-blue-600" data-oid="_nwtkjk" />
               編輯進貨單
             </h1>
-            <div className="flex items-center gap-2 mt-1" data-oid="xlvut5a">
-              <p className="text-muted-foreground" data-oid="w8_kmer">
+            <div className="flex items-center gap-2 mt-1" data-oid=".765-l7">
+              <p className="text-muted-foreground" data-oid="7:jjcmy">
                 {purchaseData.order_number}
               </p>
               <Badge
                 className={
                   PURCHASE_STATUS_COLORS[purchaseData.status as PurchaseStatus]
                 }
-                data-oid="lyj5byv"
+                data-oid="kbzwp9:"
               >
                 {PURCHASE_STATUS_LABELS[purchaseData.status as PurchaseStatus]}
               </Badge>
@@ -283,142 +283,142 @@ export default function PurchaseEditPage() {
           </div>
         </div>
 
-        <Form {...form} data-oid="l05x9s5">
+        <Form {...form} data-oid="z3waq.g">
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6"
-            data-oid="p6o0w_2"
+            data-oid="08vy7l-"
           >
             {/* 基本資訊 */}
-            <Card data-oid="ax:7hlw">
-              <CardHeader data-oid="6cioomb">
-                <CardTitle data-oid="65nyyp5">基本資訊</CardTitle>
-                <CardDescription data-oid="ieir:s.">
+            <Card data-oid="hqj5fz7">
+              <CardHeader data-oid="y1zc-28">
+                <CardTitle data-oid="3pf9ooz">基本資訊</CardTitle>
+                <CardDescription data-oid="t2d0mty">
                   修改進貨單的基本資訊和狀態
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4" data-oid="joq1fxe">
+              <CardContent className="space-y-4" data-oid="h823fas">
                 <div
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                  data-oid="w6h.5pg"
+                  data-oid="ndv55nj"
                 >
                   <FormField
                     control={form.control}
                     name="store_id"
                     render={({ field }) => (
-                      <FormItem data-oid="is0-:uu">
-                        <FormLabel data-oid="moz-k9n">門市 *</FormLabel>
+                      <FormItem data-oid="8yjn6fi">
+                        <FormLabel data-oid="m4fs8gs">門市 *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
-                          data-oid="u8fut9b"
+                          data-oid="ix6jxik"
                         >
-                          <FormControl data-oid="fqttc5k">
-                            <SelectTrigger data-oid="ozsm-ci">
+                          <FormControl data-oid="n7pwknw">
+                            <SelectTrigger data-oid=":npge38">
                               <SelectValue
                                 placeholder="選擇門市"
-                                data-oid=":wwlhlc"
+                                data-oid="g__.o0e"
                               />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent data-oid="s84ogjt">
+                          <SelectContent data-oid="9541okv">
                             {(storesData as any)?.data?.map((store: any) => (
                               <SelectItem
                                 key={store.id}
                                 value={store.id?.toString() || ""}
-                                data-oid="m8r77e."
+                                data-oid="0gqpj4s"
                               >
                                 {store.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormMessage data-oid="l7y8ntz" />
+                        <FormMessage data-oid="i3_8_38" />
                       </FormItem>
                     )}
-                    data-oid="ygdqqcw"
+                    data-oid="f0-dvfa"
                   />
 
                   <FormField
                     control={form.control}
                     name="order_number"
                     render={({ field }) => (
-                      <FormItem data-oid="8sgrxxw">
-                        <FormLabel data-oid="_76pb4_">進貨單號 *</FormLabel>
-                        <FormControl data-oid="yq:pyba">
+                      <FormItem data-oid=".h5x91x">
+                        <FormLabel data-oid="d.-971d">進貨單號 *</FormLabel>
+                        <FormControl data-oid="t879f6s">
                           <Input
                             {...field}
                             placeholder="例：PO-20240101-001"
-                            data-oid="54f93tv"
+                            data-oid=".26bgzw"
                           />
                         </FormControl>
-                        <FormMessage data-oid="c9re205" />
+                        <FormMessage data-oid="j9feppy" />
                       </FormItem>
                     )}
-                    data-oid="nv4li4-"
+                    data-oid="037ebao"
                   />
 
                   <FormField
                     control={form.control}
                     name="purchased_at"
                     render={({ field }) => (
-                      <FormItem data-oid="t3j6_6s">
-                        <FormLabel data-oid=":re_wbb">進貨日期</FormLabel>
-                        <FormControl data-oid="dkx7ssn">
-                          <Input {...field} type="date" data-oid="4mu_j02" />
+                      <FormItem data-oid="d96f09.">
+                        <FormLabel data-oid="yejx1ao">進貨日期</FormLabel>
+                        <FormControl data-oid="yz.25cm">
+                          <Input {...field} type="date" data-oid="-9dbdh_" />
                         </FormControl>
-                        <FormMessage data-oid="ta_jhyj" />
+                        <FormMessage data-oid="r8oshmk" />
                       </FormItem>
                     )}
-                    data-oid="-k1-nw-"
+                    data-oid="6xsth9x"
                   />
 
                   <FormField
                     control={form.control}
                     name="shipping_cost"
                     render={({ field }) => (
-                      <FormItem data-oid="9y1w6fd">
-                        <FormLabel data-oid="pxlzrxo">運費</FormLabel>
-                        <FormControl data-oid="pyt-h5f">
+                      <FormItem data-oid="r1mk6wn">
+                        <FormLabel data-oid="jttdmrr">運費</FormLabel>
+                        <FormControl data-oid="4gn01l4">
                           <Input
                             {...field}
                             type="number"
                             min="0"
                             step="0.01"
                             placeholder="0.00"
-                            data-oid="flx1jic"
+                            data-oid="p5w_6m9"
                           />
                         </FormControl>
-                        <FormMessage data-oid="tkwyhg:" />
+                        <FormMessage data-oid="wi-0rrd" />
                       </FormItem>
                     )}
-                    data-oid="q2:5z2h"
+                    data-oid="u:dc4wg"
                   />
 
                   <FormField
                     control={form.control}
                     name="status"
                     render={({ field }) => (
-                      <FormItem data-oid="w3:2zye">
-                        <FormLabel data-oid="t8mwe81">狀態</FormLabel>
+                      <FormItem data-oid="zocu_48">
+                        <FormLabel data-oid="7lf.aww">狀態</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
-                          data-oid="suf4mj0"
+                          data-oid="-:.1hjt"
                         >
-                          <FormControl data-oid="qc4g5tb">
-                            <SelectTrigger data-oid="k75mwj.">
+                          <FormControl data-oid="cguzi1y">
+                            <SelectTrigger data-oid="mct88nx">
                               <SelectValue
                                 placeholder="選擇狀態"
-                                data-oid="8k05pbv"
+                                data-oid="z1fgvpj"
                               />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent data-oid=".od4wwc">
+                          <SelectContent data-oid="voz8_11">
                             {/* 顯示當前狀態 */}
                             <SelectItem
                               value={purchaseData.status}
-                              data-oid="kswdbr6"
+                              data-oid="nykt0lm"
                             >
                               {
                                 PURCHASE_STATUS_LABELS[
@@ -432,54 +432,54 @@ export default function PurchaseEditPage() {
                               <SelectItem
                                 key={status}
                                 value={status}
-                                data-oid="d5cp2ai"
+                                data-oid="1uj1fqh"
                               >
                                 {PURCHASE_STATUS_LABELS[status]}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormMessage data-oid="0zuiedu" />
+                        <FormMessage data-oid="8.4d6gk" />
                       </FormItem>
                     )}
-                    data-oid="i4_umqo"
+                    data-oid="s_5xqr_"
                   />
                 </div>
               </CardContent>
             </Card>
 
             {/* 商品項目 */}
-            <Card data-oid="az_gc:.">
-              <CardHeader data-oid="1bcmgt4">
+            <Card data-oid="7tiw32l">
+              <CardHeader data-oid="yedt-8b">
                 <div
                   className="flex items-center justify-between"
-                  data-oid="oly0kd8"
+                  data-oid="r38:b3."
                 >
-                  <CardTitle data-oid="mnlwjuz">商品項目</CardTitle>
+                  <CardTitle data-oid="hca3:mb">商品項目</CardTitle>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={addItem}
-                    data-oid="expf.tu"
+                    data-oid="qa9jr-e"
                   >
-                    <Plus className="h-4 w-4 mr-2" data-oid="x0ep9cg" />
+                    <Plus className="h-4 w-4 mr-2" data-oid=":jcjybr" />
                     新增商品
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4" data-oid="fbtl993">
+              <CardContent className="space-y-4" data-oid="j9l:qb7">
                 {fields.map((field, index) => (
                   <div
                     key={field.key}
                     className="border rounded-lg p-4 space-y-4"
-                    data-oid="flsnv0m"
+                    data-oid="1v.am2i"
                   >
                     <div
                       className="flex items-center justify-between"
-                      data-oid="ht-ljza"
+                      data-oid="2bmfoxv"
                     >
-                      <h4 className="font-medium" data-oid="6f83e0b">
+                      <h4 className="font-medium" data-oid="y4hbrla">
                         商品 {index + 1}
                       </h4>
                       {fields.length > 1 && (
@@ -488,24 +488,24 @@ export default function PurchaseEditPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => remove(index)}
-                          data-oid="kre1:08"
+                          data-oid="4sd4a2c"
                         >
-                          <Trash2 className="h-4 w-4" data-oid="akglvb8" />
+                          <Trash2 className="h-4 w-4" data-oid="_9u876b" />
                         </Button>
                       )}
                     </div>
 
                     <div
                       className="grid grid-cols-1 md:grid-cols-3 gap-4"
-                      data-oid="gdte9ay"
+                      data-oid="o_t-r66"
                     >
                       <FormField
                         control={form.control}
                         name={`items.${index}.product_variant_id`}
                         render={({ field }) => (
-                          <FormItem data-oid="3pext77">
-                            <FormLabel data-oid="dixc_ij">商品 *</FormLabel>
-                            <FormControl data-oid="khjnf9o">
+                          <FormItem data-oid="5o.k92k">
+                            <FormLabel data-oid="a__4z8l">商品 *</FormLabel>
+                            <FormControl data-oid="b_9uaz6">
                               <ProductSelector
                                 value={field.value}
                                 onValueChange={(variantId, variant) => {
@@ -520,72 +520,72 @@ export default function PurchaseEditPage() {
                                 placeholder="搜尋並選擇商品規格"
                                 disabled={updatePurchaseMutation.isPending}
                                 showCurrentStock={false}
-                                data-oid="8r8zp.k"
+                                data-oid="c4r6pkd"
                               />
                             </FormControl>
-                            <FormMessage data-oid="fmw_4ke" />
+                            <FormMessage data-oid="vxwv5pv" />
                           </FormItem>
                         )}
-                        data-oid="1:7ljs9"
+                        data-oid="pd3o153"
                       />
 
                       <FormField
                         control={form.control}
                         name={`items.${index}.quantity`}
                         render={({ field }) => (
-                          <FormItem data-oid="_5uy9mf">
-                            <FormLabel data-oid="nj_fyhd">數量 *</FormLabel>
-                            <FormControl data-oid=".-ds87b">
+                          <FormItem data-oid="56en97s">
+                            <FormLabel data-oid="z.k8m07">數量 *</FormLabel>
+                            <FormControl data-oid="vs89:gt">
                               <Input
                                 {...field}
                                 type="number"
                                 min="1"
                                 placeholder="0"
-                                data-oid="6va3.04"
+                                data-oid="hlvfbja"
                               />
                             </FormControl>
-                            <FormMessage data-oid="q.ogj7d" />
+                            <FormMessage data-oid="-ol0us8" />
                           </FormItem>
                         )}
-                        data-oid="y_ucwi3"
+                        data-oid="kpe-575"
                       />
 
                       <FormField
                         control={form.control}
                         name={`items.${index}.cost_price`}
                         render={({ field }) => (
-                          <FormItem data-oid="0ffu_x1">
-                            <FormLabel data-oid=":xc-i4b">進貨價 *</FormLabel>
-                            <FormControl data-oid="olzdcyp">
+                          <FormItem data-oid="523vzuz">
+                            <FormLabel data-oid="oht8e1p">進貨價 *</FormLabel>
+                            <FormControl data-oid="q3xu8hn">
                               <Input
                                 {...field}
                                 type="number"
                                 min="0"
                                 step="0.01"
                                 placeholder="0.00"
-                                data-oid="bk416uk"
+                                data-oid="1o0gv5."
                               />
                             </FormControl>
-                            <FormMessage data-oid="kl:g1ea" />
+                            <FormMessage data-oid="l2z3vsw" />
                           </FormItem>
                         )}
-                        data-oid="bc9ec2e"
+                        data-oid="yz6rsgf"
                       />
                     </div>
                   </div>
                 ))}
 
                 {/* 總計顯示 */}
-                <div className="border-t pt-4" data-oid="pbj77w6">
-                  <div className="flex justify-end" data-oid=":o_9ehi">
-                    <div className="text-right" data-oid="fj8pti5">
+                <div className="border-t pt-4" data-oid="av8dw1g">
+                  <div className="flex justify-end" data-oid="wkextu6">
+                    <div className="text-right" data-oid="zhv7byu">
                       <div
                         className="text-sm text-muted-foreground"
-                        data-oid="g0w11rr"
+                        data-oid="a.zbnj4"
                       >
                         預估總金額
                       </div>
-                      <div className="text-lg font-semibold" data-oid="b_4nl1r">
+                      <div className="text-lg font-semibold" data-oid="ailg1w5">
                         NT${" "}
                         {calculateTotal().toLocaleString("zh-TW", {
                           minimumFractionDigits: 2,
@@ -598,27 +598,27 @@ export default function PurchaseEditPage() {
             </Card>
 
             {/* 操作按鈕 */}
-            <div className="flex justify-end space-x-2" data-oid="of61akf">
+            <div className="flex justify-end space-x-2" data-oid="k75mjgw">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
-                data-oid=":5qgzz0"
+                data-oid="oxqf23_"
               >
                 取消
               </Button>
               <Button
                 type="submit"
                 disabled={updatePurchaseMutation.isPending}
-                data-oid="hib7f-."
+                data-oid="s94p4ht"
               >
                 {updatePurchaseMutation.isPending && (
                   <Loader2
                     className="mr-2 h-4 w-4 animate-spin"
-                    data-oid="okw:22a"
+                    data-oid="7pgccos"
                   />
                 )}
-                <Save className="h-4 w-4 mr-2" data-oid=".l:.00n" />
+                <Save className="h-4 w-4 mr-2" data-oid="e-r-x5d" />
                 保存變更
               </Button>
             </div>

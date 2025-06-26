@@ -262,45 +262,45 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
   ]);
 
   return (
-    <TooltipProvider data-oid=".b_2wgb">
-      <div className="space-y-3" data-oid="4-5du8c">
+    <TooltipProvider data-oid="r4:7421">
+      <div className="space-y-3" data-oid="jf9j2lr">
         {/* 規格類型選擇 */}
-        <div className="space-y-2" data-oid="76p3i_c">
-          <div className="flex items-center gap-2" data-oid="cj11:pm">
+        <div className="space-y-2" data-oid="_em-qq0">
+          <div className="flex items-center gap-2" data-oid="w92d.wt">
             <Label
               htmlFor="specType"
               className="text-sm font-medium"
-              data-oid="d7s5jhg"
+              data-oid="jeqlkzw"
             >
               規格類型
             </Label>
-            <Tooltip data-oid="j_.2el0">
-              <TooltipTrigger asChild data-oid="t0g8p1o">
+            <Tooltip data-oid="y8yvjmo">
+              <TooltipTrigger asChild data-oid="hug7jcp">
                 <HelpCircle
                   className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help"
-                  data-oid="9vfuoe7"
+                  data-oid="yyipdwf"
                 />
               </TooltipTrigger>
-              <TooltipContent data-oid="rfxtzdk">
-                <p data-oid="_tcyppx">
+              <TooltipContent data-oid="elguzjl">
+                <p data-oid="o_1gii6">
                   根據您的商品特性，選擇單規格或多規格管理方式
                 </p>
               </TooltipContent>
             </Tooltip>
           </div>
-          <div className="flex items-center space-x-2" data-oid="ncuu_lq">
+          <div className="flex items-center space-x-2" data-oid="fssax4g">
             <Switch
               id="specType"
               checked={formData.specifications.isVariable}
               onCheckedChange={handleSpecTypeChange}
-              data-oid="sdvrv6w"
+              data-oid="_8-irpw"
             />
 
-            <Label htmlFor="specType" className="text-sm" data-oid="21lflsg">
+            <Label htmlFor="specType" className="text-sm" data-oid="qj05e32">
               {formData.specifications.isVariable ? "多規格商品" : "單規格商品"}
             </Label>
           </div>
-          <div className="text-xs text-muted-foreground" data-oid="_yi5ts_">
+          <div className="text-xs text-muted-foreground" data-oid="ha4jom2">
             {formData.specifications.isVariable
               ? "適合有多種選項的商品（顏色、尺寸等）"
               : "適合統一規格的商品（書籍、食品等）"}
@@ -313,44 +313,44 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
             {/* 屬性選擇 */}
             <Card
               className="bg-card text-card-foreground border border-border/40 shadow-sm"
-              data-oid=".ffhjoc"
+              data-oid="r-b52sv"
             >
-              <CardHeader data-oid="jcnp4:q">
+              <CardHeader data-oid="agw_:5f">
                 <CardTitle
                   className="flex items-center space-x-2"
-                  data-oid="yue5qcv"
+                  data-oid=":a6a7kl"
                 >
-                  <Tag className="h-5 w-5" data-oid="q:bfpj1" />
-                  <span data-oid="_pyqcx5">選擇規格屬性</span>
+                  <Tag className="h-5 w-5" data-oid="s8.62iv" />
+                  <span data-oid="4j53q5v">選擇規格屬性</span>
                 </CardTitle>
-                <CardDescription data-oid="b9rlsgt">
+                <CardDescription data-oid="t85jiwq">
                   選擇用於構成商品變體的屬性，如顏色、尺寸、款式等。
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4" data-oid="fuvmvs_">
+              <CardContent className="space-y-4" data-oid="apwz-dd">
                 {attributesLoading ? (
-                  <div className="text-center py-8" data-oid="n5j:yqn">
-                    <div className="text-muted-foreground" data-oid="-cxw2pb">
+                  <div className="text-center py-8" data-oid="trli413">
+                    <div className="text-muted-foreground" data-oid="p3jo6nj">
                       載入屬性資料中...
                     </div>
                   </div>
                 ) : attributes.length === 0 ? (
-                  <Alert data-oid="eo4wr63">
-                    <AlertCircle className="h-4 w-4" data-oid="q:3-5-z" />
-                    <AlertDescription data-oid="s7:g5h9">
+                  <Alert data-oid="qtb7ou5">
+                    <AlertCircle className="h-4 w-4" data-oid="bqvb88u" />
+                    <AlertDescription data-oid="_furtn7">
                       尚未建立任何屬性。請先到「規格管理」頁面建立屬性，如顏色、尺寸等。
                     </AlertDescription>
                   </Alert>
                 ) : (
                   <div
                     className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                    data-oid="1ne_juu"
+                    data-oid="w1ecrax"
                   >
                     {attributes.map((attribute) => (
                       <div
                         key={attribute.id}
                         className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                        data-oid="pvsx:06"
+                        data-oid="7f6.z0r"
                       >
                         <Checkbox
                           id={`attr-${attribute.id}`}
@@ -363,34 +363,34 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                               checked as boolean,
                             )
                           }
-                          data-oid="ane3edy"
+                          data-oid="qbgrwi5"
                         />
 
                         <Label
                           htmlFor={`attr-${attribute.id}`}
                           className="flex-1 cursor-pointer"
-                          data-oid="z8yu4gf"
+                          data-oid="gq8i9iv"
                         >
-                          <div className="font-medium" data-oid="5e881fm">
+                          <div className="font-medium" data-oid="4qzxqf8">
                             {attribute.name}
                           </div>
                           <div
                             className="text-sm text-muted-foreground"
-                            data-oid="8z2:8f_"
+                            data-oid="fyc96-a"
                           >
                             {attribute.values?.length || 0} 個預設值
                             {attribute.values &&
                               attribute.values.length > 0 && (
                                 <div
                                   className="mt-1 flex flex-wrap gap-1"
-                                  data-oid="squeju2"
+                                  data-oid="archgay"
                                 >
                                   {attribute.values.slice(0, 3).map((value) => (
                                     <Badge
                                       key={value.id}
                                       variant="outline"
                                       className="text-xs"
-                                      data-oid="p7zikgu"
+                                      data-oid="gh23x:u"
                                     >
                                       {value.value}
                                     </Badge>
@@ -399,7 +399,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                                     <Badge
                                       variant="outline"
                                       className="text-xs"
-                                      data-oid="j6o47hk"
+                                      data-oid="8d4no88"
                                     >
                                       +{attribute.values.length - 3} 更多
                                     </Badge>
@@ -419,21 +419,21 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
             {formData.specifications.selectedAttributes.length > 0 && (
               <Card
                 className="bg-card text-card-foreground border border-border/40 shadow-sm"
-                data-oid="hm7znyw"
+                data-oid="j0d2wz6"
               >
-                <CardHeader data-oid="r:3qqiy">
+                <CardHeader data-oid="pn:dbv7">
                   <CardTitle
                     className="flex items-center space-x-2"
-                    data-oid="4hw_fnx"
+                    data-oid="issky20"
                   >
-                    <Plus className="h-5 w-5" data-oid="1.afiv-" />
-                    <span data-oid="mom2jpq">管理屬性值</span>
+                    <Plus className="h-5 w-5" data-oid="n8kfm3f" />
+                    <span data-oid="-o_wii6">管理屬性值</span>
                   </CardTitle>
-                  <CardDescription data-oid="7z:2fit">
+                  <CardDescription data-oid="8czdgfg">
                     為選中的屬性添加或管理屬性值，這些值將用於生成商品變體。
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6" data-oid="yx84q8h">
+                <CardContent className="space-y-6" data-oid="pxou8nj">
                   {formData.specifications.selectedAttributes.map(
                     (attributeId) => {
                       const attribute = attributes.find(
@@ -449,25 +449,25 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                         <div
                           key={attributeId}
                           className="space-y-3"
-                          data-oid="u5en8bh"
+                          data-oid="5la93gx"
                         >
                           <div
                             className="flex items-center justify-between"
-                            data-oid="xddu5-a"
+                            data-oid=".o6:vt."
                           >
                             <Label
                               className="text-base font-medium"
-                              data-oid="d2bc2au"
+                              data-oid="ecovacq"
                             >
                               {attribute.name}
                             </Label>
-                            <Badge variant="outline" data-oid="5xzwnrx">
+                            <Badge variant="outline" data-oid="7pr6oq-">
                               {currentValues.length} 個值
                             </Badge>
                           </div>
 
                           {/* 添加屬性值 */}
-                          <div className="flex space-x-2" data-oid="c_87s43">
+                          <div className="flex space-x-2" data-oid=":jdwmz_">
                             <Input
                               placeholder={`輸入${attribute.name}的值，如：紅色、藍色`}
                               value={inputValues[attributeId] || ""}
@@ -483,7 +483,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                                   handleAddAttributeValue(attributeId);
                                 }
                               }}
-                              data-oid="52f0yyu"
+                              data-oid="1d25s0b"
                             />
 
                             <Button
@@ -492,11 +492,11 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                                 handleAddAttributeValue(attributeId)
                               }
                               className="shrink-0"
-                              data-oid="og9e6.z"
+                              data-oid="x.y3uiq"
                             >
                               <Plus
                                 className="h-4 w-4 mr-1"
-                                data-oid="iwh37-e"
+                                data-oid="lu9lau7"
                               />
                               添加
                             </Button>
@@ -506,16 +506,16 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                           {currentValues.length > 0 && (
                             <div
                               className="flex flex-wrap gap-2"
-                              data-oid="vq85uzp"
+                              data-oid="yhtrsbz"
                             >
                               {currentValues.map((value) => (
                                 <Badge
                                   key={value}
                                   variant="secondary"
                                   className="flex items-center space-x-1 pr-1"
-                                  data-oid="x4lcgic"
+                                  data-oid="fn4d3bj"
                                 >
-                                  <span data-oid="x9qiflk">{value}</span>
+                                  <span data-oid="0f1udc2">{value}</span>
                                   <Button
                                     size="sm"
                                     variant="ghost"
@@ -526,16 +526,16 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                                         value,
                                       )
                                     }
-                                    data-oid="i_1jcwk"
+                                    data-oid="gj790wo"
                                   >
-                                    <X className="h-3 w-3" data-oid="6is1klj" />
+                                    <X className="h-3 w-3" data-oid="up9xhkp" />
                                   </Button>
                                 </Badge>
                               ))}
                             </div>
                           )}
 
-                          <Separator data-oid="ht-e1zt" />
+                          <Separator data-oid="1ql_2ju" />
                         </div>
                       );
                     },
@@ -548,35 +548,35 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
             {potentialVariantsCount > 0 && (
               <Card
                 className="bg-card text-card-foreground border border-border/40 shadow-sm"
-                data-oid=":2m0b93"
+                data-oid="zbpbtri"
               >
-                <CardHeader data-oid="vsoob0k">
+                <CardHeader data-oid="blxlpw1">
                   <CardTitle
                     className="flex items-center space-x-2"
-                    data-oid="oqdwfk9"
+                    data-oid="m7-a18f"
                   >
-                    <Package className="h-5 w-5" data-oid="6bjl9q8" />
-                    <span data-oid="otfj4t7">變體預覽</span>
+                    <Package className="h-5 w-5" data-oid="1gn45t5" />
+                    <span data-oid="uvww6hx">變體預覽</span>
                   </CardTitle>
-                  <CardDescription data-oid="lt015l4">
+                  <CardDescription data-oid="yqsvzfz">
                     根據您選擇的屬性和屬性值，將生成以下變體組合。
                   </CardDescription>
                 </CardHeader>
-                <CardContent data-oid="f3jonqk">
+                <CardContent data-oid="bkzi_fc">
                   <div
                     className="p-4 rounded-lg border bg-muted/50"
-                    data-oid="b52pzbd"
+                    data-oid="8gmqdjq"
                   >
-                    <div className="text-center" data-oid="qrg01.l">
+                    <div className="text-center" data-oid="n0aoyme">
                       <div
                         className="text-2xl font-bold text-primary"
-                        data-oid="foo4.fy"
+                        data-oid="wv20z.v"
                       >
                         {potentialVariantsCount}
                       </div>
                       <div
                         className="text-sm text-muted-foreground"
-                        data-oid="4ibnu3n"
+                        data-oid="5d._quy"
                       >
                         個變體將在下一步中配置
                       </div>
@@ -589,10 +589,10 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
         )}
 
         {/* 進度提示 */}
-        <Alert data-oid="7383jfh">
-          <AlertCircle className="h-4 w-4" data-oid="l05:mi1" />
-          <AlertDescription data-oid="0gsvat6">
-            <strong data-oid="avzbrf8">進度提示：</strong>
+        <Alert data-oid="om5dbpe">
+          <AlertCircle className="h-4 w-4" data-oid="6x5a_mm" />
+          <AlertDescription data-oid="o3gpt0m">
+            <strong data-oid="-2heh.7">進度提示：</strong>
             {formData.specifications.isVariable
               ? canProceed
                 ? `已配置 ${formData.specifications.selectedAttributes.length} 個屬性，

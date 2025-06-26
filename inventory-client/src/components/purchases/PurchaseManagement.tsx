@@ -208,31 +208,31 @@ export function PurchaseManagement() {
 
   if (error) {
     return (
-      <div className="space-y-6 p-6" data-oid="2_6hzxv">
-        <div className="flex flex-col space-y-2" data-oid="ro__d.t">
-          <h1 className="text-2xl font-bold" data-oid="67kqe68">
+      <div className="space-y-6 p-6" data-oid="2apcm7l">
+        <div className="flex flex-col space-y-2" data-oid="_qmjpmy">
+          <h1 className="text-2xl font-bold" data-oid="n1p3mc7">
             進貨單管理
           </h1>
-          <p className="text-muted-foreground" data-oid="kd3j2ue">
+          <p className="text-muted-foreground" data-oid="atq_4tw">
             管理進貨單狀態、追蹤採購進度和庫存入庫
           </p>
         </div>
 
-        <Card className="p-6" data-oid="ifcj49c">
+        <Card className="p-6" data-oid="by9umld">
           <div
             className="flex items-center gap-2 text-red-600"
-            data-oid="q0zm-x0"
+            data-oid="cwy741h"
           >
-            <AlertCircle className="h-5 w-5" data-oid="k-:o8ax" />
-            <span data-oid="d1p.1gt">載入進貨單數據失敗</span>
+            <AlertCircle className="h-5 w-5" data-oid="0fji-wm" />
+            <span data-oid="8xafp3s">載入進貨單數據失敗</span>
           </div>
           <Button
             variant="outline"
             onClick={() => refetch()}
             className="mt-4"
-            data-oid="tua-gb6"
+            data-oid="6zlxgro"
           >
-            <RefreshCw className="h-4 w-4 mr-2" data-oid="cqyzg4u" />
+            <RefreshCw className="h-4 w-4 mr-2" data-oid="26kpwpf" />
             重試
           </Button>
         </Card>
@@ -241,18 +241,18 @@ export function PurchaseManagement() {
   }
 
   return (
-    <div className="space-y-6 p-6" data-oid="wlkfaz:">
+    <div className="space-y-6 p-6" data-oid="mex9nz0">
       {/* 頁面標題區 */}
-      <div className="flex items-center justify-between" data-oid="ljn3zng">
-        <div data-oid="yq7r.4z">
+      <div className="flex items-center justify-between" data-oid="tjr7afo">
+        <div data-oid="pqymmu0">
           <h1
             className="text-2xl font-bold flex items-center gap-2"
-            data-oid="ycy_en1"
+            data-oid="9hxitih"
           >
-            <Package className="h-7 w-7 text-blue-600" data-oid="_fdx8.." />
+            <Package className="h-7 w-7 text-blue-600" data-oid="o_6eqkl" />
             進貨單管理
           </h1>
-          <p className="text-muted-foreground mt-1" data-oid="a0iuu-5">
+          <p className="text-muted-foreground mt-1" data-oid="i2zsapz">
             管理進貨單狀態、追蹤採購進度和庫存入庫流程
           </p>
         </div>
@@ -260,154 +260,154 @@ export function PurchaseManagement() {
         <Button
           onClick={() => setCreateDialogOpen(true)}
           className="flex items-center gap-2"
-          data-oid="32thczi"
+          data-oid="v0cq69f"
         >
-          <Plus className="h-4 w-4" data-oid=".okiej2" />
+          <Plus className="h-4 w-4" data-oid="ccrmppz" />
           新增進貨單
         </Button>
       </div>
 
       {/* 統計卡片區 */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4" data-oid="1awx8dq">
-        <Card data-oid="mqde4ah">
-          <CardContent className="p-4" data-oid="2hvvt2k">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4" data-oid="e08x1cu">
+        <Card data-oid="-47r_hj">
+          <CardContent className="p-4" data-oid="tmyfnnw">
             <div
               className="flex items-center justify-between"
-              data-oid=":s-kg_-"
+              data-oid="9yhrz3r"
             >
-              <div data-oid="et-.u34">
+              <div data-oid="o.hddtz">
                 <p
                   className="text-sm font-medium text-muted-foreground"
-                  data-oid="ei06ad4"
+                  data-oid="a8msuh8"
                 >
                   今日新增
                 </p>
                 <p
                   className="text-2xl font-bold text-blue-600"
-                  data-oid="csm6e70"
+                  data-oid="pgdkbhk"
                 >
                   {stats.todayCount}
                 </p>
               </div>
               <ShoppingCart
                 className="h-8 w-8 text-blue-600"
-                data-oid="y4qntaz"
+                data-oid="l5qcmvd"
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card data-oid="bjc2.2s">
-          <CardContent className="p-4" data-oid="w2mguj:">
+        <Card data-oid="of7fvzq">
+          <CardContent className="p-4" data-oid="x413b55">
             <div
               className="flex items-center justify-between"
-              data-oid="ae7ki12"
+              data-oid="wbex:6k"
             >
-              <div data-oid="khsetg:">
+              <div data-oid="4b4v6kt">
                 <p
                   className="text-sm font-medium text-muted-foreground"
-                  data-oid="iec3a5d"
+                  data-oid="9a-vy.v"
                 >
                   本週進貨
                 </p>
                 <p
                   className="text-2xl font-bold text-green-600"
-                  data-oid="qqd.dht"
+                  data-oid="9t0--la"
                 >
                   {stats.weeklyCount}
                 </p>
               </div>
               <TrendingUp
                 className="h-8 w-8 text-green-600"
-                data-oid="mv2y0.i"
+                data-oid="6.q.-2n"
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card data-oid="_wrmlz5">
-          <CardContent className="p-4" data-oid="nphxf9z">
+        <Card data-oid="gjeb8uq">
+          <CardContent className="p-4" data-oid="osqftb1">
             <div
               className="flex items-center justify-between"
-              data-oid="1v9mnor"
+              data-oid="tonoqfw"
             >
-              <div data-oid="f_bmzud">
+              <div data-oid="gd.:c1a">
                 <p
                   className="text-sm font-medium text-muted-foreground"
-                  data-oid="h_y-1ds"
+                  data-oid="s4v8jar"
                 >
                   待處理
                 </p>
                 <p
                   className="text-2xl font-bold text-yellow-600"
-                  data-oid="d4o7vp_"
+                  data-oid="hjsh1bs"
                 >
                   {stats.pendingCount}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-600" data-oid="2ezz:gr" />
+              <Clock className="h-8 w-8 text-yellow-600" data-oid="b6kz23v" />
             </div>
           </CardContent>
         </Card>
 
-        <Card data-oid="89ro_t7">
-          <CardContent className="p-4" data-oid="t0yaxtr">
+        <Card data-oid="93ouu81">
+          <CardContent className="p-4" data-oid="5.whrth">
             <div
               className="flex items-center justify-between"
-              data-oid="pjvn6c:"
+              data-oid="tmkib7m"
             >
-              <div data-oid="k2ft79-">
+              <div data-oid="q9:fd1u">
                 <p
                   className="text-sm font-medium text-muted-foreground"
-                  data-oid="d28j2_i"
+                  data-oid="6j7zgtt"
                 >
                   總計
                 </p>
                 <p
                   className="text-2xl font-bold text-purple-600"
-                  data-oid="eo.om63"
+                  data-oid="dzjggy5"
                 >
                   {stats.total}
                 </p>
               </div>
-              <Archive className="h-8 w-8 text-purple-600" data-oid="grj5x95" />
+              <Archive className="h-8 w-8 text-purple-600" data-oid="v_o8e4m" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* 篩選器區域 */}
-      <Card data-oid="-myti84">
-        <CardHeader data-oid="lr2ox1y">
-          <CardTitle className="flex items-center gap-2" data-oid="7uaze7-">
-            <Filter className="h-5 w-5" data-oid="9prr7li" />
+      <Card data-oid="u_-3mv5">
+        <CardHeader data-oid="dn7okyo">
+          <CardTitle className="flex items-center gap-2" data-oid="lsg8x8f">
+            <Filter className="h-5 w-5" data-oid="uc1dp0t" />
             篩選進貨單
           </CardTitle>
-          <CardDescription data-oid="rrxjf71">
+          <CardDescription data-oid="rw3szll">
             使用以下篩選器來查找特定的進貨單
           </CardDescription>
         </CardHeader>
-        <CardContent data-oid="vygrwd.">
+        <CardContent data-oid="ef0:.wa">
           <div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-            data-oid="5gf2vts"
+            data-oid="pq0gvr8"
           >
             {/* 進貨單號搜尋 */}
-            <div className="space-y-2" data-oid="pgk:ciu">
-              <label className="text-sm font-medium" data-oid="f-09va5">
+            <div className="space-y-2" data-oid="oor1_q:">
+              <label className="text-sm font-medium" data-oid="uu3vr.j">
                 進貨單號
               </label>
               <Input
                 placeholder="搜尋進貨單號..."
                 value={orderNumberInput}
                 onChange={(e) => setOrderNumberInput(e.target.value)}
-                data-oid="axn0:ae"
+                data-oid="df6_4vj"
               />
             </div>
 
             {/* 門市篩選 */}
-            <div className="space-y-2" data-oid="jne0r4u">
-              <label className="text-sm font-medium" data-oid="j78nghv">
+            <div className="space-y-2" data-oid="f2oy7ue">
+              <label className="text-sm font-medium" data-oid="ji.114a">
                 門市
               </label>
               <Select
@@ -418,20 +418,20 @@ export function PurchaseManagement() {
                     value === "all" ? undefined : parseInt(value),
                   )
                 }
-                data-oid="qkgv1us"
+                data-oid="52.yjdr"
               >
-                <SelectTrigger data-oid="5ngjn9l">
-                  <SelectValue placeholder="選擇門市" data-oid="u7xhcp." />
+                <SelectTrigger data-oid="f.ov_xu">
+                  <SelectValue placeholder="選擇門市" data-oid="wvz9c8y" />
                 </SelectTrigger>
-                <SelectContent data-oid="iv49za8">
-                  <SelectItem value="all" data-oid="zyp:ibm">
+                <SelectContent data-oid="760qw0z">
+                  <SelectItem value="all" data-oid="bizr1fd">
                     所有門市
                   </SelectItem>
                   {(storesData as any)?.data?.map((store: any) => (
                     <SelectItem
                       key={store.id}
                       value={store.id?.toString() || ""}
-                      data-oid="arli_6v"
+                      data-oid="xa3r7fm"
                     >
                       {store.name}
                     </SelectItem>
@@ -441,25 +441,25 @@ export function PurchaseManagement() {
             </div>
 
             {/* 狀態篩選 */}
-            <div className="space-y-2" data-oid="a_pn59k">
-              <label className="text-sm font-medium" data-oid=".w69ux1">
+            <div className="space-y-2" data-oid="j-75y02">
+              <label className="text-sm font-medium" data-oid="a4-ionr">
                 狀態
               </label>
               <Select
                 value={filters.status || "all"}
                 onValueChange={(value) => handleFilterChange("status", value)}
-                data-oid=":82v_4e"
+                data-oid="o:u9jqp"
               >
-                <SelectTrigger data-oid="44earpc">
-                  <SelectValue placeholder="選擇狀態" data-oid="3fvjz4e" />
+                <SelectTrigger data-oid="3f_5h.8">
+                  <SelectValue placeholder="選擇狀態" data-oid="r45hih9" />
                 </SelectTrigger>
-                <SelectContent data-oid="3l2ivdp">
-                  <SelectItem value="all" data-oid="_4gwl2d">
+                <SelectContent data-oid="330n::b">
+                  <SelectItem value="all" data-oid="1-jiuk9">
                     所有狀態
                   </SelectItem>
                   {Object.entries(PURCHASE_STATUS_LABELS).map(
                     ([value, label]) => (
-                      <SelectItem key={value} value={value} data-oid="ebh9:rl">
+                      <SelectItem key={value} value={value} data-oid="igeyf4d">
                         {label}
                       </SelectItem>
                     ),
@@ -469,27 +469,27 @@ export function PurchaseManagement() {
             </div>
 
             {/* 操作按鈕 */}
-            <div className="space-y-2" data-oid="jyughrn">
+            <div className="space-y-2" data-oid="papk_o.">
               <label
                 className="text-sm font-medium opacity-0"
-                data-oid=".-vx-9k"
+                data-oid="bqfrnsv"
               >
                 操作
               </label>
-              <div className="flex gap-2" data-oid=".-hf95b">
+              <div className="flex gap-2" data-oid="vuk.5bt">
                 <Button
                   variant="outline"
                   onClick={handleResetFilters}
-                  data-oid="34qgjaq"
+                  data-oid=":jiz21k"
                 >
                   重置
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => refetch()}
-                  data-oid="_w6.tky"
+                  data-oid="f7zbkrf"
                 >
-                  <RefreshCw className="h-4 w-4" data-oid="13xl:ue" />
+                  <RefreshCw className="h-4 w-4" data-oid="zui06y3" />
                 </Button>
               </div>
             </div>
@@ -498,34 +498,34 @@ export function PurchaseManagement() {
       </Card>
 
       {/* 進貨單列表 */}
-      <Card data-oid="ifht1_b">
-        <CardHeader data-oid="2c-3j2g">
-          <CardTitle data-oid="-xvn8on">進貨單列表</CardTitle>
-          <CardDescription data-oid="da8yncs">
+      <Card data-oid="jon:6-j">
+        <CardHeader data-oid="yvygm_y">
+          <CardTitle data-oid="tlr1ewn">進貨單列表</CardTitle>
+          <CardDescription data-oid="nbqx4hv">
             共 {stats.total} 筆進貨單
           </CardDescription>
         </CardHeader>
-        <CardContent data-oid=":2skqo8">
+        <CardContent data-oid="4n_y9z:">
           {isLoading ? (
-            <div className="space-y-4" data-oid="ig6z2rw">
+            <div className="space-y-4" data-oid="64lnk2:">
               {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="animate-pulse" data-oid="lljfaai">
+                <div key={index} className="animate-pulse" data-oid="cc7k:t1">
                   <div
                     className="flex items-center space-x-4 p-4 border rounded-lg"
-                    data-oid=":e3dls6"
+                    data-oid="e-f76my"
                   >
                     <div
                       className="h-10 w-10 bg-muted rounded"
-                      data-oid="7.3eq6j"
+                      data-oid="16rsdw7"
                     ></div>
-                    <div className="space-y-2 flex-1" data-oid="c_zaa-i">
+                    <div className="space-y-2 flex-1" data-oid="rpp8sa.">
                       <div
                         className="h-4 bg-muted rounded w-3/4"
-                        data-oid="c9mlmz7"
+                        data-oid="miyl8ox"
                       ></div>
                       <div
                         className="h-4 bg-muted rounded w-1/2"
-                        data-oid="zhrf85q"
+                        data-oid="f7jn55d"
                       ></div>
                     </div>
                   </div>
@@ -533,7 +533,7 @@ export function PurchaseManagement() {
               ))}
             </div>
           ) : purchasesResponse?.data && purchasesResponse.data.length > 0 ? (
-            <div className="space-y-4" data-oid="9f11xgo">
+            <div className="space-y-4" data-oid="b:rr_jp">
               {purchasesResponse.data.map((purchase: any) => {
                 const permissions = getPurchasePermissions(
                   purchase.status as PurchaseStatus,
@@ -546,18 +546,18 @@ export function PurchaseManagement() {
                   <div
                     key={purchase.id}
                     className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                    data-oid="kvo01ir"
+                    data-oid="b7657pv"
                   >
                     <div
                       className="flex items-start justify-between"
-                      data-oid="uwfw:4_"
+                      data-oid="yh-n5ph"
                     >
-                      <div className="space-y-2 flex-1" data-oid="r5vt.1v">
+                      <div className="space-y-2 flex-1" data-oid="wpa9lam">
                         <div
                           className="flex items-center gap-2"
-                          data-oid="eyf-ftp"
+                          data-oid="yo06j31"
                         >
-                          <h3 className="font-semibold" data-oid="dycnmqo">
+                          <h3 className="font-semibold" data-oid="94g3-i-">
                             {purchase.order_number}
                           </h3>
                           <Badge
@@ -566,7 +566,7 @@ export function PurchaseManagement() {
                                 purchase.status as PurchaseStatus
                               ]
                             }
-                            data-oid=".zneag_"
+                            data-oid="5_l52vv"
                           >
                             {
                               PURCHASE_STATUS_LABELS[
@@ -578,23 +578,23 @@ export function PurchaseManagement() {
 
                         <div
                           className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground"
-                          data-oid="2kv51ws"
+                          data-oid="jhxe4uh"
                         >
                           <div
                             className="flex items-center gap-1"
-                            data-oid="mo:.9dr"
+                            data-oid="dvd0kfh"
                           >
-                            <Store className="h-4 w-4" data-oid="0zq:xtb" />
-                            <span data-oid="2_k:arv">
+                            <Store className="h-4 w-4" data-oid="6c1r9.e" />
+                            <span data-oid="1z39lta">
                               {purchase.store?.name}
                             </span>
                           </div>
                           <div
                             className="flex items-center gap-1"
-                            data-oid="4avjk1."
+                            data-oid="lklw030"
                           >
-                            <Calendar className="h-4 w-4" data-oid="tnnxxqy" />
-                            <span data-oid="zwi5wcb">
+                            <Calendar className="h-4 w-4" data-oid="0kid_ph" />
+                            <span data-oid="ze9aocx">
                               {purchase.purchased_at
                                 ? format(
                                     new Date(purchase.purchased_at),
@@ -604,7 +604,7 @@ export function PurchaseManagement() {
                                 : "未設定"}
                             </span>
                           </div>
-                          <div data-oid="wgw5qfu">
+                          <div data-oid="sysz-ur">
                             總金額: NT${" "}
                             {Number(
                               purchase.total_amount || 0,
@@ -615,7 +615,7 @@ export function PurchaseManagement() {
                         {purchase.items && purchase.items.length > 0 && (
                           <div
                             className="text-sm text-muted-foreground"
-                            data-oid="z53r-gi"
+                            data-oid="yn0dntn"
                           >
                             共 {purchase.items.length} 項商品， 總數量:{" "}
                             {purchase.items.reduce(
@@ -628,23 +628,23 @@ export function PurchaseManagement() {
                       </div>
 
                       {/* 操作選單 */}
-                      <DropdownMenu data-oid="pu72i-k">
-                        <DropdownMenuTrigger asChild data-oid="5wuzrwv">
-                          <Button variant="ghost" size="sm" data-oid="7kkebyq">
+                      <DropdownMenu data-oid="cn8obkz">
+                        <DropdownMenuTrigger asChild data-oid="zc8tm5z">
+                          <Button variant="ghost" size="sm" data-oid="dkku3j0">
                             <MoreHorizontal
                               className="h-4 w-4"
-                              data-oid="96sryz3"
+                              data-oid="ew:hb58"
                             />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" data-oid=":kckfnh">
+                        <DropdownMenuContent align="end" data-oid="hfvj8n6">
                           <DropdownMenuItem
                             onClick={() =>
                               router.push(`/purchases/${purchase.id}`)
                             }
-                            data-oid="427tkef"
+                            data-oid="nylndaf"
                           >
-                            <Eye className="h-4 w-4 mr-2" data-oid="98d:gqo" />
+                            <Eye className="h-4 w-4 mr-2" data-oid="jh5r..o" />
                             查看詳情
                           </DropdownMenuItem>
 
@@ -653,11 +653,11 @@ export function PurchaseManagement() {
                               onClick={() =>
                                 router.push(`/purchases/${purchase.id}/edit`)
                               }
-                              data-oid="015txwx"
+                              data-oid="tak7nc3"
                             >
                               <Edit
                                 className="h-4 w-4 mr-2"
-                                data-oid="69u8c2v"
+                                data-oid="q:584yi"
                               />
                               編輯
                             </DropdownMenuItem>
@@ -665,18 +665,18 @@ export function PurchaseManagement() {
 
                           {statusTransitions.length > 0 && (
                             <>
-                              <DropdownMenuSeparator data-oid="dv_n8v0" />
+                              <DropdownMenuSeparator data-oid="8h:pd6q" />
                               {statusTransitions.map((status) => (
                                 <DropdownMenuItem
                                   key={status}
                                   onClick={() =>
                                     handleUpdateStatus(purchase.id, status)
                                   }
-                                  data-oid="mkp64dl"
+                                  data-oid="eru5ya-"
                                 >
                                   <CheckCircle
                                     className="h-4 w-4 mr-2"
-                                    data-oid="34.chd."
+                                    data-oid="eo83k0x"
                                   />
                                   更新為 {PURCHASE_STATUS_LABELS[status]}
                                 </DropdownMenuItem>
@@ -686,37 +686,37 @@ export function PurchaseManagement() {
 
                           {permissions.canCancel && (
                             <>
-                              <DropdownMenuSeparator data-oid="tygngi5" />
-                              <AlertDialog data-oid="_flow-s">
-                                <AlertDialogTrigger asChild data-oid="m4agy_n">
+                              <DropdownMenuSeparator data-oid="y:0mqfb" />
+                              <AlertDialog data-oid="q6p3vwt">
+                                <AlertDialogTrigger asChild data-oid="k7d_2da">
                                   <DropdownMenuItem
                                     onSelect={(e) => e.preventDefault()}
-                                    data-oid="3z5i4.7"
+                                    data-oid="o-wcjmh"
                                   >
                                     <X
                                       className="h-4 w-4 mr-2"
-                                      data-oid="gw-l10r"
+                                      data-oid="rp_02t2"
                                     />
                                     取消進貨單
                                   </DropdownMenuItem>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent data-oid="kummxil">
-                                  <AlertDialogHeader data-oid="ww0x:8i">
-                                    <AlertDialogTitle data-oid="z3cw6h5">
+                                <AlertDialogContent data-oid="1jlifgx">
+                                  <AlertDialogHeader data-oid="79udxof">
+                                    <AlertDialogTitle data-oid=".wmvpgy">
                                       確認取消進貨單
                                     </AlertDialogTitle>
-                                    <AlertDialogDescription data-oid="4b07cp6">
+                                    <AlertDialogDescription data-oid="zkmpdcy">
                                       確定要取消進貨單 "{purchase.order_number}"
                                       嗎？此操作無法復原。
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
-                                  <AlertDialogFooter data-oid="0yzrp4_">
-                                    <AlertDialogCancel data-oid="y4aw:ax">
+                                  <AlertDialogFooter data-oid="2cyggwz">
+                                    <AlertDialogCancel data-oid="8pz2fe6">
                                       取消
                                     </AlertDialogCancel>
                                     <AlertDialogAction
                                       onClick={() => handleCancel(purchase.id)}
-                                      data-oid="hexldth"
+                                      data-oid="7dt8wan"
                                     >
                                       確認取消
                                     </AlertDialogAction>
@@ -728,39 +728,39 @@ export function PurchaseManagement() {
 
                           {permissions.canDelete && (
                             <>
-                              <DropdownMenuSeparator data-oid="xyaemi0" />
-                              <AlertDialog data-oid="p.l1_4i">
-                                <AlertDialogTrigger asChild data-oid="poa4l6n">
+                              <DropdownMenuSeparator data-oid="l6gmor-" />
+                              <AlertDialog data-oid="k8tpimc">
+                                <AlertDialogTrigger asChild data-oid="hdiqeez">
                                   <DropdownMenuItem
                                     onSelect={(e) => e.preventDefault()}
                                     className="text-red-600"
-                                    data-oid="i2vkz1u"
+                                    data-oid="i.vvftn"
                                   >
                                     <Trash2
                                       className="h-4 w-4 mr-2"
-                                      data-oid="-6ni7z_"
+                                      data-oid="ptwy4o2"
                                     />
                                     刪除
                                   </DropdownMenuItem>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent data-oid="1tov2r4">
-                                  <AlertDialogHeader data-oid="8.m-91l">
-                                    <AlertDialogTitle data-oid="56xz9xl">
+                                <AlertDialogContent data-oid="r4eqas_">
+                                  <AlertDialogHeader data-oid="531rgga">
+                                    <AlertDialogTitle data-oid="07igofc">
                                       確認刪除進貨單
                                     </AlertDialogTitle>
-                                    <AlertDialogDescription data-oid="7-vd0n2">
+                                    <AlertDialogDescription data-oid="rijlm0a">
                                       確定要刪除進貨單 "{purchase.order_number}"
                                       嗎？此操作無法復原。
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
-                                  <AlertDialogFooter data-oid=":p.r1p7">
-                                    <AlertDialogCancel data-oid="6y6.0d_">
+                                  <AlertDialogFooter data-oid="_k1d60s">
+                                    <AlertDialogCancel data-oid="b6fkt-k">
                                       取消
                                     </AlertDialogCancel>
                                     <AlertDialogAction
                                       onClick={() => handleDelete(purchase.id)}
                                       className="bg-red-600 hover:bg-red-700"
-                                      data-oid="x9eqzax"
+                                      data-oid="y2am:mb"
                                     >
                                       確認刪除
                                     </AlertDialogAction>
@@ -782,17 +782,17 @@ export function PurchaseManagement() {
                 purchasesResponse.meta.last_page > 1 && (
                   <div
                     className="flex items-center justify-between pt-4 border-t"
-                    data-oid=":tq9.5k"
+                    data-oid="fb-wud8"
                   >
                     <div
                       className="text-sm text-muted-foreground"
-                      data-oid="b9v0083"
+                      data-oid="t2xpqs4"
                     >
                       第 {purchasesResponse.meta.current_page} 頁，共{" "}
                       {purchasesResponse.meta.last_page} 頁 （總計{" "}
                       {purchasesResponse.meta.total} 筆記錄）
                     </div>
-                    <div className="flex items-center gap-2" data-oid="x4a5l9d">
+                    <div className="flex items-center gap-2" data-oid="pcm-3sz">
                       <Button
                         variant="outline"
                         size="sm"
@@ -805,7 +805,7 @@ export function PurchaseManagement() {
                             (purchasesResponse.meta?.current_page || 1) - 1,
                           )
                         }
-                        data-oid="301v9i2"
+                        data-oid="bn6v5sx"
                       >
                         上一頁
                       </Button>
@@ -822,7 +822,7 @@ export function PurchaseManagement() {
                             (purchasesResponse.meta?.current_page || 1) + 1,
                           )
                         }
-                        data-oid="5xdcmsg"
+                        data-oid="ds.7wqx"
                       >
                         下一頁
                       </Button>
@@ -831,23 +831,23 @@ export function PurchaseManagement() {
                 )}
             </div>
           ) : (
-            <div className="text-center py-12" data-oid="t:4doqw">
+            <div className="text-center py-12" data-oid="sjyxdag">
               <Package
                 className="h-12 w-12 text-muted-foreground mx-auto mb-4"
-                data-oid="0mj15hy"
+                data-oid="6he0v8."
               />
 
-              <h3 className="text-lg font-semibold mb-2" data-oid=".0c-8gy">
+              <h3 className="text-lg font-semibold mb-2" data-oid="te78zw6">
                 沒有進貨單
               </h3>
-              <p className="text-muted-foreground mb-4" data-oid="eola.rw">
+              <p className="text-muted-foreground mb-4" data-oid="m9_n2_4">
                 還沒有任何進貨單，點擊上方按鈕創建第一個進貨單。
               </p>
               <Button
                 onClick={() => setCreateDialogOpen(true)}
-                data-oid="_hbez8e"
+                data-oid="5_1s.yx"
               >
-                <Plus className="h-4 w-4 mr-2" data-oid="b9pfio8" />
+                <Plus className="h-4 w-4 mr-2" data-oid="-ix9v41" />
                 新增進貨單
               </Button>
             </div>
@@ -859,7 +859,7 @@ export function PurchaseManagement() {
       <CreatePurchaseDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        data-oid=".okax5z"
+        data-oid="3km:pti"
       />
     </div>
   );

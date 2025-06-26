@@ -62,35 +62,35 @@ export const InventoryTransferList = () => {
     switch (status) {
       case "pending":
         return (
-          <Badge variant="outline" data-oid="khez3r.">
+          <Badge variant="outline" data-oid="cu88:we">
             待處理
           </Badge>
         );
 
       case "in_transit":
         return (
-          <Badge variant="secondary" data-oid=":z_x9ut">
+          <Badge variant="secondary" data-oid="8prsa.u">
             運送中
           </Badge>
         );
 
       case "completed":
         return (
-          <Badge variant="default" data-oid="bvn1lc3">
+          <Badge variant="default" data-oid="lbumnmc">
             已完成
           </Badge>
         );
 
       case "cancelled":
         return (
-          <Badge variant="destructive" data-oid="9ukng.j">
+          <Badge variant="destructive" data-oid="u2xutri">
             已取消
           </Badge>
         );
 
       default:
         return (
-          <Badge variant="secondary" data-oid="sxcq7a.">
+          <Badge variant="secondary" data-oid="12fts1v">
             {status}
           </Badge>
         );
@@ -108,98 +108,98 @@ export const InventoryTransferList = () => {
   };
 
   return (
-    <div data-oid="dc92gv-">
+    <div data-oid="wo233u6">
       {isLoading ? (
-        <div className="space-y-2" data-oid="a_kb:uj">
+        <div className="space-y-2" data-oid="0xwlbcb">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" data-oid="nc3y9i3" />
+            <Skeleton key={i} className="h-12 w-full" data-oid="whp6_47" />
           ))}
         </div>
       ) : (
         <>
-          <Table data-oid="_y95u9b">
-            <TableHeader data-oid="xf_pxas">
+          <Table data-oid="qzkvvp1">
+            <TableHeader data-oid="d6:yfii">
               <TableRow
                 className="border-b hover:bg-transparent"
-                data-oid="-chlu7l"
+                data-oid="hc6:da5"
               >
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid=":z_22rb"
+                  data-oid="k:imuvn"
                 >
                   單號
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="xmw4h-5"
+                  data-oid="ku8._ws"
                 >
                   日期
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="xgjgcdh"
+                  data-oid="zvs0sw1"
                 >
                   來源門市
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="6whvbnu"
+                  data-oid="2834kj1"
                 >
                   目標門市
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="tgljvch"
+                  data-oid="dbxtq5-"
                 >
                   產品
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="ln-vtt4"
+                  data-oid="8njy7p_"
                 >
                   數量
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid=".f93lut"
+                  data-oid="oe1:0.8"
                 >
                   狀態
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="53b9cyv"
+                  data-oid="qp:no6m"
                 >
                   備註
                 </TableHead>
                 <TableHead
                   className="w-[80px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="avxa94q"
+                  data-oid="mmlzspw"
                 >
                   操作
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody data-oid="cyj-4sq">
+            <TableBody data-oid="8fmq-sd">
               {data && data.length === 0 ? (
-                <TableRow data-oid="gfytj:4">
+                <TableRow data-oid=".j4jd._">
                   <TableCell
                     colSpan={9}
                     className="h-24 text-center"
-                    data-oid="a3gook."
+                    data-oid="m1rm0u-"
                   >
                     <div
                       className="flex flex-col items-center justify-center space-y-3 py-6"
-                      data-oid="ef9qgs3"
+                      data-oid="rjurk.b"
                     >
                       <p
                         className="text-lg font-medium text-muted-foreground"
-                        data-oid="qh3td71"
+                        data-oid=":0zrq.k"
                       >
                         沒有庫存轉移記錄
                       </p>
                       <p
                         className="text-sm text-muted-foreground"
-                        data-oid="q-1uh9t"
+                        data-oid=".b27a4n"
                       >
                         點擊"新增轉移"標籤來創建庫存轉移
                       </p>
@@ -208,71 +208,71 @@ export const InventoryTransferList = () => {
                 </TableRow>
               ) : (
                 data?.map((transfer: any) => (
-                  <TableRow key={transfer.id} data-oid="6c_3ijt">
-                    <TableCell data-oid="a2.zwmp">{transfer.id}</TableCell>
-                    <TableCell data-oid="x3sl61.">
+                  <TableRow key={transfer.id} data-oid="o7ut.1o">
+                    <TableCell data-oid="lbf.rj1">{transfer.id}</TableCell>
+                    <TableCell data-oid="ioczgs5">
                       {formatDate(transfer.created_at)}
                     </TableCell>
-                    <TableCell data-oid=".bu5xse">
+                    <TableCell data-oid="1o-.0.z">
                       {transfer.from_store?.name ||
                         `門市 #${transfer.from_store_id}`}
                     </TableCell>
-                    <TableCell data-oid="ri0tlme">
+                    <TableCell data-oid="4c40:a1">
                       {transfer.to_store?.name ||
                         `門市 #${transfer.to_store_id}`}
                     </TableCell>
-                    <TableCell data-oid="3r8cdvd">
+                    <TableCell data-oid="4i:6w5b">
                       {transfer.product_variant?.product?.name ||
                         `產品 #${transfer.product_variant_id}`}
                     </TableCell>
-                    <TableCell data-oid="her816v">
+                    <TableCell data-oid="i06e22k">
                       {transfer.quantity}
                     </TableCell>
-                    <TableCell data-oid="j851vpc">
+                    <TableCell data-oid="4fei7ea">
                       {getStatusBadge(transfer.status || "unknown")}
                     </TableCell>
-                    <TableCell data-oid="8nxam.r">
+                    <TableCell data-oid="isc4-hj">
                       <div
                         className="max-w-[200px] truncate"
                         title={transfer.notes || ""}
-                        data-oid="fw-2sms"
+                        data-oid="_.9pz22"
                       >
                         {transfer.notes || "-"}
                       </div>
                     </TableCell>
-                    <TableCell data-oid="u:aykjw">
-                      <DropdownMenu data-oid=":8jh9sp">
-                        <DropdownMenuTrigger asChild data-oid="yk.laah">
+                    <TableCell data-oid="c06cvhe">
+                      <DropdownMenu data-oid="w47o8t0">
+                        <DropdownMenuTrigger asChild data-oid="i20ga3v">
                           <Button
                             variant="ghost"
                             className="h-8 w-8 p-0"
-                            data-oid=":y.rjb0"
+                            data-oid="k2xt7kg"
                           >
                             <MoreHorizontal
                               className="h-4 w-4"
-                              data-oid="8fpl.2t"
+                              data-oid="ceymzno"
                             />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" data-oid="f82gdl5">
+                        <DropdownMenuContent align="end" data-oid="eikz:hs">
                           <DropdownMenuItem
                             onClick={() => setViewingHistoryTransfer(transfer)}
-                            data-oid="nacklpe"
+                            data-oid="7kibyuq"
                           >
                             <History
                               className="mr-2 h-4 w-4"
-                              data-oid="uo33zcr"
+                              data-oid="_xjhcfc"
                             />
                             查看歷史
                           </DropdownMenuItem>
                           {canEditStatus(transfer.status || "") && (
                             <DropdownMenuItem
                               onClick={() => setEditingTransfer(transfer)}
-                              data-oid="wfqfk3w"
+                              data-oid="qrs7n:g"
                             >
                               <Edit
                                 className="mr-2 h-4 w-4"
-                                data-oid="_edq333"
+                                data-oid="a:i.bsr"
                               />
                               編輯狀態
                             </DropdownMenuItem>
@@ -287,14 +287,14 @@ export const InventoryTransferList = () => {
           </Table>
           <div
             className="flex justify-center mt-4 space-x-2"
-            data-oid="przi:4-"
+            data-oid="xbhouio"
           >
             <Button
               variant="outline"
               size="sm"
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
               disabled={page === 1}
-              data-oid="ggjlm0o"
+              data-oid="a3dcz-d"
             >
               上一頁
             </Button>
@@ -303,7 +303,7 @@ export const InventoryTransferList = () => {
               size="sm"
               onClick={() => setPage((prev) => prev + 1)}
               disabled={!data || data.length < perPage}
-              data-oid="stz-o_p"
+              data-oid="fdqbtao"
             >
               下一頁
             </Button>
@@ -318,7 +318,7 @@ export const InventoryTransferList = () => {
                 !open && setEditingTransfer(null)
               }
               onSuccess={handleEditSuccess}
-              data-oid="0he3d3h"
+              data-oid="hv13zyq"
             />
           )}
 
@@ -330,7 +330,7 @@ export const InventoryTransferList = () => {
               onOpenChange={(open: boolean) =>
                 !open && setViewingHistoryTransfer(null)
               }
-              data-oid="bg:z2.a"
+              data-oid="5pspt01"
             />
           )}
         </>

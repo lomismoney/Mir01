@@ -3218,7 +3218,7 @@ export function useOrders(filters: {
       const meta = response?.meta || {}; // 提取分頁元數據
       const links = response?.links || {}; // 提取分頁連結
 
-      // 2. 進行訂單數據的類型轉換和清理（如果需要）
+      // 2. 進行訂單數據的類型轉換和清理
       const processedOrders = orders.map((order: any) => ({
         ...order,
         // 📊 金額字段的數值化處理
@@ -3228,6 +3228,13 @@ export function useOrders(filters: {
         discount_amount: parseFloat(order.discount_amount || '0'),
         grand_total: parseFloat(order.grand_total || '0'),
         paid_amount: parseFloat(order.paid_amount || '0'),
+        
+        // 🎯 新增：日期格式化 - 在數據精煉廠中一次性完成
+        formatted_created_date: new Date(order.created_at).toLocaleDateString('zh-TW', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).replace(/\//g, '/'), // 確保使用 / 作為分隔符
       }));
 
       // 3. 返回完整的分頁響應結構

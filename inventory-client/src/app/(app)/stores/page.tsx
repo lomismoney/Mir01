@@ -203,46 +203,59 @@ export default function StoresPage() {
   const columns = createStoresColumns(storeActions, isAdmin);
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto py-8 space-y-6" data-oid="xh5wzz:">
       {/* 頁面標題 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="flex items-center justify-between" data-oid="ir3x0zi">
+        <div data-oid=".w-f3ei">
+          <h1
+            className="text-3xl font-bold text-gray-900 dark:text-white"
+            data-oid="ofivuw8"
+          >
             分店管理
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
+          <p
+            className="text-gray-600 dark:text-gray-300 mt-2"
+            data-oid="ziahzaj"
+          >
             管理系統中的分店資料
           </p>
         </div>
       </div>
 
       {/* 分店資料表格 */}
-      <div className="space-y-4">
+      <div className="space-y-4" data-oid="5qvz0je">
         <StoresDataTable
           columns={columns}
           data={stores}
           isLoading={isLoading}
           showAddButton={isAdmin}
           onAddStore={handleAddStore}
+          data-oid="c:kikgs"
         />
       </div>
 
       {/* 新增分店對話框 */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <StoreIcon className="w-5 h-5" />
+      <Dialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        data-oid="gxss3lj"
+      >
+        <DialogContent className="sm:max-w-[425px]" data-oid="7_sr2kk">
+          <DialogHeader data-oid="rt1x9o1">
+            <DialogTitle className="flex items-center gap-2" data-oid=":6gwe2w">
+              <StoreIcon className="w-5 h-5" data-oid="d8f7zva" />
               新增分店
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription data-oid="qly6khp">
               填寫以下資料以新增分店，建立完成後將可在庫存管理中使用。
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="store-name">分店名稱 *</Label>
+          <div className="py-4 space-y-4" data-oid="_024ul4">
+            <div className="space-y-2" data-oid="jh_g.0r">
+              <Label htmlFor="store-name" data-oid="fmiq_jw">
+                分店名稱 *
+              </Label>
               <Input
                 id="store-name"
                 value={newStoreName}
@@ -250,11 +263,14 @@ export default function StoresPage() {
                 placeholder="輸入分店名稱"
                 disabled={createStoreMutation.isPending}
                 autoComplete="off"
+                data-oid="wpnjtm5"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="store-address">分店地址</Label>
+            <div className="space-y-2" data-oid="_r2go77">
+              <Label htmlFor="store-address" data-oid="jkj1bt0">
+                分店地址
+              </Label>
               <Input
                 id="store-address"
                 value={newStoreAddress}
@@ -262,11 +278,12 @@ export default function StoresPage() {
                 placeholder="輸入分店地址（選填）"
                 disabled={createStoreMutation.isPending}
                 autoComplete="off"
+                data-oid="s3.84s4"
               />
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter data-oid="88e0k59">
             <Button
               variant="outline"
               onClick={() => {
@@ -274,12 +291,14 @@ export default function StoresPage() {
                 resetCreateForm();
               }}
               disabled={createStoreMutation.isPending}
+              data-oid="lrrct3y"
             >
               取消
             </Button>
             <Button
               onClick={handleCreateSubmit}
               disabled={!newStoreName.trim() || createStoreMutation.isPending}
+              data-oid="ghx8v6j"
             >
               {createStoreMutation.isPending ? "處理中..." : "確定新增"}
             </Button>
@@ -288,22 +307,28 @@ export default function StoresPage() {
       </Dialog>
 
       {/* 編輯分店對話框 */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="w-5 h-5" />
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        data-oid="372rc-z"
+      >
+        <DialogContent className="sm:max-w-[425px]" data-oid="8x6xrld">
+          <DialogHeader data-oid=":2wxgb:">
+            <DialogTitle className="flex items-center gap-2" data-oid="_1m7g_t">
+              <Edit className="w-5 h-5" data-oid="f2nex22" />
               編輯分店
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription data-oid="5p9b-3u">
               編輯分店資料，完成後將立即更新系統紀錄。
             </DialogDescription>
           </DialogHeader>
 
           {editingStore && (
-            <div className="py-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-store-name">分店名稱 *</Label>
+            <div className="py-4 space-y-4" data-oid="lgft1hw">
+              <div className="space-y-2" data-oid="p9sd0qy">
+                <Label htmlFor="edit-store-name" data-oid="ff.w9p1">
+                  分店名稱 *
+                </Label>
                 <Input
                   id="edit-store-name"
                   value={editStoreName}
@@ -311,11 +336,14 @@ export default function StoresPage() {
                   placeholder="輸入分店名稱"
                   disabled={updateStoreMutation.isPending}
                   autoComplete="off"
+                  data-oid="mm52ccu"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-store-address">分店地址</Label>
+              <div className="space-y-2" data-oid="eakt_ak">
+                <Label htmlFor="edit-store-address" data-oid="spzfn-m">
+                  分店地址
+                </Label>
                 <Input
                   id="edit-store-address"
                   value={editStoreAddress}
@@ -323,12 +351,13 @@ export default function StoresPage() {
                   placeholder="輸入分店地址（選填）"
                   disabled={updateStoreMutation.isPending}
                   autoComplete="off"
+                  data-oid="3_wi1k3"
                 />
               </div>
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter data-oid="9cov.w-">
             <Button
               variant="outline"
               onClick={() => {
@@ -336,12 +365,14 @@ export default function StoresPage() {
                 resetEditForm();
               }}
               disabled={updateStoreMutation.isPending}
+              data-oid="yshh.h:"
             >
               取消
             </Button>
             <Button
               onClick={handleEditSubmit}
               disabled={!editStoreName.trim() || updateStoreMutation.isPending}
+              data-oid="qmoxc1k"
             >
               {updateStoreMutation.isPending ? "處理中..." : "儲存變更"}
             </Button>
@@ -353,11 +384,14 @@ export default function StoresPage() {
       <AlertDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
+        data-oid="0g0fqqv"
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>確認刪除分店？</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent data-oid=".lgozsi">
+          <AlertDialogHeader data-oid="r:mq4fy">
+            <AlertDialogTitle data-oid="a0af1:j">
+              確認刪除分店？
+            </AlertDialogTitle>
+            <AlertDialogDescription data-oid="0q-vmrg">
               {storeToDelete && (
                 <>
                   您即將刪除「{storeToDelete.name}
@@ -366,8 +400,11 @@ export default function StoresPage() {
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteStoreMutation.isPending}>
+          <AlertDialogFooter data-oid="f8j3w:u">
+            <AlertDialogCancel
+              disabled={deleteStoreMutation.isPending}
+              data-oid="s1krdb3"
+            >
               取消
             </AlertDialogCancel>
             <AlertDialogAction
@@ -377,6 +414,7 @@ export default function StoresPage() {
               }}
               disabled={deleteStoreMutation.isPending}
               className="bg-red-600 hover:bg-red-700"
+              data-oid="l3e9pi4"
             >
               {deleteStoreMutation.isPending ? "處理中..." : "確認刪除"}
             </AlertDialogAction>

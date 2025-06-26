@@ -132,16 +132,13 @@ export function UsersDataTable<TData, TValue>({
   });
 
   return (
-    <div className="w-full space-y-4" data-oid="0im-wn_">
+    <div className="w-full space-y-4">
       {/* 工具列 */}
-      <div className="flex items-center justify-between" data-oid="9c:.24s">
-        <div className="flex flex-1 items-center space-x-2" data-oid=":f.ns51">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-1 items-center space-x-2">
           {/* 後端搜尋輸入框 */}
-          <div className="relative max-w-sm" data-oid="0e4.:6-">
-            <Search
-              className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"
-              data-oid="ug24g_r"
-            />
+          <div className="relative max-w-sm">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 
             <Input
               placeholder="搜尋用戶姓名或帳號..."
@@ -149,32 +146,25 @@ export function UsersDataTable<TData, TValue>({
               onChange={handleSearchInputChange}
               className="pl-8"
               disabled={isLoading}
-              data-oid="jcuz8a5"
             />
           </div>
           {isLoading && (
-            <div
-              className="flex items-center text-sm text-muted-foreground"
-              data-oid="95jo0-s"
-            >
-              <div
-                className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2"
-                data-oid="j_19odk"
-              ></div>
+            <div className="flex items-center text-sm text-muted-foreground">
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2"></div>
               搜尋中...
             </div>
           )}
         </div>
 
-        <div className="flex items-center space-x-2" data-oid="zpqbv97">
+        <div className="flex items-center space-x-2">
           {/* 欄位顯示控制 */}
-          <DropdownMenu data-oid="nti20zf">
-            <DropdownMenuTrigger asChild data-oid="ah:g41p">
-              <Button variant="outline" className="ml-auto" data-oid="_:h-myr">
-                欄位 <ChevronDown className="ml-2 h-4 w-4" data-oid="w6_-o4e" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                欄位 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" data-oid="buo421-">
+            <DropdownMenuContent align="end">
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
@@ -187,7 +177,6 @@ export function UsersDataTable<TData, TValue>({
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
                       }
-                      data-oid="y6.1325"
                     >
                       {column.id === "name" && "姓名"}
                       {column.id === "username" && "帳號"}
@@ -211,8 +200,8 @@ export function UsersDataTable<TData, TValue>({
 
           {/* 新增用戶按鈕 */}
           {showAddButton && onAddUser && (
-            <Button onClick={onAddUser} className="ml-2" data-oid="sar6wi5">
-              <Plus className="mr-2 h-4 w-4" data-oid="3r927:x" />
+            <Button onClick={onAddUser} className="ml-2">
+              <Plus className="mr-2 h-4 w-4" />
               新增用戶
             </Button>
           )}
@@ -220,21 +209,19 @@ export function UsersDataTable<TData, TValue>({
       </div>
 
       {/* 資料表格 */}
-      <div className="rounded-md border" data-oid="z--iynu">
-        <Table data-oid=".4royrq">
-          <TableHeader data-oid="gm4k00z">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
                 className="border-b hover:bg-transparent"
-                data-oid="61s.3nj"
               >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
                       className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="pp.r-i."
                     >
                       {header.isPlaceholder
                         ? null
@@ -248,24 +235,17 @@ export function UsersDataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody data-oid="u:crke0">
+          <TableBody>
             {isLoading ? (
               // 載入狀態
-              <TableRow data-oid="jt.780q">
+              <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
-                  data-oid="92d1:4s"
                 >
-                  <div
-                    className="flex items-center justify-center space-x-2"
-                    data-oid=":jb-yfz"
-                  >
-                    <div
-                      className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
-                      data-oid="xv6oihc"
-                    ></div>
-                    <span data-oid="z3t2_9b">載入中...</span>
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                    <span>載入中...</span>
                   </div>
                 </TableCell>
               </TableRow>
@@ -275,10 +255,9 @@ export function UsersDataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  data-oid=".pddcvs"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} data-oid="rdqo1sq">
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -289,17 +268,13 @@ export function UsersDataTable<TData, TValue>({
               ))
             ) : (
               // 無資料狀態
-              <TableRow data-oid="tminvn.">
+              <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
-                  data-oid="0mk1xlu"
                 >
-                  <div
-                    className="flex flex-col items-center justify-center space-y-2"
-                    data-oid="71xivb-"
-                  >
-                    <div className="text-muted-foreground" data-oid="qvf18it">
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <div className="text-muted-foreground">
                       {searchValue
                         ? `沒有找到符合 "${searchValue}" 的用戶`
                         : "沒有找到用戶資料"}
@@ -309,9 +284,8 @@ export function UsersDataTable<TData, TValue>({
                         variant="outline"
                         onClick={onAddUser}
                         className="mt-2"
-                        data-oid="8ojchgm"
                       >
-                        <Plus className="mr-2 h-4 w-4" data-oid="9my.0w1" />
+                        <Plus className="mr-2 h-4 w-4" />
                         建立第一個用戶
                       </Button>
                     )}
@@ -324,29 +298,22 @@ export function UsersDataTable<TData, TValue>({
       </div>
 
       {/* 分頁控制和統計資訊 */}
-      <div
-        className="flex items-center justify-between space-x-2 py-4"
-        data-oid="asneep4"
-      >
-        <div
-          className="flex-1 text-sm text-muted-foreground"
-          data-oid="nx3fmr-"
-        >
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
           共 {data.length} 個用戶
           {searchValue && ` (搜尋: "${searchValue}")`}
         </div>
-        <div className="flex items-center space-x-2" data-oid="ov.lmxo">
+        <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage() || isLoading}
-            data-oid="rjnlkio"
           >
             上一頁
           </Button>
-          <div className="flex items-center space-x-1" data-oid="80.oy0a">
-            <span className="text-sm text-muted-foreground" data-oid="rbk7.ts">
+          <div className="flex items-center space-x-1">
+            <span className="text-sm text-muted-foreground">
               第 {table.getState().pagination.pageIndex + 1} 頁， 共{" "}
               {table.getPageCount()} 頁
             </span>
@@ -356,7 +323,6 @@ export function UsersDataTable<TData, TValue>({
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage() || isLoading}
-            data-oid="qthuoph"
           >
             下一頁
           </Button>

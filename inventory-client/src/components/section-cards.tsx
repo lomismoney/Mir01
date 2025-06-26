@@ -25,128 +25,128 @@ export function SectionCards() {
   return (
     <div
       className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4"
-      data-oid="qlcqme8"
+      data-oid="2n3p0df"
     >
-      <Card className="@container/card" data-oid="qh3beh_">
-        <CardHeader data-oid="9ea8jtd">
-          <CardDescription data-oid="9y7ol.f">總庫存數量</CardDescription>
+      <Card className="@container/card" data-oid="4.87by1">
+        <CardHeader data-oid="0wqgai6">
+          <CardDescription data-oid="-o5uk89">總庫存數量</CardDescription>
           <CardTitle
             className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
-            data-oid="k5lagp4"
+            data-oid="uaq3btr"
           >
             15,234
           </CardTitle>
-          <CardAction data-oid="45kpufs">
-            <Badge variant="outline" data-oid="diavbs4">
-              <IconTrendingUp data-oid="-97s0zx" />
+          <CardAction data-oid="k15r0qw">
+            <Badge variant="outline" data-oid="8phjmgd">
+              <IconTrendingUp data-oid="tw-_:y4" />
               +8.2%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter
           className="flex-col items-start gap-1.5 text-sm"
-          data-oid="mgn62p."
+          data-oid="f:xz_i."
         >
           <div
             className="line-clamp-1 flex gap-2 font-medium"
-            data-oid="_06.:pw"
+            data-oid="fjbev:p"
           >
-            庫存增長穩定 <IconBox className="size-4" data-oid="-3ajcnn" />
+            庫存增長穩定 <IconBox className="size-4" data-oid="1orfshw" />
           </div>
-          <div className="text-muted-foreground" data-oid="c0j8x35">
+          <div className="text-muted-foreground" data-oid="db732p0">
             與上月相比增加了 8.2%
           </div>
         </CardFooter>
       </Card>
-      <Card className="@container/card" data-oid="75-66og">
-        <CardHeader data-oid="-ps-8oj">
-          <CardDescription data-oid="3qiw.dq">待入庫訂單</CardDescription>
+      <Card className="@container/card" data-oid="_djqiu9">
+        <CardHeader data-oid="h94oufi">
+          <CardDescription data-oid="nll-0kq">待入庫訂單</CardDescription>
           <CardTitle
             className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
-            data-oid="feo.qkd"
+            data-oid="xabytb9"
           >
             127
           </CardTitle>
-          <CardAction data-oid="jx-w9gd">
-            <Badge variant="outline" data-oid="3e9j8mk">
-              <IconTrendingUp data-oid="olw91fs" />
+          <CardAction data-oid=":wr.eue">
+            <Badge variant="outline" data-oid="zuxtp0y">
+              <IconTrendingUp data-oid="h55cpwt" />
               +15%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter
           className="flex-col items-start gap-1.5 text-sm"
-          data-oid="tofbh6y"
+          data-oid="_7_ohd3"
         >
           <div
             className="line-clamp-1 flex gap-2 font-medium"
-            data-oid=":n7zie9"
+            data-oid="w5vhfor"
           >
-            入庫作業繁忙 <IconPackage className="size-4" data-oid="_h4njr-" />
+            入庫作業繁忙 <IconPackage className="size-4" data-oid="sn178lk" />
           </div>
-          <div className="text-muted-foreground" data-oid="1qznpli">
+          <div className="text-muted-foreground" data-oid="fh0pulf">
             需要加快入庫處理速度
           </div>
         </CardFooter>
       </Card>
-      <Card className="@container/card" data-oid="n9hijz.">
-        <CardHeader data-oid="_ujb7iv">
-          <CardDescription data-oid="d3:m_gr">待出庫訂單</CardDescription>
+      <Card className="@container/card" data-oid="okkvtk4">
+        <CardHeader data-oid="y7g5x-f">
+          <CardDescription data-oid="xsp7:d7">待出庫訂單</CardDescription>
           <CardTitle
             className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
-            data-oid="o_:6_s0"
+            data-oid="_.n2kub"
           >
             89
           </CardTitle>
-          <CardAction data-oid="xk:ucs8">
-            <Badge variant="outline" data-oid="8xl5vo:">
-              <IconTrendingDown data-oid="htx8kn0" />
+          <CardAction data-oid="7xyn9_s">
+            <Badge variant="outline" data-oid="yw7swx.">
+              <IconTrendingDown data-oid="t2.lvj4" />
               -12%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter
           className="flex-col items-start gap-1.5 text-sm"
-          data-oid=".3dtfw_"
+          data-oid="4fo.xlv"
         >
           <div
             className="line-clamp-1 flex gap-2 font-medium"
-            data-oid="v-1r-f0"
+            data-oid="ustqdor"
           >
-            出庫效率提升 <IconTruck className="size-4" data-oid="hpxlm-v" />
+            出庫效率提升 <IconTruck className="size-4" data-oid="yvfajqg" />
           </div>
-          <div className="text-muted-foreground" data-oid="d8_f8cu">
+          <div className="text-muted-foreground" data-oid=".fwifl9">
             出貨速度較上週改善
           </div>
         </CardFooter>
       </Card>
-      <Card className="@container/card" data-oid="f9z-y3c">
-        <CardHeader data-oid="6aueg7i">
-          <CardDescription data-oid="ue_cu67">低庫存警告</CardDescription>
+      <Card className="@container/card" data-oid="crgz23q">
+        <CardHeader data-oid="jxa-tmp">
+          <CardDescription data-oid="34i2-4b">低庫存警告</CardDescription>
           <CardTitle
             className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
-            data-oid="oa32hzu"
+            data-oid="jjwxaj6"
           >
             23
           </CardTitle>
-          <CardAction data-oid="0pcicdf">
-            <Badge variant="destructive" data-oid="5cidg_.">
-              <IconAlertTriangle data-oid="huw5ssl" />
+          <CardAction data-oid="-ce_0wz">
+            <Badge variant="destructive" data-oid="8uep12u">
+              <IconAlertTriangle data-oid="1odrx7q" />
               警告
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter
           className="flex-col items-start gap-1.5 text-sm"
-          data-oid="3iwlu0q"
+          data-oid="v-:_v5t"
         >
           <div
             className="line-clamp-1 flex gap-2 font-medium"
-            data-oid="fm4xb7r"
+            data-oid="8d9k_tm"
           >
-            需要補貨 <IconAlertTriangle className="size-4" data-oid="xbwk59k" />
+            需要補貨 <IconAlertTriangle className="size-4" data-oid="ztektv1" />
           </div>
-          <div className="text-muted-foreground" data-oid="1l8co:o">
+          <div className="text-muted-foreground" data-oid="jclhqow">
             23 項商品庫存不足
           </div>
         </CardFooter>

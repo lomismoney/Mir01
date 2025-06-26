@@ -24,29 +24,26 @@ export function UserRoleDisplay() {
   }
 
   return (
-    <div className="flex items-center space-x-2" data-oid="deb1g1z">
+    <div className="flex items-center space-x-2">
       {/* 角色徽章 */}
       <Badge
         variant={user.isAdmin ? "default" : "secondary"}
         className="flex items-center space-x-1"
-        data-oid="aazq1pd"
       >
         {user.isAdmin ? (
-          <Shield className="h-3 w-3" data-oid="e2tn2a3" />
+          <Shield className="h-3 w-3" />
         ) : (
-          <Eye className="h-3 w-3" data-oid="04zzo2b" />
+          <Eye className="h-3 w-3" />
         )}
-        <span data-oid="rs7-lhg">{user.roleDisplay || user.role}</span>
+        <span>{user.roleDisplay || user.role}</span>
       </Badge>
 
       {/* 用戶名稱 */}
-      <span className="text-sm text-muted-foreground" data-oid="_fk5tnw">
-        {user.name}
-      </span>
+      <span className="text-sm text-muted-foreground">{user.name}</span>
 
       {/* 管理員專用標識 */}
       {user.isAdmin && (
-        <Badge variant="outline" className="text-xs" data-oid="61i5ea1">
+        <Badge variant="outline" className="text-xs">
           管理員
         </Badge>
       )}
@@ -64,17 +61,13 @@ export function RoleBasedContent() {
   // 管理員內容
   if (user?.isAdmin) {
     return (
-      <div className="p-4 border rounded-lg bg-blue-50" data-oid="mltm5ma">
-        <h3 className="font-semibold text-blue-900" data-oid="bjbd2gg">
-          管理員面板
-        </h3>
-        <p className="text-blue-700" data-oid="rqje17z">
-          您具有完整的系統管理權限。
-        </p>
-        <ul className="mt-2 text-sm text-blue-600" data-oid="f:-l7j3">
-          <li data-oid="wbknu-d">• 可以管理所有商品</li>
-          <li data-oid="nwbasnw">• 可以查看所有用戶</li>
-          <li data-oid="l3mm6bv">• 可以修改系統設定</li>
+      <div className="p-4 border rounded-lg bg-blue-50">
+        <h3 className="font-semibold text-blue-900">管理員面板</h3>
+        <p className="text-blue-700">您具有完整的系統管理權限。</p>
+        <ul className="mt-2 text-sm text-blue-600">
+          <li>• 可以管理所有商品</li>
+          <li>• 可以查看所有用戶</li>
+          <li>• 可以修改系統設定</li>
         </ul>
       </div>
     );
@@ -83,17 +76,13 @@ export function RoleBasedContent() {
   // 檢視者內容
   if (user?.role === "viewer") {
     return (
-      <div className="p-4 border rounded-lg bg-gray-50" data-oid="3fo6tqp">
-        <h3 className="font-semibold text-gray-900" data-oid="06yuvda">
-          檢視者面板
-        </h3>
-        <p className="text-gray-700" data-oid="jd:7fz4">
-          您具有唯讀權限。
-        </p>
-        <ul className="mt-2 text-sm text-gray-600" data-oid="7llx0-q">
-          <li data-oid="wl4wkn.">• 可以查看商品列表</li>
-          <li data-oid="gldcfht">• 可以查看商品詳細資訊</li>
-          <li data-oid="47yp9t-">• 無法修改任何資料</li>
+      <div className="p-4 border rounded-lg bg-gray-50">
+        <h3 className="font-semibold text-gray-900">檢視者面板</h3>
+        <p className="text-gray-700">您具有唯讀權限。</p>
+        <ul className="mt-2 text-sm text-gray-600">
+          <li>• 可以查看商品列表</li>
+          <li>• 可以查看商品詳細資訊</li>
+          <li>• 無法修改任何資料</li>
         </ul>
       </div>
     );
@@ -101,13 +90,9 @@ export function RoleBasedContent() {
 
   // 未知角色或未登入
   return (
-    <div className="p-4 border rounded-lg bg-yellow-50" data-oid="p6dcd3l">
-      <h3 className="font-semibold text-yellow-900" data-oid="7u462ps">
-        訪客
-      </h3>
-      <p className="text-yellow-700" data-oid="jo--iyz">
-        請登入以查看更多內容。
-      </p>
+    <div className="p-4 border rounded-lg bg-yellow-50">
+      <h3 className="font-semibold text-yellow-900">訪客</h3>
+      <p className="text-yellow-700">請登入以查看更多內容。</p>
     </div>
   );
 }

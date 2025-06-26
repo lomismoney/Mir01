@@ -43,20 +43,20 @@ export default function PurchaseDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 md:p-8" data-oid="8f-qkkq">
-        <div className="space-y-6" data-oid="eo1scpu">
-          <div className="animate-pulse" data-oid="br-qlvn">
+      <div className="container mx-auto p-4 md:p-8" data-oid="q:f8zl:">
+        <div className="space-y-6" data-oid="n::oau-">
+          <div className="animate-pulse" data-oid="umo8f6o">
             <div
               className="h-8 bg-muted rounded w-1/3 mb-4"
-              data-oid="f3qv25u"
+              data-oid="2vjjflz"
             ></div>
             <div
               className="h-4 bg-muted rounded w-1/2 mb-8"
-              data-oid="gma79yj"
+              data-oid="niyyyh5"
             ></div>
-            <div className="space-y-4" data-oid="9ffjc_5">
-              <div className="h-32 bg-muted rounded" data-oid="wn:25hh"></div>
-              <div className="h-48 bg-muted rounded" data-oid="qk-l8e6"></div>
+            <div className="space-y-4" data-oid="sva0l:w">
+              <div className="h-32 bg-muted rounded" data-oid="2a1b9s:"></div>
+              <div className="h-48 bg-muted rounded" data-oid="x1o9y1w"></div>
             </div>
           </div>
         </div>
@@ -66,19 +66,19 @@ export default function PurchaseDetailPage() {
 
   if (error || !purchase) {
     return (
-      <div className="container mx-auto p-4 md:p-8" data-oid="cqq1o5j">
-        <div className="text-center py-12" data-oid="hx1k_hi">
+      <div className="container mx-auto p-4 md:p-8" data-oid="lr9.4e.">
+        <div className="text-center py-12" data-oid="-mveyl6">
           <h1
             className="text-2xl font-bold text-destructive mb-4"
-            data-oid="a36961x"
+            data-oid="wali41y"
           >
             找不到進貨單
           </h1>
-          <p className="text-muted-foreground mb-6" data-oid="7:lf:3.">
+          <p className="text-muted-foreground mb-6" data-oid=".by354y">
             進貨單不存在或已被刪除
           </p>
-          <Button onClick={() => router.back()} data-oid="w_-s7gr">
-            <ArrowLeft className="h-4 w-4 mr-2" data-oid="t00f547" />
+          <Button onClick={() => router.back()} data-oid="uypzk4y">
+            <ArrowLeft className="h-4 w-4 mr-2" data-oid="e9b1ra-" />
             返回
           </Button>
         </div>
@@ -92,28 +92,28 @@ export default function PurchaseDetailPage() {
   );
 
   return (
-    <div className="container mx-auto p-4 md:p-8" data-oid="54x1j3f">
-      <div className="space-y-6" data-oid="a.e6muf">
+    <div className="container mx-auto p-4 md:p-8" data-oid="46o9f-w">
+      <div className="space-y-6" data-oid="c4bqy:l">
         {/* 頁面標題區 */}
-        <div className="flex items-center justify-between" data-oid="5la4hse">
-          <div className="flex items-center gap-4" data-oid="0nal5r_">
+        <div className="flex items-center justify-between" data-oid="1g1evug">
+          <div className="flex items-center gap-4" data-oid="tj23wd8">
             <Button
               variant="outline"
               onClick={() => router.back()}
-              data-oid="xt_1pvm"
+              data-oid="qvk1ylg"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" data-oid="_ip5j2r" />
+              <ArrowLeft className="h-4 w-4 mr-2" data-oid="g3rjuc0" />
               返回
             </Button>
-            <div data-oid="y_jyin8">
+            <div data-oid="k9or6od">
               <h1
                 className="text-2xl font-bold flex items-center gap-2"
-                data-oid="7xv4yl7"
+                data-oid="5m57naw"
               >
-                <Package className="h-7 w-7 text-blue-600" data-oid="r.v00zp" />
+                <Package className="h-7 w-7 text-blue-600" data-oid="q6h3kq6" />
                 進貨單詳情
               </h1>
-              <p className="text-muted-foreground" data-oid="qjmgwmw">
+              <p className="text-muted-foreground" data-oid=":os8gq5">
                 查看進貨單的完整資訊和商品項目
               </p>
             </div>
@@ -122,30 +122,30 @@ export default function PurchaseDetailPage() {
           {permissions.canModify && (
             <Button
               onClick={() => router.push(`/purchases/${purchaseId}/edit`)}
-              data-oid="7909p::"
+              data-oid="qod.bvt"
             >
-              <Edit className="h-4 w-4 mr-2" data-oid="sk-pe68" />
+              <Edit className="h-4 w-4 mr-2" data-oid="v18:0ab" />
               編輯
             </Button>
           )}
         </div>
 
         {/* 基本資訊卡片 */}
-        <Card data-oid="62pa:w-">
-          <CardHeader data-oid="8:l9at:">
+        <Card data-oid="xsek8iq">
+          <CardHeader data-oid="3ziltg9">
             <div
               className="flex items-center justify-between"
-              data-oid="xhz-5z."
+              data-oid="p.mfk5n"
             >
-              <div data-oid="cej6w8h">
+              <div data-oid="wtw_ub:">
                 <CardTitle
                   className="flex items-center gap-2"
-                  data-oid="a7.jumm"
+                  data-oid="bgigtbt"
                 >
-                  <Hash className="h-5 w-5" data-oid="rrknml8" />
+                  <Hash className="h-5 w-5" data-oid="jq.o9o4" />
                   {purchaseData.order_number}
                 </CardTitle>
-                <CardDescription data-oid="60c4h2j">
+                <CardDescription data-oid="cm2eimj">
                   進貨單編號和基本資訊
                 </CardDescription>
               </div>
@@ -153,39 +153,39 @@ export default function PurchaseDetailPage() {
                 className={
                   PURCHASE_STATUS_COLORS[purchaseData.status as PurchaseStatus]
                 }
-                data-oid="j9_zd_z"
+                data-oid="ty6yuat"
               >
                 {PURCHASE_STATUS_LABELS[purchaseData.status as PurchaseStatus]}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent data-oid="_vntr-r">
+          <CardContent data-oid="fj0ru9m">
             <div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-              data-oid="g.1kkla"
+              data-oid="nfg_hc1"
             >
-              <div className="space-y-2" data-oid="w2hseco">
+              <div className="space-y-2" data-oid="hay8do_">
                 <div
                   className="flex items-center gap-2 text-sm text-muted-foreground"
-                  data-oid="hewzo:x"
+                  data-oid="it7ct9m"
                 >
-                  <Store className="h-4 w-4" data-oid="td5nrzh" />
-                  <span data-oid="0fly5xr">門市</span>
+                  <Store className="h-4 w-4" data-oid=":nq-v2u" />
+                  <span data-oid="oj0w6wi">門市</span>
                 </div>
-                <p className="font-medium" data-oid="ai1l1:h">
+                <p className="font-medium" data-oid="f.745d2">
                   {purchaseData.store?.name || "未知門市"}
                 </p>
               </div>
 
-              <div className="space-y-2" data-oid="81cyj97">
+              <div className="space-y-2" data-oid=":cuee0m">
                 <div
                   className="flex items-center gap-2 text-sm text-muted-foreground"
-                  data-oid="ld9daoj"
+                  data-oid="w-a.guq"
                 >
-                  <Calendar className="h-4 w-4" data-oid="mbub:3d" />
-                  <span data-oid=":iuj8j1">進貨日期</span>
+                  <Calendar className="h-4 w-4" data-oid="jdpmwcv" />
+                  <span data-oid="datt748">進貨日期</span>
                 </div>
-                <p className="font-medium" data-oid="3fkur5p">
+                <p className="font-medium" data-oid="7yzqn8m">
                   {purchaseData.purchased_at
                     ? format(
                         new Date(purchaseData.purchased_at),
@@ -196,48 +196,48 @@ export default function PurchaseDetailPage() {
                 </p>
               </div>
 
-              <div className="space-y-2" data-oid="fnvldhk">
+              <div className="space-y-2" data-oid="7sxz.94">
                 <div
                   className="flex items-center gap-2 text-sm text-muted-foreground"
-                  data-oid="6ejp73."
+                  data-oid="5jic2gq"
                 >
-                  <Truck className="h-4 w-4" data-oid="wn:hwrt" />
-                  <span data-oid="246ixi4">運費</span>
+                  <Truck className="h-4 w-4" data-oid="gd.fhp0" />
+                  <span data-oid="vc_dqk9">運費</span>
                 </div>
-                <p className="font-medium" data-oid="-1psa2t">
+                <p className="font-medium" data-oid="ibuku02">
                   NT$ {Number(purchaseData.shipping_cost || 0).toLocaleString()}
                 </p>
               </div>
 
-              <div className="space-y-2" data-oid="k0cl9zt">
+              <div className="space-y-2" data-oid="bioma3z">
                 <div
                   className="flex items-center gap-2 text-sm text-muted-foreground"
-                  data-oid="x7e-1nk"
+                  data-oid="jsc3-a4"
                 >
-                  <DollarSign className="h-4 w-4" data-oid="a:tb.c6" />
-                  <span data-oid="fccvj41">總金額</span>
+                  <DollarSign className="h-4 w-4" data-oid="meyd7z7" />
+                  <span data-oid="t-bi:x_">總金額</span>
                 </div>
-                <p className="font-medium text-lg" data-oid="d3.ns8n">
+                <p className="font-medium text-lg" data-oid="knlfs87">
                   NT$ {Number(purchaseData.total_amount || 0).toLocaleString()}
                 </p>
               </div>
             </div>
 
-            <Separator className="my-6" data-oid="suih4x6" />
+            <Separator className="my-6" data-oid="2:n3ltw" />
 
             <div
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
-              data-oid="a_0cldy"
+              data-oid="l_ox6cr"
             >
-              <div className="space-y-2" data-oid="c.oicdk">
+              <div className="space-y-2" data-oid="34_r3bm">
                 <div
                   className="flex items-center gap-2 text-sm text-muted-foreground"
-                  data-oid="3rk:ckv"
+                  data-oid="ekaios3"
                 >
-                  <Calendar className="h-4 w-4" data-oid="-y28y85" />
-                  <span data-oid="97z5e4w">建立時間</span>
+                  <Calendar className="h-4 w-4" data-oid="gt:u_q6" />
+                  <span data-oid="fuanm:y">建立時間</span>
                 </div>
-                <p className="text-sm" data-oid="l0wfid8">
+                <p className="text-sm" data-oid="4rsx7ki">
                   {purchaseData.created_at
                     ? format(
                         new Date(purchaseData.created_at),
@@ -248,15 +248,15 @@ export default function PurchaseDetailPage() {
                 </p>
               </div>
 
-              <div className="space-y-2" data-oid="t2rrjjo">
+              <div className="space-y-2" data-oid="xo98ee2">
                 <div
                   className="flex items-center gap-2 text-sm text-muted-foreground"
-                  data-oid="bv.gjhj"
+                  data-oid="k:g1kk8"
                 >
-                  <Calendar className="h-4 w-4" data-oid="k7qk4mh" />
-                  <span data-oid="aeg5n4t">最後更新</span>
+                  <Calendar className="h-4 w-4" data-oid="rb9xs5c" />
+                  <span data-oid="f3q1r6l">最後更新</span>
                 </div>
-                <p className="text-sm" data-oid="rm1cdhw">
+                <p className="text-sm" data-oid="m2a7y.8">
                   {purchaseData.updated_at
                     ? format(
                         new Date(purchaseData.updated_at),
@@ -271,19 +271,19 @@ export default function PurchaseDetailPage() {
         </Card>
 
         {/* 商品項目列表 */}
-        <Card data-oid="p8pq9pz">
-          <CardHeader data-oid="f3mmgp3">
-            <CardTitle className="flex items-center gap-2" data-oid="mhtnab-">
-              <Receipt className="h-5 w-5" data-oid="xatkkup" />
+        <Card data-oid="w73v64y">
+          <CardHeader data-oid="a290y_z">
+            <CardTitle className="flex items-center gap-2" data-oid="kt7r3mm">
+              <Receipt className="h-5 w-5" data-oid="l.v5cyh" />
               商品項目
             </CardTitle>
-            <CardDescription data-oid="t0.o-53">
+            <CardDescription data-oid="qy0k73p">
               共 {purchaseData.items?.length || 0} 項商品
             </CardDescription>
           </CardHeader>
-          <CardContent data-oid="2ocgpdq">
+          <CardContent data-oid="_nj-zpc">
             {purchaseData.items && purchaseData.items.length > 0 ? (
-              <div className="space-y-4" data-oid="70dok-b">
+              <div className="space-y-4" data-oid=".sg3cj3">
                 {purchaseData.items.map((item: any, index: number) => {
                   const quantity = item.quantity || 0;
                   const costPrice = Number(item.cost_price || 0);
@@ -299,98 +299,98 @@ export default function PurchaseDetailPage() {
                     <div
                       key={item.id || index}
                       className="border rounded-lg p-4"
-                      data-oid="u-h1ljd"
+                      data-oid="xav.sij"
                     >
                       <div
                         className="grid grid-cols-1 md:grid-cols-4 gap-4"
-                        data-oid="-4e-2a4"
+                        data-oid="k01z4_9"
                       >
-                        <div className="md:col-span-2" data-oid="wy94a5.">
-                          <h4 className="font-medium" data-oid="f7dq0zp">
+                        <div className="md:col-span-2" data-oid="cj8:ms4">
+                          <h4 className="font-medium" data-oid=".f5mhqm">
                             {item.product_name || "未知商品"}
                           </h4>
                           <p
                             className="text-sm text-muted-foreground"
-                            data-oid="uozmu5i"
+                            data-oid="k1y.yj1"
                           >
                             SKU: {item.sku || "未知"}
                           </p>
                         </div>
 
-                        <div data-oid="quzia9m">
+                        <div data-oid="uw_::kc">
                           <p
                             className="text-sm text-muted-foreground"
-                            data-oid="6so.uj5"
+                            data-oid="lx88-.."
                           >
                             數量
                           </p>
-                          <p className="font-medium" data-oid="qzk5onk">
+                          <p className="font-medium" data-oid="6u8qon8">
                             {quantity}
                           </p>
                         </div>
 
-                        <div data-oid="xpw5t8t">
+                        <div data-oid="cmpf5xj">
                           <p
                             className="text-sm text-muted-foreground"
-                            data-oid="mu24ya7"
+                            data-oid="ztn_jn5"
                           >
                             進貨價
                           </p>
-                          <p className="font-medium" data-oid="kc0qm.:">
+                          <p className="font-medium" data-oid="kzatmah">
                             NT$ {costPrice.toLocaleString()}
                           </p>
                         </div>
                       </div>
 
-                      <Separator className="my-3" data-oid="yx-6n4f" />
+                      <Separator className="my-3" data-oid="vb48hp8" />
 
                       <div
                         className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm"
-                        data-oid="snzg2n:"
+                        data-oid="bkozm5b"
                       >
-                        <div data-oid="5onb2v.">
+                        <div data-oid="72hml-s">
                           <span
                             className="text-muted-foreground"
-                            data-oid="qhry2xk"
+                            data-oid="wbzacjv"
                           >
                             商品小計：
                           </span>
-                          <span className="font-medium ml-2" data-oid="rz7sili">
+                          <span className="font-medium ml-2" data-oid="cki6w6n">
                             NT$ {subtotal.toLocaleString()}
                           </span>
                         </div>
-                        <div data-oid="qnuatst">
+                        <div data-oid="0zk8:ao">
                           <span
                             className="text-muted-foreground"
-                            data-oid="5::z8u_"
+                            data-oid="s5fdh_u"
                           >
                             攤銷運費：
                           </span>
-                          <span className="font-medium ml-2" data-oid="1n81f7i">
+                          <span className="font-medium ml-2" data-oid="av_n575">
                             NT$ {allocatedShippingCost.toLocaleString()}
                           </span>
                         </div>
-                        <div data-oid="pl64rlr">
+                        <div data-oid="q6zp4vd">
                           <span
                             className="text-muted-foreground"
-                            data-oid="qqkf1e5"
+                            data-oid="cxf49jx"
                           >
                             總成本：
                           </span>
-                          <span className="font-medium ml-2" data-oid="mfs33en">
+                          <span className="font-medium ml-2" data-oid="oc2zx35">
                             NT$ {totalCost.toLocaleString()}
                           </span>
                         </div>
-                        <div data-oid="f:jxper">
+                        <div data-oid="01md4kk">
                           <span
                             className="text-muted-foreground"
-                            data-oid="a0kq94:"
+                            data-oid="85kg_f2"
                           >
                             單件平均成本：
                           </span>
                           <span
                             className="font-medium ml-2 text-blue-600"
-                            data-oid="0rzvomv"
+                            data-oid="wgvy0q7"
                           >
                             NT${" "}
                             {averageCostPerUnit.toLocaleString(undefined, {
@@ -405,12 +405,12 @@ export default function PurchaseDetailPage() {
                 })}
 
                 {/* 總計 */}
-                <div className="border-t pt-4" data-oid="e_m592_">
-                  <div className="flex justify-end" data-oid="bdx_r-p">
-                    <div className="text-right space-y-2" data-oid="9grjuof">
+                <div className="border-t pt-4" data-oid="2qg:q94">
+                  <div className="flex justify-end" data-oid="wqzmmo8">
+                    <div className="text-right space-y-2" data-oid="visujcv">
                       <div
                         className="text-sm text-muted-foreground"
-                        data-oid="s:4ku66"
+                        data-oid="mc1t9_r"
                       >
                         商品總計: NT${" "}
                         {purchaseData.items
@@ -424,14 +424,14 @@ export default function PurchaseDetailPage() {
                       </div>
                       <div
                         className="text-sm text-muted-foreground"
-                        data-oid="aw9mbki"
+                        data-oid="6_6kdgn"
                       >
                         運費: NT${" "}
                         {Number(
                           purchaseData.shipping_cost || 0,
                         ).toLocaleString()}
                       </div>
-                      <div className="text-lg font-semibold" data-oid="kw9u7ld">
+                      <div className="text-lg font-semibold" data-oid="yh8g-2t">
                         總金額: NT${" "}
                         {Number(
                           purchaseData.total_amount || 0,
@@ -444,7 +444,7 @@ export default function PurchaseDetailPage() {
             ) : (
               <div
                 className="text-center py-8 text-muted-foreground"
-                data-oid="m5f2fk9"
+                data-oid="hhjkyxy"
               >
                 此進貨單沒有商品項目
               </div>

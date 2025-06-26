@@ -20,10 +20,10 @@ export default function CategoriesPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
     <Suspense
-      fallback={<DataTableSkeleton data-oid="6lungx0" />}
-      data-oid="xtp0gnx"
+      fallback={<DataTableSkeleton data-oid="mi2tdmj" />}
+      data-oid="h-_b_k0"
     >
-      <CategoriesClientPage data-oid="li---51" />
+      <CategoriesClientPage data-oid="tyxvwba" />
     </Suspense>
   );
 }

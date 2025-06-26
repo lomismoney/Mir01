@@ -104,7 +104,11 @@ export interface ExpandedProductItem extends Omit<ProductItem, "id"> {
  */
 const formatPrice = (price?: number) => {
   if (price === undefined || price === null) {
-    return <span className="text-muted-foreground">N/A</span>;
+    return (
+      <span className="text-muted-foreground" data-oid=".9ha825">
+        N/A
+      </span>
+    );
   }
 
   const formatter = new Intl.NumberFormat("zh-TW", {
@@ -129,7 +133,11 @@ const formatPriceRange = (priceRange?: {
   count?: number;
 }) => {
   if (!priceRange || priceRange.count === 0 || priceRange.min === undefined) {
-    return <span className="text-muted-foreground">N/A</span>;
+    return (
+      <span className="text-muted-foreground" data-oid="npypk0i">
+        N/A
+      </span>
+    );
   }
 
   const formatter = new Intl.NumberFormat("zh-TW", {
@@ -141,11 +149,19 @@ const formatPriceRange = (priceRange?: {
 
   // 如果最低價和最高價相同，只顯示一個價格
   if (priceRange.min === priceRange.max) {
-    return <span className="font-medium">{formatter.format(priceRange.min)}</span>;
+    return (
+      <span className="font-medium" data-oid=":jhsr1t">
+        {formatter.format(priceRange.min)}
+      </span>
+    );
   }
 
   // 顯示最低價格（不加"從"字）
-  return <span className="font-medium">{formatter.format(priceRange.min)}</span>;
+  return (
+    <span className="font-medium" data-oid="exs9anp">
+      {formatter.format(priceRange.min)}
+    </span>
+  );
 };
 
 /**
@@ -158,19 +174,28 @@ const formatAttributes = (
   attributeValues?: { value?: string; attribute?: { name?: string } }[],
 ) => {
   if (!attributeValues || attributeValues.length === 0) {
-    return <span className="text-muted-foreground text-sm">無規格</span>;
+    return (
+      <span className="text-muted-foreground text-sm" data-oid="q24jbxz">
+        無規格
+      </span>
+    );
   }
 
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-1" data-oid="y430d6c">
       {attributeValues.map((attr, index) => (
         <Badge
           key={index}
           variant="outline"
           className="text-xs h-5 px-2"
+          data-oid="53dqo8g"
         >
-          <span className="text-muted-foreground">{attr.attribute?.name}:</span>
-          <span className="ml-1 font-medium">{attr.value}</span>
+          <span className="text-muted-foreground" data-oid="c215cmm">
+            {attr.attribute?.name}:
+          </span>
+          <span className="ml-1 font-medium" data-oid="ibjpjo3">
+            {attr.value}
+          </span>
         </Badge>
       ))}
     </div>
@@ -196,8 +221,8 @@ const formatInventories = (
 ) => {
   if (!inventories || inventories.length === 0) {
     return (
-      <Badge variant="secondary" className="font-normal">
-        <Box className="h-3 w-3 mr-1" />
+      <Badge variant="secondary" className="font-normal" data-oid="q_vja8e">
+        <Box className="h-3 w-3 mr-1" data-oid="9tn79zn" />
         無庫存
       </Badge>
     );
@@ -212,32 +237,38 @@ const formatInventories = (
   // 使用 Badge 組件顯示庫存狀態
   if (totalStock === 0) {
     return (
-      <div className="space-y-1">
-        <Badge variant="destructive">
-          <Box className="h-3 w-3 mr-1" />
+      <div className="space-y-1" data-oid="r7-r:kz">
+        <Badge variant="destructive" data-oid="mg0muv1">
+          <Box className="h-3 w-3 mr-1" data-oid="1h09yf0" />
           缺貨
         </Badge>
-        <div className="text-xs text-muted-foreground">{storeCount} 個門市</div>
+        <div className="text-xs text-muted-foreground" data-oid="uoge6qm">
+          {storeCount} 個門市
+        </div>
       </div>
     );
   } else if (totalStock < 10) {
     return (
-      <div className="space-y-1">
-        <Badge variant="outline">
-          <Box className="h-3 w-3 mr-1" />
+      <div className="space-y-1" data-oid="ahzasms">
+        <Badge variant="outline" data-oid="0ysma8_">
+          <Box className="h-3 w-3 mr-1" data-oid=":1nf0_s" />
           低庫存 ({totalStock})
         </Badge>
-        <div className="text-xs text-muted-foreground">{storeCount} 個門市</div>
+        <div className="text-xs text-muted-foreground" data-oid="7a.7w5f">
+          {storeCount} 個門市
+        </div>
       </div>
     );
   } else {
     return (
-      <div className="space-y-1">
-        <Badge variant="secondary">
-          <Box className="h-3 w-3 mr-1" />
+      <div className="space-y-1" data-oid="vaq0d36">
+        <Badge variant="secondary" data-oid="67-63cp">
+          <Box className="h-3 w-3 mr-1" data-oid="k6cmn_q" />
           庫存 {totalStock}
         </Badge>
-        <div className="text-xs text-muted-foreground">{storeCount} 個門市</div>
+        <div className="text-xs text-muted-foreground" data-oid="pcf8c.a">
+          {storeCount} 個門市
+        </div>
       </div>
     );
   }
@@ -256,6 +287,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="全選"
         className="translate-y-[2px]"
+        data-oid="pzmftq0"
       />
     ),
 
@@ -267,6 +299,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="選擇商品"
           className="translate-y-[2px]"
+          data-oid="t:mxh_6"
         />
       );
     },
@@ -283,8 +316,11 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       // 如果是變體行，顯示連接線
       if (row.original.isVariantRow) {
         return (
-          <div className="flex h-full w-full items-center justify-center">
-            <div className="h-full w-px bg-border"></div>
+          <div
+            className="flex h-full w-full items-center justify-center"
+            data-oid="d-fj3m0"
+          >
+            <div className="h-full w-px bg-border" data-oid="x8a5yh4"></div>
           </div>
         );
       }
@@ -303,11 +339,18 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
             e.stopPropagation();
             row.toggleExpanded();
           }}
+          data-oid="js3hzk:"
         >
           {row.getIsExpanded() ? (
-            <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+            <ChevronDown
+              className="h-4 w-4 transition-transform duration-200"
+              data-oid="fsy9lvt"
+            />
           ) : (
-            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+            <ChevronRight
+              className="h-4 w-4 transition-transform duration-200"
+              data-oid="zmbwxb6"
+            />
           )}
         </Button>
       );
@@ -327,13 +370,29 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       if (item.isVariantRow && item.variantInfo) {
         // SKU 變體行顯示
         return (
-          <div className="flex items-center gap-3 py-2 pl-10">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted/50 border border-muted">
-              <Package className="h-4 w-4 text-muted-foreground" />
+          <div
+            className="flex items-center gap-3 py-2 pl-10"
+            data-oid="qbyyy09"
+          >
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-md bg-muted/50 border border-muted"
+              data-oid="svphyhj"
+            >
+              <Package
+                className="h-4 w-4 text-muted-foreground"
+                data-oid="ven3yn9"
+              />
             </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="font-mono text-sm">{item.variantInfo.sku}</span>
-              <span className="text-xs text-muted-foreground">變體規格</span>
+            <div className="flex flex-col gap-0.5" data-oid="5bdbufe">
+              <span className="font-mono text-sm" data-oid="g5thj5n">
+                {item.variantInfo.sku}
+              </span>
+              <span
+                className="text-xs text-muted-foreground"
+                data-oid="h4v8sw0"
+              >
+                變體規格
+              </span>
             </div>
           </div>
         );
@@ -346,9 +405,12 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       }
 
       return (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4" data-oid="387-5:5">
           {/* 圖片縮圖 */}
-          <div className="h-12 w-12 flex-shrink-0 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+          <div
+            className="h-12 w-12 flex-shrink-0 bg-muted rounded-md flex items-center justify-center overflow-hidden"
+            data-oid="l.tokml"
+          >
             {imageUrl ? (
               <Image
                 src={addImageCacheBuster(imageUrl, item.updated_at) || ""}
@@ -361,27 +423,35 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
                   target.style.display = "none";
                   target.parentElement?.classList.add("image-error");
                 }}
+                data-oid="qy3c6j2"
               />
             ) : (
-              <ImageIcon className="h-6 w-6 text-muted-foreground" />
+              <ImageIcon
+                className="h-6 w-6 text-muted-foreground"
+                data-oid="6fy2:yy"
+              />
             )}
           </div>
 
           {/* 名稱與 SKU */}
-          <div className="min-w-0">
+          <div className="min-w-0" data-oid="1a7-ba4">
             <Link
               href={`/products/${item.originalId}`}
               className="font-medium truncate hover:underline inline-block max-w-[200px]"
               onClick={(e) => {
                 e.stopPropagation();
               }}
+              data-oid="zsjgpnd"
             >
               {item.name || "未命名商品"}
             </Link>
             {item.variants &&
               item.variants.length > 0 &&
               item.variants[0].sku && (
-                <div className="text-sm text-muted-foreground truncate">
+                <div
+                  className="text-sm text-muted-foreground truncate"
+                  data-oid="11s5jlx"
+                >
                   SKU: {item.variants[0].sku}
                 </div>
               )}
@@ -409,14 +479,14 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       const variantCount = item.variants?.length || 0;
 
       return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" data-oid="p.gubdd">
           {category?.name && (
-            <Badge variant="outline" className="w-fit">
-              <Tag className="h-3 w-3 mr-1" />
+            <Badge variant="outline" className="w-fit" data-oid="-11d3pz">
+              <Tag className="h-3 w-3 mr-1" data-oid="tl_k4n0" />
               {category.name}
             </Badge>
           )}
-          <Badge variant="secondary" className="w-fit">
+          <Badge variant="secondary" className="w-fit" data-oid="adbt:si">
             {variantCount} 個規格
           </Badge>
         </div>
@@ -428,9 +498,9 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
   {
     id: "price",
     header: () => (
-      <div className="flex items-center gap-1">
-        <DollarSign className="h-4 w-4" />
-        <span>價格</span>
+      <div className="flex items-center gap-1" data-oid="g2erk9m">
+        <DollarSign className="h-4 w-4" data-oid="mwal0za" />
+        <span data-oid="ad-wfra">價格</span>
       </div>
     ),
 
@@ -440,7 +510,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       if (item.isVariantRow && item.variantInfo) {
         // SKU 變體行顯示具體價格
         return (
-          <div className="text-sm">
+          <div className="text-sm" data-oid="ppchqsr">
             {formatPrice(item.variantInfo.price)}
           </div>
         );
@@ -492,17 +562,17 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         full_stock: {
           text: "有庫存",
           variant: "secondary" as const,
-          icon: <CheckCircle className="h-3 w-3 mr-1.5" />,
+          icon: <CheckCircle className="h-3 w-3 mr-1.5" data-oid="uj:2.:1" />,
         },
         partial_stock: {
           text: "部分庫存",
           variant: "outline" as const,
-          icon: <Package className="h-3 w-3 mr-1.5" />,
+          icon: <Package className="h-3 w-3 mr-1.5" data-oid="6vao7ma" />,
         },
         no_stock: {
           text: "無庫存",
           variant: "destructive" as const,
-          icon: <Box className="h-3 w-3 mr-1.5" />,
+          icon: <Box className="h-3 w-3 mr-1.5" data-oid="am8oyqn" />,
         },
       };
 
@@ -512,6 +582,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         <Badge
           variant={config.variant}
           className="flex items-center w-fit"
+          data-oid="7augw2u"
         >
           {config.icon}
           {config.text}
@@ -541,8 +612,10 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         );
 
         return (
-          <div className="flex flex-col gap-1 w-32">
-            <span className="text-sm">{totalStock} 件可用</span>
+          <div className="flex flex-col gap-1 w-32" data-oid="9.n98n:">
+            <span className="text-sm" data-oid="1gskoy-">
+              {totalStock} 件可用
+            </span>
             <Progress
               value={progress}
               className={cn(
@@ -553,6 +626,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
                     ? "[&>div]:bg-muted-foreground"
                     : "[&>div]:bg-primary",
               )}
+              data-oid="44dtq9a"
             />
           </div>
         );
@@ -576,8 +650,10 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         );
 
         return (
-          <div className="flex flex-col gap-1 w-32">
-            <span className="text-sm">{totalStock} 件可用</span>
+          <div className="flex flex-col gap-1 w-32" data-oid="rcu2t13">
+            <span className="text-sm" data-oid="a8jm-pj">
+              {totalStock} 件可用
+            </span>
             <Progress
               value={progress}
               className={cn(
@@ -588,6 +664,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
                     ? "[&>div]:bg-muted-foreground"
                     : "[&>div]:bg-primary",
               )}
+              data-oid="gfh32wl"
             />
           </div>
         );
@@ -595,8 +672,12 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
 
       // 多規格商品，提示查看變體
       return (
-        <Badge variant="outline" className="flex items-center w-fit">
-          <Eye className="h-3 w-3 mr-1.5" />
+        <Badge
+          variant="outline"
+          className="flex items-center w-fit"
+          data-oid="9me103e"
+        >
+          <Eye className="h-3 w-3 mr-1.5" data-oid="vefazkc" />
           查看變體
         </Badge>
       );
@@ -607,9 +688,9 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
   {
     id: "created_at",
     header: () => (
-      <div className="flex items-center gap-1">
-        <Calendar className="h-4 w-4" />
-        <span>建立時間</span>
+      <div className="flex items-center gap-1" data-oid="q58-tmx">
+        <Calendar className="h-4 w-4" data-oid="kgztmcy" />
+        <span data-oid="bwgcxrp">建立時間</span>
       </div>
     ),
 
@@ -623,14 +704,16 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       const createdAt = item.created_at;
       if (!createdAt)
         return (
-          <span className="text-muted-foreground">N/A</span>
+          <span className="text-muted-foreground" data-oid="fn0wqf:">
+            N/A
+          </span>
         );
 
       const date = new Date(createdAt);
       return (
-        <div className="text-sm">
-          <div>{date.toLocaleDateString("zh-TW")}</div>
-          <div className="text-xs text-muted-foreground">
+        <div className="text-sm" data-oid="zmwlieg">
+          <div data-oid="2rne3_g">{date.toLocaleDateString("zh-TW")}</div>
+          <div className="text-xs text-muted-foreground" data-oid=":20jigw">
             {date.toLocaleTimeString("zh-TW", {
               hour: "2-digit",
               minute: "2-digit",
@@ -676,33 +759,49 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         };
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <DropdownMenu data-oid="9philjy">
+            <DropdownMenuTrigger asChild data-oid="02j_0o:">
               <Button
                 variant="ghost"
                 className="h-8 w-8 p-0 hover:bg-muted data-[state=open]:bg-muted"
+                data-oid="0b-0a36"
               >
-                <span className="sr-only">開啟選單</span>
-                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only" data-oid="qnj2zx1">
+                  開啟選單
+                </span>
+                <MoreHorizontal className="h-4 w-4" data-oid="t41hsnu" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px]">
-              <DropdownMenuLabel>操作選項</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
-                <Edit className="mr-2 h-4 w-4" />
+            <DropdownMenuContent
+              align="end"
+              className="w-[160px]"
+              data-oid="hvqb-k3"
+            >
+              <DropdownMenuLabel data-oid="51qylun">操作選項</DropdownMenuLabel>
+              <DropdownMenuSeparator data-oid="2w9nwfg" />
+              <DropdownMenuItem
+                onClick={handleEdit}
+                className="cursor-pointer"
+                data-oid="05s.eq0"
+              >
+                <Edit className="mr-2 h-4 w-4" data-oid="taq:95n" />
                 編輯商品
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleViewVariants} className="cursor-pointer">
-                <Eye className="mr-2 h-4 w-4" />
+              <DropdownMenuItem
+                onClick={handleViewVariants}
+                className="cursor-pointer"
+                data-oid="aeahotp"
+              >
+                <Eye className="mr-2 h-4 w-4" data-oid="z_2e:9s" />
                 查看規格
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator data-oid="3b2fq:j" />
               <DropdownMenuItem
                 onClick={handleDelete}
                 className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                data-oid="7xca1wh"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="mr-2 h-4 w-4" data-oid="pwp53kt" />
                 刪除商品
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -710,7 +809,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         );
       }
 
-      return <ActionsComponent />;
+      return <ActionsComponent data-oid="p:9oquc" />;
     },
     size: 80,
   },

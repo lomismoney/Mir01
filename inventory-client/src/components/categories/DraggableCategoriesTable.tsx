@@ -78,17 +78,19 @@ function DraggableRow({ row, children }: DraggableRowProps) {
       style={style}
       data-state={row.getIsSelected() && "selected"}
       className={isDragging ? "cursor-grabbing" : ""}
+      data-oid="tkqrsz4"
     >
       {/* 拖曳手柄 */}
-      <TableCell className="w-10">
+      <TableCell className="w-10" data-oid="dckyxeq">
         <Button
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0 cursor-grab hover:bg-muted"
           {...attributes}
           {...listeners}
+          data-oid="_c3:csf"
         >
-          <GripVertical className="h-4 w-4" />
+          <GripVertical className="h-4 w-4" data-oid="t:g0rol" />
         </Button>
       </TableCell>
       {children}
@@ -248,26 +250,30 @@ export function DraggableCategoriesTable<TData, TValue>({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+      <div className="flex items-center justify-center h-96" data-oid="d6regf8">
+        <div
+          className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"
+          data-oid="ipdda-f"
+        ></div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border" data-oid="qjxg8a8">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        data-oid="mcxusms"
       >
-        <Table>
-          <TableHeader>
+        <Table data-oid="dbqlyzn">
+          <TableHeader data-oid="l36g4rm">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} data-oid="vsmal2r">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} data-oid="od6g9m9">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -279,10 +285,11 @@ export function DraggableCategoriesTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-oid="mvqvkw6">
             <SortableContext
               items={categoryIds}
               strategy={verticalListSortingStrategy}
+              data-oid="4x9cnsu"
             >
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => {
@@ -291,12 +298,12 @@ export function DraggableCategoriesTable<TData, TValue>({
 
                   if (isTopLevel) {
                     return (
-                      <DraggableRow key={row.id} row={row}>
+                      <DraggableRow key={row.id} row={row} data-oid="fnhv-5c">
                         {row
                           .getVisibleCells()
                           .slice(1)
                           .map((cell) => (
-                            <TableCell key={cell.id}>
+                            <TableCell key={cell.id} data-oid="2iww5:.">
                               {flexRender(
                                 cell.column.columnDef.cell,
                                 cell.getContext(),
@@ -308,13 +315,13 @@ export function DraggableCategoriesTable<TData, TValue>({
                   } else {
                     // 子分類不可拖曳
                     return (
-                      <TableRow key={row.id}>
-                        <TableCell className="w-10" />
+                      <TableRow key={row.id} data-oid="cgnxe:l">
+                        <TableCell className="w-10" data-oid="6kw__4:" />
                         {row
                           .getVisibleCells()
                           .slice(1)
                           .map((cell) => (
-                            <TableCell key={cell.id}>
+                            <TableCell key={cell.id} data-oid="2cb9a47">
                               {flexRender(
                                 cell.column.columnDef.cell,
                                 cell.getContext(),
@@ -326,10 +333,11 @@ export function DraggableCategoriesTable<TData, TValue>({
                   }
                 })
               ) : (
-                <TableRow>
+                <TableRow data-oid=".qwlvln">
                   <TableCell
                     colSpan={columns.length + 1}
                     className="h-24 text-center"
+                    data-oid=".:d25do"
                   >
                     尚無分類資料
                   </TableCell>

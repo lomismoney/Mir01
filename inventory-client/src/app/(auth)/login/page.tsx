@@ -49,41 +49,64 @@ export default function LoginPage() {
   }, [state]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">登入</CardTitle>
-          <CardDescription>請輸入您的帳號密碼以登入系統。</CardDescription>
+    <div
+      className="flex items-center justify-center min-h-screen bg-muted/40"
+      data-oid="9wsekxh"
+    >
+      <Card className="w-full max-w-sm" data-oid="eg32p3:">
+        <CardHeader data-oid="m9gheu9">
+          <CardTitle className="text-2xl" data-oid="j9hkwfh">
+            登入
+          </CardTitle>
+          <CardDescription data-oid="49vrrjn">
+            請輸入您的帳號密碼以登入系統。
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent data-oid="l5o1zsb">
           {/* 
-                            使用 Server Action 的表單
-                            - action={formAction}: 將 Server Action 直接綁定到表單
-                            - Next.js 會自動處理表單提交和資料傳遞
-                            - 無需 onSubmit 事件處理器
-                           */}
-          <form action={formAction}>
-            <div className="grid gap-4">
+                               使用 Server Action 的表單
+                               - action={formAction}: 將 Server Action 直接綁定到表單
+                               - Next.js 會自動處理表單提交和資料傳遞
+                               - 無需 onSubmit 事件處理器
+                              */}
+          <form action={formAction} data-oid="0:si5x_">
+            <div className="grid gap-4" data-oid="b0c-cai">
               {/* 使用者名稱輸入欄位 */}
-              <div className="grid gap-2">
-                <Label htmlFor="username">帳號</Label>
+              <div className="grid gap-2" data-oid="sfk9aq8">
+                <Label htmlFor="username" data-oid="t-cl892">
+                  帳號
+                </Label>
                 <Input
                   id="username"
                   type="text"
                   name="username"
                   placeholder="superadmin"
                   required
+                  data-oid="n3q5p8t"
                 />
               </div>
 
               {/* 密碼輸入欄位 */}
-              <div className="grid gap-2">
-                <Label htmlFor="password">密碼</Label>
-                <Input id="password" type="password" name="password" required />
+              <div className="grid gap-2" data-oid="ozvgyit">
+                <Label htmlFor="password" data-oid=".8xu_:k">
+                  密碼
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  name="password"
+                  required
+                  data-oid="ftopt9f"
+                />
               </div>
 
               {/* 登入按鈕 - 使用 isPending 狀態控制載入中顯示 */}
-              <Button type="submit" className="w-full" disabled={isPending}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isPending}
+                data-oid="yf1jv6-"
+              >
                 {isPending ? "登入中..." : "登入"}
               </Button>
             </div>

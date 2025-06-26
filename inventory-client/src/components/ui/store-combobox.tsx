@@ -59,34 +59,34 @@ export function StoreCombobox({
     : null;
 
   return (
-    <Popover open={open} onOpenChange={setOpen} data-oid="t64_--w">
-      <PopoverTrigger asChild data-oid="9ynqgs:">
+    <Popover open={open} onOpenChange={setOpen} data-oid="oc4accy">
+      <PopoverTrigger asChild data-oid="hsabdjy">
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
           disabled={isLoading}
-          data-oid="6vxuqhf"
+          data-oid=".7mumki"
         >
           {selectedStore ? selectedStore.name : placeholder}
           <ChevronsUpDown
             className="ml-2 h-4 w-4 shrink-0 opacity-50"
-            data-oid="ujugikd"
+            data-oid="z6wxje4"
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start" data-oid="3m5s:qw">
-        <Command data-oid="1e1i4if">
+      <PopoverContent className="w-full p-0" align="start" data-oid="uu_mqpd">
+        <Command data-oid="nz18uqz">
           <CommandInput
             placeholder="搜尋分店名稱..."
             className="h-9"
-            data-oid="qfew0so"
+            data-oid="8nzxibw"
           />
 
-          <CommandList data-oid="e9yfmbw">
-            <CommandEmpty data-oid="0:4ghzw">{emptyText}</CommandEmpty>
-            <CommandGroup data-oid="wygcwu4">
+          <CommandList data-oid="ql4:-qr">
+            <CommandEmpty data-oid="kvyergf">{emptyText}</CommandEmpty>
+            <CommandGroup data-oid="g736..y">
               {/* 全部選項 */}
               <CommandItem
                 value=""
@@ -94,14 +94,14 @@ export function StoreCombobox({
                   onValueChange("");
                   setOpen(false);
                 }}
-                data-oid=":ps6y27"
+                data-oid="i2qp355"
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
                     value === "" ? "opacity-100" : "opacity-0",
                   )}
-                  data-oid="m1bi33-"
+                  data-oid="37hzc6_"
                 />
                 全部分店
               </CommandItem>
@@ -115,7 +115,7 @@ export function StoreCombobox({
                     onValueChange(store.id?.toString() || "");
                     setOpen(false);
                   }}
-                  data-oid="-9:b_n_"
+                  data-oid="k5nhod_"
                 >
                   <Check
                     className={cn(
@@ -124,14 +124,14 @@ export function StoreCombobox({
                         ? "opacity-100"
                         : "opacity-0",
                     )}
-                    data-oid="siivg3z"
+                    data-oid="gfrgqax"
                   />
 
                   {store.name}
                   {store.address && (
                     <span
                       className="ml-2 text-xs text-muted-foreground"
-                      data-oid="wi8i.4s"
+                      data-oid="zssx:p-"
                     >
                       {store.address}
                     </span>

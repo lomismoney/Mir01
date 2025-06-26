@@ -262,21 +262,26 @@ export function CategoryForm({
   }, [categories, initialData?.id]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="grid gap-4 py-4"
+      data-oid="f9-zm.l"
+    >
       {/* 分類名稱欄位 */}
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">
+      <div className="grid grid-cols-4 items-center gap-4" data-oid="lo3-otn">
+        <Label htmlFor="name" className="text-right" data-oid="yp_:8r2">
           名稱
         </Label>
-        <div className="col-span-3">
+        <div className="col-span-3" data-oid="j-em78x">
           <Input
             id="name"
             placeholder="請輸入分類名稱"
             {...register("name", { required: "分類名稱為必填項目" })}
+            data-oid="-8umkky"
           />
 
           {errors.name && (
-            <p className="text-sm text-destructive mt-1">
+            <p className="text-sm text-destructive mt-1" data-oid="54_4eyi">
               {errors.name.message}
             </p>
           )}
@@ -284,8 +289,8 @@ export function CategoryForm({
       </div>
 
       {/* 分類描述欄位 */}
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="description" className="text-right">
+      <div className="grid grid-cols-4 items-center gap-4" data-oid="_vlhpse">
+        <Label htmlFor="description" className="text-right" data-oid="z:ra6-6">
           描述
         </Label>
         <Input
@@ -293,12 +298,13 @@ export function CategoryForm({
           placeholder="請輸入分類描述（可選）"
           {...register("description")}
           className="col-span-3"
+          data-oid="_u9e3p."
         />
       </div>
 
       {/* 父分類選擇欄位 */}
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="parent_id" className="text-right">
+      <div className="grid grid-cols-4 items-center gap-4" data-oid="k:4x5-r">
+        <Label htmlFor="parent_id" className="text-right" data-oid="rn46gm5">
           父分類
         </Label>
         <Controller
@@ -312,8 +318,12 @@ export function CategoryForm({
                 : null;
 
             return (
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild className="col-span-3">
+              <Popover open={open} onOpenChange={setOpen} data-oid="j01ott_">
+                <PopoverTrigger
+                  asChild
+                  className="col-span-3"
+                  data-oid="_v1lxl0"
+                >
                   <Button
                     variant="outline"
                     role="combobox"
@@ -323,19 +333,32 @@ export function CategoryForm({
                       "w-full justify-between",
                       !field.value && "text-muted-foreground",
                     )}
+                    data-oid="r4y8k0_"
                   >
                     {field.value === "null" || field.value === null
                       ? "設為頂層分類"
                       : selectedOption?.displayName || "選擇父分類"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown
+                      className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                      data-oid=":83hiy8"
+                    />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="搜尋分類..." />
+                <PopoverContent
+                  className="w-full p-0"
+                  align="start"
+                  data-oid="7r4s1zn"
+                >
+                  <Command data-oid="380mkc3">
+                    <CommandInput
+                      placeholder="搜尋分類..."
+                      data-oid=".4jnp5m"
+                    />
 
-                    <CommandList>
-                      <CommandEmpty>找不到相關分類</CommandEmpty>
+                    <CommandList data-oid="3:xxhve">
+                      <CommandEmpty data-oid="64x_r2i">
+                        找不到相關分類
+                      </CommandEmpty>
 
                       {/* 設為頂層分類選項 */}
                       <CommandItem
@@ -344,6 +367,7 @@ export function CategoryForm({
                           field.onChange(null); // 🔧 修復：直接使用 null 而不是 'null' 字符串
                           setOpen(false);
                         }}
+                        data-oid="s6:a0-:"
                       >
                         <Check
                           className={cn(
@@ -352,11 +376,12 @@ export function CategoryForm({
                               ? "opacity-100"
                               : "opacity-0",
                           )}
+                          data-oid="j9tm_2w"
                         />
                         設為頂層分類
                       </CommandItem>
 
-                      <CommandSeparator />
+                      <CommandSeparator data-oid="cgq-p43" />
 
                       {/* 分類選項 */}
                       {categoryOptions.map((option) => {
@@ -383,6 +408,7 @@ export function CategoryForm({
                               field.onChange(String(option.id));
                               setOpen(false);
                             }}
+                            data-oid="u64erot"
                           >
                             <Check
                               className={cn(
@@ -391,6 +417,7 @@ export function CategoryForm({
                                   ? "opacity-100"
                                   : "opacity-0",
                               )}
+                              data-oid="p-quw9g"
                             />
 
                             <span
@@ -404,6 +431,7 @@ export function CategoryForm({
                                 isDisabled &&
                                   "opacity-50 text-muted-foreground",
                               )}
+                              data-oid=".bxjhwn"
                             >
                               {option.name}
                               {isDisabled && getDisabledReason()}
@@ -417,12 +445,13 @@ export function CategoryForm({
               </Popover>
             );
           }}
+          data-oid="h-884uq"
         />
       </div>
 
       {/* 提交按鈕 */}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading}>
+      <div className="flex justify-end" data-oid="gr1w-o9">
+        <Button type="submit" disabled={isLoading} data-oid="t_j44:t">
           {isLoading ? "儲存中..." : "儲存變更"}
         </Button>
       </div>

@@ -292,31 +292,31 @@ export default function RefundModal({
   // 如果沒有訂單數據或正在載入，顯示載入狀態
   if (!order || isLoadingDetail) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange} data-oid="t17et9n">
+      <Dialog open={open} onOpenChange={onOpenChange} data-oid="gvknkop">
         <DialogContent
           className="!w-[90vw] !max-w-[1400px] sm:!max-w-[1400px]"
-          data-oid=":-78lw1"
+          data-oid="7540awa"
         >
-          <DialogHeader data-oid="u2bz:3y">
-            <DialogTitle className="flex items-center gap-2" data-oid="exp6z42">
+          <DialogHeader data-oid="o_9lkj2">
+            <DialogTitle className="flex items-center gap-2" data-oid="39_4gn:">
               <RotateCcw
                 className="h-5 w-5 text-destructive"
-                data-oid="d88q1gw"
+                data-oid="8-5o-a4"
               />
               處理訂單退款
             </DialogTitle>
           </DialogHeader>
           <div
             className="flex items-center justify-center py-12"
-            data-oid="0898qky"
+            data-oid="z99e.iq"
           >
-            <div className="text-center space-y-3" data-oid="nnlfy74">
+            <div className="text-center space-y-3" data-oid="7nh3w70">
               <div
                 className="inline-flex h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"
-                data-oid="q_0.ktz"
+                data-oid="8u3cdz7"
               />
 
-              <p className="text-muted-foreground" data-oid="u1i3im7">
+              <p className="text-muted-foreground" data-oid="_52ak.7">
                 載入訂單資料中...
               </p>
             </div>
@@ -329,41 +329,41 @@ export default function RefundModal({
   // 🎯 檢查訂單是否有品項
   if (!fullOrder || !fullOrder.items || fullOrder.items.length === 0) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange} data-oid="r6qi0_x">
+      <Dialog open={open} onOpenChange={onOpenChange} data-oid="5s19z49">
         <DialogContent
           className="!w-[90vw] !max-w-[1400px] sm:!max-w-[1400px]"
-          data-oid="lbyu_vq"
+          data-oid="wwrzdff"
         >
-          <DialogHeader data-oid="bxvdnfq">
-            <DialogTitle className="flex items-center gap-2" data-oid=":b9tq28">
+          <DialogHeader data-oid="jfdu2lc">
+            <DialogTitle className="flex items-center gap-2" data-oid="55pdsis">
               <RotateCcw
                 className="h-5 w-5 text-destructive"
-                data-oid="f48:qor"
+                data-oid="rt.sbo_"
               />
               處理訂單退款
             </DialogTitle>
-            <DialogDescription data-oid="ys6p6a7">
+            <DialogDescription data-oid=":8iy.sx">
               訂單編號：{fullOrder?.order_number || order?.order_number}
             </DialogDescription>
           </DialogHeader>
           <div
             className="flex flex-col items-center justify-center py-12 space-y-4"
-            data-oid="0j1gjzr"
+            data-oid="3i3xhor"
           >
             <Package
               className="h-16 w-16 text-muted-foreground"
-              data-oid="20zrq6f"
+              data-oid="rk_yjn3"
             />
 
-            <p className="text-muted-foreground text-lg" data-oid="gnk2lhg">
+            <p className="text-muted-foreground text-lg" data-oid="pfyweu_">
               此訂單沒有可退款的品項
             </p>
           </div>
-          <DialogFooter data-oid="4.3cnv-">
+          <DialogFooter data-oid="x37u_7e">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              data-oid="di:z5g0"
+              data-oid="e72-e5h"
             >
               關閉
             </Button>
@@ -374,23 +374,23 @@ export default function RefundModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="seoc8.:">
+    <Dialog open={open} onOpenChange={onOpenChange} data-oid="q3fsdor">
       <DialogContent
         className="sm:max-w-4xl lg:max-w-6xl max-h-[90vh] flex flex-col"
-        data-oid="sa87p76"
+        data-oid="0ycxxbe"
       >
-        <DialogHeader data-oid="tjgzevh">
+        <DialogHeader data-oid="35n6a7i">
           <DialogTitle
             className="text-xl flex items-center gap-2"
-            data-oid="d_d-atx"
+            data-oid="hf-5gar"
           >
             <RotateCcw
               className="h-5 w-5 text-destructive"
-              data-oid="5eyt-7p"
+              data-oid="mlryhk2"
             />
             處理訂單退款
           </DialogTitle>
-          <DialogDescription data-oid="uu2fvww">
+          <DialogDescription data-oid="mn8eu8r">
             訂單編號: {fullOrder.order_number} | 客戶:{" "}
             {fullOrder.customer?.name}
           </DialogDescription>
@@ -400,38 +400,38 @@ export default function RefundModal({
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex-1 overflow-hidden"
-          data-oid="nke2m_z"
+          data-oid="ad3-q6m"
         >
           <div
             className="grid md:grid-cols-3 gap-6 h-full overflow-y-auto pr-2"
-            data-oid="ro_bf4w"
+            data-oid="8s-sl_l"
           >
             {/* === 左欄：互動區 (佔 2/3) === */}
-            <div className="md:col-span-2 space-y-6" data-oid="0_v6z:2">
-              <Card data-oid="rykm3au">
-                <CardHeader data-oid="bhpols-">
+            <div className="md:col-span-2 space-y-6" data-oid="q48k1zx">
+              <Card data-oid="dwa0opr">
+                <CardHeader data-oid="ygj-coe">
                   <CardTitle
                     className="flex items-center gap-2"
-                    data-oid="o-x7ss8"
+                    data-oid=".nq0rgp"
                   >
-                    <Package className="h-5 w-5" data-oid="quqlho." />
+                    <Package className="h-5 w-5" data-oid="hmnx4t0" />
                     1. 選擇退款品項與數量
                   </CardTitle>
-                  <CardDescription data-oid="fe1twp0">
+                  <CardDescription data-oid="a6o-k.k">
                     請勾選需要退款的品項，並設定退貨數量
                   </CardDescription>
                 </CardHeader>
-                <CardContent data-oid="iasn5vy">
-                  <div className="rounded-md border" data-oid="9eufv13">
-                    <Table data-oid="6c:dgmo">
-                      <TableHeader data-oid="hvyfvl4">
+                <CardContent data-oid="2i-jgk-">
+                  <div className="rounded-md border" data-oid="3y1jh14">
+                    <Table data-oid="e3gkv_x">
+                      <TableHeader data-oid="80b5pwt">
                         <TableRow
                           className="border-b hover:bg-transparent"
-                          data-oid="89n6zi:"
+                          data-oid="fn9jekr"
                         >
                           <TableHead
                             className="w-12 h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                            data-oid="_qhhm:c"
+                            data-oid="nqtn:ih"
                           >
                             <Checkbox
                               checked={
@@ -446,42 +446,42 @@ export default function RefundModal({
                                   handleItemSelect(index, checked as boolean);
                                 });
                               }}
-                              data-oid="izzwkw3"
+                              data-oid="e39gq5h"
                             />
                           </TableHead>
                           <TableHead
                             className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                            data-oid="1o8oyn6"
+                            data-oid="ok9sisc"
                           >
                             品項資訊
                           </TableHead>
                           <TableHead
                             className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-                            data-oid="bvpy_v-"
+                            data-oid="_cjywv_"
                           >
                             已購數量
                           </TableHead>
                           <TableHead
                             className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-                            data-oid="xbzgg._"
+                            data-oid="l18wfx2"
                           >
                             退貨數量
                           </TableHead>
                           <TableHead
                             className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-                            data-oid="o_su3i4"
+                            data-oid=":8p2jp_"
                           >
                             單價
                           </TableHead>
                           <TableHead
                             className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-                            data-oid="2rglhjk"
+                            data-oid="5i2x2us"
                           >
                             小計
                           </TableHead>
                         </TableRow>
                       </TableHeader>
-                      <TableBody data-oid="tav62kb">
+                      <TableBody data-oid="3p_ws51">
                         {fields.map((field, index) => {
                           const item = watchedItems[index];
                           const isSelected = item?.is_selected || false;
@@ -494,25 +494,25 @@ export default function RefundModal({
                             <TableRow
                               key={field.key}
                               className={isSelected ? "bg-muted/30" : ""}
-                              data-oid="89nocla"
+                              data-oid="wf1u.ee"
                             >
-                              <TableCell data-oid=".2fwsf8">
+                              <TableCell data-oid="qm4fbar">
                                 <Checkbox
                                   checked={isSelected}
                                   onCheckedChange={(checked) =>
                                     handleItemSelect(index, checked as boolean)
                                   }
-                                  data-oid="2ts1gms"
+                                  data-oid="7f5:97:"
                                 />
                               </TableCell>
-                              <TableCell data-oid="3jcoz3_">
-                                <div className="space-y-1" data-oid="6w58rfj">
-                                  <p className="font-medium" data-oid="1gp9rhx">
+                              <TableCell data-oid="wr9sl2a">
+                                <div className="space-y-1" data-oid="d.6rxtb">
+                                  <p className="font-medium" data-oid="t.advud">
                                     {field.product_name}
                                   </p>
                                   <p
                                     className="text-sm text-muted-foreground"
-                                    data-oid="2bd0e__"
+                                    data-oid="tk.l:hb"
                                   >
                                     SKU: {field.sku}
                                   </p>
@@ -520,13 +520,13 @@ export default function RefundModal({
                               </TableCell>
                               <TableCell
                                 className="text-center"
-                                data-oid="inyxhca"
+                                data-oid="n9l7s04"
                               >
-                                <Badge variant="outline" data-oid=".mf5.6g">
+                                <Badge variant="outline" data-oid="6a6ncli">
                                   {field.max_quantity}
                                 </Badge>
                               </TableCell>
-                              <TableCell data-oid="y.dcdr4">
+                              <TableCell data-oid="ayy1i0e">
                                 <Controller
                                   name={`items.${index}.quantity`}
                                   control={form.control}
@@ -549,21 +549,21 @@ export default function RefundModal({
                                       }}
                                       disabled={!isSelected}
                                       className="w-20 mx-auto"
-                                      data-oid="joh2fm9"
+                                      data-oid="0.3t__s"
                                     />
                                   )}
-                                  data-oid="san11f2"
+                                  data-oid="6cy5v_t"
                                 />
                               </TableCell>
                               <TableCell
                                 className="text-right font-medium"
-                                data-oid="cr6e259"
+                                data-oid="hicfrq-"
                               >
                                 ${(field.price || 0).toFixed(2)}
                               </TableCell>
                               <TableCell
                                 className="text-right font-medium text-destructive"
-                                data-oid="jnpcvp0"
+                                data-oid="1j1k-sj"
                               >
                                 ${subtotal.toFixed(2)}
                               </TableCell>
@@ -576,18 +576,18 @@ export default function RefundModal({
                 </CardContent>
               </Card>
 
-              <Card data-oid="n4yl2r:">
-                <CardHeader data-oid="8ufx-pp">
-                  <CardTitle data-oid="58c.zlk">2. 填寫退款資訊</CardTitle>
-                  <CardDescription data-oid="n8umxa2">
+              <Card data-oid="rp_esen">
+                <CardHeader data-oid="7wyi60m">
+                  <CardTitle data-oid="w74llbl">2. 填寫退款資訊</CardTitle>
+                  <CardDescription data-oid="qeae0aq">
                     請提供退款原因及相關說明
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4" data-oid="u9pcn2a">
-                  <div className="space-y-2" data-oid="c26.798">
-                    <Label htmlFor="reason" data-oid="es_8u6e">
+                <CardContent className="space-y-4" data-oid="xh82d:r">
+                  <div className="space-y-2" data-oid="y7tmd_f">
+                    <Label htmlFor="reason" data-oid="31ly_o-">
                       退款原因{" "}
-                      <span className="text-destructive" data-oid="t05w0m2">
+                      <span className="text-destructive" data-oid="4tjygj-">
                         *
                       </span>
                     </Label>
@@ -601,25 +601,25 @@ export default function RefundModal({
                             id="reason"
                             placeholder="請詳細說明退款原因..."
                             className="min-h-[100px] resize-none"
-                            data-oid="vc9yb-."
+                            data-oid=".aj4r13"
                           />
 
                           {fieldState.error && (
                             <p
                               className="text-sm text-destructive"
-                              data-oid="1yhzh0."
+                              data-oid="a2bkqv_"
                             >
                               {fieldState.error.message}
                             </p>
                           )}
                         </>
                       )}
-                      data-oid="ghegvvf"
+                      data-oid="pltdfzi"
                     />
                   </div>
 
-                  <div className="space-y-2" data-oid="4oz0kfz">
-                    <Label htmlFor="notes" data-oid="xtru62y">
+                  <div className="space-y-2" data-oid="ucbv3xi">
+                    <Label htmlFor="notes" data-oid=":famsfn">
                       備註說明
                     </Label>
                     <Controller
@@ -631,17 +631,17 @@ export default function RefundModal({
                           id="notes"
                           placeholder="選填：其他補充說明..."
                           className="resize-none"
-                          data-oid="xpl7-r5"
+                          data-oid="x1e3ae0"
                         />
                       )}
-                      data-oid="c7vk.vl"
+                      data-oid="it12er3"
                     />
                   </div>
 
-                  <div className="space-y-4" data-oid="tjmhx6w">
+                  <div className="space-y-4" data-oid="66hr5w4">
                     <div
                       className="flex items-center space-x-2"
-                      data-oid="8kdvyje"
+                      data-oid="g68ponh"
                     >
                       <Controller
                         name="should_restock"
@@ -651,23 +651,23 @@ export default function RefundModal({
                             id="restock"
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            data-oid="vu9o1su"
+                            data-oid="jpasivn"
                           />
                         )}
-                        data-oid="p8oo_m:"
+                        data-oid="ryo1:pa"
                       />
 
                       <Label
                         htmlFor="restock"
                         className="cursor-pointer font-normal"
-                        data-oid="6k.361m"
+                        data-oid="v2sshkm"
                       >
                         將退貨商品加回庫存
                       </Label>
                     </div>
-                    <Alert data-oid="2xaa1wg">
-                      <AlertCircle className="h-4 w-4" data-oid="9oufw7-" />
-                      <AlertDescription data-oid="gbop2f8">
+                    <Alert data-oid="u:.a76z">
+                      <AlertCircle className="h-4 w-4" data-oid="uomfb6t" />
+                      <AlertDescription data-oid="wvt0xmn">
                         勾選此選項將自動將退貨商品數量加回相應的庫存
                       </AlertDescription>
                     </Alert>
@@ -677,85 +677,85 @@ export default function RefundModal({
             </div>
 
             {/* === 右欄：資訊區 (佔 1/3) === */}
-            <div className="space-y-6" data-oid="xd50jz7">
-              <Card className="sticky top-0" data-oid=".u:7g7u">
-                <CardHeader data-oid=".rxn18b">
+            <div className="space-y-6" data-oid="ncwtcpl">
+              <Card className="sticky top-0" data-oid="o26v3nc">
+                <CardHeader data-oid="0q7kvuc">
                   <CardTitle
                     className="flex items-center gap-2"
-                    data-oid="i.0tgkx"
+                    data-oid="55g3oxx"
                   >
-                    <Calculator className="h-5 w-5" data-oid="ofu-ggp" />
+                    <Calculator className="h-5 w-5" data-oid="9ldm9rr" />
                     退款金額計算
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4" data-oid="0x_7ikp">
-                  <div className="space-y-3 text-sm" data-oid="dw_lc9v">
-                    <div className="flex justify-between" data-oid="01_:2wk">
+                <CardContent className="space-y-4" data-oid="k2.voat">
+                  <div className="space-y-3 text-sm" data-oid="i3n7hs5">
+                    <div className="flex justify-between" data-oid="k8amxv3">
                       <span
                         className="text-muted-foreground"
-                        data-oid="-xyg_9u"
+                        data-oid="3yu.fm3"
                       >
                         訂單總額
                       </span>
-                      <span className="font-medium" data-oid="j7b2dsy">
+                      <span className="font-medium" data-oid="wvlc_t8">
                         ${fullOrder.grand_total.toFixed(2)}
                       </span>
                     </div>
-                    <div className="flex justify-between" data-oid="pl1mk6u">
+                    <div className="flex justify-between" data-oid="fvbpww2">
                       <span
                         className="text-muted-foreground"
-                        data-oid="rjk6iu6"
+                        data-oid="r5b.gen"
                       >
                         已付金額
                       </span>
                       <span
                         className="font-medium text-green-600"
-                        data-oid="sk0diwe"
+                        data-oid="ybt_1_g"
                       >
                         ${fullOrder.paid_amount.toFixed(2)}
                       </span>
                     </div>
 
-                    <Separator data-oid="w_17r7c" />
+                    <Separator data-oid="qm24bso" />
 
-                    <div className="flex justify-between" data-oid="s-6:foj">
+                    <div className="flex justify-between" data-oid="hld0wfy">
                       <span
                         className="text-muted-foreground"
-                        data-oid="6fgzmle"
+                        data-oid="dw6jjtv"
                       >
                         選中品項
                       </span>
-                      <span className="font-medium" data-oid="kw5ydz.">
+                      <span className="font-medium" data-oid="90d:513">
                         {selectedItemsCount} 項
                       </span>
                     </div>
-                    <div className="flex justify-between" data-oid="cyla_as">
+                    <div className="flex justify-between" data-oid="6mztt2c">
                       <span
                         className="text-muted-foreground"
-                        data-oid="k-qm6l5"
+                        data-oid="s_p5lap"
                       >
                         退貨總數量
                       </span>
-                      <span className="font-medium" data-oid="hgybsh8">
+                      <span className="font-medium" data-oid="809xty-">
                         {totalRefundQuantity} 件
                       </span>
                     </div>
 
-                    <Separator data-oid="0_8b.a2" />
+                    <Separator data-oid="kyia29q" />
 
                     <div
                       className="flex justify-between items-center pt-2"
-                      data-oid="cy16yir"
+                      data-oid="2hn9.1k"
                     >
                       <span
                         className="font-semibold text-base"
-                        data-oid="dogn3p8"
+                        data-oid="8rp9hfn"
                       >
                         預計退款金額
                       </span>
                       <span
                         className="text-2xl font-bold text-destructive"
-                        data-oid="jo-piwa"
+                        data-oid="pdv_989"
                       >
                         ${totalRefundAmount.toFixed(2)}
                       </span>
@@ -764,13 +764,13 @@ export default function RefundModal({
 
                   {/* 退款進度視覺化 */}
                   {fullOrder.grand_total > 0 && (
-                    <div className="space-y-2" data-oid="mymslme">
+                    <div className="space-y-2" data-oid="s8_x_-6">
                       <div
                         className="flex justify-between text-xs text-muted-foreground"
-                        data-oid="wxpqsx2"
+                        data-oid="3wtxsk0"
                       >
-                        <span data-oid=".2enx.z">退款比例</span>
-                        <span data-oid="tv321_7">
+                        <span data-oid="3m5g7r-">退款比例</span>
+                        <span data-oid="mxo2a8k">
                           {(
                             (totalRefundAmount / fullOrder.grand_total) *
                             100
@@ -783,7 +783,7 @@ export default function RefundModal({
                           (totalRefundAmount / fullOrder.grand_total) * 100
                         }
                         className="h-2"
-                        data-oid="y6bczay"
+                        data-oid="bb87da."
                       />
                     </div>
                   )}
@@ -791,16 +791,16 @@ export default function RefundModal({
                   {selectedItemsCount > 0 && (
                     <Alert
                       className="border-green-200 bg-green-50"
-                      data-oid="gzvh6cy"
+                      data-oid="_5zfm7o"
                     >
                       <CheckCircle
                         className="h-4 w-4 text-green-600"
-                        data-oid="80jfuku"
+                        data-oid="ny3qgn4"
                       />
 
                       <AlertDescription
                         className="text-green-800"
-                        data-oid="mol2e4a"
+                        data-oid="4_:_qc4"
                       >
                         已選擇 {selectedItemsCount} 項商品，共{" "}
                         {totalRefundQuantity} 件
@@ -813,13 +813,13 @@ export default function RefundModal({
           </div>
 
           {/* --- 底部操作按鈕 --- */}
-          <DialogFooter className="mt-6 pt-4 border-t" data-oid="byar.0j">
+          <DialogFooter className="mt-6 pt-4 border-t" data-oid="36s-fs-">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={createRefundMutation.isPending}
-              data-oid="d4v:gy1"
+              data-oid=".32gsrl"
             >
               取消
             </Button>
@@ -829,19 +829,19 @@ export default function RefundModal({
               disabled={
                 selectedItemsCount === 0 || createRefundMutation.isPending
               }
-              data-oid="mfzy.3y"
+              data-oid="x6vyjnr"
             >
               {createRefundMutation.isPending ? (
                 <>
                   <div
                     className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-                    data-oid="zu3.t9r"
+                    data-oid="9_y_kzc"
                   />
                   處理中...
                 </>
               ) : (
                 <>
-                  <DollarSign className="mr-2 h-4 w-4" data-oid="p0:vz0r" />
+                  <DollarSign className="mr-2 h-4 w-4" data-oid="s3ui-1p" />
                   確認退款 ${totalRefundAmount.toFixed(2)}
                 </>
               )}

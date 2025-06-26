@@ -37,45 +37,45 @@ export function InventoryModificationDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen} data-oid="p9m9c7r">
+    <Dialog open={open} onOpenChange={setOpen} data-oid="im9:s8x">
       <Button
         variant="ghost"
         size="icon"
         className="h-8 w-8"
         onClick={() => setOpen(true)}
-        data-oid="ewc_430"
+        data-oid="lihn44e"
       >
-        <ArrowUpDown className="h-4 w-4" data-oid="ly_rtjg" />
-        <span className="sr-only" data-oid="tvk5e.k">
+        <ArrowUpDown className="h-4 w-4" data-oid="-i0746t" />
+        <span className="sr-only" data-oid="kb26d.7">
           修改庫存
         </span>
       </Button>
       <DialogContent
         className="max-w-2xl max-h-[90vh] overflow-y-auto"
-        data-oid="p2s0548"
+        data-oid="t96axg8"
       >
-        <DialogHeader data-oid="xp7fsk6">
-          <DialogTitle data-oid=":6hcl9e">修改庫存</DialogTitle>
-          <DialogDescription data-oid="vf-egoq">
+        <DialogHeader data-oid="cv9wdfv">
+          <DialogTitle data-oid="ioqvn_z">修改庫存</DialogTitle>
+          <DialogDescription data-oid="mbxjfk5">
             調整指定商品的庫存數量（增加、減少或設定）
           </DialogDescription>
           {productName && (
             <div
               className="mt-4 p-3 bg-muted/50 rounded-lg space-y-1"
-              data-oid="i5m:0xq"
+              data-oid="gqbsb4j"
             >
-              <div className="font-medium" data-oid="-.19-op">
+              <div className="font-medium" data-oid="2s_434p">
                 {productName}
               </div>
               {sku && (
                 <div
                   className="text-sm text-muted-foreground"
-                  data-oid="140gvo5"
+                  data-oid="ujsw:8n"
                 >
                   SKU: {sku}
                 </div>
               )}
-              <div className="text-sm" data-oid="etbq2be">
+              <div className="text-sm" data-oid="_71_8gd">
                 目前庫存: {currentQuantity} 件
               </div>
             </div>
@@ -87,7 +87,7 @@ export function InventoryModificationDialog({
           currentQuantity={currentQuantity}
           onSuccess={handleSuccess}
           dialogOpen={open}
-          data-oid="ojpo:hy"
+          data-oid="t490m-9"
         />
       </DialogContent>
     </Dialog>

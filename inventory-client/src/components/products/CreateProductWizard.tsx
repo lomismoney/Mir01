@@ -777,18 +777,18 @@ export function CreateProductWizard({
             {...commonProps}
             productId={productId}
             isEditMode={isEditMode}
-            data-oid="j_ar2po"
+            data-oid="m_p_oo9"
           />
         );
 
       case 2:
-        return <Step2_DefineSpecs {...commonProps} data-oid="tv180x9" />;
+        return <Step2_DefineSpecs {...commonProps} data-oid="ol-kbjr" />;
       case 3:
-        return <Step3_ConfigureVariants {...commonProps} data-oid="u.p1l47" />;
+        return <Step3_ConfigureVariants {...commonProps} data-oid="nzdy7m3" />;
       case 4:
-        return <Step4_Review {...commonProps} data-oid="nb3d9b9" />;
+        return <Step4_Review {...commonProps} data-oid="ih0fx-i" />;
       default:
-        return <div data-oid="cb:p3hl">未知步驟</div>;
+        return <div data-oid="n93x8n4">未知步驟</div>;
     }
   };
 
@@ -801,46 +801,46 @@ export function CreateProductWizard({
   if (isEditMode) {
     // 載入中 - 使用骨架屏提供視覺連續性
     if (isLoadingProduct) {
-      return <EditProductFormSkeleton data-oid="_ajk4i0" />;
+      return <EditProductFormSkeleton data-oid="9.bvyuv" />;
     }
 
     // 載入錯誤或找不到商品
     if (productError || !productDetail?.data) {
       return (
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8" data-oid="-i327c2">
+        <div className="container mx-auto p-4 sm:p-6 lg:p-8" data-oid="ys4me2q">
           <Card
             className="border-destructive/50 bg-destructive/5"
-            data-oid="4y94h22"
+            data-oid="e6_u5t9"
           >
-            <CardContent className="pt-6" data-oid="oz:c792">
+            <CardContent className="pt-6" data-oid="vdq4hl2">
               <div
                 className="flex flex-col items-center text-center"
-                data-oid=":7dsy4g"
+                data-oid="_14hzqi"
               >
                 <div
                   className="rounded-full bg-destructive/10 p-3 mb-4"
-                  data-oid=":xwmcns"
+                  data-oid="kzhhwtx"
                 >
                   <svg
                     className="h-6 w-6 text-destructive"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    data-oid="xn.4_8s"
+                    data-oid="wcgdok4"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
                       d="M6 18L18 6M6 6l12 12"
-                      data-oid="815nmvl"
+                      data-oid="5c9:cvp"
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2" data-oid="im7cpzp">
+                <h3 className="text-lg font-semibold mb-2" data-oid="kjoc9:4">
                   無法載入商品
                 </h3>
-                <p className="text-muted-foreground mb-4" data-oid="0c9c-xe">
+                <p className="text-muted-foreground mb-4" data-oid="f9r23_w">
                   {productError instanceof Error
                     ? productError.message
                     : "找不到指定的商品，請確認商品是否存在"}
@@ -848,7 +848,7 @@ export function CreateProductWizard({
                 <Button
                   onClick={() => router.push("/products")}
                   variant="outline"
-                  data-oid="eo9gkkz"
+                  data-oid="7izz1-b"
                 >
                   返回商品列表
                 </Button>
@@ -861,13 +861,13 @@ export function CreateProductWizard({
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8" data-oid="8_c27mo">
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8" data-oid="7lrk8px">
       {/* --- 頁面標題 --- */}
-      <div className="mb-8" data-oid="oyj630b">
-        <h1 className="text-3xl font-bold tracking-tight" data-oid="qtxav0x">
+      <div className="mb-8" data-oid="7xr8zyo">
+        <h1 className="text-3xl font-bold tracking-tight" data-oid="twhc4ms">
           {isEditMode ? "編輯商品" : "新增商品"}
         </h1>
-        <p className="text-muted-foreground" data-oid="e:eqnyn">
+        <p className="text-muted-foreground" data-oid="lnwnj7n">
           {isEditMode
             ? "透過引導式流程，輕鬆更新您的商品"
             : "透過引導式流程，輕鬆創建您的商品"}
@@ -875,31 +875,31 @@ export function CreateProductWizard({
       </div>
 
       {/* --- 統一的內容容器 --- */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8" data-oid="3b7xpgj">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8" data-oid="q_p6vz.">
         {/* --- 左欄：步驟指示器 --- */}
-        <aside className="md:col-span-1" data-oid="0v:5g95">
+        <aside className="md:col-span-1" data-oid="aq9jh1h">
           {/* 進度概覽 */}
-          <div className="mb-6" data-oid="a5uutae">
+          <div className="mb-6" data-oid="qxp9wq:">
             <div
               className="flex items-center justify-between mb-2"
-              data-oid="dwngzk9"
+              data-oid="mn2ac2z"
             >
-              <span className="text-sm font-medium" data-oid="36q:v3-">
+              <span className="text-sm font-medium" data-oid="tg:z_km">
                 創建進度
               </span>
-              <Badge variant="outline" className="text-xs" data-oid="2vbigij">
+              <Badge variant="outline" className="text-xs" data-oid="6mwxh1i">
                 {Math.round(progressPercentage)}% 完成
               </Badge>
             </div>
             <Progress
               value={progressPercentage}
               className="w-full h-2"
-              data-oid="jelgzzv"
+              data-oid="o7458yj"
             />
           </div>
 
           {/* 步驟列表 */}
-          <div className="space-y-2" data-oid="jo0me0d">
+          <div className="space-y-2" data-oid="k4bfpl5">
             {STEPS.map((stepInfo, index) => {
               const stepNumber = index + 1;
               const isCompleted = stepNumber < step;
@@ -915,23 +915,23 @@ export function CreateProductWizard({
                         ? "bg-muted/50"
                         : "bg-transparent"
                   }`}
-                  data-oid="0nsvp6a"
+                  data-oid="28t.0zc"
                 >
                   {/* 步驟圖標 */}
-                  <div className="flex-shrink-0 mt-0.5" data-oid="f8p9lsi">
+                  <div className="flex-shrink-0 mt-0.5" data-oid="u_9i8j4">
                     {isCompleted ? (
                       <CheckCircle
                         className="h-5 w-5 text-primary"
-                        data-oid="7_mw49-"
+                        data-oid="zafbrer"
                       />
                     ) : isCurrent ? (
                       <div
                         className="h-5 w-5 rounded-full bg-primary flex items-center justify-center"
-                        data-oid="zc-rf:y"
+                        data-oid="833knvd"
                       >
                         <span
                           className="text-primary-foreground text-xs font-medium"
-                          data-oid="ydv6hy0"
+                          data-oid="53mbfc7"
                         >
                           {stepNumber}
                         </span>
@@ -939,13 +939,13 @@ export function CreateProductWizard({
                     ) : (
                       <Circle
                         className="h-5 w-5 text-muted-foreground"
-                        data-oid="1g8t12o"
+                        data-oid="_sf4yf-"
                       />
                     )}
                   </div>
 
                   {/* 步驟資訊 */}
-                  <div className="flex-1 min-w-0" data-oid="duc6m:_">
+                  <div className="flex-1 min-w-0" data-oid="rs0-1qk">
                     <div
                       className={`text-sm font-medium ${
                         isCurrent
@@ -954,13 +954,13 @@ export function CreateProductWizard({
                             ? "text-muted-foreground"
                             : "text-muted-foreground"
                       }`}
-                      data-oid="2ey8om0"
+                      data-oid="a0uw006"
                     >
                       {stepInfo.title}
                     </div>
                     <div
                       className="text-xs text-muted-foreground mt-0.5"
-                      data-oid="k210x76"
+                      data-oid="c8v-64l"
                     >
                       {stepInfo.description}
                     </div>
@@ -969,11 +969,11 @@ export function CreateProductWizard({
                     {isCurrent && (
                       <div
                         className="flex items-center mt-1.5 text-xs text-primary"
-                        data-oid="h50c8vv"
+                        data-oid="4mzr6sl"
                       >
                         <div
                           className="h-1.5 w-1.5 bg-primary rounded-full mr-2 animate-pulse"
-                          data-oid="n2cbf0c"
+                          data-oid="la_tilk"
                         ></div>
                         進行中
                       </div>
@@ -986,26 +986,26 @@ export function CreateProductWizard({
         </aside>
 
         {/* --- 右欄：表單內容區 --- */}
-        <main className="md:col-span-3" data-oid="s807u28">
+        <main className="md:col-span-3" data-oid="sl0o89u">
           {/* 當前步驟內容 - 讓每個步驟組件自行定義 Card 樣式 */}
           {renderCurrentStep()}
 
           {/* 底部導航控制 */}
           <div
             className="mt-6 flex items-center justify-between"
-            data-oid="f7fb_p1"
+            data-oid="yyr0:6e"
           >
             <Button
               variant="outline"
               onClick={handlePrevStep}
               disabled={step === 1 || isSubmitting}
-              data-oid="qog4wqa"
+              data-oid="vx0chfa"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" data-oid="n-b6-y0" />
+              <ArrowLeft className="mr-2 h-4 w-4" data-oid="saxa7z:" />
               上一步
             </Button>
 
-            <div className="text-sm text-muted-foreground" data-oid="t_yb-1q">
+            <div className="text-sm text-muted-foreground" data-oid="m3_-2i6">
               步驟 {step} / {STEPS.length}
             </div>
 
@@ -1013,22 +1013,22 @@ export function CreateProductWizard({
               <Button
                 onClick={handleNextStep}
                 disabled={!validateStep(step) || isSubmitting}
-                data-oid="l.ffuev"
+                data-oid="b6e5dz1"
               >
                 下一步
-                <ArrowRight className="ml-2 h-4 w-4" data-oid="i2h5wmq" />
+                <ArrowRight className="ml-2 h-4 w-4" data-oid="3io_bqe" />
               </Button>
             ) : (
               <Button
                 onClick={handleFinalSubmit}
                 disabled={!validateStep(step) || isSubmitting}
                 variant="default"
-                data-oid="smtd46v"
+                data-oid="4g9gte5"
               >
                 {isSubmitting && (
                   <Loader2
                     className="mr-2 h-4 w-4 animate-spin"
-                    data-oid=":i5n6r9"
+                    data-oid="sjl7hu6"
                   />
                 )}
                 {isSubmitting

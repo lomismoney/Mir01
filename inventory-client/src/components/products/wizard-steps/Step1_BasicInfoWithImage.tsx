@@ -227,23 +227,23 @@ export function Step1_BasicInfoWithImage({
   };
 
   return (
-    <Card data-oid="-y.bccf">
-      <CardHeader data-oid="j5uk2wb">
-        <CardTitle data-oid="wy2k:ds">基本資訊</CardTitle>
-        <CardDescription data-oid="_2yygnc">
+    <Card data-oid="lg:17o7">
+      <CardHeader data-oid="n.s5zcl">
+        <CardTitle data-oid="v0006:g">基本資訊</CardTitle>
+        <CardDescription data-oid="-jbj3bh">
           填寫商品的基礎銷售資訊。
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6" data-oid="sf:_nil">
+      <CardContent className="space-y-6" data-oid="7r3re5l">
         {/* --- 商品名稱 --- */}
-        <div className="space-y-2" data-oid="z97cgfs">
+        <div className="space-y-2" data-oid=":oqkzq1">
           <Label
             htmlFor="product-name"
             className="text-sm font-medium"
-            data-oid="ef8kl9l"
+            data-oid="6ebi.tz"
           >
             商品名稱
-            <span className="text-red-500 ml-1" data-oid="4xqc8wu">
+            <span className="text-red-500 ml-1" data-oid="-zzc0.5">
               *
             </span>
           </Label>
@@ -258,13 +258,13 @@ export function Step1_BasicInfoWithImage({
               validationErrors.name ? "border-red-500 focus:border-red-500" : ""
             }
             aria-describedby={validationErrors.name ? "name-error" : undefined}
-            data-oid="qf-czt."
+            data-oid="6otk9wh"
           />
 
           {validationErrors.name && (
-            <Alert variant="destructive" data-oid="-uxeagy">
-              <AlertCircle className="h-4 w-4" data-oid="vql70c6" />
-              <AlertDescription id="name-error" data-oid="no95jmm">
+            <Alert variant="destructive" data-oid="p7rknzl">
+              <AlertCircle className="h-4 w-4" data-oid="2ywfj5c" />
+              <AlertDescription id="name-error" data-oid="k1y338j">
                 {validationErrors.name}
               </AlertDescription>
             </Alert>
@@ -272,11 +272,11 @@ export function Step1_BasicInfoWithImage({
         </div>
 
         {/* --- 商品描述 --- */}
-        <div className="space-y-2" data-oid="2df6f.n">
+        <div className="space-y-2" data-oid="tz1snrt">
           <Label
             htmlFor="product-description"
             className="text-sm font-medium"
-            data-oid=".dbohi_"
+            data-oid="qeidhz:"
           >
             商品描述
           </Label>
@@ -295,22 +295,22 @@ export function Step1_BasicInfoWithImage({
             aria-describedby={
               validationErrors.description ? "description-error" : undefined
             }
-            data-oid="ah07kv_"
+            data-oid="93zza.l"
           />
 
           <div
             className="flex justify-between text-xs text-muted-foreground"
-            data-oid="yzo-2m_"
+            data-oid="uxe6y1y"
           >
-            <span data-oid="mv6_45r">提供詳細的商品說明，有助於提升轉換率</span>
-            <span data-oid="udgu86g">
+            <span data-oid="-oj5me9">提供詳細的商品說明，有助於提升轉換率</span>
+            <span data-oid="ukfbsy3">
               {formData.basicInfo.description.length}/1000
             </span>
           </div>
           {validationErrors.description && (
-            <Alert variant="destructive" data-oid="d37phqg">
-              <AlertCircle className="h-4 w-4" data-oid="50t0l.w" />
-              <AlertDescription id="description-error" data-oid="c16ekns">
+            <Alert variant="destructive" data-oid="_odgg1z">
+              <AlertCircle className="h-4 w-4" data-oid="hnw7b9u" />
+              <AlertDescription id="description-error" data-oid="tukf8uq">
                 {validationErrors.description}
               </AlertDescription>
             </Alert>
@@ -318,11 +318,11 @@ export function Step1_BasicInfoWithImage({
         </div>
 
         {/* --- 商品分類 --- */}
-        <div className="space-y-2" data-oid="qxwp68t">
+        <div className="space-y-2" data-oid="3wt.czr">
           <Label
             htmlFor="product-category"
             className="text-sm font-medium"
-            data-oid="-iftyql"
+            data-oid="3fecnq9"
           >
             商品分類
           </Label>
@@ -330,12 +330,12 @@ export function Step1_BasicInfoWithImage({
           {categoriesLoading ? (
             <div
               className="h-10 bg-muted rounded-md animate-pulse"
-              data-oid="rv43udx"
+              data-oid="ktpabj7"
             />
           ) : categoriesError ? (
-            <Alert variant="destructive" data-oid="0b9-22e">
-              <AlertCircle className="h-4 w-4" data-oid="0-7uwzo" />
-              <AlertDescription data-oid="82b4vry">
+            <Alert variant="destructive" data-oid="cz7m:kd">
+              <AlertCircle className="h-4 w-4" data-oid="zy3a-c2" />
+              <AlertDescription data-oid="m5b4-gj">
                 載入分類資料失敗，請重新整理頁面
               </AlertDescription>
             </Alert>
@@ -345,26 +345,26 @@ export function Step1_BasicInfoWithImage({
               onValueChange={(value) =>
                 handleFieldChange("category_id", value ? Number(value) : null)
               }
-              data-oid="x84yhgw"
+              data-oid="1ve_5-p"
             >
-              <SelectTrigger id="product-category" data-oid="1-d1vz_">
+              <SelectTrigger id="product-category" data-oid="5agtxnc">
                 <SelectValue
                   placeholder="請選擇商品分類（可選）"
-                  data-oid="bx3tsv5"
+                  data-oid=".x4te:s"
                 />
               </SelectTrigger>
-              <SelectContent data-oid="m22lw2j">
+              <SelectContent data-oid="_1apu9k">
                 {categoriesList.map((category) => (
                   <SelectItem
                     key={category.id}
                     value={category.id?.toString() || ""}
-                    data-oid="5kwdait"
+                    data-oid="1tnitzz"
                   >
                     {category.name}
                     {category.description && (
                       <span
                         className="text-xs text-muted-foreground ml-2"
-                        data-oid=".-er41x"
+                        data-oid="iuhy8.z"
                       >
                         - {category.description}
                       </span>
@@ -377,16 +377,16 @@ export function Step1_BasicInfoWithImage({
         </div>
 
         {/* --- 🎯 行內緊湊型圖片上傳器 --- */}
-        <div className="space-y-2" data-oid="r:j2rab">
-          <Label data-oid="kw2gowb">商品圖片</Label>
-          <div className="flex items-start gap-4" data-oid="6-l:jbo">
+        <div className="space-y-2" data-oid="avzxsmq">
+          <Label data-oid="nkl8vge">商品圖片</Label>
+          <div className="flex items-start gap-4" data-oid="txp.uk5">
             {formData.imageData.selectedFile ||
             formData.imageData.previewUrl ? (
               /* 已上傳圖片的預覽區 */
-              <div className="relative" data-oid="xfvtn8p">
+              <div className="relative" data-oid="rop2ug9">
                 <div
                   className="w-24 h-24 border rounded-md overflow-hidden bg-muted"
-                  data-oid="hn4e_:o"
+                  data-oid="qh1qm1s"
                 >
                   <img
                     src={
@@ -396,7 +396,7 @@ export function Step1_BasicInfoWithImage({
                     }
                     alt="商品圖片預覽"
                     className="w-full h-full object-cover"
-                    data-oid="i-pupnu"
+                    data-oid="ak6b2r8"
                   />
 
                   {/* 移除按鈕 */}
@@ -406,9 +406,9 @@ export function Step1_BasicInfoWithImage({
                     size="icon"
                     className="absolute -top-2 -right-2 h-6 w-6"
                     onClick={handleClearImage}
-                    data-oid="arlyjos"
+                    data-oid="hgv28u1"
                   >
-                    <X className="h-3 w-3" data-oid="auj:pi-" />
+                    <X className="h-3 w-3" data-oid=".egl-5." />
                   </Button>
                 </div>
               </div>
@@ -420,10 +420,10 @@ export function Step1_BasicInfoWithImage({
                   variant="outline"
                   className="flex flex-col items-center justify-center w-24 h-24 border-dashed shrink-0"
                   onClick={triggerFileSelect}
-                  data-oid="ghlpbej"
+                  data-oid=":jdyzvj"
                 >
-                  <Plus className="h-6 w-6" data-oid="37.45sc" />
-                  <span className="text-xs mt-1" data-oid="tz6fw.8">
+                  <Plus className="h-6 w-6" data-oid="jkoy40e" />
+                  <span className="text-xs mt-1" data-oid="fvr900r">
                     上傳圖片
                   </span>
                 </Button>
@@ -431,11 +431,11 @@ export function Step1_BasicInfoWithImage({
                 {/* 圖片說明文字 - 只在沒有圖片時顯示 */}
                 <div
                   className="text-xs text-muted-foreground self-center"
-                  data-oid="1k_qcef"
+                  data-oid="suptyjl"
                 >
-                  <p data-oid="8t3xxwn">支援 JPG、PNG、WebP 格式</p>
-                  <p data-oid="tdtmts1">建議尺寸 800x800 像素</p>
-                  <p data-oid="cv7cuks">最多可上傳 1 張圖片</p>
+                  <p data-oid="kzqejl5">支援 JPG、PNG、WebP 格式</p>
+                  <p data-oid="_3mdfor">建議尺寸 800x800 像素</p>
+                  <p data-oid="gq6-nj5">最多可上傳 1 張圖片</p>
                 </div>
               </>
             )}
@@ -448,7 +448,7 @@ export function Step1_BasicInfoWithImage({
             accept="image/jpeg,image/png,image/webp"
             onChange={handleFileSelect}
             className="hidden"
-            data-oid="mxdpqad"
+            data-oid="gfjiew1"
           />
         </div>
       </CardContent>

@@ -73,23 +73,23 @@ export function NavUser() {
   // 🎯 在客戶端 hydration 完成前，顯示骨架屏避免不一致
   if (!mounted || isLoading) {
     return (
-      <SidebarMenu data-oid="oy:dg9v">
-        <SidebarMenuItem data-oid=":iry-je">
+      <SidebarMenu data-oid="rgoy_sd">
+        <SidebarMenuItem data-oid="xrsbyr0">
           <SidebarMenuButton
             size="lg"
             disabled
             suppressHydrationWarning
-            data-oid="ylyw8t7"
+            data-oid="o926pgg"
           >
-            <Skeleton className="h-8 w-8 rounded-lg" data-oid="y_p6ca3" />
+            <Skeleton className="h-8 w-8 rounded-lg" data-oid="d8t:23q" />
             <div
               className="grid flex-1 text-left text-sm leading-tight"
-              data-oid="7s9ioep"
+              data-oid=".nd435q"
             >
-              <Skeleton className="h-4 w-20 mb-1" data-oid="p:8hti7" />
-              <Skeleton className="h-3 w-24" data-oid="mwtmbsy" />
+              <Skeleton className="h-4 w-20 mb-1" data-oid="ai0uisk" />
+              <Skeleton className="h-3 w-24" data-oid="kxu4yiv" />
             </div>
-            <Skeleton className="ml-auto h-4 w-4" data-oid="fh7c0y-" />
+            <Skeleton className="ml-auto h-4 w-4" data-oid="wn3rqch" />
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -99,32 +99,32 @@ export function NavUser() {
   // 如果沒有用戶資料，顯示預設狀態
   if (!user) {
     return (
-      <SidebarMenu data-oid="hwr7-fb">
-        <SidebarMenuItem data-oid="t2_i72c">
+      <SidebarMenu data-oid="i3asr4e">
+        <SidebarMenuItem data-oid="cc3bej:">
           <SidebarMenuButton
             size="lg"
             disabled
             suppressHydrationWarning
-            data-oid="veimk6r"
+            data-oid="t0e:d5-"
           >
-            <Avatar className="h-8 w-8 rounded-lg grayscale" data-oid="q4bnuc4">
-              <AvatarFallback className="rounded-lg" data-oid="52ze9oo">
+            <Avatar className="h-8 w-8 rounded-lg grayscale" data-oid="1e30eei">
+              <AvatarFallback className="rounded-lg" data-oid="w.s3vij">
                 ?
               </AvatarFallback>
             </Avatar>
             <div
               className="grid flex-1 text-left text-sm leading-tight"
-              data-oid="tsr92o5"
+              data-oid="2:4h1j_"
             >
               <span
                 className="truncate font-medium text-muted-foreground"
-                data-oid="url1k7c"
+                data-oid="dc4xd9x"
               >
                 未登入
               </span>
               <span
                 className="text-muted-foreground truncate text-xs"
-                data-oid="noa85:y"
+                data-oid="c08p-57"
               >
                 請先登入
               </span>
@@ -136,39 +136,39 @@ export function NavUser() {
   }
 
   return (
-    <SidebarMenu data-oid="htwm7b_">
-      <SidebarMenuItem data-oid="g2thcrm">
-        <DropdownMenu data-oid="lw9jj9m">
-          <DropdownMenuTrigger asChild data-oid="1zz0ws_">
+    <SidebarMenu data-oid=":3ux:6o">
+      <SidebarMenuItem data-oid="urea7v1">
+        <DropdownMenu data-oid="p.2.ir3">
+          <DropdownMenuTrigger asChild data-oid="tw68d19">
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               suppressHydrationWarning
-              data-oid="zj3vs9k"
+              data-oid="mk1b_r1"
             >
               <Avatar
                 className="h-8 w-8 rounded-lg grayscale"
-                data-oid="vzt06i2"
+                data-oid="8iuvgnp"
               >
-                <AvatarFallback className="rounded-lg" data-oid="5ktd7zt">
+                <AvatarFallback className="rounded-lg" data-oid="no5-g2d">
                   {user?.name?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div
                 className="grid flex-1 text-left text-sm leading-tight"
-                data-oid="ufh7jre"
+                data-oid="imx7bi1"
               >
-                <span className="truncate font-medium" data-oid="sr.-i4n">
+                <span className="truncate font-medium" data-oid="cysknfu">
                   {user?.name || "未知用戶"}
                 </span>
                 <span
                   className="text-muted-foreground truncate text-xs"
-                  data-oid="d4n2ojk"
+                  data-oid="c4hn69i"
                 >
                   {user?.username || "無帳號資訊"}
                 </span>
               </div>
-              <IconDotsVertical className="ml-auto size-4" data-oid="n137xqx" />
+              <IconDotsVertical className="ml-auto size-4" data-oid="jz5u_0:" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -178,52 +178,52 @@ export function NavUser() {
             align="end"
             sideOffset={4}
             suppressHydrationWarning
-            data-oid="2f7suul"
+            data-oid=":yyuq:9"
           >
-            <DropdownMenuLabel className="p-0 font-normal" data-oid="8s7dc6g">
+            <DropdownMenuLabel className="p-0 font-normal" data-oid="bl.3s3w">
               <div
                 className="flex items-center gap-2 px-1 py-1.5 text-left text-sm"
-                data-oid="hlxqvgn"
+                data-oid="awh2xr-"
               >
-                <Avatar className="h-8 w-8 rounded-lg" data-oid="w5jm3kh">
-                  <AvatarFallback className="rounded-lg" data-oid="lsx5idz">
+                <Avatar className="h-8 w-8 rounded-lg" data-oid="yhl-00p">
+                  <AvatarFallback className="rounded-lg" data-oid="n6::m3c">
                     {user?.name?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div
                   className="grid flex-1 text-left text-sm leading-tight"
-                  data-oid="5rpvmme"
+                  data-oid="x.b6om_"
                 >
-                  <span className="truncate font-medium" data-oid="nis8ly_">
+                  <span className="truncate font-medium" data-oid="v:3w.9j">
                     {user?.name || "未知用戶"}
                   </span>
                   <span
                     className="text-muted-foreground truncate text-xs"
-                    data-oid="8nrfnis"
+                    data-oid="4wumyan"
                   >
                     {user?.username || "無帳號資訊"}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator data-oid="aey0-si" />
-            <DropdownMenuGroup data-oid="kmf7lc-">
-              <DropdownMenuItem data-oid="ll40bsv">
-                <IconUserCircle data-oid="q:3sui:" />
+            <DropdownMenuSeparator data-oid="d2gdx0x" />
+            <DropdownMenuGroup data-oid="8wmbqif">
+              <DropdownMenuItem data-oid="m:xv3z.">
+                <IconUserCircle data-oid="67or-ek" />
                 個人資料
               </DropdownMenuItem>
-              <DropdownMenuItem data-oid="yrh8xy3">
-                <IconCreditCard data-oid="3ms9l90" />
+              <DropdownMenuItem data-oid="_h6x8a.">
+                <IconCreditCard data-oid="o5kq04." />
                 帳戶設定
               </DropdownMenuItem>
-              <DropdownMenuItem data-oid="zo9vq-n">
-                <IconNotification data-oid="4aulz84" />
+              <DropdownMenuItem data-oid="8ioqrm:">
+                <IconNotification data-oid="kygm5g8" />
                 通知設定
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator data-oid="u9w-r6o" />
-            <DropdownMenuItem onClick={handleLogout} data-oid="hai4ta6">
-              <IconLogout data-oid="vh:0gx_" />
+            <DropdownMenuSeparator data-oid="oyjeopz" />
+            <DropdownMenuItem onClick={handleLogout} data-oid="ir9:wor">
+              <IconLogout data-oid="8yh0:gg" />
               登出
             </DropdownMenuItem>
           </DropdownMenuContent>

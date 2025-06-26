@@ -303,17 +303,17 @@ export function Step3_ConfigureVariants({
   const variants = formData.variants.items;
 
   return (
-    <div className="space-y-6" data-oid="b_lmw-y">
+    <div className="space-y-6" data-oid="i9kg6bu">
       {/* 步驟說明 */}
-      <div className="space-y-2" data-oid="b5qohv9">
+      <div className="space-y-2" data-oid="k6ags4-">
         <h2
           className="text-2xl font-semibold flex items-center space-x-2"
-          data-oid="chf_z5p"
+          data-oid="_qsj_:-"
         >
-          <Package className="h-6 w-6 text-primary" data-oid="t1v.hub" />
-          <span data-oid="x.imov5">設定變體</span>
+          <Package className="h-6 w-6 text-primary" data-oid="5o-:jbr" />
+          <span data-oid=":j:d_np">設定變體</span>
         </h2>
-        <p className="text-muted-foreground" data-oid="ieas_vw">
+        <p className="text-muted-foreground" data-oid="vv_ga5q">
           為您的商品變體設定 SKU 編號和價格資訊。
         </p>
       </div>
@@ -322,31 +322,31 @@ export function Step3_ConfigureVariants({
       {variants.length > 1 && (
         <Card
           className="bg-card text-card-foreground border border-border/40 shadow-sm"
-          data-oid="g3-7eu-"
+          data-oid="jl2r3ei"
         >
-          <CardHeader data-oid="2eold_c">
+          <CardHeader data-oid="7zn:49q">
             <CardTitle
               className="flex items-center space-x-2"
-              data-oid="psj4_ez"
+              data-oid="_9qarx6"
             >
-              <Wand2 className="h-5 w-5" data-oid="h6msgus" />
-              <span data-oid="o9rtk9r">批量操作</span>
+              <Wand2 className="h-5 w-5" data-oid="twsf1ix" />
+              <span data-oid="s.l9qt8">批量操作</span>
             </CardTitle>
-            <CardDescription data-oid="733stos">
+            <CardDescription data-oid="qpw7e3p">
               快速為所有變體進行批量設定，提升配置效率。
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4" data-oid="xuec8em">
+          <CardContent className="space-y-4" data-oid="8gn-nre">
             <div
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              data-oid="fheoux-"
+              data-oid="5xdoleb"
             >
               {/* 批量價格設定 */}
-              <div className="space-y-3" data-oid=":j86k3r">
-                <Label className="text-base font-medium" data-oid="bas9za-">
+              <div className="space-y-3" data-oid="0dx1lb3">
+                <Label className="text-base font-medium" data-oid="6uw:1_g">
                   批量設定價格
                 </Label>
-                <div className="flex space-x-2" data-oid="sy.dy45">
+                <div className="flex space-x-2" data-oid="vh59r2e">
                   <Input
                     type="number"
                     placeholder="輸入統一價格"
@@ -354,32 +354,32 @@ export function Step3_ConfigureVariants({
                     onChange={(e) => setBulkPrice(e.target.value)}
                     min="0"
                     step="0.01"
-                    data-oid="04ueh4n"
+                    data-oid="s3fwrnt"
                   />
 
                   <Button
                     onClick={handleBulkPriceSet}
                     variant="outline"
-                    data-oid="v95aua4"
+                    data-oid="1-.ccnp"
                   >
-                    <DollarSign className="h-4 w-4 mr-1" data-oid="dn9bt8f" />
+                    <DollarSign className="h-4 w-4 mr-1" data-oid="o1wuxfk" />
                     套用
                   </Button>
                 </div>
               </div>
 
               {/* SKU 重新生成 */}
-              <div className="space-y-3" data-oid=".hyy7:7">
-                <Label className="text-base font-medium" data-oid="8cukued">
+              <div className="space-y-3" data-oid=".t62sil">
+                <Label className="text-base font-medium" data-oid=":xeu6bh">
                   SKU 管理
                 </Label>
                 <Button
                   onClick={handleRegenerateSkus}
                   variant="outline"
                   className="w-full"
-                  data-oid="d_xo2uj"
+                  data-oid="-_c8t:q"
                 >
-                  <Hash className="h-4 w-4 mr-1" data-oid="w9q6tiw" />
+                  <Hash className="h-4 w-4 mr-1" data-oid="qg6eptj" />
                   重新生成所有 SKU
                 </Button>
               </div>
@@ -391,76 +391,76 @@ export function Step3_ConfigureVariants({
       {/* 變體配置表格 */}
       <Card
         className="bg-card text-card-foreground border border-border/40 shadow-sm"
-        data-oid=".4uattv"
+        data-oid="sit2vm-"
       >
-        <CardHeader data-oid="4brcd50">
+        <CardHeader data-oid="vmt.1aa">
           <CardTitle
             className="flex items-center justify-between"
-            data-oid="kyz.ft0"
+            data-oid="17zi6w4"
           >
-            <div className="flex items-center space-x-2" data-oid="gvt8soa">
-              <Package className="h-5 w-5" data-oid="sk6lvmo" />
-              <span data-oid="u4xuw8h">變體詳情配置</span>
+            <div className="flex items-center space-x-2" data-oid="z3six57">
+              <Package className="h-5 w-5" data-oid="4ncipks" />
+              <span data-oid="gse31n5">變體詳情配置</span>
             </div>
-            <Badge variant="outline" data-oid="ee.vyp0">
+            <Badge variant="outline" data-oid="-_l2i1v">
               {variants.length} 個變體
             </Badge>
           </CardTitle>
-          <CardDescription data-oid="379y71j">
+          <CardDescription data-oid="bxzwb9z">
             為每個變體設定 SKU 編號和價格。SKU 應具唯一性，價格必須為正數。
           </CardDescription>
         </CardHeader>
-        <CardContent data-oid="dul6nyo">
+        <CardContent data-oid="b.mazao">
           {variants.length === 0 ? (
-            <div className="text-center py-8" data-oid=".inm.ix">
-              <div className="text-muted-foreground" data-oid="fkwpqlu">
+            <div className="text-center py-8" data-oid="otbvida">
+              <div className="text-muted-foreground" data-oid="6m5ppxk">
                 尚未生成任何變體，請返回上一步配置規格。
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto" data-oid="r29pxm3">
-              <Table data-oid="hxgxxd0">
-                <TableHeader data-oid="9adnmxi">
+            <div className="overflow-x-auto" data-oid="bqgiowc">
+              <Table data-oid="qronuce">
+                <TableHeader data-oid="jnjj_dc">
                   <TableRow
                     className="border-b hover:bg-transparent"
-                    data-oid="sjqj68q"
+                    data-oid="tk88pnt"
                   >
                     {/* 變體組合 */}
                     <TableHead
                       className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="qgk2iex"
+                      data-oid="drrztn3"
                     >
                       變體組合
                     </TableHead>
                     {/* SKU */}
                     <TableHead
                       className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="vds_8xe"
+                      data-oid="e98wsdm"
                     >
                       SKU 編號
                     </TableHead>
                     <TableHead
                       className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="z5np9jg"
+                      data-oid="hy62l.j"
                     >
                       價格 (NT$)
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody data-oid="auufyhn">
+                <TableBody data-oid="r.avs5c">
                   {variants.map((variant, index) => (
-                    <TableRow key={variant.key} data-oid="0km0z9r">
+                    <TableRow key={variant.key} data-oid="bfk0pm5">
                       {formData.specifications.isVariable && (
-                        <TableCell data-oid="3iv3.14">
+                        <TableCell data-oid="lc5quj8">
                           <div
                             className="flex flex-wrap gap-2"
-                            data-oid="7_garbk"
+                            data-oid="ydtr965"
                           >
                             {variant.options.map(({ attributeId, value }) => (
                               <Badge
                                 key={`${attributeId}-${value}`}
                                 variant="secondary"
-                                data-oid="9qt7--y"
+                                data-oid="_urfstk"
                               >
                                 {getAttributeName(attributeId)}: {value}
                               </Badge>
@@ -468,7 +468,7 @@ export function Step3_ConfigureVariants({
                           </div>
                         </TableCell>
                       )}
-                      <TableCell data-oid="9eo95z0">
+                      <TableCell data-oid="7sb-q32">
                         <Input
                           placeholder="輸入 SKU 編號"
                           value={variant.sku}
@@ -480,17 +480,17 @@ export function Step3_ConfigureVariants({
                             )
                           }
                           className="max-w-[200px]"
-                          data-oid="iw41._9"
+                          data-oid="b209bkc"
                         />
                       </TableCell>
-                      <TableCell data-oid="fqd9hug">
+                      <TableCell data-oid="cr460.f">
                         <div
                           className="flex items-center space-x-2"
-                          data-oid="qn0eje:"
+                          data-oid="5--_uwy"
                         >
                           <span
                             className="text-muted-foreground"
-                            data-oid="9wlhs4f"
+                            data-oid="mmwg6.7"
                           >
                             $
                           </span>
@@ -514,7 +514,7 @@ export function Step3_ConfigureVariants({
                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                                 : ""
                             }`}
-                            data-oid="xxdzrp3"
+                            data-oid="4wgkst3"
                           />
 
                           {variant.price &&
@@ -522,7 +522,7 @@ export function Step3_ConfigureVariants({
                               parseFloat(variant.price) <= 0) && (
                               <AlertCircle
                                 className="h-4 w-4 text-red-500"
-                                data-oid="f83yxeo"
+                                data-oid="msmr3nr"
                               />
                             )}
                         </div>
@@ -540,41 +540,41 @@ export function Step3_ConfigureVariants({
       {variants.length > 0 && (
         <div
           className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-4 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs"
-          data-oid="257j1rg"
+          data-oid="kyl0a1h"
         >
           {/* 變體數量卡片 */}
-          <Card data-slot="card" className="@container/card" data-oid="r5_s.8w">
+          <Card data-slot="card" className="@container/card" data-oid="dm3_bym">
             <CardHeader
               className="flex flex-row items-center justify-between space-y-0 pb-2"
-              data-oid="yky80o3"
+              data-oid="6mtryyb"
             >
-              <CardTitle className="text-sm font-medium" data-oid="a81da8f">
+              <CardTitle className="text-sm font-medium" data-oid="bp9thoi">
                 總變體數量
               </CardTitle>
               <Shapes
                 className="h-4 w-4 text-muted-foreground"
-                data-oid="x6b0av0"
+                data-oid="cjnppm9"
               />
             </CardHeader>
-            <CardContent data-oid="8-b:tyw">
-              <div className="flex items-baseline space-x-2" data-oid="p9ookmx">
+            <CardContent data-oid="ws6kx8q">
+              <div className="flex items-baseline space-x-2" data-oid="r68f146">
                 <span
                   className="text-3xl font-bold tracking-tighter"
-                  data-oid="7mzeunh"
+                  data-oid="hgm-08:"
                 >
                   {variants.length}
                 </span>
                 <Badge
                   variant="secondary"
                   className="text-xs"
-                  data-oid="9o28cut"
+                  data-oid="lbwu-_3"
                 >
                   已生成
                 </Badge>
               </div>
               <p
                 className="text-xs text-muted-foreground mt-2"
-                data-oid="_ku_rop"
+                data-oid="9bdcu1_"
               >
                 所有變體已準備就緒
               </p>
@@ -582,23 +582,23 @@ export function Step3_ConfigureVariants({
           </Card>
 
           {/* SKU 設定卡片 */}
-          <Card data-slot="card" className="@container/card" data-oid="c:l:.::">
+          <Card data-slot="card" className="@container/card" data-oid="mi-rpkn">
             <CardHeader
               className="flex flex-row items-center justify-between space-y-0 pb-2"
-              data-oid="qqv0:85"
+              data-oid="f.s_bn2"
             >
-              <CardTitle className="text-sm font-medium" data-oid="lox8oid">
+              <CardTitle className="text-sm font-medium" data-oid="78np-7f">
                 SKU 配置進度
               </CardTitle>
               <Barcode
                 className="h-4 w-4 text-muted-foreground"
-                data-oid="1td04e7"
+                data-oid="mn2:8dc"
               />
             </CardHeader>
-            <CardContent data-oid="0bk_:k9">
+            <CardContent data-oid="xdkdrp-">
               <div
                 className="text-3xl font-bold tracking-tighter"
-                data-oid="rl7-60t"
+                data-oid="1kizh0d"
               >
                 {Math.round(
                   (variants.filter((v) => v.sku.trim()).length /
@@ -614,29 +614,29 @@ export function Step3_ConfigureVariants({
                   100
                 }
                 className="h-2 mt-3"
-                data-oid="bi6wxd_"
+                data-oid="67qngej"
               />
 
               <div
                 className="flex items-center justify-between mt-2"
-                data-oid="1pbzfr6"
+                data-oid="9d5g3uv"
               >
                 <span
                   className="text-xs text-muted-foreground"
-                  data-oid="owufz1t"
+                  data-oid="p6dui3c"
                 >
                   {variants.filter((v) => v.sku.trim()).length} 已完成
                 </span>
                 <span
                   className="text-xs text-muted-foreground"
-                  data-oid="yo-t930"
+                  data-oid="n8fh822"
                 >
                   {variants.length} 總數
                 </span>
               </div>
               <p
                 className="text-xs text-muted-foreground mt-2"
-                data-oid="httipx7"
+                data-oid="ig6m10h"
               >
                 {variants.filter((v) => v.sku.trim()).length === variants.length
                   ? "所有 SKU 已設定完成"
@@ -646,23 +646,23 @@ export function Step3_ConfigureVariants({
           </Card>
 
           {/* 價格設定卡片 */}
-          <Card data-slot="card" className="@container/card" data-oid="kzs9bd_">
+          <Card data-slot="card" className="@container/card" data-oid="3lvaqs4">
             <CardHeader
               className="flex flex-row items-center justify-between space-y-0 pb-2"
-              data-oid="_f4.t02"
+              data-oid="-lu8r10"
             >
-              <CardTitle className="text-sm font-medium" data-oid="9tgta9s">
+              <CardTitle className="text-sm font-medium" data-oid="hk9i6l2">
                 價格配置進度
               </CardTitle>
               <CircleDollarSign
                 className="h-4 w-4 text-muted-foreground"
-                data-oid="1:kh1m-"
+                data-oid="_bbo5w6"
               />
             </CardHeader>
-            <CardContent data-oid="omkof.0">
+            <CardContent data-oid="qttdru8">
               <div
                 className="text-3xl font-bold tracking-tighter"
-                data-oid="6lm4l48"
+                data-oid="327au:p"
               >
                 {Math.round(
                   (variants.filter(
@@ -682,16 +682,16 @@ export function Step3_ConfigureVariants({
                   100
                 }
                 className="h-2 mt-3"
-                data-oid="l_1o5ky"
+                data-oid="g9lq6bf"
               />
 
               <div
                 className="flex items-center justify-between mt-2"
-                data-oid="sb_15-b"
+                data-oid="cl:owhq"
               >
                 <span
                   className="text-xs text-muted-foreground"
-                  data-oid="i-fenkp"
+                  data-oid="zv3uql."
                 >
                   {
                     variants.filter(
@@ -702,14 +702,14 @@ export function Step3_ConfigureVariants({
                 </span>
                 <span
                   className="text-xs text-muted-foreground"
-                  data-oid="cqh.8_8"
+                  data-oid="-2k:y7c"
                 >
                   {variants.length} 總數
                 </span>
               </div>
               <p
                 className="text-xs text-muted-foreground mt-2"
-                data-oid="yjcu_hq"
+                data-oid="zz3x0xw"
               >
                 {variants.filter(
                   (v) => v.price.trim() && !isNaN(parseFloat(v.price)),
@@ -721,23 +721,23 @@ export function Step3_ConfigureVariants({
           </Card>
 
           {/* 總價值卡片 */}
-          <Card data-slot="card" className="@container/card" data-oid="80xm93r">
+          <Card data-slot="card" className="@container/card" data-oid="ba32g7n">
             <CardHeader
               className="flex flex-row items-center justify-between space-y-0 pb-2"
-              data-oid=".cshvc8"
+              data-oid="au6lv2x"
             >
-              <CardTitle className="text-sm font-medium" data-oid="84ti9k0">
+              <CardTitle className="text-sm font-medium" data-oid="c2:4sdh">
                 商品總價值
               </CardTitle>
               <Wallet
                 className="h-4 w-4 text-muted-foreground"
-                data-oid="3m2qfjz"
+                data-oid="q__snjd"
               />
             </CardHeader>
-            <CardContent data-oid="1o.9s2v">
+            <CardContent data-oid="acahpoz">
               <div
                 className="text-3xl font-bold tracking-tighter"
-                data-oid="8zx-34p"
+                data-oid="d4bdwyi"
               >
                 $
                 {variants
@@ -752,11 +752,11 @@ export function Step3_ConfigureVariants({
               </div>
               <p
                 className="text-xs text-muted-foreground mt-2"
-                data-oid="xyqo-a8"
+                data-oid="qmodc12"
               >
                 預估庫存價值
               </p>
-              <p className="text-xs text-muted-foreground" data-oid="qr_77.6">
+              <p className="text-xs text-muted-foreground" data-oid="9hq64.g">
                 基於當前定價計算
               </p>
             </CardContent>
@@ -765,10 +765,10 @@ export function Step3_ConfigureVariants({
       )}
 
       {/* 進度提示 */}
-      <Alert data-oid="hjifvp4">
-        <AlertCircle className="h-4 w-4" data-oid="rxkydrj" />
-        <AlertDescription data-oid="yunnjwh">
-          <strong data-oid="2z2ijze">進度提示：</strong>
+      <Alert data-oid="4_7u2qg">
+        <AlertCircle className="h-4 w-4" data-oid="3ynrww7" />
+        <AlertDescription data-oid="p8.d8xw">
+          <strong data-oid="hkv3o0.">進度提示：</strong>
           {canProceed
             ? "所有變體的 SKU 和價格都已配置完成，可以進入下一步進行最終確認。"
             : "請確保所有變體都有設定 SKU 編號和有效的價格才能進入下一步。"}

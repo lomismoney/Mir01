@@ -78,40 +78,40 @@ export function AttributeValuesManager({
   const values = valuesResponse?.data || [];
 
   return (
-    <div className="space-y-4" data-oid="ohtrelz">
+    <div className="space-y-4" data-oid="jzd7zxn">
       {/* 標題區 */}
-      <div className="flex items-center justify-between" data-oid="ay0x_jd">
-        <div data-oid="v04:xha">
+      <div className="flex items-center justify-between" data-oid="mdl-p-4">
+        <div data-oid="o3ch4os">
           <h2
             className="text-2xl font-semibold flex items-center gap-2"
-            data-oid="w5anbu9"
+            data-oid="2qgkqds"
           >
-            <Tag className="h-5 w-5 text-muted-foreground" data-oid="bt5q8r8" />
+            <Tag className="h-5 w-5 text-muted-foreground" data-oid="ffj.35b" />
             {attribute.name}
           </h2>
-          <p className="text-sm text-muted-foreground mt-1" data-oid="v5w9u4a">
+          <p className="text-sm text-muted-foreground mt-1" data-oid="iqjknit">
             管理此規格類型的所有值
           </p>
         </div>
 
-        <DropdownMenu data-oid="re7hb:n">
-          <DropdownMenuTrigger asChild data-oid="h63kq56">
-            <Button variant="outline" size="sm" data-oid="fjzyxyp">
-              <MoreVertical className="h-4 w-4" data-oid="hmquznh" />
+        <DropdownMenu data-oid="5wkfxq.">
+          <DropdownMenuTrigger asChild data-oid="5jfqu-o">
+            <Button variant="outline" size="sm" data-oid="84y0b3j">
+              <MoreVertical className="h-4 w-4" data-oid="zfu05u4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" data-oid="hrru-1j">
-            <DropdownMenuItem onClick={onEdit} data-oid="x_7ur7q">
-              <Edit className="mr-2 h-3.5 w-3.5" data-oid="a8nmqp_" />
+          <DropdownMenuContent align="end" data-oid="fhcy5of">
+            <DropdownMenuItem onClick={onEdit} data-oid="-kbkeq8">
+              <Edit className="mr-2 h-3.5 w-3.5" data-oid="pq3lxi." />
               編輯規格名稱
             </DropdownMenuItem>
-            <DropdownMenuSeparator data-oid="mp9meoy" />
+            <DropdownMenuSeparator data-oid="8x.c8:9" />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onClick={onDelete}
-              data-oid="3z.-fgb"
+              data-oid="krf2ljq"
             >
-              <Trash2 className="mr-2 h-3.5 w-3.5" data-oid="xrb05g5" />
+              <Trash2 className="mr-2 h-3.5 w-3.5" data-oid="s17lve4" />
               刪除規格
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -121,36 +121,36 @@ export function AttributeValuesManager({
       {/* 統計卡片 - 儀表板樣式 */}
       <div
         className="grid gap-4 md:grid-cols-3 *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs"
-        data-oid="okf8c6h"
+        data-oid="mw.40l0"
       >
-        <Card className="@container/card" data-oid="hhjimbx">
-          <CardHeader data-oid="rc82p:c">
-            <CardDescription data-oid="2f-frvf">規格值總數</CardDescription>
+        <Card className="@container/card" data-oid="4_ig-x3">
+          <CardHeader data-oid="yvjd7es">
+            <CardDescription data-oid="jei31uh">規格值總數</CardDescription>
             <CardTitle
               className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
-              data-oid="yw9zs64"
+              data-oid="ft2yfmk"
             >
               {values.length}
             </CardTitle>
           </CardHeader>
         </Card>
 
-        <Card className="@container/card" data-oid="e_5o9u9">
-          <CardHeader data-oid="lm3lbyx">
-            <CardDescription data-oid="r5rf7i-">關聯商品數</CardDescription>
+        <Card className="@container/card" data-oid="ea9fj7w">
+          <CardHeader data-oid="0oka.gn">
+            <CardDescription data-oid="0wjn7ed">關聯商品數</CardDescription>
             <CardTitle
               className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
-              data-oid="mj42_yb"
+              data-oid="ht4wffo"
             >
               {attribute.products_count ?? 0}
             </CardTitle>
           </CardHeader>
         </Card>
 
-        <Card className="@container/card" data-oid="eo0hx2i">
-          <CardHeader data-oid="762px7w">
-            <CardDescription data-oid="fanj1j3">建立時間</CardDescription>
-            <CardTitle className="text-lg font-semibold" data-oid="d6lav5f">
+        <Card className="@container/card" data-oid="25c:5t8">
+          <CardHeader data-oid="8eekr7-">
+            <CardDescription data-oid="gr7a3jq">建立時間</CardDescription>
+            <CardTitle className="text-lg font-semibold" data-oid="kyhq:ek">
               {attribute.created_at
                 ? new Date(attribute.created_at).toLocaleDateString("zh-TW")
                 : "--"}
@@ -160,28 +160,28 @@ export function AttributeValuesManager({
       </div>
 
       {/* 規格值管理 */}
-      <Card data-oid=".96t3u1">
-        <CardHeader data-oid="p7r7z_7">
-          <div className="flex items-center justify-between" data-oid="v-xhxq4">
-            <CardTitle className="text-base" data-oid="jbw5m6i">
+      <Card data-oid="sde3u2s">
+        <CardHeader data-oid="dj2xu_3">
+          <div className="flex items-center justify-between" data-oid="rs_u:mz">
+            <CardTitle className="text-base" data-oid="i_d8cba">
               規格值管理
             </CardTitle>
             {!showValueInput && (
               <Button
                 onClick={() => setShowValueInput(true)}
                 size="sm"
-                data-oid="2-eltzi"
+                data-oid="ti.-hah"
               >
-                <Plus className="mr-2 h-4 w-4" data-oid="5h3sfhy" />
+                <Plus className="mr-2 h-4 w-4" data-oid="6jayyjp" />
                 新增規格值
               </Button>
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-4" data-oid="8fype.9">
+        <CardContent className="space-y-4" data-oid="y8n5nm.">
           {/* 新增規格值輸入區 */}
           {showValueInput && (
-            <div className="flex gap-2 pb-4 border-b" data-oid="8ov95_7">
+            <div className="flex gap-2 pb-4 border-b" data-oid="0a_3f:v">
               <Input
                 placeholder={`輸入新的${attribute.name}值`}
                 value={newValueInput}
@@ -197,18 +197,18 @@ export function AttributeValuesManager({
                   }
                 }}
                 autoFocus
-                data-oid="un4kbzi"
+                data-oid="f44ece4"
               />
 
               <Button
                 onClick={onCreateValue}
                 disabled={createValuePending || !newValueInput.trim()}
-                data-oid="73dy2af"
+                data-oid="z2e7a1n"
               >
                 {createValuePending ? (
                   <Loader2
                     className="h-4 w-4 animate-spin"
-                    data-oid="n8en8ep"
+                    data-oid="vo27e4l"
                   />
                 ) : (
                   "新增"
@@ -220,7 +220,7 @@ export function AttributeValuesManager({
                   setShowValueInput(false);
                   setNewValueInput("");
                 }}
-                data-oid="zgfl88a"
+                data-oid="l-n6r._"
               >
                 取消
               </Button>
@@ -231,44 +231,44 @@ export function AttributeValuesManager({
           {isLoading ? (
             <div
               className="flex justify-center items-center py-8"
-              data-oid="2j988gt"
+              data-oid=".we:0v:"
             >
-              <Loader2 className="h-6 w-6 animate-spin" data-oid="bax9ixx" />
+              <Loader2 className="h-6 w-6 animate-spin" data-oid="oze9njs" />
             </div>
           ) : values.length === 0 ? (
-            <div className="text-center py-8" data-oid="v6qas4r">
+            <div className="text-center py-8" data-oid="4my3vzy">
               <Package
                 className="h-8 w-8 mx-auto text-muted-foreground mb-2"
-                data-oid="vs5a9zq"
+                data-oid="z1turgy"
               />
 
-              <p className="text-sm text-muted-foreground" data-oid="bmv__mg">
+              <p className="text-sm text-muted-foreground" data-oid="z9ko1lf">
                 尚未建立任何規格值
               </p>
             </div>
           ) : (
-            <div className="rounded-md border" data-oid="02-vf.1">
-              <Table data-oid="_1riamq">
-                <TableHeader data-oid="kcf6cj-">
-                  <TableRow data-oid="59w2hyz">
-                    <TableHead data-oid="mf-oa7q">規格值</TableHead>
-                    <TableHead data-oid="av69yvf">建立時間</TableHead>
-                    <TableHead className="w-[100px]" data-oid="qs4x8vo">
+            <div className="rounded-md border" data-oid="a5mlhgt">
+              <Table data-oid="8mhep1m">
+                <TableHeader data-oid="vx58i6-">
+                  <TableRow data-oid="x3el21f">
+                    <TableHead data-oid="ebd2cut">規格值</TableHead>
+                    <TableHead data-oid="j44ft1y">建立時間</TableHead>
+                    <TableHead className="w-[100px]" data-oid="0y4ukqs">
                       操作
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody data-oid="2.y-8nf">
+                <TableBody data-oid="ya10-jp">
                   {values.map((value) => (
-                    <TableRow key={value.id} data-oid="rds2yr7">
-                      <TableCell className="font-medium" data-oid="ilfxidi">
-                        <Badge variant="secondary" data-oid="_r:9yzr">
+                    <TableRow key={value.id} data-oid="yi-7bc7">
+                      <TableCell className="font-medium" data-oid="6rclpxw">
+                        <Badge variant="secondary" data-oid="hbzixhi">
                           {value.value}
                         </Badge>
                       </TableCell>
                       <TableCell
                         className="text-sm text-muted-foreground"
-                        data-oid="wg3.7dw"
+                        data-oid="u24tbwc"
                       >
                         {value.created_at
                           ? new Date(value.created_at).toLocaleDateString(
@@ -276,17 +276,17 @@ export function AttributeValuesManager({
                             )
                           : "--"}
                       </TableCell>
-                      <TableCell data-oid="cnmnpcu">
+                      <TableCell data-oid=".36hai7">
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => onDeleteValue(value.id, value.value)}
                           className="h-8 w-8"
-                          data-oid="v1.vkm-"
+                          data-oid="16ww9ez"
                         >
                           <Trash2
                             className="h-4 w-4 text-destructive"
-                            data-oid="t5_wqsg"
+                            data-oid="7dfox0x"
                           />
                         </Button>
                       </TableCell>

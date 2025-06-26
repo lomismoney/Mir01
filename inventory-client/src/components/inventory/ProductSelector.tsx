@@ -201,7 +201,7 @@ export function ProductSelector({
         );
         if (!inventory)
           return (
-            <div className="text-xs text-muted-foreground" data-oid="ilkrk4u">
+            <div className="text-xs text-muted-foreground" data-oid="injinjy">
               此門市無庫存
             </div>
           );
@@ -209,10 +209,10 @@ export function ProductSelector({
         return (
           <div
             className="flex items-center gap-2 text-xs text-muted-foreground"
-            data-oid="wevdanv"
+            data-oid="_x2q7fh"
           >
-            <span data-oid="7r_rg82">庫存: {inventory.quantity || 0}</span>
-            <span data-oid="ce-dtpi">@ {inventory.store?.name || ""}</span>
+            <span data-oid="1i2q4i5">庫存: {inventory.quantity || 0}</span>
+            <span data-oid="f3i-445">@ {inventory.store?.name || ""}</span>
           </div>
         );
       } else {
@@ -224,15 +224,15 @@ export function ProductSelector({
         return (
           <div
             className="text-xs text-muted-foreground space-y-1"
-            data-oid="h_h1ey6"
+            data-oid="a.bhlrn"
           >
-            <div data-oid="56zq:lw">總庫存: {totalStock}</div>
-            <div className="flex flex-wrap gap-1" data-oid="b6piren">
+            <div data-oid="hrgekiw">總庫存: {totalStock}</div>
+            <div className="flex flex-wrap gap-1" data-oid=".gj.6us">
               {variant.inventory.map((inv: any) => (
                 <span
                   key={inv.store_id}
                   className="inline-flex items-center gap-1 px-1 py-0.5 bg-muted rounded text-xs"
-                  data-oid="epnkx6y"
+                  data-oid="skuq3oj"
                 >
                   {inv.store?.name}: {inv.quantity || 0}
                 </span>
@@ -248,10 +248,10 @@ export function ProductSelector({
       return (
         <div
           className="flex items-center gap-2 text-xs text-muted-foreground"
-          data-oid="zr-:ysf"
+          data-oid="9nr54o_"
         >
-          <span data-oid="2.ol:c7">庫存: {quantity}</span>
-          {storeName && <span data-oid="417qbrx">@ {storeName}</span>}
+          <span data-oid="252hab_">庫存: {quantity}</span>
+          {storeName && <span data-oid="s0__nny">@ {storeName}</span>}
         </div>
       );
     }
@@ -266,59 +266,59 @@ export function ProductSelector({
   }, [variants, selectedProductId]);
 
   return (
-    <div className="space-y-2" data-oid="bu9mcsf">
-      <Popover open={open} onOpenChange={setOpen} data-oid="rn3tv0f">
-        <PopoverTrigger asChild data-oid="5e9g:ea">
+    <div className="space-y-2" data-oid="0zav0f9">
+      <Popover open={open} onOpenChange={setOpen} data-oid="ol9km.b">
+        <PopoverTrigger asChild data-oid=":gzrvod">
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between"
             disabled={disabled || sessionStatus === "unauthenticated"}
-            data-oid="p0jka7w"
+            data-oid="fl2sky-"
           >
-            <span className="truncate" data-oid="_h8_j1x">
+            <span className="truncate" data-oid="qjbp5_2">
               {sessionStatus === "unauthenticated"
                 ? "請先登入系統"
                 : getDisplayText()}
             </span>
             <ChevronDown
               className="ml-2 h-4 w-4 shrink-0 opacity-50"
-              data-oid="7:h_a36"
+              data-oid=":39.g4m"
             />
           </Button>
         </PopoverTrigger>
         <PopoverContent
           className="w-[400px] p-0"
           align="start"
-          data-oid="ngpfkcq"
+          data-oid="bo4w5vk"
         >
-          <Command data-oid="8ec1bfx">
+          <Command data-oid="v.hhz:o">
             <CommandInput
               placeholder="搜尋商品名稱..."
               value={searchTerm}
               onValueChange={setSearchTerm}
-              data-oid="jao059l"
+              data-oid="h2hr-1b"
             />
 
             <CommandList
               className="max-h-[400px] overflow-y-auto"
-              data-oid="7l7wn9d"
+              data-oid="x0i0avc"
             >
-              <CommandEmpty data-oid="ap9mw6:">
+              <CommandEmpty data-oid="l-0ermi">
                 {isLoadingProducts ? (
                   "載入中..."
                 ) : productsError ? (
                   <div
                     className="flex flex-col items-center gap-2 p-4 text-sm text-muted-foreground"
-                    data-oid="sm6wzt3"
+                    data-oid="n1n94dr"
                   >
                     <AlertCircle
                       className="h-8 w-8 text-destructive"
-                      data-oid="o0u3vvk"
+                      data-oid="4wdvr.0"
                     />
 
-                    <div className="text-center" data-oid="9g6m69c">
+                    <div className="text-center" data-oid="fb1x1ql">
                       {sessionStatus === "unauthenticated"
                         ? "請先登入系統才能搜尋商品"
                         : "載入商品失敗，請稍後再試"}
@@ -328,15 +328,15 @@ export function ProductSelector({
                   (Array.isArray(productsData) && productsData.length === 0) ? (
                   <div
                     className="flex flex-col items-center gap-2 p-4 text-sm text-muted-foreground"
-                    data-oid="xct4qv-"
+                    data-oid="653p6:r"
                   >
-                    <div className="text-center" data-oid="3oh-ba1">
+                    <div className="text-center" data-oid=".w7cb:0">
                       {searchTerm
                         ? `找不到包含「${searchTerm}」的商品`
                         : "暫無商品資料"}
                     </div>
                     {searchTerm && (
-                      <div className="text-xs" data-oid="yxp-w4_">
+                      <div className="text-xs" data-oid="46bbiog">
                         請確認商品名稱或嘗試其他關鍵字
                       </div>
                     )}
@@ -351,26 +351,26 @@ export function ProductSelector({
                 productsData &&
                 Array.isArray(productsData) &&
                 productsData.length > 0 && (
-                  <CommandGroup heading="選擇商品" data-oid="ukrb:-u">
+                  <CommandGroup heading="選擇商品" data-oid="8m5yk36">
                     {productsData.map((product: any) => (
                       <CommandItem
                         key={product.id}
                         onSelect={() => handleProductSelect(product.id)}
                         className="flex flex-col items-start gap-1"
-                        data-oid="z0gganz"
+                        data-oid="ysoz2ms"
                       >
                         <div
                           className="flex items-center gap-2 w-full"
-                          data-oid="493ympg"
+                          data-oid="h6hurnl"
                         >
-                          <div className="flex-1" data-oid=".:-_6kg">
-                            <div className="font-medium" data-oid="8gcza85">
+                          <div className="flex-1" data-oid="0fk4wf8">
+                            <div className="font-medium" data-oid="ypkh7wo">
                               {product.name}
                             </div>
                             {product.description && (
                               <div
                                 className="text-xs text-muted-foreground"
-                                data-oid="s.eni_v"
+                                data-oid="l_5-meq"
                               >
                                 {product.description}
                               </div>
@@ -379,7 +379,7 @@ export function ProductSelector({
                           <Badge
                             variant="secondary"
                             className="text-xs"
-                            data-oid="zx:cfon"
+                            data-oid="zi.8qxs"
                           >
                             {product.variants?.length || 0} 個規格
                           </Badge>
@@ -391,29 +391,29 @@ export function ProductSelector({
 
               {/* 變體列表 */}
               {selectedProductId && (
-                <CommandGroup heading="選擇規格" data-oid="u2k9n.2">
+                <CommandGroup heading="選擇規格" data-oid=".m6r-gd">
                   <CommandItem
                     onSelect={handleReset}
                     className="text-sm text-muted-foreground border-b"
-                    data-oid="vu4.-x4"
+                    data-oid="id6i3_2"
                   >
                     ← 返回商品選擇
                   </CommandItem>
 
                   {isLoadingVariants ? (
-                    <CommandItem disabled data-oid="qnien0h">
+                    <CommandItem disabled data-oid="8.ai4pr">
                       載入規格中...
                     </CommandItem>
                   ) : variantsError ? (
                     <CommandItem
                       disabled
                       className="text-red-500"
-                      data-oid="735ei05"
+                      data-oid="ky1_-e6"
                     >
                       載入規格失敗: {variantsError.message}
                     </CommandItem>
                   ) : filteredVariants.length === 0 ? (
-                    <CommandItem disabled data-oid="pf5uck5">
+                    <CommandItem disabled data-oid="d3.30gf">
                       此商品暫無規格 (商品ID: {selectedProductId})
                     </CommandItem>
                   ) : (
@@ -422,11 +422,11 @@ export function ProductSelector({
                         key={variant.id}
                         onSelect={() => handleVariantSelect(variant)}
                         className="flex flex-col items-start gap-1"
-                        data-oid="u:1q.s:"
+                        data-oid="ff75bh8"
                       >
                         <div
                           className="flex items-center gap-2 w-full"
-                          data-oid="f-d360l"
+                          data-oid="tey7my6"
                         >
                           <Check
                             className={cn(
@@ -435,18 +435,18 @@ export function ProductSelector({
                                 ? "opacity-100"
                                 : "opacity-0",
                             )}
-                            data-oid="ve7oe2w"
+                            data-oid="5lhm_vw"
                           />
 
-                          <div className="flex-1" data-oid="2h0kcfv">
+                          <div className="flex-1" data-oid="gp_r5_r">
                             <div
                               className="flex items-center gap-2"
-                              data-oid="n-2x14f"
+                              data-oid=":5nk07y"
                             >
-                              <span className="font-medium" data-oid="b0f5dwt">
+                              <span className="font-medium" data-oid="i2:jr_v">
                                 {variant.sku}
                               </span>
-                              <span className="text-sm" data-oid="5s2_.hm">
+                              <span className="text-sm" data-oid="swq12ay">
                                 ${variant.price}
                               </span>
                             </div>
@@ -454,7 +454,7 @@ export function ProductSelector({
                               variant.attribute_values.length > 0 && (
                                 <div
                                   className="text-xs text-muted-foreground"
-                                  data-oid="afs8dts"
+                                  data-oid="gd7r8pp"
                                 >
                                   {variant.attribute_values
                                     .map(
@@ -479,13 +479,13 @@ export function ProductSelector({
 
       {/* 選中的商品資訊顯示 */}
       {selectedVariant && (
-        <div className="p-3 bg-muted/50 rounded-lg border" data-oid="-2.048k">
-          <div className="flex items-center justify-between" data-oid="6w_ie4o">
-            <div data-oid="bzlpo5h">
-              <div className="font-medium text-sm" data-oid="z5_bxak">
+        <div className="p-3 bg-muted/50 rounded-lg border" data-oid="1ukdrob">
+          <div className="flex items-center justify-between" data-oid="zgm.0x-">
+            <div data-oid="59d52md">
+              <div className="font-medium text-sm" data-oid="p9rm799">
                 {selectedVariant.product?.name}
               </div>
-              <div className="text-xs text-muted-foreground" data-oid="vp4d6b0">
+              <div className="text-xs text-muted-foreground" data-oid="cay117v">
                 SKU: {selectedVariant.sku} • 價格: ${selectedVariant.price}
               </div>
             </div>
@@ -494,7 +494,7 @@ export function ProductSelector({
               size="sm"
               onClick={handleReset}
               className="text-muted-foreground"
-              data-oid="op4-0a:"
+              data-oid=".dzp2yt"
             >
               清除
             </Button>

@@ -107,17 +107,17 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
   };
 
   return (
-    <div className="space-y-6" data-oid="9z13t75">
+    <div className="space-y-6" data-oid="bsd0284">
       {/* 步驟說明 */}
-      <div className="space-y-2" data-oid=".pd87x6">
+      <div className="space-y-2" data-oid="51govjf">
         <h2
           className="text-2xl font-semibold flex items-center space-x-2"
-          data-oid="5qsx8vd"
+          data-oid="vh0bpwp"
         >
-          <CheckCircle className="h-6 w-6 text-primary" data-oid="m5sv0ec" />
-          <span data-oid=".1qlp1d">預覽確認</span>
+          <CheckCircle className="h-6 w-6 text-primary" data-oid="xy.j1qe" />
+          <span data-oid="fw-4pc0">預覽確認</span>
         </h2>
-        <p className="text-muted-foreground" data-oid="7-pl-ih">
+        <p className="text-muted-foreground" data-oid=".qrcdbs">
           請仔細檢查所有配置資訊，確認無誤後即可提交創建商品。
         </p>
       </div>
@@ -125,55 +125,55 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       {/* 基本資訊預覽 */}
       <Card
         className="bg-card text-card-foreground border border-border/40 shadow-sm"
-        data-oid="z8wu02l"
+        data-oid="-owdc50"
       >
-        <CardHeader data-oid="qmifkvj">
-          <CardTitle className="flex items-center space-x-2" data-oid="678oljt">
-            <FileText className="h-5 w-5" data-oid="721anao" />
-            <span data-oid="2vafz0a">基本資訊</span>
+        <CardHeader data-oid=".efp-ku">
+          <CardTitle className="flex items-center space-x-2" data-oid="z:thiei">
+            <FileText className="h-5 w-5" data-oid="_f3__1q" />
+            <span data-oid="vjj4fp9">基本資訊</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4" data-oid="tcaqbpc">
+        <CardContent className="space-y-4" data-oid="jrq4_bf">
           <div
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            data-oid="ik5z:lp"
+            data-oid="geifi-a"
           >
-            <div data-oid="aep57ax">
+            <div data-oid="ljnu3s1">
               <Label
                 className="text-sm font-medium text-muted-foreground"
-                data-oid="5kco0pz"
+                data-oid="aeui-cf"
               >
                 商品名稱
               </Label>
-              <p className="text-base font-medium" data-oid="iahh6rc">
+              <p className="text-base font-medium" data-oid="-h.sm6d">
                 {formData.basicInfo.name || "未設定"}
               </p>
             </div>
 
-            <div data-oid="kig:u20">
+            <div data-oid="mdanfot">
               <Label
                 className="text-sm font-medium text-muted-foreground"
-                data-oid="nnofhnc"
+                data-oid="mnw6t6e"
               >
                 商品分類
               </Label>
-              <p className="text-base" data-oid="z.m35nn">
+              <p className="text-base" data-oid="fjgls1t">
                 {getCategoryName(formData.basicInfo.category_id)}
               </p>
             </div>
           </div>
 
           {formData.basicInfo.description && (
-            <div data-oid="3e8o4bz">
+            <div data-oid="7q4syqd">
               <Label
                 className="text-sm font-medium text-muted-foreground"
-                data-oid="yjvt0k0"
+                data-oid="-yz:gpq"
               >
                 商品描述
               </Label>
               <p
                 className="text-base text-muted-foreground mt-1"
-                data-oid="7d9pbqb"
+                data-oid="2-jaqtl"
               >
                 {formData.basicInfo.description}
               </p>
@@ -185,19 +185,19 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       {/* 規格配置預覽 */}
       <Card
         className="bg-card text-card-foreground border border-border/40 shadow-sm"
-        data-oid="4_0zjpe"
+        data-oid="2zq2_eu"
       >
-        <CardHeader data-oid="k04b69u">
-          <CardTitle className="flex items-center space-x-2" data-oid="92oc-yf">
-            <Settings className="h-5 w-5" data-oid="9qddeyb" />
-            <span data-oid="zo9:71b">規格配置</span>
+        <CardHeader data-oid="0xnedlu">
+          <CardTitle className="flex items-center space-x-2" data-oid="hya78t1">
+            <Settings className="h-5 w-5" data-oid="jb8b1ka" />
+            <span data-oid="bm-3kvc">規格配置</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4" data-oid=":c9ggpy">
-          <div className="flex items-center space-x-3" data-oid=":ky77r0">
+        <CardContent className="space-y-4" data-oid="_sse4d9">
+          <div className="flex items-center space-x-3" data-oid="_5jfzin">
             <Label
               className="text-sm font-medium text-muted-foreground"
-              data-oid="dz5:60i"
+              data-oid="fkayg7_"
             >
               規格類型
             </Label>
@@ -205,7 +205,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
               variant={
                 formData.specifications.isVariable ? "default" : "secondary"
               }
-              data-oid="ld42.-b"
+              data-oid="19lcs:i"
             >
               {formData.specifications.isVariable ? "多規格商品" : "單規格商品"}
             </Badge>
@@ -213,24 +213,24 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
 
           {formData.specifications.isVariable && (
             <>
-              <Separator data-oid="y:6rp.6" />
+              <Separator data-oid="eo567zk" />
 
               {/* 選中的屬性 */}
-              <div data-oid="3v6qd8l">
+              <div data-oid=":nzsd.9">
                 <Label
                   className="text-sm font-medium text-muted-foreground"
-                  data-oid="ke7ovcl"
+                  data-oid="y.l-hkr"
                 >
                   已選擇的屬性 (
                   {formData.specifications.selectedAttributes.length})
                 </Label>
-                <div className="flex flex-wrap gap-2 mt-2" data-oid=":iuicv3">
+                <div className="flex flex-wrap gap-2 mt-2" data-oid="ut9mw32">
                   {formData.specifications.selectedAttributes.map(
                     (attributeId) => (
                       <Badge
                         key={attributeId}
                         variant="outline"
-                        data-oid="0n_rjtp"
+                        data-oid="615v0tl"
                       >
                         {getAttributeName(attributeId)}
                       </Badge>
@@ -240,14 +240,14 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
               </div>
 
               {/* 屬性值配置 */}
-              <div data-oid=":zu_7zw">
+              <div data-oid="bp3j1k-">
                 <Label
                   className="text-sm font-medium text-muted-foreground"
-                  data-oid="m:jm:_j"
+                  data-oid="legrzhp"
                 >
                   屬性值配置
                 </Label>
-                <div className="space-y-3 mt-2" data-oid="pwjzyvw">
+                <div className="space-y-3 mt-2" data-oid="ltlfok.">
                   {formData.specifications.selectedAttributes.map(
                     (attributeId) => {
                       const values =
@@ -257,23 +257,23 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
                         <div
                           key={attributeId}
                           className="flex items-start space-x-3"
-                          data-oid=".7jgg.3"
+                          data-oid="ky-60-z"
                         >
-                          <div className="min-w-[100px]" data-oid="pcnh2wd">
-                            <Badge variant="secondary" data-oid="1jvj_c_">
+                          <div className="min-w-[100px]" data-oid="0::9lc8">
+                            <Badge variant="secondary" data-oid="62s60wi">
                               {getAttributeName(attributeId)}
                             </Badge>
                           </div>
                           <div
                             className="flex flex-wrap gap-1"
-                            data-oid="kj.5mm4"
+                            data-oid="wi7.7mq"
                           >
                             {values.map((value) => (
                               <Badge
                                 key={value}
                                 variant="outline"
                                 className="text-xs"
-                                data-oid="1xul0.0"
+                                data-oid="0v6a9o2"
                               >
                                 {value}
                               </Badge>
@@ -293,46 +293,46 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       {/* 變體配置預覽 */}
       <Card
         className="bg-card text-card-foreground border border-border/40 shadow-sm"
-        data-oid="0vrjvz6"
+        data-oid="knf931r"
       >
-        <CardHeader data-oid="nakhra9">
-          <CardTitle className="flex items-center space-x-2" data-oid="eek587l">
-            <Package className="h-5 w-5" data-oid="6af2.dh" />
-            <span data-oid="596y0te">變體配置</span>
-            <Badge variant="outline" data-oid="sug7cn2">
+        <CardHeader data-oid="3a6hb-b">
+          <CardTitle className="flex items-center space-x-2" data-oid="mg2x0x_">
+            <Package className="h-5 w-5" data-oid=":bcim8g" />
+            <span data-oid="fh.:-53">變體配置</span>
+            <Badge variant="outline" data-oid="hyeez-f">
               {formData.variants.items.length} 個變體
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent data-oid="dg4z3qq">
+        <CardContent data-oid="7vw:yri">
           {formData.variants.items.length === 0 ? (
-            <p className="text-muted-foreground" data-oid="0fseibn">
+            <p className="text-muted-foreground" data-oid=".zrxc_j">
               尚未配置任何變體
             </p>
           ) : (
-            <div className="space-y-3" data-oid="d6tokvv">
+            <div className="space-y-3" data-oid="fd9st_9">
               {formData.variants.items.map((variant, index) => (
                 <div
                   key={variant.key}
                   className="p-4 rounded-lg border bg-muted/30"
-                  data-oid="pqc8v4q"
+                  data-oid="cdgkyoq"
                 >
                   <div
                     className="flex items-center justify-between"
-                    data-oid="-o7gde9"
+                    data-oid="hrb9dk_"
                   >
-                    <div className="space-y-2" data-oid="2g.dp-2">
+                    <div className="space-y-2" data-oid="b1u:pfw">
                       {formData.specifications.isVariable &&
                         variant.options.length > 0 && (
                           <div
                             className="flex flex-wrap gap-2"
-                            data-oid="ez3:axz"
+                            data-oid="sg9:iii"
                           >
                             {variant.options.map(({ attributeId, value }) => (
                               <Badge
                                 key={`${attributeId}-${value}`}
                                 variant="secondary"
-                                data-oid="uhjd15x"
+                                data-oid="ubcr6.v"
                               >
                                 {getAttributeName(attributeId)}: {value}
                               </Badge>
@@ -342,27 +342,27 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
 
                       <div
                         className="flex items-center space-x-4 text-sm"
-                        data-oid="g:pnemu"
+                        data-oid="k4b60.3"
                       >
-                        <div data-oid=":n2pqu2">
+                        <div data-oid="5frpeki">
                           <span
                             className="text-muted-foreground"
-                            data-oid="gqgoxff"
+                            data-oid="ssagxje"
                           >
                             SKU:{" "}
                           </span>
-                          <span className="font-mono" data-oid="dpscp2q">
+                          <span className="font-mono" data-oid="v..oaka">
                             {variant.sku || "未設定"}
                           </span>
                         </div>
-                        <div data-oid="xnsh-kq">
+                        <div data-oid="97e0x8_">
                           <span
                             className="text-muted-foreground"
-                            data-oid="fsty8sl"
+                            data-oid="14jqnhp"
                           >
                             價格:{" "}
                           </span>
-                          <span className="font-semibold" data-oid="7uvw6:f">
+                          <span className="font-semibold" data-oid="y4kp:14">
                             NT$ {variant.price || "0"}
                           </span>
                         </div>
@@ -379,32 +379,32 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
       {/* 統計摘要 */}
       <div
         className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-4 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs"
-        data-oid="3mbj.k4"
+        data-oid="3r2ftng"
       >
         {/* 變體數量卡片 */}
-        <Card data-slot="card" className="@container/card" data-oid="egc97s9">
+        <Card data-slot="card" className="@container/card" data-oid="6fn6w3f">
           <CardHeader
             className="flex flex-row items-center justify-between space-y-0 pb-2"
-            data-oid="mjqkyd5"
+            data-oid="v.-hhiz"
           >
-            <CardTitle className="text-sm font-medium" data-oid="5alrgjx">
+            <CardTitle className="text-sm font-medium" data-oid="cmckpaz">
               總變體數量
             </CardTitle>
             <Shapes
               className="h-4 w-4 text-muted-foreground"
-              data-oid="k0rv9oq"
+              data-oid="828v.kh"
             />
           </CardHeader>
-          <CardContent data-oid="-occ1k2">
+          <CardContent data-oid="bul:5n7">
             <div
               className="text-3xl font-bold tracking-tighter"
-              data-oid="u_y.1e5"
+              data-oid="7n6z53h"
             >
               {statistics.totalVariants}
             </div>
             <p
               className="text-xs text-muted-foreground mt-2"
-              data-oid="8dgua8z"
+              data-oid="yf7mng."
             >
               個變體組合
             </p>
@@ -412,23 +412,23 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
         </Card>
 
         {/* 總價值卡片 */}
-        <Card data-slot="card" className="@container/card" data-oid="zny1dec">
+        <Card data-slot="card" className="@container/card" data-oid="5bod0_i">
           <CardHeader
             className="flex flex-row items-center justify-between space-y-0 pb-2"
-            data-oid="4wgn302"
+            data-oid="6es:265"
           >
-            <CardTitle className="text-sm font-medium" data-oid="dw1wdvt">
+            <CardTitle className="text-sm font-medium" data-oid="b:0.vzz">
               商品總價值
             </CardTitle>
             <DollarSign
               className="h-4 w-4 text-muted-foreground"
-              data-oid="e2kwoau"
+              data-oid="8u9p9jg"
             />
           </CardHeader>
-          <CardContent data-oid="hhev:rb">
+          <CardContent data-oid="z2wp9fr">
             <div
               className="text-3xl font-bold tracking-tighter"
-              data-oid="-a7qb_4"
+              data-oid="5lfedov"
             >
               $
               {statistics.totalValue.toLocaleString("zh-TW", {
@@ -438,7 +438,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
             </div>
             <p
               className="text-xs text-muted-foreground mt-2"
-              data-oid="2h4_9uu"
+              data-oid=".hao6w4"
             >
               所有變體合計
             </p>
@@ -446,23 +446,23 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
         </Card>
 
         {/* 平均價格卡片 */}
-        <Card data-slot="card" className="@container/card" data-oid="osmlmmq">
+        <Card data-slot="card" className="@container/card" data-oid="3noqd6x">
           <CardHeader
             className="flex flex-row items-center justify-between space-y-0 pb-2"
-            data-oid="4vde7p5"
+            data-oid="4.0nwft"
           >
-            <CardTitle className="text-sm font-medium" data-oid="kokk5kw">
+            <CardTitle className="text-sm font-medium" data-oid="nfev2x7">
               平均價格
             </CardTitle>
             <CircleDollarSign
               className="h-4 w-4 text-muted-foreground"
-              data-oid="gf3kxel"
+              data-oid="9rt.icu"
             />
           </CardHeader>
-          <CardContent data-oid=":y6wyp4">
+          <CardContent data-oid="qre8iu:">
             <div
               className="text-3xl font-bold tracking-tighter"
-              data-oid="ermo508"
+              data-oid="1a569nq"
             >
               $
               {statistics.averagePrice.toLocaleString("zh-TW", {
@@ -472,7 +472,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
             </div>
             <p
               className="text-xs text-muted-foreground mt-2"
-              data-oid="73-90ng"
+              data-oid="yg:jxh3"
             >
               每個變體平均
             </p>
@@ -480,34 +480,34 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
         </Card>
 
         {/* 屬性數量卡片 */}
-        <Card data-slot="card" className="@container/card" data-oid=".k5ximx">
+        <Card data-slot="card" className="@container/card" data-oid="wukx0kp">
           <CardHeader
             className="flex flex-row items-center justify-between space-y-0 pb-2"
-            data-oid="yx2wy-p"
+            data-oid=".kr_y0e"
           >
-            <CardTitle className="text-sm font-medium" data-oid="mwjjis8">
+            <CardTitle className="text-sm font-medium" data-oid="ld2usgf">
               使用屬性
             </CardTitle>
             <Layers
               className="h-4 w-4 text-muted-foreground"
-              data-oid="ysksrhf"
+              data-oid="ui0ts46"
             />
           </CardHeader>
-          <CardContent data-oid="j8jd6dm">
-            <div className="flex items-baseline space-x-2" data-oid="jvocg7w">
+          <CardContent data-oid="u0_7-h1">
+            <div className="flex items-baseline space-x-2" data-oid="9ohzj71">
               <span
                 className="text-3xl font-bold tracking-tighter"
-                data-oid="lsqslrt"
+                data-oid="6y6kvq8"
               >
                 {statistics.selectedAttributes}
               </span>
-              <Badge variant="secondary" className="text-xs" data-oid="fz4fu_x">
+              <Badge variant="secondary" className="text-xs" data-oid="n14dpm9">
                 已選擇
               </Badge>
             </div>
             <p
               className="text-xs text-muted-foreground mt-2"
-              data-oid="xq1.vh0"
+              data-oid="q5kz.hy"
             >
               共 {statistics.totalAttributeValues} 個屬性值
             </p>

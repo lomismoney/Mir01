@@ -338,16 +338,25 @@ export default function UsersPage() {
   // 檢查管理員權限 - 使用 useAuth hook 來檢查權限
   if (!user?.isAdmin) {
     return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <Shield className="mx-auto h-12 w-12 text-gray-400" />
+      <div className="container mx-auto py-8" data-oid="t-0ly8x">
+        <Card data-oid="ndg_yph">
+          <CardContent className="pt-6" data-oid="trh-dbl">
+            <div className="text-center" data-oid="uk7mba8">
+              <Shield
+                className="mx-auto h-12 w-12 text-gray-400"
+                data-oid="rivxq1u"
+              />
 
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+              <h3
+                className="mt-2 text-sm font-medium text-gray-900 dark:text-white"
+                data-oid="mhkwen6"
+              >
                 權限不足
               </h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p
+                className="mt-1 text-sm text-gray-500 dark:text-gray-400"
+                data-oid="6:2l5il"
+              >
                 您沒有權限訪問用戶管理功能
               </p>
             </div>
@@ -359,21 +368,27 @@ export default function UsersPage() {
 
   // 只有已登入且為管理員的用戶才會執行到這裡
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto py-8 space-y-6" data-oid="r7udv0r">
       {/* 頁面標題 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="flex items-center justify-between" data-oid="nuq9_-i">
+        <div data-oid="tu2xz8x">
+          <h1
+            className="text-3xl font-bold text-gray-900 dark:text-white"
+            data-oid="5nzglce"
+          >
             用戶管理
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
+          <p
+            className="text-gray-600 dark:text-gray-300 mt-2"
+            data-oid="d:6f:tk"
+          >
             管理系統中的所有用戶帳號
           </p>
         </div>
       </div>
 
       {/* 用戶資料表格 */}
-      <div className="space-y-4">
+      <div className="space-y-4" data-oid="ql8wyy0">
         <UsersDataTable
           columns={columns}
           data={users}
@@ -382,27 +397,42 @@ export default function UsersPage() {
           onAddUser={handleAddUser}
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
+          data-oid="xzuzf:q"
         />
       </div>
 
       {/* 新增用戶對話框 */}
-      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserCheck className="w-5 h-5" />
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={handleDialogClose}
+        data-oid="k:_qcqq"
+      >
+        <DialogContent className="sm:max-w-[425px]" data-oid="g.u-jqd">
+          <DialogHeader data-oid="wfwvpko">
+            <DialogTitle className="flex items-center gap-2" data-oid="wx0:8wq">
+              <UserCheck className="w-5 h-5" data-oid="nomy5gx" />
               建立新用戶
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription data-oid="0fsh8fb">
               填寫以下資訊以建立一個新的使用者帳號。
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4" data-oid="2f2bxdy">
             {/* 姓名欄位 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right font-medium">
-                姓名 <span className="text-red-500">*</span>
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid="-n7w.o0"
+            >
+              <Label
+                htmlFor="name"
+                className="text-right font-medium"
+                data-oid="u2l_11l"
+              >
+                姓名{" "}
+                <span className="text-red-500" data-oid="_:9v8se">
+                  *
+                </span>
               </Label>
               <Input
                 id="name"
@@ -411,13 +441,24 @@ export default function UsersPage() {
                 onChange={(e) => setNewUserName(e.target.value)}
                 className="col-span-3"
                 disabled={createUserMutation.isPending}
+                data-oid="fbe9ci1"
               />
             </div>
 
             {/* 帳號欄位 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="username" className="text-right font-medium">
-                用戶名 <span className="text-red-500">*</span>
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid=".:u7sq4"
+            >
+              <Label
+                htmlFor="username"
+                className="text-right font-medium"
+                data-oid="54r71u3"
+              >
+                用戶名{" "}
+                <span className="text-red-500" data-oid="i9ff4t5">
+                  *
+                </span>
               </Label>
               <Input
                 id="username"
@@ -426,15 +467,26 @@ export default function UsersPage() {
                 onChange={(e) => setNewUsername(e.target.value)}
                 className="col-span-3"
                 disabled={createUserMutation.isPending}
+                data-oid="6gq16i7"
               />
             </div>
 
             {/* 密碼欄位 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="password" className="text-right font-medium">
-                密碼 <span className="text-red-500">*</span>
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid="vh1h3gt"
+            >
+              <Label
+                htmlFor="password"
+                className="text-right font-medium"
+                data-oid="5cq.19t"
+              >
+                密碼{" "}
+                <span className="text-red-500" data-oid="225cazk">
+                  *
+                </span>
               </Label>
-              <div className="col-span-3 space-y-1">
+              <div className="col-span-3 space-y-1" data-oid="5mg:sbv">
                 <Input
                   id="password"
                   type="password"
@@ -442,16 +494,29 @@ export default function UsersPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={createUserMutation.isPending}
+                  data-oid="8nxs091"
                 />
 
-                <p className="text-xs text-gray-500">密碼至少需要 8 個字元</p>
+                <p className="text-xs text-gray-500" data-oid="q-8yk.p">
+                  密碼至少需要 8 個字元
+                </p>
               </div>
             </div>
 
             {/* 角色選擇 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="role" className="text-right font-medium">
-                角色 <span className="text-red-500">*</span>
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid="e6lf91d"
+            >
+              <Label
+                htmlFor="role"
+                className="text-right font-medium"
+                data-oid="05j3mxi"
+              >
+                角色{" "}
+                <span className="text-red-500" data-oid="pcbfg7m">
+                  *
+                </span>
               </Label>
               <Select
                 value={newRole}
@@ -459,26 +524,27 @@ export default function UsersPage() {
                   setNewRole(value)
                 }
                 disabled={createUserMutation.isPending}
+                data-oid=".sh2rwm"
               >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="選擇用戶角色" />
+                <SelectTrigger className="col-span-3" data-oid="5pa8:5v">
+                  <SelectValue placeholder="選擇用戶角色" data-oid="vamdupf" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
+                <SelectContent data-oid="a5m6k88">
+                  <SelectItem value="admin" data-oid="2d_30fo">
+                    <div className="flex items-center gap-2" data-oid="sk9365h">
+                      <Shield className="w-4 h-4" data-oid="mzd6v:9" />
                       管理員
                     </div>
                   </SelectItem>
-                  <SelectItem value="staff">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
+                  <SelectItem value="staff" data-oid="xlp5:70">
+                    <div className="flex items-center gap-2" data-oid="mko8ygq">
+                      <Eye className="w-4 h-4" data-oid="dixj7ae" />
                       員工
                     </div>
                   </SelectItem>
-                  <SelectItem value="viewer">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
+                  <SelectItem value="viewer" data-oid="hw32bb0">
+                    <div className="flex items-center gap-2" data-oid="xq2tj:7">
+                      <Eye className="w-4 h-4" data-oid="wgurmyw" />
                       檢視者
                     </div>
                   </SelectItem>
@@ -487,11 +553,12 @@ export default function UsersPage() {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter data-oid="27wcl53">
             <Button
               variant="outline"
               onClick={() => handleDialogClose(false)}
               disabled={createUserMutation.isPending}
+              data-oid="iod7ast"
             >
               取消
             </Button>
@@ -499,15 +566,19 @@ export default function UsersPage() {
               onClick={handleCreateUser}
               disabled={createUserMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700"
+              data-oid="63uya0f"
             >
               {createUserMutation.isPending ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2
+                    className="w-4 h-4 mr-2 animate-spin"
+                    data-oid="d-0n9ch"
+                  />
                   建立中...
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-4 h-4 mr-2" data-oid="puv8pcg" />
                   建立用戶
                 </>
               )}
@@ -517,23 +588,37 @@ export default function UsersPage() {
       </Dialog>
 
       {/* 編輯用戶對話框 */}
-      <Dialog open={isEditDialogOpen} onOpenChange={handleEditDialogClose}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserCheck className="w-5 h-5" />
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={handleEditDialogClose}
+        data-oid="u21j:jr"
+      >
+        <DialogContent className="sm:max-w-[425px]" data-oid=".eflfyy">
+          <DialogHeader data-oid="znbwg:v">
+            <DialogTitle className="flex items-center gap-2" data-oid="y3fb98d">
+              <UserCheck className="w-5 h-5" data-oid="kpg2xhy" />
               編輯用戶
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription data-oid="pxxxk:d">
               修改用戶資訊。密碼欄位留空表示不更改密碼。
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4" data-oid="2533gp5">
             {/* 姓名欄位 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-name" className="text-right font-medium">
-                姓名 <span className="text-red-500">*</span>
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid="6ugu9mm"
+            >
+              <Label
+                htmlFor="edit-name"
+                className="text-right font-medium"
+                data-oid="43xahi0"
+              >
+                姓名{" "}
+                <span className="text-red-500" data-oid="sb5lm19">
+                  *
+                </span>
               </Label>
               <Input
                 id="edit-name"
@@ -542,13 +627,24 @@ export default function UsersPage() {
                 onChange={(e) => setEditUserName(e.target.value)}
                 className="col-span-3"
                 disabled={updateUserMutation.isPending}
+                data-oid="9j3jjz1"
               />
             </div>
 
             {/* 帳號欄位 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-username" className="text-right font-medium">
-                用戶名 <span className="text-red-500">*</span>
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid="h61mwg8"
+            >
+              <Label
+                htmlFor="edit-username"
+                className="text-right font-medium"
+                data-oid="j_62pjb"
+              >
+                用戶名{" "}
+                <span className="text-red-500" data-oid="6m_0d3.">
+                  *
+                </span>
               </Label>
               <Input
                 id="edit-username"
@@ -557,13 +653,24 @@ export default function UsersPage() {
                 onChange={(e) => setEditUsername(e.target.value)}
                 className="col-span-3"
                 disabled={updateUserMutation.isPending}
+                data-oid="z.z5hw5"
               />
             </div>
 
             {/* 密碼欄位 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-password" className="text-right font-medium">
-                密碼 <span className="text-gray-500">(留空不更改)</span>
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid="yx7b9iy"
+            >
+              <Label
+                htmlFor="edit-password"
+                className="text-right font-medium"
+                data-oid="86r5mq0"
+              >
+                密碼{" "}
+                <span className="text-gray-500" data-oid="cca.95y">
+                  (留空不更改)
+                </span>
               </Label>
               <Input
                 id="edit-password"
@@ -573,13 +680,24 @@ export default function UsersPage() {
                 onChange={(e) => setEditPassword(e.target.value)}
                 className="col-span-3"
                 disabled={updateUserMutation.isPending}
+                data-oid="8:jddk2"
               />
             </div>
 
             {/* 角色選擇 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-role" className="text-right font-medium">
-                角色 <span className="text-red-500">*</span>
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid="ozp5wx:"
+            >
+              <Label
+                htmlFor="edit-role"
+                className="text-right font-medium"
+                data-oid="3:qzsot"
+              >
+                角色{" "}
+                <span className="text-red-500" data-oid="dkcuy::">
+                  *
+                </span>
               </Label>
               <Select
                 value={editRole}
@@ -587,26 +705,27 @@ export default function UsersPage() {
                   setEditRole(value)
                 }
                 disabled={updateUserMutation.isPending}
+                data-oid="xod4rfa"
               >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="選擇用戶角色" />
+                <SelectTrigger className="col-span-3" data-oid="d:pga2u">
+                  <SelectValue placeholder="選擇用戶角色" data-oid="3:ekvhj" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
+                <SelectContent data-oid="9odbich">
+                  <SelectItem value="admin" data-oid="ixr.:bn">
+                    <div className="flex items-center gap-2" data-oid="9oid_bp">
+                      <Shield className="w-4 h-4" data-oid="317zv-r" />
                       管理員
                     </div>
                   </SelectItem>
-                  <SelectItem value="staff">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
+                  <SelectItem value="staff" data-oid="s:162am">
+                    <div className="flex items-center gap-2" data-oid="wv82ejm">
+                      <Eye className="w-4 h-4" data-oid="bh90l.d" />
                       員工
                     </div>
                   </SelectItem>
-                  <SelectItem value="viewer">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
+                  <SelectItem value="viewer" data-oid="a5cqf_l">
+                    <div className="flex items-center gap-2" data-oid="rikrd1t">
+                      <Eye className="w-4 h-4" data-oid="1gmivvc" />
                       檢視者
                     </div>
                   </SelectItem>
@@ -615,11 +734,12 @@ export default function UsersPage() {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter data-oid="lhrnvg3">
             <Button
               variant="outline"
               onClick={() => handleEditDialogClose(false)}
               disabled={updateUserMutation.isPending}
+              data-oid="6gvpbc-"
             >
               取消
             </Button>
@@ -627,15 +747,19 @@ export default function UsersPage() {
               onClick={handleUpdateUser}
               disabled={updateUserMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700"
+              data-oid=":5q8486"
             >
               {updateUserMutation.isPending ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2
+                    className="w-4 h-4 mr-2 animate-spin"
+                    data-oid="qdpltlf"
+                  />
                   更新中...
                 </>
               ) : (
                 <>
-                  <UserCheck className="w-4 h-4 mr-2" />
+                  <UserCheck className="w-4 h-4 mr-2" data-oid="k4n3cuv" />
                   更新用戶
                 </>
               )}
@@ -648,16 +772,22 @@ export default function UsersPage() {
       <AlertDialog
         open={!!userToDelete}
         onOpenChange={(isOpen) => !isOpen && setUserToDelete(null)}
+        data-oid="jxha:dc"
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>確定要執行刪除嗎？</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent data-oid="qhxmhin">
+          <AlertDialogHeader data-oid="touccdr">
+            <AlertDialogTitle data-oid="s4a0jgw">
+              確定要執行刪除嗎？
+            </AlertDialogTitle>
+            <AlertDialogDescription data-oid="62ghj-u">
               你正準備刪除用戶「{userToDelete?.name}」。此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setUserToDelete(null)}>
+          <AlertDialogFooter data-oid="or59qg6">
+            <AlertDialogCancel
+              onClick={() => setUserToDelete(null)}
+              data-oid="gizwydy"
+            >
               取消
             </AlertDialogCancel>
             <AlertDialogAction
@@ -668,6 +798,7 @@ export default function UsersPage() {
                 }
               }}
               disabled={deleteUserMutation.isPending}
+              data-oid="-yivkk7"
             >
               {deleteUserMutation.isPending ? "刪除中..." : "確定刪除"}
             </AlertDialogAction>
@@ -682,6 +813,7 @@ export default function UsersPage() {
           userName={selectedUserForStores.name as string}
           open={isStoresDialogOpen}
           onOpenChange={setIsStoresDialogOpen}
+          data-oid="_ou37qk"
         />
       )}
     </div>

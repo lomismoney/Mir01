@@ -27,19 +27,19 @@ export function ModeToggle() {
       variant="outline"
       size="icon"
       onClick={toggleTheme}
-      data-oid="h5sgioh"
+      data-oid="a2di2u3"
     >
       <Sun
         className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
-        data-oid="dc8.mu7"
+        data-oid="-iol0c7"
       />
 
       <Moon
         className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
-        data-oid="-bq81a9"
+        data-oid="t6kfgna"
       />
 
-      <span className="sr-only" data-oid="p6.u7q:">
+      <span className="sr-only" data-oid="9ztxxg8">
         切換主題
       </span>
     </Button>

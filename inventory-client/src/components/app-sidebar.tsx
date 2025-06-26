@@ -76,7 +76,7 @@ const SmartNavLink = memo(function SmartNavLink({
       onMouseEnter={handleMouseEnter}
       prefetch={false} // 使用自定義預加載邏輯
       className={className}
-      data-oid="85l2zsa"
+      data-oid="ch3qgh7"
     >
       {children}
     </Link>
@@ -212,18 +212,18 @@ const AppSidebar = memo(function AppSidebar({
   // 移除未使用的 queryClient 和 prefetch 函數以通過 ESLint 檢查
 
   return (
-    <Sidebar collapsible="offcanvas" {...props} data-oid="xq.0pmn">
-      <SidebarHeader data-oid="qtv49-d">
-        <SidebarMenu data-oid="rtootk8">
-          <SidebarMenuItem data-oid="p8nzsuc">
+    <Sidebar collapsible="offcanvas" {...props} data-oid="p1zh0r:">
+      <SidebarHeader data-oid="pnu2s6k">
+        <SidebarMenu data-oid="hxyhgm6">
+          <SidebarMenuItem data-oid="lwzz6_9">
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
-              data-oid="mt54012"
+              data-oid=":5wcwi5"
             >
-              <SmartNavLink href="/dashboard" data-oid="42mw88c">
-                <IconInnerShadowTop className="!size-5" data-oid="bzr8h9." />
-                <span className="text-base font-semibold" data-oid="radde6m">
+              <SmartNavLink href="/dashboard" data-oid="_r:io8m">
+                <IconInnerShadowTop className="!size-5" data-oid="drcb2py" />
+                <span className="text-base font-semibold" data-oid="-oh.-qr">
                   庫存管理系統
                 </span>
               </SmartNavLink>
@@ -231,18 +231,18 @@ const AppSidebar = memo(function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent data-oid="al4ip_h">
+      <SidebarContent data-oid="wvi:peh">
         {/* 🚀 統一導航系統 - 移除重複項目，保持智能預加載功能 */}
-        <NavMain items={data.navMain} data-oid="rk.-s3m" />
-        <NavDocuments items={data.documents} data-oid="3yhxbz0" />
+        <NavMain items={data.navMain} data-oid="j33200a" />
+        <NavDocuments items={data.documents} data-oid="3h.pjy3" />
         <NavSecondary
           items={data.navSecondary}
           className="mt-auto"
-          data-oid="00_g0cj"
+          data-oid="9fdpydw"
         />
       </SidebarContent>
-      <SidebarFooter data-oid="r5wh6w:">
-        <NavUser data-oid="-ftyisz" />
+      <SidebarFooter data-oid=":t8l7o5">
+        <NavUser data-oid="mx8ddpb" />
       </SidebarFooter>
     </Sidebar>
   );

@@ -69,51 +69,51 @@ export function CustomerSelector({
   });
 
   return (
-    <Popover open={open} onOpenChange={setOpen} data-oid="tuqb7_p">
-      <PopoverTrigger asChild data-oid="guf95f7">
+    <Popover open={open} onOpenChange={setOpen} data-oid="tb.grcy">
+      <PopoverTrigger asChild data-oid="ffe11u7">
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className="w-full h-10 px-3 justify-between text-left font-normal hover:bg-accent/50"
-          data-oid="3nqt387"
+          data-oid=".2y8byn"
         >
           {selectedCustomer ? (
             <div
               className="flex items-center gap-2 overflow-hidden"
-              data-oid="qnqsjcn"
+              data-oid="3rbc-o1"
             >
               <UserCircle2
                 className="h-4 w-4 text-muted-foreground shrink-0"
-                data-oid="ftuhq4p"
+                data-oid="t-uj2uz"
               />
 
-              <span className="truncate" data-oid="4qnijra">
+              <span className="truncate" data-oid="spt0o5p">
                 {selectedCustomer.name}
               </span>
             </div>
           ) : (
-            <span className="text-muted-foreground" data-oid="9ai.ppg">
+            <span className="text-muted-foreground" data-oid="2h9_op1">
               請選擇客戶...
             </span>
           )}
           <ChevronsUpDown
             className="ml-2 h-4 w-4 shrink-0 opacity-50"
-            data-oid="23t2i59"
+            data-oid="lhrzikh"
           />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         className="w-[--radix-popover-trigger-width] p-2"
         align="start"
-        data-oid="sflss62"
+        data-oid="r6beoiu"
       >
-        <div className="flex flex-col gap-2" data-oid="ghj9u9c">
+        <div className="flex flex-col gap-2" data-oid="smr-scr">
           {/* 搜尋框 */}
-          <div className="relative" data-oid="tzh6b27">
+          <div className="relative" data-oid="8:vlt-6">
             <Search
               className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              data-oid="g4oupl5"
+              data-oid="auv9b-u"
             />
 
             <Input
@@ -123,33 +123,33 @@ export function CustomerSelector({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8"
               autoFocus
-              data-oid="7b1w17-"
+              data-oid="xtjc2yl"
             />
           </div>
 
           {/* 客戶列表 */}
           <div
             className="max-h-[300px] overflow-y-auto py-1"
-            data-oid="vlwus_l"
+            data-oid="q5.3mi6"
           >
             {isLoading ? (
               <div
                 className="py-6 text-center text-sm text-muted-foreground"
-                data-oid="vfh48o5"
+                data-oid="ym2gkpq"
               >
                 載入中...
               </div>
             ) : filteredCustomers.length === 0 && searchQuery ? (
               <div
                 className="py-6 text-center text-sm text-muted-foreground"
-                data-oid="z99faj_"
+                data-oid="6oyvjtz"
               >
                 找不到符合的客戶
               </div>
             ) : customers.length === 0 ? (
               <div
                 className="py-6 text-center text-sm text-muted-foreground"
-                data-oid="w58eqnu"
+                data-oid="3me.6ru"
               >
                 尚無客戶資料
               </div>
@@ -163,20 +163,20 @@ export function CustomerSelector({
                       setOpen(false);
                     }}
                     className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-accent text-left transition-colors w-full"
-                    data-oid="6.j1slj"
+                    data-oid="cwk8pmi"
                   >
                     <div
                       className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"
-                      data-oid="slng-8r"
+                      data-oid="3aq4s6r"
                     >
                       <PlusCircle
                         className="h-4 w-4 text-primary"
-                        data-oid="zxnrlge"
+                        data-oid="s9lki8_"
                       />
                     </div>
                     <span
                       className="text-primary font-medium"
-                      data-oid="dk11p_7"
+                      data-oid="b9j9tqy"
                     >
                       新增客戶
                     </span>
@@ -185,7 +185,7 @@ export function CustomerSelector({
 
                 {/* 分隔線 */}
                 {onAddNewCustomer && filteredCustomers.length > 0 && (
-                  <div className="my-1 mx-3 border-t" data-oid="e1:n5o3" />
+                  <div className="my-1 mx-3 border-t" data-oid="f06w-dv" />
                 )}
 
                 {/* 客戶項目 */}
@@ -200,38 +200,38 @@ export function CustomerSelector({
                       "flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-accent text-left transition-colors relative w-full",
                       selectedCustomerId === customer.id && "bg-accent",
                     )}
-                    data-oid="o.u9yn3"
+                    data-oid=".fkpxgq"
                   >
                     {selectedCustomerId === customer.id && (
                       <div
                         className="absolute left-1 top-1/2 -translate-y-1/2"
-                        data-oid="veir5sq"
+                        data-oid="kw1o74q"
                       >
                         <Check
                           className="h-3 w-3 text-primary"
-                          data-oid="-f5_d8i"
+                          data-oid="rv40_s6"
                         />
                       </div>
                     )}
 
                     <div
                       className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0"
-                      data-oid="soo7hak"
+                      data-oid="mth65dq"
                     >
                       <UserCircle2
                         className="h-5 w-5 text-muted-foreground"
-                        data-oid="7slgs38"
+                        data-oid="q8nv13d"
                       />
                     </div>
 
-                    <div className="flex flex-col min-w-0" data-oid="cmxds.q">
-                      <span className="font-medium truncate" data-oid=".bpso:1">
+                    <div className="flex flex-col min-w-0" data-oid="2hjl7bh">
+                      <span className="font-medium truncate" data-oid="gkqtyo1">
                         {customer.name}
                       </span>
                       {customer.phone && (
                         <span
                           className="text-xs text-muted-foreground"
-                          data-oid=".0auvo0"
+                          data-oid="0iz9mtu"
                         >
                           {customer.phone}
                         </span>

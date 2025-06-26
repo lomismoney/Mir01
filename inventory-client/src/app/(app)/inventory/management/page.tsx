@@ -18,8 +18,8 @@ import { InventoryManagement } from "@/components/inventory/InventoryManagement"
 export default function InventoryManagementPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
-    <div className="container mx-auto p-4 md:p-8" data-oid="qosoyam">
-      <InventoryManagement data-oid="v-vspi_" />
+    <div className="container mx-auto p-4 md:p-8" data-oid="_bphulm">
+      <InventoryManagement data-oid="mhtdk::" />
     </div>
   );
 }

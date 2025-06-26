@@ -390,9 +390,9 @@ const ProductClientComponent = () => {
   // 權限檢查
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-32" data-oid="afyyjkl">
-        <Loader2 className="h-6 w-6 animate-spin" data-oid="942pti:" />
-        <span className="ml-2" data-oid="271ifnh">
+      <div className="flex items-center justify-center h-32" data-oid="z.h0jik">
+        <Loader2 className="h-6 w-6 animate-spin" data-oid="yxh__ab" />
+        <span className="ml-2" data-oid="28e:tit">
           載入中...
         </span>
       </div>
@@ -401,9 +401,9 @@ const ProductClientComponent = () => {
 
   if (!isAuthorized) {
     return (
-      <Alert data-oid="vc2s6ga">
-        <Info className="h-4 w-4" data-oid="2g7zzju" />
-        <AlertDescription data-oid="lwdsg6s">
+      <Alert data-oid="3ccfywo">
+        <Info className="h-4 w-4" data-oid="l5azkss" />
+        <AlertDescription data-oid="5261a7m">
           您沒有權限訪問此頁面。請聯繫管理員。
         </AlertDescription>
       </Alert>
@@ -411,20 +411,20 @@ const ProductClientComponent = () => {
   }
 
   return (
-    <div className="space-y-6" data-oid="n:4syce">
+    <div className="space-y-6" data-oid="gdqq.dj">
       {/* 整合所有功能在單一卡片中 */}
-      <div className="rounded-lg border bg-card shadow-sm" data-oid="jyj6r9u">
+      <div className="rounded-lg border bg-card shadow-sm" data-oid="mdg:npg">
         {/* --- 搜尋與過濾控制區 --- */}
-        <div className="border-b p-6" data-oid="4i5nsl8">
+        <div className="border-b p-6" data-oid="xcwvb95">
           <div
             className="flex items-center justify-between gap-4"
-            data-oid="9wl77:1"
+            data-oid="87kd.f."
           >
-            <div className="flex-1" data-oid="9nnf-9w">
-              <div className="relative max-w-md" data-oid="vb2z51i">
+            <div className="flex-1" data-oid="io5rgq5">
+              <div className="relative max-w-md" data-oid="sp4avpr">
                 <Search
                   className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"
-                  data-oid="z-p.p:m"
+                  data-oid="sqswvo."
                 />
 
                 <Input
@@ -432,11 +432,11 @@ const ProductClientComponent = () => {
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   className="pl-8 h-10 bg-background"
-                  data-oid="48d3nwp"
+                  data-oid="s7xkeey"
                 />
               </div>
             </div>
-            <div className="flex items-center gap-2" data-oid="it.44jc">
+            <div className="flex items-center gap-2" data-oid="egi36_n">
               {/* 批量刪除按鈕 - 只在有選中項目時顯示 */}
               {table.getFilteredSelectedRowModel().rows.length > 0 && (
                 <Button
@@ -444,26 +444,26 @@ const ProductClientComponent = () => {
                   size="default"
                   onClick={handleBatchDelete}
                   className="gap-2"
-                  data-oid="p6578o5"
+                  data-oid="avr784a"
                 >
-                  <Trash2 className="h-4 w-4" data-oid="-ydrc7o" />
+                  <Trash2 className="h-4 w-4" data-oid="7:olzli" />
                   刪除選中 ({table.getFilteredSelectedRowModel().rows.length})
                 </Button>
               )}
 
               {/* 欄位顯示控制 */}
-              <DropdownMenu data-oid="jxff46k">
-                <DropdownMenuTrigger asChild data-oid="q38z03u">
+              <DropdownMenu data-oid="f1l4w5_">
+                <DropdownMenuTrigger asChild data-oid="b-9yo9l">
                   <Button
                     variant="outline"
                     className="gap-2"
-                    data-oid=".rl.zi6"
+                    data-oid="wp82dbw"
                   >
-                    <ListFilter className="h-4 w-4" data-oid="jotkjc1" />
+                    <ListFilter className="h-4 w-4" data-oid="ea4ml5v" />
                     欄位顯示
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" data-oid="wcvu8da">
+                <DropdownMenuContent align="end" data-oid="44myufu">
                   {table
                     .getAllColumns()
                     .filter((column) => column.getCanHide())
@@ -476,7 +476,7 @@ const ProductClientComponent = () => {
                           onCheckedChange={(value) =>
                             column.toggleVisibility(!!value)
                           }
-                          data-oid="21-gnpt"
+                          data-oid="ejlvr6a"
                         >
                           {columnNameMap[column.id] || column.id}
                         </DropdownMenuCheckboxItem>
@@ -492,35 +492,35 @@ const ProductClientComponent = () => {
         {isProductsLoading ? (
           <div
             className="flex items-center justify-center h-[400px]"
-            data-oid="fx1qpey"
+            data-oid="nbtgylw"
           >
             <Loader2
               className="h-8 w-8 animate-spin text-primary"
-              data-oid="bztcq31"
+              data-oid="6dc29k_"
             />
 
-            <span className="ml-3 text-lg" data-oid="eowly05">
+            <span className="ml-3 text-lg" data-oid="h.qrxr9">
               載入商品資料中...
             </span>
           </div>
         ) : error ? (
-          <div className="p-6" data-oid="r1_5cnc">
-            <Alert data-oid="09s8.tz">
-              <Info className="h-4 w-4" data-oid="u8141pf" />
-              <AlertDescription data-oid="690kboc">
+          <div className="p-6" data-oid="4ubsvhq">
+            <Alert data-oid="ol3v-c0">
+              <Info className="h-4 w-4" data-oid="7cy6.8o" />
+              <AlertDescription data-oid="cc97jax">
                 載入商品資料時發生錯誤。請重新整理頁面。
               </AlertDescription>
             </Alert>
           </div>
         ) : (
           <>
-            <Table data-oid="h5o41wf">
-              <TableHeader data-oid="w32fr.f">
+            <Table data-oid="7vayt.7">
+              <TableHeader data-oid="_w6ftuj">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
                     key={headerGroup.id}
                     className="border-b bg-muted/50 hover:bg-muted/50"
-                    data-oid="h8w___c"
+                    data-oid="396qebq"
                   >
                     {headerGroup.headers.map((header) => {
                       const isCompact = ["expander", "select"].includes(
@@ -535,7 +535,7 @@ const ProductClientComponent = () => {
                         <TableHead
                           key={header.id}
                           className={className}
-                          data-oid="90x.n1d"
+                          data-oid="vdm2y0g"
                         >
                           {header.isPlaceholder
                             ? null
@@ -549,7 +549,7 @@ const ProductClientComponent = () => {
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody data-oid="y5q4.d5">
+              <TableBody data-oid="sge9j6m">
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => {
                     // 檢查是否可以展開（不是變體行，且有多個變體）
@@ -586,7 +586,7 @@ const ProductClientComponent = () => {
                             }
                           }
                         }}
-                        data-oid="obaw3uy"
+                        data-oid="fk.to._"
                       >
                         {row.getVisibleCells().map((cell) => {
                           const isCompactCol = ["expander", "select"].includes(
@@ -600,7 +600,7 @@ const ProductClientComponent = () => {
                             <TableCell
                               key={cell.id}
                               className={cellClass}
-                              data-oid="nav5jry"
+                              data-oid="gy3oe5."
                             >
                               {flexRender(
                                 cell.column.columnDef.cell,
@@ -613,24 +613,24 @@ const ProductClientComponent = () => {
                     );
                   })
                 ) : (
-                  <TableRow data-oid="eaxx99z">
+                  <TableRow data-oid="1uumt:z">
                     <TableCell
                       colSpan={columns.length}
                       className="h-32 text-center"
-                      data-oid="rdocwqb"
+                      data-oid="yhn58kj"
                     >
                       <div
                         className="flex flex-col items-center gap-2"
-                        data-oid="z271o3-"
+                        data-oid="c2gujx_"
                       >
                         <Package
                           className="h-8 w-8 text-muted-foreground"
-                          data-oid="mtsmwfm"
+                          data-oid="rdsohbx"
                         />
 
                         <p
                           className="text-lg text-muted-foreground"
-                          data-oid="ewf8d5g"
+                          data-oid="f::ckas"
                         >
                           沒有找到商品資料
                         </p>
@@ -642,26 +642,26 @@ const ProductClientComponent = () => {
             </Table>
 
             {/* 分頁控制 */}
-            <div className="border-t p-4" data-oid="ac_e27k">
+            <div className="border-t p-4" data-oid="j4tgnn7">
               <div
                 className="flex items-center justify-between"
-                data-oid="d-oerng"
+                data-oid="3j-md2g"
               >
                 <div
                   className="text-sm text-muted-foreground"
-                  data-oid="u39rlz8"
+                  data-oid="nzr82by"
                 >
                   已選擇{" "}
                   <span
                     className="font-medium text-foreground"
-                    data-oid="ra-d8pf"
+                    data-oid="ei_o26j"
                   >
                     {table.getFilteredSelectedRowModel().rows.length}
                   </span>{" "}
                   個商品， 共{" "}
                   <span
                     className="font-medium text-foreground"
-                    data-oid=":9616nf"
+                    data-oid="7ga7a2i"
                   >
                     {
                       table
@@ -671,13 +671,13 @@ const ProductClientComponent = () => {
                   </span>{" "}
                   個商品
                 </div>
-                <div className="flex items-center gap-2" data-oid="4tj31my">
+                <div className="flex items-center gap-2" data-oid=":jbshig">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}
-                    data-oid="q09g.gc"
+                    data-oid="s7tb917"
                   >
                     上一頁
                   </Button>
@@ -686,7 +686,7 @@ const ProductClientComponent = () => {
                     size="sm"
                     onClick={() => table.nextPage()}
                     disabled={!table.getCanNextPage()}
-                    data-oid="q2s5c8p"
+                    data-oid="fo0njh4"
                   >
                     下一頁
                   </Button>
@@ -701,27 +701,27 @@ const ProductClientComponent = () => {
       <AlertDialog
         open={!!productToDelete}
         onOpenChange={() => setProductToDelete(null)}
-        data-oid="7pm8iao"
+        data-oid="1y_1zxa"
       >
-        <AlertDialogContent data-oid="08dsi-4">
-          <AlertDialogHeader data-oid="-snqxok">
-            <AlertDialogTitle data-oid="10:dl64">確認刪除商品</AlertDialogTitle>
-            <AlertDialogDescription data-oid="wuc7mhz">
+        <AlertDialogContent data-oid="91h_mfy">
+          <AlertDialogHeader data-oid=":082zx7">
+            <AlertDialogTitle data-oid="q9mbwfm">確認刪除商品</AlertDialogTitle>
+            <AlertDialogDescription data-oid="nsrr:or">
               您確定要刪除商品「{productToDelete?.name}」嗎？此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="w204ui6">
-            <AlertDialogCancel data-oid="s9mj:pi">取消</AlertDialogCancel>
+          <AlertDialogFooter data-oid="5-0ccw:">
+            <AlertDialogCancel data-oid="c0k0rq9">取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteProduct}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteProductMutation.isPending}
-              data-oid="ebv7tps"
+              data-oid="f22gv0u"
             >
               {deleteProductMutation.isPending && (
                 <Loader2
                   className="h-4 w-4 animate-spin mr-2"
-                  data-oid="o.g6fmv"
+                  data-oid="m_01um1"
                 />
               )}
               確認刪除
@@ -734,29 +734,29 @@ const ProductClientComponent = () => {
       <AlertDialog
         open={showBatchDeleteDialog}
         onOpenChange={setShowBatchDeleteDialog}
-        data-oid="b-mgp6k"
+        data-oid="08bejks"
       >
-        <AlertDialogContent data-oid="d2lk6bg">
-          <AlertDialogHeader data-oid="b8hvcj3">
-            <AlertDialogTitle data-oid="a0i22m8">確認批量刪除</AlertDialogTitle>
-            <AlertDialogDescription data-oid="biqa35t">
+        <AlertDialogContent data-oid="4y-l6bz">
+          <AlertDialogHeader data-oid="6kuc11k">
+            <AlertDialogTitle data-oid="6mwiz.c">確認批量刪除</AlertDialogTitle>
+            <AlertDialogDescription data-oid="79rssi9">
               您確定要刪除選中的{" "}
               {table.getFilteredSelectedRowModel().rows.length}{" "}
               個商品嗎？此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="ncysxh3">
-            <AlertDialogCancel data-oid="c0j8web">取消</AlertDialogCancel>
+          <AlertDialogFooter data-oid="m9oeof-">
+            <AlertDialogCancel data-oid="nb7zu_n">取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmBatchDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteMultipleProductsMutation.isPending}
-              data-oid="69z5wkw"
+              data-oid="yq4djpv"
             >
               {deleteMultipleProductsMutation.isPending && (
                 <Loader2
                   className="h-4 w-4 animate-spin mr-2"
-                  data-oid="m-fjjwb"
+                  data-oid="7i7goim"
                 />
               )}
               確認刪除
@@ -770,7 +770,7 @@ const ProductClientComponent = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         product={selectedProduct}
-        data-oid="mu0fbzm"
+        data-oid="q.v14n:"
       />
     </div>
   );

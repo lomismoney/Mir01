@@ -145,44 +145,44 @@ export function TransferStatusEditDialog({
   const availableStatuses = getAvailableStatuses(transfer.status || "");
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="oimh2ym">
-      <DialogContent className="max-w-md" data-oid="vocpds7">
-        <DialogHeader data-oid="wylpq0r">
-          <DialogTitle data-oid="q8jg0a0">編輯轉移狀態</DialogTitle>
-          <DialogDescription data-oid="ggv8w2b">
+    <Dialog open={open} onOpenChange={onOpenChange} data-oid="d6c8dxf">
+      <DialogContent className="max-w-md" data-oid="hueskhr">
+        <DialogHeader data-oid="a1pw1h0">
+          <DialogTitle data-oid=".o2ru03">編輯轉移狀態</DialogTitle>
+          <DialogDescription data-oid="3a-x0ox">
             轉移單號 #{transfer.id} - 產品 #{transfer.product_variant_id}
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form} data-oid="154gi6k">
+        <Form {...form} data-oid=":2hq8wh">
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4"
-            data-oid="vuxd.pa"
+            data-oid="o_bb6_2"
           >
             <FormField
               control={form.control}
               name="status"
               render={({ field }) => (
-                <FormItem data-oid="73ea6fm">
-                  <FormLabel data-oid="u3s2fyl">狀態</FormLabel>
+                <FormItem data-oid="29n_z.v">
+                  <FormLabel data-oid=":cg.unx">狀態</FormLabel>
                   <Select
                     disabled={isSubmitting}
                     onValueChange={field.onChange}
                     value={field.value}
-                    data-oid="-9p8t8."
+                    data-oid="bwqz61d"
                   >
-                    <FormControl data-oid="qoe.5na">
-                      <SelectTrigger data-oid="myam3fr">
-                        <SelectValue data-oid="cr8g9c_" />
+                    <FormControl data-oid="x2zf_ar">
+                      <SelectTrigger data-oid="-nbiv88">
+                        <SelectValue data-oid="tfqanih" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent data-oid="stu_f30">
+                    <SelectContent data-oid="_n6eilm">
                       {availableStatuses.map((status) => (
                         <SelectItem
                           key={status.value}
                           value={status.value}
-                          data-oid="w6t96f3"
+                          data-oid="n.wj_gy"
                         >
                           {status.label}
                         </SelectItem>
@@ -192,7 +192,7 @@ export function TransferStatusEditDialog({
                   {form.watch("status") !== transfer.status && (
                     <p
                       className="text-sm text-muted-foreground"
-                      data-oid="ph-v1l0"
+                      data-oid="1szlmf8"
                     >
                       {getStatusChangeDescription(
                         transfer.status || "",
@@ -200,48 +200,48 @@ export function TransferStatusEditDialog({
                       )}
                     </p>
                   )}
-                  <FormMessage data-oid="8quywa6" />
+                  <FormMessage data-oid="1h3:zr4" />
                 </FormItem>
               )}
-              data-oid="_2pgij:"
+              data-oid="m.owfwd"
             />
 
             <FormField
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem data-oid="gp8kk.r">
-                  <FormLabel data-oid="okumk.b">備註</FormLabel>
-                  <FormControl data-oid="_j65y:l">
+                <FormItem data-oid="mgta0:l">
+                  <FormLabel data-oid="g6w5gvg">備註</FormLabel>
+                  <FormControl data-oid="y:t9y:3">
                     <Textarea
                       {...field}
                       placeholder="輸入狀態變更的備註資訊"
                       disabled={isSubmitting}
                       rows={3}
-                      data-oid="g53_-ge"
+                      data-oid="ydb2iv8"
                     />
                   </FormControl>
-                  <FormMessage data-oid="mz21slb" />
+                  <FormMessage data-oid="dnhy189" />
                 </FormItem>
               )}
-              data-oid="dnq69fx"
+              data-oid="tcsrcad"
             />
 
-            <div className="flex justify-end gap-2" data-oid="d3xolk.">
+            <div className="flex justify-end gap-2" data-oid="t2zohj8">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
-                data-oid="zln0bfb"
+                data-oid="z9:u0:i"
               >
                 取消
               </Button>
-              <Button type="submit" disabled={isSubmitting} data-oid="wqr3e_v">
+              <Button type="submit" disabled={isSubmitting} data-oid="k1adjhi">
                 {isSubmitting && (
                   <Loader2
                     className="mr-2 h-4 w-4 animate-spin"
-                    data-oid="howpdqu"
+                    data-oid="y6850_z"
                   />
                 )}
                 更新狀態

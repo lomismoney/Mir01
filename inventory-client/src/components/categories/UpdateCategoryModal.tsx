@@ -83,11 +83,13 @@ export function UpdateCategoryModal({
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>編輯分類</DialogTitle>
-          <DialogDescription>修改「{category.name}」的資訊</DialogDescription>
+    <Dialog open={open} onOpenChange={onOpenChange} data-oid="ji6-5v_">
+      <DialogContent className="sm:max-w-[425px]" data-oid="mg:u715">
+        <DialogHeader data-oid="q3-qh1o">
+          <DialogTitle data-oid="u1ev6f9">編輯分類</DialogTitle>
+          <DialogDescription data-oid="oo7sqj7">
+            修改「{category.name}」的資訊
+          </DialogDescription>
         </DialogHeader>
 
         <CategoryForm
@@ -95,6 +97,7 @@ export function UpdateCategoryModal({
           isLoading={updateCategory.isPending}
           initialData={category}
           categories={flatCategories}
+          data-oid=":vx:twg"
         />
       </DialogContent>
     </Dialog>

@@ -101,7 +101,7 @@ export function OrderPreviewModal({
           <Badge
             variant="default"
             className="bg-green-100 text-green-800"
-            data-oid="ihao9cu"
+            data-oid="8yob0w_"
           >
             {displayText}
           </Badge>
@@ -110,7 +110,7 @@ export function OrderPreviewModal({
       case "cancelled":
       case "refunded":
         return (
-          <Badge variant="destructive" data-oid="9ooxbhl">
+          <Badge variant="destructive" data-oid=":_h7:5c">
             {displayText}
           </Badge>
         );
@@ -120,7 +120,7 @@ export function OrderPreviewModal({
       case "partial":
       default:
         return (
-          <Badge variant="secondary" data-oid="r86:3z1">
+          <Badge variant="secondary" data-oid="6wx2_6:">
             {displayText}
           </Badge>
         );
@@ -128,17 +128,17 @@ export function OrderPreviewModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="ph1fmv_">
+    <Dialog open={open} onOpenChange={onOpenChange} data-oid="oo1j65q">
       <DialogContent
         className="sm:max-w-2xl max-h-[90vh] flex flex-col"
-        data-oid="qgu8c5f"
+        data-oid="u289xs_"
       >
-        <DialogHeader data-oid="e6eexxs">
-          <DialogTitle className="text-2xl" data-oid=":046lyh">
+        <DialogHeader data-oid="cx87_5b">
+          <DialogTitle className="text-2xl" data-oid="om4k8de">
             訂單詳情
           </DialogTitle>
           {order && (
-            <DialogDescription data-oid="c1m5bjl">
+            <DialogDescription data-oid="_b4yf3w">
               訂單編號: {order.order_number}
             </DialogDescription>
           )}
@@ -147,11 +147,11 @@ export function OrderPreviewModal({
         {/* 核心內容的 div 容器和邏輯完全不變 */}
         <div
           className="flex-grow overflow-y-auto pr-4 space-y-6"
-          data-oid="-ce30i8"
+          data-oid="ttqpxie"
         >
-          {isLoading && <p data-oid="qeqevm0">載入中...</p>}
+          {isLoading && <p data-oid="x6ul-0p">載入中...</p>}
           {error && (
-            <p className="text-destructive" data-oid="y9:lsv2">
+            <p className="text-destructive" data-oid="ur5e:r5">
               讀取失敗：{error.message}
             </p>
           )}
@@ -159,132 +159,132 @@ export function OrderPreviewModal({
           {order && (
             <>
               {/* --- 狀態面板 --- */}
-              <div className="grid grid-cols-2 gap-4" data-oid="si5wsri">
-                <Card data-oid="5s8:d1h">
+              <div className="grid grid-cols-2 gap-4" data-oid="z.v:s9-">
+                <Card data-oid="c0c:bnk">
                   <CardHeader
                     className="flex flex-row items-center justify-between pb-2"
-                    data-oid="_:hkg-z"
+                    data-oid="anq0it5"
                   >
                     <CardTitle
                       className="text-sm font-medium"
-                      data-oid="najce:y"
+                      data-oid="gaf61ep"
                     >
                       貨物狀態
                     </CardTitle>
                     <Truck
                       className="h-4 w-4 text-muted-foreground"
-                      data-oid="y-uf2tn"
+                      data-oid="9ox.fsb"
                     />
                   </CardHeader>
-                  <CardContent data-oid="msrf_bb">
+                  <CardContent data-oid="xogq:y9">
                     {getStatusBadge(order.shipping_status)}
                   </CardContent>
                 </Card>
-                <Card data-oid="-dyz9h.">
+                <Card data-oid="_6z4ulx">
                   <CardHeader
                     className="flex flex-row items-center justify-between pb-2"
-                    data-oid="rwi:ppu"
+                    data-oid="3umg:v8"
                   >
                     <CardTitle
                       className="text-sm font-medium"
-                      data-oid="prx15-3"
+                      data-oid="ixlrlra"
                     >
                       付款狀態
                     </CardTitle>
                     <CreditCard
                       className="h-4 w-4 text-muted-foreground"
-                      data-oid="8x8j4gc"
+                      data-oid="9h3-yqr"
                     />
                   </CardHeader>
-                  <CardContent data-oid="15p6ao1">
+                  <CardContent data-oid="6i1d.or">
                     {getStatusBadge(order.payment_status)}
                   </CardContent>
                 </Card>
               </div>
 
               {/* --- 客戶資訊卡片 --- */}
-              <Card data-oid="reo2_h6">
-                <CardHeader data-oid="nedepio">
+              <Card data-oid="orsr7-s">
+                <CardHeader data-oid=".kgi:va">
                   <CardTitle
                     className="flex items-center text-lg"
-                    data-oid="qqeeuh_"
+                    data-oid="36ukkr6"
                   >
-                    <UserCircle className="mr-2 h-5 w-5" data-oid="b4i_2r7" />
+                    <UserCircle className="mr-2 h-5 w-5" data-oid="ufyj4ag" />
                     客戶資訊
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm" data-oid="nf489ks">
-                  <div className="flex justify-between" data-oid="5:l_mrq">
-                    <span className="text-muted-foreground" data-oid="nbbm-an">
+                <CardContent className="space-y-2 text-sm" data-oid="h7b2om7">
+                  <div className="flex justify-between" data-oid="ucmk1ox">
+                    <span className="text-muted-foreground" data-oid="e6-e75r">
                       名稱
                     </span>
-                    <span data-oid="_oojdyx">{order.customer?.name}</span>
+                    <span data-oid="pbx_vni">{order.customer?.name}</span>
                   </div>
-                  <div className="flex justify-between" data-oid="4d.umd4">
-                    <span className="text-muted-foreground" data-oid="tkec002">
+                  <div className="flex justify-between" data-oid="dteanni">
+                    <span className="text-muted-foreground" data-oid="yuzmkh0">
                       電話
                     </span>
-                    <span data-oid="o.asuhc">{order.customer?.phone}</span>
+                    <span data-oid=":kxbvy:">{order.customer?.phone}</span>
                   </div>
                 </CardContent>
               </Card>
 
               {/* --- 訂單品項卡片 --- */}
-              <Card data-oid="m8z--im">
-                <CardHeader data-oid="3_:payu">
+              <Card data-oid="_jvk2ln">
+                <CardHeader data-oid="1_n1rlb">
                   <CardTitle
                     className="flex items-center text-lg"
-                    data-oid="bta6bb5"
+                    data-oid="lhxu92d"
                   >
-                    <ShoppingCart className="mr-2 h-5 w-5" data-oid="kipk386" />
+                    <ShoppingCart className="mr-2 h-5 w-5" data-oid="5qoaumq" />
                     訂單品項
                   </CardTitle>
                 </CardHeader>
-                <CardContent data-oid="qq0pf5c">
-                  <Table data-oid="ar1z9mu">
-                    <TableHeader data-oid="gq:kct8">
+                <CardContent data-oid="lt3ofye">
+                  <Table data-oid="eyjcdbk">
+                    <TableHeader data-oid="lnkst__">
                       <TableRow
                         className="border-b hover:bg-transparent"
-                        data-oid="r2g_84h"
+                        data-oid="e2mdci0"
                       >
                         <TableHead
                           className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                          data-oid=":hjjbw."
+                          data-oid="3ekq:7n"
                         >
                           品項 (SKU)
                         </TableHead>
                         <TableHead
                           className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-                          data-oid="jx_obva"
+                          data-oid="wileitl"
                         >
                           數量
                         </TableHead>
                         <TableHead
                           className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-                          data-oid="eicp3gg"
+                          data-oid="b87gxa."
                         >
                           小計
                         </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody data-oid="a2yxq7e">
+                    <TableBody data-oid=".6fnme4">
                       {order.items?.map((item: ProcessedOrderItem) => (
-                        <TableRow key={item.id} data-oid="a-kc.iy">
-                          <TableCell data-oid="2xbhon2">
-                            <div className="font-medium" data-oid="99ry821">
+                        <TableRow key={item.id} data-oid="cmgqjkq">
+                          <TableCell data-oid=":.84089">
+                            <div className="font-medium" data-oid="ela-4qb">
                               {item.product_name}
                             </div>
                             <div
                               className="text-xs text-muted-foreground"
-                              data-oid="8nr7fl8"
+                              data-oid="031u_hs"
                             >
                               {item.sku}
                             </div>
                           </TableCell>
-                          <TableCell className="text-center" data-oid="us-82dw">
+                          <TableCell className="text-center" data-oid="v9alu95">
                             {item.quantity}
                           </TableCell>
-                          <TableCell className="text-right" data-oid="54e76hv">
+                          <TableCell className="text-right" data-oid="_m9jg3k">
                             ${(item.price * item.quantity).toLocaleString()}
                           </TableCell>
                         </TableRow>
@@ -295,38 +295,38 @@ export function OrderPreviewModal({
               </Card>
 
               {/* --- 訂單總計 --- */}
-              <div className="space-y-2 text-sm" data-oid="gl4r85:">
-                <div className="flex justify-between" data-oid="qk42m8z">
-                  <span className="text-muted-foreground" data-oid="b5amux1">
+              <div className="space-y-2 text-sm" data-oid="ay7kygr">
+                <div className="flex justify-between" data-oid="th09d7q">
+                  <span className="text-muted-foreground" data-oid="hyatcqh">
                     商品小計
                   </span>
-                  <span data-oid="9f9ftdg">
+                  <span data-oid="8q82kxm">
                     ${order.subtotal.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between" data-oid="g211_:h">
-                  <span className="text-muted-foreground" data-oid="_g3r7r4">
+                <div className="flex justify-between" data-oid="eqmam46">
+                  <span className="text-muted-foreground" data-oid="2o0k3zb">
                     運費
                   </span>
-                  <span data-oid="atk1t.d">
+                  <span data-oid="ipnft81">
                     ${(order.shipping_fee || 0).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between" data-oid="9-33vfz">
-                  <span className="text-muted-foreground" data-oid="fqk46yw">
+                <div className="flex justify-between" data-oid="297p-.a">
+                  <span className="text-muted-foreground" data-oid="e:.m9n1">
                     折扣
                   </span>
-                  <span className="text-green-600" data-oid="m9dkr00">
+                  <span className="text-green-600" data-oid="jrxyjkj">
                     -${order.discount_amount.toLocaleString()}
                   </span>
                 </div>
-                <Separator className="my-2" data-oid="_8vcdlh" />
+                <Separator className="my-2" data-oid="f4bwwx4" />
                 <div
                   className="flex justify-between font-bold text-base"
-                  data-oid="56mcmy9"
+                  data-oid="eu06uk4"
                 >
-                  <span data-oid="4ddxv1f">總計</span>
-                  <span data-oid="k3twz0x">
+                  <span data-oid="tcgiy_m">總計</span>
+                  <span data-oid="yf_ub1l">
                     ${order.grand_total.toLocaleString()}
                   </span>
                 </div>
@@ -338,16 +338,16 @@ export function OrderPreviewModal({
         {/* 🎯 底部操作按鈕區域 */}
         <DialogFooter
           className="p-6 pt-4 border-t sm:justify-between flex-wrap gap-2"
-          data-oid="vvk_8q."
+          data-oid="f8i_q5-"
         >
-          <div className="flex gap-2" data-oid="1mn12ae">
+          <div className="flex gap-2" data-oid="0a-ssi.">
             {order && (
               <>
                 <Button
                   variant="default"
                   onClick={() => onRecordPayment(order)}
                   disabled={order.payment_status === "paid"}
-                  data-oid="x0yqbx0"
+                  data-oid="bbpi1rh"
                 >
                   記錄收款
                 </Button>
@@ -358,14 +358,14 @@ export function OrderPreviewModal({
                     order.payment_status !== "paid" &&
                     order.payment_status !== "partial"
                   }
-                  data-oid="8f8eliz"
+                  data-oid="of6i3gc"
                 >
                   處理退款
                 </Button>
               </>
             )}
           </div>
-          <div className="flex gap-2" data-oid="7_h6atg">
+          <div className="flex gap-2" data-oid="83su50y">
             {order && (
               <Button
                 variant="secondary"
@@ -374,7 +374,7 @@ export function OrderPreviewModal({
                   order.payment_status !== "paid" ||
                   order.shipping_status !== "pending"
                 }
-                data-oid="j:z31qx"
+                data-oid="ibzgqzm"
               >
                 執行出貨
               </Button>
@@ -382,7 +382,7 @@ export function OrderPreviewModal({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              data-oid="8s9fpwt"
+              data-oid="4:fk6jm"
             >
               關閉
             </Button>

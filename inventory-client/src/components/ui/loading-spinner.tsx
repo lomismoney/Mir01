@@ -35,21 +35,17 @@ export function LoadingSpinner({
   };
 
   return (
-    <div className="flex items-center gap-2" data-oid="r46cg:f">
+    <div className="flex items-center gap-2">
       <Loader2
         className={cn(
           "animate-spin text-primary",
           sizeClasses[size],
           className,
         )}
-        data-oid="9no1v82"
       />
 
       {text && (
-        <span
-          className="text-sm text-muted-foreground animate-pulse"
-          data-oid="66v7-ux"
-        >
+        <span className="text-sm text-muted-foreground animate-pulse">
           {text}
         </span>
       )}

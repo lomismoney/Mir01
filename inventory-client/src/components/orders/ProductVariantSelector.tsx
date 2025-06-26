@@ -103,24 +103,24 @@ export function ProductVariantSelector({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="u06mjis">
+    <Dialog open={open} onOpenChange={onOpenChange} data-oid="1.uzhmd">
       <DialogContent
         className="w-[90vw] max-w-[1400px] max-h-[80vh] flex flex-col"
-        data-oid="khh2vkp"
+        data-oid="1:8zfs9"
       >
-        <DialogHeader data-oid="2u9i589">
-          <DialogTitle className="flex items-center gap-2" data-oid="1aokm3c">
-            <Package className="h-5 w-5" data-oid="e8unz5u" />
+        <DialogHeader data-oid="lud12wk">
+          <DialogTitle className="flex items-center gap-2" data-oid="lkr8b3m">
+            <Package className="h-5 w-5" data-oid="t_6hvif" />
             選擇商品項目
           </DialogTitle>
         </DialogHeader>
 
         {/* 搜尋欄 */}
-        <div className="flex items-center space-x-2" data-oid="3.8m:qu">
-          <div className="relative flex-1" data-oid="gbn10va">
+        <div className="flex items-center space-x-2" data-oid="xqdwq4j">
+          <div className="relative flex-1" data-oid="b4uv3ll">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"
-              data-oid="mjb.nej"
+              data-oid="7ac:o:y"
             />
 
             <Input
@@ -128,10 +128,10 @@ export function ProductVariantSelector({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
-              data-oid="seezuem"
+              data-oid="evd55g6"
             />
           </div>
-          <Badge variant="outline" data-oid=".owh8m0">
+          <Badge variant="outline" data-oid="70bd5hb">
             已選擇 {selectedVariants.length} 項
           </Badge>
         </div>
@@ -139,81 +139,81 @@ export function ProductVariantSelector({
         {/* 商品變體表格 */}
         <div
           className="flex-1 overflow-auto border rounded-md"
-          data-oid="y3fh-gr"
+          data-oid="8pn_1.q"
         >
-          <Table data-oid="a4ebgdg">
-            <TableHeader data-oid="7rrbooa">
+          <Table data-oid="xl5c5cm">
+            <TableHeader data-oid="3.uybz_">
               <TableRow
                 className="border-b hover:bg-transparent"
-                data-oid="1n8-3ed"
+                data-oid="lab6bdf"
               >
                 <TableHead
                   className="w-12 h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="5r-i9ic"
+                  data-oid="_u3rmjn"
                 >
                   選擇
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="8wb-y8a"
+                  data-oid="6-z82vy"
                 >
                   商品名稱
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="o-bdmip"
+                  data-oid="w69elp3"
                 >
                   SKU
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="dztojnz"
+                  data-oid="xe5ttg4"
                 >
                   規格
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="7dni7ps"
+                  data-oid="3cf7ov5"
                 >
                   分類
                 </TableHead>
                 <TableHead
                   className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-                  data-oid="w87bjma"
+                  data-oid="pq3yge2"
                 >
                   單價
                 </TableHead>
                 <TableHead
                   className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-                  data-oid="8ku1_9x"
+                  data-oid="h65rp2_"
                 >
                   庫存
                 </TableHead>
                 <TableHead
                   className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-                  data-oid="y3axs:h"
+                  data-oid="t4anc.1"
                 >
                   狀態
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody data-oid="cto-.5q">
+            <TableBody data-oid="efbch:q">
               {isLoading ? (
-                <TableRow data-oid=".-.5ws6">
+                <TableRow data-oid=".xpk_9m">
                   <TableCell
                     colSpan={8}
                     className="text-center py-8"
-                    data-oid="7e:co64"
+                    data-oid="8gjy-uz"
                   >
                     載入中...
                   </TableCell>
                 </TableRow>
               ) : allVariants.length === 0 ? (
-                <TableRow data-oid="mgm8_rw">
+                <TableRow data-oid="zi1ireu">
                   <TableCell
                     colSpan={8}
                     className="text-center py-8 text-muted-foreground"
-                    data-oid="b.s9loi"
+                    data-oid="um9ee46"
                   >
                     {searchQuery ? "找不到符合條件的商品" : "暫無商品資料"}
                   </TableCell>
@@ -230,45 +230,45 @@ export function ProductVariantSelector({
                       key={variant.id}
                       className={`cursor-pointer hover:bg-muted/50 ${isSelected ? "bg-muted" : ""}`}
                       onClick={() => handleVariantToggle(variant)}
-                      data-oid="hzvfjaa"
+                      data-oid="u6f5hl5"
                     >
-                      <TableCell data-oid="m8hn3ox">
+                      <TableCell data-oid="0_:u8x2">
                         <Checkbox
                           checked={isSelected}
                           onChange={() => handleVariantToggle(variant)}
-                          data-oid="csjygkp"
+                          data-oid="_mmoc6q"
                         />
                       </TableCell>
-                      <TableCell className="font-medium" data-oid="u4u--0u">
+                      <TableCell className="font-medium" data-oid="q2m0zag">
                         {variant.product_name}
                       </TableCell>
                       <TableCell
                         className="font-mono text-sm"
-                        data-oid=".1xyodb"
+                        data-oid="dyge0mq"
                       >
                         {variant.sku}
                       </TableCell>
-                      <TableCell data-oid="y:jey_a">
+                      <TableCell data-oid="jcj.jzy">
                         {variant.attribute_values
                           ?.map((av) => av.value)
                           .join(", ") || "-"}
                       </TableCell>
-                      <TableCell data-oid="jcnhb.o">
-                        <Badge variant="outline" data-oid="c9883:f">
+                      <TableCell data-oid="ze8f7qz">
+                        <Badge variant="outline" data-oid="060ay.g">
                           {variant.product_category || "未分類"}
                         </Badge>
                       </TableCell>
                       <TableCell
                         className="text-right font-medium"
-                        data-oid="w90c8fx"
+                        data-oid="fyuiboh"
                       >
                         ${parseFloat(variant.price || "0").toFixed(2)}
                       </TableCell>
-                      <TableCell className="text-center" data-oid="so2lzw6">
+                      <TableCell className="text-center" data-oid="yqxzns:">
                         {variant.total_inventory}
                       </TableCell>
-                      <TableCell className="text-center" data-oid="766wtdy">
-                        <Badge variant={stockStatus.variant} data-oid="2wngb._">
+                      <TableCell className="text-center" data-oid="pf771e7">
+                        <Badge variant={stockStatus.variant} data-oid="-g6rmgk">
                           {stockStatus.label}
                         </Badge>
                       </TableCell>
@@ -280,14 +280,14 @@ export function ProductVariantSelector({
           </Table>
         </div>
 
-        <DialogFooter data-oid="ywu4dyf">
-          <Button variant="outline" onClick={handleCancel} data-oid="g_u:qeb">
+        <DialogFooter data-oid="pgron84">
+          <Button variant="outline" onClick={handleCancel} data-oid="5soj2tt">
             取消
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={selectedVariants.length === 0}
-            data-oid="avv097o"
+            data-oid="l4prm-a"
           >
             確認添加 ({selectedVariants.length})
           </Button>

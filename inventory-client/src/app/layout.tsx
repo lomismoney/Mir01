@@ -32,18 +32,24 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-TW" suppressHydrationWarning>
+    <html lang="zh-TW" suppressHydrationWarning data-oid="hknmx0m">
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           fontSans.variable,
         )}
+        data-oid="ztw7ns4"
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SessionProvider>
-            <QueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          data-oid="tonwzxq"
+        >
+          <SessionProvider data-oid="_g6ifp_">
+            <QueryProvider data-oid="ok99bhf">
               {children}
-              <Toaster />
+              <Toaster data-oid="tm249ru" />
             </QueryProvider>
           </SessionProvider>
         </ThemeProvider>

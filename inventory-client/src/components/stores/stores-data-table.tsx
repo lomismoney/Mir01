@@ -95,22 +95,22 @@ export function StoresDataTable<TData, TValue>({
   });
 
   return (
-    <div className="w-full space-y-4" data-oid="zcsmsc3">
+    <div className="w-full space-y-4" data-oid="hf-a-3w">
       {/* 工具列 */}
-      <div className="flex items-center justify-between" data-oid="2ampr58">
-        <div className="flex-1" data-oid="ykhs_bk">
+      <div className="flex items-center justify-between" data-oid="nj8n4jj">
+        <div className="flex-1" data-oid="u2u_.kg">
           {/* 可以在這裡添加搜尋或其他過濾器 */}
         </div>
 
-        <div className="flex items-center space-x-2" data-oid="tzgji6g">
+        <div className="flex items-center space-x-2" data-oid="g47pgd-">
           {/* 欄位顯示控制 */}
-          <DropdownMenu data-oid="xi1561e">
-            <DropdownMenuTrigger asChild data-oid="_0pu0.n">
-              <Button variant="outline" data-oid="fa.5vpd">
-                欄位 <ChevronDown className="ml-2 h-4 w-4" data-oid="3go-kb9" />
+          <DropdownMenu data-oid="foiy_8s">
+            <DropdownMenuTrigger asChild data-oid="0xhmlac">
+              <Button variant="outline" data-oid="34yemnm">
+                欄位 <ChevronDown className="ml-2 h-4 w-4" data-oid="o3gp5b5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" data-oid="akrlz-_">
+            <DropdownMenuContent align="end" data-oid="vmhbn8c">
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
@@ -123,7 +123,7 @@ export function StoresDataTable<TData, TValue>({
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
                       }
-                      data-oid="rw7b:ef"
+                      data-oid="jjkzmrw"
                     >
                       {column.id === "id" && "ID"}
                       {column.id === "name" && "名稱"}
@@ -147,8 +147,8 @@ export function StoresDataTable<TData, TValue>({
 
           {/* 新增分店按鈕 */}
           {showAddButton && onAddStore && (
-            <Button onClick={onAddStore} data-oid="r4cpopf">
-              <Plus className="mr-2 h-4 w-4" data-oid="uecj9:8" />
+            <Button onClick={onAddStore} data-oid="mpmkcy3">
+              <Plus className="mr-2 h-4 w-4" data-oid="ynl30_p" />
               新增分店
             </Button>
           )}
@@ -156,21 +156,21 @@ export function StoresDataTable<TData, TValue>({
       </div>
 
       {/* 資料表格 */}
-      <div className="rounded-md border" data-oid="_39ykbo">
-        <Table data-oid=".c35nmv">
-          <TableHeader data-oid="z-daovy">
+      <div className="rounded-md border" data-oid="35fel4h">
+        <Table data-oid="-x28t9x">
+          <TableHeader data-oid="mxj8lfl">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
                 className="border-b hover:bg-transparent"
-                data-oid="iecsy.6"
+                data-oid="j-7qe7-"
               >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
                       className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="b0290mq"
+                      data-oid="_l60.t-"
                     >
                       {header.isPlaceholder
                         ? null
@@ -184,24 +184,24 @@ export function StoresDataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody data-oid="y6x-im_">
+          <TableBody data-oid="kaebga2">
             {isLoading ? (
               // 載入狀態
-              <TableRow data-oid="heo.f44">
+              <TableRow data-oid="refd4ic">
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
-                  data-oid=":gl71z1"
+                  data-oid="tm.unyk"
                 >
                   <div
                     className="flex items-center justify-center space-x-2"
-                    data-oid="vlhums:"
+                    data-oid="jl412ti"
                   >
                     <div
                       className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
-                      data-oid="jh.egqk"
+                      data-oid="me68sv4"
                     ></div>
-                    <span data-oid="xhm8t4h">載入中...</span>
+                    <span data-oid="_ma4w81">載入中...</span>
                   </div>
                 </TableCell>
               </TableRow>
@@ -211,10 +211,10 @@ export function StoresDataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  data-oid="unbb9tk"
+                  data-oid="7:e2rfa"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} data-oid="prfro_s">
+                    <TableCell key={cell.id} data-oid="5fai-:c">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -225,17 +225,17 @@ export function StoresDataTable<TData, TValue>({
               ))
             ) : (
               // 無資料狀態
-              <TableRow data-oid="2e3l524">
+              <TableRow data-oid="h6yh9am">
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
-                  data-oid="c01v2fq"
+                  data-oid="rwk2f_l"
                 >
                   <div
                     className="flex flex-col items-center justify-center space-y-2"
-                    data-oid="9z5r-f7"
+                    data-oid=".7cboyg"
                   >
-                    <div className="text-muted-foreground" data-oid="jxiucrf">
+                    <div className="text-muted-foreground" data-oid="-s7bonp">
                       尚無分店資料
                     </div>
                     {showAddButton && onAddStore && (
@@ -243,9 +243,9 @@ export function StoresDataTable<TData, TValue>({
                         variant="outline"
                         onClick={onAddStore}
                         className="mt-2"
-                        data-oid="7n6pau_"
+                        data-oid="ajljnf1"
                       >
-                        <Plus className="mr-2 h-4 w-4" data-oid="l56qd60" />
+                        <Plus className="mr-2 h-4 w-4" data-oid="nivkl:d" />
                         建立第一個分店
                       </Button>
                     )}
@@ -260,26 +260,26 @@ export function StoresDataTable<TData, TValue>({
       {/* 分頁控制和統計資訊 */}
       <div
         className="flex items-center justify-between space-x-2 py-4"
-        data-oid="c9jh4xb"
+        data-oid="a266zqv"
       >
         <div
           className="flex-1 text-sm text-muted-foreground"
-          data-oid="cq-g.p5"
+          data-oid="gv2j2hj"
         >
           共 {data.length} 個分店
         </div>
-        <div className="flex items-center space-x-2" data-oid="ukjlph.">
+        <div className="flex items-center space-x-2" data-oid=":d_ubcp">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage() || isLoading}
-            data-oid="9p06u12"
+            data-oid="dc521t1"
           >
             上一頁
           </Button>
-          <div className="flex items-center space-x-1" data-oid="edm68oi">
-            <span className="text-sm text-muted-foreground" data-oid="y39x:a_">
+          <div className="flex items-center space-x-1" data-oid="fnfwnu7">
+            <span className="text-sm text-muted-foreground" data-oid="zrjjg-z">
               第 {table.getState().pagination.pageIndex + 1} 頁， 共{" "}
               {table.getPageCount()} 頁
             </span>
@@ -289,7 +289,7 @@ export function StoresDataTable<TData, TValue>({
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage() || isLoading}
-            data-oid="67m_mg:"
+            data-oid="1o37cy5"
           >
             下一頁
           </Button>

@@ -46,28 +46,28 @@ export default function DashboardPage() {
   const variants = productVariants as ProductVariant[] | undefined;
 
   return (
-    <div className="flex flex-1 flex-col" data-oid="sdopjda">
+    <div className="flex flex-1 flex-col" data-oid="durq1z4">
       <div
         className="@container/main flex flex-1 flex-col gap-2"
-        data-oid="x851jnw"
+        data-oid="t5een4g"
       >
         <div
           className="flex flex-col gap-4 py-4 md:gap-6 md:py-6"
-          data-oid="5jjap20"
+          data-oid="z754o0l"
         >
-          <SectionCards data-oid="0kwuk6j" />
+          <SectionCards data-oid="e_fwggf" />
 
           {/* 商品選擇器 */}
-          <div className="px-4 lg:px-6" data-oid="nes7kg-">
-            <Card data-oid="pgz0uzv">
-              <CardHeader data-oid="v9eo:vy">
-                <CardTitle className="text-lg" data-oid="aw3e9a4">
+          <div className="px-4 lg:px-6" data-oid="a1:4kl9">
+            <Card data-oid="53eg68w">
+              <CardHeader data-oid="3_vkt21">
+                <CardTitle className="text-lg" data-oid="4g11-6p">
                   庫存趨勢分析
                 </CardTitle>
               </CardHeader>
-              <CardContent data-oid="o...es.">
-                <div className="space-y-2" data-oid="g4a68m6">
-                  <label className="text-sm font-medium" data-oid="or1iapg">
+              <CardContent data-oid="7wsqteg">
+                <div className="space-y-2" data-oid="3gee0mm">
+                  <label className="text-sm font-medium" data-oid="vz-2kn6">
                     選擇商品查看庫存趨勢
                   </label>
                   <Select
@@ -77,29 +77,29 @@ export default function DashboardPage() {
                         value ? parseInt(value) : null,
                       )
                     }
-                    data-oid="dtm-n9u"
+                    data-oid="blfvvmk"
                   >
-                    <SelectTrigger className="w-full" data-oid="r6kt0uz">
+                    <SelectTrigger className="w-full" data-oid="pn7sd7n">
                       <SelectValue
                         placeholder={
                           isLoadingVariants ? "載入商品中..." : "請選擇商品"
                         }
-                        data-oid="nflopdq"
+                        data-oid="sc_5ddw"
                       />
                     </SelectTrigger>
-                    <SelectContent data-oid="0tj99h:">
+                    <SelectContent data-oid="bfoo:8_">
                       {variants?.map((variant) => (
                         <SelectItem
                           key={variant.id}
                           value={variant.id?.toString() || ""}
-                          data-oid="uzgg4x4"
+                          data-oid="6y:ztz0"
                         >
                           {variant.product?.name} - {variant.sku}
                           {variant.attribute_values &&
                             variant.attribute_values.length > 0 && (
                               <span
                                 className="text-muted-foreground ml-1"
-                                data-oid="t6dgp0j"
+                                data-oid="t6vodk3"
                               >
                                 (
                                 {variant.attribute_values
@@ -118,10 +118,10 @@ export default function DashboardPage() {
           </div>
 
           {/* 庫存趨勢圖表 */}
-          <div className="px-4 lg:px-6" data-oid="omtk8zy">
+          <div className="px-4 lg:px-6" data-oid="3.4_-ms">
             <ChartAreaInteractive
               productVariantId={selectedProductVariantId}
-              data-oid="5n.n6f-"
+              data-oid="03pufnu"
             />
           </div>
         </div>

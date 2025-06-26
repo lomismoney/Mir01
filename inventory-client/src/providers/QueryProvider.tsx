@@ -110,15 +110,11 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
-    <QueryClientProvider client={queryClient} data-oid="xoi1s01">
+    <QueryClientProvider client={queryClient}>
       {children}
       {/* 🛠️ 開發工具（僅在開發環境顯示） */}
       {process.env.NODE_ENV === "development" && (
-        <ReactQueryDevtools
-          initialIsOpen={false}
-          position="bottom"
-          data-oid="epmctlk"
-        />
+        <ReactQueryDevtools initialIsOpen={false} position="bottom" />
       )}
     </QueryClientProvider>
   );

@@ -129,7 +129,7 @@ function Calendar({
               ref={rootRef}
               className={cn(className)}
               {...props}
-              data-oid="c91937f"
+              data-oid="x:zqqfo"
             />
           );
         },
@@ -139,7 +139,7 @@ function Calendar({
               <ChevronLeftIcon
                 className={cn("size-4", className)}
                 {...props}
-                data-oid="zisx34e"
+                data-oid="ovad-z-"
               />
             );
           }
@@ -149,7 +149,7 @@ function Calendar({
               <ChevronRightIcon
                 className={cn("size-4", className)}
                 {...props}
-                data-oid="g5b16rt"
+                data-oid="whume7v"
               />
             );
           }
@@ -158,17 +158,17 @@ function Calendar({
             <ChevronDownIcon
               className={cn("size-4", className)}
               {...props}
-              data-oid="vxf7f_e"
+              data-oid="yq3ye7-"
             />
           );
         },
         DayButton: CalendarDayButton,
         WeekNumber: ({ children, ...props }) => {
           return (
-            <td {...props} data-oid="bidk9gy">
+            <td {...props} data-oid="zrwmzuj">
               <div
                 className="flex size-(--cell-size) items-center justify-center text-center"
-                data-oid="h:r7rua"
+                data-oid="k.94pu8"
               >
                 {children}
               </div>
@@ -178,7 +178,7 @@ function Calendar({
         ...components,
       }}
       {...props}
-      data-oid="x-cpb.a"
+      data-oid="dla4z94"
     />
   );
 }
@@ -217,7 +217,7 @@ function CalendarDayButton({
         className,
       )}
       {...props}
-      data-oid="6dl1hq4"
+      data-oid=".um__-1"
     />
   );
 }

@@ -18,17 +18,17 @@ import InventoryTransfer from "@/components/inventory/InventoryTransfer";
 export default function InventoryTransferPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-6" data-oid="99g-du3">
-      <div className="flex flex-col space-y-2" data-oid="p31ad9n">
-        <h1 className="text-3xl font-bold tracking-tight" data-oid="-wgaj1n">
+    <div className="container mx-auto p-4 md:p-8 space-y-6" data-oid="ggc2754">
+      <div className="flex flex-col space-y-2" data-oid="82jyxza">
+        <h1 className="text-3xl font-bold tracking-tight" data-oid="r6ibhir">
           庫存轉移
         </h1>
-        <p className="text-muted-foreground" data-oid="qgddu8v">
+        <p className="text-muted-foreground" data-oid="no7-byn">
           管理不同門市間的庫存轉移作業，包括轉移申請、狀態追蹤等功能
         </p>
       </div>
 
-      <InventoryTransfer data-oid="p6_qrm7" />
+      <InventoryTransfer data-oid="mnmq1nh" />
     </div>
   );
 }

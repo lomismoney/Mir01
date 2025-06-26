@@ -19,15 +19,15 @@ export function NavSecondary({
   items: { title: string; url: string; icon: Icon }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
-    <SidebarGroup {...props} data-oid="4s8sj5:">
-      <SidebarGroupContent data-oid="biei_uo">
-        <SidebarMenu data-oid="iz92_01">
+    <SidebarGroup {...props} data-oid="jqgp35-">
+      <SidebarGroupContent data-oid="8i:3x7p">
+        <SidebarMenu data-oid="r:baz3n">
           {items.map((item) => (
-            <SidebarMenuItem key={item.title} data-oid="i89f.93">
-              <SidebarMenuButton asChild data-oid="v93nv6a">
-                <Link href={item.url} prefetch={true} data-oid=":2-tx1j">
-                  <item.icon data-oid="502adwp" />
-                  <span data-oid="1g.8j_r">{item.title}</span>
+            <SidebarMenuItem key={item.title} data-oid="hb8rdy9">
+              <SidebarMenuButton asChild data-oid="wij3ui0">
+                <Link href={item.url} prefetch={true} data-oid=":0420ak">
+                  <item.icon data-oid="cfp0ik0" />
+                  <span data-oid="euv68d6">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

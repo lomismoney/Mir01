@@ -25,7 +25,7 @@ function Command({
         className,
       )}
       {...props}
-      data-oid="_11c.iz"
+      data-oid="9np.po_"
     />
   );
 }
@@ -44,19 +44,19 @@ function CommandDialog({
   showCloseButton?: boolean;
 }) {
   return (
-    <Dialog {...props} data-oid="9l4dzko">
-      <DialogHeader className="sr-only" data-oid="mnyme58">
-        <DialogTitle data-oid="9zjh1le">{title}</DialogTitle>
-        <DialogDescription data-oid=".jty3a:">{description}</DialogDescription>
+    <Dialog {...props} data-oid="atuaczt">
+      <DialogHeader className="sr-only" data-oid="84oljbo">
+        <DialogTitle data-oid="n1_iqe0">{title}</DialogTitle>
+        <DialogDescription data-oid="8d5luee">{description}</DialogDescription>
       </DialogHeader>
       <DialogContent
         className={cn("overflow-hidden p-0", className)}
         showCloseButton={showCloseButton}
-        data-oid="ua3zxq0"
+        data-oid="bm:111q"
       >
         <Command
           className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
-          data-oid="1oxnbyc"
+          data-oid="4yc6f.p"
         >
           {children}
         </Command>
@@ -73,9 +73,9 @@ function CommandInput({
     <div
       data-slot="command-input-wrapper"
       className="flex h-9 items-center gap-2 border-b px-3"
-      data-oid="t5:s-gf"
+      data-oid="zzwaiyj"
     >
-      <SearchIcon className="size-4 shrink-0 opacity-50" data-oid="cw3hm04" />
+      <SearchIcon className="size-4 shrink-0 opacity-50" data-oid="72ssvhh" />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
@@ -83,7 +83,7 @@ function CommandInput({
           className,
         )}
         {...props}
-        data-oid="yq-.hx4"
+        data-oid="2.hm39l"
       />
     </div>
   );
@@ -101,7 +101,7 @@ function CommandList({
         className,
       )}
       {...props}
-      data-oid="sms_.:c"
+      data-oid="2b1vaqp"
     />
   );
 }
@@ -114,7 +114,7 @@ function CommandEmpty({
       data-slot="command-empty"
       className="py-6 text-center text-sm"
       {...props}
-      data-oid="29m:ufp"
+      data-oid="9or1it5"
     />
   );
 }
@@ -131,7 +131,7 @@ function CommandGroup({
         className,
       )}
       {...props}
-      data-oid="okwg:55"
+      data-oid="h4zwjqd"
     />
   );
 }
@@ -145,7 +145,7 @@ function CommandSeparator({
       data-slot="command-separator"
       className={cn("bg-border -mx-1 h-px", className)}
       {...props}
-      data-oid="w_djt1y"
+      data-oid="5hsxx_x"
     />
   );
 }
@@ -162,7 +162,7 @@ function CommandItem({
         className,
       )}
       {...props}
-      data-oid="1kti7e-"
+      data-oid="ne3-qat"
     />
   );
 }
@@ -179,7 +179,7 @@ function CommandShortcut({
         className,
       )}
       {...props}
-      data-oid="y.6dte1"
+      data-oid="59a5n88"
     />
   );
 }

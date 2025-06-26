@@ -174,70 +174,70 @@ export function SiteHeader() {
   return (
     <header
       className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)"
-      data-oid="sp82lxs"
+      data-oid="-ve9yzh"
     >
       <div
         className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6"
-        data-oid="s2z03w-"
+        data-oid="c3itd91"
       >
-        <SidebarTrigger className="-ml-1" data-oid="nffxa:1" />
+        <SidebarTrigger className="-ml-1" data-oid="7brw2i6" />
         <Separator
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
-          data-oid="2a4o2bx"
+          data-oid="udt2ro2"
         />
 
-        <Breadcrumb data-oid="m0t50d2">
-          <BreadcrumbList data-oid="7arbe1l">
+        <Breadcrumb data-oid="9dyxx29">
+          <BreadcrumbList data-oid="zdq-0_y">
             {breadcrumbItems.map((item, index) => {
               const isLastItem = item.isLast;
               return (
                 <React.Fragment key={item.href + index}>
-                  <BreadcrumbItem data-oid="wbs3hdh">
+                  <BreadcrumbItem data-oid="aw93hdm">
                     {isLastItem ? (
-                      <BreadcrumbPage data-oid="9en3be-">
+                      <BreadcrumbPage data-oid="3j41-a6">
                         {item.label}
                       </BreadcrumbPage>
                     ) : item.isClickable === false ? (
                       <span
                         className="font-normal text-muted-foreground"
-                        data-oid="8e1fwxo"
+                        data-oid=".wzqq5y"
                       >
                         {item.label}
                       </span>
                     ) : (
-                      <BreadcrumbLink asChild data-oid="ia0q-95">
-                        <Link href={item.href} data-oid=":aei.ew">
+                      <BreadcrumbLink asChild data-oid=":hporjj">
+                        <Link href={item.href} data-oid="43jtujo">
                           {item.label}
                         </Link>
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
                   {index < breadcrumbItems.length - 1 && (
-                    <BreadcrumbSeparator data-oid="dhksoor" />
+                    <BreadcrumbSeparator data-oid="be5o71o" />
                   )}
                 </React.Fragment>
               );
             })}
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ml-auto flex items-center gap-2" data-oid="ul0cfbn">
+        <div className="ml-auto flex items-center gap-2" data-oid="mbnvy_g">
           {/* 用戶資訊區域 */}
           {isLoading ? (
-            <div className="flex items-center gap-2" data-oid="q_ubo0:">
-              <Skeleton className="h-6 w-6 rounded-full" data-oid="qk3d2z:" />
-              <Skeleton className="h-4 w-16" data-oid="y5v_sy6" />
+            <div className="flex items-center gap-2" data-oid="5myvjc3">
+              <Skeleton className="h-6 w-6 rounded-full" data-oid="yvg:8h4" />
+              <Skeleton className="h-4 w-16" data-oid="1u4ihsn" />
             </div>
           ) : user ? (
-            <div className="flex items-center gap-2" data-oid="_x3wqe4">
-              <Avatar className="h-6 w-6" data-oid="ve0mcsk">
-                <AvatarFallback className="text-xs" data-oid="kbok1z9">
+            <div className="flex items-center gap-2" data-oid="r8txgk.">
+              <Avatar className="h-6 w-6" data-oid="kyaan-o">
+                <AvatarFallback className="text-xs" data-oid="ddh1qmp">
                   {user.name?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <span
                 className="text-sm font-medium hidden md:inline"
-                data-oid=".hzc35v"
+                data-oid="93f548c"
               >
                 {user.name || "未知用戶"}
               </span>
@@ -247,7 +247,7 @@ export function SiteHeader() {
           <Separator
             orientation="vertical"
             className="h-4"
-            data-oid="2ktvxv."
+            data-oid="1k8v:if"
           />
 
           <Button
@@ -255,9 +255,9 @@ export function SiteHeader() {
             asChild
             size="sm"
             className="hidden sm:flex"
-            data-oid="dsmig7-"
+            data-oid="a9hqqmn"
           >
-            <a href="/help" className="dark:text-foreground" data-oid="q29d:sw">
+            <a href="/help" className="dark:text-foreground" data-oid="pr.clfq">
               幫助
             </a>
           </Button>
@@ -266,17 +266,17 @@ export function SiteHeader() {
             asChild
             size="sm"
             className="hidden sm:flex"
-            data-oid="vd5cf4d"
+            data-oid="t2nhk22"
           >
             <a
               href="/settings"
               className="dark:text-foreground"
-              data-oid="a1bod.r"
+              data-oid="_v58_5u"
             >
               設定
             </a>
           </Button>
-          <ModeToggle data-oid="u_if.y-" />
+          <ModeToggle data-oid="sohgljs" />
         </div>
       </div>
     </header>

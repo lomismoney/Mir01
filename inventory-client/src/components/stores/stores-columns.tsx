@@ -68,24 +68,24 @@ export const createStoresColumns = (
       accessorKey: "id",
       header: ({ column }) => {
         return (
-          <div className="text-center" data-oid="3dd96ri">
+          <div className="text-center" data-oid="qf:-_zf">
             <Button
               variant="ghost"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
               className="h-auto p-0 font-medium"
-              data-oid="mwfovwb"
+              data-oid="fimz6sv"
             >
               ID
-              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="onn79_n" />
+              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="_:pn9a4" />
             </Button>
           </div>
         );
       },
       cell: ({ row }) => {
         return (
-          <div className="font-mono text-sm text-center" data-oid="lx46d:x">
+          <div className="font-mono text-sm text-center" data-oid="mdbrg.9">
             #{row.getValue("id")}
           </div>
         );
@@ -95,29 +95,29 @@ export const createStoresColumns = (
       accessorKey: "name",
       header: ({ column }) => {
         return (
-          <div className="text-center" data-oid="dkc1bk6">
+          <div className="text-center" data-oid="2xt2j1.">
             <Button
               variant="ghost"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
               className="h-auto p-0 font-medium"
-              data-oid="jf1t0ao"
+              data-oid="4u5anaf"
             >
-              <StoreIcon className="mr-2 h-4 w-4" data-oid="aw:qo6d" />
+              <StoreIcon className="mr-2 h-4 w-4" data-oid="jjcps94" />
               名稱
-              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="x804fz5" />
+              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="js0s.7c" />
             </Button>
           </div>
         );
       },
       cell: ({ row }) => {
         return (
-          <div className="flex items-center justify-center" data-oid="rgcx:8e">
+          <div className="flex items-center justify-center" data-oid="4ib:-:7">
             <Badge
               variant="secondary"
               className="font-medium"
-              data-oid="c7.6jks"
+              data-oid="0cqm-mm"
             >
               {row.getValue("name") || "未知分店"}
             </Badge>
@@ -128,7 +128,7 @@ export const createStoresColumns = (
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-center" data-oid="_y-x4ha">
+        <div className="text-center" data-oid="km::4-c">
           地址
         </div>
       ),
@@ -138,10 +138,10 @@ export const createStoresColumns = (
         return (
           <div
             className="max-w-[300px] truncate text-center"
-            data-oid="v6vuqr4"
+            data-oid=":_dojrc"
           >
             {address || (
-              <span className="text-muted-foreground" data-oid="3d80xkq">
+              <span className="text-muted-foreground" data-oid="fupioew">
                 未設定地址
               </span>
             )}
@@ -153,17 +153,17 @@ export const createStoresColumns = (
       accessorKey: "created_at",
       header: ({ column }) => {
         return (
-          <div className="text-center" data-oid="s1e2xtq">
+          <div className="text-center" data-oid=":vmstxw">
             <Button
               variant="ghost"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
               className="h-auto p-0 font-medium"
-              data-oid="3n32a2r"
+              data-oid="_s7veh5"
             >
               建立時間
-              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="4ztrd0." />
+              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="--xrfo5" />
             </Button>
           </div>
         );
@@ -174,7 +174,7 @@ export const createStoresColumns = (
           return (
             <div
               className="text-muted-foreground text-center"
-              data-oid="lz84d9f"
+              data-oid="d9b0z:b"
             >
               -
             </div>
@@ -182,7 +182,7 @@ export const createStoresColumns = (
 
         try {
           return (
-            <div className="text-sm text-center" data-oid="zgg:_74">
+            <div className="text-sm text-center" data-oid="men871i">
               {format(new Date(dateString), "yyyy-MM-dd", { locale: zhTW })}
             </div>
           );
@@ -190,7 +190,7 @@ export const createStoresColumns = (
           return (
             <div
               className="text-muted-foreground text-center"
-              data-oid="_3bnk3_"
+              data-oid="g_89hpu"
             >
               格式錯誤
             </div>
@@ -202,17 +202,17 @@ export const createStoresColumns = (
       accessorKey: "updated_at",
       header: ({ column }) => {
         return (
-          <div className="text-center" data-oid="canv13i">
+          <div className="text-center" data-oid="b.l.dty">
             <Button
               variant="ghost"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
               className="h-auto p-0 font-medium"
-              data-oid="omlmbns"
+              data-oid="9ckc.6h"
             >
               更新時間
-              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="bv3et_4" />
+              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="saxpdiq" />
             </Button>
           </div>
         );
@@ -223,7 +223,7 @@ export const createStoresColumns = (
           return (
             <div
               className="text-muted-foreground text-center"
-              data-oid="0w4_hja"
+              data-oid="lbgl0vz"
             >
               -
             </div>
@@ -231,7 +231,7 @@ export const createStoresColumns = (
 
         try {
           return (
-            <div className="text-sm text-center" data-oid="i4axwa8">
+            <div className="text-sm text-center" data-oid="11lczc3">
               {format(new Date(dateString), "yyyy-MM-dd", { locale: zhTW })}
             </div>
           );
@@ -239,7 +239,7 @@ export const createStoresColumns = (
           return (
             <div
               className="text-muted-foreground text-center"
-              data-oid="570hq_3"
+              data-oid="vbkae:-"
             >
               格式錯誤
             </div>
@@ -254,7 +254,7 @@ export const createStoresColumns = (
     columns.push({
       id: "actions",
       header: () => (
-        <div className="text-center" data-oid="v976.4_">
+        <div className="text-center" data-oid="7o.-f-e">
           操作
         </div>
       ),
@@ -263,31 +263,31 @@ export const createStoresColumns = (
         const store = row.original;
 
         return (
-          <div className="text-center" data-oid="x0wtevi">
-            <DropdownMenu data-oid="b.lvou:">
-              <DropdownMenuTrigger asChild data-oid="xb:xtfg">
+          <div className="text-center" data-oid="65::g-4">
+            <DropdownMenu data-oid="3cph87w">
+              <DropdownMenuTrigger asChild data-oid="t05io9b">
                 <Button
                   variant="ghost"
                   className="h-8 w-8 p-0"
-                  data-oid="f9dzoi9"
+                  data-oid="amapnxg"
                 >
-                  <span className="sr-only" data-oid="z7ybdz3">
+                  <span className="sr-only" data-oid="e5oa5ek">
                     開啟選單
                   </span>
-                  <MoreHorizontal className="h-4 w-4" data-oid="uzv6x5c" />
+                  <MoreHorizontal className="h-4 w-4" data-oid="9m_0nph" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" data-oid="sjtk._f">
-                <DropdownMenuLabel data-oid="2itmlkk">操作</DropdownMenuLabel>
-                <DropdownMenuSeparator data-oid="0.kvo3v" />
+              <DropdownMenuContent align="end" data-oid="0ehomqh">
+                <DropdownMenuLabel data-oid="qrtm1dm">操作</DropdownMenuLabel>
+                <DropdownMenuSeparator data-oid=".:90c7i" />
 
                 {actions.onEdit && (
                   <DropdownMenuItem
                     onClick={() => actions.onEdit?.(store)}
                     className="cursor-pointer"
-                    data-oid="zbb6ahr"
+                    data-oid="o:5d4d9"
                   >
-                    <Edit className="mr-2 h-4 w-4" data-oid="_cs-5a7" />
+                    <Edit className="mr-2 h-4 w-4" data-oid="prjwp9u" />
                     編輯分店
                   </DropdownMenuItem>
                 )}
@@ -296,9 +296,9 @@ export const createStoresColumns = (
                   <DropdownMenuItem
                     onClick={() => actions.onDelete?.(store)}
                     className="cursor-pointer text-destructive focus:text-destructive"
-                    data-oid="f3jho7f"
+                    data-oid="zpz3mw_"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" data-oid="cdapaux" />
+                    <Trash2 className="mr-2 h-4 w-4" data-oid="gj.201o" />
                     刪除分店
                   </DropdownMenuItem>
                 )}

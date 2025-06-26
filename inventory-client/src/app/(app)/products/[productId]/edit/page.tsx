@@ -17,5 +17,5 @@ export default function ProductEditPage({
   // Next.js 15: params 現在是 Promise，需要使用 React.use() 解包
   const { productId } = use(params);
 
-  return <CreateProductWizard productId={productId} data-oid="5ayymhr" />;
+  return <CreateProductWizard productId={productId} data-oid="hp6bn4r" />;
 }

@@ -149,39 +149,39 @@ export function CategoriesClientPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96" data-oid="5mzriv2">
+      <div className="flex items-center justify-center h-96" data-oid="gulh-la">
         <Loader2
           className="h-8 w-8 animate-spin text-muted-foreground"
-          data-oid="9m757:z"
+          data-oid="9_s:2ek"
         />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6" data-oid="dwynog:">
+    <div className="space-y-6" data-oid="tb_.s33">
       {/* 頁面標題與操作 */}
-      <div className="flex items-center justify-between" data-oid="3fixaba">
-        <h1 className="text-3xl font-bold tracking-tight" data-oid="lu-gxpy">
+      <div className="flex items-center justify-between" data-oid="ctt3cqa">
+        <h1 className="text-3xl font-bold tracking-tight" data-oid="gfpa66n">
           分類管理
         </h1>
-        <Button onClick={() => setIsCreateModalOpen(true)} data-oid="9jclmgt">
-          <PlusCircle className="mr-2 h-4 w-4" data-oid="zxc-ja4" />
+        <Button onClick={() => setIsCreateModalOpen(true)} data-oid="7ca:me3">
+          <PlusCircle className="mr-2 h-4 w-4" data-oid="ku5cf2g" />
           新增分類
         </Button>
       </div>
 
       {/* 主要內容區 */}
-      <Card data-oid="w:jj_wn">
-        <CardHeader data-oid="l1.a-oa">
-          <div className="flex items-center gap-4" data-oid="axqs7:d">
-            <CardTitle data-oid="ywrnbh1">分類列表</CardTitle>
+      <Card data-oid="osh-yhb">
+        <CardHeader data-oid="yt6h.s4">
+          <div className="flex items-center gap-4" data-oid="m:q4ft1">
+            <CardTitle data-oid="oo5m7n7">分類列表</CardTitle>
 
             {/* 搜尋欄 */}
-            <div className="relative w-96" data-oid="68tfhw4">
+            <div className="relative w-96" data-oid="6va3nwd">
               <Search
                 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                data-oid="5swg19c"
+                data-oid="e-hianp"
               />
 
               <Input
@@ -189,23 +189,23 @@ export function CategoriesClientPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
-                data-oid="flpx9u8"
+                data-oid="w0kd8s-"
               />
             </div>
 
             {/* 欄位顯示控制 - 真正實作 */}
-            <DropdownMenu data-oid="7stvcmk">
-              <DropdownMenuTrigger asChild data-oid="pp.rv0r">
-                <Button variant="outline" data-oid="wld:9zn">
+            <DropdownMenu data-oid="hsod.jj">
+              <DropdownMenuTrigger asChild data-oid="_46fm24">
+                <Button variant="outline" data-oid="t4llcdl">
                   欄位{" "}
-                  <ChevronDown className="ml-2 h-4 w-4" data-oid="ywiszy8" />
+                  <ChevronDown className="ml-2 h-4 w-4" data-oid="7625821" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" data-oid="ayrqkst">
+              <DropdownMenuContent align="end" data-oid="-ffhw8k">
                 <DropdownMenuCheckboxItem
                   checked={columnVisibility.name}
                   disabled
-                  data-oid="6.4guq."
+                  data-oid="1aogg0b"
                 >
                   分類名稱
                 </DropdownMenuCheckboxItem>
@@ -217,7 +217,7 @@ export function CategoriesClientPage() {
                       description: checked,
                     }))
                   }
-                  data-oid="k4piask"
+                  data-oid="4p0vf_c"
                 >
                   描述
                 </DropdownMenuCheckboxItem>
@@ -229,14 +229,14 @@ export function CategoriesClientPage() {
                       statistics: checked,
                     }))
                   }
-                  data-oid="_ryl95n"
+                  data-oid="f550_3_"
                 >
                   統計
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   checked={columnVisibility.actions}
                   disabled
-                  data-oid="vhvmp-6"
+                  data-oid="5eb5nlf"
                 >
                   操作
                 </DropdownMenuCheckboxItem>
@@ -244,7 +244,7 @@ export function CategoriesClientPage() {
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent data-oid="cv3fdqd">
+        <CardContent data-oid="mwqe-ua">
           {/* 使用支援拖曳的資料表格 */}
           <DraggableCategoriesTable
             columns={columns}
@@ -254,7 +254,7 @@ export function CategoriesClientPage() {
             onColumnVisibilityChange={setColumnVisibility}
             expanded={expanded}
             onExpandedChange={setExpanded}
-            data-oid="a7-7jev"
+            data-oid="amg0c92"
           />
         </CardContent>
       </Card>
@@ -268,7 +268,7 @@ export function CategoriesClientPage() {
           setIsCreateModalOpen(false);
           setSelectedCategory(null);
         }}
-        data-oid="vp-0ynq"
+        data-oid="oweuu.k"
       />
 
       {/* 編輯分類 Modal */}
@@ -278,7 +278,7 @@ export function CategoriesClientPage() {
           onOpenChange={(open) => !open && setSelectedCategory(null)}
           category={selectedCategory}
           onSuccess={() => setSelectedCategory(null)}
-          data-oid="-wl-jxu"
+          data-oid="tg3rsee"
         />
       )}
 
@@ -286,18 +286,18 @@ export function CategoriesClientPage() {
       <AlertDialog
         open={!!categoryToDelete}
         onOpenChange={(open) => !open && setCategoryToDelete(null)}
-        data-oid="7zgr:2n"
+        data-oid="bidnmvf"
       >
-        <AlertDialogContent data-oid="wjciry4">
-          <AlertDialogHeader data-oid="z0-1ne3">
-            <AlertDialogTitle data-oid="tbqxi4y">確認刪除</AlertDialogTitle>
-            <AlertDialogDescription data-oid="t9z_f9a">
+        <AlertDialogContent data-oid="8m:vbo3">
+          <AlertDialogHeader data-oid="vuwuz80">
+            <AlertDialogTitle data-oid="euxs_3q">確認刪除</AlertDialogTitle>
+            <AlertDialogDescription data-oid="4x8r0q0">
               您確定要刪除分類「{categoryToDelete?.name}」嗎？
               {categoryToDelete?.children &&
                 categoryToDelete.children.length > 0 && (
                   <span
                     className="block mt-2 text-destructive"
-                    data-oid="af:4srt"
+                    data-oid="s_peunw"
                   >
                     注意：此分類包含 {categoryToDelete.children.length}{" "}
                     個子分類，將一併刪除。
@@ -306,12 +306,12 @@ export function CategoriesClientPage() {
               此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="w7f1:3s">
-            <AlertDialogCancel data-oid="_iz1mi2">取消</AlertDialogCancel>
+          <AlertDialogFooter data-oid="xhguon7">
+            <AlertDialogCancel data-oid="pjui:e5">取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              data-oid="-si.jr7"
+              data-oid="t6thwjj"
             >
               刪除
             </AlertDialogAction>

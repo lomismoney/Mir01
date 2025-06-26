@@ -409,13 +409,13 @@ export function ProductForm({
   // 載入狀態處理
   if (attributesLoading) {
     return (
-      <Card data-oid="h9gveb9">
+      <Card data-oid="c6.lye9">
         <CardContent
           className="flex items-center justify-center py-8"
-          data-oid="mvqh_da"
+          data-oid="2gz.50m"
         >
-          <Loader2 className="h-6 w-6 animate-spin mr-2" data-oid="gfs_qmq" />
-          <span data-oid="ezaewin">載入屬性資料中...</span>
+          <Loader2 className="h-6 w-6 animate-spin mr-2" data-oid="hcjb-sd" />
+          <span data-oid="l.o09ht">載入屬性資料中...</span>
         </CardContent>
       </Card>
     );
@@ -424,13 +424,13 @@ export function ProductForm({
   // 錯誤狀態處理
   if (attributesError) {
     return (
-      <Card data-oid="7sgbm0x">
-        <CardContent className="py-8" data-oid="c-80ut8">
-          <div className="text-center text-red-600" data-oid="5s-uve2">
-            <p data-oid="7_15t6f">載入屬性資料失敗</p>
+      <Card data-oid="q9etlxw">
+        <CardContent className="py-8" data-oid="0iq9ouq">
+          <div className="text-center text-red-600" data-oid="5sp9fno">
+            <p data-oid="0a8dnar">載入屬性資料失敗</p>
             <p
               className="text-sm text-muted-foreground mt-1"
-              data-oid="ewqhptu"
+              data-oid="udrdian"
             >
               請重試或聯繫系統管理員
             </p>
@@ -441,22 +441,22 @@ export function ProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" data-oid="i1aa0l7">
+    <form onSubmit={handleSubmit} className="space-y-6" data-oid="ct8:now">
       {/* 表單標題 */}
-      <Card data-oid=".9-vw96">
-        <CardHeader data-oid="s8prhvt">
-          <CardTitle className="flex items-center gap-2" data-oid="gs49:26">
-            <Package className="h-5 w-5" data-oid="8n06by6" />
+      <Card data-oid="th-n22:">
+        <CardHeader data-oid="oaoe.bg">
+          <CardTitle className="flex items-center gap-2" data-oid="501kxk9">
+            <Package className="h-5 w-5" data-oid="pgjxgjo" />
             {title}
           </CardTitle>
           {description && (
-            <CardDescription data-oid="x_p8n1x">{description}</CardDescription>
+            <CardDescription data-oid="0gg0:ia">{description}</CardDescription>
           )}
         </CardHeader>
-        <CardContent className="space-y-4" data-oid="iozwpma">
+        <CardContent className="space-y-4" data-oid="tz96.0x">
           {/* 商品名稱 */}
-          <div className="space-y-2" data-oid="h9avff_">
-            <Label htmlFor="name" data-oid="1vtwqgm">
+          <div className="space-y-2" data-oid="454qkq7">
+            <Label htmlFor="name" data-oid="m.st2jv">
               商品名稱 *
             </Label>
             <Input
@@ -466,13 +466,13 @@ export function ProductForm({
               onChange={(e) => handleFieldChange("name", e.target.value)}
               disabled={isLoading}
               required
-              data-oid="bc::0i9"
+              data-oid="dd-da92"
             />
           </div>
 
           {/* 商品描述 */}
-          <div className="space-y-2" data-oid="ewk:gkt">
-            <Label htmlFor="description" data-oid="7iz.-t3">
+          <div className="space-y-2" data-oid="27-a6vv">
+            <Label htmlFor="description" data-oid="zn8h.ue">
               商品描述
             </Label>
             <Textarea
@@ -482,38 +482,38 @@ export function ProductForm({
               onChange={(e) => handleFieldChange("description", e.target.value)}
               disabled={isLoading}
               rows={3}
-              data-oid="_dk:uh-"
+              data-oid="kfwovmv"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* 規格定義區 */}
-      <Card data-oid="6rubg0s">
-        <CardHeader data-oid="n:a0wao">
-          <CardTitle className="flex items-center gap-2" data-oid="emjgdf1">
-            <Settings className="h-5 w-5" data-oid="7vrmm2f" />
+      <Card data-oid="hs8w3ls">
+        <CardHeader data-oid="9_-mym2">
+          <CardTitle className="flex items-center gap-2" data-oid="dfbfuv2">
+            <Settings className="h-5 w-5" data-oid="zh3_yo8" />
             規格定義
           </CardTitle>
-          <CardDescription data-oid="slnh1f6">
+          <CardDescription data-oid="5na.d.-">
             設定商品的規格屬性，支援單規格和多規格商品
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6" data-oid=":4f36..">
+        <CardContent className="space-y-6" data-oid="cv4w8l6">
           {/* 多規格切換開關 */}
-          <div className="flex items-center space-x-3" data-oid="zh-q1wd">
+          <div className="flex items-center space-x-3" data-oid="lxdzxa.">
             <Switch
               id="variable-switch"
               checked={isVariable}
               onCheckedChange={setIsVariable}
               disabled={isLoading}
-              data-oid="u9n4y1n"
+              data-oid="-bzh3s7"
             />
 
             <Label
               htmlFor="variable-switch"
               className="text-sm font-medium"
-              data-oid="cclkjg."
+              data-oid="id2zgvg"
             >
               此商品擁有多種規格
             </Label>
@@ -521,23 +521,23 @@ export function ProductForm({
 
           {/* 多規格配置區 */}
           {isVariable && (
-            <div className="space-y-6" data-oid="skmwa35">
-              <Separator data-oid="mm0cu1-" />
+            <div className="space-y-6" data-oid="czws7.l">
+              <Separator data-oid="4zxbqlj" />
 
               {/* 規格選擇區 */}
-              <div className="space-y-4" data-oid="3xxwkbz">
-                <h4 className="text-sm font-medium" data-oid="jz76lx1">
+              <div className="space-y-4" data-oid="4wgutm6">
+                <h4 className="text-sm font-medium" data-oid="c0u3dxe">
                   選擇規格屬性
                 </h4>
                 <div
                   className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
-                  data-oid="vexuzfx"
+                  data-oid="9y:9a:w"
                 >
                   {attributes.map((attribute: Attribute) => (
                     <div
                       key={attribute.id}
                       className="flex items-center space-x-2"
-                      data-oid="pyl3sj2"
+                      data-oid="u6oksdw"
                     >
                       <Checkbox
                         id={`attr-${attribute.id}`}
@@ -546,13 +546,13 @@ export function ProductForm({
                           handleAttributeToggle(attribute.id, checked === true)
                         }
                         disabled={isLoading}
-                        data-oid="chyyg-k"
+                        data-oid="f531nj0"
                       />
 
                       <Label
                         htmlFor={`attr-${attribute.id}`}
                         className="text-sm cursor-pointer"
-                        data-oid="a9vdbw-"
+                        data-oid="p1ipo8q"
                       >
                         {attribute.name}
                       </Label>
@@ -563,9 +563,9 @@ export function ProductForm({
 
               {/* 規格值輸入區 */}
               {selectedAttrs.size > 0 && (
-                <div className="space-y-4" data-oid="wji0md-">
-                  <Separator data-oid="m:hwc:2" />
-                  <h4 className="text-sm font-medium" data-oid="qmp3g:3">
+                <div className="space-y-4" data-oid="7eu40ak">
+                  <Separator data-oid="ewi9q:i" />
+                  <h4 className="text-sm font-medium" data-oid="mpqi1up">
                     配置規格值
                   </h4>
 
@@ -582,16 +582,16 @@ export function ProductForm({
                       <Card
                         key={attributeId}
                         className="bg-muted/30"
-                        data-oid="27j_qqd"
+                        data-oid="j2xaf88"
                       >
-                        <CardHeader className="pb-3" data-oid="y6ww:-g">
-                          <CardTitle className="text-base" data-oid="2ftaain">
+                        <CardHeader className="pb-3" data-oid="fk1ztpi">
+                          <CardTitle className="text-base" data-oid="ncjze18">
                             {attribute.name}
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4" data-oid="qbm.l22">
+                        <CardContent className="space-y-4" data-oid=".gjfukb">
                           {/* 添加新值的輸入區 */}
-                          <div className="flex space-x-2" data-oid="ry_w:p_">
+                          <div className="flex space-x-2" data-oid="gwx3dyt">
                             <Input
                               placeholder={`輸入${attribute.name}值，例如：紅色、藍色`}
                               value={inputValue}
@@ -608,7 +608,7 @@ export function ProductForm({
                                 }
                               }}
                               disabled={isLoading}
-                              data-oid="ix617ml"
+                              data-oid="4b85sm7"
                             />
 
                             <Button
@@ -619,31 +619,31 @@ export function ProductForm({
                                 handleAddAttributeValue(attributeId)
                               }
                               disabled={isLoading || !inputValue.trim()}
-                              data-oid="ihgoz3_"
+                              data-oid="r6a23yi"
                             >
-                              <Plus className="h-4 w-4" data-oid="0-de70." />
+                              <Plus className="h-4 w-4" data-oid=".:50gkg" />
                             </Button>
                           </div>
 
                           {/* 已添加的值列表 */}
                           {currentValues.length > 0 && (
-                            <div className="space-y-2" data-oid="g72js78">
+                            <div className="space-y-2" data-oid="rn0m73y">
                               <Label
                                 className="text-xs text-muted-foreground"
-                                data-oid="db-xum-"
+                                data-oid="o615tdj"
                               >
                                 已添加的{attribute.name}值：
                               </Label>
                               <div
                                 className="flex flex-wrap gap-2"
-                                data-oid="zmftn20"
+                                data-oid="xs5cui8"
                               >
                                 {currentValues.map((value) => (
                                   <Badge
                                     key={value}
                                     variant="secondary"
                                     className="flex items-center gap-1"
-                                    data-oid="nsio9ah"
+                                    data-oid="vg3qvwz"
                                   >
                                     {value}
                                     <Button
@@ -658,11 +658,11 @@ export function ProductForm({
                                         )
                                       }
                                       disabled={isLoading}
-                                      data-oid="l:5r06v"
+                                      data-oid="h-cn2cu"
                                     >
                                       <X
                                         className="h-3 w-3"
-                                        data-oid="sbmzfts"
+                                        data-oid="l.raud2"
                                       />
                                     </Button>
                                   </Badge>
@@ -679,19 +679,19 @@ export function ProductForm({
 
               {/* 生成規格組合按鈕 */}
               {selectedAttrs.size > 0 && (
-                <div className="space-y-4" data-oid="h2b3lj2">
-                  <Separator data-oid="wi:-p_t" />
+                <div className="space-y-4" data-oid="tgumrlt">
+                  <Separator data-oid=".8n2a0d" />
                   <div
                     className="flex items-center justify-between"
-                    data-oid="f6wgz5q"
+                    data-oid="8omacb8"
                   >
-                    <div data-oid="5stdlfd">
-                      <h4 className="text-sm font-medium" data-oid="c7tpsqn">
+                    <div data-oid="131fijs">
+                      <h4 className="text-sm font-medium" data-oid=":j_vlf2">
                         生成 SKU 變體
                       </h4>
                       <p
                         className="text-xs text-muted-foreground"
-                        data-oid="u:1r6pa"
+                        data-oid="xxb9zb:"
                       >
                         根據選擇的規格屬性組合生成所有可能的 SKU 變體
                       </p>
@@ -703,7 +703,7 @@ export function ProductForm({
                       variant="default"
                       size="sm"
                       className="min-w-[120px]"
-                      data-oid="ir_d4ci"
+                      data-oid="z61o:80"
                     >
                       {variants.length > 0 ? "重新生成組合" : "生成規格組合"}
                     </Button>
@@ -713,23 +713,23 @@ export function ProductForm({
                   {variants.length > 0 && (
                     <div
                       className="bg-muted/50 rounded-lg p-3"
-                      data-oid="qkwyzdo"
+                      data-oid="1_:y4v."
                     >
                       <p
                         className="text-sm text-muted-foreground"
-                        data-oid="guwrgz."
+                        data-oid="6s8n89:"
                       >
                         已生成{" "}
                         <span
                           className="font-medium text-foreground"
-                          data-oid="hy8kef:"
+                          data-oid="h2chexz"
                         >
                           {variants.length}
                         </span>{" "}
                         個 SKU 變體， 包含{" "}
                         <span
                           className="font-medium text-foreground"
-                          data-oid="r3vrf9f"
+                          data-oid="xuzmkxu"
                         >
                           {selectedAttrs.size}
                         </span>{" "}
@@ -746,47 +746,47 @@ export function ProductForm({
 
       {/* SKU 變體編輯表格 */}
       {variants.length > 0 && (
-        <Card data-oid="uxzg225">
-          <CardHeader data-oid="w_cyf2q">
-            <CardTitle data-oid=":kg0c:4">編輯規格 (SKU)</CardTitle>
-            <CardDescription data-oid="tfua1t0">
+        <Card data-oid="29ox8ow">
+          <CardHeader data-oid="4nad1o6">
+            <CardTitle data-oid="3t.1-2.">編輯規格 (SKU)</CardTitle>
+            <CardDescription data-oid="h:ai-2u">
               為每一個自動生成的規格組合，設定唯一的 SKU 編號和價格。
             </CardDescription>
           </CardHeader>
-          <CardContent data-oid="siigzt2">
-            <Table data-oid=".og0j5h">
-              <TableHeader data-oid="d:djce5">
+          <CardContent data-oid=":ekprrr">
+            <Table data-oid="nv686vh">
+              <TableHeader data-oid="oaa:a98">
                 <TableRow
                   className="border-b hover:bg-transparent"
-                  data-oid="iyvx3yh"
+                  data-oid="b2en-yd"
                 >
                   <TableHead
                     className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                    data-oid="zu1sxzp"
+                    data-oid="55ff6-x"
                   >
                     規格
                   </TableHead>
                   <TableHead
                     className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                    data-oid="t397_zm"
+                    data-oid="awd-kh-"
                   >
                     SKU 編號
                   </TableHead>
                   <TableHead
                     className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                    data-oid="pnbjwoj"
+                    data-oid="kiu:a_."
                   >
                     價格
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody data-oid="baymsrk">
+              <TableBody data-oid="e_zpo.k">
                 {variants.map((variant, index) => (
-                  <TableRow key={variant.key} data-oid="bfmm254">
-                    <TableCell data-oid="89l71w6">
+                  <TableRow key={variant.key} data-oid="qt-tthe">
+                    <TableCell data-oid="24rk16t">
                       {variant.options.map((opt) => opt.value).join(" / ")}
                     </TableCell>
-                    <TableCell data-oid="3yw3sxr">
+                    <TableCell data-oid="qqfzn_o">
                       <Input
                         value={variant.sku}
                         onChange={(e) => {
@@ -794,10 +794,10 @@ export function ProductForm({
                           newVariants[index].sku = e.target.value;
                           setVariants(newVariants);
                         }}
-                        data-oid="nft-:3n"
+                        data-oid="5y5riee"
                       />
                     </TableCell>
-                    <TableCell data-oid="entl8oe">
+                    <TableCell data-oid="b8rh3gl">
                       <Input
                         type="number"
                         value={variant.price}
@@ -806,7 +806,7 @@ export function ProductForm({
                           newVariants[index].price = e.target.value;
                           setVariants(newVariants);
                         }}
-                        data-oid="fyujtt7"
+                        data-oid="q863dyg"
                       />
                     </TableCell>
                   </TableRow>
@@ -818,18 +818,18 @@ export function ProductForm({
       )}
 
       {/* 表單操作按鈕 */}
-      <div className="flex justify-end space-x-3" data-oid="m-jq9vt">
+      <div className="flex justify-end space-x-3" data-oid="07q4hog">
         <Button
           type="button"
           variant="outline"
           disabled={isLoading}
-          data-oid="__cc65_"
+          data-oid="pv.5.g0"
         >
           取消
         </Button>
-        <Button type="submit" disabled={isLoading} data-oid="9elsxqm">
+        <Button type="submit" disabled={isLoading} data-oid="ecwg_fq">
           {isLoading && (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" data-oid="zygo1cp" />
+            <Loader2 className="h-4 w-4 animate-spin mr-2" data-oid="7g64iif" />
           )}
           建立商品
         </Button>

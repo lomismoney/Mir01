@@ -120,12 +120,12 @@ export function ImageSelector({
   };
 
   return (
-    <div className={cn("space-y-4", className)} data-oid="_7r9:1f">
+    <div className={cn("space-y-4", className)} data-oid="zyx6jqh">
       {!imageData.file && !imageData.preview ? (
         // 圖片選擇區域
         <div
           className="flex items-center justify-center w-full"
-          data-oid="zfvewse"
+          data-oid="4ahgb-i"
         >
           <label
             htmlFor="dropzone-file"
@@ -138,11 +138,11 @@ export function ImageSelector({
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            data-oid="w38f543"
+            data-oid="5q2uf:."
           >
             <div
               className="flex flex-col items-center justify-center pt-5 pb-6"
-              data-oid="a-fs5ej"
+              data-oid="gk-mjbe"
             >
               <svg
                 className="w-8 h-8 mb-4 text-muted-foreground"
@@ -150,7 +150,7 @@ export function ImageSelector({
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 20 16"
-                data-oid=":p1vbvr"
+                data-oid="5hzdgu0"
               >
                 <path
                   stroke="currentColor"
@@ -158,19 +158,19 @@ export function ImageSelector({
                   strokeLinejoin="round"
                   strokeWidth="2"
                   d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                  data-oid=":g.4gfv"
+                  data-oid="41opuav"
                 />
               </svg>
               <p
                 className="mb-2 text-sm text-muted-foreground"
-                data-oid="tt29qqm"
+                data-oid="nnayvyu"
               >
-                <span className="font-semibold" data-oid=":fycwis">
+                <span className="font-semibold" data-oid="fdzxb.l">
                   點擊上傳
                 </span>{" "}
                 或拖曳檔案至此
               </p>
-              <p className="text-xs text-muted-foreground" data-oid="9lodwfj">
+              <p className="text-xs text-muted-foreground" data-oid="q4wr:7-">
                 {acceptedFormats
                   .map((format) => format.split("/")[1].toUpperCase())
                   .join("、")}
@@ -185,22 +185,22 @@ export function ImageSelector({
               accept={acceptedFormats.join(",")}
               onChange={handleFileInputChange}
               disabled={disabled}
-              data-oid="4wp8.ud"
+              data-oid="uxhzag0"
             />
           </label>
         </div>
       ) : (
         // 圖片預覽區域
-        <div className="relative" data-oid="09xz15p">
+        <div className="relative" data-oid="qpmwf4u">
           <div
             className="relative w-full max-w-sm h-48 mx-auto overflow-hidden rounded-lg border border-border bg-muted/30"
-            data-oid="e-_yi.l"
+            data-oid="4_hoey1"
           >
             <img
               src={imageData.preview!}
               alt="商品圖片預覽"
               className="w-full h-full object-contain p-2"
-              data-oid="f095wr6"
+              data-oid="n.ktdeo"
             />
 
             {/* 清除按鈕 */}
@@ -212,9 +212,9 @@ export function ImageSelector({
               onClick={onClearImage}
               disabled={disabled}
               aria-label="清除圖片"
-              data-oid="ers5nrt"
+              data-oid="nsp:2t0"
             >
-              <X className="h-4 w-4" data-oid="n4p82mz" />
+              <X className="h-4 w-4" data-oid="uli_6.j" />
             </Button>
           </div>
 
@@ -222,13 +222,13 @@ export function ImageSelector({
           {imageData.file && (
             <div
               className="mt-2 text-xs text-muted-foreground space-y-1"
-              data-oid="mog__jp"
+              data-oid="s5jtnq2"
             >
-              <p data-oid="-4qb4.e">檔案名稱：{imageData.file.name}</p>
-              <p data-oid="m9-s1ic">
+              <p data-oid=":0-vym-">檔案名稱：{imageData.file.name}</p>
+              <p data-oid="8v4xnuy">
                 檔案大小：{formatFileSize(imageData.file.size)}
               </p>
-              <p data-oid="m5bgmxq">檔案格式：{imageData.file.type}</p>
+              <p data-oid="-xzz0uk">檔案格式：{imageData.file.type}</p>
             </div>
           )}
         </div>
@@ -236,9 +236,9 @@ export function ImageSelector({
 
       {/* 錯誤提示 */}
       {!imageData.isValid && imageData.validationError && (
-        <Alert variant="destructive" data-oid="m:zi2fr">
-          <AlertCircle className="h-4 w-4" data-oid="nam2m49" />
-          <AlertDescription data-oid="gy6:gb2">
+        <Alert variant="destructive" data-oid="-vh1cz-">
+          <AlertCircle className="h-4 w-4" data-oid="pot0ffr" />
+          <AlertDescription data-oid="gqr-7kv">
             {imageData.validationError}
           </AlertDescription>
         </Alert>
@@ -252,7 +252,7 @@ export function ImageSelector({
         onChange={handleFileInputChange}
         className="hidden"
         disabled={disabled}
-        data-oid=":.dt38h"
+        data-oid="up0tt6z"
       />
     </div>
   );

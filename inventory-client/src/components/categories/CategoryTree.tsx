@@ -50,7 +50,7 @@ export function CategoryTree({
   isTopLevel = false,
 }: CategoryTreeProps) {
   return (
-    <div className={isTopLevel ? "" : "pl-6"}>
+    <div className={isTopLevel ? "" : "pl-6"} data-oid="svs2ta9">
       {categories.map((category) => (
         <CategoryItem
           key={category.id}
@@ -59,6 +59,7 @@ export function CategoryTree({
           onEdit={onEdit}
           onDelete={onDelete}
           onAddSubCategory={onAddSubCategory}
+          data-oid="fieiswa"
         />
       ))}
     </div>

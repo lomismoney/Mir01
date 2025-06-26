@@ -84,14 +84,14 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="container space-y-8 py-8" data-oid="49e0lnk">
+    <div className="container space-y-8 py-8" data-oid="veq1flm">
       {/* 頁面頭部 */}
-      <div className="flex items-center justify-between" data-oid="cg6u:y7">
-        <div className="space-y-1" data-oid="m33acve">
-          <h1 className="text-3xl font-bold tracking-tight" data-oid="tyy2-l8">
+      <div className="flex items-center justify-between" data-oid="7ktgey.">
+        <div className="space-y-1" data-oid="n1g2jv8">
+          <h1 className="text-3xl font-bold tracking-tight" data-oid="l6v_qkn">
             商品管理
           </h1>
-          <p className="text-muted-foreground" data-oid="uz2m634">
+          <p className="text-muted-foreground" data-oid="9swh3t0">
             管理您的商品庫存、價格和規格資訊
           </p>
         </div>
@@ -99,9 +99,9 @@ export default function ProductsPage() {
           onClick={() => router.push("/products/new")}
           size="lg"
           className="gap-2"
-          data-oid="4e0m1cy"
+          data-oid="12as8ep"
         >
-          <Plus className="h-5 w-5" data-oid=":mdv:yu" />
+          <Plus className="h-5 w-5" data-oid="5meengs" />
           新增商品
         </Button>
       </div>
@@ -109,102 +109,122 @@ export default function ProductsPage() {
       {/* 統計卡片 - 使用與儀表板相同的樣式 */}
       <div
         className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:grid-cols-4"
-        data-oid="gxvd3eh"
+        data-oid="cvwmwac"
       >
-        <Card className="@container/card" data-oid="w5q9cb6">
-          <CardHeader className="space-y-1" data-oid="kem9.6q">
-            <CardDescription className="text-xs" data-oid=".k7g5_1">商品總數</CardDescription>
+        <Card className="@container/card" data-oid="d-l2y1c">
+          <CardHeader className="space-y-1" data-oid="a41m9hw">
+            <CardDescription className="text-xs" data-oid="0e77icv">
+              商品總數
+            </CardDescription>
             <CardTitle
               className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl"
-              data-oid="v.l2yrn"
+              data-oid="ba0pwo3"
             >
               {stats.total}
             </CardTitle>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground" data-oid="p88hh0u">
+            <div
+              className="flex items-center justify-between"
+              data-oid="kbec17a"
+            >
+              <p className="text-xs text-muted-foreground" data-oid="tnklk6d">
                 所有已建立的商品
               </p>
               <Badge
                 variant="outline"
                 className="text-xs h-5"
-                data-oid="xnkt7ru"
+                data-oid="nv483ke"
               >
-                <TrendingUp className="h-3 w-3 mr-1" data-oid="b64k6vr" />+
+                <TrendingUp className="h-3 w-3 mr-1" data-oid="g7dlqs_" />+
                 {percentageChanges.total}%
               </Badge>
             </div>
           </CardHeader>
         </Card>
 
-        <Card className="@container/card" data-oid="o_9rhvg">
-          <CardHeader className="space-y-1" data-oid="juy2zca">
-            <CardDescription className="text-xs" data-oid="quxz864">有庫存商品</CardDescription>
+        <Card className="@container/card" data-oid="4:ua060">
+          <CardHeader className="space-y-1" data-oid="3vtnd7k">
+            <CardDescription className="text-xs" data-oid="6.uqcob">
+              有庫存商品
+            </CardDescription>
             <CardTitle
               className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl"
-              data-oid="a4fn:ye"
+              data-oid="9py.y6z"
             >
               {stats.active}
             </CardTitle>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground" data-oid="ns6.39q">
+            <div
+              className="flex items-center justify-between"
+              data-oid="g7tpm3p"
+            >
+              <p className="text-xs text-muted-foreground" data-oid="8al-p.j">
                 至少有一個門市有庫存
               </p>
               <Badge
                 variant="outline"
                 className="text-xs h-5"
-                data-oid="efx0jab"
+                data-oid="dlkjy5a"
               >
-                <TrendingUp className="h-3 w-3 mr-1" data-oid="nx8zt5f" />+
+                <TrendingUp className="h-3 w-3 mr-1" data-oid="hc03qyd" />+
                 {percentageChanges.active}%
               </Badge>
             </div>
           </CardHeader>
         </Card>
 
-        <Card className="@container/card" data-oid="5.:g1:y">
-          <CardHeader className="space-y-1" data-oid="3gcfqbm">
-            <CardDescription className="text-xs" data-oid="c.mjgz4">低庫存預警</CardDescription>
+        <Card className="@container/card" data-oid="qzw-av3">
+          <CardHeader className="space-y-1" data-oid="xphlz:1">
+            <CardDescription className="text-xs" data-oid="g3aflsh">
+              低庫存預警
+            </CardDescription>
             <CardTitle
               className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl"
-              data-oid="-d-sav-"
+              data-oid="addqb_s"
             >
               {stats.lowStock}
             </CardTitle>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground" data-oid="zuu8lem">
+            <div
+              className="flex items-center justify-between"
+              data-oid=".7-_ixz"
+            >
+              <p className="text-xs text-muted-foreground" data-oid="ozkx9g8">
                 庫存量低於 10 件
               </p>
               <Badge
                 variant="outline"
                 className="text-xs h-5"
-                data-oid="5y6q87_"
+                data-oid="y9ndib1"
               >
-                <TrendingDown className="h-3 w-3 mr-1" data-oid="v14q7ga" />
+                <TrendingDown className="h-3 w-3 mr-1" data-oid="fdg84ht" />
                 {percentageChanges.lowStock}%
               </Badge>
             </div>
           </CardHeader>
         </Card>
 
-        <Card className="@container/card" data-oid="wndnntk">
-          <CardHeader className="space-y-1" data-oid="2zd5_e6">
-            <CardDescription className="text-xs" data-oid="xaa:s0b">缺貨商品</CardDescription>
+        <Card className="@container/card" data-oid="1h931d7">
+          <CardHeader className="space-y-1" data-oid="m6zh2:g">
+            <CardDescription className="text-xs" data-oid="i1e-wbl">
+              缺貨商品
+            </CardDescription>
             <CardTitle
               className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl"
-              data-oid="q20j__s"
+              data-oid="x64u9zj"
             >
               {stats.outOfStock}
             </CardTitle>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground" data-oid="q9bu77a">
+            <div
+              className="flex items-center justify-between"
+              data-oid="zg6917."
+            >
+              <p className="text-xs text-muted-foreground" data-oid="nu-wgt.">
                 所有門市皆無庫存
               </p>
               <Badge
                 variant="destructive"
                 className="text-xs h-5"
-                data-oid="r8s:.85"
+                data-oid="de4kewr"
               >
-                <TrendingUp className="h-3 w-3 mr-1" data-oid="8ajuj_n" />+
+                <TrendingUp className="h-3 w-3 mr-1" data-oid="889gz4v" />+
                 {percentageChanges.outOfStock}%
               </Badge>
             </div>
@@ -213,7 +233,7 @@ export default function ProductsPage() {
       </div>
 
       {/* 商品列表 */}
-      <ProductClientComponent data-oid="ag4u2x." />
+      <ProductClientComponent data-oid="grqlkgu" />
     </div>
   );
 }

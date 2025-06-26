@@ -50,16 +50,12 @@ const ScrollArea = React.forwardRef<
     ref={ref}
     className={cn("relative overflow-hidden", className)}
     {...props}
-    data-oid="vyst9_3"
   >
-    <ScrollAreaPrimitive.Viewport
-      className="h-full w-full rounded-[inherit]"
-      data-oid="2uchd9x"
-    >
+    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
       {children}
     </ScrollAreaPrimitive.Viewport>
-    <ScrollAreaScrollbar orientation="vertical" data-oid="5jsm92a" />
-    <ScrollAreaPrimitive.Corner data-oid="wdgfsco" />
+    <ScrollAreaScrollbar orientation="vertical" />
+    <ScrollAreaPrimitive.Corner />
   </ScrollAreaPrimitive.Root>
 ));
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
@@ -80,12 +76,8 @@ const ScrollAreaScrollbar = React.forwardRef<
       className,
     )}
     {...props}
-    data-oid="dddpnsr"
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb
-      className="relative flex-1 rounded-full bg-border"
-      data-oid=":-7y7oy"
-    />
+    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ));
 ScrollAreaScrollbar.displayName =
@@ -195,89 +187,67 @@ export function UserStoresDialog({
     .map((store) => store.name);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="o1.ysim">
-      <DialogContent className="sm:max-w-[500px]" data-oid="m7eiz90">
-        <DialogHeader data-oid="9.z4zsn">
-          <DialogTitle className="flex items-center gap-2" data-oid=":9_p30o">
-            <StoreIcon className="w-5 h-5" data-oid="nc-bgm_" />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <StoreIcon className="w-5 h-5" />
             分配分店給用戶
           </DialogTitle>
-          <DialogDescription data-oid="nm3lw3b">
-            為 <strong data-oid="i8ev3q8">{userName}</strong>{" "}
+          <DialogDescription>
+            為 <strong>{userName}</strong>{" "}
             選擇所屬的分店。用戶可以管理這些分店的庫存和相關數據。
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-6 space-y-4" data-oid="-qa7e.t">
+        <div className="py-6 space-y-4">
           {isLoadingStores || isLoadingUserStores ? (
-            <div className="flex justify-center py-4" data-oid="h:p5ppq">
-              <Loader2 className="animate-spin h-4 w-4" data-oid="p6mq969" />
+            <div className="flex justify-center py-4">
+              <Loader2 className="animate-spin h-4 w-4" />
             </div>
           ) : (
             <>
-              <div className="space-y-2" data-oid="tsyj4bo">
-                <h3 className="text-sm font-medium" data-oid="0cg9mdi">
-                  選擇分店
-                </h3>
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">選擇分店</h3>
 
-                <Popover
-                  open={popoverOpen}
-                  onOpenChange={setPopoverOpen}
-                  data-oid="kzod6ac"
-                >
-                  <PopoverTrigger asChild data-oid="mqkse5q">
+                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                  <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       role="combobox"
                       aria-expanded={popoverOpen}
                       className="w-full justify-between"
                       disabled={assignStoresMutation.isPending}
-                      data-oid="e748eo8"
                     >
                       {selectedStoreIds.length === 0
                         ? "選擇分店..."
                         : `已選擇 ${selectedStoreIds.length} 間分店`}
-                      <ChevronsUpDown
-                        className="ml-2 h-4 w-4 shrink-0 opacity-50"
-                        data-oid="-bh-1y_"
-                      />
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent
-                    className="w-full p-0"
-                    align="start"
-                    data-oid="b8fs1jz"
-                  >
-                    <Command data-oid="7phpe3e">
-                      <CommandInput
-                        placeholder="搜尋分店..."
-                        data-oid="9h8aq2c"
-                      />
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="搜尋分店..." />
 
-                      <CommandEmpty data-oid="09azmdb">找不到分店</CommandEmpty>
-                      <CommandGroup data-oid="um3h7y0">
-                        <ScrollArea className="h-60" data-oid="a_jo7tu">
+                      <CommandEmpty>找不到分店</CommandEmpty>
+                      <CommandGroup>
+                        <ScrollArea className="h-60">
                           {stores.map((store) => (
                             <CommandItem
                               key={store.id}
                               onSelect={() => handleStoreToggle(store.id)}
                               className="flex items-center gap-2"
-                              data-oid="azivz93"
                             >
                               <Checkbox
                                 checked={selectedStoreIds.includes(store.id)}
                                 onCheckedChange={() =>
                                   handleStoreToggle(store.id)
                                 }
-                                data-oid="n7n9odr"
                               />
 
-                              <span data-oid="cp5qbqr">{store.name}</span>
+                              <span>{store.name}</span>
                               {store.address && (
-                                <span
-                                  className="text-sm text-muted-foreground ml-2"
-                                  data-oid="nw_ecse"
-                                >
+                                <span className="text-sm text-muted-foreground ml-2">
                                   ({store.address})
                                 </span>
                               )}
@@ -291,13 +261,11 @@ export function UserStoresDialog({
               </div>
 
               {selectedStoreIds.length > 0 && (
-                <div className="space-y-2" data-oid="1ltgthu">
-                  <h3 className="text-sm font-medium" data-oid="lxxq-18">
-                    已選擇的分店
-                  </h3>
-                  <div className="flex flex-wrap gap-2" data-oid="5h.lts:">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">已選擇的分店</h3>
+                  <div className="flex flex-wrap gap-2">
                     {selectedStoreNames.map((name) => (
-                      <Badge key={name} variant="secondary" data-oid="o6:m5k6">
+                      <Badge key={name} variant="secondary">
                         {name}
                       </Badge>
                     ))}
@@ -308,12 +276,11 @@ export function UserStoresDialog({
           )}
         </div>
 
-        <div className="flex justify-end gap-2" data-oid="y50vfjs">
+        <div className="flex justify-end gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={assignStoresMutation.isPending}
-            data-oid="91_6d.h"
           >
             取消
           </Button>
@@ -324,7 +291,6 @@ export function UserStoresDialog({
               isLoadingStores ||
               isLoadingUserStores
             }
-            data-oid="tkgt6sm"
           >
             {assignStoresMutation.isPending ? "處理中..." : "儲存設定"}
           </Button>

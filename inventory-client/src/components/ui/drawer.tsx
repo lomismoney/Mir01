@@ -8,45 +8,25 @@ import { cn } from "@/lib/utils";
 function Drawer({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
-  return (
-    <DrawerPrimitive.Root data-slot="drawer" {...props} data-oid="q143u0r" />
-  );
+  return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
 function DrawerTrigger({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
-  return (
-    <DrawerPrimitive.Trigger
-      data-slot="drawer-trigger"
-      {...props}
-      data-oid="ygs85rm"
-    />
-  );
+  return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
 }
 
 function DrawerPortal({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
-  return (
-    <DrawerPrimitive.Portal
-      data-slot="drawer-portal"
-      {...props}
-      data-oid="jmzda3s"
-    />
-  );
+  return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
 }
 
 function DrawerClose({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
-  return (
-    <DrawerPrimitive.Close
-      data-slot="drawer-close"
-      {...props}
-      data-oid="ztqi0:j"
-    />
-  );
+  return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
 function DrawerOverlay({
@@ -61,7 +41,6 @@ function DrawerOverlay({
         className,
       )}
       {...props}
-      data-oid="41mh9l-"
     />
   );
 }
@@ -72,8 +51,8 @@ function DrawerContent({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
   return (
-    <DrawerPortal data-slot="drawer-portal" data-oid="ma.ptbk">
-      <DrawerOverlay data-oid="--:-j_e" />
+    <DrawerPortal data-slot="drawer-portal">
+      <DrawerOverlay />
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
@@ -85,12 +64,8 @@ function DrawerContent({
           className,
         )}
         {...props}
-        data-oid="y_272:2"
       >
-        <div
-          className="bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block"
-          data-oid="f13vc6c"
-        />
+        <div className="bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
 
         {children}
       </DrawerPrimitive.Content>
@@ -107,7 +82,6 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
         className,
       )}
       {...props}
-      data-oid="funtaqq"
     />
   );
 }
@@ -118,7 +92,6 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="drawer-footer"
       className={cn("mt-auto flex flex-col gap-2 p-4", className)}
       {...props}
-      data-oid="zvb0bt-"
     />
   );
 }
@@ -132,7 +105,6 @@ function DrawerTitle({
       data-slot="drawer-title"
       className={cn("text-foreground font-semibold", className)}
       {...props}
-      data-oid="v2vwiz."
     />
   );
 }
@@ -146,7 +118,6 @@ function DrawerDescription({
       data-slot="drawer-description"
       className={cn("text-muted-foreground text-sm", className)}
       {...props}
-      data-oid="e9dnrt."
     />
   );
 }

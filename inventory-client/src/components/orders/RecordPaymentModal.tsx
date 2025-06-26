@@ -233,17 +233,17 @@ export default function RecordPaymentModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose} data-oid="s22f6tn">
+    <Dialog open={open} onOpenChange={handleClose} data-oid="66chh:5">
       <DialogContent
         className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto"
-        data-oid="jsx.yyh"
+        data-oid="qpkcj1."
       >
-        <DialogHeader data-oid="_ju0y-v">
-          <DialogTitle className="flex items-center gap-2" data-oid="161q5oo">
-            <DollarSign className="h-5 w-5 text-green-600" data-oid="k67e1u4" />
+        <DialogHeader data-oid="ivrtjwk">
+          <DialogTitle className="flex items-center gap-2" data-oid="kw.4if6">
+            <DollarSign className="h-5 w-5 text-green-600" data-oid="y1uu5fx" />
             記錄部分收款
           </DialogTitle>
-          <DialogDescription data-oid="24jshtm">
+          <DialogDescription data-oid=".wkgxln">
             為訂單 {order.order_number} 記錄新的收款資訊
           </DialogDescription>
         </DialogHeader>
@@ -251,39 +251,39 @@ export default function RecordPaymentModal({
         {/* 訂單金額概覽卡片 */}
         <Card
           className="bg-gray-50 border-l-4 border-l-blue-500"
-          data-oid="56wh5z6"
+          data-oid="rdivghs"
         >
-          <CardContent className="pt-4" data-oid="u2ns2_6">
-            <div className="grid grid-cols-3 gap-4 text-sm" data-oid="e456-2v">
-              <div className="text-center" data-oid="u-t:lu.">
-                <div className="text-gray-600 font-medium" data-oid="hv09wh-">
+          <CardContent className="pt-4" data-oid=".dh4sno">
+            <div className="grid grid-cols-3 gap-4 text-sm" data-oid="ca-suov">
+              <div className="text-center" data-oid="uv8cx2w">
+                <div className="text-gray-600 font-medium" data-oid="xkeoynw">
                   訂單總額
                 </div>
                 <div
                   className="text-lg font-bold text-gray-900"
-                  data-oid="dfhqt46"
+                  data-oid="ybxzfh9"
                 >
                   ${order.grand_total.toFixed(2)}
                 </div>
               </div>
-              <div className="text-center" data-oid="e3-qecw">
-                <div className="text-gray-600 font-medium" data-oid="ylk8t7:">
+              <div className="text-center" data-oid="-ryg7jz">
+                <div className="text-gray-600 font-medium" data-oid="4za:2xe">
                   已付金額
                 </div>
                 <div
                   className="text-lg font-bold text-green-600"
-                  data-oid="3yp_6qf"
+                  data-oid="b7dwmno"
                 >
                   ${order.paid_amount.toFixed(2)}
                 </div>
               </div>
-              <div className="text-center" data-oid="b1cak8z">
-                <div className="text-gray-600 font-medium" data-oid="o2r.fxf">
+              <div className="text-center" data-oid="onbnl2y">
+                <div className="text-gray-600 font-medium" data-oid=":vugby1">
                   剩餘未付
                 </div>
                 <div
                   className="text-lg font-bold text-red-600"
-                  data-oid="l.pr05y"
+                  data-oid=":72:t.b"
                 >
                   ${remainingAmount.toFixed(2)}
                 </div>
@@ -292,27 +292,27 @@ export default function RecordPaymentModal({
           </CardContent>
         </Card>
 
-        <Form {...form} data-oid="ooqyugm">
+        <Form {...form} data-oid="j3enj2b">
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6"
-            data-oid="_ob43pw"
+            data-oid="_s09qgb"
           >
             {/* 收款金額 */}
             <FormField
               control={form.control}
               name="amount"
               render={({ field }) => (
-                <FormItem data-oid="oura1vz">
+                <FormItem data-oid="fyxq5lg">
                   <FormLabel
                     className="flex items-center gap-2"
-                    data-oid="s:vek8z"
+                    data-oid="m852qck"
                   >
-                    <DollarSign className="h-4 w-4" data-oid="8akjw_1" />
+                    <DollarSign className="h-4 w-4" data-oid=":4gql.v" />
                     收款金額 *
                   </FormLabel>
-                  <FormControl data-oid="q.od0k-">
-                    <div className="flex gap-2" data-oid="uh0lak7">
+                  <FormControl data-oid="8u5-n8p">
+                    <div className="flex gap-2" data-oid=":5nd3qs">
                       <Input
                         type="number"
                         placeholder="請輸入收款金額"
@@ -324,7 +324,7 @@ export default function RecordPaymentModal({
                           field.onChange(parseFloat(e.target.value) || 0)
                         }
                         className="text-right flex-1"
-                        data-oid="6c775g-"
+                        data-oid="0yjx083"
                       />
 
                       {/* 🎯 新增：快速填入按鈕 */}
@@ -334,26 +334,26 @@ export default function RecordPaymentModal({
                           variant="outline"
                           size="sm"
                           onClick={handleFillRemainingAmount}
-                          data-oid="k-_vuvc"
+                          data-oid="qxd:y71"
                         >
                           填入剩餘金額
                         </Button>
                       )}
                     </div>
                   </FormControl>
-                  <FormMessage data-oid="k_5mzwp" />
+                  <FormMessage data-oid="7mr2-pe" />
                   {/* 🎯 新增：提示文字 */}
                   {remainingAmount > 0 && field.value === remainingAmount && (
                     <p
                       className="text-sm text-green-600 mt-1"
-                      data-oid="k3zp25m"
+                      data-oid="5gb7nlc"
                     >
                       ✓ 此金額將會完成全額付款
                     </p>
                   )}
                 </FormItem>
               )}
-              data-oid="eisngvs"
+              data-oid="xcj7k1l"
             />
 
             {/* 收款方式 */}
@@ -361,43 +361,43 @@ export default function RecordPaymentModal({
               control={form.control}
               name="payment_method"
               render={({ field }) => (
-                <FormItem data-oid="kb.pm84">
+                <FormItem data-oid="atpq3-l">
                   <FormLabel
                     className="flex items-center gap-2"
-                    data-oid="cmt9hfk"
+                    data-oid="eouqy-5"
                   >
-                    <CreditCard className="h-4 w-4" data-oid="ht-f6ta" />
+                    <CreditCard className="h-4 w-4" data-oid="4ejn0sv" />
                     收款方式 *
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    data-oid="3qk6h27"
+                    data-oid="-dci:wc"
                   >
-                    <FormControl data-oid="nyila..">
-                      <SelectTrigger data-oid="6kuzcpw">
+                    <FormControl data-oid="lrwhphj">
+                      <SelectTrigger data-oid="ht3xl61">
                         <SelectValue
                           placeholder="請選擇收款方式"
-                          data-oid="_3_228y"
+                          data-oid="u1lvpo_"
                         />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent data-oid="1sfy32v">
+                    <SelectContent data-oid="p4we2x7">
                       {PAYMENT_METHODS.map((method) => {
                         const IconComponent = method.icon;
                         return (
                           <SelectItem
                             key={method.value}
                             value={method.value}
-                            data-oid="_f7_86r"
+                            data-oid="4q17n.d"
                           >
                             <div
                               className="flex items-center gap-2"
-                              data-oid="a9ujj7g"
+                              data-oid="j:sjpce"
                             >
                               <IconComponent
                                 className="h-4 w-4"
-                                data-oid="99j3moc"
+                                data-oid="yaac7a9"
                               />
 
                               {method.label}
@@ -407,10 +407,10 @@ export default function RecordPaymentModal({
                       })}
                     </SelectContent>
                   </Select>
-                  <FormMessage data-oid="3dx5:1-" />
+                  <FormMessage data-oid="7zc8zwa" />
                 </FormItem>
               )}
-              data-oid="q7t24ni"
+              data-oid="v.fs4kg"
             />
 
             {/* 收款日期 */}
@@ -418,33 +418,33 @@ export default function RecordPaymentModal({
               control={form.control}
               name="payment_date"
               render={({ field }) => (
-                <FormItem className="flex flex-col" data-oid="biw6dg0">
+                <FormItem className="flex flex-col" data-oid="8148-c8">
                   <FormLabel
                     className="flex items-center gap-2"
-                    data-oid="p.rr3y2"
+                    data-oid="o458pcq"
                   >
-                    <Clock className="h-4 w-4" data-oid="6_huzs3" />
+                    <Clock className="h-4 w-4" data-oid="ajeoplq" />
                     收款日期
                   </FormLabel>
-                  <Popover data-oid=".:wgce6">
-                    <PopoverTrigger asChild data-oid="kpw8vmm">
-                      <FormControl data-oid="0-mwzaj">
+                  <Popover data-oid="54gqnxt">
+                    <PopoverTrigger asChild data-oid="ghosfur">
+                      <FormControl data-oid="tb0djlu">
                         <Button
                           variant="outline"
                           className={cn(
                             "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground",
                           )}
-                          data-oid="92738th"
+                          data-oid="bq:n8n3"
                         >
                           {field.value ? (
                             format(field.value, "yyyy年MM月dd日")
                           ) : (
-                            <span data-oid="51mxyka">選擇收款日期</span>
+                            <span data-oid="kqoz:rq">選擇收款日期</span>
                           )}
                           <CalendarIcon
                             className="ml-auto h-4 w-4 opacity-50"
-                            data-oid="1:wv.p8"
+                            data-oid="66b-fky"
                           />
                         </Button>
                       </FormControl>
@@ -452,7 +452,7 @@ export default function RecordPaymentModal({
                     <PopoverContent
                       className="w-auto p-0"
                       align="start"
-                      data-oid="32.-cq8"
+                      data-oid="6t4wt3g"
                     >
                       <Calendar
                         mode="single"
@@ -462,14 +462,14 @@ export default function RecordPaymentModal({
                           date > new Date() || date < new Date("1900-01-01")
                         }
                         initialFocus
-                        data-oid="a7-v_5n"
+                        data-oid="7p3dal:"
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormMessage data-oid="umqoz4e" />
+                  <FormMessage data-oid=":qqfal7" />
                 </FormItem>
               )}
-              data-oid="aisf2q1"
+              data-oid="wwofbc3"
             />
 
             {/* 備註 */}
@@ -477,29 +477,29 @@ export default function RecordPaymentModal({
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem data-oid=".5a81.b">
-                  <FormLabel data-oid="g4tm4n-">備註</FormLabel>
-                  <FormControl data-oid="oq3u38a">
+                <FormItem data-oid="ivyqhlo">
+                  <FormLabel data-oid="0ipse.2">備註</FormLabel>
+                  <FormControl data-oid=".0pvf_d">
                     <Textarea
                       placeholder="輸入收款相關備註（選填）"
                       className="resize-none"
                       {...field}
-                      data-oid="vd4y1cn"
+                      data-oid="72d7qoc"
                     />
                   </FormControl>
-                  <FormMessage data-oid="p0d513m" />
+                  <FormMessage data-oid="y41zkm2" />
                 </FormItem>
               )}
-              data-oid="459iihc"
+              data-oid="yq6hv:1"
             />
 
-            <DialogFooter className="flex gap-2" data-oid="zxlith6">
+            <DialogFooter className="flex gap-2" data-oid="0qx2scf">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={addPayment.isPending}
-                data-oid="-lei70q"
+                data-oid="vyu06.q"
               >
                 取消
               </Button>
@@ -507,13 +507,13 @@ export default function RecordPaymentModal({
                 type="submit"
                 disabled={addPayment.isPending || remainingAmount <= 0}
                 className="min-w-[120px]"
-                data-oid="nx_ucub"
+                data-oid="ff:jaz7"
               >
                 {addPayment.isPending ? (
                   <>
                     <Loader2
                       className="mr-2 h-4 w-4 animate-spin"
-                      data-oid="xjq0xvk"
+                      data-oid=":6y1fx6"
                     />
                     記錄中...
                   </>

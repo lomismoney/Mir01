@@ -285,15 +285,15 @@ export default function SkuHistoryPage({
   // 條件性渲染移到最後
   if (!mounted || !sku) {
     return (
-      <div className="container mx-auto py-8" data-oid="ly_4lcz">
-        <Card data-oid="dxh3lc9">
-          <CardContent className="p-6" data-oid="jkb.uux">
-            <div className="space-y-4" data-oid="j08a7zr">
+      <div className="container mx-auto py-8" data-oid="m3a83o:">
+        <Card data-oid=".ox2roo">
+          <CardContent className="p-6" data-oid="1fv_bth">
+            <div className="space-y-4" data-oid="ni5bufi">
               {Array.from({ length: 5 }).map((_, index) => (
                 <Skeleton
                   key={index}
                   className="h-16 w-full"
-                  data-oid="whca.ny"
+                  data-oid="onz:0dw"
                 />
               ))}
             </div>
@@ -305,15 +305,15 @@ export default function SkuHistoryPage({
 
   if (isLoadingHistory) {
     return (
-      <div className="container mx-auto py-8" data-oid="6bdlba5">
-        <Card data-oid="r5p417p">
-          <CardContent className="p-6" data-oid=".4o3kir">
-            <div className="space-y-4" data-oid="20xct-8">
+      <div className="container mx-auto py-8" data-oid="k8as6gr">
+        <Card data-oid="0teab43">
+          <CardContent className="p-6" data-oid="3rcgzfd">
+            <div className="space-y-4" data-oid="wq551bl">
               {Array.from({ length: 5 }).map((_, index) => (
                 <Skeleton
                   key={index}
                   className="h-16 w-full"
-                  data-oid="rq-qyu5"
+                  data-oid="q256qz4"
                 />
               ))}
             </div>
@@ -325,9 +325,9 @@ export default function SkuHistoryPage({
 
   if (historyError) {
     return (
-      <div className="container mx-auto py-8" data-oid="hsjzb4m">
-        <Alert variant="destructive" data-oid="lm:5eq.">
-          <AlertDescription data-oid="l9q9m-d">
+      <div className="container mx-auto py-8" data-oid="i:6nuy-">
+        <Alert variant="destructive" data-oid="8af08sz">
+          <AlertDescription data-oid="cxswmj6">
             載入庫存歷史記錄失敗，請稍後再試。
           </AlertDescription>
         </Alert>
@@ -337,9 +337,9 @@ export default function SkuHistoryPage({
 
   if (matchingInventories.length === 0) {
     return (
-      <div className="container mx-auto py-8" data-oid=".10785l">
-        <Alert data-oid="x_hzzs3">
-          <AlertDescription data-oid="zr30q7u">
+      <div className="container mx-auto py-8" data-oid="thaj61d">
+        <Alert data-oid="wvx-pbt">
+          <AlertDescription data-oid="egma5kz">
             找不到 SKU 為 "{sku}" 的庫存項目。
           </AlertDescription>
         </Alert>
@@ -348,17 +348,17 @@ export default function SkuHistoryPage({
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6" data-oid="enxecgm">
+    <div className="container mx-auto py-8 space-y-6" data-oid="binpewz">
       {/* 標題區塊 */}
-      <div className="flex items-center justify-between" data-oid="7kbeu9_">
-        <div data-oid="stkybf2">
-          <h2 className="text-2xl font-bold" data-oid="7:lvug8">
+      <div className="flex items-center justify-between" data-oid="e2jxqec">
+        <div data-oid="mc7jg64">
+          <h2 className="text-2xl font-bold" data-oid="snt.a79">
             SKU 庫存變動歷史
           </h2>
-          <p className="text-muted-foreground" data-oid="khu9wp:">
+          <p className="text-muted-foreground" data-oid="mdx.77_">
             {productName} (SKU: {sku})
           </p>
-          <p className="text-sm text-muted-foreground mt-1" data-oid="oqbndxv">
+          <p className="text-sm text-muted-foreground mt-1" data-oid=":u8_w4_">
             覆蓋 {matchingInventories.length} 個分店的庫存記錄
           </p>
         </div>
@@ -366,48 +366,48 @@ export default function SkuHistoryPage({
           onClick={() => window.location.reload()}
           variant="outline"
           size="sm"
-          data-oid="g.hgpwb"
+          data-oid="u50hhgn"
         >
-          <RefreshCw className="h-4 w-4 mr-2" data-oid="ow1uet." />
+          <RefreshCw className="h-4 w-4 mr-2" data-oid="_u._yzw" />
           重新整理
         </Button>
       </div>
 
       {/* 分店概覽 */}
-      <Card data-oid="1yadsed">
-        <CardHeader data-oid="o5e2zkr">
-          <CardTitle className="flex items-center gap-2" data-oid="30zbhjk">
-            <Building className="h-5 w-5" data-oid="_s8ge:s" />
+      <Card data-oid="4aty-ol">
+        <CardHeader data-oid="sqgu_7v">
+          <CardTitle className="flex items-center gap-2" data-oid="qdayqdb">
+            <Building className="h-5 w-5" data-oid="br_jwmk" />
             分店庫存概覽
           </CardTitle>
         </CardHeader>
-        <CardContent data-oid="nbjy_gq">
+        <CardContent data-oid=":fc_ktj">
           <div
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
-            data-oid="pep95_e"
+            data-oid="8k-rqiy"
           >
             {matchingInventories.map((inventory: InventoryItem) => (
               <div
                 key={inventory.id}
                 className="p-3 border rounded-lg"
-                data-oid="ts7k-ou"
+                data-oid="cj_p1fb"
               >
-                <div className="font-medium" data-oid="ty8bqt0">
+                <div className="font-medium" data-oid="q5h1.d-">
                   {inventory.store?.name || `分店 ${inventory.store?.id}`}
                 </div>
                 <div
                   className="text-sm text-muted-foreground"
-                  data-oid="6r98abd"
+                  data-oid="o-7r0p2"
                 >
                   當前庫存:{" "}
-                  <span className="font-medium" data-oid="u56vdvv">
+                  <span className="font-medium" data-oid="f_0uk:9">
                     {inventory.quantity || 0}
                   </span>
                 </div>
                 {inventory.low_stock_threshold && (
                   <div
                     className="text-xs text-muted-foreground"
-                    data-oid="nehsyc4"
+                    data-oid="7ks8dd9"
                   >
                     低庫存門檻: {inventory.low_stock_threshold}
                   </div>
@@ -419,20 +419,20 @@ export default function SkuHistoryPage({
       </Card>
 
       {/* 篩選器 */}
-      <Card data-oid="_vjxvv_">
-        <CardHeader data-oid="leisz40">
-          <CardTitle className="flex items-center gap-2" data-oid="y81lfie">
-            <Search className="h-5 w-5" data-oid="sjmz5tj" />
+      <Card data-oid="ldyjwpg">
+        <CardHeader data-oid="8vz-9wq">
+          <CardTitle className="flex items-center gap-2" data-oid="al:85yp">
+            <Search className="h-5 w-5" data-oid="f14osov" />
             篩選條件
           </CardTitle>
         </CardHeader>
-        <CardContent data-oid="_ebgxt-">
+        <CardContent data-oid="hv:vvoe">
           <div
             className="grid grid-cols-1 md:grid-cols-5 gap-4"
-            data-oid="0x6sga2"
+            data-oid=":0gepn8"
           >
-            <div className="space-y-2" data-oid="z1heiwo">
-              <Label data-oid="s:18g.s">交易類型</Label>
+            <div className="space-y-2" data-oid="tmozg16">
+              <Label data-oid="yg6xi54">交易類型</Label>
               <Select
                 value={filters.type || "all"}
                 onValueChange={(value) =>
@@ -442,33 +442,33 @@ export default function SkuHistoryPage({
                     page: 1,
                   }))
                 }
-                data-oid="ly9.0sh"
+                data-oid="_9d_6xg"
               >
-                <SelectTrigger data-oid="a:jnn.k">
-                  <SelectValue placeholder="全部類型" data-oid="yuqwmnp" />
+                <SelectTrigger data-oid="eahg8i6">
+                  <SelectValue placeholder="全部類型" data-oid="_76605g" />
                 </SelectTrigger>
-                <SelectContent data-oid="d:4e-4f">
-                  <SelectItem value="all" data-oid=":5-z-6d">
+                <SelectContent data-oid="uhxhs-5">
+                  <SelectItem value="all" data-oid=".zr-zul">
                     全部類型
                   </SelectItem>
-                  <SelectItem value="addition" data-oid="8v5ykoh">
+                  <SelectItem value="addition" data-oid="roos7lq">
                     入庫
                   </SelectItem>
-                  <SelectItem value="reduction" data-oid="2nb5kro">
+                  <SelectItem value="reduction" data-oid=".4o2ucx">
                     出庫
                   </SelectItem>
-                  <SelectItem value="adjustment" data-oid="pd.ang5">
+                  <SelectItem value="adjustment" data-oid="3l:mo2t">
                     調整
                   </SelectItem>
-                  <SelectItem value="transfer" data-oid="7n.hklb">
+                  <SelectItem value="transfer" data-oid="xvqw-t2">
                     轉移
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2" data-oid=".v::jpj">
-              <Label data-oid="mbiesd3">分店篩選</Label>
+            <div className="space-y-2" data-oid="tw7vzw5">
+              <Label data-oid="l0ql9m1">分店篩選</Label>
               <StoreCombobox
                 value={filters.store_id}
                 onValueChange={(value) =>
@@ -476,12 +476,12 @@ export default function SkuHistoryPage({
                 }
                 placeholder="全部分店"
                 className="w-full"
-                data-oid="3l9lu9p"
+                data-oid=":cawkdk"
               />
             </div>
 
-            <div className="space-y-2" data-oid="cm30g25">
-              <Label data-oid="ubee1_1">起始日期</Label>
+            <div className="space-y-2" data-oid="pctdiu3">
+              <Label data-oid="jeqtdyn">起始日期</Label>
               <Input
                 type="date"
                 value={filters.start_date}
@@ -492,11 +492,11 @@ export default function SkuHistoryPage({
                     page: 1,
                   }))
                 }
-                data-oid="j0zuipl"
+                data-oid="l1v6nl8"
               />
             </div>
-            <div className="space-y-2" data-oid="2k5hbnp">
-              <Label data-oid="avk.6ns">結束日期</Label>
+            <div className="space-y-2" data-oid="q7g.yq1">
+              <Label data-oid="x7lyqfl">結束日期</Label>
               <Input
                 type="date"
                 value={filters.end_date}
@@ -507,11 +507,11 @@ export default function SkuHistoryPage({
                     page: 1,
                   }))
                 }
-                data-oid="mefzzz9"
+                data-oid="7_8bud-"
               />
             </div>
-            <div className="space-y-2" data-oid="yvju-jf">
-              <Label data-oid="3dgco_o">每頁顯示</Label>
+            <div className="space-y-2" data-oid="4bptshb">
+              <Label data-oid="swhq1l5">每頁顯示</Label>
               <Select
                 value={filters.per_page.toString()}
                 onValueChange={(value) =>
@@ -521,19 +521,19 @@ export default function SkuHistoryPage({
                     page: 1,
                   }))
                 }
-                data-oid="m1vnno3"
+                data-oid="tk28.o7"
               >
-                <SelectTrigger data-oid="b6g-ea2">
-                  <SelectValue data-oid="sg:l0m3" />
+                <SelectTrigger data-oid="vioy34t">
+                  <SelectValue data-oid="f0j2kqx" />
                 </SelectTrigger>
-                <SelectContent data-oid="ui11v7.">
-                  <SelectItem value="10" data-oid="xiy3mbi">
+                <SelectContent data-oid="7jze7ib">
+                  <SelectItem value="10" data-oid="kr0npvz">
                     10 筆
                   </SelectItem>
-                  <SelectItem value="20" data-oid="1momptu">
+                  <SelectItem value="20" data-oid=":3yzokl">
                     20 筆
                   </SelectItem>
-                  <SelectItem value="50" data-oid="757p73n">
+                  <SelectItem value="50" data-oid="t8g7ijy">
                     50 筆
                   </SelectItem>
                 </SelectContent>
@@ -544,40 +544,40 @@ export default function SkuHistoryPage({
       </Card>
 
       {/* 歷史記錄 */}
-      <Card data-oid="vivrtjs">
-        <CardHeader data-oid="z-nx.n5">
-          <CardTitle className="flex items-center gap-2" data-oid="8a40g7f">
-            <Clock className="h-5 w-5" data-oid=".vt7jvu" />
+      <Card data-oid="nf89o1f">
+        <CardHeader data-oid="hfxxg7y">
+          <CardTitle className="flex items-center gap-2" data-oid="r10arf_">
+            <Clock className="h-5 w-5" data-oid="e0ey.7q" />
             變動記錄
           </CardTitle>
-          <CardDescription data-oid="2wicai0">
+          <CardDescription data-oid="empwmze">
             共 {filteredTransactions.length} 筆記錄
             {filters.store_id && ` (已篩選分店)`}
           </CardDescription>
         </CardHeader>
-        <CardContent data-oid="r:t:7rc">
+        <CardContent data-oid="y-a1022">
           {isLoadingHistory ? (
-            <div className="space-y-4" data-oid="w5yfyvh">
+            <div className="space-y-4" data-oid="g_nbx6m">
               {Array.from({ length: 5 }).map((_, index) => (
                 <div
                   key={index}
                   className="flex items-center space-x-4 p-4 border rounded-lg"
-                  data-oid="4n.gh5e"
+                  data-oid="t0ibnl-"
                 >
                   <Skeleton
                     className="h-10 w-10 rounded-full"
-                    data-oid="6-18ra2"
+                    data-oid="ano0x5s"
                   />
 
-                  <div className="space-y-2" data-oid="km8tsar">
-                    <Skeleton className="h-4 w-[250px]" data-oid="7m7gmsu" />
-                    <Skeleton className="h-4 w-[200px]" data-oid="_doo0jt" />
+                  <div className="space-y-2" data-oid="ps09pfx">
+                    <Skeleton className="h-4 w-[250px]" data-oid=":4zvy_y" />
+                    <Skeleton className="h-4 w-[200px]" data-oid=".42h8v0" />
                   </div>
                 </div>
               ))}
             </div>
           ) : filteredTransactions.length > 0 ? (
-            <div className="space-y-4" data-oid="i-rih:c">
+            <div className="space-y-4" data-oid=".o3t1t:">
               {filteredTransactions.map((transaction: any, index: number) => {
                 // 處理合併的轉移記錄
                 if (transaction.type === "transfer") {
@@ -585,43 +585,43 @@ export default function SkuHistoryPage({
                     <div
                       key={`${transaction.id}-${index}`}
                       className="flex items-start space-x-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                      data-oid="t_bbiv-"
+                      data-oid=":tz2zfy"
                     >
-                      <div className="mt-1" data-oid="vlcmwks">
+                      <div className="mt-1" data-oid="5j71-c5">
                         <Package
                           className="h-4 w-4 text-blue-600"
-                          data-oid="ruxnd2x"
+                          data-oid="4v23rec"
                         />
                       </div>
 
-                      <div className="flex-1 space-y-2" data-oid="2an17tt">
+                      <div className="flex-1 space-y-2" data-oid="skhzkq8">
                         <div
                           className="flex items-center justify-between"
-                          data-oid="zst7rl5"
+                          data-oid="y6ifzb-"
                         >
                           <div
                             className="flex items-center gap-2"
-                            data-oid="1b_4bd-"
+                            data-oid="k.8t6lc"
                           >
                             <Badge
                               variant="default"
                               className="bg-blue-600"
-                              data-oid="dpttkjx"
+                              data-oid="bdknmx5"
                             >
                               庫存轉移
                             </Badge>
                             <span
                               className="text-sm text-muted-foreground"
-                              data-oid="xprf.io"
+                              data-oid="tm6zlxw"
                             >
                               數量: {transaction.quantity}
                             </span>
                           </div>
                           <div
                             className="flex items-center gap-2 text-sm text-muted-foreground"
-                            data-oid="u.v8_na"
+                            data-oid="4aa2cw5"
                           >
-                            <Calendar className="h-4 w-4" data-oid="6xkau0." />
+                            <Calendar className="h-4 w-4" data-oid="cmh:2ae" />
                             {transaction.created_at &&
                               formatDistanceToNow(
                                 new Date(transaction.created_at),
@@ -635,28 +635,28 @@ export default function SkuHistoryPage({
 
                         <div
                           className="flex items-center gap-2 text-sm"
-                          data-oid="qd87.ql"
+                          data-oid="67ftqxu"
                         >
-                          <Badge variant="outline" data-oid=":p_ab98">
+                          <Badge variant="outline" data-oid="_ys1kmn">
                             {transaction.from_store.name}
                           </Badge>
                           <ArrowRight
                             className="h-4 w-4 text-muted-foreground"
-                            data-oid="_67-fm5"
+                            data-oid="_2jjjfl"
                           />
 
-                          <Badge variant="outline" data-oid="vrulr.3">
+                          <Badge variant="outline" data-oid="4auis5b">
                             {transaction.to_store.name}
                           </Badge>
                         </div>
 
                         <div
                           className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"
-                          data-oid="49dgo2o"
+                          data-oid="5leke.b"
                         >
                           {transaction._original?.out && (
-                            <div data-oid="3xip:l2">
-                              <span className="font-medium" data-oid="c_n80qw">
+                            <div data-oid="hirrl6i">
+                              <span className="font-medium" data-oid="5mq.o4q">
                                 {transaction.from_store.name} 轉出後:
                               </span>{" "}
                               {transaction._original.out.after_quantity ??
@@ -664,8 +664,8 @@ export default function SkuHistoryPage({
                             </div>
                           )}
                           {transaction._original?.in && (
-                            <div data-oid="81sgk-p">
-                              <span className="font-medium" data-oid="hggp:ht">
+                            <div data-oid="sbio_cf">
+                              <span className="font-medium" data-oid="-_j4q8x">
                                 {transaction.to_store.name} 轉入後:
                               </span>{" "}
                               {transaction._original.in.after_quantity ??
@@ -675,10 +675,10 @@ export default function SkuHistoryPage({
                           {transaction.user && (
                             <div
                               className="flex items-center gap-1 md:col-span-2"
-                              data-oid="qizcrp8"
+                              data-oid=":c5pbfi"
                             >
-                              <User className="h-3 w-3" data-oid="j_synzq" />
-                              <span className="font-medium" data-oid="b2qwo2:">
+                              <User className="h-3 w-3" data-oid="_9neieh" />
+                              <span className="font-medium" data-oid="l1d54l7">
                                 操作人:
                               </span>{" "}
                               {transaction.user.name}
@@ -689,9 +689,9 @@ export default function SkuHistoryPage({
                         {transaction.notes && (
                           <div
                             className="text-sm text-muted-foreground"
-                            data-oid="1d.gf_c"
+                            data-oid="-6y3_4o"
                           >
-                            <span className="font-medium" data-oid="cnvwdn1">
+                            <span className="font-medium" data-oid="4e45ki-">
                               備註:
                             </span>{" "}
                             {transaction.notes}
@@ -701,9 +701,9 @@ export default function SkuHistoryPage({
                         {transaction.metadata && (
                           <div
                             className="text-xs text-muted-foreground"
-                            data-oid="rlshneq"
+                            data-oid="2rztl3_"
                           >
-                            <span className="font-medium" data-oid="tlzv1ge">
+                            <span className="font-medium" data-oid="wo2kczz">
                               轉移編號:
                             </span>
                             {(() => {
@@ -737,9 +737,9 @@ export default function SkuHistoryPage({
                   <div
                     key={`${transaction.id}-${index}`}
                     className="flex items-start space-x-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    data-oid="jr.dpw7"
+                    data-oid="06dj-gc"
                   >
-                    <div className="mt-1" data-oid="w_4mtwd">
+                    <div className="mt-1" data-oid="9.co6mn">
                       {(() => {
                         const IconComponent = getTransactionIcon(
                           transaction.type,
@@ -747,36 +747,36 @@ export default function SkuHistoryPage({
                         return (
                           <IconComponent
                             className={`h-4 w-4 ${getTransactionIconColor(transaction.type)}`}
-                            data-oid="ab422-d"
+                            data-oid="p_mi.wd"
                           />
                         );
                       })()}
                     </div>
 
-                    <div className="flex-1 space-y-2" data-oid="::cer.o">
+                    <div className="flex-1 space-y-2" data-oid="qbl1fhv">
                       <div
                         className="flex items-center justify-between"
-                        data-oid="0p:vzvi"
+                        data-oid="a4y-bwf"
                       >
                         <div
                           className="flex items-center gap-2"
-                          data-oid="-sr-qk6"
+                          data-oid="qsm_e3z"
                         >
                           <Badge
                             variant={getTransactionTypeVariant(
                               transaction.type,
                             )}
-                            data-oid="gftp8t5"
+                            data-oid=":up.v0k"
                           >
                             {getTransactionTypeName(transaction.type)}
                           </Badge>
-                          <Badge variant="outline" data-oid="0e1hvpw">
+                          <Badge variant="outline" data-oid="y6re.a0">
                             {relatedInventory?.store?.name ||
                               `分店 ${relatedInventory?.store?.id}`}
                           </Badge>
                           <span
                             className="text-sm text-muted-foreground"
-                            data-oid="h7e3kvb"
+                            data-oid="1yh6odw"
                           >
                             數量變動:{" "}
                             {(transaction.quantity || 0) > 0 ? "+" : ""}
@@ -785,9 +785,9 @@ export default function SkuHistoryPage({
                         </div>
                         <div
                           className="flex items-center gap-2 text-sm text-muted-foreground"
-                          data-oid="xlgw:jj"
+                          data-oid="j8uip4k"
                         >
-                          <Calendar className="h-4 w-4" data-oid="kd1-oz-" />
+                          <Calendar className="h-4 w-4" data-oid="cnrehrb" />
                           {transaction.created_at &&
                             formatDistanceToNow(
                               new Date(transaction.created_at),
@@ -801,16 +801,16 @@ export default function SkuHistoryPage({
 
                       <div
                         className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm"
-                        data-oid="i5o9:u-"
+                        data-oid="9nhqexr"
                       >
-                        <div data-oid="ynd22pq">
-                          <span className="font-medium" data-oid="4.zlp.1">
+                        <div data-oid="wid88p3">
+                          <span className="font-medium" data-oid="0s79oaz">
                             變動前:
                           </span>{" "}
                           {transaction.before_quantity ?? "未知"}
                         </div>
-                        <div data-oid="xd-2qeo">
-                          <span className="font-medium" data-oid="zv3doic">
+                        <div data-oid="1eb.m38">
+                          <span className="font-medium" data-oid="gmn1:z9">
                             變動後:
                           </span>{" "}
                           {transaction.after_quantity ?? "未知"}
@@ -818,10 +818,10 @@ export default function SkuHistoryPage({
                         {transaction.user && (
                           <div
                             className="flex items-center gap-1"
-                            data-oid="v4cx_an"
+                            data-oid="9cwz929"
                           >
-                            <User className="h-3 w-3" data-oid="sn6cqdd" />
-                            <span className="font-medium" data-oid="02h4isw">
+                            <User className="h-3 w-3" data-oid="5j73tij" />
+                            <span className="font-medium" data-oid="vf8xuvl">
                               操作人:
                             </span>{" "}
                             {transaction.user.name}
@@ -832,9 +832,9 @@ export default function SkuHistoryPage({
                       {transaction.notes && (
                         <div
                           className="text-sm text-muted-foreground"
-                          data-oid="i:nahb_"
+                          data-oid="tflwfzd"
                         >
-                          <span className="font-medium" data-oid="jin6zxz">
+                          <span className="font-medium" data-oid="y-vkt2j">
                             備註:
                           </span>{" "}
                           {transaction.notes}
@@ -843,9 +843,9 @@ export default function SkuHistoryPage({
 
                       <div
                         className="text-xs text-muted-foreground"
-                        data-oid="bt-m2gp"
+                        data-oid="s3gfxjm"
                       >
-                        <span className="font-medium" data-oid="ez.r1ot">
+                        <span className="font-medium" data-oid="c5cva7c">
                           額外資訊:
                         </span>
                         {(() => {
@@ -899,15 +899,15 @@ export default function SkuHistoryPage({
           ) : (
             <div
               className="text-center py-8 text-muted-foreground"
-              data-oid="-l7vb3w"
+              data-oid="22ad6fi"
             >
               <Clock
                 className="h-12 w-12 mx-auto mb-4 opacity-20"
-                data-oid=".w-shsy"
+                data-oid="wq33-sl"
               />
 
-              <p data-oid="q-0.5mo">暫無變動記錄</p>
-              <p className="text-sm" data-oid="dce2-49">
+              <p data-oid="ty07iwf">暫無變動記錄</p>
+              <p className="text-sm" data-oid="v6i_-dz">
                 該 SKU 尚無任何庫存變動記錄
               </p>
             </div>

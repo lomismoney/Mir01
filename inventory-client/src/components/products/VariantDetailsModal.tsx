@@ -73,7 +73,7 @@ interface VariantDetailsModalProps {
 const formatPrice = (price?: number) => {
   if (price === undefined || price === null) {
     return (
-      <span className="text-muted-foreground" data-oid="98a:4vg">
+      <span className="text-muted-foreground" data-oid="zb8-3zo">
         N/A
       </span>
     );
@@ -101,7 +101,7 @@ const formatVariantAttributes = (
 ) => {
   if (!attributeValues || attributeValues.length === 0) {
     return (
-      <span className="text-muted-foreground" data-oid="mgqa-6d">
+      <span className="text-muted-foreground" data-oid="a3zpmyz">
         無規格
       </span>
     );
@@ -116,7 +116,7 @@ const formatVariantAttributes = (
 
   return (
     attributes || (
-      <span className="text-muted-foreground" data-oid="0mpw924">
+      <span className="text-muted-foreground" data-oid="vk7ka3l">
         無規格
       </span>
     )
@@ -142,9 +142,9 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
     cell: ({ row }) => {
       const sku = row.original.sku;
       return (
-        <Badge variant="outline" className="font-mono" data-oid="wacxk9x">
+        <Badge variant="outline" className="font-mono" data-oid="mi1m5_j">
           {sku || (
-            <span className="text-muted-foreground" data-oid="401r2lu">
+            <span className="text-muted-foreground" data-oid="4ysxdl:">
               無 SKU
             </span>
           )}
@@ -160,7 +160,7 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
     cell: ({ row }) => {
       const attributeValues = row.original.attribute_values;
       return (
-        <div className="max-w-[250px]" data-oid="-zqlitb">
+        <div className="max-w-[250px]" data-oid="wbwy.uj">
           {formatVariantAttributes(attributeValues)}
         </div>
       );
@@ -174,7 +174,7 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
     cell: ({ row }) => {
       const price = row.original.price;
       return (
-        <div className="font-medium" data-oid="-dal5xe">
+        <div className="font-medium" data-oid="btm00qj">
           {formatPrice(
             Number.isFinite(Number(price)) ? Number(price) : undefined,
           )}
@@ -197,10 +197,10 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
           0,
         );
         return (
-          <div className="text-center" data-oid="ms95f3a">
+          <div className="text-center" data-oid="e54d3o2">
             <Badge
               variant={totalQuantity > 0 ? "default" : "destructive"}
-              data-oid="fmo38nm"
+              data-oid="onajh31"
             >
               {totalQuantity} 件
             </Badge>
@@ -210,8 +210,8 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
 
       // 預留接口提示
       return (
-        <div className="text-center" data-oid="hz9n-1_">
-          <Badge variant="secondary" data-oid="k4dfzqh">
+        <div className="text-center" data-oid="-aq8x-w">
+          <Badge variant="secondary" data-oid="1yh3ybg">
             待對接
           </Badge>
         </div>
@@ -227,7 +227,7 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
       const createdAt = row.original.created_at;
       if (!createdAt)
         return (
-          <span className="text-muted-foreground" data-oid="o.dcbm5">
+          <span className="text-muted-foreground" data-oid="7skn.yl">
             N/A
           </span>
         );
@@ -251,18 +251,18 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
         // 編輯功能尚未實現
       };
       return (
-        <DropdownMenu data-oid="pmhio3o">
-          <DropdownMenuTrigger asChild data-oid="el4gt-i">
-            <Button variant="ghost" className="h-8 w-8 p-0" data-oid="12wjmf0">
-              <span className="sr-only" data-oid="1t_.gc6">
+        <DropdownMenu data-oid="caoi:br">
+          <DropdownMenuTrigger asChild data-oid="cgcdzqx">
+            <Button variant="ghost" className="h-8 w-8 p-0" data-oid="nqpyuto">
+              <span className="sr-only" data-oid="s0_clqx">
                 開啟選單
               </span>
-              <MoreHorizontal className="h-4 w-4" data-oid="p5igxwa" />
+              <MoreHorizontal className="h-4 w-4" data-oid="i7w9xw7" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" data-oid="4ur_o1o">
-            <DropdownMenuItem onClick={handleEditVariant} data-oid="7pg7lf6">
-              <Edit className="mr-2 h-4 w-4" data-oid=":qdia54" />
+          <DropdownMenuContent align="end" data-oid="b3xe8__">
+            <DropdownMenuItem onClick={handleEditVariant} data-oid="q7ij4lc">
+              <Edit className="mr-2 h-4 w-4" data-oid="5btityx" />
               編輯 SKU
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -311,17 +311,17 @@ const VariantDetailsModal = ({
   });
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} data-oid="xmi7c56">
+    <Dialog open={isOpen} onOpenChange={onClose} data-oid="m:0i36e">
       <DialogContent
         className="max-w-6xl max-h-[80vh] overflow-y-auto"
-        data-oid="-0b9lba"
+        data-oid="hzprxet"
       >
-        <DialogHeader data-oid="-j:5t9t">
-          <DialogTitle className="flex items-center gap-2" data-oid="rsw0g46">
-            <Package className="h-5 w-5" data-oid="67l8bma" />
-            <span data-oid="oxinu4k">商品規格詳情</span>
+        <DialogHeader data-oid="e60jpti">
+          <DialogTitle className="flex items-center gap-2" data-oid="0sl23v9">
+            <Package className="h-5 w-5" data-oid="_vqdmkk" />
+            <span data-oid="1afstow">商品規格詳情</span>
             {product?.name && (
-              <span className="text-muted-foreground" data-oid="o4c20hw">
+              <span className="text-muted-foreground" data-oid="8d2fc-k">
                 - {product.name}
               </span>
             )}
@@ -329,44 +329,44 @@ const VariantDetailsModal = ({
         </DialogHeader>
 
         {/* SKU 詳細表格 */}
-        <div className="mt-4" data-oid="tlwji:8">
+        <div className="mt-4" data-oid="e0s88.0">
           {product ? (
-            <div className="space-y-4" data-oid="l3db_mx">
+            <div className="space-y-4" data-oid="1hqmw:g">
               {/* 商品摘要資訊 */}
               <div
                 className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg"
-                data-oid="d3ybe1t"
+                data-oid="q3_9hxs"
               >
-                <div data-oid="v5s18.4">
+                <div data-oid="296101-">
                   <span
                     className="text-sm font-medium text-muted-foreground"
-                    data-oid="c615zl0"
+                    data-oid="kzt-vkk"
                   >
                     商品名稱
                   </span>
-                  <p className="font-medium" data-oid="5ee-yiw">
+                  <p className="font-medium" data-oid=".ue_tq_">
                     {product.name}
                   </p>
                 </div>
-                <div data-oid="nn1iu2a">
+                <div data-oid="d46ol4j">
                   <span
                     className="text-sm font-medium text-muted-foreground"
-                    data-oid="0mqgl08"
+                    data-oid="fpchxb2"
                   >
                     規格數量
                   </span>
-                  <p className="font-medium" data-oid="4cd9m0_">
+                  <p className="font-medium" data-oid="-y0mxl1">
                     {variants.length} 個 SKU
                   </p>
                 </div>
-                <div data-oid="p:x0hob">
+                <div data-oid="c.5bnma">
                   <span
                     className="text-sm font-medium text-muted-foreground"
-                    data-oid="83d8unj"
+                    data-oid="wd7j7::"
                   >
                     價格範圍
                   </span>
-                  <p className="font-medium" data-oid="3l2rj-v">
+                  <p className="font-medium" data-oid="m1d6tsl">
                     {product.price_range
                       ? `${formatPrice(product.price_range.min)} - ${formatPrice(product.price_range.max)}`
                       : "N/A"}
@@ -376,12 +376,12 @@ const VariantDetailsModal = ({
 
               {/* SKU 表格 */}
               {variants.length > 0 ? (
-                <div className="space-y-4" data-oid="wist7ep">
+                <div className="space-y-4" data-oid="0wihyka">
                   {/* 搜尋框 */}
-                  <div className="relative max-w-sm" data-oid="om4i5-z">
+                  <div className="relative max-w-sm" data-oid="tgvt:1.">
                     <Search
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"
-                      data-oid="1y6-x1q"
+                      data-oid="wlk0yay"
                     />
 
                     <Input
@@ -389,25 +389,25 @@ const VariantDetailsModal = ({
                       value={globalFilter ?? ""}
                       onChange={(e) => setGlobalFilter(e.target.value)}
                       className="pl-10"
-                      data-oid="sxzw7ib"
+                      data-oid="ax2hpt6"
                     />
                   </div>
 
                   {/* 表格 */}
-                  <div className="rounded-md border" data-oid="7tby66:">
-                    <Table data-oid="0tplza6">
-                      <TableHeader data-oid="t72ugly">
+                  <div className="rounded-md border" data-oid="o.gwar.">
+                    <Table data-oid="k118fcn">
+                      <TableHeader data-oid="4v_sms0">
                         {table.getHeaderGroups().map((headerGroup) => (
                           <TableRow
                             key={headerGroup.id}
                             className="border-b hover:bg-transparent"
-                            data-oid="8x0.e9z"
+                            data-oid=".:whgta"
                           >
                             {headerGroup.headers.map((header) => (
                               <TableHead
                                 key={header.id}
                                 className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                                data-oid="c-uh.qa"
+                                data-oid="fss26py"
                               >
                                 {header.isPlaceholder
                                   ? null
@@ -420,16 +420,16 @@ const VariantDetailsModal = ({
                           </TableRow>
                         ))}
                       </TableHeader>
-                      <TableBody data-oid="n0-pdlj">
+                      <TableBody data-oid="_lwbwi_">
                         {table.getRowModel().rows?.length ? (
                           table.getRowModel().rows.map((row) => (
                             <TableRow
                               key={row.id}
                               data-state={row.getIsSelected() && "selected"}
-                              data-oid="4mtt_d8"
+                              data-oid="8.z_c67"
                             >
                               {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id} data-oid="bzxxgxy">
+                                <TableCell key={cell.id} data-oid="vj1xkpx">
                                   {flexRender(
                                     cell.column.columnDef.cell,
                                     cell.getContext(),
@@ -439,11 +439,11 @@ const VariantDetailsModal = ({
                             </TableRow>
                           ))
                         ) : (
-                          <TableRow data-oid="o9b13p5">
+                          <TableRow data-oid="u_a7m_5">
                             <TableCell
                               colSpan={skuColumns.length}
                               className="h-24 text-center"
-                              data-oid="vyveysz"
+                              data-oid="5x.34_1"
                             >
                               沒有找到相符的 SKU
                             </TableCell>
@@ -456,21 +456,21 @@ const VariantDetailsModal = ({
                   {/* 分頁控制 */}
                   <div
                     className="flex items-center justify-between space-x-2 py-4"
-                    data-oid="7pgsxdr"
+                    data-oid="bgbii2g"
                   >
                     <div
                       className="text-sm text-muted-foreground"
-                      data-oid="oxeyimu"
+                      data-oid="_e1ru1f"
                     >
                       共 {table.getFilteredRowModel().rows.length} 個 SKU
                     </div>
-                    <div className="space-x-2" data-oid="p54cdqr">
+                    <div className="space-x-2" data-oid="5t1ya:p">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
-                        data-oid="f.lsxz3"
+                        data-oid="h-cyamk"
                       >
                         上一頁
                       </Button>
@@ -479,7 +479,7 @@ const VariantDetailsModal = ({
                         size="sm"
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
-                        data-oid="jzw7rf."
+                        data-oid="zeyt5px"
                       >
                         下一頁
                       </Button>
@@ -489,15 +489,15 @@ const VariantDetailsModal = ({
               ) : (
                 <div
                   className="text-center py-8 text-muted-foreground"
-                  data-oid="qcevq8d"
+                  data-oid="1vcff17"
                 >
                   <Package
                     className="h-12 w-12 mx-auto mb-4 opacity-50"
-                    data-oid="gb7yrjx"
+                    data-oid="t7ldoi-"
                   />
 
-                  <p data-oid="tr5amif">此商品尚無 SKU 規格</p>
-                  <p className="text-sm" data-oid="6i7i0ts">
+                  <p data-oid="-61ovjf">此商品尚無 SKU 規格</p>
+                  <p className="text-sm" data-oid="_s-yatv">
                     請先為商品添加規格變體
                   </p>
                 </div>
@@ -506,14 +506,14 @@ const VariantDetailsModal = ({
           ) : (
             <div
               className="text-center py-8 text-muted-foreground"
-              data-oid="mne42kr"
+              data-oid="n5zfj_q"
             >
               <Package
                 className="h-12 w-12 mx-auto mb-4 opacity-50"
-                data-oid="pakv_hk"
+                data-oid="agaxe0_"
               />
 
-              <p data-oid="887ifuf">請選擇一個商品以查看其規格詳情</p>
+              <p data-oid="or.:1ho">請選擇一個商品以查看其規格詳情</p>
             </div>
           )}
         </div>

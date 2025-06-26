@@ -80,15 +80,15 @@ export function CreateCategoryModal({
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
+    <Dialog open={open} onOpenChange={onOpenChange} data-oid="yor.uzp">
+      <DialogContent className="sm:max-w-[425px]" data-oid="1_1abgt">
+        <DialogHeader data-oid="_azl8st">
+          <DialogTitle data-oid="66a3m0i">
             {parentCategory
               ? `新增子分類 - ${parentCategory.name}`
               : "新增分類"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription data-oid="9617060">
             {parentCategory
               ? `在「${parentCategory.name}」下新增子分類`
               : "建立新的商品分類"}
@@ -100,6 +100,7 @@ export function CreateCategoryModal({
           isLoading={createCategory.isPending}
           categories={flatCategories}
           parentId={parentCategory?.id}
+          data-oid="j5kruzw"
         />
       </DialogContent>
     </Dialog>

@@ -61,52 +61,52 @@ export function NavMain({ items }: { items: NavLink[] }) {
   // 🎯 在客戶端 hydration 完成前，渲染一個簡化版本
   if (!mounted) {
     return (
-      <SidebarGroup data-oid="anwid89">
-        <SidebarGroupContent className="flex flex-col gap-2" data-oid="thtff8m">
-          <SidebarMenu data-oid="433x49e">
+      <SidebarGroup data-oid="gl71bb0">
+        <SidebarGroupContent className="flex flex-col gap-2" data-oid="bhe_ypr">
+          <SidebarMenu data-oid="1n_lc5t">
             <SidebarMenuItem
               className="flex items-center gap-2"
-              data-oid="4mg23vs"
+              data-oid="o51d6q."
             >
               <SidebarMenuButton
                 tooltip="Quick Create"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-                data-oid="3byyyw9"
+                data-oid="0b3hr-u"
               >
-                <IconCirclePlusFilled data-oid="pesddx0" />
-                <span data-oid="y_0ad:v">Quick Create</span>
+                <IconCirclePlusFilled data-oid="vjajjox" />
+                <span data-oid="emg2li1">Quick Create</span>
               </SidebarMenuButton>
               <Button
                 size="icon"
                 className="size-8 group-data-[collapsible=icon]:opacity-0"
                 variant="outline"
-                data-oid="d.dkv.3"
+                data-oid="phewpor"
               >
-                <IconMail data-oid="574ld:5" />
-                <span className="sr-only" data-oid="vz4e756">
+                <IconMail data-oid="_vr_f6m" />
+                <span className="sr-only" data-oid="r5_.cks">
                   Inbox
                 </span>
               </Button>
             </SidebarMenuItem>
           </SidebarMenu>
-          <SidebarMenu data-oid="lqa4evo">
+          <SidebarMenu data-oid="jp7c55s">
             {items.map((item) => (
-              <SidebarMenuItem key={item.title} data-oid="dxxcwpa">
+              <SidebarMenuItem key={item.title} data-oid="vne16t_">
                 {item.children ? (
                   // 🔧 SSR 階段：簡化渲染，避免狀態依賴
                   <div
                     className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground"
-                    data-oid="hli:bte"
+                    data-oid="kxyk35s"
                   >
-                    <item.icon className="h-4 w-4" data-oid="k0u2ur." />
+                    <item.icon className="h-4 w-4" data-oid=":rn_.8v" />
                     {item.title}
                   </div>
                 ) : (
                   <div
                     className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground"
-                    data-oid=":wra3hh"
+                    data-oid="6ximu6r"
                   >
-                    <item.icon className="h-4 w-4" data-oid="g_920iy" />
+                    <item.icon className="h-4 w-4" data-oid="s1iv70m" />
                     {item.title}
                   </div>
                 )}
@@ -119,65 +119,65 @@ export function NavMain({ items }: { items: NavLink[] }) {
   }
 
   return (
-    <SidebarGroup data-oid="an.35c_">
-      <SidebarGroupContent className="flex flex-col gap-2" data-oid="66xyw0.">
-        <SidebarMenu data-oid="ekcm8pz">
+    <SidebarGroup data-oid="60.g61t">
+      <SidebarGroupContent className="flex flex-col gap-2" data-oid="lte69h8">
+        <SidebarMenu data-oid="3rfe18i">
           <SidebarMenuItem
             className="flex items-center gap-2"
-            data-oid="_1_4y4y"
+            data-oid="w5zf05i"
           >
             <SidebarMenuButton
               tooltip="Quick Create"
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-              data-oid="jb1:m.i"
+              data-oid="-ln5:xw"
             >
-              <IconCirclePlusFilled data-oid=":qsxlr1" />
-              <span data-oid="hl4lo23">Quick Create</span>
+              <IconCirclePlusFilled data-oid="g_pbug_" />
+              <span data-oid=":6vd8rt">Quick Create</span>
             </SidebarMenuButton>
             <Button
               size="icon"
               className="size-8 group-data-[collapsible=icon]:opacity-0"
               variant="outline"
-              data-oid="m7j5mmf"
+              data-oid="i6h-odp"
             >
-              <IconMail data-oid="dxjdxni" />
-              <span className="sr-only" data-oid="bb506t.">
+              <IconMail data-oid="ftm.s6d" />
+              <span className="sr-only" data-oid="74vbta4">
                 Inbox
               </span>
             </Button>
           </SidebarMenuItem>
         </SidebarMenu>
-        <SidebarMenu data-oid="vl2gmjo">
+        <SidebarMenu data-oid="0_kw35s">
           {items.map((item) =>
             item.children ? (
               // ✅ 如果有子選單，渲染修正後的 Collapsible 元件
-              <SidebarMenuItem key={item.title} data-oid="t9qhstj">
+              <SidebarMenuItem key={item.title} data-oid="e0oo9p-">
                 <Collapsible
                   open={openItems.includes(item.title)}
                   onOpenChange={() => toggleItem(item.title)}
-                  data-oid="68i9isz"
+                  data-oid="r5vr4yh"
                 >
                   <CollapsibleTrigger
                     // 將樣式直接應用在觸發器上，而不是內部的 span
                     className={cn(
                       "flex items-center justify-between w-full rounded-lg text-sidebar-foreground transition-all hover:text-sidebar-accent-foreground",
                     )}
-                    data-oid="g54cj5u"
+                    data-oid="47eq:6u"
                   >
                     {/* 將 padding 等樣式統一放在這裡 */}
                     <div
                       className="flex items-center gap-3 rounded-lg px-3 py-2"
-                      data-oid="-ob125q"
+                      data-oid="glmnw9z"
                     >
-                      <item.icon className="h-4 w-4" data-oid="n:inld5" />
+                      <item.icon className="h-4 w-4" data-oid="cxf_kqs" />
                       {item.title}
                     </div>
                     <IconChevronDown
                       className={`h-4 w-4 mr-3 shrink-0 transition-transform duration-200 ${openItems.includes(item.title) ? "rotate-180" : ""}`}
-                      data-oid="losshx."
+                      data-oid="9yt83ug"
                     />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="pl-8 pt-1" data-oid="ar:r--9">
+                  <CollapsibleContent className="pl-8 pt-1" data-oid="djwpmvf">
                     {item.children.map((child) => (
                       <Link
                         key={child.title}
@@ -192,7 +192,7 @@ export function NavMain({ items }: { items: NavLink[] }) {
                           },
                         )}
                         suppressHydrationWarning
-                        data-oid="ukzr3js"
+                        data-oid="i88x_8x"
                       >
                         {child.title}
                       </Link>
@@ -202,7 +202,7 @@ export function NavMain({ items }: { items: NavLink[] }) {
               </SidebarMenuItem>
             ) : (
               // 普通連結項保持統一樣式
-              <SidebarMenuItem key={item.title} data-oid="ami2bwc">
+              <SidebarMenuItem key={item.title} data-oid="c1sy8ck">
                 <Link
                   href={item.url!}
                   prefetch={true}
@@ -215,9 +215,9 @@ export function NavMain({ items }: { items: NavLink[] }) {
                     },
                   )}
                   suppressHydrationWarning
-                  data-oid="ultyna3"
+                  data-oid="o-f0qjw"
                 >
-                  <item.icon className="h-4 w-4" data-oid="gr57s0l" />
+                  <item.icon className="h-4 w-4" data-oid="_9qt0su" />
                   {item.title}
                 </Link>
               </SidebarMenuItem>

@@ -99,19 +99,19 @@ export function InventoryListTable({
 
     if (quantity <= 0) {
       return (
-        <Badge variant="destructive" data-oid="k6wxlic">
+        <Badge variant="destructive" data-oid="k9isybl">
           缺貨
         </Badge>
       );
     } else if (quantity <= lowStockThreshold) {
       return (
-        <Badge variant="outline" data-oid="a8tp4zh">
+        <Badge variant="outline" data-oid="ivmasp5">
           低庫存
         </Badge>
       );
     } else {
       return (
-        <Badge variant="default" data-oid="xjb8org">
+        <Badge variant="default" data-oid="sj620nc">
           正常
         </Badge>
       );
@@ -121,100 +121,100 @@ export function InventoryListTable({
   const flatInventoryItems = flattenInventoryData(data);
 
   return (
-    <div className="rounded-md border" data-oid="dm9eo6s">
-      <Table data-oid="6sqm7dd">
-        <TableHeader data-oid=":.rx-n6">
+    <div className="rounded-md border" data-oid="kv-uht3">
+      <Table data-oid="c0tobc0">
+        <TableHeader data-oid="oolkh13">
           <TableRow
             className="border-b hover:bg-transparent"
-            data-oid="9selih8"
+            data-oid="cvqkomq"
           >
             <TableHead
               className="w-[100px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-              data-oid="7ekb._p"
+              data-oid="w87krfw"
             >
               SKU
             </TableHead>
             <TableHead
               className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-              data-oid="avnuh.u"
+              data-oid="z66.sm."
             >
               產品名稱
             </TableHead>
             <TableHead
               className="w-[120px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-              data-oid="jt927zo"
+              data-oid="wl_l16_"
             >
               所在分店
             </TableHead>
             <TableHead
               className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="lj:9wh_"
+              data-oid="8ekcm7r"
             >
               數量
             </TableHead>
             <TableHead
               className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="craee2l"
+              data-oid="4d2c-se"
             >
               售價
             </TableHead>
             <TableHead
               className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="2z9xjzc"
+              data-oid="nyfwqd9"
             >
               平均成本
             </TableHead>
             <TableHead
               className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="3i020ev"
+              data-oid="1jsbdo8"
             >
               利潤率
             </TableHead>
             <TableHead
               className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="4938ba_"
+              data-oid="er-4q53"
             >
               狀態
             </TableHead>
             <TableHead
               className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="pfr788."
+              data-oid="4ryquqk"
             >
               操作
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody data-oid="o.._275">
+        <TableBody data-oid="q7sbuja">
           {isLoading ? (
             // 載入中顯示骨架屏
             Array.from({ length: 5 }).map((_, index) => (
-              <TableRow key={`skeleton-${index}`} data-oid="3u7s:y-">
-                <TableCell colSpan={9} data-oid="y:--ij2">
-                  <Skeleton className="h-12 w-full" data-oid="sohx64q" />
+              <TableRow key={`skeleton-${index}`} data-oid="urio_pp">
+                <TableCell colSpan={9} data-oid="yyaj_i3">
+                  <Skeleton className="h-12 w-full" data-oid="pulct47" />
                 </TableCell>
               </TableRow>
             ))
           ) : flatInventoryItems.length === 0 ? (
             // 無資料顯示
-            <TableRow data-oid="69gbf2m">
+            <TableRow data-oid="7mw77db">
               <TableCell
                 colSpan={9}
                 className="h-24 text-center"
-                data-oid="u0we.ut"
+                data-oid="vyf1_l1"
               >
                 <div
                   className="flex flex-col items-center justify-center space-y-3 py-6"
-                  data-oid="xv63f-1"
+                  data-oid="ug-2hh2"
                 >
                   <p
                     className="text-lg font-medium text-muted-foreground"
-                    data-oid="lbrey78"
+                    data-oid="p93w2:9"
                   >
                     沒有庫存資料
                   </p>
                   <p
                     className="text-sm text-muted-foreground"
-                    data-oid="8tnd73i"
+                    data-oid="g:5.9a9"
                   >
                     選擇一個門市並添加庫存
                   </p>
@@ -224,40 +224,40 @@ export function InventoryListTable({
           ) : (
             // 庫存資料
             flatInventoryItems.map((item, index) => (
-              <TableRow key={`${item.inventoryId}-${index}`} data-oid="823zg9:">
+              <TableRow key={`${item.inventoryId}-${index}`} data-oid="eku5bg0">
                 <TableCell
                   className="font-medium font-mono text-sm"
-                  data-oid="4mbflak"
+                  data-oid="qwq9--2"
                 >
                   {item.sku}
                 </TableCell>
-                <TableCell data-oid="odt8:f.">{item.productName}</TableCell>
-                <TableCell className="font-medium" data-oid="j581f5i">
+                <TableCell data-oid="gn584h_">{item.productName}</TableCell>
+                <TableCell className="font-medium" data-oid="v:q0zig">
                   {item.storeName}
                 </TableCell>
-                <TableCell className="text-center font-mono" data-oid="-2_cvmg">
+                <TableCell className="text-center font-mono" data-oid="6qqxj8t">
                   {item.quantity.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-right font-mono" data-oid="6f.pmzr">
+                <TableCell className="text-right font-mono" data-oid="lby7t8t">
                   {item.price > 0 ? `NT$ ${item.price.toLocaleString()}` : "—"}
                 </TableCell>
-                <TableCell className="text-right font-mono" data-oid="m8p.rq_">
+                <TableCell className="text-right font-mono" data-oid="2-yrosu">
                   {item.averageCost && item.averageCost > 0
                     ? `NT$ ${item.averageCost.toLocaleString()}`
                     : "—"}
                 </TableCell>
-                <TableCell className="text-right font-mono" data-oid=".np90yx">
+                <TableCell className="text-right font-mono" data-oid="5bmrdw8">
                   {item.profitMargin && item.profitMargin > 0
                     ? `${item.profitMargin.toFixed(1)}%`
                     : "—"}
                 </TableCell>
-                <TableCell className="text-center" data-oid="ot6cgiu">
+                <TableCell className="text-center" data-oid="nmk67pp">
                   {getStockStatusBadge(item)}
                 </TableCell>
-                <TableCell className="text-right" data-oid="0ns6tot">
+                <TableCell className="text-right" data-oid=".b30llb">
                   <div
                     className="flex justify-end space-x-2"
-                    data-oid="pg3nc1q"
+                    data-oid="8mw69-s"
                   >
                     <Button
                       variant="outline"
@@ -269,10 +269,10 @@ export function InventoryListTable({
                           item.quantity,
                         )
                       }
-                      data-oid="yxew_:2"
+                      data-oid="z68.e27"
                     >
-                      <ArrowUpDown className="h-4 w-4" data-oid="3jbruhr" />
-                      <span className="sr-only" data-oid="y:4gpr6">
+                      <ArrowUpDown className="h-4 w-4" data-oid="cazidwh" />
+                      <span className="sr-only" data-oid="__ialje">
                         調整庫存
                       </span>
                     </Button>

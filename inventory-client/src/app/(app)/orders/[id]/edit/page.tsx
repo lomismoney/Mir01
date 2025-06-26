@@ -14,21 +14,21 @@ import Link from "next/link";
 
 // 表單骨架屏
 const FormSkeleton = () => (
-  <div className="space-y-8" data-oid="a0qo4ig">
-    <div className="space-y-2" data-oid="v415dx_">
-      <Skeleton className="h-4 w-1/4" data-oid="h912.6l" />
-      <Skeleton className="h-10 w-full" data-oid="57fwiul" />
+  <div className="space-y-8" data-oid="gva::jm">
+    <div className="space-y-2" data-oid="1fe.17i">
+      <Skeleton className="h-4 w-1/4" data-oid="auui4we" />
+      <Skeleton className="h-10 w-full" data-oid="r8i-ogl" />
     </div>
-    <div className="space-y-2" data-oid="xi_q5lb">
-      <Skeleton className="h-4 w-1/4" data-oid="4d8r5sg" />
-      <Skeleton className="h-10 w-full" data-oid="8whx-ip" />
+    <div className="space-y-2" data-oid="3v3mu-.">
+      <Skeleton className="h-4 w-1/4" data-oid="qcqspis" />
+      <Skeleton className="h-10 w-full" data-oid="lslpmtr" />
     </div>
     <div
       className="h-48 w-full rounded-md border-2 border-dashed"
-      data-oid="58uan.f"
+      data-oid="i3yzpr4"
     />
 
-    <Skeleton className="h-10 w-32" data-oid="gsvc1lr" />
+    <Skeleton className="h-10 w-32" data-oid="-j7y_r3" />
   </div>
 );
 
@@ -65,43 +65,43 @@ export default function EditOrderPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6" data-oid="n5ry95-">
-        <div className="flex items-center gap-4" data-oid="qwymmq.">
-          <Button variant="outline" size="sm" asChild data-oid="b1sx1zx">
-            <Link href="/orders" data-oid="wo5ytvj">
-              <ArrowLeft className="h-4 w-4 mr-2" data-oid="8lve-2x" />
+      <div className="space-y-6" data-oid="bh0yumg">
+        <div className="flex items-center gap-4" data-oid="3xuomg5">
+          <Button variant="outline" size="sm" asChild data-oid="k:u0_tr">
+            <Link href="/orders" data-oid="9:ob85q">
+              <ArrowLeft className="h-4 w-4 mr-2" data-oid="meg:vn1" />
               返回訂單列表
             </Link>
           </Button>
-          <div data-oid="rrhar6v">
-            <h1 className="text-2xl font-bold" data-oid="2jvhz8s">
+          <div data-oid="hcaj3p.">
+            <h1 className="text-2xl font-bold" data-oid="s90qy.n">
               編輯訂單
             </h1>
-            <p className="text-muted-foreground" data-oid="84t28cq">
+            <p className="text-muted-foreground" data-oid="eplo89u">
               載入中...
             </p>
           </div>
         </div>
-        <FormSkeleton data-oid="cbakgo1" />
+        <FormSkeleton data-oid="kv1_tl7" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="space-y-6" data-oid="n15mj1q">
-        <div className="flex items-center gap-4" data-oid="rpvhjhn">
-          <Button variant="outline" size="sm" asChild data-oid=".fzp6ml">
-            <Link href="/orders" data-oid="3l89qtg">
-              <ArrowLeft className="h-4 w-4 mr-2" data-oid="ok3utrm" />
+      <div className="space-y-6" data-oid="b31j6p1">
+        <div className="flex items-center gap-4" data-oid="sptviiu">
+          <Button variant="outline" size="sm" asChild data-oid=":2erdmh">
+            <Link href="/orders" data-oid="ct2_5j9">
+              <ArrowLeft className="h-4 w-4 mr-2" data-oid="h4t-6lj" />
               返回訂單列表
             </Link>
           </Button>
-          <div data-oid="kv7yzwt">
-            <h1 className="text-2xl font-bold" data-oid="3:o7g.o">
+          <div data-oid="8uj2hog">
+            <h1 className="text-2xl font-bold" data-oid="8svyv62">
               編輯訂單
             </h1>
-            <p className="text-red-500" data-oid="i0uqt9z">
+            <p className="text-red-500" data-oid="7wwx3ts">
               載入失敗: {error?.message}
             </p>
           </div>
@@ -141,19 +141,19 @@ export default function EditOrderPage() {
     : undefined;
 
   return (
-    <div className="space-y-6" data-oid="xh-k8.h">
-      <div className="flex items-center gap-4" data-oid="i1t7a_p">
-        <Button variant="outline" size="sm" asChild data-oid="swt7zvh">
-          <Link href={`/orders/${orderId}`} data-oid="rwxg5mz">
-            <ArrowLeft className="h-4 w-4 mr-2" data-oid="0hmvt28" />
+    <div className="space-y-6" data-oid="vb-upos">
+      <div className="flex items-center gap-4" data-oid="l34d4-z">
+        <Button variant="outline" size="sm" asChild data-oid="ho82tsk">
+          <Link href={`/orders/${orderId}`} data-oid="esr-min">
+            <ArrowLeft className="h-4 w-4 mr-2" data-oid="j9f6clg" />
             返回訂單詳情
           </Link>
         </Button>
-        <div data-oid="4--q-ed">
-          <h1 className="text-2xl font-bold" data-oid="q94ymko">
+        <div data-oid="xjfyjc0">
+          <h1 className="text-2xl font-bold" data-oid="p:pimix">
             編輯訂單
           </h1>
-          <p className="text-muted-foreground" data-oid="tir71.6">
+          <p className="text-muted-foreground" data-oid="gpunqe1">
             正在修改訂單號：{order?.order_number}
           </p>
         </div>
@@ -163,7 +163,7 @@ export default function EditOrderPage() {
         initialData={initialData}
         isSubmitting={isUpdating}
         onSubmit={handleUpdateSubmit}
-        data-oid="wrb56n2"
+        data-oid="hwp1rsj"
       />
     </div>
   );

@@ -12,5 +12,5 @@ import { PurchaseManagement } from "@/components/purchases/PurchaseManagement";
  * - 顯示操作者信息
  */
 export default function IncomingPage() {
-  return <PurchaseManagement data-oid=".x1bx6p" />;
+  return <PurchaseManagement data-oid="fi7oayh" />;
 }

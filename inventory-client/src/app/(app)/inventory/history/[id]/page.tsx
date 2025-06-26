@@ -22,13 +22,13 @@ export default async function InventoryHistoryPage({
     return (
       <div
         className="flex items-center justify-center min-h-[400px]"
-        data-oid="kb21l10"
+        data-oid="1.s6ea9"
       >
-        <div className="text-center" data-oid="2ag8jns">
-          <h2 className="text-xl font-semibold mb-2" data-oid="37-8rv2">
+        <div className="text-center" data-oid=":1dpp:a">
+          <h2 className="text-xl font-semibold mb-2" data-oid="i10z048">
             無效的庫存ID
           </h2>
-          <p className="text-muted-foreground" data-oid="-_4jdvt">
+          <p className="text-muted-foreground" data-oid="c30b4h.">
             請檢查URL中的庫存ID是否正確
           </p>
         </div>
@@ -41,7 +41,7 @@ export default async function InventoryHistoryPage({
       inventoryId={inventoryId}
       productName={resolvedSearchParams.productName}
       sku={resolvedSearchParams.sku}
-      data-oid="1euua.."
+      data-oid="eblnz1r"
     />
   );
 }

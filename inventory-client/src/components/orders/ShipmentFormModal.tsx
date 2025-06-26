@@ -130,36 +130,36 @@ export function ShipmentFormModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose} data-oid="h.rqq8n">
-      <DialogContent className="sm:max-w-md" data-oid="oj0ty5y">
-        <DialogHeader data-oid="2z-ndsl">
-          <DialogTitle data-oid="8-u1-w6">建立出貨資訊</DialogTitle>
+    <Dialog open={open} onOpenChange={handleClose} data-oid="mpbjo-4">
+      <DialogContent className="sm:max-w-md" data-oid="qc--ll4">
+        <DialogHeader data-oid="e77lkqq">
+          <DialogTitle data-oid="sr0y4m0">建立出貨資訊</DialogTitle>
         </DialogHeader>
 
-        <Form {...form} data-oid="i.cpp-x">
+        <Form {...form} data-oid="nc1.fkf">
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-6"
-            data-oid="c471uvf"
+            data-oid="lzdr25d"
           >
             {/* 物流公司欄位 */}
             <FormField
               control={form.control}
               name="carrier"
               render={({ field }) => (
-                <FormItem data-oid="spwi1:r">
-                  <FormLabel data-oid="1-94u9h">物流公司</FormLabel>
-                  <FormControl data-oid="hzunyxx">
+                <FormItem data-oid="j2:7:5r">
+                  <FormLabel data-oid="99enhuq">物流公司</FormLabel>
+                  <FormControl data-oid="uvnhrv-">
                     <Input
                       placeholder="請輸入物流公司名稱（如：黑貓宅急便、新竹貨運）"
                       {...field}
-                      data-oid="0xdbevk"
+                      data-oid="ha5akqv"
                     />
                   </FormControl>
-                  <FormMessage data-oid="375hp2m" />
+                  <FormMessage data-oid="7qjawuz" />
                 </FormItem>
               )}
-              data-oid=":fl_2lu"
+              data-oid="aa23_g-"
             />
 
             {/* 追蹤單號欄位 */}
@@ -167,36 +167,36 @@ export function ShipmentFormModal({
               control={form.control}
               name="tracking_number"
               render={({ field }) => (
-                <FormItem data-oid="-8wge6y">
-                  <FormLabel data-oid=":r47xz5">追蹤單號</FormLabel>
-                  <FormControl data-oid="molv1ij">
+                <FormItem data-oid="03ct5t2">
+                  <FormLabel data-oid="y-oxyta">追蹤單號</FormLabel>
+                  <FormControl data-oid="-7rz.n3">
                     <Input
                       placeholder="請輸入追蹤單號"
                       {...field}
-                      data-oid="b0jz4iy"
+                      data-oid="t8yvjdx"
                     />
                   </FormControl>
-                  <FormMessage data-oid="uz_sp.5" />
+                  <FormMessage data-oid="b0:gcg0" />
                 </FormItem>
               )}
-              data-oid="lk.cq3t"
+              data-oid="hb5afsq"
             />
 
             {/* 表單操作按鈕 */}
-            <DialogFooter className="gap-2" data-oid="y-33hvo">
+            <DialogFooter className="gap-2" data-oid="ocldaol">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={createShipment.isPending}
-                data-oid="uo18v:b"
+                data-oid="ge_u1ez"
               >
                 取消
               </Button>
               <Button
                 type="submit"
                 disabled={createShipment.isPending}
-                data-oid="ujnj718"
+                data-oid="j0dakvo"
               >
                 {createShipment.isPending ? "建立中..." : "建立出貨"}
               </Button>

@@ -47,46 +47,46 @@ const AppLayout = memo(function AppLayout({ children }: AppLayoutProps) {
           "--header-height": "3rem", // 48px = 3rem，固定標題高度
         } as React.CSSProperties
       }
-      data-oid="tm-6xs1"
+      data-oid="o:23pqb"
     >
       {/* 🔧 側邊欄組件 - 獨立緩存和優化 */}
-      <AppSidebar variant="inset" data-oid="43y3o-j" />
+      <AppSidebar variant="inset" data-oid="fw.pe:i" />
 
-      <SidebarInset data-oid="lq-7fbo">
+      <SidebarInset data-oid="5r1_z.l">
         {/* 🔧 標題組件 - 輕量級，最小重渲染 */}
-        <SiteHeader data-oid="w50djt." />
+        <SiteHeader data-oid="e6q6bd8" />
 
         {/* 🚀 主內容區域 - 核心性能優化區域 */}
         <main
           className="flex-1 overflow-auto p-6 bg-background"
-          data-oid="ype050f"
+          data-oid="_a-0cwf"
         >
-          <div className="container mx-auto max-w-7xl" data-oid="ysh0jeg">
+          <div className="container mx-auto max-w-7xl" data-oid="ou:o_lv">
             {/* 🎯 Suspense 邊界 - 路由性能革命的核心 */}
             <Suspense
               fallback={
                 <div
                   className="flex flex-col items-center justify-center h-64 space-y-4"
-                  data-oid="u8lv-5:"
+                  data-oid="furuu9m"
                 >
-                  <LoadingSpinner size="lg" data-oid="ur2t3w5" />
-                  <div className="text-center space-y-2" data-oid="1v6j2zi">
+                  <LoadingSpinner size="lg" data-oid="cdwi6_k" />
+                  <div className="text-center space-y-2" data-oid="l.qc7ro">
                     <h3
                       className="text-lg font-semibold text-foreground"
-                      data-oid="elat_gp"
+                      data-oid="hepf.:_"
                     >
                       載入頁面中
                     </h3>
                     <p
                       className="text-sm text-muted-foreground"
-                      data-oid="jxagfl7"
+                      data-oid="qmht-si"
                     >
                       正在為您準備最新內容...
                     </p>
                   </div>
                 </div>
               }
-              data-oid="w5s2vra"
+              data-oid="9xdzj50"
             >
               {/* 🔥 子頁面內容 - 在 Suspense 保護下懶加載 */}
               {children}
@@ -96,7 +96,7 @@ const AppLayout = memo(function AppLayout({ children }: AppLayoutProps) {
       </SidebarInset>
 
       {/* 🚀 性能監控儀表板 - 實時監控系統性能 */}
-      <PerformanceMonitor data-oid="4u2lv75" />
+      <PerformanceMonitor data-oid="tkl0b8p" />
     </SidebarProvider>
   );
 });

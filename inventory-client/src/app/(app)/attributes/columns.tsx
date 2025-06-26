@@ -40,7 +40,7 @@ import { Attribute } from "@/types/attribute";
 const formatDate = (dateString?: string) => {
   if (!dateString) {
     return (
-      <span className="text-muted-foreground" data-oid="1q7s2xt">
+      <span className="text-muted-foreground" data-oid="_1.dbfw">
         N/A
       </span>
     );
@@ -54,7 +54,7 @@ const formatDate = (dateString?: string) => {
     });
   } catch (error) {
     return (
-      <span className="text-muted-foreground" data-oid="4c2isgm">
+      <span className="text-muted-foreground" data-oid="an8-:y4">
         無效日期
       </span>
     );
@@ -78,7 +78,7 @@ const formatValueCount = (values?: Attribute["values"]) => {
       <Badge
         variant="secondary"
         className="text-muted-foreground"
-        data-oid="v7zew:7"
+        data-oid="99e3f76"
       >
         無值
       </Badge>
@@ -86,8 +86,8 @@ const formatValueCount = (values?: Attribute["values"]) => {
   }
 
   return (
-    <Badge variant="outline" className="font-medium" data-oid="l0m:.20">
-      <Tags className="h-3 w-3 mr-1" data-oid="t.pzzbl" />
+    <Badge variant="outline" className="font-medium" data-oid="s04sv2n">
+      <Tags className="h-3 w-3 mr-1" data-oid="ir7gcq5" />
       {count} 個值
     </Badge>
   );
@@ -107,7 +107,7 @@ export const columns: ColumnDef<Attribute>[] = [
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="選擇全部"
         className="translate-y-[2px]"
-        data-oid="yzd8gzs"
+        data-oid="5j0l_8q"
       />
     ),
 
@@ -117,7 +117,7 @@ export const columns: ColumnDef<Attribute>[] = [
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="選擇此行"
         className="translate-y-[2px]"
-        data-oid="e9xn:6q"
+        data-oid="jfojo8g"
       />
     ),
 
@@ -133,9 +133,9 @@ export const columns: ColumnDef<Attribute>[] = [
     cell: ({ row }) => {
       const name = row.original.name;
       return (
-        <div className="font-medium" data-oid="y2liap9">
+        <div className="font-medium" data-oid="i2o16x5">
           {name || (
-            <span className="text-muted-foreground" data-oid="6_l-l-n">
+            <span className="text-muted-foreground" data-oid="_c7dbcw">
               未命名規格
             </span>
           )}
@@ -151,7 +151,7 @@ export const columns: ColumnDef<Attribute>[] = [
     cell: ({ row }) => {
       const values = row.original.values;
       return (
-        <div className="text-center" data-oid="ni87jy.">
+        <div className="text-center" data-oid="xba3vtn">
           {formatValueCount(values)}
         </div>
       );
@@ -166,7 +166,7 @@ export const columns: ColumnDef<Attribute>[] = [
     cell: ({ row }) => {
       const createdAt = row.original.created_at;
       return (
-        <div className="text-sm" data-oid="81t1cjt">
+        <div className="text-sm" data-oid="p3vrvj8">
           {formatDate(createdAt)}
         </div>
       );
@@ -208,30 +208,30 @@ export const columns: ColumnDef<Attribute>[] = [
       };
 
       return (
-        <DropdownMenu data-oid="-1d6._6">
-          <DropdownMenuTrigger asChild data-oid="0yh4dsc">
-            <Button variant="ghost" className="h-8 w-8 p-0" data-oid="p.zq8zi">
-              <span className="sr-only" data-oid="rnu6_b2">
+        <DropdownMenu data-oid="-_:f6qz">
+          <DropdownMenuTrigger asChild data-oid="7vzj_::">
+            <Button variant="ghost" className="h-8 w-8 p-0" data-oid="ujqgst3">
+              <span className="sr-only" data-oid="9.ashr3">
                 開啟選單
               </span>
-              <MoreHorizontal className="h-4 w-4" data-oid="e60sys6" />
+              <MoreHorizontal className="h-4 w-4" data-oid="rzr34b_" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" data-oid="300abi2">
-            <DropdownMenuItem onClick={handleEdit} data-oid="l7:6tw9">
-              <Edit className="mr-2 h-4 w-4" data-oid="dm59yck" />
+          <DropdownMenuContent align="end" data-oid="z6m:o27">
+            <DropdownMenuItem onClick={handleEdit} data-oid="g53z.1-">
+              <Edit className="mr-2 h-4 w-4" data-oid="2lfr:24" />
               編輯規格
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleManageValues} data-oid="2q6-sf-">
-              <Tags className="mr-2 h-4 w-4" data-oid="wpcj7hv" />
+            <DropdownMenuItem onClick={handleManageValues} data-oid="czn2rv1">
+              <Tags className="mr-2 h-4 w-4" data-oid="fukfxi5" />
               管理規格值
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleDelete}
               className="text-destructive focus:text-destructive"
-              data-oid="iyohr84"
+              data-oid="ta69:5i"
             >
-              <Trash2 className="mr-2 h-4 w-4" data-oid="5fi3009" />
+              <Trash2 className="mr-2 h-4 w-4" data-oid="74f771w" />
               刪除規格
             </DropdownMenuItem>
           </DropdownMenuContent>

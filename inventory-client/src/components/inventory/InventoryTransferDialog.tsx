@@ -28,24 +28,24 @@ export function InventoryTransferDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen} data-oid="u_758vm">
-      <DialogTrigger asChild data-oid=":aagy_h">
-        <Button data-oid="nf6:d91">
-          <ArrowRightLeft className="h-4 w-4 mr-2" data-oid="t0tsw_c" />
+    <Dialog open={open} onOpenChange={setOpen} data-oid="bcziill">
+      <DialogTrigger asChild data-oid="wxp4_06">
+        <Button data-oid="hfo2-ys">
+          <ArrowRightLeft className="h-4 w-4 mr-2" data-oid="wsityg0" />
           新增轉移
         </Button>
       </DialogTrigger>
       <DialogContent
         className="max-w-2xl max-h-[90vh] overflow-y-auto"
-        data-oid="h0dks_4"
+        data-oid="-gc6ww-"
       >
-        <DialogHeader data-oid="1st6:1z">
-          <DialogTitle data-oid="woms2-0">新增庫存轉移</DialogTitle>
-          <DialogDescription data-oid="pt59-cc">
+        <DialogHeader data-oid="7w2wm7c">
+          <DialogTitle data-oid="::7og7m">新增庫存轉移</DialogTitle>
+          <DialogDescription data-oid="jc74q13">
             在不同門市之間轉移庫存
           </DialogDescription>
         </DialogHeader>
-        <InventoryTransferForm onSuccess={handleSuccess} data-oid="_hzf_yd" />
+        <InventoryTransferForm onSuccess={handleSuccess} data-oid="ygn92z6" />
       </DialogContent>
     </Dialog>
   );

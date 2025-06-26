@@ -12,8 +12,8 @@ import { PurchaseManagement } from "@/components/purchases/PurchaseManagement";
  */
 export default function PurchasesPage() {
   return (
-    <div className="container mx-auto p-4 md:p-8" data-oid="8a4acje">
-      <PurchaseManagement data-oid="zfdm28r" />
+    <div className="container mx-auto p-4 md:p-8" data-oid="p4rva1_">
+      <PurchaseManagement data-oid="2p_uiso" />
     </div>
   );
 }

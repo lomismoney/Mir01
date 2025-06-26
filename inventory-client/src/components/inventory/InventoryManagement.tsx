@@ -188,33 +188,33 @@ export function InventoryManagement() {
   // 顯示錯誤狀態
   if (inventoryError) {
     return (
-      <div className="space-y-6 p-6" data-oid=".-04wmz">
+      <div className="space-y-6 p-6" data-oid="9b5p__d">
         {/* 頁面標題區 */}
-        <div className="flex flex-col space-y-2" data-oid="h0.7:o3">
-          <h1 className="text-2xl font-bold" data-oid="2og_gvh">
+        <div className="flex flex-col space-y-2" data-oid="5me540s">
+          <h1 className="text-2xl font-bold" data-oid="_yjxm8b">
             庫存管理
           </h1>
-          <p className="text-muted-foreground" data-oid="3rsitfz">
+          <p className="text-muted-foreground" data-oid="idphyw7">
             管理商品庫存數量、監控庫存水位和處理庫存調整
           </p>
         </div>
 
-        <Alert className="mt-4" data-oid="_dvaktu">
-          <AlertCircle className="h-4 w-4" data-oid="7wl_3qn" />
-          <AlertTitle data-oid="yj7d:ig">載入失敗</AlertTitle>
+        <Alert className="mt-4" data-oid="ue27jb-">
+          <AlertCircle className="h-4 w-4" data-oid="rkl.vi7" />
+          <AlertTitle data-oid="3bv9w6-">載入失敗</AlertTitle>
           <AlertDescription
             className="flex items-center justify-between"
-            data-oid="dm6s8jn"
+            data-oid="xb6dbku"
           >
-            <span data-oid="lre6tkz">無法載入庫存資料，請稍後再試</span>
+            <span data-oid="zzasw1o">無法載入庫存資料，請稍後再試</span>
             <Button
               variant="outline"
               size="sm"
               onClick={handleRefresh}
               className="ml-4"
-              data-oid="tr1:oni"
+              data-oid="1epgfyu"
             >
-              <RefreshIcon className="h-4 w-4 mr-2" data-oid="350ebr1" />
+              <RefreshIcon className="h-4 w-4 mr-2" data-oid="t.bo0ip" />
               重試
             </Button>
           </AlertDescription>
@@ -224,50 +224,50 @@ export function InventoryManagement() {
   }
 
   return (
-    <div className="space-y-6 p-6" data-oid="d5vc2p0">
+    <div className="space-y-6 p-6" data-oid="u3y:w5u">
       {/* 頁面標題區 */}
       <div
         className="flex items-center justify-between mb-6"
-        data-oid="8ntuvk5"
+        data-oid="myyx..b"
       >
-        <div data-oid="9v7p4:8">
-          <h1 className="text-2xl font-bold" data-oid="yi:vye.">
+        <div data-oid="rv.:9p.">
+          <h1 className="text-2xl font-bold" data-oid="vhcsmml">
             庫存管理
           </h1>
-          <p className="text-muted-foreground" data-oid="j0pbezg">
+          <p className="text-muted-foreground" data-oid="yaa7dai">
             管理商品庫存數量、監控庫存水位和處理庫存調整
           </p>
         </div>
       </div>
 
       {/* 篩選器區域 */}
-      <Card data-oid="-ko-b5r">
-        <CardHeader data-oid=":0dz7b:">
-          <CardTitle className="flex items-center gap-2" data-oid="_g5h1:0">
-            <Search className="h-5 w-5" data-oid="qbrt94w" />
+      <Card data-oid=":_vos79">
+        <CardHeader data-oid="euudy.j">
+          <CardTitle className="flex items-center gap-2" data-oid="gnkjv73">
+            <Search className="h-5 w-5" data-oid="7091por" />
             篩選器
             {getActiveFiltersCount() > 0 && (
-              <Badge variant="secondary" className="ml-2" data-oid="ahsj:i:">
+              <Badge variant="secondary" className="ml-2" data-oid="26.nqww">
                 {getActiveFiltersCount()} 項篩選
               </Badge>
             )}
           </CardTitle>
-          <CardDescription data-oid="lczn_kn">
+          <CardDescription data-oid="vl6h3e5">
             使用以下篩選器來精確查找您需要的商品和庫存資訊
           </CardDescription>
         </CardHeader>
-        <CardContent data-oid="m-i453r">
+        <CardContent data-oid="64iz6ev">
           <div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"
-            data-oid="xu851gi"
+            data-oid="aymw7g7"
           >
             {/* 商品名稱搜尋 */}
-            <div className="space-y-2" data-oid="awo.bmp">
+            <div className="space-y-2" data-oid="idua581">
               <label
                 className="text-sm font-medium flex items-center gap-2"
-                data-oid="cv1.l8u"
+                data-oid="_oj6xlo"
               >
-                <Search className="h-4 w-4" data-oid="5vz5jvc" />
+                <Search className="h-4 w-4" data-oid=".xjmdgg" />
                 商品名稱
               </label>
               <Input
@@ -275,36 +275,36 @@ export function InventoryManagement() {
                 value={productNameInput}
                 onChange={(e) => setProductNameInput(e.target.value)}
                 className="w-full"
-                data-oid="ol5lohz"
+                data-oid="c-xuv.m"
               />
             </div>
 
             {/* 門市篩選 */}
-            <div className="space-y-2" data-oid="fn4-8om">
+            <div className="space-y-2" data-oid="gwg2owk">
               <label
                 className="text-sm font-medium flex items-center gap-2"
-                data-oid="x339gfg"
+                data-oid="7wkc0e-"
               >
-                <Store className="h-4 w-4" data-oid="d-bc-l2" />
+                <Store className="h-4 w-4" data-oid="zo8lfb6" />
                 門市
               </label>
               <Select
                 value={filters.store_id?.toString() || "all"}
                 onValueChange={handleStoreChange}
-                data-oid="2b4ipyv"
+                data-oid="oxl9qpg"
               >
-                <SelectTrigger data-oid=":3kj_:6">
-                  <SelectValue placeholder="選擇門市" data-oid="ur5q_7u" />
+                <SelectTrigger data-oid="4xdvt94">
+                  <SelectValue placeholder="選擇門市" data-oid="w_4_x7o" />
                 </SelectTrigger>
-                <SelectContent data-oid="pbs_opi">
-                  <SelectItem value="all" data-oid="g2w0aoi">
+                <SelectContent data-oid="x091tnn">
+                  <SelectItem value="all" data-oid="dr5e:xo">
                     所有門市
                   </SelectItem>
                   {stores.map((store) => (
                     <SelectItem
                       key={store.id}
                       value={store.id?.toString() || ""}
-                      data-oid="zs0ri06"
+                      data-oid="wi6nw13"
                     >
                       {store.name}
                     </SelectItem>
@@ -314,31 +314,31 @@ export function InventoryManagement() {
             </div>
 
             {/* 分類篩選 */}
-            <div className="space-y-2" data-oid="hn9q688">
+            <div className="space-y-2" data-oid="r6s9xbc">
               <label
                 className="text-sm font-medium flex items-center gap-2"
-                data-oid="xhr.asm"
+                data-oid=":gww_wd"
               >
-                <Tag className="h-4 w-4" data-oid="yw4e_oa" />
+                <Tag className="h-4 w-4" data-oid="jsu4.20" />
                 分類
               </label>
               <Select
                 value={filters.category_id?.toString() || "all"}
                 onValueChange={handleCategoryChange}
-                data-oid="6.7sgxe"
+                data-oid="r6uw81_"
               >
-                <SelectTrigger data-oid="skz0cto">
-                  <SelectValue placeholder="選擇分類" data-oid="xdh:lkv" />
+                <SelectTrigger data-oid="1.p6w_w">
+                  <SelectValue placeholder="選擇分類" data-oid="mew2u0r" />
                 </SelectTrigger>
-                <SelectContent data-oid="0nyo-y:">
-                  <SelectItem value="all" data-oid="h02dvk4">
+                <SelectContent data-oid="kmb3k4u">
+                  <SelectItem value="all" data-oid="_8214bu">
                     所有分類
                   </SelectItem>
                   {categories.map((category) => (
                     <SelectItem
                       key={category.id}
                       value={category.id?.toString() || ""}
-                      data-oid="lo3fmg7"
+                      data-oid="qk.t7kr"
                     >
                       {category.name}
                     </SelectItem>
@@ -348,26 +348,26 @@ export function InventoryManagement() {
             </div>
 
             {/* 低庫存篩選 */}
-            <div className="space-y-2" data-oid="3vfj3_l">
+            <div className="space-y-2" data-oid="6nwdsxg">
               <label
                 className="text-sm font-medium flex items-center gap-2"
-                data-oid="lv4dpdh"
+                data-oid="bevgbx-"
               >
-                <AlertTriangle className="h-4 w-4" data-oid="o1b_swm" />
+                <AlertTriangle className="h-4 w-4" data-oid="da57o7p" />
                 庫存狀態
               </label>
-              <div className="flex items-center space-x-2" data-oid="udzjsj0">
+              <div className="flex items-center space-x-2" data-oid="0w:o4ku">
                 <Checkbox
                   id="low-stock"
                   checked={!!filters.low_stock}
                   onCheckedChange={handleLowStockChange}
-                  data-oid="82bg.3i"
+                  data-oid="7bq845v"
                 />
 
                 <label
                   htmlFor="low-stock"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  data-oid="jmkvdhq"
+                  data-oid=":szfg9:"
                 >
                   低庫存
                 </label>
@@ -375,26 +375,26 @@ export function InventoryManagement() {
             </div>
 
             {/* 缺貨篩選 */}
-            <div className="space-y-2" data-oid="zk6h.qf">
+            <div className="space-y-2" data-oid="itftwn4">
               <label
                 className="text-sm font-medium flex items-center gap-2"
-                data-oid="1xmfu.g"
+                data-oid="ae4s4tz"
               >
-                <PackageX className="h-4 w-4" data-oid="qif.aws" />
+                <PackageX className="h-4 w-4" data-oid="ue65kxz" />
                 缺貨狀態
               </label>
-              <div className="flex items-center space-x-2" data-oid="g4-2g5c">
+              <div className="flex items-center space-x-2" data-oid="j9n5tq-">
                 <Checkbox
                   id="out-of-stock"
                   checked={!!filters.out_of_stock}
                   onCheckedChange={handleOutOfStockChange}
-                  data-oid="p778bd0"
+                  data-oid="594np2k"
                 />
 
                 <label
                   htmlFor="out-of-stock"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  data-oid="uoay6l5"
+                  data-oid="mey5hp6"
                 >
                   缺貨
                 </label>
@@ -405,27 +405,27 @@ export function InventoryManagement() {
           {/* 操作按鈕區域 */}
           <div
             className="flex items-center justify-between pt-4"
-            data-oid="952wb:t"
+            data-oid="g72e9qh"
           >
-            <div className="flex items-center gap-2" data-oid="6tk-hsw">
+            <div className="flex items-center gap-2" data-oid="8qoqx3z">
               <Button
                 variant="outline"
                 onClick={handleResetFilters}
-                data-oid="pe18o71"
+                data-oid="..07hpe"
               >
                 重置篩選
               </Button>
               <Button
                 variant="outline"
                 onClick={handleRefresh}
-                data-oid="sc88spa"
+                data-oid="zuglzm-"
               >
-                <RefreshIcon className="h-4 w-4 mr-2" data-oid="i2_d.pi" />
+                <RefreshIcon className="h-4 w-4 mr-2" data-oid="tc0v-y_" />
                 重新整理
               </Button>
             </div>
             {getActiveFiltersCount() > 0 && (
-              <p className="text-sm text-muted-foreground" data-oid="avra.yf">
+              <p className="text-sm text-muted-foreground" data-oid="hoyxcjo">
                 找到 {inventoryData?.data?.length || 0} 筆結果
               </p>
             )}
@@ -434,30 +434,30 @@ export function InventoryManagement() {
       </Card>
 
       {/* 商品庫存明細 */}
-      <Card data-oid="6m-s12y">
-        <CardHeader data-oid="1b.mpwi">
-          <CardTitle className="flex items-center gap-2" data-oid="yr8w9zn">
-            <Package className="h-5 w-5" data-oid="0gghjwx" />
+      <Card data-oid="yiqq5z9">
+        <CardHeader data-oid="_7bom5-">
+          <CardTitle className="flex items-center gap-2" data-oid="d49wtgg">
+            <Package className="h-5 w-5" data-oid="-t4vwwr" />
             商品庫存明細
           </CardTitle>
-          <CardDescription data-oid="l1ty3fw">
+          <CardDescription data-oid="xdf-lcl">
             按商品分組顯示庫存詳情，支援展開查看各變體的庫存狀況
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0" data-oid="nbsrwna">
+        <CardContent className="p-0" data-oid=":10jelv">
           {inventoryError ? (
-            <div className="p-6" data-oid="zytsa-l">
-              <Alert data-oid="xblfd-d">
-                <AlertCircle className="h-4 w-4" data-oid="d8-ozi0" />
-                <AlertTitle data-oid="ojqqcwl">載入失敗</AlertTitle>
+            <div className="p-6" data-oid="qfn3ula">
+              <Alert data-oid="oq-wyia">
+                <AlertCircle className="h-4 w-4" data-oid="mq8:g.j" />
+                <AlertTitle data-oid="jr7mvaq">載入失敗</AlertTitle>
                 <AlertDescription
                   className="flex items-center justify-between"
-                  data-oid="l91jjp1"
+                  data-oid="x1ee3lz"
                 >
-                  <span data-oid="57gksr0">無法載入庫存資料</span>
-                  <Button asChild size="sm" className="ml-4" data-oid="o6e2gev">
-                    <Link href="/login" data-oid="sveznxy">
-                      <LogIn className="h-4 w-4 mr-2" data-oid="j5f66fa" />
+                  <span data-oid="lk-dkf-">無法載入庫存資料</span>
+                  <Button asChild size="sm" className="ml-4" data-oid="-cxajdg">
+                    <Link href="/login" data-oid="6xrd1bj">
+                      <LogIn className="h-4 w-4 mr-2" data-oid="pshhd.e" />
                       立即登入
                     </Link>
                   </Button>
@@ -470,14 +470,14 @@ export function InventoryManagement() {
               isLoading={isLoadingInventory}
               onAdjustInventory={handleAdjustInventory}
               onManageProduct={handleManageProduct}
-              data-oid="w_tbq6_"
+              data-oid="kw4eg6a"
             />
           )}
         </CardContent>
         {inventoryData?.meta && (
           <CardFooter
             className="flex items-center justify-center border-t pt-6"
-            data-oid="32-0k6p"
+            data-oid="eee7v6f"
           >
             <InventoryPagination
               meta={{
@@ -487,7 +487,7 @@ export function InventoryManagement() {
                 total: inventoryData.meta.total || 0,
               }}
               onPageChange={setPage}
-              data-oid="ws-kry5"
+              data-oid="wg5.2ar"
             />
           </CardFooter>
         )}

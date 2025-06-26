@@ -168,58 +168,58 @@ export function InventoryAdjustmentForm({
   };
 
   return (
-    <Card data-oid="z1q7efk">
-      <CardHeader data-oid="t7x3b15">
-        <CardTitle data-oid="b.nykep">修改庫存</CardTitle>
-        <CardDescription data-oid="dd-4a0w">
+    <Card data-oid="wzlgbq:">
+      <CardHeader data-oid="us1sl8q">
+        <CardTitle data-oid="1sr1k_u">修改庫存</CardTitle>
+        <CardDescription data-oid="2.ygyzq">
           {currentQuantity > 0
             ? `當前庫存: ${currentQuantity} 件`
             : "設定庫存數量"}
         </CardDescription>
       </CardHeader>
-      <CardContent data-oid="wrg4us-">
-        <Form {...form} data-oid="ir.vyo:">
+      <CardContent data-oid=":jhv1:d">
+        <Form {...form} data-oid="hvdbfga">
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4"
-            data-oid="5h5roli"
+            data-oid="jwr6_mt"
           >
             <FormField
               control={form.control}
               name="storeId"
               render={({ field }) => (
-                <FormItem data-oid="p7kfanl">
-                  <FormLabel data-oid="jg87qjb">選擇門市</FormLabel>
+                <FormItem data-oid="tq9n3n5">
+                  <FormLabel data-oid="5xco6_j">選擇門市</FormLabel>
                   <Select
                     disabled={isLoadingStores || isSubmitting}
                     onValueChange={field.onChange}
                     value={field.value}
-                    data-oid="r:rw9wk"
+                    data-oid="los_s:."
                   >
-                    <FormControl data-oid="65_p92q">
-                      <SelectTrigger data-oid=":hm1jpj">
+                    <FormControl data-oid="-kvw:5e">
+                      <SelectTrigger data-oid="skw_kaq">
                         <SelectValue
                           placeholder="選擇入庫門市"
-                          data-oid="a7q6.kg"
+                          data-oid="y07vx10"
                         />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent data-oid="lc4rfr9">
+                    <SelectContent data-oid="tr4bdd2">
                       {storesData?.data?.map((store) => (
                         <SelectItem
                           key={store.id}
                           value={store.id?.toString() || ""}
-                          data-oid="ky76ka3"
+                          data-oid="s4.9g-d"
                         >
                           {store.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage data-oid="5txkqv_" />
+                  <FormMessage data-oid="ncj5svv" />
                 </FormItem>
               )}
-              data-oid="14p2dyh"
+              data-oid="c5tpuy-"
             />
 
             {isNewProduct && (
@@ -227,9 +227,9 @@ export function InventoryAdjustmentForm({
                 control={form.control}
                 name="productVariantId"
                 render={({ field }) => (
-                  <FormItem data-oid="3qxykur">
-                    <FormLabel data-oid="6_rb7fp">選擇商品</FormLabel>
-                    <FormControl data-oid="xi:dtrz">
+                  <FormItem data-oid="27e5uix">
+                    <FormLabel data-oid="k5n_ydy">選擇商品</FormLabel>
+                    <FormControl data-oid="o9kcmmt">
                       <ProductSelector
                         value={field.value}
                         onValueChange={(variantId, variant) => {
@@ -240,13 +240,13 @@ export function InventoryAdjustmentForm({
                         disabled={isSubmitting}
                         showCurrentStock={true}
                         storeId={parseInt(form.watch("storeId")) || undefined}
-                        data-oid="imtbuvs"
+                        data-oid="0k967sv"
                       />
                     </FormControl>
-                    <FormMessage data-oid="_p1dsa8" />
+                    <FormMessage data-oid="s4hn3al" />
                   </FormItem>
                 )}
-                data-oid="_b_-f9r"
+                data-oid="unqpyze"
               />
             )}
 
@@ -254,106 +254,106 @@ export function InventoryAdjustmentForm({
               control={form.control}
               name="action"
               render={({ field }) => (
-                <FormItem className="space-y-3" data-oid="bm1bf.t">
-                  <FormLabel data-oid="q1kdd:8">調整方式</FormLabel>
-                  <FormControl data-oid="3go_5:f">
+                <FormItem className="space-y-3" data-oid="wyh:y8g">
+                  <FormLabel data-oid="9-goq.q">調整方式</FormLabel>
+                  <FormControl data-oid="zz-s86-">
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                       className="flex flex-col space-y-1"
-                      data-oid=".ldz1_w"
+                      data-oid="y0l6uw1"
                     >
                       <FormItem
                         className="flex items-center space-x-3 space-y-0"
-                        data-oid="qpb5tzs"
+                        data-oid="8hv1v.3"
                       >
-                        <FormControl data-oid="w2490u.">
-                          <RadioGroupItem value="add" data-oid="znckic1" />
+                        <FormControl data-oid="3o4m2-9">
+                          <RadioGroupItem value="add" data-oid="j:muyv9" />
                         </FormControl>
-                        <FormLabel className="font-normal" data-oid="omyxztb">
+                        <FormLabel className="font-normal" data-oid="hyviqy.">
                           增加庫存
                         </FormLabel>
                       </FormItem>
                       <FormItem
                         className="flex items-center space-x-3 space-y-0"
-                        data-oid="ymdtz09"
+                        data-oid="oa7fa1h"
                       >
-                        <FormControl data-oid="siffr4.">
-                          <RadioGroupItem value="reduce" data-oid="wlj6jbi" />
+                        <FormControl data-oid="ynyjy_m">
+                          <RadioGroupItem value="reduce" data-oid="22xzd_n" />
                         </FormControl>
-                        <FormLabel className="font-normal" data-oid="89jdksy">
+                        <FormLabel className="font-normal" data-oid="xujzkx:">
                           減少庫存
                         </FormLabel>
                       </FormItem>
                       <FormItem
                         className="flex items-center space-x-3 space-y-0"
-                        data-oid="h0hr6am"
+                        data-oid="-hkucmr"
                       >
-                        <FormControl data-oid="psdvhm6">
-                          <RadioGroupItem value="set" data-oid="-gj76li" />
+                        <FormControl data-oid="av:8s9-">
+                          <RadioGroupItem value="set" data-oid="hdzapqe" />
                         </FormControl>
-                        <FormLabel className="font-normal" data-oid="v8kruja">
+                        <FormLabel className="font-normal" data-oid="mam.0j.">
                           設定為特定數量
                         </FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
-                  <FormMessage data-oid="bpdibx9" />
+                  <FormMessage data-oid="w9whj_a" />
                 </FormItem>
               )}
-              data-oid="64dt_y1"
+              data-oid="447193h"
             />
 
             <FormField
               control={form.control}
               name="quantity"
               render={({ field }) => (
-                <FormItem data-oid="zfx6q:3">
-                  <FormLabel data-oid="sdpi1.j">數量</FormLabel>
-                  <FormControl data-oid="ya.k22b">
+                <FormItem data-oid=".ey5zww">
+                  <FormLabel data-oid="8713sv0">數量</FormLabel>
+                  <FormControl data-oid="pcaox61">
                     <Input
                       {...field}
                       type="number"
                       min="1"
                       disabled={isSubmitting}
-                      data-oid="4dru1li"
+                      data-oid="8ca5mu."
                     />
                   </FormControl>
-                  <FormDescription data-oid="4erga1d">
+                  <FormDescription data-oid="ah4.x.4">
                     請輸入大於 0 的正整數
                   </FormDescription>
-                  <FormMessage data-oid="c3cir37" />
+                  <FormMessage data-oid=".swbq6h" />
                 </FormItem>
               )}
-              data-oid="7uo9pv1"
+              data-oid="p4kevz5"
             />
 
             <FormField
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem data-oid="d7mseau">
-                  <FormLabel data-oid="hhp-2ka">備註</FormLabel>
-                  <FormControl data-oid=":uq3onf">
+                <FormItem data-oid=".635gzv">
+                  <FormLabel data-oid="m-d57xt">備註</FormLabel>
+                  <FormControl data-oid="0gpgb:8">
                     <Textarea
                       {...field}
                       placeholder="輸入此次調整的原因或備註（選填）"
                       disabled={isSubmitting}
-                      data-oid="gvj0:i_"
+                      data-oid="8g1icyj"
                     />
                   </FormControl>
-                  <FormMessage data-oid="xleqirq" />
+                  <FormMessage data-oid="joe.mpl" />
                 </FormItem>
               )}
-              data-oid="jdnfrox"
+              data-oid="ufaazji"
             />
 
-            <div className="flex justify-end" data-oid="2su8zik">
-              <Button type="submit" disabled={isSubmitting} data-oid="09j13wa">
+            <div className="flex justify-end" data-oid="t39l.y8">
+              <Button type="submit" disabled={isSubmitting} data-oid="u-h.bp:">
                 {isSubmitting && (
                   <Loader2
                     className="mr-2 h-4 w-4 animate-spin"
-                    data-oid="6qdjrev"
+                    data-oid="p99eul:"
                   />
                 )}
                 {isNewProduct ? "新增庫存" : "確認調整"}

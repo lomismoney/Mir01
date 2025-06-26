@@ -157,23 +157,23 @@ export function CreatePurchaseDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="od5wl62">
+    <Dialog open={open} onOpenChange={onOpenChange} data-oid="ba1hqz0">
       <DialogContent
         className="max-w-4xl max-h-[90vh] overflow-y-auto"
-        data-oid="79co.tz"
+        data-oid="fxq2dtd"
       >
-        <DialogHeader data-oid="5p3qs67">
-          <DialogTitle data-oid="spb_216">新增進貨單</DialogTitle>
-          <DialogDescription data-oid="bra80yl">
+        <DialogHeader data-oid="73:.-qr">
+          <DialogTitle data-oid="0hkbuxf">新增進貨單</DialogTitle>
+          <DialogDescription data-oid="5rld5:s">
             建立進貨單並設定進貨價格，系統將根據狀態自動同步庫存並計算運費攤銷
           </DialogDescription>
         </DialogHeader>
 
         {/* 身份驗證狀態提示 */}
         {status === "unauthenticated" && (
-          <Alert variant="destructive" data-oid="tdgexoz">
-            <AlertCircle className="h-4 w-4" data-oid="yxexwt1" />
-            <AlertDescription data-oid="0-ejk3_">
+          <Alert variant="destructive" data-oid="ubjgk-i">
+            <AlertCircle className="h-4 w-4" data-oid="o:2l9to" />
+            <AlertDescription data-oid="e:fsr6s">
               您的登入已過期，請重新登入後再試。
             </AlertDescription>
           </Alert>
@@ -183,131 +183,131 @@ export function CreatePurchaseDialog({
         {status === "loading" ? (
           <div
             className="flex items-center justify-center py-8"
-            data-oid="rcz:o28"
+            data-oid="pzpfg_e"
           >
-            <Loader2 className="h-8 w-8 animate-spin" data-oid="srhnz--" />
-            <span className="ml-2" data-oid="fcgd8db">
+            <Loader2 className="h-8 w-8 animate-spin" data-oid="sbepcab" />
+            <span className="ml-2" data-oid="4ojp91g">
               載入中...
             </span>
           </div>
         ) : status === "authenticated" ? (
-          <Form {...form} data-oid="do7.p7p">
+          <Form {...form} data-oid="a4o5907">
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-6"
-              data-oid="im8aq-j"
+              data-oid="ivb2-tn"
             >
               {/* 基本資訊 */}
-              <Card data-oid="2rsn65t">
-                <CardHeader data-oid="2-cdh-l">
-                  <CardTitle data-oid="48ghs1x">基本資訊</CardTitle>
+              <Card data-oid="5wshoui">
+                <CardHeader data-oid="_n6k4li">
+                  <CardTitle data-oid="ng0ua_f">基本資訊</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4" data-oid="2bqwbc5">
+                <CardContent className="space-y-4" data-oid="ln.0pp9">
                   <div
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                    data-oid="s7vk_::"
+                    data-oid="-2gshx:"
                   >
                     <FormField
                       control={form.control}
                       name="store_id"
                       render={({ field }) => (
-                        <FormItem data-oid="yrneumn">
-                          <FormLabel data-oid="nxo_rl4">門市 *</FormLabel>
+                        <FormItem data-oid="5l5fk.5">
+                          <FormLabel data-oid="y4widi.">門市 *</FormLabel>
                           <Select
                             disabled={isLoadingStores}
                             onValueChange={field.onChange}
                             value={field.value}
-                            data-oid="q0jc8vh"
+                            data-oid="bzxhfko"
                           >
-                            <FormControl data-oid=":.s37ul">
-                              <SelectTrigger data-oid="0pjp0no">
+                            <FormControl data-oid="p61ceuh">
+                              <SelectTrigger data-oid=":f:gr8k">
                                 <SelectValue
                                   placeholder="選擇入庫門市"
-                                  data-oid="fe2rty3"
+                                  data-oid="8lo9mg1"
                                 />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent data-oid="dgx5vis">
+                            <SelectContent data-oid="48p0t0v">
                               {storesData?.data?.map((store) => (
                                 <SelectItem
                                   key={store.id}
                                   value={store.id?.toString() || ""}
-                                  data-oid="fomndlb"
+                                  data-oid="hsbxw_a"
                                 >
                                   {store.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
-                          <FormMessage data-oid="mlphhry" />
+                          <FormMessage data-oid="_bztzj2" />
                         </FormItem>
                       )}
-                      data-oid="0rai3a:"
+                      data-oid="2m082cl"
                     />
 
                     <FormField
                       control={form.control}
                       name="purchased_at"
                       render={({ field }) => (
-                        <FormItem data-oid="mbfpj-r">
-                          <FormLabel data-oid="95a7v01">進貨日期</FormLabel>
-                          <FormControl data-oid="g7qg02g">
-                            <Input {...field} type="date" data-oid="hs57_g-" />
+                        <FormItem data-oid="0e2judp">
+                          <FormLabel data-oid="ce-fg:b">進貨日期</FormLabel>
+                          <FormControl data-oid="6pp1lrz">
+                            <Input {...field} type="date" data-oid="pesiwb8" />
                           </FormControl>
-                          <FormMessage data-oid="2f95a6j" />
+                          <FormMessage data-oid="xhqo0q9" />
                         </FormItem>
                       )}
-                      data-oid="4thyjz0"
+                      data-oid="rj2e46h"
                     />
 
                     <FormField
                       control={form.control}
                       name="shipping_cost"
                       render={({ field }) => (
-                        <FormItem data-oid="ur2e0n-">
-                          <FormLabel data-oid="2e_8mny">運費</FormLabel>
-                          <FormControl data-oid="_3_waye">
+                        <FormItem data-oid="k1o6lvp">
+                          <FormLabel data-oid="pg-wv0o">運費</FormLabel>
+                          <FormControl data-oid="ihak0:u">
                             <Input
                               {...field}
                               type="number"
                               min="0"
                               step="0.01"
                               placeholder="0.00"
-                              data-oid="rg.-dkz"
+                              data-oid="apzhj.6"
                             />
                           </FormControl>
-                          <FormMessage data-oid="ikbxd3g" />
+                          <FormMessage data-oid="c3vu51c" />
                         </FormItem>
                       )}
-                      data-oid="3e7rxr-"
+                      data-oid=":s--0eo"
                     />
 
                     <FormField
                       control={form.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem data-oid="p-iavv7">
-                          <FormLabel data-oid="v2vkng_">狀態</FormLabel>
+                        <FormItem data-oid="51yk04-">
+                          <FormLabel data-oid="sw.kz-a">狀態</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             value={field.value}
-                            data-oid="dn1625t"
+                            data-oid="4mxz_ij"
                           >
-                            <FormControl data-oid="lm:4_:n">
-                              <SelectTrigger data-oid="pk3u125">
+                            <FormControl data-oid="flrl_64">
+                              <SelectTrigger data-oid="dr67evq">
                                 <SelectValue
                                   placeholder="選擇狀態"
-                                  data-oid="ytug0l:"
+                                  data-oid="zvrnq1v"
                                 />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent data-oid="gofqrda">
+                            <SelectContent data-oid=".oc4bqu">
                               {Object.entries(PURCHASE_STATUS_LABELS).map(
                                 ([value, label]) => (
                                   <SelectItem
                                     key={value}
                                     value={value}
-                                    data-oid="ckrz8eb"
+                                    data-oid="bsfc.nq"
                                   >
                                     {label}
                                   </SelectItem>
@@ -315,47 +315,47 @@ export function CreatePurchaseDialog({
                               )}
                             </SelectContent>
                           </Select>
-                          <FormMessage data-oid="0x7wmnz" />
+                          <FormMessage data-oid="z62t8bs" />
                         </FormItem>
                       )}
-                      data-oid="yv2sr-0"
+                      data-oid="8f.z5::"
                     />
                   </div>
                 </CardContent>
               </Card>
 
               {/* 商品項目 */}
-              <Card data-oid="rme6n87">
-                <CardHeader data-oid="2tk5p03">
+              <Card data-oid="dp5io13">
+                <CardHeader data-oid="reyp08z">
                   <div
                     className="flex items-center justify-between"
-                    data-oid="vracjqx"
+                    data-oid="w0-rl26"
                   >
-                    <CardTitle data-oid="64td54f">商品項目</CardTitle>
+                    <CardTitle data-oid=".ez6raf">商品項目</CardTitle>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={addItem}
-                      data-oid="dqetek3"
+                      data-oid="775vbm:"
                     >
-                      <Plus className="h-4 w-4 mr-2" data-oid="dlaix5n" />
+                      <Plus className="h-4 w-4 mr-2" data-oid=":ormfs_" />
                       新增商品
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4" data-oid="ptjq00h">
+                <CardContent className="space-y-4" data-oid="0kl:t43">
                   {fields.map((field, index) => (
                     <div
                       key={field.id}
                       className="border rounded-lg p-4 space-y-4"
-                      data-oid="-u2j5.o"
+                      data-oid="0sc4h:o"
                     >
                       <div
                         className="flex items-center justify-between"
-                        data-oid="cdfp-zd"
+                        data-oid="bz3:ot3"
                       >
-                        <h4 className="font-medium" data-oid=":9p5se4">
+                        <h4 className="font-medium" data-oid="4se6af1">
                           商品 {index + 1}
                         </h4>
                         {fields.length > 1 && (
@@ -364,24 +364,24 @@ export function CreatePurchaseDialog({
                             variant="outline"
                             size="sm"
                             onClick={() => remove(index)}
-                            data-oid="45wli92"
+                            data-oid="1yx6ouf"
                           >
-                            <Trash2 className="h-4 w-4" data-oid="w8rt65l" />
+                            <Trash2 className="h-4 w-4" data-oid="dofhakn" />
                           </Button>
                         )}
                       </div>
 
                       <div
                         className="grid grid-cols-1 md:grid-cols-3 gap-4"
-                        data-oid="9u.8rn."
+                        data-oid="wh8w-zv"
                       >
                         <FormField
                           control={form.control}
                           name={`items.${index}.product_variant_id`}
                           render={({ field }) => (
-                            <FormItem data-oid="kraze35">
-                              <FormLabel data-oid="ko054z.">商品 *</FormLabel>
-                              <FormControl data-oid="4t:c1e1">
+                            <FormItem data-oid="yre1la7">
+                              <FormLabel data-oid="3mwwzp:">商品 *</FormLabel>
+                              <FormControl data-oid="oskt-fp">
                                 <ProductSelector
                                   value={field.value}
                                   onValueChange={(variantId, variant) => {
@@ -397,74 +397,74 @@ export function CreatePurchaseDialog({
                                   placeholder="搜尋並選擇商品規格"
                                   disabled={createPurchaseMutation.isPending}
                                   showCurrentStock={false}
-                                  data-oid="atwebs."
+                                  data-oid="l1hu7hj"
                                 />
                               </FormControl>
-                              <FormMessage data-oid="emlbtbp" />
+                              <FormMessage data-oid="64i77qp" />
                             </FormItem>
                           )}
-                          data-oid="klw2x4_"
+                          data-oid="_rc-cgp"
                         />
 
                         <FormField
                           control={form.control}
                           name={`items.${index}.quantity`}
                           render={({ field }) => (
-                            <FormItem data-oid="ipvl404">
-                              <FormLabel data-oid="zt4_oi5">數量 *</FormLabel>
-                              <FormControl data-oid="5b3s1wm">
+                            <FormItem data-oid="mohfj.n">
+                              <FormLabel data-oid="c7fcofr">數量 *</FormLabel>
+                              <FormControl data-oid="7rsuuaa">
                                 <Input
                                   {...field}
                                   type="number"
                                   min="1"
                                   placeholder="0"
-                                  data-oid="0oy9o9u"
+                                  data-oid="e168.8e"
                                 />
                               </FormControl>
-                              <FormMessage data-oid="_wkzj48" />
+                              <FormMessage data-oid="4de9vjd" />
                             </FormItem>
                           )}
-                          data-oid="okcj2sl"
+                          data-oid="lj9f1tx"
                         />
 
                         <FormField
                           control={form.control}
                           name={`items.${index}.cost_price`}
                           render={({ field }) => (
-                            <FormItem data-oid="shmh_cs">
-                              <FormLabel data-oid="zxr.jii">進貨價 *</FormLabel>
-                              <FormControl data-oid="a9a1f7.">
+                            <FormItem data-oid="ug.djuq">
+                              <FormLabel data-oid="am00n84">進貨價 *</FormLabel>
+                              <FormControl data-oid="3vicsau">
                                 <Input
                                   {...field}
                                   type="number"
                                   min="0"
                                   step="0.01"
                                   placeholder="0.00"
-                                  data-oid="h-w2mh8"
+                                  data-oid="_ni_bth"
                                 />
                               </FormControl>
-                              <FormMessage data-oid="ficam90" />
+                              <FormMessage data-oid="-ikt1nv" />
                             </FormItem>
                           )}
-                          data-oid="8osq4v1"
+                          data-oid="f9.6t_p"
                         />
                       </div>
                     </div>
                   ))}
 
                   {/* 總計顯示 */}
-                  <div className="border-t pt-4" data-oid="3-2ptn.">
-                    <div className="flex justify-end" data-oid="vi:v8kj">
-                      <div className="text-right" data-oid="im:h4rm">
+                  <div className="border-t pt-4" data-oid="iwgmr.j">
+                    <div className="flex justify-end" data-oid="kh63a1m">
+                      <div className="text-right" data-oid="f9rcog.">
                         <div
                           className="text-sm text-muted-foreground"
-                          data-oid="3:2mh95"
+                          data-oid="6g3iss_"
                         >
                           預估總金額
                         </div>
                         <div
                           className="text-lg font-semibold"
-                          data-oid="grnfveq"
+                          data-oid="8:qa7xk"
                         >
                           NT${" "}
                           {calculateTotal().toLocaleString("zh-TW", {
@@ -478,24 +478,24 @@ export function CreatePurchaseDialog({
               </Card>
 
               {/* 操作按鈕 */}
-              <div className="flex justify-end space-x-2" data-oid="r1tt294">
+              <div className="flex justify-end space-x-2" data-oid="ciucegd">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
-                  data-oid="rt17kw:"
+                  data-oid="h_bgk_z"
                 >
                   取消
                 </Button>
                 <Button
                   type="submit"
                   disabled={createPurchaseMutation.isPending}
-                  data-oid="s_s11v3"
+                  data-oid="sygs7eu"
                 >
                   {createPurchaseMutation.isPending && (
                     <Loader2
                       className="mr-2 h-4 w-4 animate-spin"
-                      data-oid="l_zgi7c"
+                      data-oid="0e2na1-"
                     />
                   )}
                   建立進貨單

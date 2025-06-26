@@ -124,10 +124,16 @@ function DragHandle({ id }: { id: number }) {
       variant="ghost"
       size="icon"
       className="text-muted-foreground size-7 hover:bg-transparent"
+      data-oid="9y425kq"
     >
-      <IconGripVertical className="text-muted-foreground size-3" />
+      <IconGripVertical
+        className="text-muted-foreground size-3"
+        data-oid="v.d.k.f"
+      />
 
-      <span className="sr-only">Drag to reorder</span>
+      <span className="sr-only" data-oid="ou97b3x">
+        Drag to reorder
+      </span>
     </Button>
   );
 }
@@ -136,12 +142,12 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     id: "drag",
     header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
+    cell: ({ row }) => <DragHandle id={row.original.id} data-oid="13bz7pt" />,
   },
   {
     id: "select",
     header: ({ table }) => (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center" data-oid="0u61hke">
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
@@ -149,16 +155,18 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
+          data-oid="8._-jp1"
         />
       </div>
     ),
 
     cell: ({ row }) => (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center" data-oid="sntlb1s">
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
+          data-oid="za19:j8"
         />
       </div>
     ),
@@ -170,7 +178,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "header",
     header: "Header",
     cell: ({ row }) => {
-      return <TableCellViewer item={row.original} />;
+      return <TableCellViewer item={row.original} data-oid="_:y2rbx" />;
     },
     enableHiding: false,
   },
@@ -178,8 +186,12 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "type",
     header: "Section Type",
     cell: ({ row }) => (
-      <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
+      <div className="w-32" data-oid="pwn5t74">
+        <Badge
+          variant="outline"
+          className="text-muted-foreground px-1.5"
+          data-oid="zdm6rr8"
+        >
           {row.original.type}
         </Badge>
       </div>
@@ -189,11 +201,18 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
+      <Badge
+        variant="outline"
+        className="text-muted-foreground px-1.5"
+        data-oid="v1bu-nk"
+      >
         {row.original.status === "Done" ? (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+          <IconCircleCheckFilled
+            className="fill-green-500 dark:fill-green-400"
+            data-oid="gguthn0"
+          />
         ) : (
-          <IconLoader />
+          <IconLoader data-oid="w-p7u95" />
         )}
         {row.original.status}
       </Badge>
@@ -201,7 +220,11 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
   {
     accessorKey: "target",
-    header: () => <div className="w-full text-right">Target</div>,
+    header: () => (
+      <div className="w-full text-right" data-oid=":3fit68">
+        Target
+      </div>
+    ),
 
     cell: ({ row }) => (
       <form
@@ -213,21 +236,31 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             error: "Error",
           });
         }}
+        data-oid="3fewnpt"
       >
-        <Label htmlFor={`${row.original.id}-target`} className="sr-only">
+        <Label
+          htmlFor={`${row.original.id}-target`}
+          className="sr-only"
+          data-oid="33:qvt2"
+        >
           Target
         </Label>
         <Input
           className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
           defaultValue={row.original.target}
           id={`${row.original.id}-target`}
+          data-oid="b11ec7j"
         />
       </form>
     ),
   },
   {
     accessorKey: "limit",
-    header: () => <div className="w-full text-right">Limit</div>,
+    header: () => (
+      <div className="w-full text-right" data-oid="pmf4:_w">
+        Limit
+      </div>
+    ),
 
     cell: ({ row }) => (
       <form
@@ -239,14 +272,20 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             error: "Error",
           });
         }}
+        data-oid="ln0iozl"
       >
-        <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
+        <Label
+          htmlFor={`${row.original.id}-limit`}
+          className="sr-only"
+          data-oid="zqbq7g_"
+        >
           Limit
         </Label>
         <Input
           className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
           defaultValue={row.original.limit}
           id={`${row.original.id}-limit`}
+          data-oid="nr5dtl5"
         />
       </form>
     ),
@@ -263,20 +302,27 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 
       return (
         <>
-          <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
+          <Label
+            htmlFor={`${row.original.id}-reviewer`}
+            className="sr-only"
+            data-oid="6h_ox5e"
+          >
             Reviewer
           </Label>
-          <Select>
+          <Select data-oid="nlzfg8d">
             <SelectTrigger
               className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
               size="sm"
               id={`${row.original.id}-reviewer`}
+              data-oid="ikbr6em"
             >
-              <SelectValue placeholder="Assign reviewer" />
+              <SelectValue placeholder="Assign reviewer" data-oid="kimphaz" />
             </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-              <SelectItem value="Jamik Tashpulatov">
+            <SelectContent align="end" data-oid="o_pdmuz">
+              <SelectItem value="Eddie Lake" data-oid="qxk53pb">
+                Eddie Lake
+              </SelectItem>
+              <SelectItem value="Jamik Tashpulatov" data-oid="frxvnrt">
                 Jamik Tashpulatov
               </SelectItem>
             </SelectContent>
@@ -288,23 +334,28 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     id: "actions",
     cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <DropdownMenu data-oid="bwcfstp">
+        <DropdownMenuTrigger asChild data-oid="o-lcn7d">
           <Button
             variant="ghost"
             className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
             size="icon"
+            data-oid="qne8v_3"
           >
-            <IconDotsVertical />
-            <span className="sr-only">Open menu</span>
+            <IconDotsVertical data-oid="2c:0hhi" />
+            <span className="sr-only" data-oid="62t5qmg">
+              Open menu
+            </span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem>Make a copy</DropdownMenuItem>
-          <DropdownMenuItem>Favorite</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+        <DropdownMenuContent align="end" className="w-32" data-oid="dcar28d">
+          <DropdownMenuItem data-oid="013yyru">Edit</DropdownMenuItem>
+          <DropdownMenuItem data-oid="3yk2hq:">Make a copy</DropdownMenuItem>
+          <DropdownMenuItem data-oid="zt29_h0">Favorite</DropdownMenuItem>
+          <DropdownMenuSeparator data-oid="sqvvgof" />
+          <DropdownMenuItem variant="destructive" data-oid="aut7rhs">
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
@@ -326,9 +377,10 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
         transform: CSS.Transform.toString(transform),
         transition: transition,
       }}
+      data-oid="19mnhum"
     >
       {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
+        <TableCell key={cell.id} data-oid="k9u:vkt">
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}
@@ -406,47 +458,81 @@ export function DataTable({
     <Tabs
       defaultValue="outline"
       className="w-full flex-col justify-start gap-6"
+      data-oid="044ozbw"
     >
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <Label htmlFor="view-selector" className="sr-only">
+      <div
+        className="flex items-center justify-between px-4 lg:px-6"
+        data-oid="l9j8upn"
+      >
+        <Label htmlFor="view-selector" className="sr-only" data-oid="r9z9.wa">
           View
         </Label>
-        <Select defaultValue="outline">
+        <Select defaultValue="outline" data-oid="s5xc9ew">
           <SelectTrigger
             className="flex w-fit @4xl/main:hidden"
             size="sm"
             id="view-selector"
+            data-oid="mibebsv"
           >
-            <SelectValue placeholder="Select a view" />
+            <SelectValue placeholder="Select a view" data-oid="ha1nzy_" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="outline">Outline</SelectItem>
-            <SelectItem value="past-performance">Past Performance</SelectItem>
-            <SelectItem value="key-personnel">Key Personnel</SelectItem>
-            <SelectItem value="focus-documents">Focus Documents</SelectItem>
+          <SelectContent data-oid="u.95_r0">
+            <SelectItem value="outline" data-oid=":7an3w:">
+              Outline
+            </SelectItem>
+            <SelectItem value="past-performance" data-oid="jm6r0i_">
+              Past Performance
+            </SelectItem>
+            <SelectItem value="key-personnel" data-oid="zu:bvb_">
+              Key Personnel
+            </SelectItem>
+            <SelectItem value="focus-documents" data-oid="ylcs084">
+              Focus Documents
+            </SelectItem>
           </SelectContent>
         </Select>
-        <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
-          <TabsTrigger value="outline">Outline</TabsTrigger>
-          <TabsTrigger value="past-performance">
-            Past Performance <Badge variant="secondary">3</Badge>
+        <TabsList
+          className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex"
+          data-oid=":8eb7q5"
+        >
+          <TabsTrigger value="outline" data-oid="df5af4l">
+            Outline
           </TabsTrigger>
-          <TabsTrigger value="key-personnel">
-            Key Personnel <Badge variant="secondary">2</Badge>
+          <TabsTrigger value="past-performance" data-oid="5x8vvgt">
+            Past Performance{" "}
+            <Badge variant="secondary" data-oid="hfoklhq">
+              3
+            </Badge>
           </TabsTrigger>
-          <TabsTrigger value="focus-documents">Focus Documents</TabsTrigger>
+          <TabsTrigger value="key-personnel" data-oid="wn2s5vh">
+            Key Personnel{" "}
+            <Badge variant="secondary" data-oid="36g8hl3">
+              2
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="focus-documents" data-oid="nrj708f">
+            Focus Documents
+          </TabsTrigger>
         </TabsList>
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <IconLayoutColumns />
-                <span className="hidden lg:inline">Customize Columns</span>
-                <span className="lg:hidden">Columns</span>
-                <IconChevronDown />
+        <div className="flex items-center gap-2" data-oid="j8:k:f-">
+          <DropdownMenu data-oid="2ug6myz">
+            <DropdownMenuTrigger asChild data-oid="hbtjtgd">
+              <Button variant="outline" size="sm" data-oid=".yilskd">
+                <IconLayoutColumns data-oid="xfopehb" />
+                <span className="hidden lg:inline" data-oid=":248-yi">
+                  Customize Columns
+                </span>
+                <span className="lg:hidden" data-oid="9afekuf">
+                  Columns
+                </span>
+                <IconChevronDown data-oid="wiyf137" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent
+              align="end"
+              className="w-56"
+              data-oid="njkmhm8"
+            >
               {table
                 .getAllColumns()
                 .filter(
@@ -463,6 +549,7 @@ export function DataTable({
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
                       }
+                      data-oid="fregrte"
                     >
                       {column.id}
                     </DropdownMenuCheckboxItem>
@@ -470,30 +557,38 @@ export function DataTable({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm">
-            <IconPlus />
-            <span className="hidden lg:inline">Add Section</span>
+          <Button variant="outline" size="sm" data-oid="9-ljo3n">
+            <IconPlus data-oid="cjyg0pn" />
+            <span className="hidden lg:inline" data-oid="b-qhr9b">
+              Add Section
+            </span>
           </Button>
         </div>
       </div>
       <TabsContent
         value="outline"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+        data-oid="74ia9yi"
       >
-        <div className="overflow-hidden rounded-lg border">
+        <div className="overflow-hidden rounded-lg border" data-oid="ivxzc_x">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
             onDragEnd={handleDragEnd}
             sensors={sensors}
             id={sortableId}
+            data-oid="v74048n"
           >
-            <Table>
-              <TableHeader className="bg-muted sticky top-0 z-10">
+            <Table data-oid="wcf-2te">
+              <TableHeader
+                className="bg-muted sticky top-0 z-10"
+                data-oid="ee_gah0"
+              >
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
                     key={headerGroup.id}
                     className="border-b hover:bg-transparent"
+                    data-oid="e4s93ls"
                   >
                     {headerGroup.headers.map((header) => {
                       return (
@@ -501,6 +596,7 @@ export function DataTable({
                           key={header.id}
                           colSpan={header.colSpan}
                           className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                          data-oid="13bd-14"
                         >
                           {header.isPlaceholder
                             ? null
@@ -514,21 +610,26 @@ export function DataTable({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="**:data-[slot=table-cell]:first:w-8">
+              <TableBody
+                className="**:data-[slot=table-cell]:first:w-8"
+                data-oid=":xxc1ll"
+              >
                 {table.getRowModel().rows?.length ? (
                   <SortableContext
                     items={dataIds}
                     strategy={verticalListSortingStrategy}
+                    data-oid=".dks1dp"
                   >
                     {table.getRowModel().rows.map((row) => (
-                      <DraggableRow key={row.id} row={row} />
+                      <DraggableRow key={row.id} row={row} data-oid="k.jkdix" />
                     ))}
                   </SortableContext>
                 ) : (
-                  <TableRow>
+                  <TableRow data-oid="cckd-y.">
                     <TableCell
                       colSpan={columns.length}
                       className="h-24 text-center"
+                      data-oid="j1h6tu:"
                     >
                       No results.
                     </TableCell>
@@ -538,14 +639,30 @@ export function DataTable({
             </Table>
           </DndContext>
         </div>
-        <div className="flex items-center justify-between px-4">
-          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+        <div
+          className="flex items-center justify-between px-4"
+          data-oid="2cztisa"
+        >
+          <div
+            className="text-muted-foreground hidden flex-1 text-sm lg:flex"
+            data-oid="gk16cw3"
+          >
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
-          <div className="flex w-full items-center gap-8 lg:w-fit">
-            <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="text-sm font-medium">
+          <div
+            className="flex w-full items-center gap-8 lg:w-fit"
+            data-oid="xlqd-3v"
+          >
+            <div
+              className="hidden items-center gap-2 lg:flex"
+              data-oid=":jjsk3n"
+            >
+              <Label
+                htmlFor="rows-per-page"
+                className="text-sm font-medium"
+                data-oid="2ftu3g1"
+              >
                 Rows per page
               </Label>
               <Select
@@ -553,34 +670,54 @@ export function DataTable({
                 onValueChange={(value) => {
                   table.setPageSize(Number(value));
                 }}
+                data-oid="f2pqv5e"
               >
-                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                <SelectTrigger
+                  size="sm"
+                  className="w-20"
+                  id="rows-per-page"
+                  data-oid="0thy5y:"
+                >
                   <SelectValue
                     placeholder={table.getState().pagination.pageSize}
+                    data-oid="2-ruxe8"
                   />
                 </SelectTrigger>
-                <SelectContent side="top">
+                <SelectContent side="top" data-oid="mvxk83-">
                   {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                    <SelectItem
+                      key={pageSize}
+                      value={`${pageSize}`}
+                      data-oid="4_aqgbn"
+                    >
                       {pageSize}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-fit items-center justify-center text-sm font-medium">
+            <div
+              className="flex w-fit items-center justify-center text-sm font-medium"
+              data-oid="pf1w:1s"
+            >
               Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount()}
             </div>
-            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+            <div
+              className="ml-auto flex items-center gap-2 lg:ml-0"
+              data-oid="x42ih:e"
+            >
               <Button
                 variant="outline"
                 className="hidden h-8 w-8 p-0 lg:flex"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
+                data-oid="nkrmrak"
               >
-                <span className="sr-only">Go to first page</span>
-                <IconChevronsLeft />
+                <span className="sr-only" data-oid="o329ptf">
+                  Go to first page
+                </span>
+                <IconChevronsLeft data-oid="dv4nt-7" />
               </Button>
               <Button
                 variant="outline"
@@ -588,9 +725,12 @@ export function DataTable({
                 size="icon"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
+                data-oid="x:hv9lw"
               >
-                <span className="sr-only">Go to previous page</span>
-                <IconChevronLeft />
+                <span className="sr-only" data-oid="3ohofvr">
+                  Go to previous page
+                </span>
+                <IconChevronLeft data-oid="in:pcz_" />
               </Button>
               <Button
                 variant="outline"
@@ -598,9 +738,12 @@ export function DataTable({
                 size="icon"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
+                data-oid="qxb660m"
               >
-                <span className="sr-only">Go to next page</span>
-                <IconChevronRight />
+                <span className="sr-only" data-oid="o0peg85">
+                  Go to next page
+                </span>
+                <IconChevronRight data-oid="er67q4-" />
               </Button>
               <Button
                 variant="outline"
@@ -608,9 +751,12 @@ export function DataTable({
                 size="icon"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
+                data-oid="fold42u"
               >
-                <span className="sr-only">Go to last page</span>
-                <IconChevronsRight />
+                <span className="sr-only" data-oid="o0xmztj">
+                  Go to last page
+                </span>
+                <IconChevronsRight data-oid="s9fqmu7" />
               </Button>
             </div>
           </div>
@@ -619,17 +765,32 @@ export function DataTable({
       <TabsContent
         value="past-performance"
         className="flex flex-col px-4 lg:px-6"
+        data-oid="y.me1zj"
       >
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        <div
+          className="aspect-video w-full flex-1 rounded-lg border border-dashed"
+          data-oid="ovsrwbx"
+        ></div>
       </TabsContent>
-      <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+      <TabsContent
+        value="key-personnel"
+        className="flex flex-col px-4 lg:px-6"
+        data-oid="gjr_soy"
+      >
+        <div
+          className="aspect-video w-full flex-1 rounded-lg border border-dashed"
+          data-oid="141w7aw"
+        ></div>
       </TabsContent>
       <TabsContent
         value="focus-documents"
         className="flex flex-col px-4 lg:px-6"
+        data-oid="-rdpf7e"
       >
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        <div
+          className="aspect-video w-full flex-1 rounded-lg border border-dashed"
+          data-oid="makl1yt"
+        ></div>
       </TabsContent>
     </Tabs>
   );
@@ -659,23 +820,30 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile();
 
   return (
-    <Drawer direction={isMobile ? "bottom" : "right"}>
-      <DrawerTrigger asChild>
-        <Button variant="link" className="text-foreground w-fit px-0 text-left">
+    <Drawer direction={isMobile ? "bottom" : "right"} data-oid="e.is8l7">
+      <DrawerTrigger asChild data-oid="xys2aqq">
+        <Button
+          variant="link"
+          className="text-foreground w-fit px-0 text-left"
+          data-oid="wi:up22"
+        >
           {item.header}
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.header}</DrawerTitle>
-          <DrawerDescription>
+      <DrawerContent data-oid="-of.fje">
+        <DrawerHeader className="gap-1" data-oid="1p.qgtl">
+          <DrawerTitle data-oid="a5m_nxh">{item.header}</DrawerTitle>
+          <DrawerDescription data-oid="jkf-mc_">
             Showing total visitors for the last 6 months
           </DrawerDescription>
         </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
+        <div
+          className="flex flex-col gap-4 overflow-y-auto px-4 text-sm"
+          data-oid="p6hgzu0"
+        >
           {!isMobile && (
             <>
-              <ChartContainer config={chartConfig}>
+              <ChartContainer config={chartConfig} data-oid="sjw6e5z">
                 <AreaChart
                   accessibilityLayer
                   data={chartData}
@@ -683,8 +851,9 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                     left: 0,
                     right: 10,
                   }}
+                  data-oid="qfdi-ic"
                 >
-                  <CartesianGrid vertical={false} />
+                  <CartesianGrid vertical={false} data-oid="abaqzek" />
                   <XAxis
                     dataKey="month"
                     tickLine={false}
@@ -692,11 +861,15 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                     tickMargin={8}
                     tickFormatter={(value) => value.slice(0, 3)}
                     hide
+                    data-oid="-:whgwp"
                   />
 
                   <ChartTooltip
                     cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
+                    content={
+                      <ChartTooltipContent indicator="dot" data-oid="46yl9u7" />
+                    }
+                    data-oid="xn5--8a"
                   />
 
                   <Area
@@ -706,6 +879,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                     fillOpacity={0.6}
                     stroke="var(--color-mobile)"
                     stackId="a"
+                    data-oid="gf_nlqi"
                   />
 
                   <Area
@@ -715,99 +889,168 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                     fillOpacity={0.4}
                     stroke="var(--color-desktop)"
                     stackId="a"
+                    data-oid="39259mg"
                   />
                 </AreaChart>
               </ChartContainer>
-              <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 leading-none font-medium">
+              <Separator data-oid="28.4m0j" />
+              <div className="grid gap-2" data-oid="lhi4ji5">
+                <div
+                  className="flex gap-2 leading-none font-medium"
+                  data-oid="rj5aa9l"
+                >
                   Trending up by 5.2% this month{" "}
-                  <IconTrendingUp className="size-4" />
+                  <IconTrendingUp className="size-4" data-oid="so-4a-w" />
                 </div>
-                <div className="text-muted-foreground">
+                <div className="text-muted-foreground" data-oid="voh0l1m">
                   顯示過去6個月的總訪問量統計數據。
                 </div>
               </div>
-              <Separator />
+              <Separator data-oid="98-fk01" />
             </>
           )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
+          <form className="flex flex-col gap-4" data-oid="pcw8zir">
+            <div className="flex flex-col gap-3" data-oid="yya_r1d">
+              <Label htmlFor="header" data-oid="1j4ls18">
+                Header
+              </Label>
+              <Input
+                id="header"
+                defaultValue={item.header}
+                data-oid="jnyry4o"
+              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
-                <Select defaultValue={item.type}>
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Select a type" />
+            <div className="grid grid-cols-2 gap-4" data-oid="n:ttnnf">
+              <div className="flex flex-col gap-3" data-oid="oearkr-">
+                <Label htmlFor="type" data-oid="tdb6c.5">
+                  Type
+                </Label>
+                <Select defaultValue={item.type} data-oid="lf12hhs">
+                  <SelectTrigger
+                    id="type"
+                    className="w-full"
+                    data-oid="nyru_yw"
+                  >
+                    <SelectValue
+                      placeholder="Select a type"
+                      data-oid="_3b0t3m"
+                    />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Table of Contents">
+                  <SelectContent data-oid="x2il_8p">
+                    <SelectItem value="Table of Contents" data-oid="j-84pxq">
                       Table of Contents
                     </SelectItem>
-                    <SelectItem value="Executive Summary">
+                    <SelectItem value="Executive Summary" data-oid="uegymoq">
                       Executive Summary
                     </SelectItem>
-                    <SelectItem value="Technical Approach">
+                    <SelectItem value="Technical Approach" data-oid=":zm1he:">
                       Technical Approach
                     </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
+                    <SelectItem value="Design" data-oid="1fo94jp">
+                      Design
+                    </SelectItem>
+                    <SelectItem value="Capabilities" data-oid="y7sg3ol">
+                      Capabilities
+                    </SelectItem>
+                    <SelectItem value="Focus Documents" data-oid="c.4qx-k">
                       Focus Documents
                     </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
+                    <SelectItem value="Narrative" data-oid="y_i8haz">
+                      Narrative
+                    </SelectItem>
+                    <SelectItem value="Cover Page" data-oid="u24k:u5">
+                      Cover Page
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status</Label>
-                <Select defaultValue={item.status}>
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue placeholder="Select a status" />
+              <div className="flex flex-col gap-3" data-oid="o0k0309">
+                <Label htmlFor="status" data-oid="jwl_fty">
+                  Status
+                </Label>
+                <Select defaultValue={item.status} data-oid="8cy:xad">
+                  <SelectTrigger
+                    id="status"
+                    className="w-full"
+                    data-oid="r9ot.:d"
+                  >
+                    <SelectValue
+                      placeholder="Select a status"
+                      data-oid="uo:_l27"
+                    />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Done">Done</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
+                  <SelectContent data-oid="zalt9-k">
+                    <SelectItem value="Done" data-oid="g-e2jw7">
+                      Done
+                    </SelectItem>
+                    <SelectItem value="In Progress" data-oid="l0366u7">
+                      In Progress
+                    </SelectItem>
+                    <SelectItem value="Not Started" data-oid="16stexx">
+                      Not Started
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
+            <div className="grid grid-cols-2 gap-4" data-oid="v3y:4_4">
+              <div className="flex flex-col gap-3" data-oid="7q5xuno">
+                <Label htmlFor="target" data-oid="jbp...n">
+                  Target
+                </Label>
+                <Input
+                  id="target"
+                  defaultValue={item.target}
+                  data-oid="2x8u6u6"
+                />
               </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
+              <div className="flex flex-col gap-3" data-oid="a-3:hoe">
+                <Label htmlFor="limit" data-oid="4.mh69c">
+                  Limit
+                </Label>
+                <Input
+                  id="limit"
+                  defaultValue={item.limit}
+                  data-oid="9mpqjlj"
+                />
               </div>
             </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
-              <Select defaultValue={item.reviewer}>
-                <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
+            <div className="flex flex-col gap-3" data-oid="5:tm5me">
+              <Label htmlFor="reviewer" data-oid="gzbzzkl">
+                Reviewer
+              </Label>
+              <Select defaultValue={item.reviewer} data-oid="mot2nk-">
+                <SelectTrigger
+                  id="reviewer"
+                  className="w-full"
+                  data-oid="qaapsca"
+                >
+                  <SelectValue
+                    placeholder="Select a reviewer"
+                    data-oid="919xhfz"
+                  />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                  <SelectItem value="Jamik Tashpulatov">
+                <SelectContent data-oid="d.j8xbn">
+                  <SelectItem value="Eddie Lake" data-oid="an75crd">
+                    Eddie Lake
+                  </SelectItem>
+                  <SelectItem value="Jamik Tashpulatov" data-oid="8bm4wux">
                     Jamik Tashpulatov
                   </SelectItem>
-                  <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
+                  <SelectItem value="Emily Whalen" data-oid="vhid60s">
+                    Emily Whalen
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </form>
         </div>
-        <DrawerFooter>
-          <Button>Submit</Button>
-          <DrawerClose asChild>
-            <Button variant="outline">Done</Button>
+        <DrawerFooter data-oid="djjq0a3">
+          <Button data-oid="qm-t_u8">Submit</Button>
+          <DrawerClose asChild data-oid="r1550zs">
+            <Button variant="outline" data-oid="rgzdqef">
+              Done
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

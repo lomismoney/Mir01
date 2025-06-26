@@ -65,33 +65,33 @@ export function CategoryCombobox({
     : "選擇分類...";
 
   return (
-    <Popover open={open} onOpenChange={setOpen} data-oid="09ha29k">
-      <PopoverTrigger asChild data-oid="df:rn-4">
+    <Popover open={open} onOpenChange={setOpen} data-oid="_k.e.bv">
+      <PopoverTrigger asChild data-oid=":ywpp4w">
         <Button
           variant="outline"
           role="combobox"
           className="w-full justify-between font-normal"
           disabled={disabled}
-          data-oid="bserz.3"
+          data-oid="3s_8u6f"
         >
-          <span className="truncate" data-oid="vsn5.b3">
+          <span className="truncate" data-oid="-:2cm4i">
             {selectedCategoryName}
           </span>
           <ChevronsUpDown
             className="ml-2 h-4 w-4 shrink-0 opacity-50"
-            data-oid="hizr7-7"
+            data-oid="2km-m-i"
           />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0"
-        data-oid="fc1a0kw"
+        data-oid="4hq5j6q"
       >
-        <Command data-oid="iteyqid">
-          <CommandInput placeholder="搜尋分類..." data-oid="m1u-x3g" />
-          <CommandList data-oid="275c2hz">
-            <CommandEmpty data-oid="mz1c91-">找不到分類。</CommandEmpty>
-            <CommandGroup data-oid="1q5f7zq">
+        <Command data-oid="vxkb3ru">
+          <CommandInput placeholder="搜尋分類..." data-oid="3a-hhb6" />
+          <CommandList data-oid="z68u8jd">
+            <CommandEmpty data-oid="4uj_am:">找不到分類。</CommandEmpty>
+            <CommandGroup data-oid="cw4xpl7">
               {/* 不指定分類選項 */}
               <CommandItem
                 value="null"
@@ -99,14 +99,14 @@ export function CategoryCombobox({
                   onChange(null);
                   setOpen(false);
                 }}
-                data-oid=".wpfi7_"
+                data-oid="xz5l2_w"
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
                     value === null ? "opacity-100" : "opacity-0",
                   )}
-                  data-oid="nnn4xmn"
+                  data-oid="egk6s.d"
                 />
                 不指定分類
               </CommandItem>
@@ -130,23 +130,23 @@ export function CategoryCombobox({
                       category.hasChildren,
                     "hover:bg-muted": !category.hasChildren,
                   })}
-                  data-oid="eoj9fjo"
+                  data-oid="vmryl5t"
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
                       value === category.id ? "opacity-100" : "opacity-0",
                     )}
-                    data-oid="0xifgel"
+                    data-oid="trbsi:f"
                   />
 
-                  <span className="truncate" data-oid="w84p1ca">
+                  <span className="truncate" data-oid="h7352vf">
                     {category.displayPath}
                   </span>
                   {category.hasChildren && (
                     <span
                       className="ml-auto text-xs text-muted-foreground"
-                      data-oid="0xh44tu"
+                      data-oid="xcsqym1"
                     >
                       （含子分類）
                     </span>

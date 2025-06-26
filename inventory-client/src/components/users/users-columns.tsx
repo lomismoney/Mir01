@@ -71,8 +71,8 @@ export const createUsersColumns = (
         .slice(0, 2);
 
       return (
-        <Avatar className="h-8 w-8" data-oid="dpbf62m">
-          <AvatarFallback className="text-xs font-medium" data-oid="yo.gm.n">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback className="text-xs font-medium">
             {initials}
           </AvatarFallback>
         </Avatar>
@@ -89,18 +89,15 @@ export const createUsersColumns = (
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 font-medium"
-          data-oid="2v:mqjp"
         >
           姓名
-          <ArrowUpDown className="ml-2 h-4 w-4" data-oid="vp_4jjg" />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
       return (
-        <div className="font-medium" data-oid="gsc6vjd">
-          {row.getValue("name") || "未知用戶"}
-        </div>
+        <div className="font-medium">{row.getValue("name") || "未知用戶"}</div>
       );
     },
   },
@@ -112,16 +109,15 @@ export const createUsersColumns = (
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 font-medium"
-          data-oid="ac-vj_3"
         >
           用戶名
-          <ArrowUpDown className="ml-2 h-4 w-4" data-oid="klo1btg" />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
       return (
-        <div className="font-mono text-sm" data-oid="y7o0gx6">
+        <div className="font-mono text-sm">
           {row.getValue("username") || "未知用戶名"}
         </div>
       );
@@ -139,17 +135,17 @@ export const createUsersColumns = (
         admin: {
           label: "管理員",
           variant: "default" as const,
-          icon: <Shield className="h-3 w-3" data-oid="5khxvst" />,
+          icon: <Shield className="h-3 w-3" />,
         },
         staff: {
           label: "員工",
           variant: "destructive" as const,
-          icon: <Eye className="h-3 w-3" data-oid="38s_zih" />,
+          icon: <Eye className="h-3 w-3" />,
         },
         viewer: {
           label: "檢視者",
           variant: "secondary" as const,
-          icon: <Eye className="h-3 w-3" data-oid="01q1759" />,
+          icon: <Eye className="h-3 w-3" />,
         },
       };
 
@@ -160,7 +156,6 @@ export const createUsersColumns = (
         <Badge
           variant={config.variant}
           className="flex w-fit items-center gap-1"
-          data-oid="yne1fmq"
         >
           {config.icon}
           {config.label}
@@ -178,15 +173,10 @@ export const createUsersColumns = (
       const user = row.original;
       const stores = user.stores || [];
       return (
-        <div className="flex flex-wrap gap-1" data-oid="j9583cl">
+        <div className="flex flex-wrap gap-1">
           {stores.map((store) => (
-            <Badge
-              key={store.id}
-              variant="outline"
-              className="text-xs"
-              data-oid="_aojafr"
-            >
-              <Store className="mr-1 h-3 w-3" data-oid="5uw:hbt" />
+            <Badge key={store.id} variant="outline" className="text-xs">
+              <Store className="mr-1 h-3 w-3" />
               {store.name}
             </Badge>
           ))}
@@ -203,34 +193,24 @@ export const createUsersColumns = (
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 font-medium"
-          data-oid="toiw7or"
         >
           建立時間
-          <ArrowUpDown className="ml-2 h-4 w-4" data-oid="flv_.f1" />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
       const dateString = row.getValue("created_at") as string;
-      if (!dateString)
-        return (
-          <div className="text-muted-foreground" data-oid="4aaxbvj">
-            -
-          </div>
-        );
+      if (!dateString) return <div className="text-muted-foreground">-</div>;
 
       try {
         return (
-          <div className="text-sm" data-oid="ac75wm3">
+          <div className="text-sm">
             {format(new Date(dateString), "yyyy-MM-dd HH:mm", { locale: zhTW })}
           </div>
         );
       } catch {
-        return (
-          <div className="text-muted-foreground" data-oid="rx597ap">
-            格式錯誤
-          </div>
-        );
+        return <div className="text-muted-foreground">格式錯誤</div>;
       }
     },
   },
@@ -242,34 +222,24 @@ export const createUsersColumns = (
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 font-medium"
-          data-oid="rybp73u"
         >
           更新時間
-          <ArrowUpDown className="ml-2 h-4 w-4" data-oid="nd87ofy" />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
       const dateString = row.getValue("updated_at") as string;
-      if (!dateString)
-        return (
-          <div className="text-muted-foreground" data-oid="903x9pk">
-            -
-          </div>
-        );
+      if (!dateString) return <div className="text-muted-foreground">-</div>;
 
       try {
         return (
-          <div className="text-sm" data-oid="coyy6ke">
+          <div className="text-sm">
             {format(new Date(dateString), "yyyy-MM-dd HH:mm", { locale: zhTW })}
           </div>
         );
       } catch {
-        return (
-          <div className="text-muted-foreground" data-oid="67vyxqp">
-            格式錯誤
-          </div>
-        );
+        return <div className="text-muted-foreground">格式錯誤</div>;
       }
     },
   },
@@ -280,26 +250,23 @@ export const createUsersColumns = (
       const user = row.original;
 
       return (
-        <DropdownMenu data-oid="x88kx.v">
-          <DropdownMenuTrigger asChild data-oid="gpr6ds-">
-            <Button variant="ghost" className="h-8 w-8 p-0" data-oid="j8g3xvf">
-              <span className="sr-only" data-oid="lw4f3q4">
-                開啟選單
-              </span>
-              <MoreHorizontal className="h-4 w-4" data-oid="ms91kh0" />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">開啟選單</span>
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" data-oid="2223j9v">
-            <DropdownMenuLabel data-oid="t.uwnou">操作</DropdownMenuLabel>
-            <DropdownMenuSeparator data-oid="7umw:8." />
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>操作</DropdownMenuLabel>
+            <DropdownMenuSeparator />
 
             {actions.onView && (
               <DropdownMenuItem
                 onClick={() => actions.onView?.(user)}
                 className="cursor-pointer"
-                data-oid="1izj5rj"
               >
-                <Eye className="mr-2 h-4 w-4" data-oid="5.gg.d0" />
+                <Eye className="mr-2 h-4 w-4" />
                 查看詳情
               </DropdownMenuItem>
             )}
@@ -308,9 +275,8 @@ export const createUsersColumns = (
               <DropdownMenuItem
                 onClick={() => actions.onEdit?.(user)}
                 className="cursor-pointer"
-                data-oid="y04ivty"
               >
-                <Edit className="mr-2 h-4 w-4" data-oid="6dy1mpz" />
+                <Edit className="mr-2 h-4 w-4" />
                 編輯用戶
               </DropdownMenuItem>
             )}
@@ -319,22 +285,20 @@ export const createUsersColumns = (
               <DropdownMenuItem
                 onClick={() => actions.onManageStores?.(user)}
                 className="cursor-pointer"
-                data-oid="nf3rolu"
               >
-                <Store className="mr-2 h-4 w-4" data-oid="ec481pe" />
+                <Store className="mr-2 h-4 w-4" />
                 分配分店
               </DropdownMenuItem>
             )}
 
-            <DropdownMenuSeparator data-oid="vyt_bxc" />
+            <DropdownMenuSeparator />
 
             {actions.onDelete && (
               <DropdownMenuItem
                 onClick={() => actions.onDelete?.(user)}
                 className="cursor-pointer text-destructive focus:text-destructive"
-                data-oid=".ebj9j1"
               >
-                <Trash2 className="mr-2 h-4 w-4" data-oid=".bfbgnp" />
+                <Trash2 className="mr-2 h-4 w-4" />
                 刪除用戶
               </DropdownMenuItem>
             )}

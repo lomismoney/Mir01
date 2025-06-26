@@ -3,18 +3,18 @@ import { OrderClientComponent } from "@/components/orders/OrderClientComponent";
 
 export default function OrdersPage() {
   return (
-    <div className="space-y-6" data-oid="v.bey71">
-      <div data-oid="v5fjyjq">
-        <h2 className="text-2xl font-bold" data-oid="6l32p4b">
+    <div className="space-y-6" data-oid="pwk.c1p">
+      <div data-oid="2::4bet">
+        <h2 className="text-2xl font-bold" data-oid="cw_mry.">
           訂單管理
         </h2>
-        <p className="text-muted-foreground" data-oid="nddy11e">
+        <p className="text-muted-foreground" data-oid="pwzpwsm">
           管理您的所有銷售訂單、追蹤出貨與付款狀態。
         </p>
       </div>
 
       {/* 渲染我們的主力部隊組件 */}
-      <OrderClientComponent data-oid="0vt3xwe" />
+      <OrderClientComponent data-oid="k:7vzqj" />
     </div>
   );
 }

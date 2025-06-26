@@ -102,59 +102,74 @@ export function CustomerClientComponent() {
   // 【修復】現在才進行條件性渲染，所有 Hooks 都已調用完畢
   if (isLoading) {
     // 顯示骨架屏，提升加載體驗。6 列包含：名稱、電話、行業、付款、時間、操作
-    return <DataTableSkeleton columns={6} rows={5} showHeader={false} />;
+    return (
+      <DataTableSkeleton
+        columns={6}
+        rows={5}
+        showHeader={false}
+        data-oid="q1cih:k"
+      />
+    );
   }
 
   if (isError) {
     return (
-      <div className="text-red-500">
+      <div className="text-red-500" data-oid="krj1zia">
         無法加載客戶資料: {error?.message || "未知錯誤"}
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-oid="dfmx2hw">
       {/* 【升級】工具列 - 搜尋與操作按鈕 */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-oid="yyerznt">
         <Input
           placeholder="搜尋客戶名稱、電話或統編..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
+          data-oid="fptju4r"
         />
 
         {/* 【新增】新增客戶按鈕與對話框 */}
-        <Dialog open={isCreateModalOpen} onOpenChange={setCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button>新增客戶</Button>
+        <Dialog
+          open={isCreateModalOpen}
+          onOpenChange={setCreateModalOpen}
+          data-oid="cfplh_s"
+        >
+          <DialogTrigger asChild data-oid=".ai_p__">
+            <Button data-oid="6exc4rg">新增客戶</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>新增客戶</DialogTitle>
+          <DialogContent className="sm:max-w-[600px]" data-oid="jjjzpp9">
+            <DialogHeader data-oid="a2t_a61">
+              <DialogTitle data-oid="nxg63:a">新增客戶</DialogTitle>
             </DialogHeader>
             <CustomerForm
               isSubmitting={isCreating}
               onSubmit={handleCreateSubmit}
+              data-oid=":93cfk2"
             />
           </DialogContent>
         </Dialog>
       </div>
 
       {/* 表格容器 */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+      <div className="rounded-md border" data-oid="ncku7l0">
+        <Table data-oid="db:8idg">
+          <TableHeader data-oid="fpapqj5">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
                 className="border-b hover:bg-transparent"
+                data-oid="62npwkv"
               >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
                       className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                      data-oid="wj.coop"
                     >
                       {header.isPlaceholder
                         ? null
@@ -168,15 +183,16 @@ export function CustomerClientComponent() {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-oid="6jywpyl">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  data-oid="nd84i3m"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} data-oid="foizz6:">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -186,10 +202,11 @@ export function CustomerClientComponent() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow data-oid="vq8bfs6">
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
+                  data-oid="q7t853m"
                 >
                   暫無客戶資料
                 </TableCell>

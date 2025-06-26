@@ -35,19 +35,19 @@ export default function NewOrderPage() {
   };
 
   return (
-    <div className="space-y-6" data-oid=".mgu-5-">
-      <div data-oid="uxa5b3y">
-        <h2 className="text-2xl font-bold" data-oid="pzbtkvs">
+    <div className="space-y-6" data-oid="dx7m__r">
+      <div data-oid="dfcxmsl">
+        <h2 className="text-2xl font-bold" data-oid="gwvvljp">
           新增訂單
         </h2>
-        <p className="text-muted-foreground" data-oid="xe6rcg_">
+        <p className="text-muted-foreground" data-oid="90rzrrg">
           填寫以下資訊以創建一筆新的銷售訂單。
         </p>
       </div>
       <OrderForm
         isSubmitting={isPending}
         onSubmit={handleSubmit}
-        data-oid="3-2szoj"
+        data-oid="r4y513s"
       />
     </div>
   );

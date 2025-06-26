@@ -17,42 +17,42 @@ import { toast } from "sonner";
  * 用於模擬表單的載入狀態，提升用戶體驗
  */
 const FormSkeleton = () => (
-  <div className="space-y-8" data-oid="j_h:6al">
+  <div className="space-y-8" data-oid="6dt.6uo">
     {/* 客戶名稱字段骨架 */}
-    <div className="space-y-2" data-oid="7ywd-7b">
-      <Skeleton className="h-4 w-1/4" data-oid="prmc3ci" />
-      <Skeleton className="h-10 w-full" data-oid="e6iyyit" />
+    <div className="space-y-2" data-oid="rqd1r26">
+      <Skeleton className="h-4 w-1/4" data-oid="i9jtzy:" />
+      <Skeleton className="h-10 w-full" data-oid="n11n_kn" />
     </div>
 
     {/* 聯絡電話字段骨架 */}
-    <div className="space-y-2" data-oid="38lvkld">
-      <Skeleton className="h-4 w-1/4" data-oid="1mej9y." />
-      <Skeleton className="h-10 w-full" data-oid="_88:l3z" />
+    <div className="space-y-2" data-oid="1_1:om4">
+      <Skeleton className="h-4 w-1/4" data-oid="j2:jbr8" />
+      <Skeleton className="h-10 w-full" data-oid="kn_1dab" />
     </div>
 
     {/* 其他字段骨架 */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-oid="a8lwz.a">
-      <div className="space-y-2" data-oid="abre.px">
-        <Skeleton className="h-4 w-1/3" data-oid="bnl1l9n" />
-        <Skeleton className="h-10 w-full" data-oid=".7cwqoh" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-oid="n_.qrpq">
+      <div className="space-y-2" data-oid="ljjifaj">
+        <Skeleton className="h-4 w-1/3" data-oid="ryrt4oc" />
+        <Skeleton className="h-10 w-full" data-oid=".fw2bpy" />
       </div>
-      <div className="space-y-2" data-oid="hj-mng_">
-        <Skeleton className="h-4 w-1/3" data-oid="267r_sn" />
-        <Skeleton className="h-10 w-full" data-oid="x:7teub" />
+      <div className="space-y-2" data-oid="m5-d0i1">
+        <Skeleton className="h-4 w-1/3" data-oid="xd5mgo." />
+        <Skeleton className="h-10 w-full" data-oid="pazv49c" />
       </div>
     </div>
 
     {/* 地址管理區塊骨架 */}
-    <div className="space-y-4" data-oid="t1.2wkq">
-      <Skeleton className="h-6 w-1/3" data-oid="gits_cu" />
-      <div className="space-y-2" data-oid="3.5e68-">
-        <Skeleton className="h-4 w-1/4" data-oid="e0-1w1-" />
-        <Skeleton className="h-10 w-full" data-oid="70_5f-:" />
+    <div className="space-y-4" data-oid="um0iq46">
+      <Skeleton className="h-6 w-1/3" data-oid="y:rq5l8" />
+      <div className="space-y-2" data-oid="g2yapo7">
+        <Skeleton className="h-4 w-1/4" data-oid="kqc.b6w" />
+        <Skeleton className="h-10 w-full" data-oid="8wwcg1x" />
       </div>
     </div>
 
     {/* 提交按鈕骨架 */}
-    <Skeleton className="h-10 w-32" data-oid="p7gf0-." />
+    <Skeleton className="h-10 w-32" data-oid="tm0p7ay" />
   </div>
 );
 
@@ -118,12 +118,12 @@ export default function EditCustomerPage() {
   // 🔄 載入狀態：顯示表單骨架屏
   if (isLoadingCustomer) {
     return (
-      <div className="space-y-6" data-oid="mbtnbx7">
-        <div data-oid="g0tefu:">
-          <Skeleton className="h-8 w-1/3" data-oid="kjsvzuw" />
-          <Skeleton className="h-4 w-2/3 mt-2" data-oid="bfjtt04" />
+      <div className="space-y-6" data-oid="etsvtel">
+        <div data-oid="bc-79pn">
+          <Skeleton className="h-8 w-1/3" data-oid="iehm_sg" />
+          <Skeleton className="h-4 w-2/3 mt-2" data-oid="57vx7dr" />
         </div>
-        <FormSkeleton data-oid="-mdubup" />
+        <FormSkeleton data-oid="fr-lwuy" />
       </div>
     );
   }
@@ -131,38 +131,38 @@ export default function EditCustomerPage() {
   // ❌ 錯誤狀態：顯示友善的錯誤訊息
   if (isError) {
     return (
-      <div className="space-y-6" data-oid="nizrs-l">
-        <div data-oid="9dywisv">
+      <div className="space-y-6" data-oid="ar40xhk">
+        <div data-oid="-lfnm8y">
           <h2
             className="text-2xl font-bold text-destructive"
-            data-oid="ikgcy.w"
+            data-oid="hvkwnr8"
           >
             載入失敗
           </h2>
-          <p className="text-muted-foreground" data-oid="8go64r7">
+          <p className="text-muted-foreground" data-oid="q5j6-n5">
             無法載入客戶資料，請檢查網路連線或稍後再試。
           </p>
         </div>
         <div
           className="p-4 border border-destructive/20 rounded-md bg-destructive/5"
-          data-oid="sf-kg_d"
+          data-oid="y579mt3"
         >
-          <p className="text-sm text-destructive" data-oid="9-y--np">
+          <p className="text-sm text-destructive" data-oid="-fdhxic">
             錯誤詳情：{error?.message || "未知錯誤"}
           </p>
         </div>
-        <div className="flex gap-2" data-oid="-kd:3ti">
+        <div className="flex gap-2" data-oid=".05iqbw">
           <button
             onClick={() => router.push("/customers")}
             className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
-            data-oid="q:lk7pi"
+            data-oid="b0o9d9d"
           >
             返回客戶列表
           </button>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            data-oid="-w9psve"
+            data-oid="0wz-yz:"
           >
             重新載入
           </button>
@@ -173,13 +173,13 @@ export default function EditCustomerPage() {
 
   // ✅ 正常狀態：渲染編輯表單
   return (
-    <div className="space-y-6" data-oid="ne:54si">
+    <div className="space-y-6" data-oid="emx8pv9">
       {/* 📋 頁面標題與描述 */}
-      <div data-oid="1dtw436">
-        <h2 className="text-2xl font-bold" data-oid="s.n0b0c">
+      <div data-oid="qk_-mc6">
+        <h2 className="text-2xl font-bold" data-oid="d-r7ime">
           編輯客戶
         </h2>
-        <p className="text-muted-foreground" data-oid="3ag0.-0">
+        <p className="text-muted-foreground" data-oid="alo455h">
           修改客戶「{customerResponse?.data?.name}」的詳細資料。
         </p>
       </div>
@@ -189,7 +189,7 @@ export default function EditCustomerPage() {
         initialData={customerResponse?.data}
         isSubmitting={isUpdating}
         onSubmit={handleUpdateSubmit}
-        data-oid="js:69zf"
+        data-oid="l1bksa_"
       />
     </div>
   );

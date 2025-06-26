@@ -50,7 +50,7 @@ function ChartContainer({
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
 
   return (
-    <ChartContext.Provider value={{ config }} data-oid="zxkeuo6">
+    <ChartContext.Provider value={{ config }} data-oid="03y63x8">
       <div
         data-slot="chart"
         data-chart={chartId}
@@ -59,10 +59,10 @@ function ChartContainer({
           className,
         )}
         {...props}
-        data-oid="x8wykj7"
+        data-oid="k-tixc."
       >
-        <ChartStyle id={chartId} config={config} data-oid="ju2..8:" />
-        <RechartsPrimitive.ResponsiveContainer data-oid="hiadzch">
+        <ChartStyle id={chartId} config={config} data-oid="ro:bdf_" />
+        <RechartsPrimitive.ResponsiveContainer data-oid="xbav_cr">
           {children}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
@@ -99,7 +99,7 @@ ${colorConfig
           )
           .join("\n"),
       }}
-      data-oid="ji:iigt"
+      data-oid="y.5czua"
     />
   );
 };
@@ -145,7 +145,7 @@ function ChartTooltipContent({
 
     if (labelFormatter) {
       return (
-        <div className={cn("font-medium", labelClassName)} data-oid="63r1333">
+        <div className={cn("font-medium", labelClassName)} data-oid="3h.z:at">
           {labelFormatter(value, payload)}
         </div>
       );
@@ -156,7 +156,7 @@ function ChartTooltipContent({
     }
 
     return (
-      <div className={cn("font-medium", labelClassName)} data-oid="w06279y">
+      <div className={cn("font-medium", labelClassName)} data-oid="nix647r">
         {value}
       </div>
     );
@@ -182,10 +182,10 @@ function ChartTooltipContent({
         "border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
         className,
       )}
-      data-oid="u.cmusp"
+      data-oid="42hdhpj"
     >
       {!nestLabel ? tooltipLabel : null}
-      <div className="grid gap-1.5" data-oid="sy-9gep">
+      <div className="grid gap-1.5" data-oid="ft6o6_q">
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
@@ -198,14 +198,14 @@ function ChartTooltipContent({
                 "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5",
                 indicator === "dot" && "items-center",
               )}
-              data-oid="b4ajrpr"
+              data-oid=":kyooin"
             >
               {formatter && item?.value !== undefined && item.name ? (
                 formatter(item.value, item.name, item, index, item.payload)
               ) : (
                 <>
                   {itemConfig?.icon ? (
-                    <itemConfig.icon data-oid="l7u6j8f" />
+                    <itemConfig.icon data-oid="ko2q_y4" />
                   ) : (
                     !hideIndicator && (
                       <div
@@ -225,7 +225,7 @@ function ChartTooltipContent({
                             "--color-border": indicatorColor,
                           } as React.CSSProperties
                         }
-                        data-oid="ypvi67c"
+                        data-oid="--l8-sz"
                       />
                     )
                   )}
@@ -234,13 +234,13 @@ function ChartTooltipContent({
                       "flex flex-1 justify-between leading-none",
                       nestLabel ? "items-end" : "items-center",
                     )}
-                    data-oid="ojwfh6d"
+                    data-oid="9kzgeck"
                   >
-                    <div className="grid gap-1.5" data-oid="-6mmqri">
+                    <div className="grid gap-1.5" data-oid="9c.vohs">
                       {nestLabel ? tooltipLabel : null}
                       <span
                         className="text-muted-foreground"
-                        data-oid="533bgp."
+                        data-oid=":arw7ez"
                       >
                         {itemConfig?.label || item.name}
                       </span>
@@ -248,7 +248,7 @@ function ChartTooltipContent({
                     {item.value && (
                       <span
                         className="text-foreground font-mono font-medium tabular-nums"
-                        data-oid="8h67ndq"
+                        data-oid="lda8f73"
                       >
                         {item.value.toLocaleString()}
                       </span>
@@ -290,7 +290,7 @@ function ChartLegendContent({
         verticalAlign === "top" ? "pb-3" : "pt-3",
         className,
       )}
-      data-oid="8noilz5"
+      data-oid="kxenyki"
     >
       {payload.map((item) => {
         const key = `${nameKey || item.dataKey || "value"}`;
@@ -302,17 +302,17 @@ function ChartLegendContent({
             className={cn(
               "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3",
             )}
-            data-oid="y50f4e_"
+            data-oid="s1pjhy8"
           >
             {itemConfig?.icon && !hideIcon ? (
-              <itemConfig.icon data-oid="i56h73r" />
+              <itemConfig.icon data-oid="vhhda3_" />
             ) : (
               <div
                 className="h-2 w-2 shrink-0 rounded-[2px]"
                 style={{
                   backgroundColor: item.color,
                 }}
-                data-oid="l21rjbc"
+                data-oid="5i7e.be"
               />
             )}
             {itemConfig?.label}

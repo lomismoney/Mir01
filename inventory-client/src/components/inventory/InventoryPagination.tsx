@@ -31,9 +31,9 @@ export function InventoryPagination({
   // to show ellipsis for many pages. For now, we show all pages.
 
   return (
-    <Pagination data-oid="uid3c:j">
-      <PaginationContent data-oid=":y50s94">
-        <PaginationItem data-oid="851:-a6">
+    <Pagination data-oid="ma:v.c:">
+      <PaginationContent data-oid="fz1krxl">
+        <PaginationItem data-oid="-jxuj_r">
           <PaginationPrevious
             href="#"
             onClick={(e) => {
@@ -45,11 +45,11 @@ export function InventoryPagination({
             className={
               current_page === 1 ? "pointer-events-none opacity-50" : undefined
             }
-            data-oid=".7lecj7"
+            data-oid="4g51-7s"
           />
         </PaginationItem>
         {[...Array(last_page)].map((_, i) => (
-          <PaginationItem key={i} data-oid="6h5m1pk">
+          <PaginationItem key={i} data-oid="0vghi.g">
             <PaginationLink
               href="#"
               onClick={(e) => {
@@ -57,13 +57,13 @@ export function InventoryPagination({
                 onPageChange(i + 1);
               }}
               isActive={current_page === i + 1}
-              data-oid="zueh-ds"
+              data-oid="2oly5w3"
             >
               {i + 1}
             </PaginationLink>
           </PaginationItem>
         ))}
-        <PaginationItem data-oid="gwegn-s">
+        <PaginationItem data-oid=":g65hak">
           <PaginationNext
             href="#"
             onClick={(e) => {
@@ -77,7 +77,7 @@ export function InventoryPagination({
                 ? "pointer-events-none opacity-50"
                 : undefined
             }
-            data-oid="cul7d8c"
+            data-oid="rlq95d0"
           />
         </PaginationItem>
       </PaginationContent>
