@@ -18,7 +18,7 @@ class OrderItemController extends Controller
      * 此端點用於更新單個訂單項目的狀態，並自動記錄狀態變更歷史。
      * 適用於逐項追蹤訂單進度的場景。
      * 
-     * @urlParam order_item integer required 訂單項目的 ID。Example: 1
+     
      * 
      * @bodyParam status string required 新的項目狀態。Example: 已叫貨
      * @bodyParam notes string 狀態變更備註。Example: 商品已從倉庫叫貨

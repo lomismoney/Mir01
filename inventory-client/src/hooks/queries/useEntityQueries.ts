@@ -3471,8 +3471,7 @@ export function useCreateOrderShipment() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/create-shipment", {
         params: { 
           path: { 
-            order_id: payload.orderId,
-            order: payload.orderId
+            order_id: payload.orderId
           } 
         },
         body: payload.data,
@@ -3522,8 +3521,7 @@ export function useAddOrderPayment() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/add-payment", {
         params: { 
           path: { 
-            order_id: payload.orderId,
-            order: payload.orderId
+            order_id: payload.orderId
           } 
         },
         body: payload.data,
@@ -3699,7 +3697,7 @@ export function useUpdateOrderItemStatus() {
       };
       
       const { data, error } = await apiClient.PATCH('/api/order-items/{order_item_id}/status', {
-        params: { path: { order_item_id: orderItemId, order_item: orderItemId } },
+        params: { path: { order_item_id: orderItemId } },
         body: requestBody,
       });
       
@@ -3780,8 +3778,7 @@ export function useCreateRefund() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/refunds", {
         params: { 
           path: { 
-            order_id: payload.orderId,
-            order: payload.orderId
+            order_id: payload.orderId
           } 
         },
         body: payload.data,

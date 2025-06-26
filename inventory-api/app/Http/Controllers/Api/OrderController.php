@@ -291,8 +291,6 @@ class OrderController extends Controller
      * 系統會自動計算已付金額，並根據付款進度更新訂單的付款狀態。
      * 每次付款都會記錄詳細的付款歷史，便於追蹤和對帳。
      * 
-     * @urlParam order integer required 要新增付款記錄的訂單 ID。Example: 1
-     * 
      * @bodyParam amount number required 付款金額，必須大於 0.01 且不超過剩餘未付金額。Example: 1500.50
      * @bodyParam payment_method string required 付款方式（cash, transfer, credit_card）。Example: cash
      * @bodyParam payment_date string 付款日期（格式: Y-m-d H:i:s），不填則使用當前時間。Example: 2025-06-20 10:30:00
@@ -373,8 +371,6 @@ class OrderController extends Controller
      * 
      * 此端點用於為訂單創建出貨記錄，將貨物狀態更新為「已出貨」。
      * 可以提供物流追蹤號碼等出貨相關資訊。
-     * 
-     * @urlParam order integer required 要創建出貨記錄的訂單 ID。Example: 1
      * 
      * @bodyParam tracking_number string required 物流追蹤號碼。Example: SF1234567890
      * @bodyParam carrier string 承運商名稱。Example: 順豐速運
@@ -495,7 +491,7 @@ class OrderController extends Controller
      * 系統會自動計算退款金額、更新訂單狀態，並可選擇性回補庫存。
      * 每筆退款都會記錄詳細的退貨明細和操作歷史。
      * 
-     * @urlParam order integer required 要創建退款的訂單 ID。Example: 1
+     
      * 
      * @bodyParam reason string required 退款原因，10-500 字符。Example: 商品品質不符合要求，客戶要求退貨
      * @bodyParam notes string 退款備註，最多 1000 字符。Example: 商品外觀無損，已檢查確認可回庫
