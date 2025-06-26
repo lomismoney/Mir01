@@ -8,9 +8,11 @@ import { SimpleProductTest } from "@/components/debug/SimpleProductTest";
  */
 export default function ApiTestPage() {
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">商品 API 診斷測試</h1>
-      <SimpleProductTest />
+    <div className="container mx-auto p-6" data-oid="1uwuy6m">
+      <h1 className="text-2xl font-bold mb-6" data-oid="r.ufvk4">
+        商品 API 診斷測試
+      </h1>
+      <SimpleProductTest data-oid="e-a5g18" />
     </div>
   );
 }

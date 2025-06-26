@@ -26,6 +26,7 @@ class Category extends Model
         'name',
         'description',
         'parent_id',
+        'sort_order',
     ];
 
     /**

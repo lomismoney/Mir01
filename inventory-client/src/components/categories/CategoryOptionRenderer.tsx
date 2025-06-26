@@ -1,17 +1,17 @@
-import { Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { CommandItem } from '@/components/ui/command';
-import { Category } from '@/types/category';
+import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { CommandItem } from "@/components/ui/command";
+import { Category } from "@/types/category";
 
 /**
  * 分類選項遞迴渲染器組件
- * 
+ *
  * 功能說明：
  * 1. 遞迴渲染單個分類及其所有子分類
  * 2. 根據分類層級自動計算縮排距離
  * 3. 支援選中狀態的視覺反饋
  * 4. 提供點擊選擇功能
- * 
+ *
  * @param category - 當前要渲染的分類
  * @param allCategories - 所有分類的分組結構
  * @param currentValue - 當前選中的分類 ID
@@ -47,11 +47,15 @@ export function CategoryOptionRenderer({
       >
         {/* 選中狀態的勾選圖標 */}
         <Check
-          className={cn('mr-2 h-4 w-4', currentValue === category.id ? 'opacity-100' : 'opacity-0')}
+          className={cn(
+            "mr-2 h-4 w-4",
+            currentValue === category.id ? "opacity-100" : "opacity-0",
+          )}
         />
+
         {category.name}
       </CommandItem>
-      
+
       {/* 遞迴渲染子分類，層級加一 */}
       {children.map((child) => (
         <CategoryOptionRenderer
@@ -65,4 +69,4 @@ export function CategoryOptionRenderer({
       ))}
     </>
   );
-} 
+}

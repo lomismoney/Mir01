@@ -1,8 +1,8 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: '庫存管理',
-  description: '管理門市商品庫存',
+  title: "庫存管理",
+  description: "管理門市商品庫存",
 };
 
 export default function ManagementLayout({
@@ -11,4 +11,4 @@ export default function ManagementLayout({
   children: React.ReactNode;
 }) {
   return <>{children}</>;
-} 
+}

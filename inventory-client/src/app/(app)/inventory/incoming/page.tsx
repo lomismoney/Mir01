@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { PurchaseManagement } from '@/components/purchases/PurchaseManagement'
+import { PurchaseManagement } from "@/components/purchases/PurchaseManagement";
 
 /**
  * 商品入庫管理頁面
- * 
+ *
  * 功能概述：
  * - 專注處理商品入庫操作
  * - 查看入庫歷史記錄
@@ -12,5 +12,5 @@ import { PurchaseManagement } from '@/components/purchases/PurchaseManagement'
  * - 顯示操作者信息
  */
 export default function IncomingPage() {
-  return <PurchaseManagement />
-} 
+  return <PurchaseManagement data-oid=".x1bx6p" />;
+}

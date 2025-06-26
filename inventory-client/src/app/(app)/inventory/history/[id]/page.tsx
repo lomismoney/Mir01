@@ -1,39 +1,47 @@
-import { InventoryHistory } from "@/components/inventory/InventoryHistory"
+import { InventoryHistory } from "@/components/inventory/InventoryHistory";
 
 interface InventoryHistoryPageProps {
   params: Promise<{
-    id: string
-  }>
+    id: string;
+  }>;
   searchParams: Promise<{
-    productName?: string
-    sku?: string
-  }>
+    productName?: string;
+    sku?: string;
+  }>;
 }
 
-export default async function InventoryHistoryPage({ 
-  params, 
-  searchParams 
+export default async function InventoryHistoryPage({
+  params,
+  searchParams,
 }: InventoryHistoryPageProps) {
-  const resolvedParams = await params
-  const resolvedSearchParams = await searchParams
-  const inventoryId = parseInt(resolvedParams.id)
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const inventoryId = parseInt(resolvedParams.id);
 
   if (isNaN(inventoryId)) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">無效的庫存ID</h2>
-          <p className="text-muted-foreground">請檢查URL中的庫存ID是否正確</p>
+      <div
+        className="flex items-center justify-center min-h-[400px]"
+        data-oid="kb21l10"
+      >
+        <div className="text-center" data-oid="2ag8jns">
+          <h2 className="text-xl font-semibold mb-2" data-oid="37-8rv2">
+            無效的庫存ID
+          </h2>
+          <p className="text-muted-foreground" data-oid="-_4jdvt">
+            請檢查URL中的庫存ID是否正確
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <InventoryHistory 
+    <InventoryHistory
       inventoryId={inventoryId}
       productName={resolvedSearchParams.productName}
       sku={resolvedSearchParams.sku}
+      data-oid="1euua.."
     />
-  )
+  );
 }

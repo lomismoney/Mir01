@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,23 +9,23 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { ArrowUpDown } from "lucide-react"
-import { InventoryAdjustmentForm } from "./InventoryAdjustmentForm"
+} from "@/components/ui/dialog";
+import { ArrowUpDown } from "lucide-react";
+import { InventoryAdjustmentForm } from "./InventoryAdjustmentForm";
 
 interface InventoryAdjustmentDialogProps {
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 export function InventoryAdjustmentDialog({
   onSuccess,
 }: InventoryAdjustmentDialogProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   const handleSuccess = () => {
-    setOpen(false)
-    onSuccess?.()
-  }
+    setOpen(false);
+    onSuccess?.();
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -50,5 +50,5 @@ export function InventoryAdjustmentDialog({
         />
       </DialogContent>
     </Dialog>
-  )
+  );
 }

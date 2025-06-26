@@ -168,6 +168,15 @@ Route::middleware('auth:sanctum')->group(function () {
      * DELETE /api/categories/{id}   - 刪除指定分類
      */
     Route::apiResource('categories', CategoryController::class);
+    
+    /**
+     * 批量重新排序分類路由
+     * 允許管理員批量更新分類的排序順序和父子關係
+     * 支援拖曳排序功能的後端實現
+     * 
+     * POST   /api/categories/batch-reorder  - 批量更新分類順序
+     */
+    Route::post('/categories/batch-reorder', [CategoryController::class, 'reorder'])->middleware('auth:sanctum');
 
     /**
      * 商品屬性管理路由

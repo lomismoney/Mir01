@@ -1,15 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ChevronRight, MoreHorizontal, Edit, Trash, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CategoryTree } from './CategoryTree';
-import { Category } from '@/types/category';
+import { useState } from "react";
+import { ChevronRight, MoreHorizontal, Edit, Trash, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CategoryTree } from "./CategoryTree";
+import { Category } from "@/types/category";
 
 /**
  * CategoryItem 元件屬性介面
- * 
+ *
  * @param category - 當前分類資料
  * @param allCategories - 所有分類的分組資料（按 parent_id 分組）
  * @param onEdit - 編輯分類的回調函數
@@ -26,20 +32,20 @@ interface CategoryItemProps {
 
 /**
  * 單一分類項目元件（遞迴核心）
- * 
+ *
  * 這是分類樹狀結構的核心遞迴元件，負責：
  * 1. 顯示單個分類的基本資訊
  * 2. 提供展開/收合功能控制子分類顯示
  * 3. 遞迴調用 CategoryTree 來顯示子分類
  * 4. 提供完整的操作選單（編輯、刪除、新增子分類）
- * 
+ *
  * 功能特色：
  * - 智能展開控制（無子分類時禁用展開按鈕）
  * - 平滑的動畫效果（箭頭旋轉）
  * - 滑鼠懸停效果增強用戶體驗
  * - 完整的 CRUD 操作選單
  * - 遞迴傳遞事件處理函數
- * 
+ *
  * @param category - 要顯示的分類資料
  * @param allCategories - 完整分類分組資料，用於查找子分類
  * @param onEdit - 編輯分類的事件處理函數
@@ -47,16 +53,16 @@ interface CategoryItemProps {
  * @param onAddSubCategory - 新增子分類的事件處理函數
  * @returns 渲染的分類項目及其子樹
  */
-export function CategoryItem({ 
-  category, 
-  allCategories, 
-  onEdit, 
-  onDelete, 
-  onAddSubCategory 
+export function CategoryItem({
+  category,
+  allCategories,
+  onEdit,
+  onDelete,
+  onAddSubCategory,
 }: CategoryItemProps) {
   // 控制當前分類是否展開顯示子分類
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // 從分組資料中獲取當前分類的子分類
   // 使用 category.id 作為 key 查找對應的子分類陣列
   const children = allCategories[category.id.toString()] || [];
@@ -66,15 +72,15 @@ export function CategoryItem({
       {/* 分類項目主要內容區 */}
       <div className="flex items-center p-2 rounded-md hover:bg-muted group">
         {/* 展開/收合按鈕 */}
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => setIsExpanded(!isExpanded)} 
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
           disabled={children.length === 0}
           className="mr-2 h-6 w-6 p-0"
         >
-          <ChevronRight 
-            className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''} ${children.length === 0 ? 'opacity-0' : ''}`} 
+          <ChevronRight
+            className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-90" : ""} ${children.length === 0 ? "opacity-0" : ""}`}
           />
         </Button>
 
@@ -98,9 +104,9 @@ export function CategoryItem({
         {/* 操作選單 */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <MoreHorizontal className="h-3 w-3" />
@@ -123,7 +129,7 @@ export function CategoryItem({
               </DropdownMenuItem>
             )}
             {onDelete && (
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => onDelete(category)}
                 className="text-destructive focus:text-destructive"
               >
@@ -137,8 +143,8 @@ export function CategoryItem({
 
       {/* 子分類遞迴展示區 */}
       {isExpanded && children.length > 0 && (
-        <CategoryTree 
-          categories={children} 
+        <CategoryTree
+          categories={children}
           allCategories={allCategories}
           onEdit={onEdit}
           onDelete={onDelete}
@@ -147,4 +153,4 @@ export function CategoryItem({
       )}
     </div>
   );
-} 
+}

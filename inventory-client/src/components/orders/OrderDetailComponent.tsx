@@ -1,403 +1,716 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useOrderDetail, useUpdateOrderItemStatus } from '@/hooks/queries/useEntityQueries';
+import React, { useState } from "react";
+import {
+  useOrderDetail,
+  useUpdateOrderItemStatus,
+} from "@/hooks/queries/useEntityQueries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, DollarSign, Calendar, User, CreditCard, Plus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Loader2,
+  DollarSign,
+  Calendar,
+  User,
+  CreditCard,
+  Plus,
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import RecordPaymentModal from '@/components/orders/RecordPaymentModal';
+import RecordPaymentModal from "@/components/orders/RecordPaymentModal";
 
 interface OrderDetailComponentProps {
   orderId: number;
 }
 
 export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
-    const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
-    const { mutate: updateItemStatus, isPending } = useUpdateOrderItemStatus();
-    
-    // 🎯 新增：部分付款 Modal 狀態
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    
-    // 🎯 狀態中文對照表
-    const getStatusText = (status: string) => {
-        const statusMap: Record<string, string> = {
-            // 付款狀態
-            'pending': '待付款',
-            'paid': '已付款',
-            'partial': '部分付款',
-            'refunded': '已退款',
-            // 出貨狀態
-            'processing': '處理中',
-            'shipped': '已出貨',
-            'delivered': '已送達',
-            'cancelled': '已取消',
-            'completed': '已完成',
-            // 項目狀態
-            '待處理': '待處理',
-            '已叫貨': '已叫貨',
-            '已出貨': '已出貨',
-            '完成': '完成'
-        };
-        return statusMap[status] || status;
+  const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
+  const { mutate: updateItemStatus, isPending } = useUpdateOrderItemStatus();
+
+  // 🎯 新增：部分付款 Modal 狀態
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // 🎯 狀態中文對照表
+  const getStatusText = (status: string) => {
+    const statusMap: Record<string, string> = {
+      // 付款狀態
+      pending: "待付款",
+      paid: "已付款",
+      partial: "部分付款",
+      refunded: "已退款",
+      // 出貨狀態
+      processing: "處理中",
+      shipped: "已出貨",
+      delivered: "已送達",
+      cancelled: "已取消",
+      completed: "已完成",
+      // 項目狀態
+      待處理: "待處理",
+      已叫貨: "已叫貨",
+      已出貨: "已出貨",
+      完成: "完成",
     };
-    
-    // 可用的項目狀態選項
-    const statusOptions = [
-        { value: '待處理', label: '待處理' },
-        { value: '已叫貨', label: '已叫貨' },
-        { value: '已出貨', label: '已出貨' },
-        { value: '完成', label: '完成' },
-    ];
-    
-    // 處理狀態更新
-    const handleStatusChange = (itemId: number, newStatus: string) => {
-        updateItemStatus({
-            orderItemId: itemId,
-            status: newStatus,
-        });
-    };
+    return statusMap[status] || status;
+  };
 
-    if (isLoading) {
-        return (
-            <div className="grid gap-6 md:grid-cols-3">
-                <Card className="md:col-span-2"><CardHeader><Skeleton className="h-8 w-3/4" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
-                <Card><CardHeader><Skeleton className="h-8 w-3/4" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
-            </div>
-        );
-    }
+  // 可用的項目狀態選項
+  const statusOptions = [
+    { value: "待處理", label: "待處理" },
+    { value: "已叫貨", label: "已叫貨" },
+    { value: "已出貨", label: "已出貨" },
+    { value: "完成", label: "完成" },
+  ];
 
-    if (isError) {
-        return <div className="text-red-500">無法加載訂單詳情: {error?.message}</div>;
-    }
+  // 處理狀態更新
+  const handleStatusChange = (itemId: number, newStatus: string) => {
+    updateItemStatus({
+      orderItemId: itemId,
+      status: newStatus,
+    });
+  };
 
-    if (!order) {
-        return <div>找不到訂單資料。</div>;
-    }
-
-    // 🎯 計算總計資訊
-    const subtotal = order.items?.reduce((acc: number, item: any) => 
-        acc + (Number(item.price) * item.quantity), 0) || 0;
-    
-    // 🎯 計算付款進度
-    const paymentProgress = order.grand_total > 0 ? (order.paid_amount / order.grand_total) * 100 : 0;
-    const remainingAmount = order.grand_total - order.paid_amount;
-
+  if (isLoading) {
     return (
-        <>
-        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
-            {/* 左側主欄，佔據 2/3 寬度 */}
-            <div className="grid gap-4 lg:col-span-2">
-                {/* 訂單項目卡片 - 主要內容 */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>訂單品項</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="border-b hover:bg-transparent">
-                                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">商品名稱</TableHead>
-                                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">SKU</TableHead>
-                                    <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">單價</TableHead>
-                                    <TableHead className="text-center h-12 px-4 align-middle font-medium text-muted-foreground">數量</TableHead>
-                                    <TableHead className="text-right h-12 px-4 align-middle font-medium text-muted-foreground">小計</TableHead>
-                                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">項目狀態</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {order.items?.map((item: any) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <div>
-                                                    <div className="font-medium">{item.product_name}</div>
-                                                    {item.custom_specifications && (
-                                                        <Badge variant="outline" className="mt-1">訂製</Badge>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {/* 🎯 優雅地顯示訂製規格 */}
-                                            {item.custom_specifications && (
-                                                <div className="mt-2 p-2 bg-muted rounded-md">
-                                                    <div className="text-xs font-medium text-muted-foreground">訂製規格：</div>
-                                                    <div className="text-sm mt-1">
-                                                        {Object.entries(
-                                                            typeof item.custom_specifications === 'string' 
-                                                                ? JSON.parse(item.custom_specifications) 
-                                                                : item.custom_specifications
-                                                        ).map(([key, value]) => (
-                                                            <div key={key} className="flex gap-2">
-                                                                <span className="font-medium">{key}:</span>
-                                                                <span>{value as string}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="font-mono text-sm">{item.sku}</TableCell>
-                                        <TableCell className="text-right">${Number(item.price).toLocaleString()}</TableCell>
-                                        <TableCell className="text-center">{item.quantity}</TableCell>
-                                        <TableCell className="text-right font-medium">${(Number(item.price) * item.quantity).toLocaleString()}</TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <Select
-                                                    value={item.status}
-                                                    onValueChange={(newStatus) => handleStatusChange(item.id, newStatus)}
-                                                    disabled={isPending}
-                                                >
-                                                    <SelectTrigger className="w-[120px]">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {statusOptions.map((option) => (
-                                                            <SelectItem key={option.value} value={option.value}>
-                                                                {option.label}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {isPending && (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-                
-                {/* 🎯 新增：付款歷史卡片 */}
-                {order.payment_records && order.payment_records.length > 0 && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <DollarSign className="h-5 w-5" />
-                                付款記錄
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {order.payment_records.map((payment: any) => (
-                                    <div key={payment.id} className="rounded-lg border p-4">
-                                        <div className="flex items-start justify-between">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium text-lg">
-                                                        ${payment.amount.toLocaleString()}
-                                                    </span>
-                                                    <Badge variant="outline">
-                                                        {payment.payment_method === 'cash' ? '現金' :
-                                                         payment.payment_method === 'transfer' ? '銀行轉帳' :
-                                                         payment.payment_method === 'credit_card' ? '信用卡' : 
-                                                         payment.payment_method}
-                                                    </Badge>
-                                                </div>
-                                                {payment.notes && (
-                                                    <p className="text-sm text-muted-foreground">{payment.notes}</p>
-                                                )}
-                                            </div>
-                                            <div className="text-right text-sm text-muted-foreground">
-                                                <div className="flex items-center gap-1">
-                                                    <Calendar className="h-3 w-3" />
-                                                    {format(new Date(payment.payment_date), 'yyyy/MM/dd HH:mm')}
-                                                </div>
-                                                {payment.creator && (
-                                                    <div className="flex items-center gap-1 mt-1">
-                                                        <User className="h-3 w-3" />
-                                                        {payment.creator.name}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
-            
-            {/* 右側邊欄，佔據 1/3 寬度 */}
-            <div className="grid gap-4">
-                {/* 訂單摘要卡片 */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>訂單摘要</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid gap-2 text-sm">
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">訂單號碼</span>
-                            <span className="font-medium">{order.order_number}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">下單時間</span>
-                            <span>{new Date(order.created_at).toLocaleString('zh-TW')}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">貨物狀態</span>
-                            <Badge variant={order.shipping_status === 'shipped' ? 'default' : 'secondary'}>
-                                {getStatusText(order.shipping_status)}
-                            </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">付款狀態</span>
-                            <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>
-                                {getStatusText(order.payment_status)}
-                            </Badge>
-                        </div>
-                        
-                        {/* 金額明細 */}
-                        <div className="pt-3 mt-3 border-t space-y-2">
-                            <div className="flex items-center justify-between">
-                                <span className="text-muted-foreground">商品小計</span>
-                                <span>${subtotal.toLocaleString()}</span>
-                            </div>
-                            {order.shipping_fee && order.shipping_fee > 0 && (
-                                <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground">運費</span>
-                                    <span>${order.shipping_fee.toLocaleString()}</span>
-                                </div>
-                            )}
-                            {order.discount_amount > 0 && (
-                                <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground">折扣</span>
-                                    <span className="text-green-600">-${order.discount_amount.toLocaleString()}</span>
-                                </div>
-                            )}
-                            {order.tax_amount > 0 && (
-                                <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground">稅額</span>
-                                    <span>${order.tax_amount.toLocaleString()}</span>
-                                </div>
-                            )}
-                            <div className="flex items-center justify-between font-medium text-base pt-2 border-t">
-                                <span className="text-muted-foreground">訂單總額</span>
-                                <span>{new Intl.NumberFormat('zh-TW', { 
-                                    style: 'currency', 
-                                    currency: 'TWD', 
-                                    minimumFractionDigits: 0 
-                                }).format(order.grand_total)}</span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                
-                {/* 🎯 新增：付款進度卡片 */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="flex items-center gap-2">
-                                <CreditCard className="h-5 w-5" />
-                                付款進度
-                            </CardTitle>
-                            {/* 🎯 新增：在卡片頭部加入記錄付款按鈕 */}
-                            {order.payment_status !== 'paid' && order.payment_status !== 'refunded' && (
-                                <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => setIsPaymentModalOpen(true)}
-                                >
-                                    <Plus className="h-4 w-4 mr-1" />
-                                    記錄付款
-                                </Button>
-                            )}
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {/* 進度條 */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">完成度</span>
-                                <span className="font-medium">{paymentProgress.toFixed(0)}%</span>
-                            </div>
-                            <Progress value={paymentProgress} className="h-2" />
-                        </div>
-                        
-                        {/* 金額明細 */}
-                        <div className="space-y-2 pt-2">
-                            <div className="flex items-center justify-between">
-                                <span className="text-muted-foreground">已付金額</span>
-                                <span className="font-medium text-green-600">
-                                    ${order.paid_amount.toLocaleString()}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-muted-foreground">未付金額</span>
-                                <span className="font-medium text-red-600">
-                                    ${remainingAmount.toLocaleString()}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between pt-2 border-t">
-                                <span className="text-muted-foreground">訂單總額</span>
-                                <span className="font-medium">
-                                    ${order.grand_total.toLocaleString()}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        {/* 付款次數統計 */}
-                        {order.payment_records && order.payment_records.length > 0 && (
-                            <div className="pt-3 border-t">
-                                <p className="text-xs text-muted-foreground">
-                                    已收到 {order.payment_records.length} 筆付款
-                                </p>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* 客戶資訊卡片 */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>客戶資訊</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid gap-2 text-sm">
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">客戶名稱</span>
-                            <span className="font-medium">{order.customer?.name || '未提供'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">聯絡電話</span>
-                            <span>{order.customer?.phone || '未提供'}</span>
-                        </div>
-                        {order.shipping_address && (
-                            <div className="pt-2 mt-2 border-t">
-                                <p className="text-muted-foreground mb-1">運送地址</p>
-                                <p className="text-sm">{order.shipping_address}</p>
-                            </div>
-                        )}
-                        {order.billing_address && (
-                            <div className="pt-2 mt-2 border-t">
-                                <p className="text-muted-foreground mb-1">帳單地址</p>
-                                <p className="text-sm">{order.billing_address}</p>
-                            </div>
-                        )}
-                        {order.notes && (
-                            <div className="pt-2 mt-2 border-t">
-                                <p className="text-muted-foreground mb-1">備註</p>
-                                <p className="text-sm whitespace-pre-wrap">{order.notes}</p>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
-        
-        {/* 🎯 記錄付款 Modal */}
-        <RecordPaymentModal
-            order={order || null}
-            open={isPaymentModalOpen}
-            onOpenChange={setIsPaymentModalOpen}
-        />
-        </>
+      <div className="grid gap-6 md:grid-cols-3" data-oid="7lb4hb3">
+        <Card className="md:col-span-2" data-oid="29_5sms">
+          <CardHeader data-oid="5_5vgva">
+            <Skeleton className="h-8 w-3/4" data-oid="x.cq3vc" />
+          </CardHeader>
+          <CardContent data-oid=".w76p2g">
+            <Skeleton className="h-24 w-full" data-oid=":iipnt:" />
+          </CardContent>
+        </Card>
+        <Card data-oid="9fwcr6t">
+          <CardHeader data-oid="64qdu:i">
+            <Skeleton className="h-8 w-3/4" data-oid="xy6zkf6" />
+          </CardHeader>
+          <CardContent data-oid="2ru045v">
+            <Skeleton className="h-24 w-full" data-oid="u2ut4h:" />
+          </CardContent>
+        </Card>
+      </div>
     );
-} 
+  }
+
+  if (isError) {
+    return (
+      <div className="text-red-500" data-oid="luo7pxa">
+        無法加載訂單詳情: {error?.message}
+      </div>
+    );
+  }
+
+  if (!order) {
+    return <div data-oid="970:fav">找不到訂單資料。</div>;
+  }
+
+  // 🎯 計算總計資訊
+  const subtotal =
+    order.items?.reduce(
+      (acc: number, item: any) => acc + Number(item.price) * item.quantity,
+      0,
+    ) || 0;
+
+  // 🎯 計算付款進度
+  const paymentProgress =
+    order.grand_total > 0 ? (order.paid_amount / order.grand_total) * 100 : 0;
+  const remainingAmount = order.grand_total - order.paid_amount;
+
+  return (
+    <>
+      <div
+        className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3"
+        data-oid="hvuut5t"
+      >
+        {/* 左側主欄，佔據 2/3 寬度 */}
+        <div className="grid gap-4 lg:col-span-2" data-oid="ce7_ugo">
+          {/* 訂單項目卡片 - 主要內容 */}
+          <Card data-oid="bqxve_j">
+            <CardHeader data-oid=":xiugov">
+              <CardTitle data-oid="p:4c3x8">訂單品項</CardTitle>
+            </CardHeader>
+            <CardContent data-oid="d:u7i-a">
+              <Table data-oid="bvcyvps">
+                <TableHeader data-oid=":oqct0j">
+                  <TableRow
+                    className="border-b hover:bg-transparent"
+                    data-oid="n-lhsq2"
+                  >
+                    <TableHead
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                      data-oid="vks9z8x"
+                    >
+                      商品名稱
+                    </TableHead>
+                    <TableHead
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                      data-oid="mw_achc"
+                    >
+                      SKU
+                    </TableHead>
+                    <TableHead
+                      className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
+                      data-oid="-yf5w:6"
+                    >
+                      單價
+                    </TableHead>
+                    <TableHead
+                      className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
+                      data-oid="7::nxwh"
+                    >
+                      數量
+                    </TableHead>
+                    <TableHead
+                      className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
+                      data-oid="60oz6:k"
+                    >
+                      小計
+                    </TableHead>
+                    <TableHead
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                      data-oid="4sx8y7f"
+                    >
+                      項目狀態
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody data-oid="b3du-f2">
+                  {order.items?.map((item: any) => (
+                    <TableRow key={item.id} data-oid="b3o328t">
+                      <TableCell data-oid="y2mh::w">
+                        <div
+                          className="flex items-center gap-2"
+                          data-oid="t2wjmws"
+                        >
+                          <div data-oid="bf2pl7o">
+                            <div className="font-medium" data-oid="8.g8py_">
+                              {item.product_name}
+                            </div>
+                            {item.custom_specifications && (
+                              <Badge
+                                variant="outline"
+                                className="mt-1"
+                                data-oid="ju38zhw"
+                              >
+                                訂製
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        {/* 🎯 優雅地顯示訂製規格 */}
+                        {item.custom_specifications && (
+                          <div
+                            className="mt-2 p-2 bg-muted rounded-md"
+                            data-oid="cw-3hlq"
+                          >
+                            <div
+                              className="text-xs font-medium text-muted-foreground"
+                              data-oid="4t7c4wp"
+                            >
+                              訂製規格：
+                            </div>
+                            <div className="text-sm mt-1" data-oid="54q4s_:">
+                              {Object.entries(
+                                typeof item.custom_specifications === "string"
+                                  ? JSON.parse(item.custom_specifications)
+                                  : item.custom_specifications,
+                              ).map(([key, value]) => (
+                                <div
+                                  key={key}
+                                  className="flex gap-2"
+                                  data-oid="0jbo3o8"
+                                >
+                                  <span
+                                    className="font-medium"
+                                    data-oid="vuer3a-"
+                                  >
+                                    {key}:
+                                  </span>
+                                  <span data-oid="7qz5-3n">
+                                    {value as string}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell
+                        className="font-mono text-sm"
+                        data-oid="wr6ilg4"
+                      >
+                        {item.sku}
+                      </TableCell>
+                      <TableCell className="text-right" data-oid=".e2ywo:">
+                        ${Number(item.price).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-center" data-oid="--x9shn">
+                        {item.quantity}
+                      </TableCell>
+                      <TableCell
+                        className="text-right font-medium"
+                        data-oid="rp5m1ui"
+                      >
+                        ${(Number(item.price) * item.quantity).toLocaleString()}
+                      </TableCell>
+                      <TableCell data-oid="lfrr3hn">
+                        <div
+                          className="flex items-center gap-2"
+                          data-oid="5bbidmh"
+                        >
+                          <Select
+                            value={item.status}
+                            onValueChange={(newStatus) =>
+                              handleStatusChange(item.id, newStatus)
+                            }
+                            disabled={isPending}
+                            data-oid="kmps8x3"
+                          >
+                            <SelectTrigger
+                              className="w-[120px]"
+                              data-oid="evd.wva"
+                            >
+                              <SelectValue data-oid="rdc4hy7" />
+                            </SelectTrigger>
+                            <SelectContent data-oid="ixwwoyl">
+                              {statusOptions.map((option) => (
+                                <SelectItem
+                                  key={option.value}
+                                  value={option.value}
+                                  data-oid="synkib3"
+                                >
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {isPending && (
+                            <Loader2
+                              className="h-4 w-4 animate-spin"
+                              data-oid="_qpwp23"
+                            />
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* 🎯 新增：付款歷史卡片 */}
+          {order.payment_records && order.payment_records.length > 0 && (
+            <Card data-oid="h-iuofq">
+              <CardHeader data-oid="ihamgt1">
+                <CardTitle
+                  className="flex items-center gap-2"
+                  data-oid="08hodi4"
+                >
+                  <DollarSign className="h-5 w-5" data-oid="zrvi824" />
+                  付款記錄
+                </CardTitle>
+              </CardHeader>
+              <CardContent data-oid="n6mvnjt">
+                <div className="space-y-4" data-oid="btoey7g">
+                  {order.payment_records.map((payment: any) => (
+                    <div
+                      key={payment.id}
+                      className="rounded-lg border p-4"
+                      data-oid="655u0za"
+                    >
+                      <div
+                        className="flex items-start justify-between"
+                        data-oid="5dr.z6j"
+                      >
+                        <div className="space-y-1" data-oid="ifg.yo2">
+                          <div
+                            className="flex items-center gap-2"
+                            data-oid="7x3qm0y"
+                          >
+                            <span
+                              className="font-medium text-lg"
+                              data-oid="-y-uqqe"
+                            >
+                              ${payment.amount.toLocaleString()}
+                            </span>
+                            <Badge variant="outline" data-oid=".h70y97">
+                              {payment.payment_method === "cash"
+                                ? "現金"
+                                : payment.payment_method === "transfer"
+                                  ? "銀行轉帳"
+                                  : payment.payment_method === "credit_card"
+                                    ? "信用卡"
+                                    : payment.payment_method}
+                            </Badge>
+                          </div>
+                          {payment.notes && (
+                            <p
+                              className="text-sm text-muted-foreground"
+                              data-oid="i9hoffy"
+                            >
+                              {payment.notes}
+                            </p>
+                          )}
+                        </div>
+                        <div
+                          className="text-right text-sm text-muted-foreground"
+                          data-oid="8lr9:as"
+                        >
+                          <div
+                            className="flex items-center gap-1"
+                            data-oid="ui9r52c"
+                          >
+                            <Calendar className="h-3 w-3" data-oid="j:o-:zq" />
+                            {format(
+                              new Date(payment.payment_date),
+                              "yyyy/MM/dd HH:mm",
+                            )}
+                          </div>
+                          {payment.creator && (
+                            <div
+                              className="flex items-center gap-1 mt-1"
+                              data-oid="4yvjkje"
+                            >
+                              <User className="h-3 w-3" data-oid="_e4i_35" />
+                              {payment.creator.name}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* 右側邊欄，佔據 1/3 寬度 */}
+        <div className="grid gap-4" data-oid="_8qx7b9">
+          {/* 訂單摘要卡片 */}
+          <Card data-oid="zdmj9b2">
+            <CardHeader data-oid="_kmqa4-">
+              <CardTitle data-oid="c-ypsfs">訂單摘要</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 text-sm" data-oid="z3u0_jl">
+              <div
+                className="flex items-center justify-between"
+                data-oid="..eyn5w"
+              >
+                <span className="text-muted-foreground" data-oid="y4f6ikc">
+                  訂單號碼
+                </span>
+                <span className="font-medium" data-oid="gr_hpz1">
+                  {order.order_number}
+                </span>
+              </div>
+              <div
+                className="flex items-center justify-between"
+                data-oid="q2pq8.r"
+              >
+                <span className="text-muted-foreground" data-oid="dzif37f">
+                  下單時間
+                </span>
+                <span data-oid="5l1r9bk">
+                  {new Date(order.created_at).toLocaleString("zh-TW")}
+                </span>
+              </div>
+              <div
+                className="flex items-center justify-between"
+                data-oid="x5i41j6"
+              >
+                <span className="text-muted-foreground" data-oid="eudcn1h">
+                  貨物狀態
+                </span>
+                <Badge
+                  variant={
+                    order.shipping_status === "shipped"
+                      ? "default"
+                      : "secondary"
+                  }
+                  data-oid="0:6d9l7"
+                >
+                  {getStatusText(order.shipping_status)}
+                </Badge>
+              </div>
+              <div
+                className="flex items-center justify-between"
+                data-oid="6fdt-27"
+              >
+                <span className="text-muted-foreground" data-oid=".k-44d-">
+                  付款狀態
+                </span>
+                <Badge
+                  variant={
+                    order.payment_status === "paid" ? "default" : "secondary"
+                  }
+                  data-oid="343bmjb"
+                >
+                  {getStatusText(order.payment_status)}
+                </Badge>
+              </div>
+
+              {/* 金額明細 */}
+              <div className="pt-3 mt-3 border-t space-y-2" data-oid="h7xo7gd">
+                <div
+                  className="flex items-center justify-between"
+                  data-oid="hz64u9q"
+                >
+                  <span className="text-muted-foreground" data-oid="_9n5d-k">
+                    商品小計
+                  </span>
+                  <span data-oid="461z3g3">${subtotal.toLocaleString()}</span>
+                </div>
+                {order.shipping_fee && order.shipping_fee > 0 && (
+                  <div
+                    className="flex items-center justify-between"
+                    data-oid="rwv7wp2"
+                  >
+                    <span className="text-muted-foreground" data-oid="ym:9xcc">
+                      運費
+                    </span>
+                    <span data-oid="zyypqh3">
+                      ${order.shipping_fee.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+                {order.discount_amount > 0 && (
+                  <div
+                    className="flex items-center justify-between"
+                    data-oid="p0k06x:"
+                  >
+                    <span className="text-muted-foreground" data-oid="euhz1r.">
+                      折扣
+                    </span>
+                    <span className="text-green-600" data-oid="d_1iafn">
+                      -${order.discount_amount.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+                {order.tax_amount > 0 && (
+                  <div
+                    className="flex items-center justify-between"
+                    data-oid="ehn8up_"
+                  >
+                    <span className="text-muted-foreground" data-oid=":-glzja">
+                      稅額
+                    </span>
+                    <span data-oid="flvumq6">
+                      ${order.tax_amount.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+                <div
+                  className="flex items-center justify-between font-medium text-base pt-2 border-t"
+                  data-oid="3v1fppu"
+                >
+                  <span className="text-muted-foreground" data-oid="k9rz77-">
+                    訂單總額
+                  </span>
+                  <span data-oid="ngoeqph">
+                    {new Intl.NumberFormat("zh-TW", {
+                      style: "currency",
+                      currency: "TWD",
+                      minimumFractionDigits: 0,
+                    }).format(order.grand_total)}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 🎯 新增：付款進度卡片 */}
+          <Card data-oid="vbk4xtw">
+            <CardHeader data-oid="rkha112">
+              <div
+                className="flex items-center justify-between"
+                data-oid="f5ma.ni"
+              >
+                <CardTitle
+                  className="flex items-center gap-2"
+                  data-oid="49iob:2"
+                >
+                  <CreditCard className="h-5 w-5" data-oid="9lyyl9c" />
+                  付款進度
+                </CardTitle>
+                {/* 🎯 新增：在卡片頭部加入記錄付款按鈕 */}
+                {order.payment_status !== "paid" &&
+                  order.payment_status !== "refunded" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsPaymentModalOpen(true)}
+                      data-oid="w_ytrzc"
+                    >
+                      <Plus className="h-4 w-4 mr-1" data-oid="zmk7zk4" />
+                      記錄付款
+                    </Button>
+                  )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4" data-oid="gqi:qfr">
+              {/* 進度條 */}
+              <div className="space-y-2" data-oid="pa.rhi8">
+                <div
+                  className="flex justify-between text-sm"
+                  data-oid="yd79xwn"
+                >
+                  <span className="text-muted-foreground" data-oid="wnuee76">
+                    完成度
+                  </span>
+                  <span className="font-medium" data-oid="2kabzzt">
+                    {paymentProgress.toFixed(0)}%
+                  </span>
+                </div>
+                <Progress
+                  value={paymentProgress}
+                  className="h-2"
+                  data-oid="2yymrs2"
+                />
+              </div>
+
+              {/* 金額明細 */}
+              <div className="space-y-2 pt-2" data-oid="j1kgnwi">
+                <div
+                  className="flex items-center justify-between"
+                  data-oid="3o74ouv"
+                >
+                  <span className="text-muted-foreground" data-oid="k6hbq6t">
+                    已付金額
+                  </span>
+                  <span
+                    className="font-medium text-green-600"
+                    data-oid="i0t4dnh"
+                  >
+                    ${order.paid_amount.toLocaleString()}
+                  </span>
+                </div>
+                <div
+                  className="flex items-center justify-between"
+                  data-oid="e:._8rw"
+                >
+                  <span className="text-muted-foreground" data-oid="1:6wvut">
+                    未付金額
+                  </span>
+                  <span className="font-medium text-red-600" data-oid="i.h7l24">
+                    ${remainingAmount.toLocaleString()}
+                  </span>
+                </div>
+                <div
+                  className="flex items-center justify-between pt-2 border-t"
+                  data-oid="j0qvjkl"
+                >
+                  <span className="text-muted-foreground" data-oid="dlge31v">
+                    訂單總額
+                  </span>
+                  <span className="font-medium" data-oid="r9k6beo">
+                    ${order.grand_total.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* 付款次數統計 */}
+              {order.payment_records && order.payment_records.length > 0 && (
+                <div className="pt-3 border-t" data-oid="aie2.c9">
+                  <p
+                    className="text-xs text-muted-foreground"
+                    data-oid="76y4wlg"
+                  >
+                    已收到 {order.payment_records.length} 筆付款
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 客戶資訊卡片 */}
+          <Card data-oid="x.lrkg0">
+            <CardHeader data-oid="ea-59j4">
+              <CardTitle data-oid="tukchkd">客戶資訊</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 text-sm" data-oid="4tc761b">
+              <div
+                className="flex items-center justify-between"
+                data-oid="0wb8.1e"
+              >
+                <span className="text-muted-foreground" data-oid="c.zgbvt">
+                  客戶名稱
+                </span>
+                <span className="font-medium" data-oid="dwwjmnt">
+                  {order.customer?.name || "未提供"}
+                </span>
+              </div>
+              <div
+                className="flex items-center justify-between"
+                data-oid="r659jl."
+              >
+                <span className="text-muted-foreground" data-oid="_.mnp0q">
+                  聯絡電話
+                </span>
+                <span data-oid="aoclzcy">
+                  {order.customer?.phone || "未提供"}
+                </span>
+              </div>
+              {order.shipping_address && (
+                <div className="pt-2 mt-2 border-t" data-oid="4uth:n7">
+                  <p className="text-muted-foreground mb-1" data-oid="mj8yjnz">
+                    運送地址
+                  </p>
+                  <p className="text-sm" data-oid="kihz6cu">
+                    {order.shipping_address}
+                  </p>
+                </div>
+              )}
+              {order.billing_address && (
+                <div className="pt-2 mt-2 border-t" data-oid="ve.4-gl">
+                  <p className="text-muted-foreground mb-1" data-oid="f.f0i0e">
+                    帳單地址
+                  </p>
+                  <p className="text-sm" data-oid="b.o-iwr">
+                    {order.billing_address}
+                  </p>
+                </div>
+              )}
+              {order.notes && (
+                <div className="pt-2 mt-2 border-t" data-oid="qw73y49">
+                  <p className="text-muted-foreground mb-1" data-oid="qhbu55j">
+                    備註
+                  </p>
+                  <p className="text-sm whitespace-pre-wrap" data-oid="lv_td9x">
+                    {order.notes}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* 🎯 記錄付款 Modal */}
+      <RecordPaymentModal
+        order={order || null}
+        open={isPaymentModalOpen}
+        onOpenChange={setIsPaymentModalOpen}
+        data-oid="veyb7ve"
+      />
+    </>
+  );
+}

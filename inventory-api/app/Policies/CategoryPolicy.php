@@ -97,4 +97,17 @@ class CategoryPolicy
     {
         return $user->isAdmin();
     }
+
+    /**
+     * 批量重新排序分類的權限
+     * 只有管理員可以重新排序分類
+     * 
+     * @param User $user 當前用戶
+     * @return bool
+     */
+    public function reorder(User $user): bool
+    {
+        // 暫定只有管理員可以排序，你可以根據需求修改
+        return $user->isAdmin();
+    }
 }

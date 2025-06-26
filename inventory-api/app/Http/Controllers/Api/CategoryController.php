@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreCategoryRequest;
 use App\Http\Requests\Api\UpdateCategoryRequest;
+use App\Http\Requests\Api\ReorderCategoriesRequest;
 use App\Http\Resources\Api\CategoryResource;
 use App\Models\Category;
+use App\Services\CategoryService;
 
 /**
  * CategoryController 分類控制器
@@ -18,14 +20,22 @@ use App\Models\Category;
 class CategoryController extends Controller
 {
     /**
+     * 分類服務層實例
+     * 
+     * @var CategoryService
+     */
+    protected $categoryService;
+
+    /**
      * 控制器建構函數
      * 
      * 自動對所有資源路由方法應用 CategoryPolicy 權限檢查
      * 確保只有授權用戶（管理員）才能執行分類管理操作
      */
-    public function __construct()
+    public function __construct(CategoryService $categoryService)
     {
         $this->authorizeResource(Category::class, 'category');
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -59,7 +69,11 @@ class CategoryController extends Controller
     public function index()
     {
         // 獲取所有分類，並預載入每個分類的直接商品數量
-        $categories = Category::withCount('products')->get();
+        // 按照 sort_order 排序，確保拖曳排序的結果能正確顯示
+        $categories = Category::withCount('products')
+            ->orderBy('sort_order')
+            ->orderBy('id') // 次要排序，確保穩定性
+            ->get();
         $categoryMap = $categories->keyBy('id');
 
         // 為每個分類計算其包含所有後代的商品總數
@@ -199,5 +213,25 @@ class CategoryController extends Controller
     {
         $category->delete();
         return response()->noContent();
+    }
+
+    /**
+     * 批量重新排序分類
+     * 
+     * 處理前端拖曳排序功能的批量更新請求
+     * 使用事務確保操作的原子性
+     * 
+     * @param \App\Http\Requests\Api\ReorderCategoriesRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reorder(ReorderCategoriesRequest $request)
+    {
+        // 3.2.1 權限驗證
+        $this->authorize('reorder', Category::class);
+
+        // 3.2.2 將核心邏輯委派給 Service 層
+        $this->categoryService->reorder($request->validated()['items']);
+
+        return response()->json(['message' => '分類順序已成功更新。']);
     }
 }

@@ -1,8 +1,8 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: '進貨管理',
-  description: '管理商品進貨和入庫作業',
+  title: "進貨管理",
+  description: "管理商品進貨和入庫作業",
 };
 
 /**
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function PurchasesLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return children;
 }

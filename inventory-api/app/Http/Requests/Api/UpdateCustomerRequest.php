@@ -112,12 +112,10 @@ class UpdateCustomerRequest extends FormRequest
             'addresses.*.is_default.boolean' => '預設地址設定格式錯誤',
         ];
     }
-    
+
     /**
-     * 取得請求體參數的文檔
-     * 
-     * 用於 Scribe API 文檔生成
-     * 
+     * 定義請求參數文檔（用於 Scribe API 文檔生成）
+     *
      * @return array
      */
     public function bodyParameters(): array
@@ -125,7 +123,7 @@ class UpdateCustomerRequest extends FormRequest
         return [
             'name' => [
                 'description' => '客戶名稱或公司抬頭',
-                'example' => '測試客戶（已更新）',
+                'example' => '測試客戶',
             ],
             'phone' => [
                 'description' => '手機號碼',
@@ -136,7 +134,7 @@ class UpdateCustomerRequest extends FormRequest
                 'example' => false,
             ],
             'tax_id' => [
-                'description' => '統一編號（is_company 為 true 時必填）',
+                'description' => '統一編號 (is_company為true時必填)',
                 'example' => '12345678',
             ],
             'industry_type' => [
@@ -152,14 +150,30 @@ class UpdateCustomerRequest extends FormRequest
                 'example' => '台北市信義區',
             ],
             'addresses' => [
-                'description' => '運送地址列表',
+                'description' => '客戶地址列表',
                 'example' => [
                     [
                         'id' => 1,
-                        'address' => '台北市大安區',
+                        'address' => '台北市大安區復興南路一段100號',
                         'is_default' => true,
                     ],
+                    [
+                        'address' => '台北市信義區市府路45號',
+                        'is_default' => false,
+                    ],
                 ],
+            ],
+            'addresses.*.id' => [
+                'description' => '地址 ID（更新現有地址時提供）',
+                'example' => 1,
+            ],
+            'addresses.*.address' => [
+                'description' => '詳細地址',
+                'example' => '台北市大安區復興南路一段100號',
+            ],
+            'addresses.*.is_default' => [
+                'description' => '是否為預設地址',
+                'example' => true,
             ],
         ];
     }
