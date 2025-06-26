@@ -85,57 +85,5 @@ class StoreInstallationRequest extends FormRequest
         });
     }
     
-    /**
-     * 取得請求體參數的文檔
-     * 
-     * 用於 Scribe API 文檔生成
-     * 
-     * @return array
-     */
-    public function bodyParameters(): array
-    {
-        return [
-            'order_id' => [
-                'description' => '關聯的訂單 ID（可選）',
-                'example' => 1,
-            ],
-            'installer_user_id' => [
-                'description' => '安裝師傅的用戶 ID（可選）',
-                'example' => 3,
-            ],
-            'customer_name' => [
-                'description' => '客戶姓名',
-                'example' => '王小明',
-            ],
-            'customer_phone' => [
-                'description' => '客戶電話',
-                'example' => '0912345678',
-            ],
-            'installation_address' => [
-                'description' => '安裝地址',
-                'example' => '台北市大安區信義路四段1號',
-            ],
-            'scheduled_date' => [
-                'description' => '預計安裝日期（可選，格式：Y-m-d）',
-                'example' => '2025-06-25',
-            ],
-            'notes' => [
-                'description' => '備註（可選）',
-                'example' => '客戶希望下午安裝',
-            ],
-            'items' => [
-                'description' => '安裝項目陣列',
-                'example' => [
-                    [
-                        'order_item_id' => 1,
-                        'product_name' => '層架組合',
-                        'sku' => 'SHELF-001',
-                        'quantity' => 2,
-                        'specifications' => '牆面安裝，高度 150cm',
-                        'notes' => '需要特殊固定器',
-                    ],
-                ],
-            ],
-        ];
-    }
+
 } 

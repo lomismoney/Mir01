@@ -33,8 +33,8 @@ class CustomerController extends Controller
      * @group 客戶管理
      * @authenticated
      * @queryParam search string 關鍵字搜尋，將匹配姓名、電話、統一編號。Example: 設計公司
-     * @queryParam start_date date 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
-     * @queryParam end_date date 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
+     * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
+     * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
      * 
      * @response 200 scenario="客戶列表" {
      *   "data": [

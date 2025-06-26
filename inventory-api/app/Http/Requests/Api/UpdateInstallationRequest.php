@@ -25,7 +25,7 @@ class UpdateInstallationRequest extends FormRequest
         return [
             'installer_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'customer_name' => ['sometimes', 'required', 'string', 'max:255'],
-            'customer_phone' => ['sometimes', 'required', 'string', 'max:20'],
+            'customer_phone' => ['sometimes', 'nullable', 'string', 'max:20'],
             'installation_address' => ['sometimes', 'required', 'string'],
             'status' => [
                 'sometimes',
@@ -114,66 +114,5 @@ class UpdateInstallationRequest extends FormRequest
         });
     }
     
-    /**
-     * 取得請求體參數的文檔
-     * 
-     * 用於 Scribe API 文檔生成
-     * 
-     * @return array
-     */
-    public function bodyParameters(): array
-    {
-        return [
-            'installer_user_id' => [
-                'description' => '安裝師傅的用戶 ID（可選）',
-                'example' => 3,
-            ],
-            'customer_name' => [
-                'description' => '客戶姓名',
-                'example' => '王小明',
-            ],
-            'customer_phone' => [
-                'description' => '客戶電話',
-                'example' => '0912345678',
-            ],
-            'installation_address' => [
-                'description' => '安裝地址',
-                'example' => '台北市大安區信義路四段1號',
-            ],
-            'status' => [
-                'description' => '安裝狀態（pending: 待處理, scheduled: 已排程, in_progress: 進行中, completed: 已完成, cancelled: 已取消）',
-                'example' => 'scheduled',
-            ],
-            'scheduled_date' => [
-                'description' => '預計安裝日期（可選，格式：Y-m-d）',
-                'example' => '2025-06-25',
-            ],
-            'actual_start_time' => [
-                'description' => '實際開始時間（可選，格式：Y-m-d H:i:s）',
-                'example' => '2025-06-25 09:00:00',
-            ],
-            'actual_end_time' => [
-                'description' => '實際結束時間（可選，格式：Y-m-d H:i:s）',
-                'example' => '2025-06-25 12:00:00',
-            ],
-            'notes' => [
-                'description' => '備註（可選）',
-                'example' => '安裝順利完成',
-            ],
-            'items' => [
-                'description' => '安裝項目陣列（可選）',
-                'example' => [
-                    [
-                        'id' => 1,
-                        'product_name' => '層架組合',
-                        'sku' => 'SHELF-001',
-                        'quantity' => 2,
-                        'specifications' => '牆面安裝，高度 150cm',
-                        'status' => 'completed',
-                        'notes' => '已安裝完成',
-                    ],
-                ],
-            ],
-        ];
-    }
+
 } 

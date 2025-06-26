@@ -90,47 +90,5 @@ class CreateInstallationFromOrderRequest extends FormRequest
         });
     }
     
-    /**
-     * 取得請求體參數的文檔
-     * 
-     * 用於 Scribe API 文檔生成
-     * 
-     * @return array
-     */
-    public function bodyParameters(): array
-    {
-        return [
-            'order_id' => [
-                'description' => '訂單 ID',
-                'example' => 1,
-            ],
-            'installer_user_id' => [
-                'description' => '安裝師傅的用戶 ID（可選）',
-                'example' => 3,
-            ],
-            'installation_address' => [
-                'description' => '安裝地址（可選，如果不提供則使用訂單地址）',
-                'example' => '台北市大安區信義路四段1號',
-            ],
-            'scheduled_date' => [
-                'description' => '預計安裝日期（可選，格式：Y-m-d）',
-                'example' => '2025-06-25',
-            ],
-            'notes' => [
-                'description' => '備註（可選）',
-                'example' => '客戶希望下午安裝',
-            ],
-            'order_item_ids' => [
-                'description' => '要安裝的訂單項目 ID 陣列',
-                'example' => [1, 2, 3],
-            ],
-            'specifications' => [
-                'description' => '安裝規格（可選，按訂單項目 ID 對應）',
-                'example' => [
-                    '1' => '牆面安裝，高度 150cm',
-                    '2' => '標準地面安裝',
-                ],
-            ],
-        ];
-    }
+
 } 

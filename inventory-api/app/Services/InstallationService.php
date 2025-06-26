@@ -287,7 +287,7 @@ class InstallationService
         return Installation::where('installer_user_id', $installerUserId)
             ->whereBetween('scheduled_date', [$startDate, $endDate])
             ->whereNotIn('status', ['cancelled'])
-            ->with(['items', 'order', 'customer'])
+            ->with(['items', 'order.customer'])
             ->orderBy('scheduled_date')
             ->get();
     }
