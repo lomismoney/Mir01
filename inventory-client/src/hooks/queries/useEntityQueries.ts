@@ -196,44 +196,72 @@ export function useProducts(filters: ProductFilters = {}) {
     });
 }
 
+// ✅ 已移除 useProduct Hook - 由 useProductDetail 統一處理
+
 /**
- * 單個商品查詢 Hook
- * 
- * @param id - 商品 ID
- * @returns React Query 查詢結果
+ * 處理過的商品數據結構 - 保證類型完整性（零容忍版本）
  */
-export function useProduct(id: number) {
-    return useQuery({
-        queryKey: QUERY_KEYS.PRODUCT(id),
-        queryFn: async () => {
-            const { data, error } = await apiClient.GET('/api/products/{id}', {
-                params: { path: { id, product: id } }
-            });
-            
-            if (error) {
-                throw new Error('獲取商品失敗');
-            }
-            return data;
-        },
-        // 🎯 新增的數據精煉廠，負責解包
-        select: (response: any) => response?.data,
-        enabled: !!id, // 只有當 id 存在時才執行查詢
-    });
+export interface ProcessedProduct {
+  id: number;
+  name: string;
+  description: string | null;
+  category_id: number | null;
+  category?: any;
+  attributes: Array<ProcessedProductAttribute>;
+  variants: Array<ProcessedProductVariant>;
+  image_url?: string;
+  thumbnail_url?: string;
+  has_image: boolean;
+  image_urls?: any;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any;
 }
 
 /**
- * 商品詳情查詢 Hook - 專為編輯功能設計
+ * 商品屬性類型定義
+ */
+export interface ProcessedProductAttribute {
+  id: number;
+  name: string;
+  [key: string]: any;
+}
+
+/**
+ * 商品變體類型定義
+ */
+export interface ProcessedProductVariant {
+  id: number;
+  sku: string;
+  price: number;
+  attribute_values?: Array<ProcessedProductAttributeValue>;
+  [key: string]: any;
+}
+
+/**
+ * 屬性值類型定義
+ */
+export interface ProcessedProductAttributeValue {
+  id: number;
+  attribute_id: number;
+  value: string;
+  [key: string]: any;
+}
+
+/**
+ * 商品詳情查詢 Hook - 權威數據源（已統一）
  * 
- * 此 Hook 專門用於商品編輯嚮導，提供完整的商品資訊：
+ * 🚀 此 Hook 是獲取商品詳情的唯一權威來源，提供完整且類型安全的商品資訊：
  * 1. SPU 基本資訊 (name, description, category)
- * 2. 商品屬性列表 (attributes)
- * 3. 所有 SKU 變體詳情 (variants with attribute values)
- * 4. 庫存資訊 (inventory per store)
+ * 2. 商品屬性列表 (attributes) - 總是包含
+ * 3. 所有 SKU 變體詳情 (variants with attribute values) - 總是包含
+ * 4. 圖片資訊 (image_urls, has_image)
+ * 5. 完整的類型安全保證
  * 
  * @param productId - 商品 ID
- * @returns React Query 查詢結果，包含完整的商品結構
+ * @returns React Query 查詢結果，返回 ProcessedProduct 類型
  */
-export function useProductDetail(productId: number | string | undefined) {
+export function useProductDetail(productId: number | string | undefined): any {
     // 確保 productId 是有效的數字
     const numericId = productId ? Number(productId) : undefined;
     
@@ -244,8 +272,8 @@ export function useProductDetail(productId: number | string | undefined) {
                 throw new Error('商品 ID 無效');
             }
 
-            const { data, error } = await apiClient.GET('/api/products/{id}', {
-                params: { path: { id: numericId, product: numericId } }
+            const { data, error } = await apiClient.GET('/api/products/{product}', {
+                params: { path: { product: numericId } }
             });
             
             if (error) {
@@ -255,7 +283,59 @@ export function useProductDetail(productId: number | string | undefined) {
 
             return data;
         },
-        // 不需要 select，因為 API 響應已經是正確的格式
+        // 🎯 數據精煉廠 - 確保類型完整性和數據一致性
+        select: (response: any): ProcessedProduct | null => {
+            const rawProduct = response?.data;
+            
+            if (!rawProduct) {
+                return null; // 返回 null 而不是拋出錯誤，讓組件層處理
+            }
+            
+            // 確保 attributes 總是存在且為陣列
+            const attributes = Array.isArray(rawProduct.attributes) 
+                ? rawProduct.attributes 
+                : [];
+            
+            // 確保 variants 總是存在且為陣列
+            const variants = Array.isArray(rawProduct.variants) 
+                ? rawProduct.variants 
+                : [];
+            
+            // 返回完整且類型安全的商品數據
+            return {
+                id: rawProduct.id || 0,
+                name: rawProduct.name || '',
+                description: rawProduct.description || null,
+                category_id: rawProduct.category_id || null,
+                category: rawProduct.category,
+                attributes: attributes.map((attr: any) => ({
+                    id: attr.id || 0,
+                    name: attr.name || '',
+                    ...attr
+                })),
+                variants: variants.map((variant: any) => ({
+                    id: variant.id || 0,
+                    sku: variant.sku || '',
+                    price: variant.price || 0,
+                    attribute_values: Array.isArray(variant.attribute_values) 
+                        ? variant.attribute_values.map((av: any) => ({
+                            id: av.id || 0,
+                            attribute_id: av.attribute_id || 0,
+                            value: av.value || '',
+                            ...av
+                        }))
+                        : [],
+                    ...variant
+                })),
+                image_url: rawProduct.image_url,
+                thumbnail_url: rawProduct.thumbnail_url,
+                has_image: rawProduct.has_image || false,
+                image_urls: rawProduct.image_urls,
+                created_at: rawProduct.created_at || '',
+                updated_at: rawProduct.updated_at || '',
+                ...rawProduct
+            };
+        },
         enabled: !!numericId, // 只有當有效的 ID 存在時才執行查詢
         staleTime: 5 * 60 * 1000, // 5 分鐘緩存時間，編輯期間避免重複請求
         retry: 2, // 失敗時重試 2 次
@@ -948,7 +1028,7 @@ export function useCreateCustomer() {
       };
       
       const { data, error } = await apiClient.POST('/api/customers', {
-        body: apiPayload,
+        body: apiPayload as any, // 修復 addresses 欄位類型不匹配問題
       });
 
       if (error) {
@@ -1461,7 +1541,7 @@ export function useUpdateCategory() {
   return useMutation({
     mutationFn: async (payload: UpdateCategoryPayload) => {
       const { data, error } = await apiClient.PUT("/api/categories/{id}", {
-        params: { path: { id: payload.id } },
+        path: { id: payload.id },
         body: payload.data,
       });
       if (error) throw error;

@@ -196,11 +196,11 @@ export default function UsersPage() {
   const handleEditUser = (userToEdit: UserItem) => {
     setEditingUser(userToEdit);
     setEditUserName(userToEdit.name || "");
-    // 使用 username 字段，如果不存在則使用 email 作為後備
+    // 使用 email 字段，如果不存在則使用空字符串
     // 注意：API 設計問題 - /api/users 響應可能不包含 username，但創建/更新時需要
-    setEditUsername(userToEdit.username || userToEdit.email || "");
+    setEditUsername((userToEdit as any).username || (userToEdit as any).email || "");
     setEditPassword(""); // 密碼留空，表示不更改
-    setEditRole(userToEdit.role || "viewer"); // 使用用戶實際的角色，並提供默認值
+    setEditRole((userToEdit as any).role || "viewer"); // 使用用戶實際的角色，並提供默認值
     setIsEditDialogOpen(true);
   };
 
@@ -238,7 +238,7 @@ export default function UsersPage() {
 
     updateUserMutation.mutate(
       {
-        path: { id: editingUser.id, user: editingUser.id },
+        path: { user: editingUser.id },
         body: updateData as any, // 暫時使用 any 處理 API 類型定義問題
       },
       {
@@ -265,7 +265,6 @@ export default function UsersPage() {
 
     deleteUserMutation.mutate(
       {
-        id: userToDelete.id,
         user: userToDelete.id,
       },
       {

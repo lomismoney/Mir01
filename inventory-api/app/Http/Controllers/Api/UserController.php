@@ -141,7 +141,6 @@ class UserController extends Controller
      * 
      * @param \App\Models\User $user 要查看的用戶模型實例（透過路由模型綁定自動解析）
      * @urlParam user integer required 用戶的 ID。 Example: 1
-     * @urlParam id integer required 用戶的 ID。 Example: 1
      * 
      * @response 200 scenario="用戶詳情" {
      *   "data": {

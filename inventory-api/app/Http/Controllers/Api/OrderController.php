@@ -135,7 +135,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * @urlParam id integer required 訂單的 ID。 Example: 1
+     * @urlParam order integer required 訂單的 ID。 Example: 1
      * 
      * @response 200 scenario="訂單詳情" {
      *   "data": {

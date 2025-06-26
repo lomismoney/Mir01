@@ -20,7 +20,7 @@ import {
 } from "@/types/purchase";
 import { useDebounce } from "@/hooks/use-debounce";
 import { toast } from "sonner";
-import { PurchasesResponse } from "@/types/api-helpers";
+// PurchasesResponse 類型已移除，直接使用 hook 返回的數據結構
 
 import {
   Card,
@@ -115,7 +115,7 @@ export function PurchaseManagement() {
     ...filters,
     order_number: debouncedOrderNumber || undefined,
   }) as {
-    data: PurchasesResponse | undefined;
+    data: any;
     isLoading: boolean;
     error: any;
     refetch: () => void;

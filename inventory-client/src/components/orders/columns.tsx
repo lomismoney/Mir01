@@ -59,30 +59,26 @@ export const createColumns = ({
   {
     id: "select",
     header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-          data-oid="dtoft90"
-        />
-      </div>
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+        className="mx-auto block"
+        data-oid="dtoft90"
+      />
     ),
 
     cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-          data-oid="_2_w_d."
-        />
-      </div>
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+        className="mx-auto block"
+        data-oid="_2_w_d."
+      />
     ),
 
     enableSorting: false,
@@ -98,22 +94,20 @@ export const createColumns = ({
     cell: ({ row }) => {
       const order = row.original;
       return (
-        <div className="py-1">
-          <div className="flex items-center gap-2" data-oid="vx3ki2n">
-            <button
-              onClick={() => onPreview(order.id)}
-              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-              data-oid="b1yasza"
-            >
-              {order.order_number}
-            </button>
-            {/* 🎯 如果訂單包含訂製商品，顯示標籤 */}
-            {order.has_custom_items && (
-              <Badge variant="secondary" className="text-xs" data-oid="qfgr0ki">
-                含訂製品
-              </Badge>
-            )}
-          </div>
+        <div className="flex items-center gap-2" data-oid="vx3ki2n">
+          <button
+            onClick={() => onPreview(order.id)}
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            data-oid="b1yasza"
+          >
+            {order.order_number}
+          </button>
+          {/* 🎯 如果訂單包含訂製商品，顯示標籤 */}
+          {order.has_custom_items && (
+            <Badge variant="secondary" className="text-xs" data-oid="qfgr0ki">
+              含訂製品
+            </Badge>
+          )}
         </div>
       );
     },
@@ -123,7 +117,7 @@ export const createColumns = ({
     header: () => <div className="text-center">日期</div>,
     size: 100,
     cell: ({ row }) => (
-      <div className="py-1 text-center">
+      <div className="text-center">
         <span
           className="whitespace-nowrap text-muted-foreground text-sm"
           data-oid="j-3iaoj"
@@ -139,14 +133,12 @@ export const createColumns = ({
     cell: ({ row }) => {
       const customerName = row.original.customer?.name || "-";
       return (
-        <div className="py-1">
-          <div
-            className="max-w-[150px] truncate text-sm"
-            title={customerName}
-            data-oid="79txkxp"
-          >
-            {customerName}
-          </div>
+        <div
+          className="max-w-[150px] truncate text-sm"
+          title={customerName}
+          data-oid="79txkxp"
+        >
+          {customerName}
         </div>
       );
     },
@@ -168,7 +160,7 @@ export const createColumns = ({
         minimumFractionDigits: 0,
       }).format(amount);
               return (
-          <div className="py-1 text-center">
+          <div className="text-center">
             <span
               className="font-medium tabular-nums text-sm"
               data-oid="weqxenh"
@@ -204,8 +196,8 @@ export const createColumns = ({
         }[status] || status;
 
       return (
-        <div className="py-1 text-center">
-          <Badge variant={variant} data-oid="asnc4c9">
+        <div className="text-center">
+          <Badge variant={variant} className="text-xs" data-oid="asnc4c9">
             {statusText}
           </Badge>
         </div>
@@ -239,8 +231,8 @@ export const createColumns = ({
         }[status] || status;
 
       return (
-        <div className="py-1 text-center">
-          <Badge variant={variant} data-oid="lo24k4c">
+        <div className="text-center">
+          <Badge variant={variant} className="text-xs" data-oid="lo24k4c">
             {statusText}
           </Badge>
         </div>

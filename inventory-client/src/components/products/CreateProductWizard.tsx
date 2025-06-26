@@ -39,6 +39,36 @@ import {
 import type { paths } from "@/types/api";
 
 /**
+ * 屬性數據類型定義（為了移除 as any 斷言）
+ */
+interface AttributeForTransform {
+  id: number;
+  name: string;
+  values?: AttributeValueForTransform[];
+}
+
+interface AttributeValueForTransform {
+  id: number;
+  value: string;
+  attribute_id: number;
+}
+
+interface AttributesDataForTransform {
+  data?: AttributeForTransform[];
+}
+
+/**
+ * API 響應結果類型定義（為了移除 as any 斷言）
+ */
+interface ProductCreationResult {
+  data?: {
+    id: number;
+    name: string;
+    [key: string]: unknown; // 保持靈活性
+  };
+}
+
+/**
  * 嚮導表單資料完整結構（原子化創建流程優化版）
  */
 export interface WizardFormData {
@@ -126,7 +156,7 @@ const STEPS = [
  */
 function transformWizardDataToApiPayload(
   formData: WizardFormData,
-  attributesData?: any,
+  attributesData?: AttributesDataForTransform,
 ): paths["/api/products"]["post"]["requestBody"]["content"]["application/json"] {
   const { basicInfo, specifications, variants } = formData;
 
@@ -198,11 +228,11 @@ function transformWizardDataToApiPayload(
     // 遍歷變體的每個選項，找到對應的屬性值ID
     variant.options.forEach((option) => {
       const attribute = attributesData?.data?.find(
-        (attr: any) => attr.id === option.attributeId,
+        (attr) => attr.id === option.attributeId,
       );
-      if (attribute) {
-        const attributeValue = attribute.values?.find(
-          (val: any) => val.value === option.value,
+      if (attribute && attribute.values) {
+        const attributeValue = attribute.values.find(
+          (val) => val.value === option.value,
         );
         if (attributeValue) {
           attributeValueIds.push(attributeValue.id);
@@ -282,7 +312,7 @@ function transformToSimplePayload(formData: WizardFormData) {
  */
 function transformToVariantPayload(
   formData: WizardFormData,
-  attributesData?: any,
+  attributesData?: AttributesDataForTransform,
 ): paths["/api/products"]["post"]["requestBody"]["content"]["application/json"] {
   // 直接使用現有的轉換邏輯
   return transformWizardDataToApiPayload(formData, attributesData);
@@ -371,37 +401,35 @@ export function CreateProductWizard({
    * 編輯模式：當商品數據加載完成後，預填表單數據
    */
   useEffect(() => {
-    if (isEditMode && productDetail?.data) {
-      const product = productDetail.data;
+    if (isEditMode && productDetail) {
+      // 🎯 零容忍：現在 productDetail 直接是 ProcessedProduct | null 類型
+      const productData = productDetail;
 
-      // 使用類型安全的方式訪問商品數據
-      const productData = product as any; // 臨時類型斷言以處理缺失的類型定義
-
-      // 判斷是否為多規格商品（有屬性或有多個變體）
-      const hasAttributes =
-        productData.attributes && productData.attributes.length > 0;
-      const hasMultipleVariants =
-        productData.variants && productData.variants.length > 1;
-      const hasAttributeValues =
-        productData.variants?.some(
-          (variant: any) =>
+              // 判斷是否為多規格商品（有屬性或有多個變體）
+        // 現在可以直接安全地訪問 attributes 和 variants，因為 useProductDetail 保證了它們的存在
+        const attributes = productData.attributes || [];
+        const variants = productData.variants || [];
+        
+        const hasAttributes = attributes.length > 0;
+        const hasMultipleVariants = variants.length > 1;
+        const hasAttributeValues = variants.some(
+          (variant: import('@/hooks/queries/useEntityQueries').ProcessedProductVariant) =>
             variant.attribute_values && variant.attribute_values.length > 0,
-        ) || false;
-      const isVariable =
-        hasAttributes || hasMultipleVariants || hasAttributeValues;
+        );
+        const isVariable = hasAttributes || hasMultipleVariants || hasAttributeValues;
 
       // 建構屬性值映射（用於變體配置）
       const attributeValues: Record<number, string[]> = {};
 
-      if (hasAttributes && productData.attributes && productData.variants) {
+      if (hasAttributes && attributes.length > 0 && variants.length > 0) {
         // 遍歷每個屬性，收集所有可能的屬性值
-        productData.attributes.forEach((attr: any) => {
+        attributes.forEach((attr: import('@/hooks/queries/useEntityQueries').ProcessedProductAttribute) => {
           const values = new Set<string>();
 
           // 從現有變體中提取屬性值
-          productData.variants?.forEach((variant: any) => {
+          variants.forEach((variant: import('@/hooks/queries/useEntityQueries').ProcessedProductVariant) => {
             if (variant.attribute_values) {
-              variant.attribute_values.forEach((attrVal: any) => {
+              variant.attribute_values.forEach((attrVal: import('@/hooks/queries/useEntityQueries').ProcessedProductAttributeValue) => {
                 if (attrVal.attribute_id === attr.id) {
                   values.add(attrVal.value);
                 }
@@ -414,49 +442,47 @@ export function CreateProductWizard({
       }
 
       // 建構變體配置數據
-      const variantItems =
-        productData.variants?.map((variant: any, index: number) => {
-          // 從屬性值中建構選項
-          const options =
-            variant.attribute_values?.map((attrVal: any) => ({
-              attributeId: attrVal.attribute_id,
-              value: attrVal.value,
-            })) || [];
+      const variantItems = variants.map((variant: import('@/hooks/queries/useEntityQueries').ProcessedProductVariant, index: number) => {
+        // 從屬性值中建構選項
+        const options =
+          variant.attribute_values?.map((attrVal: import('@/hooks/queries/useEntityQueries').ProcessedProductAttributeValue) => ({
+            attributeId: attrVal.attribute_id,
+            value: attrVal.value,
+          })) || [];
 
-          // 確保價格正確轉換：如果有價格就使用實際價格，否則為空字符串
-          const priceValue =
-            variant.price !== null && variant.price !== undefined
-              ? variant.price.toString()
-              : "";
+        // 確保價格正確轉換：如果有價格就使用實際價格，否則為空字符串
+        const priceValue =
+          variant.price !== null && variant.price !== undefined
+            ? variant.price.toString()
+            : "";
 
-          return {
-            key: `variant-${index}`,
-            id: variant.id, // 保存變體 ID 用於編輯模式
-            options,
-            sku: variant.sku || "",
-            price: priceValue,
-          };
-        }) || [];
+        return {
+          key: `variant-${index}`,
+          id: variant.id, // 保存變體 ID 用於編輯模式
+          options,
+          sku: variant.sku || "",
+          price: priceValue,
+        };
+      });
 
       // 轉換商品數據為嚮導表單格式
       const transformedData: WizardFormData = {
         basicInfo: {
-          name: product.name || "",
-          description: product.description || "",
-          category_id: product.category_id || null,
+          name: productData.name || "",
+          description: productData.description || "",
+          category_id: productData.category_id || null,
         },
         imageData: {
           selectedFile: null,
-          // 如果商品有圖片，使用原圖 URL 作為預覽
+          // 如果商品有圖片，使用原圖 URL 作為預覽（現在可以安全訪問）
           previewUrl:
             productData.image_url || productData.thumbnail_url || null,
         },
         specifications: {
           isVariable: isVariable,
-          selectedAttributes:
-            hasAttributes && productData.attributes
-              ? productData.attributes.map((attr: any) => attr.id)
-              : [],
+          selectedAttributes: hasAttributes
+            ? attributes.map((attr: import('@/hooks/queries/useEntityQueries').ProcessedProductAttribute) => attr.id)
+            : [],
           attributeValues: attributeValues,
         },
         variants: {
@@ -651,7 +677,7 @@ export function CreateProductWizard({
     try {
       setIsSubmitting(true);
 
-      let productResult: any;
+      let productResult: ProductCreationResult | unknown;
       let productName: string;
 
       // 步驟1：判斷創建模式並選擇合適的 API 通道 (v3.0 雙軌制 API)
@@ -714,12 +740,13 @@ export function CreateProductWizard({
       }
 
       // 步驟3：處理圖片上傳（如果有選擇圖片）
-      if (formData.imageData.selectedFile && productResult?.data?.id) {
+      const typedProductResult = productResult as ProductCreationResult;
+      if (formData.imageData.selectedFile && typedProductResult?.data?.id) {
         try {
           toast.loading("正在上傳商品圖片...", { id: "image-progress" });
 
           await uploadImageMutation.mutateAsync({
-            productId: productResult.data.id,
+            productId: typedProductResult.data.id,
             image: formData.imageData.selectedFile,
           });
 
@@ -805,7 +832,7 @@ export function CreateProductWizard({
     }
 
     // 載入錯誤或找不到商品
-    if (productError || !productDetail?.data) {
+    if (productError || !productDetail) {
       return (
         <div className="container mx-auto p-4 sm:p-6 lg:p-8" data-oid="ys4me2q">
           <Card

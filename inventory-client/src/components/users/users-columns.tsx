@@ -128,7 +128,7 @@ export const createUsersColumns = (
     header: "角色",
     cell: ({ row }) => {
       const user = row.original;
-      const role = user.role || "viewer";
+      const role = (user as any).role || "viewer";
 
       // 角色映射表
       const roleConfig = {

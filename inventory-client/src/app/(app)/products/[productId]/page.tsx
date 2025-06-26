@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { useProduct } from "@/hooks/queries/useEntityQueries";
+import { useProductDetail } from "@/hooks/queries/useEntityQueries";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -58,7 +58,7 @@ export default function ProductDetailPage({
   const { productId } = use(params);
 
   // 獲取商品詳情
-  const { data: product, isLoading } = useProduct(Number(productId));
+  const { data: product, isLoading } = useProductDetail(Number(productId));
 
   if (isLoading) {
     return (

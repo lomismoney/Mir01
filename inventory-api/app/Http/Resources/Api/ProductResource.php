@@ -38,11 +38,11 @@ class ProductResource extends JsonResource
             // 分類資訊（當已載入時）
             'category' => new CategoryResource($this->whenLoaded('category')),
             
-            // 🔧 修復：添加屬性資訊輸出，解決編輯模式規格類型無法同步的問題
-            'attributes' => AttributeResource::collection($this->whenLoaded('attributes')),
+            // 🔧 修復：確保屬性和變體數據總是被序列化，解決前端類型不匹配問題
+            'attributes' => AttributeResource::collection($this->attributes),
         
-            // 變體資訊（當已載入時）
-            'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),
+            // 變體資訊（總是包含）
+            'variants' => ProductVariantResource::collection($this->variants),
             'variant_count' => $this->when(
                 $this->relationLoaded('variants'),
                 fn() => $this->variants->count()

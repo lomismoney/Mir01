@@ -66,6 +66,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRouter } from "next/navigation";
 
 export function OrderClientComponent() {
   // 🎯 分頁狀態管理 - 分段進軍終章
@@ -247,9 +248,11 @@ export function OrderClientComponent() {
     state: {
       sorting,
       pagination, // 🎯 納入分頁狀態
-      rowSelection, // 🎯 新增
+      rowSelection, // �� 新增
     },
   });
+
+  const router = useRouter();
 
   if (isLoading) {
     // 預計會有 8 列，顯示 10 行骨架屏
@@ -448,9 +451,9 @@ export function OrderClientComponent() {
 
       {/* 表格容器 */}
       <div 
-        className="rounded-lg border bg-white dark:bg-gray-900 shadow-md overflow-hidden" 
+        className="rounded-lg border bg-white dark:bg-gray-900 shadow-sm overflow-hidden" 
         style={{ 
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
           border: "1px solid #e5e7eb"
         }}
         data-oid="c-gfz:5"
@@ -467,12 +470,12 @@ export function OrderClientComponent() {
                   return (
                     <TableHead
                       key={header.id}
-                      className="h-16 px-6 text-left align-middle font-semibold text-gray-700 dark:text-gray-300"
+                      className="h-12 px-4 text-left align-middle font-medium text-gray-700 dark:text-gray-300"
                       style={{ 
-                        height: "64px", 
-                        padding: "0 1.5rem",
-                        backgroundColor: "rgba(243, 244, 246, 0.5)",
-                        borderBottom: "2px solid #e5e7eb"
+                        height: "48px", 
+                        padding: "0 1rem",
+                        backgroundColor: "rgba(249, 250, 251, 0.5)",
+                        borderBottom: "1px solid #e5e7eb"
                       }}
                       data-oid="3-c76.y"
                     >
@@ -494,15 +497,15 @@ export function OrderClientComponent() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="border-b transition-all duration-150 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  style={{ borderBottom: "1px solid #e5e7eb" }}
+                  className="border-b transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50"
+                  style={{ borderBottom: "1px solid rgba(229, 231, 235, 0.5)" }}
                   data-oid="8i08hjh"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell 
                       key={cell.id} 
-                      className="h-16 px-6 py-4 align-middle"
-                      style={{ height: "64px", padding: "1rem 1.5rem" }}
+                      className="h-12 px-4 py-2 align-middle"
+                      style={{ height: "48px", padding: "0.5rem 1rem" }}
                       data-oid="b3tvodv"
                     >
                       {flexRender(
@@ -544,9 +547,31 @@ export function OrderClientComponent() {
             setPreviewingOrderId(null); // 當面板關閉時，重置 ID
           }
         }}
-        onShip={setShippingOrderId}
-        onRecordPayment={setPayingOrder}
-        onRefund={setRefundingOrder} // 🎯 新增
+        onEdit={(order) => {
+          // 跳轉到編輯頁面
+          router.push(`/orders/${order.id}/edit`);
+          setPreviewingOrderId(null);
+        }}
+        onPrint={(order) => {
+          // TODO: 實現列印功能
+          toast.info("列印功能開發中");
+        }}
+        onCancel={(order) => {
+          setCancellingOrder(order);
+          setPreviewingOrderId(null);
+        }}
+        onShipOrder={(order) => {
+          setShippingOrderId(order.id);
+          setPreviewingOrderId(null);
+        }}
+        onRecordPayment={(order) => {
+          setPayingOrder(order);
+          setPreviewingOrderId(null);
+        }}
+        onRefund={(order) => {
+          setRefundingOrder(order);
+          setPreviewingOrderId(null);
+        }}
         data-oid="k8vq1n_"
       />
 
