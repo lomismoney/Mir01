@@ -29,23 +29,28 @@ class UserResource extends JsonResource
             'id' => (int) $this->id,
             'name' => $this->name,
             'username' => $this->username,
-            'role' => $this->role, // 新增 'role' 欄位
-            'role_display' => $this->getRoleDisplayName(), // 角色顯示名稱
-            'is_admin' => (bool) $this->isAdmin(), // 是否為管理員
+            'roles' => $this->getRoleNames()->toArray(), // 用戶的所有角色
+            'roles_display' => $this->getRolesDisplayNames(), // 角色顯示名稱
+            'is_admin' => $this->hasRole('admin'), // 是否有管理員角色
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'stores' => StoreResource::collection($this->whenLoaded('stores')), // 新增分店關聯
+            'stores' => StoreResource::collection($this->whenLoaded('stores')), // 分店關聯
         ];
     }
 
     /**
-     * 獲取角色顯示名稱
+     * 獲取角色顯示名稱陣列
      *
-     * @return string
+     * @return array
      */
-    private function getRoleDisplayName(): string
+    private function getRolesDisplayNames(): array
     {
-        $roleNames = User::getAvailableRoles();
-        return $roleNames[$this->role] ?? $this->role;
+        $availableRoles = User::getAvailableRoles();
+        
+        return $this->getRoleNames()
+            ->map(function ($role) use ($availableRoles) {
+                return $availableRoles[$role] ?? $role;
+            })
+            ->toArray();
     }
 }

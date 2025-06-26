@@ -15,7 +15,8 @@ class UserStoreAssignRequestTest extends TestCase
 
     public function test_authorize_returns_true_for_admin_user()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
 
         $request = new UserStoreAssignRequest();
         $request->setUserResolver(fn() => $admin);
@@ -25,7 +26,8 @@ class UserStoreAssignRequestTest extends TestCase
 
     public function test_authorize_returns_false_for_staff_user()
     {
-        $staff = User::factory()->create(['role' => 'staff']);
+        $staff = User::factory()->create();
+        $staff->assignRole('staff');
 
         $request = new UserStoreAssignRequest();
         $request->setUserResolver(fn() => $staff);
@@ -35,7 +37,8 @@ class UserStoreAssignRequestTest extends TestCase
 
     public function test_authorize_returns_false_for_viewer_user()
     {
-        $viewer = User::factory()->create(['role' => 'viewer']);
+        $viewer = User::factory()->create();
+        $viewer->assignRole('viewer');
 
         $request = new UserStoreAssignRequest();
         $request->setUserResolver(fn() => $viewer);

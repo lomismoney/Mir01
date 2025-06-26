@@ -62,8 +62,9 @@ class PurchaseService
                     ]);
             }
             
-            // 格式化進貨單號
-            $orderNumber = sprintf('PO-%s-%03d', $dateStr, $newSequence);
+            // 格式化進貨單號（將日期格式從 YYYY-MM-DD 改為 YYYYMMDD）
+            $dateFormatted = $date->format('Ymd');
+            $orderNumber = sprintf('PO-%s-%03d', $dateFormatted, $newSequence);
             
             return $orderNumber;
         });

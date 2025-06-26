@@ -22,8 +22,8 @@ class AuthControllerTest extends TestCase
         $user = User::factory()->create([
             'username' => 'testuser',
             'password' => Hash::make($password),
-            'role' => 'admin'
         ]);
+        $user->assignRole('admin');
         
         // 準備登入數據
         $loginData = [
@@ -43,7 +43,8 @@ class AuthControllerTest extends TestCase
                  ->has('token')
                  ->where('user.id', $user->id)
                  ->where('user.username', $user->username)
-                 ->where('user.role', $user->role)
+                 ->where('user.roles', ['admin'])
+                 ->where('user.is_admin', true)
                  ->etc();
         });
         

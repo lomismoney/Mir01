@@ -29,8 +29,8 @@ class UserCollection extends ResourceCollection
             'meta' => [
                 'total' => $this->collection->count(),
                 'roles' => [
-                    'admin_count' => $this->collection->where('role', 'admin')->count(),
-                    'viewer_count' => $this->collection->where('role', 'viewer')->count(),
+                    'admin_count' => $this->collection->filter(fn($user) => $user->hasRole('admin'))->count(),
+                    'viewer_count' => $this->collection->filter(fn($user) => $user->hasRole('viewer'))->count(),
                 ],
             ],
         ];

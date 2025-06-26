@@ -28,8 +28,9 @@ class PartialPaymentTest extends TestCase
     {
         parent::setUp();
         
-        // 創建測試用戶
+        // 創建測試用戶並分配 admin 角色
         $this->user = User::factory()->create();
+        $this->user->assignRole('admin');
         $this->actingAs($this->user, 'sanctum');
     }
 
@@ -174,7 +175,7 @@ class PartialPaymentTest extends TestCase
 
         // 驗證：返回 422 錯誤
         $response->assertStatus(422);
-        $response->assertJsonFragment(['message' => '此訂單已全額付清，無法再新增付款記錄']);
+        $response->assertJsonValidationErrors(['amount']);
     }
 
     /** @test */

@@ -37,8 +37,8 @@ class ReportController extends Controller
      * @authenticated
      * 
      * @queryParam product_variant_id integer required 商品變體ID. Example: 1
-     * @queryParam start_date date required 開始日期 (YYYY-MM-DD). Example: 2025-01-01
-     * @queryParam end_date date required 結束日期 (YYYY-MM-DD). Example: 2025-01-31
+     * @queryParam start_date string required 開始日期 (格式: Y-m-d). Example: 2025-01-01
+     * @queryParam end_date string required 結束日期 (格式: Y-m-d). Example: 2025-01-31
      * 
      * @response 200 scenario="成功獲取庫存趨勢數據" {
      *   "data": [

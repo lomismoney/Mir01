@@ -32,8 +32,8 @@ class InventoryTransferController extends Controller
      * @queryParam from_store_id integer 來源門市ID. Example: 1
      * @queryParam to_store_id integer 目標門市ID. Example: 2
      * @queryParam status string 轉移狀態. Example: completed
-     * @queryParam start_date date 起始日期. Example: 2023-01-01
-     * @queryParam end_date date 結束日期. Example: 2023-12-31
+     * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
+     * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
      * @queryParam product_name string 按商品名稱搜尋. Example: T恤
      * @queryParam per_page integer 每頁項目數，預設 15
      * 

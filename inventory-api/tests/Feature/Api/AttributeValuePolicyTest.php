@@ -22,9 +22,14 @@ class AttributeValuePolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->staff = User::factory()->create(['role' => 'staff']);
-        $this->viewer = User::factory()->create(['role' => 'viewer']);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole('admin');
+        
+        $this->staff = User::factory()->create();
+        $this->staff->assignRole('staff');
+        
+        $this->viewer = User::factory()->create();
+        $this->viewer->assignRole('viewer');
         $attribute = Attribute::factory()->create();
         $this->attributeValue = AttributeValue::factory()->create(['attribute_id' => $attribute->id]);
         $this->policy = new AttributeValuePolicy();

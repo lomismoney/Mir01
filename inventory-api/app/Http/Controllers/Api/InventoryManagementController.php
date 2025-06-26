@@ -214,8 +214,8 @@ class InventoryManagementController extends Controller
      * 獲取庫存交易歷史
      * 
      * @urlParam id integer required 庫存ID. Example: 1
-     * @queryParam start_date date 起始日期. Example: 2023-01-01
-     * @queryParam end_date date 結束日期. Example: 2023-12-31
+     * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
+     * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
      * @queryParam type string 交易類型. Example: addition
      * @queryParam per_page integer 每頁顯示數量，預設15. Example: 20
      * 
@@ -319,8 +319,8 @@ class InventoryManagementController extends Controller
      * @urlParam sku string required 商品SKU編號. Example: T001-M-RED
      * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
      * @queryParam type string 交易類型篩選 (addition, reduction, adjustment, transfer_in, transfer_out, transfer_cancel). Example: transfer_in
-     * @queryParam start_date date 起始日期 (YYYY-MM-DD). Example: 2023-01-01
-     * @queryParam end_date date 結束日期 (YYYY-MM-DD). Example: 2023-12-31
+     * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
+     * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
      * @queryParam per_page integer 每頁顯示數量，預設20，最大100. Example: 50
      * @queryParam page integer 頁碼. Example: 1
      * 
@@ -479,8 +479,8 @@ class InventoryManagementController extends Controller
      * 
      * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
      * @queryParam type string 交易類型篩選. Example: transfer_in
-     * @queryParam start_date date 起始日期. Example: 2023-01-01
-     * @queryParam end_date date 結束日期. Example: 2023-12-31
+     * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
+     * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
      * @queryParam product_name string 商品名稱搜尋. Example: T恤
      * @queryParam per_page integer 每頁顯示數量，預設20. Example: 50
      * @queryParam page integer 頁碼. Example: 1
