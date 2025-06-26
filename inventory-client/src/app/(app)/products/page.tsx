@@ -111,124 +111,104 @@ export default function ProductsPage() {
         className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:grid-cols-4"
         data-oid="gxvd3eh"
       >
-        <Card data-oid="w5q9cb6">
-          <CardHeader className="pb-2" data-oid="kem9.6q">
-            <CardDescription data-oid=".k7g5_1">商品總數</CardDescription>
-            <div
-              className="flex items-center justify-between"
-              data-oid="mtwhhb:"
+        <Card className="@container/card" data-oid="w5q9cb6">
+          <CardHeader className="space-y-1" data-oid="kem9.6q">
+            <CardDescription className="text-xs" data-oid=".k7g5_1">商品總數</CardDescription>
+            <CardTitle
+              className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl"
+              data-oid="v.l2yrn"
             >
-              <CardTitle
-                className="text-2xl font-semibold tabular-nums"
-                data-oid="v.l2yrn"
-              >
-                {stats.total}
-              </CardTitle>
+              {stats.total}
+            </CardTitle>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground" data-oid="p88hh0u">
+                所有已建立的商品
+              </p>
               <Badge
                 variant="outline"
                 className="text-xs h-5"
                 data-oid="xnkt7ru"
               >
-                <TrendingUp className="h-3 w-3" data-oid="b64k6vr" />+
+                <TrendingUp className="h-3 w-3 mr-1" data-oid="b64k6vr" />+
                 {percentageChanges.total}%
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-0" data-oid="4idozls">
-            <p className="text-sm text-muted-foreground" data-oid="p88hh0u">
-              所有已建立的商品
-            </p>
-          </CardContent>
         </Card>
 
-        <Card data-oid="o_9rhvg">
-          <CardHeader className="pb-2" data-oid="juy2zca">
-            <CardDescription data-oid="quxz864">有庫存商品</CardDescription>
-            <div
-              className="flex items-center justify-between"
-              data-oid="q5zum3i"
+        <Card className="@container/card" data-oid="o_9rhvg">
+          <CardHeader className="space-y-1" data-oid="juy2zca">
+            <CardDescription className="text-xs" data-oid="quxz864">有庫存商品</CardDescription>
+            <CardTitle
+              className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl"
+              data-oid="a4fn:ye"
             >
-              <CardTitle
-                className="text-2xl font-semibold tabular-nums"
-                data-oid="a4fn:ye"
-              >
-                {stats.active}
-              </CardTitle>
+              {stats.active}
+            </CardTitle>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground" data-oid="ns6.39q">
+                至少有一個門市有庫存
+              </p>
               <Badge
                 variant="outline"
                 className="text-xs h-5"
                 data-oid="efx0jab"
               >
-                <TrendingUp className="h-3 w-3" data-oid="nx8zt5f" />+
+                <TrendingUp className="h-3 w-3 mr-1" data-oid="nx8zt5f" />+
                 {percentageChanges.active}%
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-0" data-oid="mrpe_.o">
-            <p className="text-sm text-muted-foreground" data-oid="ns6.39q">
-              至少有一個門市有庫存
-            </p>
-          </CardContent>
         </Card>
 
-        <Card data-oid="5.:g1:y">
-          <CardHeader className="pb-2" data-oid="3gcfqbm">
-            <CardDescription data-oid="c.mjgz4">低庫存預警</CardDescription>
-            <div
-              className="flex items-center justify-between"
-              data-oid="e7hobe6"
+        <Card className="@container/card" data-oid="5.:g1:y">
+          <CardHeader className="space-y-1" data-oid="3gcfqbm">
+            <CardDescription className="text-xs" data-oid="c.mjgz4">低庫存預警</CardDescription>
+            <CardTitle
+              className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl"
+              data-oid="-d-sav-"
             >
-              <CardTitle
-                className="text-2xl font-semibold tabular-nums"
-                data-oid="-d-sav-"
-              >
-                {stats.lowStock}
-              </CardTitle>
+              {stats.lowStock}
+            </CardTitle>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground" data-oid="zuu8lem">
+                庫存量低於 10 件
+              </p>
               <Badge
                 variant="outline"
                 className="text-xs h-5"
                 data-oid="5y6q87_"
               >
-                <TrendingDown className="h-3 w-3" data-oid="v14q7ga" />
+                <TrendingDown className="h-3 w-3 mr-1" data-oid="v14q7ga" />
                 {percentageChanges.lowStock}%
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-0" data-oid="j116wq4">
-            <p className="text-sm text-muted-foreground" data-oid="zuu8lem">
-              庫存量低於 10 件
-            </p>
-          </CardContent>
         </Card>
 
-        <Card data-oid="wndnntk">
-          <CardHeader className="pb-2" data-oid="2zd5_e6">
-            <CardDescription data-oid="xaa:s0b">缺貨商品</CardDescription>
-            <div
-              className="flex items-center justify-between"
-              data-oid="nr9ya_8"
+        <Card className="@container/card" data-oid="wndnntk">
+          <CardHeader className="space-y-1" data-oid="2zd5_e6">
+            <CardDescription className="text-xs" data-oid="xaa:s0b">缺貨商品</CardDescription>
+            <CardTitle
+              className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl"
+              data-oid="q20j__s"
             >
-              <CardTitle
-                className="text-2xl font-semibold tabular-nums"
-                data-oid="q20j__s"
-              >
-                {stats.outOfStock}
-              </CardTitle>
+              {stats.outOfStock}
+            </CardTitle>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground" data-oid="q9bu77a">
+                所有門市皆無庫存
+              </p>
               <Badge
                 variant="destructive"
                 className="text-xs h-5"
                 data-oid="r8s:.85"
               >
-                <TrendingUp className="h-3 w-3" data-oid="8ajuj_n" />+
+                <TrendingUp className="h-3 w-3 mr-1" data-oid="8ajuj_n" />+
                 {percentageChanges.outOfStock}%
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-0" data-oid="qex-pt.">
-            <p className="text-sm text-muted-foreground" data-oid="q9bu77a">
-              所有門市皆無庫存
-            </p>
-          </CardContent>
         </Card>
       </div>
 
