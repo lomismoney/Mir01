@@ -42,7 +42,7 @@ class StoreUserRequest extends FormRequest
      * 1. name: 姓名必填且不超過 255 字元
      * 2. username: 用戶名必填且在系統中唯一
      * 3. password: 密碼必填且最少 8 字元（安全性考量）
-     * 4. role: 角色必填且只能是預定義的有效角色
+     * 4. roles: 角色陣列（可選），必須是有效的角色
      * 
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
@@ -52,7 +52,8 @@ class StoreUserRequest extends FormRequest
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => ['required', Rule::in([User::ROLE_ADMIN, User::ROLE_VIEWER])],
+            'roles' => ['sometimes', 'array'],
+            'roles.*' => ['string', Rule::in(array_keys(User::getAvailableRoles()))],
         ];
     }
 

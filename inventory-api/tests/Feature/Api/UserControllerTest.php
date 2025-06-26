@@ -17,8 +17,12 @@ class UserControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        $this->viewer = User::factory()->create(['role' => User::ROLE_VIEWER]);
+        
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole(User::ROLE_ADMIN);
+        
+        $this->viewer = User::factory()->create();
+        $this->viewer->assignRole(User::ROLE_VIEWER);
     }
 
     // =================================================================
@@ -93,7 +97,7 @@ class UserControllerTest extends TestCase
             'username' => 'newuser',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => User::ROLE_VIEWER,
+            'roles' => [User::ROLE_VIEWER],
         ];
 
         $this->actingAs($this->admin);
@@ -107,6 +111,7 @@ class UserControllerTest extends TestCase
         
         $createdUser = User::where('username', 'newuser')->first();
         $this->assertTrue(Hash::check('password123', $createdUser->password));
+        $this->assertTrue($createdUser->hasRole(User::ROLE_VIEWER));
     }
 
     /** @test */
@@ -117,7 +122,7 @@ class UserControllerTest extends TestCase
         // Missing required fields
         $this->postJson('/api/users', [])
              ->assertStatus(422)
-             ->assertJsonValidationErrors(['name', 'username', 'password', 'role']);
+             ->assertJsonValidationErrors(['name', 'username', 'password']);
         
         // Password confirmation mismatch
         $this->postJson('/api/users', [
@@ -125,7 +130,7 @@ class UserControllerTest extends TestCase
             'username' => 'testuser',
             'password' => 'password123',
             'password_confirmation' => 'wrongpassword',
-            'role' => User::ROLE_VIEWER,
+            'roles' => [User::ROLE_VIEWER],
         ])->assertStatus(422)->assertJsonValidationErrors(['password']);
 
         // Username already taken
@@ -134,7 +139,7 @@ class UserControllerTest extends TestCase
             'username' => $this->viewer->username,
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => User::ROLE_VIEWER,
+            'roles' => [User::ROLE_VIEWER],
         ])->assertStatus(422)->assertJsonValidationErrors(['username']);
     }
 
@@ -162,16 +167,19 @@ class UserControllerTest extends TestCase
 
         $updateData = [
             'name' => 'Updated Name',
-            'role' => 'admin',
+            'roles' => ['admin'],
         ];
 
         $this->actingAs($this->admin);
 
         $this->putJson("/api/users/{$userToUpdate->id}", $updateData)
              ->assertOk()
-             ->assertJsonFragment(['name' => 'Updated Name', 'role' => 'admin']);
+             ->assertJsonFragment(['name' => 'Updated Name'])
+             ->assertJsonPath('data.roles', ['admin']);
         
         $this->assertDatabaseHas('users', ['id' => $userToUpdate->id, 'name' => 'Updated Name']);
+        $userToUpdate->refresh();
+        $this->assertTrue($userToUpdate->hasRole('admin'));
     }
     
     /** @test */

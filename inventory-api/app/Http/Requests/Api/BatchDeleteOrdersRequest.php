@@ -49,4 +49,21 @@ class BatchDeleteOrdersRequest extends FormRequest
             'ids.*.exists' => '選擇的訂單不存在或已被刪除',
         ];
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'ids' => [
+                'description' => '要刪除的訂單 ID 陣列',
+                'example' => [1, 2, 3],
+            ],
+        ];
+    }
 }

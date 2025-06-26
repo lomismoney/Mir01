@@ -65,7 +65,7 @@ class CategoryModelTest extends TestCase
     /** @test */
     public function category_has_correct_fillable_attributes()
     {
-        $fillable = ['name', 'description', 'parent_id'];
+        $fillable = ['name', 'description', 'parent_id', 'sort_order'];
         $category = new Category();
         
         $this->assertEquals($fillable, $category->getFillable());

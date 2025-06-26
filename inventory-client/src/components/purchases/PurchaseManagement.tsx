@@ -20,7 +20,6 @@ import {
 } from "@/types/purchase";
 import { useDebounce } from "@/hooks/use-debounce";
 import { toast } from "sonner";
-// PurchasesResponse 類型已移除，直接使用 hook 返回的數據結構
 
 import {
   Card,
@@ -89,6 +88,18 @@ interface PurchaseFilters {
   per_page?: number;
 }
 
+// 定義進貨單響應的類型
+type PurchaseResponseData = {
+  data: any[];
+  meta: {
+    current_page?: number;
+    per_page?: number;
+    total?: number;
+    last_page?: number;
+  };
+  links?: any;
+} | any[];
+
 export function PurchaseManagement() {
   const router = useRouter();
 
@@ -114,12 +125,7 @@ export function PurchaseManagement() {
   } = usePurchases({
     ...filters,
     order_number: debouncedOrderNumber || undefined,
-  }) as {
-    data: any;
-    isLoading: boolean;
-    error: any;
-    refetch: () => void;
-  };
+  });
 
   // Mutations
   const updateStatusMutation = useUpdatePurchaseStatus();
@@ -188,7 +194,15 @@ export function PurchaseManagement() {
    * 計算統計數據
    */
   const getStatistics = () => {
-    const purchases = purchasesResponse?.data || [];
+    // 檢查響應格式並提取購買數據
+    const purchases = Array.isArray(purchasesResponse) 
+      ? purchasesResponse 
+      : purchasesResponse?.data || [];
+    
+    const meta = Array.isArray(purchasesResponse) 
+      ? null 
+      : purchasesResponse?.meta;
+    
     const today = new Date().toDateString();
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
@@ -199,7 +213,7 @@ export function PurchaseManagement() {
       weeklyCount: purchases.filter(
         (p: any) => new Date(p.created_at || "") >= weekAgo,
       ).length,
-      total: purchasesResponse?.meta?.total || 0,
+      total: meta?.total || purchases.length,
       pendingCount: purchases.filter((p: any) => p.status === "pending").length,
     };
   };

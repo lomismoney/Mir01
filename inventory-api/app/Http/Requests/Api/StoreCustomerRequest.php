@@ -27,6 +27,7 @@ class StoreCustomerRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:50|unique:customers,phone',
+            'email' => 'nullable|email|max:255|unique:customers,email',
             'is_company' => 'required|boolean',
             // 當 is_company 為 true 時，tax_id 為必填且唯一
             'tax_id' => 'nullable|string|max:50|unique:customers,tax_id|required_if:is_company,true',
@@ -52,6 +53,9 @@ class StoreCustomerRequest extends FormRequest
             'name.max' => '客戶姓名不得超過 255 個字元',
             'phone.unique' => '此電話號碼已被使用',
             'phone.max' => '電話號碼不得超過 50 個字元',
+            'email.email' => '請輸入有效的電子郵件地址',
+            'email.unique' => '此電子郵件地址已被使用',
+            'email.max' => '電子郵件地址不得超過 255 個字元',
             'is_company.required' => '請指定是否為公司客戶',
             'tax_id.unique' => '此統一編號已被使用',
             'tax_id.required_if' => '公司客戶必須填寫統一編號',
@@ -84,6 +88,10 @@ class StoreCustomerRequest extends FormRequest
             'phone' => [
                 'description' => '手機號碼',
                 'example' => '0987654321',
+            ],
+            'email' => [
+                'description' => '電子郵件地址',
+                'example' => 'customer@example.com',
             ],
             'is_company' => [
                 'description' => '是否為公司戶',

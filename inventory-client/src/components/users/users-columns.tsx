@@ -124,11 +124,11 @@ export const createUsersColumns = (
     },
   },
   {
-    accessorKey: "role",
+    accessorKey: "roles",
     header: "角色",
     cell: ({ row }) => {
       const user = row.original;
-      const role = (user as any).role || "viewer";
+      const roles = (user as any).roles || [];
 
       // 角色映射表
       const roleConfig = {
@@ -140,30 +140,46 @@ export const createUsersColumns = (
         staff: {
           label: "員工",
           variant: "destructive" as const,
-          icon: <Eye className="h-3 w-3" />,
+          icon: <Store className="h-3 w-3" />,
         },
         viewer: {
           label: "檢視者",
           variant: "secondary" as const,
           icon: <Eye className="h-3 w-3" />,
         },
+        installer: {
+          label: "安裝師傅",
+          variant: "outline" as const,
+          icon: <Edit className="h-3 w-3" />,
+        },
       };
 
-      const config =
-        roleConfig[role as keyof typeof roleConfig] || roleConfig.viewer;
-
       return (
-        <Badge
-          variant={config.variant}
-          className="flex w-fit items-center gap-1"
-        >
-          {config.icon}
-          {config.label}
-        </Badge>
+        <div className="flex flex-wrap gap-1">
+          {roles.map((role: string) => {
+            const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.viewer;
+            return (
+              <Badge
+                key={role}
+                variant={config.variant}
+                className="flex w-fit items-center gap-1 text-xs"
+              >
+                {config.icon}
+                {config.label}
+              </Badge>
+            );
+          })}
+          {roles.length === 0 && (
+            <Badge variant="outline" className="text-xs text-muted-foreground">
+              無角色
+            </Badge>
+          )}
+        </div>
       );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
+      const roles = row.getValue(id) as string[];
+      return value.some((v: string) => roles.includes(v));
     },
   },
   {
@@ -173,10 +189,15 @@ export const createUsersColumns = (
       const user = row.original;
       const stores = user.stores || [];
       return (
-        <div className="flex flex-wrap gap-1">
-          {stores.map((store) => (
-            <Badge key={store.id} variant="outline" className="text-xs">
-              <Store className="mr-1 h-3 w-3" />
+        <div className="flex flex-wrap gap-1" data-oid="j9583cl">
+          {stores.map((store: StoreItem) => (
+            <Badge
+              key={store.id}
+              variant="outline"
+              className="text-xs"
+              data-oid="_aojafr"
+            >
+              <Store className="mr-1 h-3 w-3" data-oid="5uw:hbt" />
               {store.name}
             </Badge>
           ))}

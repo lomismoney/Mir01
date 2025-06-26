@@ -46,8 +46,11 @@ class ProductVariantControllerTest extends TestCase
         parent::setUp();
         
         // 創建測試用戶
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->user = User::factory()->create(['role' => 'user']);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole('admin');
+        
+        $this->user = User::factory()->create();
+        $this->user->assignRole('viewer');
         
         // 創建測試分類
         $this->category = Category::factory()->create(['name' => 'T-shirt']);

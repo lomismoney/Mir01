@@ -32,7 +32,8 @@ class ProductImageUploadTest extends TestCase
         parent::setUp();
 
         // 創建測試用的管理員用戶
-        $this->adminUser = User::factory()->create(['role' => 'admin']);
+        $this->adminUser = User::factory()->create();
+        $this->adminUser->assignRole('admin');
         
         // 創建測試用的商品
         $category = Category::factory()->create();

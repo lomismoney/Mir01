@@ -222,4 +222,42 @@ class CreateRefundRequest extends FormRequest
             $this->merge(['items' => $cleanedItems]);
         }
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'reason' => [
+                'description' => '退款原因（至少 10 個字符）',
+                'example' => '商品有瑕疵，客戶要求退貨',
+            ],
+            'notes' => [
+                'description' => '備註（可選）',
+                'example' => '客戶於 2025-06-24 來電申請退貨',
+            ],
+            'should_restock' => [
+                'description' => '是否將退貨商品加回庫存',
+                'example' => true,
+            ],
+            'items' => [
+                'description' => '退款品項陣列',
+                'example' => [
+                    [
+                        'order_item_id' => 1,
+                        'quantity' => 2,
+                    ],
+                    [
+                        'order_item_id' => 2,
+                        'quantity' => 1,
+                    ],
+                ],
+            ],
+        ];
+    }
 }

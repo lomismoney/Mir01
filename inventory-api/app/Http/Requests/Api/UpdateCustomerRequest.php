@@ -40,6 +40,14 @@ class UpdateCustomerRequest extends FormRequest
                 Rule::unique('customers')->ignore($customerId)
             ],
             
+            // 驗證 email 唯一性時，忽略當前客戶自己的 email
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                Rule::unique('customers')->ignore($customerId)
+            ],
+            
             // 客戶類型 (個人/公司)
             'is_company' => 'required|boolean',
             
@@ -83,6 +91,11 @@ class UpdateCustomerRequest extends FormRequest
             // 電話號碼錯誤訊息
             'phone.unique' => '此電話號碼已被其他客戶使用',
             'phone.max' => '電話號碼不能超過 50 個字元',
+            
+            // 電子郵件錯誤訊息
+            'email.email' => '請輸入有效的電子郵件地址',
+            'email.unique' => '此電子郵件地址已被其他客戶使用',
+            'email.max' => '電子郵件地址不能超過 255 個字元',
             
             // 客戶類型錯誤訊息
             'is_company.required' => '請選擇客戶類型（個人或公司）',
@@ -128,6 +141,10 @@ class UpdateCustomerRequest extends FormRequest
             'phone' => [
                 'description' => '手機號碼',
                 'example' => '0987654321',
+            ],
+            'email' => [
+                'description' => '電子郵件地址',
+                'example' => 'customer@example.com',
             ],
             'is_company' => [
                 'description' => '是否為公司戶',

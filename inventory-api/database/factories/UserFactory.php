@@ -26,10 +26,10 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'username' => fake()->unique()->userName(), // 將 email 改為 username，並使用 userName() 生成器
+            'username' => fake()->unique()->userName(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role' => User::ROLE_VIEWER, // 為工廠生成的用戶設定預設角色為 'viewer'
+            // 不再設定 role 字段，角色通過 Spatie Permission 管理
         ];
     }
 
@@ -51,9 +51,9 @@ class UserFactory extends Factory
      */
     public function admin(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'role' => User::ROLE_ADMIN,
-        ]);
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole(User::ROLE_ADMIN);
+        });
     }
 
     /**
@@ -63,8 +63,45 @@ class UserFactory extends Factory
      */
     public function viewer(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'role' => User::ROLE_VIEWER,
-        ]);
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole(User::ROLE_VIEWER);
+        });
+    }
+
+    /**
+     * 創建具有員工角色的用戶
+     *
+     * @return static
+     */
+    public function staff(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole(User::ROLE_STAFF);
+        });
+    }
+
+    /**
+     * 創建具有安裝師傅角色的用戶
+     *
+     * @return static
+     */
+    public function installer(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole(User::ROLE_INSTALLER);
+        });
+    }
+
+    /**
+     * 創建具有指定角色的用戶
+     *
+     * @param string|array $roles
+     * @return static
+     */
+    public function withRoles($roles): static
+    {
+        return $this->afterCreating(function (User $user) use ($roles) {
+            $user->assignRole($roles);
+        });
     }
 }

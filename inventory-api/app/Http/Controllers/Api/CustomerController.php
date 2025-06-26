@@ -33,8 +33,8 @@ class CustomerController extends Controller
      * @group 客戶管理
      * @authenticated
      * @queryParam search string 關鍵字搜尋，將匹配姓名、電話、統一編號。Example: 設計公司
-     * @queryParam start_date date 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
-     * @queryParam end_date date 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
+     * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
+     * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
      * 
      * @response 200 scenario="客戶列表" {
      *   "data": [
@@ -42,6 +42,7 @@ class CustomerController extends Controller
      *       "id": 1,
      *       "name": "客戶名稱",
      *       "phone": "0912345678",
+     *       "email": "customer@example.com",
      *       "is_company": false,
      *       "tax_id": null,
      *       "industry_type": "設計師",
@@ -104,6 +105,7 @@ class CustomerController extends Controller
      * @authenticated
      * @bodyParam name string required 客戶名稱或公司抬頭. Example: 測試客戶
      * @bodyParam phone string 手機號碼. Example: 0987654321
+     * @bodyParam email string 電子郵件地址. Example: customer@example.com
      * @bodyParam is_company boolean required 是否為公司戶. Example: false
      * @bodyParam tax_id string 統一編號 (is_company為true時必填). Example: 12345678
      * @bodyParam industry_type string required 行業別. Example: 設計師
@@ -118,6 +120,7 @@ class CustomerController extends Controller
      *     "id": 1,
      *     "name": "測試客戶",
      *     "phone": "0987654321",
+     *     "email": "customer@example.com",
      *     "is_company": false,
      *     "tax_id": null,
      *     "industry_type": "設計師",
@@ -177,6 +180,7 @@ class CustomerController extends Controller
      *     "id": 1,
      *     "name": "客戶名稱",
      *     "phone": "0912345678",
+     *     "email": "customer@example.com",
      *     "is_company": false,
      *     "tax_id": null,
      *     "industry_type": "設計師",
@@ -207,6 +211,7 @@ class CustomerController extends Controller
      * @urlParam customer integer required 客戶的 ID。 Example: 1
      * @bodyParam name string required 客戶名稱或公司抬頭. Example: 測試客戶（已更新）
      * @bodyParam phone string 手機號碼. Example: 0987654321
+     * @bodyParam email string 電子郵件地址. Example: customer@example.com
      * @bodyParam is_company boolean required 是否為公司戶. Example: false
      * @bodyParam tax_id string 統一編號 (is_company為true時必填). Example: 12345678
      * @bodyParam industry_type string required 行業別. Example: 設計師
@@ -222,6 +227,7 @@ class CustomerController extends Controller
      *     "id": 1,
      *     "name": "測試客戶（已更新）",
      *     "phone": "0987654321",
+     *     "email": "customer@example.com",
      *     "is_company": false,
      *     "tax_id": null,
      *     "industry_type": "設計師",

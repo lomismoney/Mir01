@@ -60,4 +60,33 @@ class BatchUpdateStatusRequest extends FormRequest
             'notes.max' => '備註不能超過 500 個字符',
         ];
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'ids' => [
+                'description' => '要更新狀態的訂單 ID 陣列',
+                'example' => [1, 2, 3],
+            ],
+            'status_type' => [
+                'description' => '要更新的狀態類型（payment_status: 付款狀態, shipping_status: 貨物狀態）',
+                'example' => 'payment_status',
+            ],
+            'status_value' => [
+                'description' => '新的狀態值',
+                'example' => 'paid',
+            ],
+            'notes' => [
+                'description' => '狀態更新備註（可選）',
+                'example' => '已收到付款',
+            ],
+        ];
+    }
 } 

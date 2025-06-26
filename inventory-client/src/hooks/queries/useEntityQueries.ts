@@ -1023,8 +1023,8 @@ export function useCreateCustomer() {
         industry_type: payload.industry_type,
         payment_type: payload.payment_type,
         contact_address: payload.contact_address || undefined,
-        // 保持原始的 addresses 物件陣列格式
-        addresses: payload.addresses || [],
+        // 將 addresses 物件陣列轉換為字串陣列（API 要求的格式）
+        addresses: payload.addresses?.map(addr => addr.address) || [],
       };
       
       const { data, error } = await apiClient.POST('/api/customers', {
@@ -3059,20 +3059,16 @@ export function usePurchases(params?: {
     
     // 🎯 數據精煉廠 - 統一處理進貨單數據格式
     select: (response: any) => {
-      // 特殊處理：如果需要保留分頁元數據，返回完整結構
-      if (response?.meta || response?.links) {
-        return {
-          data: response.data || [],
-          meta: response.meta,
-          links: response.links
-        };
-      }
+      // 始終返回一致的格式，包含 data、meta 和 links
+      const data = response?.data || response || [];
+      const meta = response?.meta || null;
+      const links = response?.links || null;
       
-      // 否則，解包並返回純淨的進貨單陣列
-      const purchases = response?.data || response || [];
-      if (!Array.isArray(purchases)) return [];
-      
-      return purchases;
+      return {
+        data: Array.isArray(data) ? data : [],
+        meta: meta,
+        links: links
+      };
     },
     
     placeholderData: keepPreviousData,
@@ -3669,8 +3665,25 @@ export function useUpdateOrder() {
   const queryClient = useQueryClient();
   
   // 🎯 契約淨化：使用精確的 API 類型定義，徹底根除 any 污染
-  type UpdateOrderRequestBody = import('@/types/api').paths["/api/orders/{id}"]["put"]["requestBody"]["content"]["application/json"];
-  
+  type UpdateOrderRequestBody = {
+    customer_id?: number;
+    shipping_status?: string;
+    payment_status?: string;
+    shipping_fee?: number | null;
+    tax?: number | null;
+    discount_amount?: number | null;
+    payment_method?: string | null;
+    shipping_address?: string | null;
+    billing_address?: string | null;
+    customer_address_id?: string | null;
+    notes?: string | null;
+    po_number?: string | null;
+    reference_number?: string | null;
+    subtotal?: number | null;
+    grand_total?: number | null;
+    items?: string[];
+  };
+
   return useMutation({
     mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
       const { data, error } = await apiClient.PUT("/api/orders/{id}", {
@@ -3893,6 +3906,7 @@ export function useCancelOrder() {
   
   return useMutation({
     mutationFn: async ({ orderId, reason }: { orderId: number; reason?: string }) => {
+      // @ts-expect-error 新端點尚未同步到類型定義
       const { error } = await apiClient.POST('/api/orders/{order}/cancel', {
         params: { path: { order: orderId } },
         body: { reason },
@@ -4087,10 +4101,14 @@ export function useInventoryTimeSeries(filters: {
   return useQuery({
     queryKey: ['inventoryTimeSeries', filters],
     queryFn: async () => {
+      if (!product_variant_id) {
+        throw new Error('product_variant_id is required');
+      }
+      
       const { data, error } = await apiClient.GET('/api/reports/inventory-time-series', {
         params: {
           query: { 
-            product_variant_id, 
+            product_variant_id: product_variant_id as number, 
             start_date, 
             end_date 
           },
@@ -4124,5 +4142,573 @@ export function useInventoryTimeSeries(filters: {
     
     enabled: !!product_variant_id, // 只有在有 product_variant_id 時才觸發
     staleTime: 5 * 60 * 1000, // 5 分鐘緩存時間
+  });
+}
+
+// ==================== 安裝管理 (INSTALLATION MANAGEMENT) ====================
+
+
+
+import { 
+  Installation, 
+  InstallationFilters, 
+  CreateInstallationRequest, 
+  CreateInstallationFromOrderRequest,
+  UpdateInstallationRequest,
+  AssignInstallerRequest,
+  UpdateInstallationStatusRequest,
+  InstallationSchedule
+} from '@/types/installation';
+
+/**
+ * 查詢金鑰定義 - 安裝管理
+ */
+export const INSTALLATION_QUERY_KEYS = {
+  INSTALLATIONS: ['installations'] as const,
+  INSTALLATION: (id: number) => ['installations', id] as const,
+  SCHEDULE: ['installations', 'schedule'] as const,
+};
+
+/**
+ * 獲取安裝單列表的 Hook
+ * 
+ * 功能特性：
+ * 1. 支援完整的後端篩選參數（搜尋、狀態、師傅、日期等）
+ * 2. 智能查詢鍵結構，支援所有篩選參數的精確緩存
+ * 3. 分頁功能支援
+ * 4. 🎯 資料精煉廠 - 在源頭處理所有數據轉換和類型安全
+ * 
+ * @param filters - 篩選參數物件
+ * @returns React Query 查詢結果
+ */
+export function useInstallations(filters: InstallationFilters = {}) {
+  return useQuery({
+    queryKey: [...INSTALLATION_QUERY_KEYS.INSTALLATIONS, filters],
+    queryFn: async () => {
+      // 構建查詢參數，使用 Spatie QueryBuilder 格式
+      const queryParams: Record<string, string | number | boolean> = {};
+      
+      if (filters.search) queryParams['filter[search]'] = filters.search;
+      if (filters.installation_number) queryParams['filter[installation_number]'] = filters.installation_number;
+      if (filters.status) queryParams['filter[status]'] = filters.status;
+      if (filters.installer_user_id !== undefined) queryParams['filter[installer_user_id]'] = filters.installer_user_id;
+      if (filters.scheduled_date) queryParams['filter[scheduled_date]'] = filters.scheduled_date;
+      if (filters.start_date) queryParams['filter[start_date]'] = filters.start_date;
+      if (filters.end_date) queryParams['filter[end_date]'] = filters.end_date;
+      if (filters.page !== undefined) queryParams.page = filters.page;
+      if (filters.per_page !== undefined) queryParams.per_page = filters.per_page;
+
+      const { data, error } = await apiClient.GET('/api/installations', {
+        params: { 
+          query: Object.keys(queryParams).length > 0 ? queryParams : undefined 
+        }
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '獲取安裝單列表失敗');
+      }
+
+      return data;
+    },
+    
+    // 🎯 數據精煉廠 - 安裝單數據的完美轉換
+    select: (response: any) => {
+      // 處理分頁數據結構
+      const installations = response?.data?.data || response?.data || [];
+      const meta = response?.data?.meta || null;
+      const links = response?.data?.links || null;
+      
+      if (!Array.isArray(installations)) return { data: [], meta, links };
+
+      // 轉換每個安裝單數據
+      const transformedData = installations.map((installation: any) => ({
+        id: installation.id || 0,
+        installation_number: installation.installation_number || '',
+        order_id: installation.order_id || null,
+        customer_name: installation.customer_name || '',
+        customer_phone: installation.customer_phone || null,
+        installation_address: installation.installation_address || '',
+        installer_user_id: installation.installer_user_id || null,
+        status: installation.status || 'pending',
+        scheduled_date: installation.scheduled_date || null,
+        actual_start_time: installation.actual_start_time || null,
+        actual_end_time: installation.actual_end_time || null,
+        notes: installation.notes || null,
+        created_by: installation.created_by || 0,
+        created_at: installation.created_at || '',
+        updated_at: installation.updated_at || '',
+        
+        // 關聯數據處理
+        installer: installation.installer ? {
+          id: installation.installer.id || 0,
+          name: installation.installer.name || '',
+          username: installation.installer.username || '',
+        } : null,
+        
+        creator: installation.creator ? {
+          id: installation.creator.id || 0,
+          name: installation.creator.name || '',
+          username: installation.creator.username || '',
+        } : null,
+        
+        order: installation.order ? {
+          id: installation.order.id || 0,
+          order_number: installation.order.order_number || '',
+          customer_name: installation.order.customer_name || '',
+        } : null,
+        
+        items: installation.items?.map((item: any) => ({
+          id: item.id || 0,
+          installation_id: item.installation_id || 0,
+          order_item_id: item.order_item_id || null,
+          product_name: item.product_name || '',
+          sku: item.sku || '',
+          quantity: item.quantity || 0,
+          specifications: item.specifications || null,
+          status: item.status || 'pending',
+          notes: item.notes || null,
+        })) || [],
+      })) as Installation[];
+
+      return { data: transformedData, meta, links };
+    },
+    
+    // 🚀 體驗優化配置
+    placeholderData: keepPreviousData, // 篩選時保持舊資料，避免載入閃爍
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: 1 * 60 * 1000, // 1 分鐘緩存
+    retry: 2,
+  });
+}
+
+/**
+ * 獲取單個安裝單詳情的 Hook
+ * 
+ * @param id - 安裝單 ID
+ * @returns React Query 查詢結果
+ */
+export function useInstallation(id: number) {
+  return useQuery({
+    queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(id),
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/installations/{id}', {
+        params: { path: { id } }
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '獲取安裝單詳情失敗');
+      }
+      
+      return data;
+    },
+    
+    // 🎯 數據精煉廠
+    select: (response: any) => response?.data,
+    
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 分鐘緩存
+    retry: 2,
+  });
+}
+
+/**
+ * 創建安裝單的 Hook
+ * 
+ * @returns React Query 變更結果
+ */
+export function useCreateInstallation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateInstallationRequest) => {
+      const { data: response, error } = await apiClient.POST('/api/installations', {
+        body: data as any
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '創建安裝單失敗');
+      }
+      
+      return response;
+    },
+    onSuccess: async (data) => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATIONS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        queryClient.refetchQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATIONS,
+          exact: false,
+        })
+      ]);
+      
+      // 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('安裝單創建成功！', {
+          description: `安裝單號：${data?.data?.installation_number}`
+        });
+      }
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('安裝單創建失敗', {
+          description: error.message || '請檢查輸入資料並重試。'
+        });
+      }
+    },
+  });
+}
+
+/**
+ * 從訂單創建安裝單的 Hook
+ * 
+ * @returns React Query 變更結果
+ */
+export function useCreateInstallationFromOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateInstallationFromOrderRequest) => {
+      const { data: response, error } = await apiClient.POST('/api/installations/create-from-order', {
+        body: data as any
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '從訂單創建安裝單失敗');
+      }
+      
+      return response;
+    },
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await Promise.all([
+        // 失效安裝單列表
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATIONS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        // 失效相關訂單詳情
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.ORDER(variables.order_id),
+          exact: false,
+          refetchType: 'active',
+        })
+      ]);
+      
+      // 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('安裝單創建成功！', {
+          description: `已從訂單創建安裝單：${data?.data?.installation_number}`
+        });
+      }
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('從訂單創建安裝單失敗', {
+          description: error.message || '請檢查訂單狀態並重試。'
+        });
+      }
+    },
+  });
+}
+
+/**
+ * 更新安裝單的 Hook
+ * 
+ * @returns React Query 變更結果
+ */
+export function useUpdateInstallation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: { id: number } & UpdateInstallationRequest) => {
+      const { data: response, error } = await apiClient.PUT('/api/installations/{id}', {
+        params: { path: { id } },
+        body: data as any
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '更新安裝單失敗');
+      }
+      
+      return response;
+    },
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATIONS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(variables.id),
+          exact: false,
+          refetchType: 'active',
+        })
+      ]);
+      
+      // 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('安裝單已更新');
+      }
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('更新安裝單失敗', {
+          description: error.message || '請檢查輸入資料並重試。'
+        });
+      }
+    },
+  });
+}
+
+/**
+ * 刪除安裝單的 Hook
+ * 
+ * @returns React Query 變更結果
+ */
+export function useDeleteInstallation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { data, error } = await apiClient.DELETE('/api/installations/{id}', {
+        params: { path: { id } }
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '刪除安裝單失敗');
+      }
+      
+      return data;
+    },
+    onSuccess: async () => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await queryClient.invalidateQueries({
+        queryKey: INSTALLATION_QUERY_KEYS.INSTALLATIONS,
+        exact: false,
+        refetchType: 'active',
+      });
+      
+      // 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('安裝單已刪除');
+      }
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('刪除安裝單失敗', {
+          description: error.message
+        });
+      }
+    },
+  });
+}
+
+/**
+ * 分配安裝師傅的 Hook
+ * 
+ * @returns React Query 變更結果
+ */
+export function useAssignInstaller() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ installationId, ...data }: { installationId: number } & AssignInstallerRequest) => {
+      const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/assign', {
+        params: { path: { installation_id: installationId } },
+        body: data
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '分配安裝師傅失敗');
+      }
+      
+      return response;
+    },
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATIONS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(variables.installationId),
+          exact: false,
+          refetchType: 'active',
+        }),
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.SCHEDULE,
+          exact: false,
+          refetchType: 'active',
+        })
+      ]);
+      
+      // 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.success('已成功分配安裝師傅');
+      }
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('分配安裝師傅失敗', {
+          description: error.message
+        });
+      }
+    },
+  });
+}
+
+/**
+ * 更新安裝單狀態的 Hook
+ * 
+ * @returns React Query 變更結果
+ */
+export function useUpdateInstallationStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ installationId, ...data }: { installationId: number } & UpdateInstallationStatusRequest) => {
+      const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/status', {
+        params: { path: { installation_id: installationId } },
+        body: data
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '更新安裝單狀態失敗');
+      }
+      
+      return response;
+    },
+    onSuccess: async (data, variables) => {
+      // 🚀 「失效並強制重取」標準快取處理模式
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATIONS,
+          exact: false,
+          refetchType: 'active',
+        }),
+        queryClient.invalidateQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(variables.installationId),
+          exact: false,
+          refetchType: 'active',
+        })
+      ]);
+      
+      // 成功通知
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        const statusText = {
+          'pending': '待排程',
+          'scheduled': '已排程',
+          'in_progress': '進行中',
+          'completed': '已完成',
+          'cancelled': '已取消'
+        }[variables.status] || variables.status;
+        
+        toast.success('安裝單狀態已更新', {
+          description: `狀態已更新為「${statusText}」`
+        });
+      }
+    },
+    onError: (error) => {
+      if (typeof window !== 'undefined') {
+        const { toast } = require('sonner');
+        toast.error('更新安裝單狀態失敗', {
+          description: error.message
+        });
+      }
+    },
+  });
+}
+
+/**
+ * 獲取安裝行程的 Hook
+ * 
+ * @param params - 查詢參數
+ * @returns React Query 查詢結果
+ */
+export function useInstallationSchedule(params: {
+  installer_user_id?: number;
+  start_date?: string;
+  end_date?: string;
+} = {}) {
+  return useQuery({
+    queryKey: [...INSTALLATION_QUERY_KEYS.SCHEDULE, params],
+    queryFn: async () => {
+      // 構建查詢參數
+      const queryParams: Record<string, string | number> = {};
+      
+      if (params.installer_user_id !== undefined) queryParams['installer_user_id'] = params.installer_user_id;
+      if (params.start_date) queryParams['start_date'] = params.start_date;
+      if (params.end_date) queryParams['end_date'] = params.end_date;
+
+      const { data, error } = await apiClient.GET('/api/installations/schedule', {
+        params: { 
+          query: Object.keys(queryParams).length > 0 ? queryParams as any : undefined 
+        }
+      });
+      
+      if (error) {
+        const errorMessage = parseApiError(error);
+        throw new Error(errorMessage || '獲取安裝行程失敗');
+      }
+
+      return data;
+    },
+    
+    // 🎯 數據精煉廠 - 行程數據轉換
+    select: (response: any) => {
+      const schedules = response?.data || [];
+      
+      if (!Array.isArray(schedules)) return [];
+
+      // 轉換為行事曆適用的格式
+      return schedules.map((schedule: any) => ({
+        id: schedule.id || 0,
+        installation_number: schedule.installation_number || '',
+        customer_name: schedule.customer_name || '',
+        installation_address: schedule.installation_address || '',
+        scheduled_date: schedule.scheduled_date || '',
+        status: schedule.status || 'pending',
+        installer: schedule.installer ? {
+          id: schedule.installer.id || 0,
+          name: schedule.installer.name || '',
+          color: schedule.installer.color || null,
+        } : null,
+      })) as InstallationSchedule[];
+    },
+    
+    // 🚀 體驗優化配置
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 分鐘緩存
+    retry: 2,
   });
 }

@@ -662,13 +662,15 @@ class CategoryControllerTest extends TestCase
 
     protected function actingAsAdmin()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
         return $this->actingAs($admin, 'sanctum');
     }
 
     protected function actingAsUser()
     {
-        $user = User::factory()->create(['role' => 'staff']);
+        $user = User::factory()->create();
+        $user->assignRole('staff');
         return $this->actingAs($user, 'sanctum');
     }
 } 
