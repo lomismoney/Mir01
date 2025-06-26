@@ -25,6 +25,12 @@ import {
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -93,6 +99,10 @@ export const createColumns = ({
     header: "訂單編號",
     cell: ({ row }) => {
       const order = row.original;
+      
+      // 🎯 檢查是否為預訂訂單（根據備註中的預訂模式標記）
+      const isBackorder = order.notes?.includes('【預訂模式】') || false;
+      
       return (
         <div className="flex items-center gap-2" data-oid="vx3ki2n">
           <button
@@ -102,6 +112,27 @@ export const createColumns = ({
           >
             {order.order_number}
           </button>
+          
+          {/* 🎯 預訂訂單徽章 - 使用 shadcn/ui 官方警告色系統 */}
+          {isBackorder && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge 
+                    variant="warning" 
+                    className="text-xs cursor-help"
+                    data-oid="backorder-badge"
+                  >
+                    預訂
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>此訂單包含庫存不足的商品，將於補貨後出貨</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          
           {/* 🎯 如果訂單包含訂製商品，顯示標籤 */}
           {order.has_custom_items && (
             <Badge variant="secondary" className="text-xs" data-oid="qfgr0ki">

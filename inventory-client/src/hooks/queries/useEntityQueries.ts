@@ -3332,15 +3332,48 @@ export function useCreateOrder() {
 
     return useMutation({
         mutationFn: async (orderData: OrderFormData) => {
+            console.log('🚀 useCreateOrder 收到的數據:', JSON.stringify(orderData, null, 2));
+            
+            // 🎯 重新整理數據格式以匹配後端 API 期望
+            const apiPayload = {
+                customer_id: orderData.customer_id,
+                shipping_status: orderData.shipping_status,
+                payment_status: orderData.payment_status,
+                shipping_fee: orderData.shipping_fee || 0,
+                tax: orderData.tax || 0,
+                discount_amount: orderData.discount_amount || 0,
+                payment_method: orderData.payment_method,
+                order_source: orderData.order_source,
+                shipping_address: orderData.shipping_address,
+                notes: orderData.notes || null,
+                items: orderData.items,
+                ...(orderData.hasOwnProperty('force_create_despite_stock') && {
+                    force_create_despite_stock: (orderData as any).force_create_despite_stock,
+                }),
+            };
+            
             const { data, error } = await apiClient.POST('/api/orders', {
-                body: orderData as any // 暫時使用 any 繞過類型檢查，直到 API 契約修復
+                body: apiPayload as any
             });
             
+            // 如果有錯誤，代表 API 請求失敗
             if (error) {
+                console.error('🔴 API 回傳錯誤:', error);
+                
+                // 🎯 檢查這個錯誤是否是我們預期的「庫存不足」結構化錯誤
+                if ((error as any).stockCheckResults || (error as any).insufficientStockItems) {
+                    // 如果是，直接將這個帶有詳細數據的錯誤物件拋出
+                    // 讓 onError 回調可以接收到它
+                    throw error;
+                }
+                
+                // 如果是其他類型的錯誤，則使用我們的標準解析器
                 const errorMessage = parseApiError(error);
                 throw new Error(errorMessage || '創建訂單失敗');
             }
             
+            // 如果沒有錯誤，返回成功的數據
+            console.log('✅ 訂單創建成功:', data);
             return data;
         },
         onSuccess: async (data) => {
@@ -3367,13 +3400,20 @@ export function useCreateOrder() {
                 });
             }
         },
-        onError: (error) => {
-            // 錯誤處理並顯示錯誤訊息
-            if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
-                toast.error('訂單創建失敗', {
-                    description: error.message || '請檢查輸入資料並重試。'
-                });
+        onError: (error: any) => {
+            // 🎯 在 onError 回調中，我們現在可以更安全地檢查錯誤類型
+            if (error.stockCheckResults || error.insufficientStockItems) {
+                // 這裡是處理庫存不足的邏輯...
+                // 前端頁面組件會自行處理這種錯誤，這裡只需要記錄即可
+                console.log('⚠️ 庫存不足錯誤已傳遞給前端組件處理');
+            } else {
+                // 這裡是處理其他通用錯誤的邏輯...
+                if (typeof window !== 'undefined') {
+                    const { toast } = require('sonner');
+                    toast.error('訂單創建失敗', {
+                        description: error.message || '請檢查輸入資料並重試。'
+                    });
+                }
             }
         },
     });

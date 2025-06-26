@@ -319,7 +319,7 @@ export function OrderPreviewModal({
                       )}
                       
                       {order.discount_amount && order.discount_amount > 0 && (
-                        <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
+                        <div className="flex justify-between text-sm text-success">
                           <span>折扣優惠</span>
                           <span>-{formatCurrency(order.discount_amount)}</span>
                         </div>
@@ -347,14 +347,14 @@ export function OrderPreviewModal({
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
                             <p className="text-muted-foreground">已付</p>
-                            <p className="font-semibold text-emerald-600 dark:text-emerald-400">
+                            <p className="font-semibold text-success">
                               {formatCurrency(order.paid_amount)}
                             </p>
                           </div>
                           {remainingAmount > 0 && (
                             <div className="text-right">
                               <p className="text-muted-foreground">待付</p>
-                              <p className="font-semibold text-orange-600 dark:text-orange-400">
+                              <p className="font-semibold text-warning">
                                 {formatCurrency(remainingAmount)}
                               </p>
                             </div>

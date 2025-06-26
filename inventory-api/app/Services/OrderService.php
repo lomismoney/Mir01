@@ -21,29 +21,54 @@ class OrderService
     ) {
     }
 
+    /**
+     * 創建新訂單
+     * 
+     * 🎯 預訂系統支援：智能處理庫存不足場景
+     * - 當庫存充足時：正常扣減庫存建立訂單
+     * - 當庫存不足時：拋出結構化異常，前端可選擇強制建單
+     * - 當強制建單時：忽略庫存限制，直接建立預訂訂單
+     *
+     * @param array $validatedData 已驗證的訂單資料
+     * @return Order
+     * @throws \Exception 一般錯誤
+     * @throws \App\Exceptions\InsufficientStockException 庫存不足結構化異常
+     */
     public function createOrder(array $validatedData): Order
     {
         return DB::transaction(function () use ($validatedData) {
-            // 🎯 1. 生成新的訂單編號（格式：YYYYMM-XXXX）
+            // 1. 生成新的訂單編號
             $orderNumber = $this->orderNumberGenerator->generateNextNumber();
+
+            // 2. 🎯 預訂系統核心邏輯：智能庫存檢查（第三道防線）
+            $forceCreate = filter_var(
+                $validatedData['force_create_despite_stock'] ?? false,
+                FILTER_VALIDATE_BOOLEAN
+            );
             
-            // 2. 檢查所有商品的庫存是否足夠
             // 過濾出需要檢查庫存的標準商品（排除訂製商品）
             $standardItems = collect($validatedData['items'])->filter(function ($item) {
                 return !empty($item['product_variant_id']) && ($item['is_stocked_sale'] ?? true);
             })->values()->all();
             
-            // 只有在有標準商品時才進行庫存檢查
-            if (!empty($standardItems)) {
+            // 庫存檢查與智能處理
+            if (!empty($standardItems) && !$forceCreate) {
                 $stockCheckResults = $this->inventoryService->batchCheckStock($standardItems);
-            
-            if (!empty($stockCheckResults)) {
-                // 有商品庫存不足，組織錯誤訊息
-                $errorMessage = "以下商品庫存不足：\n";
-                foreach ($stockCheckResults as $result) {
-                    $errorMessage .= "- {$result['product_name']} (SKU: {$result['sku']})：需求 {$result['requested_quantity']}，庫存 {$result['available_quantity']}\n";
-                }
-                throw new \Exception($errorMessage);
+                
+                if (!empty($stockCheckResults)) {
+                    // 🎯 庫存不足時拋出結構化異常（而非一般錯誤）
+                    $exception = new \Exception('庫存不足');
+                    $exception->stockCheckResults = $stockCheckResults; // 附加詳細庫存資訊
+                    $exception->insufficientStockItems = collect($stockCheckResults)->map(function ($result) {
+                        return [
+                            'product_name' => $result['product_name'],
+                            'sku' => $result['sku'],
+                            'requested_quantity' => $result['requested_quantity'],
+                            'available_quantity' => $result['available_quantity'],
+                            'shortage' => $result['requested_quantity'] - $result['available_quantity']
+                        ];
+                    })->all();
+                    throw $exception;
                 }
             }
 
@@ -104,24 +129,36 @@ class OrderService
                 $order->items()->create($orderItemData);
             }
             
-            // 7. 批量扣減庫存（整個交易內執行，確保原子性）
-            // 只扣減標準商品的庫存
+            // 7. 🎯 智能庫存扣減：根據庫存情況決定處理方式
             if (!empty($standardItems)) {
-            $this->inventoryService->batchDeductStock(
-                    $standardItems,
-                null, // 使用預設門市
-                ['order_number' => $order->order_number, 'order_id' => $order->id]
-            );
+                if ($forceCreate) {
+                    // 強制建單模式：不扣減庫存，建立預訂訂單
+                    // 在訂單備註中標記為預訂模式
+                    $order->update([
+                        'notes' => ($order->notes ? $order->notes . ' | ' : '') . 
+                                  '【預訂模式】部分商品庫存不足，待供應商補貨後出貨'
+                    ]);
+                } else {
+                    // 正常模式：批量扣減庫存（整個交易內執行，確保原子性）
+                    $this->inventoryService->batchDeductStock(
+                        $standardItems,
+                        null, // 使用預設門市
+                        ['order_number' => $order->order_number, 'order_id' => $order->id]
+                    );
+                }
             }
 
             // 8. 記錄初始狀態歷史
+            $initialNotes = $forceCreate ? '預訂訂單已創建（庫存不足）' : '訂單已創建';
+            
             $order->statusHistories()->create([
                 'to_status' => $order->shipping_status,
                 'status_type' => 'shipping',
                 'user_id' => auth()->id(),
-                'notes' => '訂單已創建',
+                'notes' => $initialNotes,
             ]);
-             $order->statusHistories()->create([
+            
+            $order->statusHistories()->create([
                 'to_status' => $order->payment_status,
                 'status_type' => 'payment',
                 'user_id' => auth()->id(),

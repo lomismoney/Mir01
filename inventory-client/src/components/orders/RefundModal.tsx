@@ -709,7 +709,7 @@ export default function RefundModal({
                         已付金額
                       </span>
                       <span
-                        className="font-medium text-green-600"
+                        className="font-medium text-success"
                         data-oid="ybt_1_g"
                       >
                         ${fullOrder.paid_amount.toFixed(2)}
@@ -790,16 +790,16 @@ export default function RefundModal({
 
                   {selectedItemsCount > 0 && (
                     <Alert
-                      className="border-green-200 bg-green-50"
+                      className="border-success bg-success/10"
                       data-oid="_5zfm7o"
                     >
                       <CheckCircle
-                        className="h-4 w-4 text-green-600"
+                                                  className="h-4 w-4 text-success"
                         data-oid="ny3qgn4"
                       />
 
                       <AlertDescription
-                        className="text-green-800"
+                                                  className="text-success"
                         data-oid="4_:_qc4"
                       >
                         已選擇 {selectedItemsCount} 項商品，共{" "}

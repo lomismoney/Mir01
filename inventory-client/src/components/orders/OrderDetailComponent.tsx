@@ -115,7 +115,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
 
   if (isError) {
     return (
-      <div className="text-red-500">
+                      <div className="text-error">
         無法加載訂單詳情: {error?.message}
       </div>
     );
@@ -368,7 +368,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                 {order.discount_amount > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">折扣</span>
-                    <span className="text-green-600 text-right w-[120px]">
+                    <span className="text-success text-right w-[120px]">
                       -${order.discount_amount.toLocaleString()}
                     </span>
                   </div>
@@ -433,13 +433,13 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">已付金額</span>
-                  <span className="font-medium text-green-600">
+                                      <span className="font-medium text-success">
                     ${order.paid_amount.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">未付金額</span>
-                  <span className="font-medium text-red-600">
+                                      <span className="font-medium text-error">
                     ${remainingAmount.toLocaleString()}
                   </span>
                 </div>

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Inventory;
 use App\Models\ProductVariant;
+use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,6 +20,51 @@ use Illuminate\Support\Facades\Auth;
 class InventoryService
 {
     /**
+     * 獲取預設門市ID
+     * 
+     * 優先級：
+     * 1. 查找標記為主門市的門市
+     * 2. 如果沒有主門市，返回ID最小的門市
+     * 3. 如果沒有任何門市，拋出異常
+     * 
+     * @return int
+     * @throws \Exception
+     */
+    protected function getDefaultStoreId(): int
+    {
+        // 🎯 直接使用第一個門市作為預設門市（按 ID 排序）
+        $store = Store::orderBy('id')->first();
+        
+        if (!$store) {
+            throw new \Exception('系統中沒有任何門市，請先創建門市後再進行庫存操作');
+        }
+        
+        return $store->id;
+    }
+
+    /**
+     * 確保門市ID有效
+     * 
+     * 如果未提供門市ID，則使用預設門市
+     * 
+     * @param int|null $storeId 門市ID
+     * @return int 有效的門市ID
+     * @throws \Exception
+     */
+    protected function ensureValidStoreId(?int $storeId = null): int
+    {
+        if ($storeId) {
+            // 驗證門市是否存在
+            if (!Store::where('id', $storeId)->exists()) {
+                throw new \InvalidArgumentException("門市ID {$storeId} 不存在");
+            }
+            return $storeId;
+        }
+        
+        return $this->getDefaultStoreId();
+    }
+
+    /**
      * 扣減庫存 (用於訂單創建)
      * 
      * @param int $productVariantId 商品變體ID
@@ -32,17 +78,15 @@ class InventoryService
     public function deductStock(int $productVariantId, int $quantity, ?int $storeId = null, ?string $notes = null, array $metadata = []): bool
     {
         return DB::transaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
-            // 確保提供了有效的門市ID
-            if (!$storeId) {
-                throw new \InvalidArgumentException('必須提供有效的門市ID');
-            }
+            // 🎯 使用預設門市邏輯，確保門市ID有效
+            $effectiveStoreId = $this->ensureValidStoreId($storeId);
 
             // 獲取或創建庫存記錄
             $inventory = Inventory::lockForUpdate()
                 ->firstOrCreate(
                     [
                         'product_variant_id' => $productVariantId,
-                        'store_id' => $storeId
+                        'store_id' => $effectiveStoreId
                     ],
                     [
                         'quantity' => 0,
@@ -88,17 +132,15 @@ class InventoryService
     public function returnStock(int $productVariantId, int $quantity, ?int $storeId = null, ?string $notes = null, array $metadata = []): bool
     {
         return DB::transaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
-            // 確保提供了有效的門市ID
-            if (!$storeId) {
-                throw new \InvalidArgumentException('必須提供有效的門市ID');
-            }
+            // 🎯 使用預設門市邏輯，確保門市ID有效
+            $effectiveStoreId = $this->ensureValidStoreId($storeId);
 
             // 獲取或創建庫存記錄
             $inventory = Inventory::lockForUpdate()
                 ->firstOrCreate(
                     [
                         'product_variant_id' => $productVariantId,
-                        'store_id' => $storeId
+                        'store_id' => $effectiveStoreId
                     ],
                     [
                         'quantity' => 0,
@@ -138,13 +180,13 @@ class InventoryService
         return DB::transaction(function () use ($items, $storeId, $metadata) {
             foreach ($items as $item) {
                 if (isset($item['product_variant_id']) && $item['is_stocked_sale']) {
-                    $this->deductStock(
-                        $item['product_variant_id'],
-                        $item['quantity'],
-                        $storeId,
-                        "訂單商品：{$item['product_name']}",
-                        $metadata
-                    );
+                                    $this->deductStock(
+                    $item['product_variant_id'],
+                    $item['quantity'],
+                    $storeId, // 保持原有邏輯，讓 deductStock 內部處理預設門市
+                    "訂單商品：{$item['product_name']}",
+                    $metadata
+                );
                 }
             }
             return true;
@@ -168,7 +210,7 @@ class InventoryService
                     $this->returnStock(
                         $item->product_variant_id,
                         $item->quantity,
-                        $storeId,
+                        $storeId, // 保持原有邏輯，讓 returnStock 內部處理預設門市
                         "訂單取消返還：{$item->product_name}",
                         $metadata
                     );
@@ -188,12 +230,11 @@ class InventoryService
      */
     public function checkStock(int $productVariantId, int $quantity, ?int $storeId = null): bool
     {
-        if (!$storeId) {
-            throw new \InvalidArgumentException('必須提供有效的門市ID');
-        }
+        // 🎯 使用預設門市邏輯，確保門市ID有效
+        $effectiveStoreId = $this->ensureValidStoreId($storeId);
 
         $inventory = Inventory::where('product_variant_id', $productVariantId)
-            ->where('store_id', $storeId)
+            ->where('store_id', $effectiveStoreId)
             ->first();
 
         if (!$inventory) {
@@ -214,20 +255,19 @@ class InventoryService
     {
         $results = [];
         
+        // 🎯 提前確保門市ID有效，避免在迴圈中重複檢查
+        $effectiveStoreId = $this->ensureValidStoreId($storeId);
+        
         foreach ($items as $item) {
             if (isset($item['product_variant_id']) && $item['is_stocked_sale']) {
                 $isAvailable = $this->checkStock(
                     $item['product_variant_id'],
                     $item['quantity'],
-                    $storeId
+                    $effectiveStoreId // 使用已確保有效的門市ID
                 );
                 
                 if (!$isAvailable) {
                     $variant = ProductVariant::find($item['product_variant_id']);
-                    $effectiveStoreId = $storeId;
-                    if (!$effectiveStoreId) {
-                        throw new \InvalidArgumentException('必須提供有效的門市ID');
-                    }
                     
                     $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])
                         ->where('store_id', $effectiveStoreId)

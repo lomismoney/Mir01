@@ -96,6 +96,9 @@ class OrderController extends Controller
      * 此端點用於創建新的訂單，包含訂單頭資訊和訂單項目明細。
      * 系統會自動生成訂單號、計算總金額，並記錄初始狀態歷史。
      * 
+     * 🎯 預訂系統支援：當庫存不足時，會返回結構化錯誤資訊，
+     * 前端可以基於此資訊引導用戶選擇預訂模式。
+     * 
      * @bodyParam customer_id integer required 客戶ID。Example: 1
      * @bodyParam shipping_status string required 貨物狀態。Example: 待出貨
      * @bodyParam payment_status string required 付款狀態。Example: 待付款
@@ -106,6 +109,7 @@ class OrderController extends Controller
      * @bodyParam order_source string required 訂單來源。Example: 現場客戶
      * @bodyParam shipping_address string required 運送地址。Example: 台北市信義區信義路五段7號
      * @bodyParam notes string 備註。Example: 請小心輕放
+     * @bodyParam force_create_despite_stock boolean 是否在庫存不足時強制建立訂單（預訂模式）。Example: false
      * @bodyParam items array required 訂單項目清單。
      * @bodyParam items.*.product_variant_id integer 商品變體ID（訂製商品可為空）。Example: 1
      * @bodyParam items.*.is_stocked_sale boolean required 是否為庫存銷售。Example: true
@@ -117,19 +121,55 @@ class OrderController extends Controller
      * @bodyParam items.*.quantity integer required 數量。Example: 2
      * 
      * @response 201
+     * @response 422 scenario="庫存不足" {
+     *   "message": "庫存不足",
+     *   "stockCheckResults": [...],
+     *   "insufficientStockItems": [
+     *     {
+     *       "product_name": "標準辦公桌",
+     *       "sku": "DESK-001",
+     *       "requested_quantity": 5,
+     *       "available_quantity": 2,
+     *       "shortage": 3
+     *     }
+     *   ]
+     * }
      */
     public function store(StoreOrderRequest $request)
     {
         // 1. 權限驗證
         $this->authorize('create', Order::class);
 
-        // 2. 將所有業務邏輯委派給 Service 層
-        $order = $this->orderService->createOrder($request->validated());
+        try {
+            // 2. 將所有業務邏輯委派給 Service 層
+            $order = $this->orderService->createOrder($request->validated());
 
-        // 3. 返回標準化的 API 資源，並附帶 201 Created 狀態碼
-        return (new OrderResource($order))
-            ->response()
-            ->setStatusCode(201);
+            // 3. 返回標準化的 API 資源，並附帶 201 Created 狀態碼
+            return (new OrderResource($order))
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Exception $e) {
+            // 🎯 預訂系統：檢查是否為庫存不足的結構化異常
+            if ($e->getMessage() === '庫存不足' && 
+                property_exists($e, 'stockCheckResults') && 
+                property_exists($e, 'insufficientStockItems')) {
+                
+                // 返回結構化的庫存不足錯誤響應
+                return response()->json([
+                    'message' => '庫存不足',
+                    'stockCheckResults' => $e->stockCheckResults,
+                    'insufficientStockItems' => $e->insufficientStockItems
+                ], 422);
+            }
+            
+            // 4. 其他異常則使用標準錯誤處理
+            return response()->json([
+                'message' => $e->getMessage(),
+                'errors' => [
+                    'general' => [$e->getMessage()]
+                ]
+            ], 500);
+        }
     }
 
     /**
