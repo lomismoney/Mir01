@@ -1665,13 +1665,8 @@ export function useReorderCategories() {
       }
     },
     
-    // 成功時顯示通知並同步數據
+    // 成功時同步數據（移除重複的 toast，由組件層處理）
     onSuccess: async () => {
-      if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.success('分類順序已成功更新');
-      }
-      
       // 立即失效快取，確保獲取最新數據
       await queryClient.invalidateQueries({ 
         queryKey: QUERY_KEYS.CATEGORIES,
@@ -1679,12 +1674,9 @@ export function useReorderCategories() {
       });
     },
     
-    // 錯誤處理（由組件層面處理恢復）
+    // 錯誤處理由組件層統一處理，這裡只保留 console 日誌
     onError: (err) => {
-      if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.error(`更新失敗: ${err.message}`);
-      }
+      console.error('🚫 [useReorderCategories] API 調用失敗:', err.message);
     }
   });
 }
