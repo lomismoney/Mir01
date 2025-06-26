@@ -67,13 +67,13 @@ class InventoryTimeSeriesRequest extends FormRequest
     }
     
     /**
-     * 取得請求體參數的文檔
+     * 取得查詢參數的文檔
      * 
      * 用於 Scribe API 文檔生成
      * 
      * @return array
      */
-    public function bodyParameters(): array
+    public function queryParameters(): array
     {
         return [
             'product_variant_id' => [

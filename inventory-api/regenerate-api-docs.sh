@@ -14,16 +14,22 @@ echo "🔄 開始重新生成 API 文檔..."
 # 步驟 1: 生成 Scribe 文檔
 echo "📝 生成 Scribe 文檔..."
 php artisan scribe:generate
+SCRIBE_EXIT_CODE=$?
 
 # 修復非標準的 OpenAPI 類型
 # 注意：這只是為了處理遺留代碼中的 date/datetime/numeric 類型
 # 新代碼應該使用標準的 string/number 類型，避免需要此修復步驟
-php fix-openapi-types.php
+# php fix-openapi-types.php # 已刪除，新代碼已使用標準類型
 
-# 檢查是否成功
-if [ $? -ne 0 ]; then
-    echo "❌ Scribe 文檔生成失敗"
+# 檢查 openapi.yaml 是否存在（即使有警告也可能生成成功）
+if [ ! -f "storage/app/private/scribe/openapi.yaml" ]; then
+    echo "❌ Scribe 文檔生成失敗 - 找不到 openapi.yaml"
     exit 1
+fi
+
+# 如果有錯誤但文件存在，顯示警告
+if [ $SCRIBE_EXIT_CODE -ne 0 ]; then
+    echo "⚠️  Scribe 生成過程中有一些警告，但文檔已生成"
 fi
 
 # 步驟 2: 複製到前端

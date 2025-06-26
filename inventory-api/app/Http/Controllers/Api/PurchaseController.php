@@ -27,6 +27,42 @@ class PurchaseController extends Controller
      * @queryParam sort string 排序欄位 Example: -purchased_at
      * @queryParam page integer 頁數 Example: 1
      * @queryParam per_page integer 每頁筆數 Example: 20
+     * 
+     * @response 200 scenario="成功獲取進貨單列表" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "order_number": "PO-20250101-001",
+     *       "store_id": 1,
+     *       "purchased_at": "2025-01-01T10:00:00.000000Z",
+     *       "shipping_cost": "150.00",
+     *       "total_amount": "1500.00",
+     *       "status": "pending",
+     *       "notes": "進貨備註",
+     *       "created_at": "2025-01-01T10:00:00.000000Z",
+     *       "updated_at": "2025-01-01T10:00:00.000000Z",
+     *       "items_count": 5,
+     *       "items_sum_quantity": 50,
+     *       "store": {
+     *         "id": 1,
+     *         "name": "門市名稱"
+     *       },
+     *       "items": []
+     *     }
+     *   ],
+     *   "meta": {
+     *     "current_page": 1,
+     *     "per_page": 20,
+     *     "total": 100,
+     *     "last_page": 5
+     *   },
+     *   "links": {
+     *     "first": "http://localhost/api/purchases?page=1",
+     *     "last": "http://localhost/api/purchases?page=5",
+     *     "prev": null,
+     *     "next": "http://localhost/api/purchases?page=2"
+     *   }
+     * }
      */
     public function index()
     {

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class UpdateInstallationRequest extends FormRequest
 {
@@ -37,7 +38,7 @@ class UpdateInstallationRequest extends FormRequest
             'actual_end_time' => [
                 'nullable',
                 'date_format:Y-m-d H:i:s',
-                'after:actual_start_time'
+                // 移除 after:actual_start_time，改為在 withValidator 中處理
             ],
             'notes' => ['nullable', 'string'],
             
@@ -66,7 +67,6 @@ class UpdateInstallationRequest extends FormRequest
             'scheduled_date.after_or_equal' => '預計安裝日期不能早於今天',
             'actual_start_time.date_format' => '開始時間格式不正確',
             'actual_end_time.date_format' => '結束時間格式不正確',
-            'actual_end_time.after' => '結束時間必須晚於開始時間',
             'items.*.product_name.required' => '商品名稱為必填項目',
             'items.*.sku.required' => '商品編號為必填項目',
             'items.*.quantity.required' => '安裝數量為必填項目',
@@ -110,6 +110,32 @@ class UpdateInstallationRequest extends FormRequest
             // 如果要更新為已完成，必須有結束時間
             if ($this->status === 'completed' && !$this->actual_end_time && !$installation->actual_end_time) {
                 $validator->errors()->add('actual_end_time', '已完成狀態必須設定結束時間');
+            }
+            
+            // 驗證 actual_end_time 必須在 actual_start_time 之後
+            if ($this->has('actual_end_time') && $this->actual_end_time) {
+                // 決定要使用的 actual_start_time：優先使用請求中的值，否則使用資料庫中的值
+                $startTime = null;
+                
+                if ($this->has('actual_start_time') && $this->actual_start_time) {
+                    // 使用請求中的 actual_start_time
+                    $startTime = \Carbon\Carbon::parse($this->actual_start_time);
+                } elseif ($installation->actual_start_time) {
+                    // 使用資料庫中已存在的 actual_start_time
+                    $startTime = \Carbon\Carbon::parse($installation->actual_start_time);
+                }
+                
+                // 如果有開始時間，檢查結束時間是否在開始時間之後
+                if ($startTime) {
+                    $endTime = \Carbon\Carbon::parse($this->actual_end_time);
+                    
+                    if ($endTime->lte($startTime)) {
+                        $validator->errors()->add(
+                            'actual_end_time', 
+                            '結束時間必須晚於開始時間（' . $startTime->format('Y-m-d H:i:s') . '）'
+                        );
+                    }
+                }
             }
         });
     }

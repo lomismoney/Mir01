@@ -68,9 +68,13 @@ class UserController extends Controller
      *     {
      *       "id": 1,
      *       "name": "用戶名稱",
-     *       "email": "user@example.com",
+     *       "username": "admin",
+     *       "role": "admin",
+     *       "role_display": "管理員",
+     *       "is_admin": true,
      *       "created_at": "2025-01-01T10:00:00.000000Z",
-     *       "updated_at": "2025-01-01T10:00:00.000000Z"
+     *       "updated_at": "2025-01-01T10:00:00.000000Z",
+     *       "stores": []
      *     }
      *   ],
      *   "meta": {
@@ -111,7 +115,10 @@ class UserController extends Controller
      *   "data": {
      *     "id": 1,
      *     "name": "新用戶",
-     *     "email": "newuser@example.com",
+     *     "username": "newuser",
+     *     "role": "viewer",
+     *     "role_display": "檢視者",
+     *     "is_admin": false,
      *     "created_at": "2025-01-01T10:00:00.000000Z",
      *     "updated_at": "2025-01-01T10:00:00.000000Z"
      *   }
@@ -147,9 +154,13 @@ class UserController extends Controller
      *   "data": {
      *     "id": 1,
      *     "name": "用戶名稱",
-     *     "email": "user@example.com",
+     *     "username": "admin",
+     *     "role": "admin",
+     *     "role_display": "管理員",
+     *     "is_admin": true,
      *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     "updated_at": "2025-01-01T10:00:00.000000Z",
+     *     "stores": []
      *   }
      * }
      * @return \App\Http\Resources\Api\UserResource 用戶資源
@@ -181,8 +192,12 @@ class UserController extends Controller
      *   "data": {
      *     "id": 1,
      *     "name": "更新後的用戶名稱",
-     *     "email": "updated@example.com",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
+     *     "username": "updateduser",
+     *     "role": "admin",
+     *     "role_display": "管理員",
+     *     "is_admin": true,
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-01T12:00:00.000000Z"
      *   }
      * }
      * @return \App\Http\Resources\Api\UserResource 更新後的用戶資源

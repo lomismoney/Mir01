@@ -119,3 +119,58 @@ npx tsc --noEmit
 用戶現在可以：
 1. 訪問 http://localhost:3000/login 登入
 2. 登入後訪問 http://localhost:3000/inventory/management 查看庫存管理
+
+## 2025-06-26 後端修正與類型問題解決
+
+### 問題描述
+前端 TypeScript 編譯錯誤，主要是因為後端 API 響應格式與前端類型定義不符：
+1. UserItem 類型缺少 username 和 role 屬性
+2. PurchasesResponse 類型定義不正確
+3. inventory-time-series 端點參數問題
+
+### 解決方案（不使用 any）
+
+#### 1. 修復 InventoryTimeSeriesRequest
+將 `bodyParameters()` 改為 `queryParameters()`，因為這是 GET 請求：
+```php
+// inventory-api/app/Http/Requests/Api/InventoryTimeSeriesRequest.php
+public function queryParameters(): array
+{
+    return [
+        'product_variant_id' => [
+            'description' => '商品變體 ID',
+            'example' => 1,
+        ],
+        // ...
+    ];
+}
+```
+
+#### 2. 確認 User 模型和資源正確返回所需欄位
+- User 模型已有 username 和 role 欄位（role 在 2025_06_09_232411_add_role_to_users_table 中添加）
+- UserResource 正確返回這些欄位
+- UserController 的 PHPDoc 註解已更新，包含正確的響應格式
+
+#### 3. 更新 PurchaseResource
+添加缺失的欄位：
+```php
+'store_id' => $this->store_id,
+'notes' => $this->notes,
+'items_sum_quantity' => $this->whenAggregated('items', 'quantity', 'sum'),
+```
+
+#### 4. 更新 PurchaseController 文檔
+添加完整的 @response 註解，確保 Scribe 生成正確的 OpenAPI 規範
+
+### 執行步驟
+1. 修正後端代碼
+2. 使用 Laravel Sail 生成 API 文檔：`./vendor/bin/sail artisan scribe:generate`
+3. 同步 OpenAPI 規範到前端
+4. 生成新的 TypeScript 類型：`npm run api:types`
+5. 驗證編譯和構建成功
+
+### 結果
+✅ 所有 TypeScript 編譯錯誤已解決
+✅ 不再使用 any 類型來掩蓋問題
+✅ 後端 API 響應格式與前端類型定義完全一致
+✅ 專案成功構建

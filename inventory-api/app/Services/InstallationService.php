@@ -131,35 +131,79 @@ class InstallationService
     public function updateInstallation(Installation $installation, array $data): Installation
     {
         return DB::transaction(function () use ($installation, $data) {
+            // 準備更新資料 - 只包含明確提供的欄位
+            $updateData = [];
+            
+            // 檢查每個欄位是否在 $data 中明確提供
+            if (array_key_exists('installer_user_id', $data)) {
+                $updateData['installer_user_id'] = $data['installer_user_id'];
+            }
+            if (array_key_exists('customer_name', $data)) {
+                $updateData['customer_name'] = $data['customer_name'];
+            }
+            if (array_key_exists('customer_phone', $data)) {
+                $updateData['customer_phone'] = $data['customer_phone'];
+            }
+            if (array_key_exists('installation_address', $data)) {
+                $updateData['installation_address'] = $data['installation_address'];
+            }
+            if (array_key_exists('status', $data)) {
+                $updateData['status'] = $data['status'];
+            }
+            if (array_key_exists('scheduled_date', $data)) {
+                $updateData['scheduled_date'] = $data['scheduled_date'];
+            }
+            if (array_key_exists('actual_start_time', $data)) {
+                $updateData['actual_start_time'] = $data['actual_start_time'];
+            }
+            if (array_key_exists('actual_end_time', $data)) {
+                $updateData['actual_end_time'] = $data['actual_end_time'];
+            }
+            if (array_key_exists('notes', $data)) {
+                $updateData['notes'] = $data['notes'];
+            }
+            
             // 更新安裝單主檔
-            $installation->update(array_filter([
-                'installer_user_id' => $data['installer_user_id'] ?? $installation->installer_user_id,
-                'customer_name' => $data['customer_name'] ?? $installation->customer_name,
-                'customer_phone' => $data['customer_phone'] ?? $installation->customer_phone,
-                'installation_address' => $data['installation_address'] ?? $installation->installation_address,
-                'status' => $data['status'] ?? $installation->status,
-                'scheduled_date' => array_key_exists('scheduled_date', $data) ? $data['scheduled_date'] : $installation->scheduled_date,
-                'actual_start_time' => array_key_exists('actual_start_time', $data) ? $data['actual_start_time'] : $installation->actual_start_time,
-                'actual_end_time' => array_key_exists('actual_end_time', $data) ? $data['actual_end_time'] : $installation->actual_end_time,
-                'notes' => array_key_exists('notes', $data) ? $data['notes'] : $installation->notes,
-            ], fn($value) => !is_null($value)));
+            if (!empty($updateData)) {
+                $installation->update($updateData);
+            }
 
             // 更新安裝項目（如果有提供）
             if (isset($data['items'])) {
                 $existingItemIds = [];
                 
+                // 注意：如果 $data['items'] 為空陣列，將會刪除所有現有項目
+                // 這是預期行為 - 明確提供空陣列表示要清空所有項目
                 foreach ($data['items'] as $itemData) {
                     if (isset($itemData['id'])) {
                         // 更新現有項目
                         $item = InstallationItem::findOrFail($itemData['id']);
-                        $item->update(array_filter([
-                            'product_name' => $itemData['product_name'] ?? $item->product_name,
-                            'sku' => $itemData['sku'] ?? $item->sku,
-                            'quantity' => $itemData['quantity'] ?? $item->quantity,
-                            'specifications' => array_key_exists('specifications', $itemData) ? $itemData['specifications'] : $item->specifications,
-                            'status' => $itemData['status'] ?? $item->status,
-                            'notes' => array_key_exists('notes', $itemData) ? $itemData['notes'] : $item->notes,
-                        ], fn($value) => !is_null($value)));
+                        
+                        // 準備項目更新資料 - 只包含明確提供的欄位
+                        $itemUpdateData = [];
+                        
+                        if (array_key_exists('product_name', $itemData)) {
+                            $itemUpdateData['product_name'] = $itemData['product_name'];
+                        }
+                        if (array_key_exists('sku', $itemData)) {
+                            $itemUpdateData['sku'] = $itemData['sku'];
+                        }
+                        if (array_key_exists('quantity', $itemData)) {
+                            $itemUpdateData['quantity'] = $itemData['quantity'];
+                        }
+                        if (array_key_exists('specifications', $itemData)) {
+                            $itemUpdateData['specifications'] = $itemData['specifications'];
+                        }
+                        if (array_key_exists('status', $itemData)) {
+                            $itemUpdateData['status'] = $itemData['status'];
+                        }
+                        if (array_key_exists('notes', $itemData)) {
+                            $itemUpdateData['notes'] = $itemData['notes'];
+                        }
+                        
+                        if (!empty($itemUpdateData)) {
+                            $item->update($itemUpdateData);
+                        }
                         
                         $existingItemIds[] = $item->id;
                     } else {
@@ -180,6 +224,7 @@ class InstallationService
                 }
                 
                 // 刪除未包含在更新中的項目
+                // 注意：如果 $existingItemIds 為空（即 $data['items'] 為空陣列），將刪除所有項目
                 $installation->items()->whereNotIn('id', $existingItemIds)->delete();
             }
 

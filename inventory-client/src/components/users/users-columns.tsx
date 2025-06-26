@@ -179,7 +179,7 @@ export const createUsersColumns = (
       const stores = user.stores || [];
       return (
         <div className="flex flex-wrap gap-1" data-oid="j9583cl">
-          {stores.map((store) => (
+          {stores.map((store: StoreItem) => (
             <Badge
               key={store.id}
               variant="outline"

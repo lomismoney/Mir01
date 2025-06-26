@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useAllInventoryTransactions } from "@/hooks/queries/useEntityQueries";
 import {
   InventoryTransaction,
-  InventoryTransactionsResponse,
 } from "@/types/api-helpers";
 import { StoreCombobox } from "@/components/ui/store-combobox";
 import { format } from "date-fns";

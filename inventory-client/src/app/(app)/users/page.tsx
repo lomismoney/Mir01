@@ -196,11 +196,12 @@ export default function UsersPage() {
   const handleEditUser = (userToEdit: UserItem) => {
     setEditingUser(userToEdit);
     setEditUserName(userToEdit.name || "");
-    // 使用 username 字段，如果不存在則使用 email 作為後備
-    // 注意：API 設計問題 - /api/users 響應可能不包含 username，但創建/更新時需要
-    setEditUsername(userToEdit.username || userToEdit.email || "");
+    // 使用 username 字段
+    setEditUsername(userToEdit.username || "");
     setEditPassword(""); // 密碼留空，表示不更改
-    setEditRole(userToEdit.role || "viewer"); // 使用用戶實際的角色，並提供默認值
+    // 確保 role 是有效的角色類型
+    const userRole = userToEdit.role as "admin" | "staff" | "viewer" | undefined;
+    setEditRole(userRole || "viewer"); // 使用用戶實際的角色，並提供默認值
     setIsEditDialogOpen(true);
   };
 
