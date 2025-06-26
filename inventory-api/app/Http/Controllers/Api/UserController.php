@@ -69,7 +69,7 @@ class UserController extends Controller
      *       "id": 1,
      *       "name": "用戶名稱",
      *       "username": "admin",
-     *       "role": "admin",
+     *       "roles": ["admin"],
      *       "role_display": "管理員",
      *       "is_admin": true,
      *       "created_at": "2025-01-01T10:00:00.000000Z",
@@ -110,13 +110,14 @@ class UserController extends Controller
      * @bodyParam name string required 用戶名稱
      * @bodyParam email string required 電子郵件地址
      * @bodyParam password string required 密碼
+     * @bodyParam roles array 角色陣列
      * 
      * @response 201 scenario="用戶創建成功" {
      *   "data": {
      *     "id": 1,
      *     "name": "新用戶",
      *     "username": "newuser",
-     *     "role": "viewer",
+     *     "roles": ["viewer"],
      *     "role_display": "檢視者",
      *     "is_admin": false,
      *     "created_at": "2025-01-01T10:00:00.000000Z",
@@ -133,8 +134,17 @@ class UserController extends Controller
         // 建立用戶前必須對密碼進行雜湊處理（安全性要求）
         $validatedData['password'] = Hash::make($validatedData['password']);
         
+        // 取出角色資料（不存入 users 表）
+        $roles = $validatedData['roles'] ?? [];
+        unset($validatedData['roles']);
+        
         // 建立新用戶
         $user = User::create($validatedData);
+        
+        // 如果有指定角色，分配給用戶
+        if (!empty($roles)) {
+            $user->syncRoles($roles);
+        }
 
         // 返回格式化的用戶資源
         return new UserResource($user);
@@ -155,7 +165,7 @@ class UserController extends Controller
      *     "id": 1,
      *     "name": "用戶名稱",
      *     "username": "admin",
-     *     "role": "admin",
+     *     "roles": ["admin"],
      *     "role_display": "管理員",
      *     "is_admin": true,
      *     "created_at": "2025-01-01T10:00:00.000000Z",
@@ -187,13 +197,14 @@ class UserController extends Controller
      * @urlParam user integer required 用戶的 ID。 Example: 1
      * @bodyParam name string required 用戶名稱
      * @bodyParam email string required 電子郵件地址
+     * @bodyParam roles array 角色陣列
      * 
      * @response 200 scenario="用戶更新成功" {
      *   "data": {
      *     "id": 1,
      *     "name": "更新後的用戶名稱",
      *     "username": "updateduser",
-     *     "role": "admin",
+     *     "roles": ["admin"],
      *     "role_display": "管理員",
      *     "is_admin": true,
      *     "created_at": "2025-01-01T10:00:00.000000Z",
@@ -210,6 +221,12 @@ class UserController extends Controller
         // 如果請求中包含了新密碼，則對其進行雜湊處理
         if (isset($validatedData['password'])) {
             $validatedData['password'] = Hash::make($validatedData['password']);
+        }
+        
+        // 如果請求中包含角色，更新角色
+        if (isset($validatedData['roles'])) {
+            $user->syncRoles($validatedData['roles']);
+            unset($validatedData['roles']);
         }
         
         // 更新用戶資料（只更新提供的欄位）

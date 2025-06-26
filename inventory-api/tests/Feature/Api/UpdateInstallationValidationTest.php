@@ -19,7 +19,8 @@ class UpdateInstallationValidationTest extends TestCase
     public function test_actual_end_time_validation_with_existing_start_time()
     {
         // 建立測試用戶
-        $user = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $user = User::factory()->create();
+        $user->assignRole(User::ROLE_ADMIN);
         Sanctum::actingAs($user);
 
         // 建立一個已經有 actual_start_time 的安裝單
@@ -62,7 +63,8 @@ class UpdateInstallationValidationTest extends TestCase
     public function test_update_both_start_and_end_time()
     {
         // 建立測試用戶
-        $user = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $user = User::factory()->create();
+        $user->assignRole(User::ROLE_ADMIN);
         Sanctum::actingAs($user);
 
         // 建立一個安裝單
@@ -101,7 +103,8 @@ class UpdateInstallationValidationTest extends TestCase
     public function test_update_end_time_without_start_time()
     {
         // 建立測試用戶
-        $user = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $user = User::factory()->create();
+        $user->assignRole(User::ROLE_ADMIN);
         Sanctum::actingAs($user);
 
         // 建立一個沒有 actual_start_time 的安裝單

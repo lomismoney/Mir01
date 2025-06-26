@@ -18,9 +18,8 @@ class UserStoreControllerTest extends TestCase
     public function admin_can_get_user_stores()
     {
         // 創建用戶
-        $user = User::factory()->create([
-            'role' => 'staff'
-        ]);
+        $user = User::factory()->create();
+        $user->assignRole('staff');
         
         // 手動創建多個商店並關聯到用戶
         $stores = Store::factory()->count(3)->create();
@@ -39,9 +38,8 @@ class UserStoreControllerTest extends TestCase
     public function admin_can_assign_stores_to_user()
     {
         // 創建用戶
-        $user = User::factory()->create([
-            'role' => 'staff'
-        ]);
+        $user = User::factory()->create();
+        $user->assignRole('staff');
         
         // 手動創建多個商店
         $stores = Store::factory()->count(3)->create();
@@ -75,9 +73,8 @@ class UserStoreControllerTest extends TestCase
     public function admin_can_update_user_store_assignments()
     {
         // 創建用戶
-        $user = User::factory()->create([
-            'role' => 'staff'
-        ]);
+        $user = User::factory()->create();
+        $user->assignRole('staff');
         
         // 手動創建 5 個商店
         $stores = Store::factory()->count(5)->create();
@@ -114,7 +111,8 @@ class UserStoreControllerTest extends TestCase
     public function staff_cannot_get_other_user_stores()
     {
         // 創建另一個用戶
-        $targetUser = User::factory()->create(['role' => 'staff']);
+        $targetUser = User::factory()->create();
+        $targetUser->assignRole('staff');
         $stores = Store::factory()->count(3)->create();
         $targetUser->stores()->attach($stores->pluck('id'));
         
@@ -127,7 +125,8 @@ class UserStoreControllerTest extends TestCase
     /** @test */
     public function staff_can_view_own_stores_list()
     {
-        $staff = User::factory()->create(['role' => 'staff']);
+        $staff = User::factory()->create();
+        $staff->assignRole('staff');
         $stores = Store::factory()->count(2)->create();
         $staff->stores()->attach($stores->pluck('id'));
 
@@ -140,10 +139,12 @@ class UserStoreControllerTest extends TestCase
     /** @test */
     public function staff_cannot_assign_stores_to_any_user()
     {
-        $staff = User::factory()->create(['role' => 'staff']);
+        $staff = User::factory()->create();
+        $staff->assignRole('staff');
         $this->actingAs($staff);
         
-        $anotherStaff = User::factory()->create(['role' => 'staff']);
+        $anotherStaff = User::factory()->create();
+        $anotherStaff->assignRole('staff');
         $stores = Store::factory()->count(3)->create();
         $storeIds = $stores->pluck('id')->toArray();
         

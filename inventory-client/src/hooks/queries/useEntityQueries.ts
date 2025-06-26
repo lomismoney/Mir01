@@ -4063,6 +4063,8 @@ export function useInventoryTimeSeries(filters: {
 
 // ==================== 安裝管理 (INSTALLATION MANAGEMENT) ====================
 
+
+
 import { 
   Installation, 
   InstallationFilters, 
@@ -4208,7 +4210,7 @@ export function useInstallation(id: number) {
     queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(id),
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/installations/{id}', {
-        params: { path: { id, installation: id } }
+        params: { path: { id } }
       });
       
       if (error) {
@@ -4350,7 +4352,7 @@ export function useUpdateInstallation() {
   return useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & UpdateInstallationRequest) => {
       const { data: response, error } = await apiClient.PUT('/api/installations/{id}', {
-        params: { path: { id, installation: id } },
+        params: { path: { id } },
         body: data as any
       });
       
@@ -4404,7 +4406,7 @@ export function useDeleteInstallation() {
   return useMutation({
     mutationFn: async (id: number) => {
       const { data, error } = await apiClient.DELETE('/api/installations/{id}', {
-        params: { path: { id, installation: id } }
+        params: { path: { id } }
       });
       
       if (error) {
@@ -4450,7 +4452,7 @@ export function useAssignInstaller() {
   return useMutation({
     mutationFn: async ({ installationId, ...data }: { installationId: number } & AssignInstallerRequest) => {
       const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/assign', {
-        params: { path: { installation_id: installationId, installation: installationId } },
+        params: { path: { installation_id: installationId } },
         body: data
       });
       
@@ -4509,7 +4511,7 @@ export function useUpdateInstallationStatus() {
   return useMutation({
     mutationFn: async ({ installationId, ...data }: { installationId: number } & UpdateInstallationStatusRequest) => {
       const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/status', {
-        params: { path: { installation_id: installationId, installation: installationId } },
+        params: { path: { installation_id: installationId } },
         body: data
       });
       

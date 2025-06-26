@@ -16,9 +16,12 @@ class UserCollectionTest extends TestCase
     public function test_user_collection_transforms_data_correctly()
     {
         // 建立測試用戶
-        $adminUser = User::factory()->create(['role' => 'admin']);
-        $viewerUser1 = User::factory()->create(['role' => 'viewer']);
-        $viewerUser2 = User::factory()->create(['role' => 'viewer']);
+        $adminUser = User::factory()->create();
+        $adminUser->assignRole('admin');
+        $viewerUser1 = User::factory()->create();
+        $viewerUser1->assignRole('viewer');
+        $viewerUser2 = User::factory()->create();
+        $viewerUser2->assignRole('viewer');
 
         $users = collect([$adminUser, $viewerUser1, $viewerUser2]);
         
@@ -61,8 +64,10 @@ class UserCollectionTest extends TestCase
 
     public function test_user_collection_handles_only_admin_users()
     {
-        $adminUser1 = User::factory()->create(['role' => 'admin']);
-        $adminUser2 = User::factory()->create(['role' => 'admin']);
+        $adminUser1 = User::factory()->create();
+        $adminUser1->assignRole('admin');
+        $adminUser2 = User::factory()->create();
+        $adminUser2->assignRole('admin');
 
         $users = collect([$adminUser1, $adminUser2]);
         
@@ -79,8 +84,10 @@ class UserCollectionTest extends TestCase
 
     public function test_user_collection_handles_only_viewer_users()
     {
-        $viewerUser1 = User::factory()->create(['role' => 'viewer']);
-        $viewerUser2 = User::factory()->create(['role' => 'viewer']);
+        $viewerUser1 = User::factory()->create();
+        $viewerUser1->assignRole('viewer');
+        $viewerUser2 = User::factory()->create();
+        $viewerUser2->assignRole('viewer');
 
         $users = collect([$viewerUser1, $viewerUser2]);
         
@@ -97,9 +104,12 @@ class UserCollectionTest extends TestCase
 
     public function test_user_collection_handles_staff_role()
     {
-        $adminUser = User::factory()->create(['role' => 'admin']);
-        $staffUser = User::factory()->create(['role' => 'staff']);
-        $viewerUser = User::factory()->create(['role' => 'viewer']);
+        $adminUser = User::factory()->create();
+        $adminUser->assignRole('admin');
+        $staffUser = User::factory()->create();
+        $staffUser->assignRole('staff');
+        $viewerUser = User::factory()->create();
+        $viewerUser->assignRole('viewer');
 
         $users = collect([$adminUser, $staffUser, $viewerUser]);
         

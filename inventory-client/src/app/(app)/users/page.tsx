@@ -20,17 +20,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Plus, UserCheck, Shield, Eye } from "lucide-react";
+import { Loader2, Plus, UserCheck, Shield } from "lucide-react";
 import {
   useUsers,
   useCreateUser,
@@ -41,9 +34,10 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { UsersDataTable } from "@/components/users/users-data-table";
 import { createUsersColumns } from "@/components/users/users-columns";
-import { UserItem, StoreItem } from "@/types/api-helpers";
+import { UserItem } from "@/types/api-helpers";
 import { UserActions } from "@/components/users/users-columns";
 import { UserStoresDialog } from "@/components/users/user-stores-dialog";
+import { RoleSelector } from "@/components/users/role-selector";
 import { useQueryClient } from "@tanstack/react-query";
 
 /**
@@ -84,18 +78,14 @@ export default function UsersPage() {
   const [newUserName, setNewUserName] = useState("");
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [newRole, setNewRole] = useState<"admin" | "staff" | "viewer">(
-    "viewer",
-  ); // 預設角色
+  const [newRoles, setNewRoles] = useState<string[]>([]); // 多角色支持
 
   // 編輯用戶狀態
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [editUserName, setEditUserName] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [editPassword, setEditPassword] = useState("");
-  const [editRole, setEditRole] = useState<"admin" | "staff" | "viewer">(
-    "viewer",
-  );
+  const [editRoles, setEditRoles] = useState<string[]>([]); // 多角色支持
 
   // 刪除確認對話框狀態
   const [userToDelete, setUserToDelete] = useState<UserItem | null>(null);
@@ -146,13 +136,20 @@ export default function UsersPage() {
       return;
     }
 
+    // 角色驗證
+    if (newRoles.length === 0) {
+      toast.error("請至少選擇一個角色");
+      return;
+    }
+
     createUserMutation.mutate(
       {
         name: newUserName,
         username: newUsername,
         password: newPassword,
-        role: newRole,
-      },
+        password_confirmation: newPassword,
+        roles: newRoles,
+      } as any, // 暫時使用 any 處理 API 類型定義問題
       {
         onSuccess: () => {
           toast.success("用戶建立成功！");
@@ -199,9 +196,8 @@ export default function UsersPage() {
     // 使用 username 字段
     setEditUsername(userToEdit.username || "");
     setEditPassword(""); // 密碼留空，表示不更改
-    // 確保 role 是有效的角色類型
-    const userRole = userToEdit.role as "admin" | "staff" | "viewer" | undefined;
-    setEditRole(userRole || "viewer"); // 使用用戶實際的角色，並提供默認值
+    // 設置用戶的角色陣列
+    setEditRoles(userToEdit.roles || []);
     setIsEditDialogOpen(true);
   };
 
@@ -220,21 +216,29 @@ export default function UsersPage() {
       return;
     }
 
+    // 角色驗證
+    if (editRoles.length === 0) {
+      toast.error("請至少選擇一個角色");
+      return;
+    }
+
     // 準備更新資料（只包含有值的欄位）
     const updateData: {
       name: string;
       username: string;
-      role: "admin" | "staff" | "viewer";
+      roles: string[];
       password?: string;
+      password_confirmation?: string;
     } = {
       name: editUserName,
       username: editUsername,
-      role: editRole,
+      roles: editRoles,
     };
 
     // 如果有填寫密碼，則包含密碼更新
     if (editPassword.trim()) {
       updateData.password = editPassword;
+      updateData.password_confirmation = editPassword;
     }
 
     updateUserMutation.mutate(
@@ -289,7 +293,7 @@ export default function UsersPage() {
     setNewUserName("");
     setNewUsername("");
     setNewPassword("");
-    setNewRole("viewer");
+    setNewRoles([]);
   };
 
   /**
@@ -300,7 +304,7 @@ export default function UsersPage() {
     setEditUserName("");
     setEditUsername("");
     setEditPassword("");
-    setEditRole("viewer");
+    setEditRoles([]);
   };
 
   /**
@@ -450,41 +454,17 @@ export default function UsersPage() {
             </div>
 
             {/* 角色選擇 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="role" className="text-right font-medium">
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label className="text-right font-medium mt-3">
                 角色 <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={newRole}
-                onValueChange={(value: "admin" | "staff" | "viewer") =>
-                  setNewRole(value)
-                }
-                disabled={createUserMutation.isPending}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="選擇用戶角色" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
-                      管理員
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="staff">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
-                      員工
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="viewer">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
-                      檢視者
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="col-span-3">
+                <RoleSelector
+                  selectedRoles={newRoles}
+                  onRolesChange={setNewRoles}
+                  disabled={createUserMutation.isPending}
+                />
+              </div>
             </div>
           </div>
 
@@ -578,41 +558,17 @@ export default function UsersPage() {
             </div>
 
             {/* 角色選擇 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-role" className="text-right font-medium">
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label className="text-right font-medium mt-3">
                 角色 <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={editRole}
-                onValueChange={(value: "admin" | "staff" | "viewer") =>
-                  setEditRole(value)
-                }
-                disabled={updateUserMutation.isPending}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="選擇用戶角色" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
-                      管理員
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="staff">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
-                      員工
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="viewer">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
-                      檢視者
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="col-span-3">
+                <RoleSelector
+                  selectedRoles={editRoles}
+                  onRolesChange={setEditRoles}
+                  disabled={updateUserMutation.isPending}
+                />
+              </div>
             </div>
           </div>
 

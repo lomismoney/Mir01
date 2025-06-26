@@ -36,6 +36,19 @@ class InstallationController extends Controller
     }
 
     /**
+     * 檢查安裝師傅是否只能查看自己的資源
+     * 
+     * @param \App\Models\User $user
+     * @return bool 如果用戶只能查看自己的資源則返回 true
+     */
+    private function isInstallerRestrictedToOwn($user): bool
+    {
+        // 檢查用戶是否只有 installer 角色
+        // 如果用戶同時有其他高權限角色（admin, staff, viewer），則不限制
+        return $user->hasRole('installer') && !$user->hasAnyRole(['admin', 'staff', 'viewer']);
+    }
+
+    /**
      * 獲取安裝單列表
      * 
      * @queryParam filter[status] 按狀態篩選。可選值：pending, scheduled, in_progress, completed, cancelled。Example: pending
@@ -79,7 +92,7 @@ class InstallationController extends Controller
             ->defaultSort('-created_at');
 
         // 如果是安裝師傅，只能看到分配給自己的安裝單
-        if ($request->user()->hasRole('installer') && !$request->user()->hasAnyRole(['admin', 'staff', 'viewer'])) {
+        if ($this->isInstallerRestrictedToOwn($request->user())) {
             $query->where('installer_user_id', $request->user()->id);
         }
 
@@ -171,7 +184,6 @@ class InstallationController extends Controller
     /**
      * 查看安裝單詳情
      * 
-     * @urlParam installation integer required 安裝單ID。Example: 1
      * @queryParam include 包含關聯資源。可選值：items,order,installer,creator。Example: items,order
      * 
      * @authenticated
@@ -205,7 +217,6 @@ class InstallationController extends Controller
     /**
      * 更新安裝單
      * 
-     * @urlParam installation integer required 安裝單ID。Example: 1
      * @bodyParam installer_user_id integer 分配的安裝師傅ID。Example: 2
      * @bodyParam customer_name string 客戶姓名。Example: 王小明
      * @bodyParam customer_phone string nullable 客戶電話。Example: 0912345678
@@ -248,8 +259,6 @@ class InstallationController extends Controller
     /**
      * 刪除安裝單
      * 
-     * @urlParam installation integer required 安裝單ID。Example: 1
-     * 
      * @authenticated
      * @response 204
      */
@@ -265,7 +274,6 @@ class InstallationController extends Controller
     /**
      * 分配安裝師傅
      * 
-     * @urlParam installation integer required 安裝單ID。Example: 1
      * @bodyParam installer_user_id integer required 安裝師傅用戶ID。Example: 2
      * 
      * @authenticated
@@ -296,7 +304,6 @@ class InstallationController extends Controller
     /**
      * 更新安裝單狀態
      * 
-     * @urlParam installation integer required 安裝單ID。Example: 1
      * @bodyParam status string required 新狀態。可選值：pending, scheduled, in_progress, completed, cancelled。Example: in_progress
      * @bodyParam reason string 取消原因（當狀態為cancelled時）。Example: 客戶要求取消
      * 
@@ -355,7 +362,7 @@ class InstallationController extends Controller
         $this->authorize('viewAny', Installation::class);
 
         // 如果是安裝師傅角色，只能查看自己的行程
-        if ($request->user()->hasRole('installer') && !$request->user()->hasAnyRole(['admin', 'staff'])) {
+        if ($this->isInstallerRestrictedToOwn($request->user())) {
             if ($request->installer_user_id != $request->user()->id) {
                 abort(403, '您只能查看自己的安裝行程');
             }

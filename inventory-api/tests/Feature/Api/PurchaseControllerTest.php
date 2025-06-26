@@ -259,7 +259,6 @@ class PurchaseControllerTest extends TestCase
         $response->assertStatus(422)
                  ->assertJsonValidationErrors([
                      'store_id',
-                     'order_number',
                      'shipping_cost',
                      'items'
                  ]);
@@ -386,10 +385,10 @@ class PurchaseControllerTest extends TestCase
         $response->assertStatus(201);
 
         // 檢查進貨單創建成功
-        $this->assertDatabaseHas('purchases', [
-            'order_number' => 'PO-20240101-009',
-            'status' => 'pending'
-        ]);
+        $purchase = Purchase::latest()->first();
+        $this->assertNotNull($purchase);
+        $this->assertStringStartsWith('PO-', $purchase->order_number);
+        $this->assertEquals('pending', $purchase->status);
 
         // 檢查庫存沒有被創建（因為狀態是pending）
         $inventory = Inventory::where('store_id', $this->store->id)
@@ -423,10 +422,10 @@ class PurchaseControllerTest extends TestCase
         $response->assertStatus(201);
 
         // 檢查進貨單創建成功
-        $this->assertDatabaseHas('purchases', [
-            'order_number' => 'PO-20240101-010',
-            'status' => 'completed'
-        ]);
+        $purchase = Purchase::latest()->first();
+        $this->assertNotNull($purchase);
+        $this->assertStringStartsWith('PO-', $purchase->order_number);
+        $this->assertEquals('completed', $purchase->status);
 
         // 檢查庫存已經自動創建並增加
         $inventory = Inventory::where('store_id', $this->store->id)
@@ -460,7 +459,7 @@ class PurchaseControllerTest extends TestCase
                         'status',
                         'purchased_at',
                         'items_count',
-                        'total_quantity'
+                        'items_sum_quantity'
                     ]
                 ],
                 'meta' => [

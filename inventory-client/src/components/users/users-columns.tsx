@@ -128,47 +128,62 @@ export const createUsersColumns = (
     },
   },
   {
-    accessorKey: "role",
+    accessorKey: "roles",
     header: "角色",
     cell: ({ row }) => {
       const user = row.original;
-      const role = user.role || "viewer";
+      const roles = user.roles || [];
 
       // 角色映射表
       const roleConfig = {
         admin: {
           label: "管理員",
           variant: "default" as const,
-          icon: <Shield className="h-3 w-3" data-oid="5khxvst" />,
+          icon: <Shield className="h-3 w-3" />,
         },
         staff: {
           label: "員工",
           variant: "destructive" as const,
-          icon: <Eye className="h-3 w-3" data-oid="38s_zih" />,
+          icon: <Store className="h-3 w-3" />,
         },
         viewer: {
           label: "檢視者",
           variant: "secondary" as const,
-          icon: <Eye className="h-3 w-3" data-oid="01q1759" />,
+          icon: <Eye className="h-3 w-3" />,
+        },
+        installer: {
+          label: "安裝師傅",
+          variant: "outline" as const,
+          icon: <Edit className="h-3 w-3" />,
         },
       };
 
-      const config =
-        roleConfig[role as keyof typeof roleConfig] || roleConfig.viewer;
-
       return (
-        <Badge
-          variant={config.variant}
-          className="flex w-fit items-center gap-1"
-          data-oid="yne1fmq"
-        >
-          {config.icon}
-          {config.label}
-        </Badge>
+        <div className="flex flex-wrap gap-1">
+          {roles.map((role: string) => {
+            const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.viewer;
+            return (
+              <Badge
+                key={role}
+                variant={config.variant}
+                className="flex w-fit items-center gap-1 text-xs"
+              >
+                {config.icon}
+                {config.label}
+              </Badge>
+            );
+          })}
+          {roles.length === 0 && (
+            <Badge variant="outline" className="text-xs text-muted-foreground">
+              無角色
+            </Badge>
+          )}
+        </div>
       );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
+      const roles = row.getValue(id) as string[];
+      return value.some((v: string) => roles.includes(v));
     },
   },
   {

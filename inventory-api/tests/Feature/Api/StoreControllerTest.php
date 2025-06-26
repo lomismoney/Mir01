@@ -20,8 +20,12 @@ class StoreControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        $this->staff = User::factory()->create(['role' => 'staff']); // Assuming 'staff' is a valid role for these checks
+        
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole(User::ROLE_ADMIN);
+        
+        $this->staff = User::factory()->create();
+        $this->staff->assignRole('staff');
     }
 
     /** @test */
