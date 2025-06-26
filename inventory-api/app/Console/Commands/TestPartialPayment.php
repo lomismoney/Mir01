@@ -84,7 +84,10 @@ class TestPartialPayment extends Command
     {
         return DB::transaction(function () {
             // 創建測試用戶和客戶
-            $user = User::first() ?? User::factory()->create(['role' => 'admin']);
+            if (!$user = User::first()) {
+            $user = User::factory()->create();
+            $user->assignRole('admin');
+        }
             $customer = Customer::first() ?? Customer::factory()->create();
             
             // 創建測試訂單 (總金額 1000 元)

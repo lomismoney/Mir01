@@ -33,38 +33,38 @@ class ProductPolicy
 
     /**
      * Determine whether the user can create models.
-     * 只有 admin 可以建立
+     * admin 和 staff 可以建立
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 
     /**
      * Determine whether the user can update the model.
-     * 只有 admin 可以更新
+     * admin 和 staff 可以更新
      */
     public function update(User $user, Product $product): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 
     /**
      * Determine whether the user can delete the model.
-     * 只有 admin 可以刪除
+     * admin 和 staff 可以刪除
      */
     public function delete(User $user, Product $product): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 
     /**
      * Determine whether the user can batch delete models.
-     * 只有 admin 可以批量刪除
+     * admin 和 staff 可以批量刪除
      */
     public function deleteAny(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 
     /**
@@ -77,8 +77,8 @@ class ProductPolicy
      */
     public function deleteMultiple(User $user): bool
     {
-        // 只有管理員可以批量刪除商品
-        return $user->isAdmin();
+        // admin 和 staff 可以批量刪除商品
+        return $user->isAdmin() || $user->isStaff();
     }
 
     /**

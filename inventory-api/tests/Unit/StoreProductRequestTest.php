@@ -22,37 +22,40 @@ class StoreProductRequestTest extends TestCase
         parent::setUp();
     }
 
-    public function test_authorize_returns_true_for_admin_user()
+    /** @test */
+    public function it_authorizes_admin_to_store_product()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $this->actingAs($admin);
-
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        
         $request = new StoreProductRequest();
         $request->setUserResolver(fn() => $admin);
-
+        
         $this->assertTrue($request->authorize());
     }
-
-    public function test_authorize_returns_false_for_non_admin_user()
+    
+    /** @test */
+    public function it_denies_viewer_to_store_product()
     {
-        $viewer = User::factory()->create(['role' => 'viewer']);
-        $this->actingAs($viewer);
-
+        $viewer = User::factory()->create();
+        $viewer->assignRole('viewer');
+        
         $request = new StoreProductRequest();
         $request->setUserResolver(fn() => $viewer);
-
+        
         $this->assertFalse($request->authorize());
     }
-
-    public function test_authorize_returns_false_for_staff_user()
+    
+    /** @test */
+    public function it_allows_staff_to_store_product()
     {
-        $staff = User::factory()->create(['role' => 'staff']);
-        $this->actingAs($staff);
-
+        $staff = User::factory()->create();
+        $staff->assignRole('staff');
+        
         $request = new StoreProductRequest();
         $request->setUserResolver(fn() => $staff);
-
-        $this->assertFalse($request->authorize());
+        
+        $this->assertTrue($request->authorize());
     }
 
     public function test_validation_rules_are_correct()

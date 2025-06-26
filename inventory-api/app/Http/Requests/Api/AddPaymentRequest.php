@@ -90,4 +90,33 @@ class AddPaymentRequest extends FormRequest
             ]);
         }
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'amount' => [
+                'description' => '付款金額',
+                'example' => 5000.00,
+            ],
+            'payment_method' => [
+                'description' => '付款方式（cash: 現金, transfer: 轉帳, credit_card: 信用卡）',
+                'example' => 'cash',
+            ],
+            'payment_date' => [
+                'description' => '付款日期（可選，預設為當前時間）',
+                'example' => '2025-06-24',
+            ],
+            'notes' => [
+                'description' => '付款備註（可選）',
+                'example' => '第一期款項',
+            ],
+        ];
+    }
 }

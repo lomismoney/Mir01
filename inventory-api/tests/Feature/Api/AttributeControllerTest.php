@@ -28,8 +28,11 @@ class AttributeControllerTest extends TestCase
         parent::setUp();
         
         // 創建測試用戶
-        $this->admin = User::factory()->create(['role' => 'admin']);
-        $this->user = User::factory()->create(['role' => 'user']);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole('admin');
+        
+        $this->user = User::factory()->create();
+        $this->user->assignRole('viewer');
         
         // 創建測試屬性
         $this->attribute = Attribute::factory()->create(['name' => '顏色']);
@@ -69,6 +72,7 @@ class AttributeControllerTest extends TestCase
                             ->where('name', '顏色')
                             ->has('created_at')
                             ->has('updated_at')
+                            ->has('products_count')
                             ->has('values', 2)
                             ->has('values.0', fn ($json) =>
                                 $json->where('value', '紅色')

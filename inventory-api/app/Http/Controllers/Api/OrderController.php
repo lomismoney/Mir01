@@ -29,8 +29,8 @@ class OrderController extends Controller
      * @queryParam search string 關鍵字搜尋，將匹配訂單號、客戶名稱。Example: PO-20250619-001
      * @queryParam shipping_status string 按貨物進度篩選。Example: 待出貨
      * @queryParam payment_status string 按付款進度篩選。Example: 待付款
-     * @queryParam start_date date 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
-     * @queryParam end_date date 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-19
+     * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
+     * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-19
      */
     public function index(Request $request)
     {
@@ -99,9 +99,9 @@ class OrderController extends Controller
      * @bodyParam customer_id integer required 客戶ID。Example: 1
      * @bodyParam shipping_status string required 貨物狀態。Example: 待出貨
      * @bodyParam payment_status string required 付款狀態。Example: 待付款
-     * @bodyParam shipping_fee numeric 運費。Example: 100
-     * @bodyParam tax numeric 稅金。Example: 50
-     * @bodyParam discount_amount numeric 折扣金額。Example: 0
+     * @bodyParam shipping_fee number 運費。Example: 100
+     * @bodyParam tax number 稅金。Example: 50
+     * @bodyParam discount_amount number 折扣金額。Example: 0
      * @bodyParam payment_method string required 付款方式。Example: 轉帳
      * @bodyParam order_source string required 訂單來源。Example: 現場客戶
      * @bodyParam shipping_address string required 運送地址。Example: 台北市信義區信義路五段7號
@@ -113,7 +113,7 @@ class OrderController extends Controller
      * @bodyParam items.*.custom_specifications json 訂製規格（僅訂製商品需要）。Example: {"寬度": "150cm"}
      * @bodyParam items.*.product_name string required 商品名稱。Example: 標準辦公桌
      * @bodyParam items.*.sku string required SKU。Example: DESK-001
-     * @bodyParam items.*.price numeric required 單價。Example: 5000
+     * @bodyParam items.*.price number required 單價。Example: 5000
      * @bodyParam items.*.quantity integer required 數量。Example: 2
      * 
      * @response 201
@@ -182,9 +182,9 @@ class OrderController extends Controller
      * @bodyParam customer_id integer 客戶ID。Example: 2
      * @bodyParam shipping_status string 貨物狀態（pending, processing, shipped, delivered）。Example: processing
      * @bodyParam payment_status string 付款狀態（pending, paid, failed, refunded）。Example: paid
-     * @bodyParam shipping_fee numeric 運費。Example: 150
-     * @bodyParam tax numeric 稅金。Example: 75
-     * @bodyParam discount_amount numeric 折扣金額。Example: 50
+     * @bodyParam shipping_fee number 運費。Example: 150
+     * @bodyParam tax number 稅金。Example: 75
+     * @bodyParam discount_amount number 折扣金額。Example: 50
      * @bodyParam payment_method string 付款方式。Example: 信用卡
      * @bodyParam shipping_address string 運送地址。Example: 台北市大安區羅斯福路四段1號
      * @bodyParam billing_address string 帳單地址。Example: 台北市大安區羅斯福路四段1號
@@ -196,10 +196,10 @@ class OrderController extends Controller
      * @bodyParam items.*.is_stocked_sale boolean required 是否為庫存銷售。Example: true
      * @bodyParam items.*.status string required 項目狀態。Example: confirmed
      * @bodyParam items.*.quantity integer required 數量。Example: 3
-     * @bodyParam items.*.price numeric required 單價。Example: 5500
-     * @bodyParam items.*.cost numeric required 成本。Example: 3500
-     * @bodyParam items.*.tax_rate numeric required 稅率。Example: 5
-     * @bodyParam items.*.discount_amount numeric required 折扣金額。Example: 0
+     * @bodyParam items.*.price number required 單價。Example: 5500
+     * @bodyParam items.*.cost number required 成本。Example: 3500
+     * @bodyParam items.*.tax_rate number required 稅率。Example: 5
+     * @bodyParam items.*.discount_amount number required 折扣金額。Example: 0
      * @bodyParam items.*.custom_product_name string 訂製商品名稱。Example: 客製化辦公椅
      * @bodyParam items.*.custom_product_specs string 訂製商品規格。Example: 高度可調，藍色布料
      * 
@@ -293,9 +293,9 @@ class OrderController extends Controller
      * 
      * @urlParam order integer required 要新增付款記錄的訂單 ID。Example: 1
      * 
-     * @bodyParam amount numeric required 付款金額，必須大於 0.01 且不超過剩餘未付金額。Example: 1500.50
+     * @bodyParam amount number required 付款金額，必須大於 0.01 且不超過剩餘未付金額。Example: 1500.50
      * @bodyParam payment_method string required 付款方式（cash, transfer, credit_card）。Example: cash
-     * @bodyParam payment_date datetime 付款日期（格式: Y-m-d H:i:s），不填則使用當前時間。Example: 2025-06-20 10:30:00
+     * @bodyParam payment_date string 付款日期（格式: Y-m-d H:i:s），不填則使用當前時間。Example: 2025-06-20 10:30:00
      * @bodyParam notes string 付款備註，最多 500 字符。Example: 收到現金付款，找零 50 元
      * 
      * @response 200 {
@@ -378,8 +378,8 @@ class OrderController extends Controller
      * 
      * @bodyParam tracking_number string required 物流追蹤號碼。Example: SF1234567890
      * @bodyParam carrier string 承運商名稱。Example: 順豐速運
-     * @bodyParam shipped_at datetime 實際出貨時間（格式: Y-m-d H:i:s）。Example: 2025-06-19 14:30:00
-     * @bodyParam estimated_delivery_date date 預計送達日期（格式: Y-m-d）。Example: 2025-06-21
+     * @bodyParam shipped_at string 實際出貨時間（格式: Y-m-d H:i:s）。Example: 2025-06-19 14:30:00
+     * @bodyParam estimated_delivery_date string 預計送達日期（格式: Y-m-d）。Example: 2025-06-21
      * @bodyParam notes string 出貨備註。Example: 易碎物品，請小心處理
      * 
      * @response 200 {

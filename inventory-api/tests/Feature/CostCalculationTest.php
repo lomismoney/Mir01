@@ -112,10 +112,10 @@ class CostCalculationTest extends TestCase
         // 驗證進貨單建立成功
         $this->assertDatabaseHas('purchases', [
             'id' => $purchase->id,
-            'order_number' => 'PO-TEST-001',
             'total_amount' => (10 * 150) + (5 * 160) + 200, // 1500 + 800 + 200 = 2500
-            'shipping_cost' => 200.00
+            'shipping_cost' => 200
         ]);
+        $this->assertStringStartsWith('PO-', $purchase->order_number);
 
         // 驗證進貨項目的運費攤銷計算
         $items = $purchase->items;

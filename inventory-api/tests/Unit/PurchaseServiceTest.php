@@ -36,15 +36,15 @@ class PurchaseServiceTest extends TestCase
         
         // 生成第一個單號
         $orderNumber1 = $method->invoke($this->purchaseService, $date);
-        $this->assertEquals('PO-2025-06-22-001', $orderNumber1);
+        $this->assertEquals('PO-20250622-001', $orderNumber1);
         
         // 生成第二個單號
         $orderNumber2 = $method->invoke($this->purchaseService, $date);
-        $this->assertEquals('PO-2025-06-22-002', $orderNumber2);
+        $this->assertEquals('PO-20250622-002', $orderNumber2);
         
         // 生成第三個單號
         $orderNumber3 = $method->invoke($this->purchaseService, $date);
-        $this->assertEquals('PO-2025-06-22-003', $orderNumber3);
+        $this->assertEquals('PO-20250622-003', $orderNumber3);
         
         // 檢查計數器表的記錄
         $counter = DB::table('daily_purchase_counters')
@@ -91,7 +91,7 @@ class PurchaseServiceTest extends TestCase
         // 檢查單號是否按順序生成
         sort($results);
         for ($i = 0; $i < $threads; $i++) {
-            $expectedNumber = sprintf('PO-2025-06-23-%03d', $i + 1);
+            $expectedNumber = sprintf('PO-20250623-%03d', $i + 1);
             $this->assertEquals($expectedNumber, $results[$i]);
         }
     }
@@ -108,15 +108,15 @@ class PurchaseServiceTest extends TestCase
         // 第一天
         $date1 = new \DateTime('2025-06-24');
         $orderNumber1 = $method->invoke($this->purchaseService, $date1);
-        $this->assertEquals('PO-2025-06-24-001', $orderNumber1);
+        $this->assertEquals('PO-20250624-001', $orderNumber1);
         
         // 第二天
         $date2 = new \DateTime('2025-06-25');
         $orderNumber2 = $method->invoke($this->purchaseService, $date2);
-        $this->assertEquals('PO-2025-06-25-001', $orderNumber2);
+        $this->assertEquals('PO-20250625-001', $orderNumber2);
         
         // 再次第一天
         $orderNumber3 = $method->invoke($this->purchaseService, $date1);
-        $this->assertEquals('PO-2025-06-24-002', $orderNumber3);
+        $this->assertEquals('PO-20250624-002', $orderNumber3);
     }
 } 

@@ -56,4 +56,25 @@ class UpdateOrderItemStatusRequest extends FormRequest
             'notes.max' => '備註不能超過 500 個字符',
         ];
     }
+    
+    /**
+     * 取得請求體參數的文檔
+     * 
+     * 用於 Scribe API 文檔生成
+     * 
+     * @return array
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'status' => [
+                'description' => '項目狀態（待處理、已叫貨、已出貨、完成）',
+                'example' => '已叫貨',
+            ],
+            'notes' => [
+                'description' => '備註（可選）',
+                'example' => '已向供應商下單',
+            ],
+        ];
+    }
 }

@@ -7,15 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; // 1. 確保已導入
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable; // 2. 確保已使用
+    use HasApiTokens, HasFactory, Notifiable, HasRoles; // 2. 確保已使用
 
     // 角色常數定義
     public const ROLE_ADMIN = 'admin';
     public const ROLE_STAFF = 'staff';
     public const ROLE_VIEWER = 'viewer';
+    public const ROLE_INSTALLER = 'installer';
 
     /**
      * The attributes that are mass assignable.
@@ -24,9 +26,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'username', // 3. 將 'email' 改為 'username'
+        'username',
         'password',
-        'role', // 新增 'role'
+        // 'role' 字段已廢棄，使用 Spatie Permission 管理角色
     ];
 
     /**
@@ -65,7 +67,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->hasRole(self::ROLE_ADMIN);
     }
 
     /**
@@ -75,7 +77,7 @@ class User extends Authenticatable
      */
     public function isStaff(): bool
     {
-        return $this->role === self::ROLE_STAFF;
+        return $this->hasRole(self::ROLE_STAFF);
     }
 
     /**
@@ -85,19 +87,21 @@ class User extends Authenticatable
      */
     public function isViewer(): bool
     {
-        return $this->role === self::ROLE_VIEWER;
+        return $this->hasRole(self::ROLE_VIEWER);
     }
 
     /**
-     * 檢查用戶是否具有指定角色
+     * 檢查用戶是否為安裝師傅
      *
-     * @param string $role
      * @return bool
      */
-    public function hasRole(string $role): bool
+    public function isInstaller(): bool
     {
-        return $this->role === $role;
+        return $this->hasRole(self::ROLE_INSTALLER);
     }
+
+    // Spatie Permission 會自動提供 hasRole() 和 hasAnyRole() 方法
+    // 不需要覆寫，直接使用 trait 提供的功能
 
     /**
      * 獲取所有可用的角色
@@ -110,6 +114,7 @@ class User extends Authenticatable
             self::ROLE_ADMIN => '管理員',
             self::ROLE_STAFF => '員工',
             self::ROLE_VIEWER => '檢視者',
+            self::ROLE_INSTALLER => '安裝師傅',
         ];
     }
 }

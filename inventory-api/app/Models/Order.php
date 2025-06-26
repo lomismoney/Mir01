@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Order extends Model
 {
+    use HasFactory;
     /**
      * 可批量賦值的屬性
      */
@@ -88,6 +90,14 @@ class Order extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_user_id');
+    }
+
+    /**
+     * 一個訂單可能有多個相關的安裝單 (One-to-Many)
+     */
+    public function installations(): HasMany
+    {
+        return $this->hasMany(Installation::class);
     }
 
     /**
