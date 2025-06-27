@@ -176,6 +176,24 @@ export function ProductSelector({
   const [customPrice, setCustomPrice] = useState<number | "">("");
   const [customQuantity, setCustomQuantity] = useState<number | "">(1);
 
+  // 過濾和排序狀態 - 🎯 移到 useEffect 之前
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [sortOrder, setSortOrder] = useState<string>("default");
+
+  // 🎯 監聽 open 狀態變化，確保每次打開都重置到主頁面
+  React.useEffect(() => {
+    if (open) {
+      // 每次打開時強制重置到主頁面
+      setSelectedProduct(null);
+      setIsAddingCustom(false);
+      setSearchQuery("");
+      setCategoryFilter("all");
+      setSortOrder("default");
+      // 重置選擇狀態為傳入的 selectedIds
+      setSelectedVariants(new Set(selectedIds));
+    }
+  }, [open, selectedIds]);
+
   // 🎯 直接消費「數據精煉廠」處理過的純淨數據
   const {
     data: products = [], // 直接將 data 解構為 products，並提供預設值
@@ -185,10 +203,6 @@ export function ProductSelector({
     product_name: debouncedSearchQuery, // 將 debounced 搜尋字串作為 product_name 參數傳遞
     // 暫不傳遞 category，詳見戰術註記
   });
-
-  // 過濾和排序狀態
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [sortOrder, setSortOrder] = useState<string>("default");
 
   /**
    * 處理規格選擇/取消選擇
@@ -298,11 +312,19 @@ export function ProductSelector({
       open={open}
       onOpenChange={(newOpen) => {
         if (!newOpen) {
-          // 關閉時重置所有狀態
+          // 🎯 關閉時重置所有狀態，確保下次打開是乾淨狀態
           setIsAddingCustom(false);
           setCustomSpec("");
           setCustomPrice("");
           setCustomQuantity(1);
+          setSelectedProduct(null); // 🎯 重置選中的商品，確保回到主頁面
+          setSearchQuery(""); // 🎯 重置搜尋
+          setCategoryFilter("all"); // 🎯 重置分類篩選
+          setSortOrder("default"); // 🎯 重置排序
+        } else {
+          // 🎯 開啟時也重置狀態，雙重保險
+          setSelectedProduct(null);
+          setIsAddingCustom(false);
         }
         onOpenChange(newOpen);
       }}

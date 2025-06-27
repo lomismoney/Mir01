@@ -430,6 +430,7 @@ export interface OrderItem {
   id: number;
   product_variant_id: number | null;
   is_stocked_sale: boolean;
+  is_backorder: boolean; // 🎯 Operation: Precise Tagging - 新增預訂標記欄位
   status: string;
   custom_specifications: Record<string, any> | null;
   product_name: string;
@@ -572,6 +573,7 @@ export interface ProcessedOrderItem {
   id: number;
   product_variant_id: number | null;
   is_stocked_sale: boolean;
+  is_backorder: boolean; // 🎯 Operation: Precise Tagging - 新增預訂標記欄位
   status: string;
   custom_specifications: Record<string, any> | null;
   product_name: string;

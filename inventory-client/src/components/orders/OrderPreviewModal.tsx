@@ -1,26 +1,42 @@
 /**
  * 訂單預覽 Modal 組件
- * 採用現代電商平台設計風格，提供快速查看訂單詳情的功能
+ * 採用「整合式儀表板」設計
  */
 "use client";
 
 import React from 'react';
-import { X, Package, Truck, CreditCard, User, CheckCircle, Clock, XCircle, MapPin } from 'lucide-react';
+import { 
+  X, Package, Truck, CreditCard, User, CheckCircle, 
+  Clock, XCircle, MapPin, Phone, Calendar, Hash,
+  Receipt, ShoppingBag, Printer, Edit3, Ban, DollarSign,
+  RotateCcw, FileText, AlertCircle, StickyNote, History,
+  NotebookText
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { ProductStatusBadge } from '@/components/orders/ProductStatusBadge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useOrderDetail } from '@/hooks/queries/useEntityQueries';
 import { ProcessedOrder, ProcessedOrderItem, PaymentRecord } from '@/types/api-helpers';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface OrderPreviewModalProps {
   open: boolean;
@@ -34,20 +50,65 @@ interface OrderPreviewModalProps {
   onRefund: (order: ProcessedOrder) => void;
 }
 
-// 狀態配置
+// 狀態配置 - 使用 Shadcn/UI 標準變體
 const statusConfig = {
   payment: {
-    pending: { label: '待付款', icon: Clock, className: 'text-amber-600 bg-amber-50' },
-    partial: { label: '部分付款', icon: Clock, className: 'text-blue-600 bg-blue-50' },
-    paid: { label: '已付款', icon: CheckCircle, className: 'text-green-600 bg-green-50' },
-    overdue: { label: '逾期', icon: XCircle, className: 'text-red-600 bg-red-50' },
+    pending: { 
+      label: '待付款', 
+      icon: Clock, 
+      variant: 'outline' as const,
+      className: ''
+    },
+    partial: { 
+      label: '部分付款', 
+      icon: Clock, 
+      variant: 'default' as const,
+      className: ''
+    },
+    paid: { 
+      label: '已付款', 
+      icon: CheckCircle, 
+      variant: 'secondary' as const,
+      className: ''
+    },
+    overdue: { 
+      label: '逾期', 
+      icon: XCircle, 
+      variant: 'destructive' as const,
+      className: ''
+    },
   },
   shipping: {
-    pending: { label: '待出貨', icon: Clock, className: 'text-amber-600 bg-amber-50' },
-    processing: { label: '處理中', icon: Package, className: 'text-blue-600 bg-blue-50' },
-    shipped: { label: '已出貨', icon: Truck, className: 'text-green-600 bg-green-50' },
-    delivered: { label: '已送達', icon: CheckCircle, className: 'text-green-600 bg-green-50' },
-    cancelled: { label: '已取消', icon: XCircle, className: 'text-red-600 bg-red-50' },
+    pending: { 
+      label: '待出貨', 
+      icon: Clock, 
+      variant: 'outline' as const,
+      className: ''
+    },
+    processing: { 
+      label: '處理中', 
+      icon: Package, 
+      variant: 'default' as const,
+      className: ''
+    },
+    shipped: { 
+      label: '已出貨', 
+      icon: Truck, 
+      variant: 'secondary' as const,
+      className: ''
+    },
+    delivered: { 
+      label: '已送達', 
+      icon: CheckCircle, 
+      variant: 'secondary' as const,
+      className: ''
+    },
+    cancelled: { 
+      label: '已取消', 
+      icon: XCircle, 
+      variant: 'secondary' as const,
+      className: ''
+    },
   },
 };
 
@@ -84,198 +145,349 @@ export function OrderPreviewModal({
   const defaultAddress = order.customer?.addresses?.find(a => a.is_default) || 
                         order.customer?.addresses?.[0];
 
+  // 計算付款進度
+  const paymentProgress = order.paid_amount / order.grand_total * 100;
+  const remainingAmount = order.grand_total - order.paid_amount;
+  const hasCustomItems = order.items.some(item => !item.is_stocked_sale);
+
   return (
     <TooltipProvider>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-4xl lg:max-w-6xl max-h-[90vh] flex flex-col p-0">
           {/* 隱藏的標題 for a11y */}
           <DialogTitle className="sr-only">訂單 {order.order_number} 預覽</DialogTitle>
           
-          {/* Header */}
-          <div className="bg-muted/30 px-6 py-4 border-b">
-            <div className="flex items-center justify-between">
+          {/* === 頂部標題與狀態欄 (維持不變) === */}
+          <div className="flex items-center justify-between p-6 pb-4 border-b">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+              </div>
               <div>
                 <h2 className="text-lg font-semibold">{order.order_number}</h2>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {new Date(order.created_at).toLocaleDateString('zh-TW')}
+                <p className="text-sm text-muted-foreground">
+                  創建於 {new Date(order.created_at).toLocaleDateString('zh-TW', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant={paymentStatus.variant} className={cn("px-3 py-1", paymentStatus.className)}>
+                <paymentStatus.icon className="h-4 w-4 mr-1" />
+                {paymentStatus.label}
+              </Badge>
+              <Badge variant={shippingStatus.variant} className={cn("px-3 py-1", shippingStatus.className)}>
+                <shippingStatus.icon className="h-4 w-4 mr-1" />
+                {shippingStatus.label}
+              </Badge>
             </div>
           </div>
 
-          <ScrollArea className="max-h-[calc(100vh-200px)]">
-            <div className="p-6 space-y-6">
-              {/* 狀態卡片組 */}
-              <div className="grid grid-cols-2 gap-4">
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">付款狀態</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <paymentStatus.icon className="h-4 w-4" />
-                          <span className="font-medium">{paymentStatus.label}</span>
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className={cn("font-normal", paymentStatus.className)}>
-                        {paymentStatus.label}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">出貨狀態</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <shippingStatus.icon className="h-4 w-4" />
-                          <span className="font-medium">{shippingStatus.label}</span>
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className={cn("font-normal", shippingStatus.className)}>
-                        {shippingStatus.label}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
+          {/* === 核心：整合後的雙欄式佈局 === */}
+          <div className="grid md:grid-cols-3 flex-grow overflow-y-auto">
+            
+            {/* --- 👈 左側主內容區 (單一容器) --- */}
+            <div className="md:col-span-2 p-6 space-y-8">
+              
+              {/* 1. 訂單品項 */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg flex items-center">
+                  <Package className="h-5 w-5 mr-3 text-muted-foreground" />
+                  訂單品項
+                </h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>商品名稱</TableHead>
+                      <TableHead className="text-center w-20">數量</TableHead>
+                      <TableHead className="text-right w-24">單價</TableHead>
+                      <TableHead className="text-right w-28">小計</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {order.items.map((item: ProcessedOrderItem) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-sm">{item.product_name}</p>
+                              {/* 🎯 統一的商品狀態徽章 */}
+                              <ProductStatusBadge item={item} />
+                            </div>
+                            {item.sku && (
+                              <p className="text-xs text-muted-foreground">
+                                SKU: {item.sku}
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center text-sm">
+                          {item.quantity}
+                        </TableCell>
+                        <TableCell className="text-right text-sm">
+                          {formatCurrency(item.price)}
+                        </TableCell>
+                        <TableCell className="text-right font-medium text-sm">
+                          {formatCurrency(item.price * item.quantity)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
 
-              {/* 客戶資訊 */}
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="font-medium">客戶資訊</h3>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">姓名</span>
-                      <span className="font-medium">{order.customer?.name || '-'}</span>
-                    </div>
-                    {order.customer?.phone && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">電話</span>
-                        <span>{order.customer.phone}</span>
-                      </div>
-                    )}
-                    {defaultAddress && (
-                      <div className="flex justify-between items-start">
-                        <span className="text-muted-foreground flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          地址
-                        </span>
-                        <span className="text-right max-w-xs">
-                          {defaultAddress.address}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 商品明細 */}
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Package className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="font-medium">商品明細</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {order.items.map((item: ProcessedOrderItem) => (
-                      <div key={item.id} className="flex items-start justify-between py-2">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{item.product_name}</p>
-                          {item.sku && (
-                            <p className="text-xs text-muted-foreground mt-0.5">SKU: {item.sku}</p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {formatCurrency(item.price)} × {item.quantity}
-                          </p>
-                        </div>
-                        <p className="text-sm font-medium ml-4">
-                          {formatCurrency(item.price * item.quantity)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Separator className="my-3" />
-
-                  {/* 費用明細 */}
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">小計</span>
-                      <span>{formatCurrency(order.subtotal)}</span>
-                    </div>
-                    {order.shipping_fee !== null && order.shipping_fee > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">運費</span>
-                        <span>{formatCurrency(order.shipping_fee)}</span>
-                      </div>
-                    )}
-                    {order.discount_amount && order.discount_amount > 0 && (
-                      <div className="flex justify-between text-green-600">
-                        <span>折扣</span>
-                        <span>-{formatCurrency(order.discount_amount)}</span>
-                      </div>
-                    )}
-                    <Separator className="my-2" />
-                    <div className="flex justify-between font-medium">
-                      <span>總計</span>
-                      <span className="text-base">{formatCurrency(order.grand_total)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 付款資訊 */}
+              {/* 付款紀錄 - 只有在有紀錄時才顯示分隔線和內容 */}
               {order.payment_records && order.payment_records.length > 0 && (
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
-                      <h3 className="font-medium">付款紀錄</h3>
-                    </div>
-                    <div className="space-y-2">
-                      {order.payment_records.map((record: PaymentRecord, index: number) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">
-                              {new Date(record.payment_date).toLocaleDateString('zh-TW')}
-                            </span>
-                            <span>{record.payment_method}</span>
-                          </div>
-                          <span className="font-medium">{formatCurrency(record.amount)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <>
+                  <Separator />
+                  
+                  {/* 2. 付款紀錄 */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg flex items-center">
+                      <History className="h-5 w-5 mr-3 text-muted-foreground" />
+                      付款紀錄
+                      <Badge variant="secondary" className="ml-3 text-xs">
+                        {order.payment_records.length} 筆
+                      </Badge>
+                    </h3>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>付款日期</TableHead>
+                          <TableHead>付款方式</TableHead>
+                          <TableHead className="text-right">金額</TableHead>
+                          <TableHead>備註</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {order.payment_records.map((record: PaymentRecord, index: number) => (
+                          <TableRow key={index}>
+                            <TableCell className="text-sm">
+                              {new Date(record.payment_date).toLocaleDateString('zh-TW', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {record.payment_method}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right font-medium text-sm">
+                              {formatCurrency(record.amount)}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {record.notes || '-'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
               )}
             </div>
-          </ScrollArea>
 
-          {/* Footer Actions */}
-          <div className="border-t bg-muted/10 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <Button variant="outline" onClick={handleViewDetails}>
-                查看完整詳情
-              </Button>
-              <Button onClick={() => onEdit(order)}>
-                編輯訂單
-              </Button>
+            {/* --- 👉 右側邊欄 (極簡主義一體式設計) --- */}
+            <div className="md:col-span-1 p-6 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>訂單資訊</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  
+                  {/* 1. 訂單總計區 */}
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">訂單總計</h3>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">商品小計</span>
+                        <span>{formatCurrency(order.subtotal)}</span>
+                      </div>
+                      
+                      {order.shipping_fee !== null && order.shipping_fee > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">運費</span>
+                          <span>{formatCurrency(order.shipping_fee)}</span>
+                        </div>
+                      )}
+                      
+                      {order.discount_amount && order.discount_amount > 0 && (
+                        <div className="flex justify-between text-sm text-success">
+                          <span>折扣優惠</span>
+                          <span>-{formatCurrency(order.discount_amount)}</span>
+                        </div>
+                      )}
+                      
+                      <Separator className="my-2" />
+                      
+                      <div className="flex justify-between font-bold text-base pt-1">
+                        <span>總計</span>
+                        <span className="text-primary">{formatCurrency(order.grand_total)}</span>
+                      </div>
+
+                      {/* 付款進度 */}
+                      <div className="space-y-2 pt-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">付款進度</span>
+                          <span className="font-medium">{Math.round(paymentProgress)}%</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary transition-all duration-300"
+                            style={{ width: `${paymentProgress}%` }}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <p className="text-muted-foreground">已付</p>
+                            <p className="font-semibold text-success">
+                              {formatCurrency(order.paid_amount)}
+                            </p>
+                          </div>
+                          {remainingAmount > 0 && (
+                            <div className="text-right">
+                              <p className="text-muted-foreground">待付</p>
+                              <p className="font-semibold text-warning">
+                                {formatCurrency(remainingAmount)}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* 2. 客戶資訊區 */}
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">客戶資訊</h3>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground">客戶姓名</p>
+                        <p className="text-sm font-medium">{order.customer?.name || '-'}</p>
+                      </div>
+                      
+                      {order.customer?.phone && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">聯絡電話</p>
+                          <div className="text-sm font-medium flex items-center gap-1">
+                            <Phone className="h-3 w-3" />
+                            {order.customer.phone}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {defaultAddress && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">
+                            {defaultAddress.is_default ? '預設地址' : '送貨地址'}
+                          </p>
+                          <div className="text-sm font-medium flex items-start gap-1">
+                            <MapPin className="h-3 w-3 mt-0.5" />
+                            <span className="flex-1">{defaultAddress.address}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* 3. 訂單備註區 */}
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">訂單備註</h3>
+                    <p className="text-sm">
+                      {order.notes || "無"}
+                    </p>
+                  </div>
+
+                </CardContent>
+              </Card>
             </div>
           </div>
+
+          {/* === 底部操作欄 (維持不變) === */}
+          <DialogFooter className="p-6 pt-4 border-t flex justify-between">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex gap-2">
+                {/* 查看詳情、列印等輔助按鈕 */}
+                <Button variant="outline" size="sm" onClick={handleViewDetails}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  查看完整詳情
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" onClick={() => onPrint(order)}>
+                      <Printer className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>列印訂單</TooltipContent>
+                </Tooltip>
+              </div>
+
+              <div className="flex gap-2">
+                {/* 出貨、退款等主要操作按鈕 */}
+                {order.shipping_status === 'pending' && (
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onShipOrder(order)}
+                  >
+                    <Truck className="h-4 w-4 mr-2" />
+                    出貨
+                  </Button>
+                )}
+
+                {order.payment_status !== 'paid' && order.payment_status !== 'cancelled' && (
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onRecordPayment(order)}
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    記錄付款
+                  </Button>
+                )}
+
+                {order.payment_status === 'paid' && (
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onRefund(order)}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    退款
+                  </Button>
+                )}
+
+                {order.shipping_status !== 'shipped' && 
+                 order.shipping_status !== 'delivered' && 
+                 order.shipping_status !== 'cancelled' && (
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onCancel(order)}
+                  >
+                    <Ban className="h-4 w-4 mr-2" />
+                    取消訂單
+                  </Button>
+                )}
+
+                <Button size="sm" onClick={() => onEdit(order)}>
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  編輯訂單
+                </Button>
+              </div>
+            </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </TooltipProvider>

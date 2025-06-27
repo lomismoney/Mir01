@@ -33,6 +33,8 @@ class StoreOrderRequest extends FormRequest
             'shipping_address'     => 'required|string',
             'notes'                => 'nullable|string',
             
+            'force_create_despite_stock' => 'sometimes|boolean',
+            
             'items'                => 'required|array|min:1',
             'items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'items.*.is_stocked_sale'    => 'required|boolean',
@@ -43,6 +45,21 @@ class StoreOrderRequest extends FormRequest
             'items.*.price'              => 'required|numeric|min:0',
             'items.*.quantity'           => 'required|integer|min:1',
         ];
+    }
+
+    /**
+     * 在驗證前強制布林值轉換，確保多端一致
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('force_create_despite_stock')) {
+            $this->merge([
+                'force_create_despite_stock' => filter_var(
+                    $this->input('force_create_despite_stock'),
+                    FILTER_VALIDATE_BOOLEAN
+                ),
+            ]);
+        }
     }
 
     /**
@@ -92,6 +109,10 @@ class StoreOrderRequest extends FormRequest
             'notes' => [
                 'description' => '備註',
                 'example' => '請小心輕放',
+            ],
+            'force_create_despite_stock' => [
+                'description' => '是否在庫存不足時強制建立訂單（預訂模式）',
+                'example' => false,
             ],
             'items' => [
                 'description' => '訂單項目清單',

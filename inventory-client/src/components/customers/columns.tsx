@@ -135,7 +135,7 @@ export const columns: ColumnDef<Customer>[] = [
               </DropdownMenuItem>
               <AlertDialogTrigger asChild data-oid="dpctrga">
                 <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600"
+                  className="text-destructive focus:text-destructive"
                   onSelect={(e) => e.preventDefault()} // 防止 DropdownMenu 自動關閉
                   data-oid="e.6uwvo"
                 >

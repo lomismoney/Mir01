@@ -451,11 +451,7 @@ export function OrderClientComponent() {
 
       {/* 表格容器 */}
       <div 
-        className="rounded-lg border bg-white dark:bg-gray-900 shadow-sm overflow-hidden" 
-        style={{ 
-          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-          border: "1px solid #e5e7eb"
-        }}
+        className="rounded-lg border bg-card shadow-sm overflow-hidden" 
         data-oid="c-gfz:5"
       >
         <Table data-oid="bp0-wlx">
@@ -470,13 +466,7 @@ export function OrderClientComponent() {
                   return (
                     <TableHead
                       key={header.id}
-                      className="h-12 px-4 text-left align-middle font-medium text-gray-700 dark:text-gray-300"
-                      style={{ 
-                        height: "48px", 
-                        padding: "0 1rem",
-                        backgroundColor: "rgba(249, 250, 251, 0.5)",
-                        borderBottom: "1px solid #e5e7eb"
-                      }}
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
                       data-oid="3-c76.y"
                     >
                       {header.isPlaceholder
@@ -497,15 +487,13 @@ export function OrderClientComponent() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="border-b transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50"
-                  style={{ borderBottom: "1px solid rgba(229, 231, 235, 0.5)" }}
+                  className="border-b transition-colors hover:bg-muted/50"
                   data-oid="8i08hjh"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell 
                       key={cell.id} 
                       className="h-12 px-4 py-2 align-middle"
-                      style={{ height: "48px", padding: "0.5rem 1rem" }}
                       data-oid="b3tvodv"
                     >
                       {flexRender(

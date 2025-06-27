@@ -243,7 +243,7 @@ export default function UsersPage() {
 
     updateUserMutation.mutate(
       {
-        path: { id: editingUser.id },
+        path: { id: editingUser.id, user: editingUser.id } as any,
         body: updateData as any, // 暫時使用 any 處理 API 類型定義問題
       },
       {
@@ -271,7 +271,8 @@ export default function UsersPage() {
     deleteUserMutation.mutate(
       {
         id: userToDelete.id,
-      },
+        user: userToDelete.id,
+      } as any,
       {
         onSuccess: () => {
           toast.success("用戶刪除成功！");

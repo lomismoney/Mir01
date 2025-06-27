@@ -14,6 +14,7 @@ class OrderItem extends Model
         'order_id',
         'product_variant_id',
         'is_stocked_sale',
+        'is_backorder', // 🎯 Operation: Precise Tagging - 新增預訂標記欄位
         'status',
         'custom_specifications',
         'product_name',
@@ -35,6 +36,7 @@ class OrderItem extends Model
      */
     protected $casts = [
         'is_stocked_sale' => 'boolean',
+        'is_backorder' => 'boolean', // 🎯 Operation: Precise Tagging - 預訂標記轉換
         'custom_specifications' => 'json',
         'price' => 'decimal:2',
         'cost' => 'decimal:2',
@@ -49,6 +51,7 @@ class OrderItem extends Model
     protected $attributes = [
         'status' => '待處理',
         'is_stocked_sale' => true,
+        'is_backorder' => false, // 🎯 Operation: Precise Tagging - 預設非預訂商品
     ];
 
     /**

@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { ProductStatusBadge } from "@/components/orders/ProductStatusBadge";
 import {
   Select,
   SelectContent,
@@ -115,7 +116,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
 
   if (isError) {
     return (
-      <div className="text-red-500">
+                      <div className="text-error">
         無法加載訂單詳情: {error?.message}
       </div>
     );
@@ -177,12 +178,11 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div>
-                            <div className="font-medium">{item.product_name}</div>
-                            {item.custom_specifications && (
-                              <Badge variant="outline" className="mt-1">
-                                訂製
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{item.product_name}</span>
+                              {/* 🎯 統一的商品狀態徽章 */}
+                              <ProductStatusBadge item={item} />
+                            </div>
                           </div>
                         </div>
                         {/* 🎯 優雅地顯示訂製規格 */}
@@ -368,7 +368,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                 {order.discount_amount > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">折扣</span>
-                    <span className="text-green-600 text-right w-[120px]">
+                    <span className="text-success text-right w-[120px]">
                       -${order.discount_amount.toLocaleString()}
                     </span>
                   </div>
@@ -433,13 +433,13 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">已付金額</span>
-                  <span className="font-medium text-green-600">
+                                      <span className="font-medium text-success">
                     ${order.paid_amount.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">未付金額</span>
-                  <span className="font-medium text-red-600">
+                                      <span className="font-medium text-error">
                     ${remainingAmount.toLocaleString()}
                   </span>
                 </div>

@@ -240,7 +240,7 @@ export default function RecordPaymentModal({
       >
         <DialogHeader data-oid="ivrtjwk">
           <DialogTitle className="flex items-center gap-2" data-oid="kw.4if6">
-            <DollarSign className="h-5 w-5 text-green-600" data-oid="y1uu5fx" />
+                            <DollarSign className="h-5 w-5 text-success" data-oid="y1uu5fx" />
             記錄部分收款
           </DialogTitle>
           <DialogDescription data-oid=".wkgxln">
@@ -250,39 +250,39 @@ export default function RecordPaymentModal({
 
         {/* 訂單金額概覽卡片 */}
         <Card
-          className="bg-gray-50 border-l-4 border-l-blue-500"
+                          className="bg-muted border-l-4 border-l-info"
           data-oid="rdivghs"
         >
           <CardContent className="pt-4" data-oid=".dh4sno">
             <div className="grid grid-cols-3 gap-4 text-sm" data-oid="ca-suov">
               <div className="text-center" data-oid="uv8cx2w">
-                <div className="text-gray-600 font-medium" data-oid="xkeoynw">
+                <div className="text-muted-foreground font-medium" data-oid="xkeoynw">
                   訂單總額
                 </div>
                 <div
-                  className="text-lg font-bold text-gray-900"
+                                      className="text-lg font-bold text-foreground"
                   data-oid="ybxzfh9"
                 >
                   ${order.grand_total.toFixed(2)}
                 </div>
               </div>
               <div className="text-center" data-oid="-ryg7jz">
-                <div className="text-gray-600 font-medium" data-oid="4za:2xe">
+                                  <div className="text-muted-foreground font-medium" data-oid="4za:2xe">
                   已付金額
                 </div>
                 <div
-                  className="text-lg font-bold text-green-600"
+                                      className="text-lg font-bold text-success"
                   data-oid="b7dwmno"
                 >
                   ${order.paid_amount.toFixed(2)}
                 </div>
               </div>
               <div className="text-center" data-oid="onbnl2y">
-                <div className="text-gray-600 font-medium" data-oid=":vugby1">
+                                  <div className="text-muted-foreground font-medium" data-oid=":vugby1">
                   剩餘未付
                 </div>
                 <div
-                  className="text-lg font-bold text-red-600"
+                                      className="text-lg font-bold text-error"
                   data-oid=":72:t.b"
                 >
                   ${remainingAmount.toFixed(2)}
@@ -345,7 +345,7 @@ export default function RecordPaymentModal({
                   {/* 🎯 新增：提示文字 */}
                   {remainingAmount > 0 && field.value === remainingAmount && (
                     <p
-                      className="text-sm text-green-600 mt-1"
+                      className="text-sm text-success mt-1"
                       data-oid="5gb7nlc"
                     >
                       ✓ 此金額將會完成全額付款
