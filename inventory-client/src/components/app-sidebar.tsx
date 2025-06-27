@@ -20,6 +20,7 @@ import {
   IconBuilding,
   IconBuildingStore,
   IconUserCheck,
+  IconTool,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
@@ -119,6 +120,11 @@ const data = {
       title: "訂單管理",
       url: "/orders",
       icon: IconShoppingCart,
+    },
+    {
+      title: "安裝管理",
+      url: "/installations",
+      icon: IconTool,
     },
     {
       title: "客戶管理",

@@ -16,6 +16,7 @@ class InstallationItemResource extends JsonResource
             'id' => $this->id,
             'installation_id' => $this->installation_id,
             'order_item_id' => $this->order_item_id,
+            'product_variant_id' => $this->product_variant_id,
             
             // 商品資訊
             'product_name' => $this->product_name,
@@ -35,6 +36,7 @@ class InstallationItemResource extends JsonResource
             
             // 關聯資源（按需加載）
             'order_item' => new OrderItemResource($this->whenLoaded('orderItem')),
+            'product_variant' => new ProductVariantResource($this->whenLoaded('productVariant')),
             
             // 計算屬性
             'is_completed' => $this->isCompleted(),

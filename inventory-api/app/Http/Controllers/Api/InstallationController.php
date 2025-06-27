@@ -209,6 +209,9 @@ class InstallationController extends Controller
         $includeParam = $request->input('include', '');
         if (!empty($includeParam)) {
             $installation->loadMissing(explode(',', $includeParam));
+        } else {
+            // 預設載入 items，因為詳情頁通常需要顯示項目
+            $installation->loadMissing(['items']);
         }
 
         return new InstallationResource($installation);
@@ -252,6 +255,9 @@ class InstallationController extends Controller
             $installation,
             $request->validated()
         );
+
+        // 確保載入項目資料以便前端顯示
+        $installation->loadMissing(['items']);
 
         return new InstallationResource($installation);
     }

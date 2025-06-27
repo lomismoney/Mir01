@@ -217,9 +217,8 @@ return [
             ]),
         ],
         'urlParameters' => [
-            // 🎯 移除 GetFromLaravelAPI 策略，防止路由模型綁定參數重複定義
-            // 只信任 PHPDoc @urlParam 註解作為唯一參數來源
-            Strategies\UrlParameters\GetFromUrlParamTag::class,
+            // 只使用 Laravel API 策略來識別路由模型綁定參數
+            Strategies\UrlParameters\GetFromLaravelAPI::class,
         ],
         'queryParameters' => [
             ...Defaults::QUERY_PARAMETERS_STRATEGIES,
