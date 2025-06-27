@@ -101,7 +101,7 @@ export const createColumns = ({
       const order = row.original;
       
       // 🎯 檢查是否為預訂訂單（根據備註中的預訂模式標記）
-      const isBackorder = order.notes?.includes('【預訂模式】') || false;
+      const isBackorder = order.notes?.includes('【智能預訂】') || false;
       
       return (
         <div className="flex items-center gap-2" data-oid="vx3ki2n">

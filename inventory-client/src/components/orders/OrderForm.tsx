@@ -42,6 +42,7 @@ import Image from "next/image";
 import { CustomerSelector } from "./CustomerSelector";
 import { CustomerForm } from "@/components/customers/CustomerForm";
 import { ProductSelector, type Variant } from "@/components/ui/ProductSelector";
+import { OrderFormProductBadge } from "./OrderFormProductBadge";
 import { useCreateCustomer } from "@/hooks/queries/useEntityQueries";
 import { Customer, ProductVariant, OrderFormData } from "@/types/api-helpers";
 import { useAppFieldArray } from "@/hooks/useAppFieldArray";
@@ -71,6 +72,7 @@ const orderFormSchema = z.object({
         sku: z.string().min(1, "SKU 為必填"),
         custom_specifications: z.record(z.string()).optional(),
         imageUrl: z.string().optional().nullable(),
+        stock: z.number().optional(), // 🎯 添加庫存字段
       })
     )
     .min(1, "訂單至少需要一個品項"),
@@ -155,6 +157,7 @@ export function OrderForm({
           sku: variant.sku || `SKU-${variant.id}`,
           custom_specifications: undefined,
           imageUrl: variant.imageUrl || null,
+          stock: variant.stock || 0, // 🎯 添加庫存信息
         });
       }
     });
@@ -174,6 +177,7 @@ export function OrderForm({
       sku: item.sku,
       custom_specifications: item.custom_specifications,
       imageUrl: item.imageUrl || null,
+      stock: 0, // 🎯 訂製商品沒有庫存概念
     });
 
     setIsSelectorOpen(false);
@@ -319,26 +323,33 @@ export function OrderForm({
                                         <div className="text-xs text-gray-500 dark:text-gray-400">
                                           SKU: {form.watch(`items.${index}.sku`)}
                                         </div>
-                                        {field.product_variant_id === null && (
-                                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            <Badge
-                                              variant="outline"
-                                              className="text-xs"
-                                            >
-                                              訂製
-                                            </Badge>
-                                            <span className="truncate">
-                                              {field.custom_specifications &&
-                                                Object.entries(
-                                                  field.custom_specifications
-                                                )
-                                                  .map(
-                                                    ([k, v]) => `${k}: ${v}`
-                                                  )
-                                                  .join("; ")}
+                                        {/* 🎯 智能徽章系統：顯示商品狀態 */}
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <OrderFormProductBadge 
+                                            item={{
+                                              product_variant_id: field.product_variant_id,
+                                              is_stocked_sale: field.is_stocked_sale,
+                                              custom_specifications: field.custom_specifications || null,
+                                              quantity: Number(form.watch(`items.${index}.quantity`) || 0),
+                                              stock: field.stock || 0
+                                            }}
+                                            className="text-xs"
+                                          />
+                                          {/* 🎯 庫存信息顯示 */}
+                                          {field.is_stocked_sale && field.stock !== undefined && (
+                                            <span className="text-xs text-muted-foreground">
+                                              庫存: {field.stock}
                                             </span>
-                                          </div>
-                                        )}
+                                          )}
+                                          {/* 🎯 訂製商品額外資訊顯示 */}
+                                          {field.product_variant_id === null && field.custom_specifications && (
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                              {Object.entries(field.custom_specifications)
+                                                .map(([k, v]) => `${k}: ${v}`)
+                                                .join("; ")}
+                                            </span>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
                                   </TableCell>
