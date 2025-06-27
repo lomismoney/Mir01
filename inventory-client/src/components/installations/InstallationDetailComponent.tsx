@@ -383,22 +383,6 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
                   </p>
                 </div>
               </div>
-
-              {/* 工作時長計算 */}
-              {installation.actual_start_time && installation.actual_end_time && (
-                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">
-                      總工作時長：
-                      {Math.round(
-                        (new Date(installation.actual_end_time).getTime() - 
-                         new Date(installation.actual_start_time).getTime()) / (1000 * 60 * 60 * 100)
-                      ) / 100} 小時
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
 
             <Separator />
