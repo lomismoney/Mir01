@@ -3474,6 +3474,8 @@ export function useOrderDetail(orderId: number | null) {
           quantity: parseInt(item.quantity || '0', 10),
           tax_rate: parseFloat(item.tax_rate || '0'),
           discount_amount: parseFloat(item.discount_amount || '0'),
+          // 🎯 Operation: Precise Tagging - 確保預訂標記正確傳遞
+          is_backorder: Boolean(item.is_backorder),
         })) || [],
         
         // 🔄 確保客戶資訊的完整性

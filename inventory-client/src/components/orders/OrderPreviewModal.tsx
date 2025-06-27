@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { ProductStatusBadge } from '@/components/orders/ProductStatusBadge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -211,16 +212,15 @@ export function OrderPreviewModal({
                       <TableRow key={item.id}>
                         <TableCell>
                           <div className="space-y-1">
-                            <p className="font-medium text-sm">{item.product_name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-sm">{item.product_name}</p>
+                              {/* 🎯 統一的商品狀態徽章 */}
+                              <ProductStatusBadge item={item} />
+                            </div>
                             {item.sku && (
                               <p className="text-xs text-muted-foreground">
                                 SKU: {item.sku}
                               </p>
-                            )}
-                            {!item.is_stocked_sale && (
-                              <Badge variant="outline" className="text-xs">
-                                訂製品
-                              </Badge>
                             )}
                           </div>
                         </TableCell>
