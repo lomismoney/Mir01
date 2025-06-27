@@ -169,12 +169,12 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
-     * @urlParam id integer required 進貨單ID Example: 1
+     * @urlParam purchase integer required 進貨單ID Example: 1
      * @bodyParam status string required 新狀態 Example: in_transit
      */
-    public function updateStatus(string $id, Request $request)
+    public function updateStatus(string $purchase, Request $request)
     {
-        $purchase = Purchase::findOrFail($id);
+        $purchase = Purchase::findOrFail($purchase);
         $this->authorize('update', $purchase);
 
         $request->validate([
@@ -198,11 +198,11 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
-     * @urlParam id integer required 進貨單ID Example: 1
+     * @urlParam purchase integer required 進貨單ID Example: 1
      */
-    public function cancel(string $id)
+    public function cancel(string $purchase)
     {
-        $purchase = Purchase::findOrFail($id);
+        $purchase = Purchase::findOrFail($purchase);
         $this->authorize('update', $purchase);
 
         if (!$purchase->canBeCancelled()) {
@@ -218,7 +218,7 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
-     * @urlParam id integer required 進貨單ID Example: 1
+     * @urlParam purchase integer required 進貨單ID Example: 1
      */
     public function destroy(string $id)
     {

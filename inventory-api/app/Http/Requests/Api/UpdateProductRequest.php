@@ -26,7 +26,7 @@ class UpdateProductRequest extends FormRequest
             'name'          => 'required|string|max:255',
             'description'   => 'nullable|string',
             'category_id'   => 'nullable|integer|exists:categories,id',
-            'attributes'    => 'required|array',
+            'attributes'    => 'array', // 🎯 允許空陣列，支援單規格商品
             'attributes.*'  => 'integer|exists:attributes,id',
             
             'variants'      => 'required|array|min:1',
@@ -75,7 +75,7 @@ class UpdateProductRequest extends FormRequest
                 }
             ],
             'variants.*.price' => 'required|numeric|min:0',
-            'variants.*.attribute_value_ids' => 'required|array',
+            'variants.*.attribute_value_ids' => 'array', // 🎯 允許空陣列，支援單規格商品
             'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
         ];
     }

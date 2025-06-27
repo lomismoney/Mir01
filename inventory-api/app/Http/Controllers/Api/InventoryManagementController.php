@@ -118,6 +118,7 @@ class InventoryManagementController extends Controller
      * 獲取單條庫存記錄詳情
      * 
      * @authenticated
+     * @urlParam id integer required 庫存ID. Example: 1
      * 
      * @param int $id
      * @return JsonResponse
