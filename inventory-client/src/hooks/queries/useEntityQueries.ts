@@ -2771,7 +2771,7 @@ export function useDeleteStore() {
   return useMutation({
     mutationFn: async (id: number) => {
       const { error } = await apiClient.DELETE('/api/stores/{id}' as any, {
-        params: { path: { store: id } },
+        params: { path: { id: id } },
       });
       if (error) {
         throw new Error('刪除門市失敗');
