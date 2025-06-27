@@ -272,8 +272,8 @@ export function useProductDetail(productId: number | string | undefined): any {
                 throw new Error('商品 ID 無效');
             }
 
-            const { data, error } = await apiClient.GET('/api/products/{product}', {
-                params: { path: { product: numericId } }
+            const { data, error } = await apiClient.GET('/api/products/{id}' as any, {
+                params: { path: { id: numericId } }
             });
             
             if (error) {
@@ -1541,7 +1541,7 @@ export function useUpdateCategory() {
   return useMutation({
     mutationFn: async (payload: UpdateCategoryPayload) => {
       const { data, error } = await apiClient.PUT("/api/categories/{id}", {
-        path: { id: payload.id },
+        params: { path: { id: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -1600,8 +1600,8 @@ export function useDeleteCategory() {
   
   return useMutation({
     mutationFn: async (categoryId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/categories/{id}", {
-        params: { path: { id: categoryId } },
+      const { data, error } = await apiClient.DELETE("/api/categories/{id}" as any, {
+        params: { path: { category: categoryId } },
       });
       if (error) throw error;
       return data;
@@ -2507,7 +2507,7 @@ export function useUpdateInventoryTransferStatus() {
       notes?: string;
     }) => {
       const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{id}/status', {
-        params: { path: { id: params.id } },
+        params: { path: { id: params.id.toString() } },
         body: { status: params.status, notes: params.notes },
       });
       if (error) {
@@ -2558,7 +2558,7 @@ export function useCancelInventoryTransfer() {
   return useMutation({
     mutationFn: async (params: { id: number; reason: string }) => {
       const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{id}/cancel', {
-        params: { path: { id: params.id } },
+        params: { path: { id: params.id.toString() } },
         body: { reason: params.reason },
       });
       if (error) {
@@ -2778,8 +2778,8 @@ export function useDeleteStore() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: number) => {
-      const { error } = await apiClient.DELETE('/api/stores/{id}', {
-        params: { path: { id, store: id } },
+      const { error } = await apiClient.DELETE('/api/stores/{id}' as any, {
+        params: { path: { store: id } },
       });
       if (error) {
         throw new Error('刪除門市失敗');
@@ -3080,7 +3080,7 @@ export function usePurchase(id: number | string) {
   return useQuery({
     queryKey: ['purchase', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/purchases/{id}', {
+      const { data, error } = await apiClient.GET('/api/purchases/{id}' as any, {
         params: { path: { id: Number(id) } }
       });
       
@@ -3145,8 +3145,8 @@ export function useUpdatePurchase() {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: number | string; data: any }) => {
-      const { data: responseData, error } = await apiClient.PUT('/api/purchases/{id}', {
-        params: { path: { id: Number(id) } },
+      const { data: responseData, error } = await apiClient.PUT('/api/purchases/{id}' as any, {
+        params: { path: { purchase: Number(id) } },
         body: data
       })
       
@@ -3172,7 +3172,7 @@ export function useUpdatePurchaseStatus() {
   return useMutation({
     mutationFn: async ({ id, status }: { id: number | string; status: string }) => {
       const { data, error } = await apiClient.PATCH('/api/purchases/{id}/status', {
-        params: { path: { id: Number(id) } },
+        params: { path: { id: id.toString() } },
         body: { status }
       })
       
@@ -3198,7 +3198,7 @@ export function useCancelPurchase() {
   return useMutation({
     mutationFn: async (id: number | string) => {
       const { data, error } = await apiClient.PATCH('/api/purchases/{id}/cancel', {
-        params: { path: { id: Number(id) } }
+        params: { path: { id: id.toString() } }
       })
       
       if (error) {
@@ -3222,7 +3222,7 @@ export function useDeletePurchase() {
   return useMutation({
     mutationFn: async (id: number | string) => {
       const { data, error } = await apiClient.DELETE('/api/purchases/{id}', {
-        params: { path: { id: Number(id) } }
+        params: { path: { id: id.toString() } }
       })
       
       if (error) {
@@ -3279,7 +3279,7 @@ export function useOrders(filters: {
       if (filters.page) queryParams.page = filters.page;
       if (filters.per_page) queryParams.per_page = filters.per_page;
       
-      const { data, error } = await apiClient.GET("/api/orders", {
+      const { data, error } = await apiClient.GET("/api/orders" as any, {
         params: {
           query: queryParams,
         },
@@ -4157,7 +4157,7 @@ import {
   UpdateInstallationRequest,
   AssignInstallerRequest,
   UpdateInstallationStatusRequest,
-  InstallationSchedule
+  InstallationScheduleParams
 } from '@/types/installation';
 
 /**
@@ -4189,18 +4189,19 @@ export function useInstallations(filters: InstallationFilters = {}) {
       const queryParams: Record<string, string | number | boolean> = {};
       
       if (filters.search) queryParams['filter[search]'] = filters.search;
-      if (filters.installation_number) queryParams['filter[installation_number]'] = filters.installation_number;
       if (filters.status) queryParams['filter[status]'] = filters.status;
       if (filters.installer_user_id !== undefined) queryParams['filter[installer_user_id]'] = filters.installer_user_id;
-      if (filters.scheduled_date) queryParams['filter[scheduled_date]'] = filters.scheduled_date;
       if (filters.start_date) queryParams['filter[start_date]'] = filters.start_date;
       if (filters.end_date) queryParams['filter[end_date]'] = filters.end_date;
       if (filters.page !== undefined) queryParams.page = filters.page;
       if (filters.per_page !== undefined) queryParams.per_page = filters.per_page;
 
-      const { data, error } = await apiClient.GET('/api/installations', {
+      // 添加關聯資料載入，確保包含師傅和其他相關資訊
+      queryParams.include = 'items,installer,creator,order';
+
+      const { data, error } = await apiClient.GET('/api/installations' as any, {
         params: { 
-          query: Object.keys(queryParams).length > 0 ? queryParams : undefined 
+          query: queryParams
         }
       });
       
@@ -4294,7 +4295,10 @@ export function useInstallation(id: number) {
     queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(id),
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/installations/{id}', {
-        params: { path: { id } }
+        params: { 
+          path: { id },
+          query: { include: 'items,installer,creator,order' }
+        }
       });
       
       if (error) {
@@ -4324,18 +4328,24 @@ export function useCreateInstallation() {
 
   return useMutation({
     mutationFn: async (data: CreateInstallationRequest) => {
+      console.log('API 調用 - 創建安裝單:', data);
+      
       const { data: response, error } = await apiClient.POST('/api/installations', {
         body: data as any
       });
       
       if (error) {
+        console.error('API 錯誤回應:', error);
         const errorMessage = parseApiError(error);
         throw new Error(errorMessage || '創建安裝單失敗');
       }
       
+      console.log('API 成功回應:', response);
       return response;
     },
     onSuccess: async (data) => {
+      console.log('Hook onSuccess - 更新快取');
+      
       // 🚀 「失效並強制重取」標準快取處理模式
       await Promise.all([
         queryClient.invalidateQueries({
@@ -4349,6 +4359,8 @@ export function useCreateInstallation() {
         })
       ]);
       
+      console.log('快取更新完成');
+      
       // 成功通知
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
@@ -4358,12 +4370,7 @@ export function useCreateInstallation() {
       }
     },
     onError: (error) => {
-      if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.error('安裝單創建失敗', {
-          description: error.message || '請檢查輸入資料並重試。'
-        });
-      }
+      console.error('Hook onError:', error);
     },
   });
 }
@@ -4450,31 +4457,27 @@ export function useUpdateInstallation() {
     onSuccess: async (data, variables) => {
       // 🚀 「失效並強制重取」標準快取處理模式
       await Promise.all([
+        // 使快取失效並重新獲取列表
         queryClient.invalidateQueries({
           queryKey: INSTALLATION_QUERY_KEYS.INSTALLATIONS,
           exact: false,
           refetchType: 'active',
         }),
+        // 使快取失效並重新獲取詳情
         queryClient.invalidateQueries({
           queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(variables.id),
           exact: false,
           refetchType: 'active',
+        }),
+        // 強制重新獲取詳情
+        queryClient.refetchQueries({
+          queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(variables.id),
+          exact: false,
         })
       ]);
-      
-      // 成功通知
-      if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.success('安裝單已更新');
-      }
     },
     onError: (error) => {
-      if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.error('更新安裝單失敗', {
-          description: error.message || '請檢查輸入資料並重試。'
-        });
-      }
+      console.error('Hook onError:', error);
     },
   });
 }
@@ -4624,13 +4627,14 @@ export function useUpdateInstallationStatus() {
       // 成功通知
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
-        const statusText = {
+        const statusLabels = {
           'pending': '待排程',
           'scheduled': '已排程',
           'in_progress': '進行中',
           'completed': '已完成',
           'cancelled': '已取消'
-        }[variables.status] || variables.status;
+        };
+        const statusText = statusLabels[variables.status as keyof typeof statusLabels] || variables.status;
         
         toast.success('安裝單狀態已更新', {
           description: `狀態已更新為「${statusText}」`
@@ -4702,7 +4706,7 @@ export function useInstallationSchedule(params: {
           name: schedule.installer.name || '',
           color: schedule.installer.color || null,
         } : null,
-      })) as InstallationSchedule[];
+      })) as any[];
     },
     
     // 🚀 體驗優化配置

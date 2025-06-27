@@ -13,6 +13,7 @@ class InstallationItem extends Model
     protected $fillable = [
         'installation_id',
         'order_item_id',
+        'product_variant_id',
         'product_name',
         'sku',
         'quantity',
@@ -43,6 +44,15 @@ class InstallationItem extends Model
     public function orderItem(): BelongsTo
     {
         return $this->belongsTo(OrderItem::class);
+    }
+
+    /**
+     * 一個安裝項目可能關聯一個商品變體 (Many-to-One / Inverse)
+     * 可選關聯，用於追蹤商品規格
+     */
+    public function productVariant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class);
     }
 
     /**

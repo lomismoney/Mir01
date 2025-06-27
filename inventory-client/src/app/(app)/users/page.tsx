@@ -243,7 +243,7 @@ export default function UsersPage() {
 
     updateUserMutation.mutate(
       {
-        path: { user: editingUser.id },
+        path: { id: editingUser.id },
         body: updateData as any, // 暫時使用 any 處理 API 類型定義問題
       },
       {
@@ -270,7 +270,7 @@ export default function UsersPage() {
 
     deleteUserMutation.mutate(
       {
-        user: userToDelete.id,
+        id: userToDelete.id,
       },
       {
         onSuccess: () => {

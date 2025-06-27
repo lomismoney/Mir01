@@ -59,6 +59,7 @@ class UserController extends Controller
      * @queryParam filter[name] string 對用戶名稱進行模糊搜尋。 Example: admin
      * @queryParam filter[username] string 對用戶帳號進行模糊搜尋。 Example: superadmin
      * @queryParam filter[search] string 對名稱或帳號進行全域模糊搜尋。 Example: admin
+     * @queryParam filter[role] string 按角色篩選用戶。 Example: installer
      * @queryParam user_name string 按用戶名稱篩選
      * @queryParam email string 按電子郵件篩選
      * @queryParam per_page integer 每頁項目數量，預設 15
@@ -84,17 +85,25 @@ class UserController extends Controller
      *   }
      * }
      */
-    public function index()
+    public function index(Request $request)
     {
         // 授權檢查已由 __construct 中的 authorizeResource 處理
         
-        $users = QueryBuilder::for(User::class)
+        $query = QueryBuilder::for(User::class)
             ->allowedFilters([
-                'name', 'username',
+                'name', 
+                'username',
                 AllowedFilter::custom('search', new UserSearchFilter()),
+                // 添加角色篩選器
+                AllowedFilter::callback('role', function ($query, $value) {
+                    $query->whereHas('roles', function ($q) use ($value) {
+                        $q->where('name', $value);
+                    });
+                }),
             ])
-            ->with('stores')
-            ->paginate(15);
+            ->with('stores');
+            
+        $users = $query->paginate(15);
 
         return UserResource::collection($users);
     }
