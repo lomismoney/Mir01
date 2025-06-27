@@ -1600,7 +1600,7 @@ export function useDeleteCategory() {
   
   return useMutation({
     mutationFn: async (categoryId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/categories/{id}" as any, {
+      const { data, error } = await apiClient.DELETE("/api/categories/{category}" as any, {
         params: { path: { category: categoryId } },
       });
       if (error) throw error;
