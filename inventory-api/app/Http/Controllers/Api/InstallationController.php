@@ -16,7 +16,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 
 /**
- * @group 安裝管理
+
  * 
  * 管理安裝單的相關 API
  */
@@ -51,17 +51,16 @@ class InstallationController extends Controller
     /**
      * 獲取安裝單列表
      * 
-     * @queryParam filter[status] 按狀態篩選。可選值：pending, scheduled, in_progress, completed, cancelled。Example: pending
-     * @queryParam filter[installer_user_id] 按安裝師傅篩選。Example: 1
-     * @queryParam filter[scheduled_date] 按預計安裝日期篩選。Example: 2025-06-24
-     * @queryParam filter[customer_name] 按客戶姓名篩選（模糊搜尋）。Example: 王小明
-     * @queryParam filter[installation_number] 按安裝單號篩選。Example: I-202506-0001
-     * @queryParam include 包含關聯資源。可選值：items,order,installer,creator。Example: items,order
-     * @queryParam sort 排序欄位。可選值：created_at,-created_at,scheduled_date,-scheduled_date。Example: -created_at
-     * @queryParam per_page 每頁顯示筆數。Example: 15
+
+
+
+
+
+
+
+
      * 
-     * @authenticated
-     * @response 200 {
+
      *   "data": [{
      *     "id": 1,
      *     "installation_number": "I-202506-0001",
@@ -104,23 +103,22 @@ class InstallationController extends Controller
     /**
      * 建立新的安裝單
      * 
-     * @bodyParam order_id integer 關聯的訂單ID（可選）。Example: 1
-     * @bodyParam installer_user_id integer 分配的安裝師傅ID（可選）。Example: 2
-     * @bodyParam customer_name string required 客戶姓名。Example: 王小明
-     * @bodyParam customer_phone string required 客戶電話。Example: 0912345678
-     * @bodyParam installation_address string required 安裝地址。Example: 台北市信義區信義路五段7號
-     * @bodyParam scheduled_date string 預計安裝日期（可選，格式：Y-m-d）。Example: 2025-06-25
-     * @bodyParam notes string 備註（可選）。Example: 請於下午2點後安裝
-     * @bodyParam items array required 安裝項目清單。Example: [{"product_name": "辦公桌", "sku": "DESK-001", "quantity": 2, "specifications": "靠窗安裝"}]
-     * @bodyParam items.*.order_item_id integer 關聯的訂單項目ID（可選）。Example: 1
-     * @bodyParam items.*.product_name string required 商品名稱。Example: 辦公桌
-     * @bodyParam items.*.sku string required 商品編號。Example: DESK-001
-     * @bodyParam items.*.quantity integer required 數量。Example: 2
-     * @bodyParam items.*.specifications string 安裝規格說明（可選）。Example: 靠窗安裝
-     * @bodyParam items.*.notes string 項目備註（可選）。Example: 需要特殊固定器
+
+
+
+
+
+
+
+
+
+
+
+
+
+
      * 
-     * @authenticated
-     * @response 201 {
+
      *   "data": {
      *     "id": 1,
      *     "installation_number": "I-202506-0001",
@@ -144,18 +142,17 @@ class InstallationController extends Controller
     /**
      * 從訂單建立安裝單
      * 
-     * @bodyParam order_id integer required 訂單ID。Example: 1
-     * @bodyParam order_item_ids array required 要安裝的訂單項目ID清單。Example: [1, 2, 3]
-     * @bodyParam order_item_ids.* integer required 訂單項目ID。Example: 1
-     * @bodyParam installer_user_id integer 分配的安裝師傅ID（可選）。Example: 2
-     * @bodyParam installation_address string 安裝地址（可選，預設使用訂單地址）。Example: 台北市信義區信義路五段7號
-     * @bodyParam scheduled_date string 預計安裝日期（可選，格式：Y-m-d）。Example: 2025-06-25
-     * @bodyParam notes string 備註（可選）。Example: 請於下午2點後安裝
-     * @bodyParam specifications array 安裝規格（按訂單項目ID）。Example: ["靠窗安裝", "靠牆安裝"]
-     * @bodyParam specifications.* string 安裝規格說明。Example: 靠窗安裝
+
+
+
+
+
+
+
+
+
      * 
-     * @authenticated
-     * @response 201 {
+
      *   "data": {
      *     "id": 1,
      *     "installation_number": "I-202506-0001",
@@ -184,11 +181,10 @@ class InstallationController extends Controller
     /**
      * 查看安裝單詳情
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
-     * @queryParam include 包含關聯資源。可選值：items,order,installer,creator。Example: items,order
+
+
      * 
-     * @authenticated
-     * @response 200 {
+
      *   "data": {
      *     "id": 1,
      *     "installation_number": "I-202506-0001",
@@ -218,27 +214,26 @@ class InstallationController extends Controller
     /**
      * 更新安裝單
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
-     * @bodyParam installer_user_id integer 分配的安裝師傅ID。Example: 2
-     * @bodyParam customer_name string 客戶姓名。Example: 王小明
-     * @bodyParam customer_phone string nullable 客戶電話。Example: 0912345678
-     * @bodyParam installation_address string 安裝地址。Example: 台北市信義區信義路五段7號
-     * @bodyParam status string 狀態。可選值：pending, scheduled, in_progress, completed, cancelled。Example: scheduled
-     * @bodyParam scheduled_date string 預計安裝日期（格式：Y-m-d）。Example: 2025-06-25
-     * @bodyParam actual_start_time string 實際開始時間（格式：Y-m-d H:i:s）。Example: 2025-06-25 09:00:00
-     * @bodyParam actual_end_time string 實際結束時間（格式：Y-m-d H:i:s）。Example: 2025-06-25 11:00:00
-     * @bodyParam notes string 備註。Example: 已完成安裝
-     * @bodyParam items array 安裝項目陣列（可選）。Example: [{"id": 1, "product_name": "層架組合", "sku": "SHELF-001", "quantity": 2, "specifications": "牆面安裝，高度 150cm", "status": "completed", "notes": "已安裝完成"}]
-     * @bodyParam items.*.id integer 安裝項目ID（編輯現有項目時提供）。Example: 1
-     * @bodyParam items.*.product_name string required 商品名稱。Example: 層架組合
-     * @bodyParam items.*.sku string required 商品編號。Example: SHELF-001
-     * @bodyParam items.*.quantity integer required 數量。Example: 2
-     * @bodyParam items.*.specifications string 安裝規格說明（可選）。Example: 牆面安裝，高度 150cm
-     * @bodyParam items.*.status string 項目狀態。可選值：pending, completed。Example: completed
-     * @bodyParam items.*.notes string 項目備註（可選）。Example: 已安裝完成
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
      * 
-     * @authenticated
-     * @response 200 {
+
      *   "data": {
      *     "id": 1,
      *     "installation_number": "I-202506-0001",
@@ -261,9 +256,8 @@ class InstallationController extends Controller
     /**
      * 刪除安裝單
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
-     * @authenticated
-     * @response 204
+
+
      */
     public function destroy(Installation $installation)
     {
@@ -277,11 +271,10 @@ class InstallationController extends Controller
     /**
      * 分配安裝師傅
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
-     * @bodyParam installer_user_id integer required 安裝師傅用戶ID。Example: 2
+
+
      * 
-     * @authenticated
-     * @response 200 {
+
      *   "data": {
      *     "id": 1,
      *     "installer_user_id": 2,
@@ -308,12 +301,11 @@ class InstallationController extends Controller
     /**
      * 更新安裝單狀態
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
-     * @bodyParam status string required 新狀態。可選值：pending, scheduled, in_progress, completed, cancelled。Example: in_progress
-     * @bodyParam reason string 取消原因（當狀態為cancelled時）。Example: 客戶要求取消
+
+
+
      * 
-     * @authenticated
-     * @response 200 {
+
      *   "data": {
      *     "id": 1,
      *     "status": "in_progress",
@@ -348,12 +340,11 @@ class InstallationController extends Controller
     /**
      * 獲取安裝師傅的行程
      * 
-     * @queryParam installer_user_id integer required 安裝師傅的用戶ID。Example: 1
-     * @queryParam start_date string required 起始日期（格式：Y-m-d）。Example: 2025-06-01
-     * @queryParam end_date string required 結束日期（格式：Y-m-d）。Example: 2025-06-30
+
+
+
      * 
-     * @authenticated
-     * @response 200 {
+
      *   "data": [{
      *     "id": 1,
      *     "installation_number": "I-202506-0001",

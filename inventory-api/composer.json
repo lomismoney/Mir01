@@ -5,8 +5,16 @@
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://satis.dedoc.co"
+        }
+    ],
     "require": {
         "php": "^8.2",
+        "dedoc/scramble": "^0.12.23",
+        "dedoc/scramble-pro": "^0.7.9",
         "doctrine/dbal": "^4.2",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.1",
@@ -19,7 +27,6 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "knuckleswtf/scribe": "^5.2",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
         "laravel/sail": "*",

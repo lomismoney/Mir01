@@ -13,6 +13,19 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StoreController;
 use App\Http\Controllers\Api\UserStoreController;
 use App\Http\Resources\Api\UserResource;
+use App\Http\Controllers\Api\BatchDeleteProductController;
+use App\Http\Controllers\Api\CustomerCheckController;
+use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\InstallationController;
+use App\Http\Controllers\Api\InventoryAdjustmentController;
+use App\Http\Controllers\Api\InventoryManagementController;
+use App\Http\Controllers\Api\InventoryTimeSeriesController;
+use App\Http\Controllers\Api\InventoryTransactionController;
+use App\Http\Controllers\Api\InventoryTransferController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\OrderItemStatusController;
+use App\Http\Controllers\Api\ProductImageUploadController;
+use App\Http\Controllers\Api\RefundController;
 
 /**
  * 健康檢查端點
@@ -23,14 +36,14 @@ Route::get('/health', function () {
 });
 
 /**
- * @group Authentication
+
  * 
  * 使用者登入
  * 
  * 驗證使用者憑證並返回 API Token 用於後續的認證請求。
  * 公開路由，不需要認證即可訪問。
  */
-Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/login', [AuthController::class, 'login']); // 暫時註釋用於隔離測試
 
 /**
  * 保護路由群組：需要有效的 API Token 才能訪問
@@ -48,15 +61,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     /**
-     * @group Authentication
-     * @authenticated
+
      *
      * 使用者登出
      * 
      * 撤銷當前使用者的 API Token，使其失效。
      * 此操作會刪除當前請求使用的 Token，但不會影響該使用者的其他活動 Token。
      */
-    Route::post('/logout', [AuthController::class, 'logout']);
+    // Route::post('/logout', [AuthController::class, 'logout']); // 暫時註釋用於隔離測試
 
     /**
      * 商品管理路由

@@ -22,15 +22,14 @@ class StoreController extends Controller
     }
 
     /**
-     * @group Store Management
-     * @authenticated
+
      * 
      * 列出所有分店
      * 
      * 獲取系統中的所有分店列表。
      * 
-     * @queryParam include string 可選的關聯，用逗號分隔。例如: users,inventories
-     * @response 200 scenario="門市列表" {
+
+
      *   "data": [
      *     {
      *       "id": 1,
@@ -54,8 +53,7 @@ class StoreController extends Controller
     }
 
     /**
-     * @group Store Management
-     * @authenticated
+
      * 
      * 創建新分店
      * 
@@ -74,8 +72,7 @@ class StoreController extends Controller
     }
 
     /**
-     * @group Store Management
-     * @authenticated
+
      * 
      * 獲取指定分店
      * 
@@ -84,8 +81,8 @@ class StoreController extends Controller
      * @apiResource App\Http\Resources\Api\StoreResource
      * @apiResourceModel App\Models\Store
      * 
-     * @urlParam store integer required 分店 ID. Example: 1
-     * @queryParam include string 可選的關聯，用逗號分隔。例如: users,inventories
+
+
      * @param Store $store
      * @return StoreResource
      */
@@ -122,8 +119,7 @@ class StoreController extends Controller
     }
 
     /**
-     * @group Store Management
-     * @authenticated
+
      * 
      * 更新指定分店
      * 
@@ -132,7 +128,7 @@ class StoreController extends Controller
      * @apiResource App\Http\Resources\Api\StoreResource
      * @apiResourceModel App\Models\Store
      * 
-     * @urlParam store integer required 分店 ID. Example: 1
+
      * @param StoreUpdateRequest $request
      * @param Store $store
      * @return StoreResource
@@ -144,14 +140,13 @@ class StoreController extends Controller
     }
 
     /**
-     * @group Store Management
-     * @authenticated
+
      * 
      * 刪除指定分店
      * 
      * 刪除指定ID的分店。
      * 
-     * @urlParam store integer required 分店 ID. Example: 1
+
      * @param Store $store
      * @return JsonResponse
      */

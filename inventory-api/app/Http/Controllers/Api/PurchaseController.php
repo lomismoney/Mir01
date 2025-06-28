@@ -7,7 +7,10 @@ use App\Data\PurchaseData;
 use App\Services\PurchaseService;
 use App\Data\PurchaseResponseData;
 use App\Models\Purchase;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Log;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 use App\Http\Resources\Api\PurchaseResource;
@@ -17,228 +20,221 @@ class PurchaseController extends Controller
     /**
      * Display a listing of the resource.
      * 
-     * @group 進貨管理
-     * @authenticated
-     * @queryParam filter[store_id] integer 門市ID篩選 Example: 1
-     * @queryParam filter[status] string 狀態篩選 Example: pending
-     * @queryParam filter[order_number] string 進貨單號篩選 Example: PO-20240101-001
-     * @queryParam filter[start_date] string 開始日期篩選 Example: 2024-01-01
-     * @queryParam filter[end_date] string 結束日期篩選 Example: 2024-12-31
-     * @queryParam sort string 排序欄位 Example: -purchased_at
-     * @queryParam page integer 頁數 Example: 1
-     * @queryParam per_page integer 每頁筆數 Example: 20
-     * 
-     * @response 200 scenario="成功獲取進貨單列表" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "order_number": "PO-20250101-001",
-     *       "store_id": 1,
-     *       "purchased_at": "2025-01-01T10:00:00.000000Z",
-     *       "shipping_cost": "150.00",
-     *       "total_amount": "1500.00",
-     *       "status": "pending",
-     *       "notes": "進貨備註",
-     *       "created_at": "2025-01-01T10:00:00.000000Z",
-     *       "updated_at": "2025-01-01T10:00:00.000000Z",
-     *       "items_count": 5,
-     *       "items_sum_quantity": 50,
-     *       "store": {
-     *         "id": 1,
-     *         "name": "門市名稱"
-     *       },
-     *       "items": []
-     *     }
-     *   ],
-     *   "meta": {
-     *     "current_page": 1,
-     *     "per_page": 20,
-     *     "total": 100,
-     *     "last_page": 5
-     *   },
-     *   "links": {
-     *     "first": "http://localhost/api/purchases?page=1",
-     *     "last": "http://localhost/api/purchases?page=5",
-     *     "prev": null,
-     *     "next": "http://localhost/api/purchases?page=2"
-     *   }
-     * }
+     * @return AnonymousResourceCollection
      */
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
-        $this->authorize('viewAny', Purchase::class);
+        try {
+            $this->authorize('viewAny', Purchase::class);
 
-        $purchases = QueryBuilder::for(Purchase::class)
-            ->allowedFilters([
-                'order_number',
-                'status',
-                AllowedFilter::exact('store_id'),
-                AllowedFilter::scope('date_range', 'whereBetween'),
-            ])
-            ->allowedSorts(['order_number', 'purchased_at', 'total_amount', 'created_at'])
-            ->defaultSort('-purchased_at')
-            ->with(['store', 'items.productVariant.product'])
-            ->withCount('items')
-            ->withSum('items', 'quantity')
-            ->paginate(request('per_page', 20));
+            $purchases = QueryBuilder::for(Purchase::class)
+                ->allowedFilters([
+                    'order_number',
+                    'status',
+                    AllowedFilter::exact('store_id'),
+                    AllowedFilter::scope('date_range', 'whereBetween'),
+                ])
+                ->allowedSorts(['order_number', 'purchased_at', 'total_amount', 'created_at'])
+                ->defaultSort('-purchased_at')
+                ->with(['store', 'items.productVariant.product'])
+                ->withCount('items')
+                ->withSum('items', 'quantity')
+                ->paginate(request('per_page', 20));
 
-        return PurchaseResource::collection($purchases);
+            return PurchaseResource::collection($purchases);
+
+        } catch (\Throwable $th) {
+            Log::error('Purchase index error: ' . $th->getMessage(), [
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            return PurchaseResource::collection(collect([]));
+        }
     }
 
     /**
      * Store a newly created resource in storage.
      * 
-     * @group 進貨管理
-     * @authenticated
-     * @bodyParam store_id integer required 門市ID Example: 1
-     * @bodyParam order_number string 進貨單號（選填，系統會自動生成） Example: PO-20240101-001
-     * @bodyParam purchased_at string 進貨日期 Example: 2024-01-01T10:00:00+08:00
-     * @bodyParam shipping_cost number required 總運費成本 Example: 150.00
-     * @bodyParam status string 進貨單狀態 Example: pending
-     * @bodyParam items object[] required 進貨項目列表 
-     * @bodyParam items[].product_variant_id integer required 商品變體ID Example: 1
-     * @bodyParam items[].quantity integer required 數量 Example: 10
-     * @bodyParam items[].cost_price number required 成本價格 Example: 150.00
-     * @bodyParam notes string 進貨備註
-     * 
-     * @response 201 scenario="進貨單創建成功" {
-     *   "data": {
-     *     "id": 1,
-     *     "purchase_number": "PO-20250101-001",
-     *     "supplier": "供應商名稱",
-     *     "total_amount": 1500.00,
-     *     "status": "pending",
-     *     "notes": "進貨備註",
-     *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * @param PurchaseData $purchaseData
+     * @param PurchaseService $purchaseService
+     * @return PurchaseResource
      */
-    public function store(PurchaseData $purchaseData, PurchaseService $purchaseService)
+    public function store(PurchaseData $purchaseData, PurchaseService $purchaseService): PurchaseResource
     {
-        $this->authorize('create', Purchase::class);
-        $purchase = $purchaseService->createPurchase($purchaseData);
-        return new PurchaseResource($purchase->load(['store', 'items.productVariant.product']));
+        try {
+            $this->authorize('create', Purchase::class);
+            $purchase = $purchaseService->createPurchase($purchaseData);
+            return new PurchaseResource($purchase->load(['store', 'items.productVariant.product']));
+
+        } catch (\Throwable $th) {
+            Log::error('Purchase store error: ' . $th->getMessage(), [
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            throw $th;
+        }
     }
 
     /**
      * Display the specified resource.
      * 
-     * @group 進貨管理
-     * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
+     * @param string $id
+     * @return PurchaseResource
      */
-    public function show(string $id)
+    public function show(string $id): PurchaseResource
     {
-        $purchase = Purchase::with(['store', 'items.productVariant.product'])->findOrFail($id);
-        $this->authorize('view', $purchase);
-        return new PurchaseResource($purchase);
+        try {
+            $purchase = Purchase::with(['store', 'items.productVariant.product'])->findOrFail($id);
+            $this->authorize('view', $purchase);
+            return new PurchaseResource($purchase);
+
+        } catch (\Throwable $th) {
+            Log::error('Purchase show error: ' . $th->getMessage(), [
+                'id' => $id,
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            throw $th;
+        }
     }
 
     /**
      * Update the specified resource in storage.
      * 
-     * @group 進貨管理
-     * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
-     * @bodyParam store_id integer 門市ID Example: 1
-     * @bodyParam order_number string 進貨單號 Example: PO-20240101-001
-     * @bodyParam purchased_at string 進貨日期 Example: 2024-01-01T10:00:00+08:00
-     * @bodyParam shipping_cost number 總運費成本 Example: 150.00
-     * @bodyParam status string 進貨單狀態 Example: confirmed
-     * @bodyParam items object[] 進貨項目列表 
-     * @bodyParam items[].product_variant_id integer 商品變體ID Example: 1
-     * @bodyParam items[].quantity integer 數量 Example: 10
-     * @bodyParam items[].cost_price number 成本價格 Example: 150.00
+     * @param PurchaseData $purchaseData
+     * @param string $id
+     * @param PurchaseService $purchaseService
+     * @return PurchaseResource|JsonResponse
      */
-    public function update(PurchaseData $purchaseData, string $id, PurchaseService $purchaseService)
+    public function update(PurchaseData $purchaseData, string $id, PurchaseService $purchaseService): PurchaseResource|JsonResponse
     {
-        $purchase = Purchase::findOrFail($id);
-        $this->authorize('update', $purchase);
+        try {
+            $purchase = Purchase::findOrFail($id);
+            $this->authorize('update', $purchase);
 
-        if (!$purchase->canBeModified()) {
-            return response()->json(['message' => "進貨單狀態為 {$purchase->status_description}，無法修改"], 422);
+            if (!$purchase->canBeModified()) {
+                return new JsonResponse(['message' => "進貨單狀態為 {$purchase->status_description}，無法修改"], 422);
+            }
+
+            $updatedPurchase = $purchaseService->updatePurchase($purchase, $purchaseData);
+            return new PurchaseResource($updatedPurchase->load(['store', 'items.productVariant.product']));
+
+        } catch (\Throwable $th) {
+            Log::error('Purchase update error: ' . $th->getMessage(), [
+                'id' => $id,
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            return new JsonResponse(['message' => '更新進貨單時發生錯誤'], 500);
         }
-
-        $updatedPurchase = $purchaseService->updatePurchase($purchase, $purchaseData);
-        return new PurchaseResource($updatedPurchase->load(['store', 'items.productVariant.product']));
     }
 
     /**
      * Update the status of the specified purchase.
      * 
-     * @group 進貨管理
-     * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
-     * @bodyParam status string required 新狀態 Example: in_transit
+     * @param string $purchase
+     * @param Request $request
+     * @return PurchaseResource|JsonResponse
      */
-    public function updateStatus(string $purchase, Request $request)
+    public function updateStatus(string $purchase, Request $request): PurchaseResource|JsonResponse
     {
-        $purchase = Purchase::findOrFail($purchase);
-        $this->authorize('update', $purchase);
+        try {
+            $purchase = Purchase::findOrFail($purchase);
+            $this->authorize('update', $purchase);
 
-        $request->validate([
-            'status' => 'required|in:' . implode(',', array_keys(Purchase::getStatusOptions()))
-        ]);
+            $request->validate([
+                'status' => 'required|in:' . implode(',', array_keys(Purchase::getStatusOptions()))
+            ]);
 
-        $newStatus = $request->input('status');
+            $newStatus = $request->input('status');
 
-        if (!$this->isValidStatusTransition($purchase->status, $newStatus)) {
-            return response()->json([
-                'message' => "無法從 {$purchase->status_description} 轉換到 " . Purchase::getStatusOptions()[$newStatus]
-            ], 422);
+            if (!$this->isValidStatusTransition($purchase->status, $newStatus)) {
+                return new JsonResponse([
+                    'message' => "無法從 {$purchase->status_description} 轉換到 " . Purchase::getStatusOptions()[$newStatus]
+                ], 422);
+            }
+
+            $purchase->update(['status' => $newStatus]);
+            return new PurchaseResource($purchase->fresh()->load('store', 'items.productVariant.product'));
+
+        } catch (\Throwable $th) {
+            Log::error('Purchase updateStatus error: ' . $th->getMessage(), [
+                'purchase_id' => $purchase,
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            return new JsonResponse(['message' => '更新進貨單狀態時發生錯誤'], 500);
         }
-
-        $purchase->update(['status' => $newStatus]);
-        return new PurchaseResource($purchase->fresh()->load('store', 'items.productVariant.product'));
     }
 
     /**
      * Cancel the specified purchase.
      * 
-     * @group 進貨管理
-     * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
+     * @param string $purchase
+     * @return PurchaseResource|JsonResponse
      */
-    public function cancel(string $purchase)
+    public function cancel(string $purchase): PurchaseResource|JsonResponse
     {
-        $purchase = Purchase::findOrFail($purchase);
-        $this->authorize('update', $purchase);
+        try {
+            $purchase = Purchase::findOrFail($purchase);
+            $this->authorize('update', $purchase);
 
-        if (!$purchase->canBeCancelled()) {
-            return response()->json(['message' => "進貨單狀態為 {$purchase->status_description}，無法取消"], 422);
+            if (!$purchase->canBeCancelled()) {
+                return new JsonResponse(['message' => "進貨單狀態為 {$purchase->status_description}，無法取消"], 422);
+            }
+
+            $purchase->update(['status' => Purchase::STATUS_CANCELLED]);
+            return new PurchaseResource($purchase->fresh()->load('store', 'items.productVariant.product'));
+
+        } catch (\Throwable $th) {
+            Log::error('Purchase cancel error: ' . $th->getMessage(), [
+                'purchase_id' => $purchase,
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            return new JsonResponse(['message' => '取消進貨單時發生錯誤'], 500);
         }
-
-        $purchase->update(['status' => Purchase::STATUS_CANCELLED]);
-        return new PurchaseResource($purchase->fresh()->load('store', 'items.productVariant.product'));
     }
 
     /**
      * Remove the specified resource from storage.
      * 
-     * @group 進貨管理
-     * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
+     * @param string $id
+     * @return JsonResponse
      */
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
-        $purchase = Purchase::findOrFail($id);
-        
-        $this->authorize('delete', $purchase);
+        try {
+            $purchase = Purchase::findOrFail($id);
+            
+            $this->authorize('delete', $purchase);
 
-        if ($purchase->status !== Purchase::STATUS_PENDING) {
-            return response()->json([
-                'message' => "只有待處理狀態的進貨單可以刪除"
-            ], 422);
+            if ($purchase->status !== Purchase::STATUS_PENDING) {
+                return new JsonResponse([
+                    'message' => "只有待處理狀態的進貨單可以刪除"
+                ], 422);
+            }
+
+            $purchase->delete();
+
+            return new JsonResponse(['message' => '進貨單已刪除'], 200);
+
+        } catch (\Throwable $th) {
+            Log::error('Purchase destroy error: ' . $th->getMessage(), [
+                'id' => $id,
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            return new JsonResponse(['message' => '刪除進貨單時發生錯誤'], 500);
         }
-
-        $purchase->delete();
-
-        return response()->json(['message' => '進貨單已刪除']);
     }
 
     /**
      * 檢查狀態轉換是否合法
+     * 
+     * @param string $currentStatus
+     * @param string $newStatus
+     * @return bool
      */
     private function isValidStatusTransition(string $currentStatus, string $newStatus): bool
     {

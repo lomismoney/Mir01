@@ -30,13 +30,11 @@ class CustomerController extends Controller
         $this->customerService = $customerService;
     }
     /**
-     * @group 客戶管理
-     * @authenticated
-     * @queryParam search string 關鍵字搜尋，將匹配姓名、電話、統一編號。Example: 設計公司
-     * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
-     * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
+
+
+
      * 
-     * @response 200 scenario="客戶列表" {
+
      *   "data": [
      *     {
      *       "id": 1,
@@ -101,21 +99,19 @@ class CustomerController extends Controller
     /**
      * 創建新客戶
      *
-     * @group 客戶管理
-     * @authenticated
-     * @bodyParam name string required 客戶名稱或公司抬頭. Example: 測試客戶
-     * @bodyParam phone string 手機號碼. Example: 0987654321
-     * @bodyParam email string 電子郵件地址. Example: customer@example.com
-     * @bodyParam is_company boolean required 是否為公司戶. Example: false
-     * @bodyParam tax_id string 統一編號 (is_company為true時必填). Example: 12345678
-     * @bodyParam industry_type string required 行業別. Example: 設計師
-     * @bodyParam payment_type string required 付款類別. Example: 現金付款
-     * @bodyParam contact_address string 主要聯絡地址. Example: 台北市信義區
-     * @bodyParam addresses array nullable 運送地址列表.
-     * @bodyParam addresses.*.address string required 地址內容. Example: 台北市大安區
-     * @bodyParam addresses.*.is_default boolean required 是否為預設地址. Example: true
+
+
+
+
+
+
+
+
+
+
+
      * 
-     * @response 201 scenario="客戶創建成功" {
+
      *   "data": {
      *     "id": 1,
      *     "name": "測試客戶",
@@ -171,11 +167,9 @@ class CustomerController extends Controller
     /**
      * 顯示指定的客戶詳細資訊
      *
-     * @group 客戶管理
-     * @authenticated
-     * @urlParam customer integer required 客戶的 ID。 Example: 1
+
      * 
-     * @response 200 scenario="客戶詳情" {
+
      *   "data": {
      *     "id": 1,
      *     "name": "客戶名稱",
@@ -206,23 +200,21 @@ class CustomerController extends Controller
     /**
      * 更新指定的客戶資訊
      *
-     * @group 客戶管理
-     * @authenticated
-     * @urlParam customer integer required 客戶的 ID。 Example: 1
-     * @bodyParam name string required 客戶名稱或公司抬頭. Example: 測試客戶（已更新）
-     * @bodyParam phone string 手機號碼. Example: 0987654321
-     * @bodyParam email string 電子郵件地址. Example: customer@example.com
-     * @bodyParam is_company boolean required 是否為公司戶. Example: false
-     * @bodyParam tax_id string 統一編號 (is_company為true時必填). Example: 12345678
-     * @bodyParam industry_type string required 行業別. Example: 設計師
-     * @bodyParam payment_type string required 付款類別. Example: 現金付款
-     * @bodyParam contact_address string 主要聯絡地址. Example: 台北市信義區
-     * @bodyParam addresses array nullable 運送地址列表.
-     * @bodyParam addresses.*.id integer nullable 地址 ID (更新現有地址時必填). Example: 1
-     * @bodyParam addresses.*.address string required 地址內容. Example: 台北市大安區
-     * @bodyParam addresses.*.is_default boolean required 是否為預設地址. Example: true
+
+
+
+
+
+
+
+
+
+
+
+
+
      * 
-     * @response 200 scenario="客戶更新成功" {
+
      *   "data": {
      *     "id": 1,
      *     "name": "測試客戶（已更新）",
@@ -276,10 +268,8 @@ class CustomerController extends Controller
     /**
      * 刪除指定的客戶
      *
-     * @group 客戶管理
-     * @authenticated
-     * @urlParam customer integer required 要刪除的客戶的 ID。 Example: 1
-     * @response 204 scenario="刪除成功"
+
+
      */
     public function destroy(Customer $customer)
     {
@@ -296,11 +286,9 @@ class CustomerController extends Controller
     /**
      * 檢查客戶名稱是否存在
      *
-     * @group 客戶管理
-     * @authenticated
-     * @queryParam name string required 要檢查的客戶名稱。Example: 測試客戶
-     * @response 200 scenario="檢查成功" {"exists": true}
-     * @response 200 scenario="名稱不存在" {"exists": false}
+
+
+
      */
     public function checkExistence(Request $request): JsonResponse
     {

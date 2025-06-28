@@ -26,8 +26,7 @@ class UserStoreController extends Controller
     }
 
     /**
-     * @group User Store Management
-     * @authenticated
+
      * 
      * 獲取用戶的所有分店
      * 
@@ -48,8 +47,7 @@ class UserStoreController extends Controller
     }
 
     /**
-     * @group User Store Management
-     * @authenticated
+
      * 
      * 為用戶分配分店
      * 

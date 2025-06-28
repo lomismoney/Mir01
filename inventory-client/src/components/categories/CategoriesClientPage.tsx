@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { VisibilityState, ExpandedState } from "@tanstack/react-table";
 import {
-  useCategories,
-  useDeleteCategory,
+  useScrambleCategories,
+  useDeleteScrambleCategory,
   type CategoryNode,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks/useScrambleCategories";
 import { DraggableCategoriesTable } from "./DraggableCategoriesTable";
 import { createCategoryColumns } from "./categories-columns";
 import { Button } from "@/components/ui/button";
@@ -61,8 +61,8 @@ export function CategoriesClientPage() {
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
   // 資料查詢
-  const { data: categories = [], isLoading } = useCategories();
-  const deleteCategory = useDeleteCategory();
+  const { data: categories = [], isLoading } = useScrambleCategories();
+  const deleteCategory = useDeleteScrambleCategory();
 
   // 搜尋過濾（遞迴搜尋所有層級）
   const filterCategories = (

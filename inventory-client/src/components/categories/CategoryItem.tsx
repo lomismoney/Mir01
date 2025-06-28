@@ -11,43 +11,47 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CategoryTree } from "./CategoryTree";
-import { Category } from "@/types/category";
+import { CategoryNode } from "@/hooks/queries/useEntityQueries";
 
 /**
  * CategoryItem 元件屬性介面
+ * 
+ * 【完美架構重構】適配新的樹狀結構
+ * - 移除複雜的 allCategories 分組邏輯
+ * - 直接使用 CategoryNode 的 children 屬性
+ * - 簡化組件接口，提升性能
  *
- * @param category - 當前分類資料
- * @param allCategories - 所有分類的分組資料（按 parent_id 分組）
+ * @param category - 當前分類資料（包含 children）
  * @param onEdit - 編輯分類的回調函數
  * @param onDelete - 刪除分類的回調函數
  * @param onAddSubCategory - 新增子分類的回調函數
  */
 interface CategoryItemProps {
-  category: Category;
-  allCategories: Record<string, Category[]>;
-  onEdit?: (category: Category) => void;
-  onDelete?: (category: Category) => void;
+  category: CategoryNode;
+  onEdit?: (category: CategoryNode) => void;
+  onDelete?: (category: CategoryNode) => void;
   onAddSubCategory?: (parentId: number) => void;
 }
 
 /**
  * 單一分類項目元件（遞迴核心）
- *
- * 這是分類樹狀結構的核心遞迴元件，負責：
- * 1. 顯示單個分類的基本資訊
- * 2. 提供展開/收合功能控制子分類顯示
- * 3. 遞迴調用 CategoryTree 來顯示子分類
- * 4. 提供完整的操作選單（編輯、刪除、新增子分類）
+ * 
+ * 【完美架構重構】簡化數據處理邏輯
+ * 
+ * 重構優勢：
+ * 1. 🎯 直接使用樹狀結構 - 移除複雜的分組查找邏輯
+ * 2. ⚡ 性能優化 - 不再需要遍歷 allCategories 查找子分類
+ * 3. 🧹 代碼簡化 - 組件接口更加清晰
+ * 4. 🔒 類型安全 - 完全使用 CategoryNode 強類型
  *
  * 功能特色：
- * - 智能展開控制（無子分類時禁用展開按鈕）
+ * - 智能展開控制（根據 children 長度判斷）
  * - 平滑的動畫效果（箭頭旋轉）
  * - 滑鼠懸停效果增強用戶體驗
  * - 完整的 CRUD 操作選單
  * - 遞迴傳遞事件處理函數
  *
- * @param category - 要顯示的分類資料
- * @param allCategories - 完整分類分組資料，用於查找子分類
+ * @param category - 要顯示的分類資料（包含 children）
  * @param onEdit - 編輯分類的事件處理函數
  * @param onDelete - 刪除分類的事件處理函數
  * @param onAddSubCategory - 新增子分類的事件處理函數
@@ -55,7 +59,6 @@ interface CategoryItemProps {
  */
 export function CategoryItem({
   category,
-  allCategories,
   onEdit,
   onDelete,
   onAddSubCategory,
@@ -63,9 +66,9 @@ export function CategoryItem({
   // 控制當前分類是否展開顯示子分類
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // 從分組資料中獲取當前分類的子分類
-  // 使用 category.id 作為 key 查找對應的子分類陣列
-  const children = allCategories[category.id.toString()] || [];
+  // 🚀 【完美架構重構】直接使用 CategoryNode 的 children 屬性
+  // 不再需要複雜的分組查找邏輯
+  const children = category.children || [];
 
   return (
     <div className="my-1" data-oid="q359zik">
@@ -163,10 +166,10 @@ export function CategoryItem({
       </div>
 
       {/* 子分類遞迴展示區 */}
+      {/* 🎯 【完美架構重構】直接傳遞 children，不再需要 allCategories */}
       {isExpanded && children.length > 0 && (
         <CategoryTree
           categories={children}
-          allCategories={allCategories}
           onEdit={onEdit}
           onDelete={onDelete}
           onAddSubCategory={onAddSubCategory}

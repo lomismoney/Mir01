@@ -34,7 +34,8 @@ class UserResource extends JsonResource
             'is_admin' => $this->hasRole('admin'), // 是否有管理員角色
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'stores' => StoreResource::collection($this->whenLoaded('stores')), // 分店關聯
+            // 暫時移除 stores 關聯，避免循環依賴問題
+            // 'stores' => StoreResource::collection($this->whenLoaded('stores')),
         ];
     }
 

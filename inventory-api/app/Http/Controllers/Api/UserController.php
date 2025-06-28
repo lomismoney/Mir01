@@ -28,8 +28,7 @@ use Spatie\QueryBuilder\QueryBuilder;
  * - 管理員不能刪除自己的帳號
  * - 檢視者無法存取任何用戶管理功能
  * 
- * @group 用戶管理
- * @authenticated
+
  */
 class UserController extends Controller
 {
@@ -54,16 +53,14 @@ class UserController extends Controller
      * 顯示用戶列表
      *
      * 支援對 name 和 username 欄位進行部分匹配篩選。
-     * @group 用戶管理
-     * @authenticated
-     * @queryParam filter[name] string 對用戶名稱進行模糊搜尋。 Example: admin
-     * @queryParam filter[username] string 對用戶帳號進行模糊搜尋。 Example: superadmin
-     * @queryParam filter[search] string 對名稱或帳號進行全域模糊搜尋。 Example: admin
-     * @queryParam user_name string 按用戶名稱篩選
-     * @queryParam email string 按電子郵件篩選
-     * @queryParam per_page integer 每頁項目數量，預設 15
+
+
+
+
+
+
      * 
-     * @response 200 scenario="成功獲取用戶列表" {
+
      *   "data": [
      *     {
      *       "id": 1,
@@ -107,12 +104,12 @@ class UserController extends Controller
      * 權限檢查：需要通過 UserPolicy::create() 方法（僅管理員可執行）
      * 
      * @param \App\Http\Requests\Api\StoreUserRequest $request 已驗證的請求資料
-     * @bodyParam name string required 用戶名稱
-     * @bodyParam email string required 電子郵件地址
-     * @bodyParam password string required 密碼
-     * @bodyParam roles array 角色陣列
+
+
+
+
      * 
-     * @response 201 scenario="用戶創建成功" {
+
      *   "data": {
      *     "id": 1,
      *     "name": "新用戶",
@@ -157,9 +154,9 @@ class UserController extends Controller
      * 權限檢查：需要通過 UserPolicy::view() 方法（僅管理員可存取）
      * 
      * @param \App\Models\User $user 要查看的用戶模型實例（透過路由模型綁定自動解析）
-     * @urlParam user integer required 用戶的 ID。 Example: 1
+
      * 
-     * @response 200 scenario="用戶詳情" {
+
      *   "data": {
      *     "id": 1,
      *     "name": "用戶名稱",
@@ -193,12 +190,12 @@ class UserController extends Controller
      * 
      * @param \App\Http\Requests\Api\UpdateUserRequest $request 已驗證的請求資料
      * @param \App\Models\User $user 要更新的用戶模型實例（透過路由模型綁定自動解析）
-     * @urlParam user integer required 用戶的 ID。 Example: 1
-     * @bodyParam name string required 用戶名稱
-     * @bodyParam email string required 電子郵件地址
-     * @bodyParam roles array 角色陣列
+
+
+
+
      * 
-     * @response 200 scenario="用戶更新成功" {
+
      *   "data": {
      *     "id": 1,
      *     "name": "更新後的用戶名稱",
@@ -247,8 +244,8 @@ class UserController extends Controller
      * - 檢視者無法執行刪除操作
      * 
      * @param \App\Models\User $user 要刪除的用戶模型實例（透過路由模型綁定自動解析）
-     * @urlParam user integer required 用戶的 ID。 Example: 1
-     * @response 204
+
+
      * @return \Illuminate\Http\Response 204 No Content 回應
      */
     public function destroy(User $user)

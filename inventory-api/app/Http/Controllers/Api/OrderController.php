@@ -24,13 +24,11 @@ class OrderController extends Controller
     ) {
     }
     /**
-     * @group 訂單管理
-     * @authenticated
-     * @queryParam search string 關鍵字搜尋，將匹配訂單號、客戶名稱。Example: PO-20250619-001
-     * @queryParam shipping_status string 按貨物進度篩選。Example: 待出貨
-     * @queryParam payment_status string 按付款進度篩選。Example: 待付款
-     * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
-     * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-19
+
+
+
+
+
      */
     public function index(Request $request)
     {
@@ -89,8 +87,7 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 創建新訂單
      * 
      * 此端點用於創建新的訂單，包含訂單頭資訊和訂單項目明細。
@@ -99,29 +96,29 @@ class OrderController extends Controller
      * 🎯 預訂系統支援：當庫存不足時，會返回結構化錯誤資訊，
      * 前端可以基於此資訊引導用戶選擇預訂模式。
      * 
-     * @bodyParam customer_id integer required 客戶ID。Example: 1
-     * @bodyParam shipping_status string required 貨物狀態。Example: 待出貨
-     * @bodyParam payment_status string required 付款狀態。Example: 待付款
-     * @bodyParam shipping_fee number 運費。Example: 100
-     * @bodyParam tax number 稅金。Example: 50
-     * @bodyParam discount_amount number 折扣金額。Example: 0
-     * @bodyParam payment_method string required 付款方式。Example: 轉帳
-     * @bodyParam order_source string required 訂單來源。Example: 現場客戶
-     * @bodyParam shipping_address string required 運送地址。Example: 台北市信義區信義路五段7號
-     * @bodyParam notes string 備註。Example: 請小心輕放
-     * @bodyParam force_create_despite_stock boolean 是否在庫存不足時強制建立訂單（預訂模式）。Example: false
-     * @bodyParam items array required 訂單項目清單。
-     * @bodyParam items.*.product_variant_id integer 商品變體ID（訂製商品可為空）。Example: 1
-     * @bodyParam items.*.is_stocked_sale boolean required 是否為庫存銷售。Example: true
-     * @bodyParam items.*.status string required 項目狀態。Example: 待處理
-     * @bodyParam items.*.custom_specifications json 訂製規格（僅訂製商品需要）。Example: {"寬度": "150cm"}
-     * @bodyParam items.*.product_name string required 商品名稱。Example: 標準辦公桌
-     * @bodyParam items.*.sku string required SKU。Example: DESK-001
-     * @bodyParam items.*.price number required 單價。Example: 5000
-     * @bodyParam items.*.quantity integer required 數量。Example: 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
      * 
-     * @response 201
-     * @response 422 scenario="庫存不足" {
+
+
      *   "message": "庫存不足",
      *   "stockCheckResults": [...],
      *   "insufficientStockItems": [
@@ -173,11 +170,9 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
-     * @urlParam order integer required 訂單的 ID。 Example: 1
+
      * 
-     * @response 200 scenario="訂單詳情" {
+
      *   "data": {
      *     "id": 1,
      *     "order_number": "ORD-20250101-001",
@@ -209,41 +204,15 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 更新訂單
      * 
      * 此端點用於更新現有訂單的資訊。支援部分更新（PATCH），
      * 只需提供要更新的欄位即可。當更新訂單項目時，
      * 系統會自動處理項目的新增、更新和刪除，並重新計算訂單總額。
+ * 
      * 
-     * @urlParam order integer required 訂單的 ID。Example: 1
-     * 
-     * @bodyParam customer_id integer 客戶ID。Example: 2
-     * @bodyParam shipping_status string 貨物狀態（pending, processing, shipped, delivered）。Example: processing
-     * @bodyParam payment_status string 付款狀態（pending, paid, failed, refunded）。Example: paid
-     * @bodyParam shipping_fee number 運費。Example: 150
-     * @bodyParam tax number 稅金。Example: 75
-     * @bodyParam discount_amount number 折扣金額。Example: 50
-     * @bodyParam payment_method string 付款方式。Example: 信用卡
-     * @bodyParam shipping_address string 運送地址。Example: 台北市大安區羅斯福路四段1號
-     * @bodyParam billing_address string 帳單地址。Example: 台北市大安區羅斯福路四段1號
-     * @bodyParam notes string 備註。Example: 請在下午配送
-     * 
-     * @bodyParam items array 訂單項目清單（提供此參數時會同步所有項目）。
-     * @bodyParam items.*.id integer 項目ID（用於更新現有項目，新項目不需提供）。Example: 1
-     * @bodyParam items.*.product_variant_id integer 商品變體ID。Example: 2
-     * @bodyParam items.*.is_stocked_sale boolean required 是否為庫存銷售。Example: true
-     * @bodyParam items.*.status string required 項目狀態。Example: confirmed
-     * @bodyParam items.*.quantity integer required 數量。Example: 3
-     * @bodyParam items.*.price number required 單價。Example: 5500
-     * @bodyParam items.*.cost number required 成本。Example: 3500
-     * @bodyParam items.*.tax_rate number required 稅率。Example: 5
-     * @bodyParam items.*.discount_amount number required 折扣金額。Example: 0
-     * @bodyParam items.*.custom_product_name string 訂製商品名稱。Example: 客製化辦公椅
-     * @bodyParam items.*.custom_product_specs string 訂製商品規格。Example: 高度可調，藍色布料
-     * 
-     * @response 200
+
      */
     public function update(UpdateOrderRequest $request, Order $order)
     {
@@ -258,10 +227,8 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
-     * @urlParam order integer required 要刪除的訂單的 ID。 Example: 1
-     * @response 204 scenario="刪除成功"
+
+
      */
     public function destroy(Order $order)
     {
@@ -276,16 +243,15 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 確認訂單付款
      * 
      * 此端點用於確認訂單的付款狀態，將付款狀態從「待付款」更新為「已付款」。
      * 系統會自動記錄狀態變更歷史，並更新相關時間戳。
      * 
-     * @urlParam order integer required 要確認付款的訂單 ID。Example: 1
+
      * 
-     * @response 200 {
+
      *   "data": {
      *     "id": 1,
      *     "order_number": "PO-20250619-001",
@@ -293,7 +259,7 @@ class OrderController extends Controller
      *     "updated_at": "2025-06-19T10:30:00.000000Z"
      *   }
      * }
-     * @response 422 scenario="訂單狀態不允許此操作" {
+
      *   "message": "此訂單的付款狀態不允許確認付款操作",
      *   "errors": {
      *     "payment_status": ["訂單已付款，無法重複確認"]
@@ -323,22 +289,13 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 新增部分付款記錄
      * 
      * 此端點用於為訂單新增部分付款記錄，支援訂金、分期付款等場景。
      * 系統會自動計算已付金額，並根據付款進度更新訂單的付款狀態。
      * 每次付款都會記錄詳細的付款歷史，便於追蹤和對帳。
-     * 
-     * @urlParam order integer required 訂單 ID。Example: 1
-     * 
-     * @bodyParam amount number required 付款金額，必須大於 0.01 且不超過剩餘未付金額。Example: 1500.50
-     * @bodyParam payment_method string required 付款方式（cash, transfer, credit_card）。Example: cash
-     * @bodyParam payment_date string 付款日期（格式: Y-m-d H:i:s），不填則使用當前時間。Example: 2025-06-20 10:30:00
-     * @bodyParam notes string 付款備註，最多 500 字符。Example: 收到現金付款，找零 50 元
-     * 
-     * @response 200 {
+ * 
      *   "data": {
      *     "id": 1,
      *     "order_number": "PO-20250619-001",
@@ -361,13 +318,13 @@ class OrderController extends Controller
      *     "updated_at": "2025-06-20T10:30:00.000000Z"
      *   }
      * }
-     * @response 422 scenario="付款金額超過剩餘未付金額" {
+
      *   "message": "收款金額不能超過剩餘未付金額：3499.50",
      *   "errors": {
      *     "amount": ["收款金額不能超過剩餘未付金額：3499.50"]
      *   }
      * }
-     * @response 422 scenario="訂單已全額付清" {
+
      *   "message": "此訂單已全額付清，無法再新增付款記錄",
      *   "errors": {
      *     "payment_status": ["訂單已全額付清"]
@@ -407,22 +364,12 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 創建訂單出貨記錄
      * 
      * 此端點用於為訂單創建出貨記錄，將貨物狀態更新為「已出貨」。
      * 可以提供物流追蹤號碼等出貨相關資訊。
-     * 
-     * @urlParam order integer required 訂單 ID。Example: 1
-     * 
-     * @bodyParam tracking_number string required 物流追蹤號碼。Example: SF1234567890
-     * @bodyParam carrier string 承運商名稱。Example: 順豐速運
-     * @bodyParam shipped_at string 實際出貨時間（格式: Y-m-d H:i:s）。Example: 2025-06-19 14:30:00
-     * @bodyParam estimated_delivery_date string 預計送達日期（格式: Y-m-d）。Example: 2025-06-21
-     * @bodyParam notes string 出貨備註。Example: 易碎物品，請小心處理
-     * 
-     * @response 200 {
+ * 
      *   "data": {
      *     "id": 1,
      *     "order_number": "PO-20250619-001",
@@ -432,7 +379,7 @@ class OrderController extends Controller
      *     "updated_at": "2025-06-19T14:30:00.000000Z"
      *   }
      * }
-     * @response 422 scenario="訂單狀態不允許此操作" {
+
      *   "message": "此訂單的貨物狀態不允許出貨操作",
      *   "errors": {
      *     "shipping_status": ["訂單已出貨，無法重複操作"]
@@ -471,19 +418,13 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 取消訂單
      * 
      * 此端點用於取消訂單，將訂單狀態更新為已取消，
      * 並自動返還所有庫存銷售商品的庫存數量。
      * 注意：已出貨或已交付的訂單無法取消。
-     * 
-     * @urlParam order integer required 要取消的訂單 ID。Example: 1
-     * 
-     * @bodyParam reason string 取消原因。Example: 客戶要求取消
-     * 
-     * @response 200 {
+ * 
      *   "data": {
      *     "id": 1,
      *     "order_number": "PO-20250619-001",
@@ -492,7 +433,7 @@ class OrderController extends Controller
      *     "updated_at": "2025-06-19T12:00:00.000000Z"
      *   }
      * }
-     * @response 422 scenario="訂單狀態不允許此操作" {
+
      *   "message": "此訂單的狀態不允許取消操作",
      *   "errors": {
      *     "shipping_status": ["已出貨或已交付的訂單無法取消"]
@@ -527,24 +468,13 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 創建訂單退款
      * 
      * 此端點用於為訂單創建品項級別的退款，支援部分品項退貨。
      * 系統會自動計算退款金額、更新訂單狀態，並可選擇性回補庫存。
      * 每筆退款都會記錄詳細的退貨明細和操作歷史。
-     * 
-     * @urlParam order_id integer required 訂單 ID。Example: 1
-     * 
-     * @bodyParam reason string required 退款原因，10-500 字符。Example: 商品品質不符合要求，客戶要求退貨
-     * @bodyParam notes string 退款備註，最多 1000 字符。Example: 商品外觀無損，已檢查確認可回庫
-     * @bodyParam should_restock boolean required 是否將退貨商品加回庫存。Example: true
-     * @bodyParam items array required 退款品項清單，至少包含一個品項。
-     * @bodyParam items.*.order_item_id integer required 訂單品項 ID，必須屬於當前訂單。Example: 1
-     * @bodyParam items.*.quantity integer required 退貨數量，必須大於 0 且不超過可退數量。Example: 2
-     * 
-     * @response 201 {
+ * 
      *   "data": {
      *     "id": 1,
      *     "order_id": 1,
@@ -573,13 +503,13 @@ class OrderController extends Controller
      *     "created_at": "2025-06-20T15:30:00.000000Z"
      *   }
      * }
-     * @response 422 scenario="退貨數量超過可退數量" {
+
      *   "message": "品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)",
      *   "errors": {
      *     "items.0.quantity": ["品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)"]
      *   }
      * }
-     * @response 422 scenario="訂單狀態不允許退款" {
+
      *   "message": "未付款的訂單無法退款",
      *   "errors": {
      *     "payment_status": ["未付款的訂單無法退款"]
@@ -638,29 +568,28 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 批量刪除訂單
      * 
      * 此端點用於批量刪除多個訂單，同時處理庫存返還和相關清理操作。
      * 系統會在事務中執行所有操作，確保資料一致性。
      * 注意：只有管理員可以執行批量刪除，且已出貨或已交付的訂單不能刪除。
      * 
-     * @bodyParam ids array required 要刪除的訂單 ID 清單，至少包含一個 ID。Example: [1, 2, 3]
-     * @bodyParam ids.* integer required 訂單 ID，必須存在於系統中。Example: 1
+
+
      * 
-     * @response 200 {
+
      *   "message": "訂單已成功批量刪除",
      *   "deleted_count": 3,
      *   "deleted_ids": [1, 2, 3]
      * }
-     * @response 422 scenario="包含不可刪除的訂單" {
+
      *   "message": "部分訂單無法刪除",
      *   "errors": {
      *     "orders": ["訂單 PO-20250619-001 已出貨，無法刪除", "訂單 PO-20250619-002 已交付，無法刪除"]
      *   }
      * }
-     * @response 403 scenario="權限不足" {
+
      *   "message": "您沒有權限執行此操作"
      * }
      */
@@ -726,35 +655,34 @@ class OrderController extends Controller
     }
 
     /**
-     * @group 訂單管理
-     * @authenticated
+
      * 批量更新訂單狀態
      * 
      * 此端點用於批量更新多個訂單的狀態，支援付款狀態和貨物狀態的批量變更。
      * 系統會在事務中執行所有操作，確保資料一致性，並記錄每個訂單的狀態變更歷史。
      * 注意：只有管理員可以執行批量狀態更新。
      * 
-     * @bodyParam ids array required 要更新狀態的訂單 ID 清單，至少包含一個 ID。Example: [1, 2, 3]
-     * @bodyParam ids.* integer required 訂單 ID，必須存在於系統中。Example: 1
-     * @bodyParam status_type string required 要更新的狀態類型。Example: payment_status
-     * @bodyParam status_value string required 要更新成的目標狀態值。Example: paid
-     * @bodyParam notes string 批量操作備註，最多 500 字符。Example: 批量確認收款
+
+
+
+
+
      * 
-     * @response 200 {
+
      *   "message": "訂單狀態已成功批量更新",
      *   "updated_count": 3,
      *   "updated_ids": [1, 2, 3],
      *   "status_type": "payment_status",
      *   "status_value": "paid"
      * }
-     * @response 422 scenario="驗證失敗" {
+
      *   "message": "驗證失敗",
      *   "errors": {
      *     "status_type": ["狀態類型必須是付款狀態或貨物狀態"],
      *     "status_value": ["請提供狀態值"]
      *   }
      * }
-     * @response 403 scenario="權限不足" {
+
      *   "message": "您沒有權限執行此操作"
      * }
      */

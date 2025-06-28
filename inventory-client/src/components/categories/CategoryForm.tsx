@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/command";
 import { ChevronsUpDown, Check } from "lucide-react";
 import { Category } from "@/types/category";
+import { CategoryNode } from "@/hooks/queries/useEntityQueries";
 import { useForm, Controller } from "react-hook-form";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -35,7 +36,7 @@ interface CategoryFormProps {
   onSubmit: (data: FormValues) => void;
   isLoading: boolean;
   initialData?: Category | null;
-  categories: Category[]; // 用於父分類選擇
+  categories: CategoryNode[]; // 用於父分類選擇
   parentId?: number | null; // 用於新增子分類
 }
 
@@ -59,7 +60,7 @@ interface CategoryOption {
   name: string;
   depth: number;
   displayName: string;
-  children: Category[]; // 子分類列表，用於判斷是否為父分類
+  children: CategoryNode[]; // 子分類列表，用於判斷是否為父分類
 }
 
 // =====================================================
@@ -67,70 +68,81 @@ interface CategoryOption {
 // =====================================================
 
 /**
- * 遞迴檢查指定分類是否為目標分類的後代
- * 使用查詢表優化性能，避免重複的 filter 操作
- *
+ * 【完美架構重構】扁平化分類樹為陣列
+ * 將樹狀結構的 CategoryNode 轉換為扁平陣列，用於父分類選擇
+ * 
+ * @param categories - 樹狀結構的分類陣列
+ * @returns 扁平化的分類陣列
+ */
+function flattenCategoryTree(categories: CategoryNode[]): CategoryNode[] {
+  const result: CategoryNode[] = [];
+  
+  function traverse(nodes: CategoryNode[]) {
+    nodes.forEach(node => {
+      result.push(node);
+      if (node.children && node.children.length > 0) {
+        traverse(node.children);
+      }
+    });
+  }
+  
+  traverse(categories);
+  return result;
+}
+
+/**
+ * 【完美架構重構】檢查分類是否為另一個分類的後代
+ * 用於防止循環引用
+ * 
+ * @param categories - 樹狀結構的分類陣列
  * @param parentId - 父分類 ID
  * @param targetId - 目標分類 ID
- * @param childrenMap - 子分類查詢表
  * @returns 如果是後代關係則返回 true
  */
-function isDescendant(
+function isDescendantInTree(
+  categories: CategoryNode[],
   parentId: number,
   targetId: number,
-  childrenMap: Map<number, Category[]>,
 ): boolean {
-  const children = childrenMap.get(parentId) || [];
-
-  for (const child of children) {
-    if (child.id === targetId) return true; // 直接子分類
-    if (isDescendant(child.id, targetId, childrenMap)) return true; // 間接子分類（孫分類等）
+  // 找到父分類節點
+  function findNode(nodes: CategoryNode[], id: number): CategoryNode | null {
+    for (const node of nodes) {
+      if (node.id === id) return node;
+      if (node.children && node.children.length > 0) {
+        const found = findNode(node.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
   }
-
-  return false;
+  
+  // 檢查是否為後代
+  function checkDescendant(node: CategoryNode, targetId: number): boolean {
+    if (node.children && node.children.length > 0) {
+      for (const child of node.children) {
+        if (child.id === targetId) return true;
+        if (checkDescendant(child, targetId)) return true;
+      }
+    }
+    return false;
+  }
+  
+  const parentNode = findNode(categories, parentId);
+  return parentNode ? checkDescendant(parentNode, targetId) : false;
 }
 
 /**
- * 智能循環檢查函數（優化版）
- * 判斷選擇指定分類作為父分類是否會造成循環關係
+ * 【完美架構重構】建立具有層級結構的分類選項列表
+ * 從樹狀結構建立扁平的選項列表，包含層級和顯示名稱資訊
  *
- * @param optionId - 想要設定為父分類的選項 ID
- * @param currentCategoryId - 當前正在編輯的分類 ID (新增模式時為 null)
- * @param childrenMap - 子分類查詢表
- * @returns 如果應該禁用此選項則返回 true
- */
-function shouldDisableOption(
-  optionId: number,
-  currentCategoryId: number | null,
-  childrenMap: Map<number, Category[]>,
-): boolean {
-  // 新增模式：不禁用任何選項
-  if (!currentCategoryId) return false;
-
-  // 編輯模式：禁用自己（避免自我循環）
-  if (optionId === currentCategoryId) return true;
-
-  // 禁用所有後代分類（避免循環關係）
-  return isDescendant(currentCategoryId, optionId, childrenMap);
-}
-
-/**
- * 建立具有層級結構的分類選項列表
- *
- * 此函數會遞迴處理分類結構，為每個分類添加深度和顯示名稱資訊，
- * 用於在 Combobox 中顯示具有視覺層級的分類選項。
- *
- * @param categories - 原始分類列表
+ * @param categories - 樹狀結構的分類陣列
  * @returns 包含層級資訊的扁平化分類選項列表
  */
-function buildCategoryOptions(categories: Category[]): CategoryOption[] {
-  const categoryMap = new Map<number, Category>();
-  categories.forEach((cat) => categoryMap.set(cat.id, cat));
-
+function buildCategoryOptions(categories: CategoryNode[]): CategoryOption[] {
   const options: CategoryOption[] = [];
 
   function addCategoryOption(
-    category: Category,
+    category: CategoryNode,
     depth: number = 0,
     parentPath: string = "",
   ) {
@@ -138,28 +150,24 @@ function buildCategoryOptions(categories: Category[]): CategoryOption[] {
       ? `${parentPath} > ${category.name}`
       : category.name;
 
-    // 找到所有子分類
-    const children = categories.filter((cat) => cat.parent_id === category.id);
-
     options.push({
       id: category.id,
       name: category.name,
       depth,
       displayName,
-      children, // 添加子分類資訊
+      children: category.children || [],
     });
 
     // 遞迴處理子分類
-    children.forEach((child) => {
-      addCategoryOption(child, depth + 1, displayName);
-    });
+    if (category.children && category.children.length > 0) {
+      category.children.forEach((child) => {
+        addCategoryOption(child, depth + 1, displayName);
+      });
+    }
   }
 
-  // 處理頂層分類（parent_id 為 null 或 0）
-  const topLevelCategories = categories.filter(
-    (cat) => !cat.parent_id || cat.parent_id === 0,
-  );
-  topLevelCategories.forEach((category) => {
+  // 處理所有頂層分類
+  categories.forEach((category) => {
     addCategoryOption(category);
   });
 
@@ -221,18 +229,19 @@ export function CategoryForm({
 }: CategoryFormProps) {
   const [open, setOpen] = useState(false);
 
-  // 🚀 性能優化：創建子分類的快速查詢表
-  const childrenMap = useMemo(() => {
-    const map = new Map<number, Category[]>();
-    categories.forEach((cat) => {
-      if (cat.parent_id) {
-        const children = map.get(cat.parent_id) || [];
-        children.push(cat);
-        map.set(cat.parent_id, children);
-      }
-    });
-    return map;
-  }, [categories]);
+  // 🚀 【完美架構重構】智能循環檢查函數
+  const shouldDisableOption = useMemo(() => {
+    return (optionId: number): boolean => {
+      // 新增模式：不禁用任何選項
+      if (!initialData?.id) return false;
+
+      // 編輯模式：禁用自己（避免自我循環）
+      if (optionId === initialData.id) return true;
+
+      // 禁用所有後代分類（避免循環關係）
+      return isDescendantInTree(categories, initialData.id, optionId);
+    };
+  }, [categories, initialData?.id]);
 
   const {
     register,
@@ -254,12 +263,10 @@ export function CategoryForm({
     },
   });
 
-  // 建立分類選項並排除當前編輯的分類（避免自我循環）
+  // 【完美架構重構】建立分類選項（不過濾，讓 shouldDisableOption 處理）
   const categoryOptions = useMemo(() => {
-    return buildCategoryOptions(
-      categories.filter((cat) => cat.id !== initialData?.id),
-    );
-  }, [categories, initialData?.id]);
+    return buildCategoryOptions(categories);
+  }, [categories]);
 
   return (
     <form
@@ -385,12 +392,8 @@ export function CategoryForm({
 
                       {/* 分類選項 */}
                       {categoryOptions.map((option) => {
-                        // 🚀 使用優化後的查詢函數
-                        const isDisabled = shouldDisableOption(
-                          option.id,
-                          initialData?.id ?? null,
-                          childrenMap,
-                        );
+                        // 🚀 【完美架構重構】使用新的循環檢查函數
+                        const isDisabled = shouldDisableOption(option.id);
 
                         // 決定禁用原因的顯示文字
                         const getDisabledReason = () => {

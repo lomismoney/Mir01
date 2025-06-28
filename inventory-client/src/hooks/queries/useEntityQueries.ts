@@ -1280,83 +1280,65 @@ export interface CategoryNode extends Category {
 }
 
 /**
- * 構建分類樹狀結構
- * 將後端返回的分組數據轉換為樹狀結構
+ * 從扁平陣列建構分類樹狀結構
  * 
- * @param groupedCategories - 以 parent_id 分組的分類對象
+ * 【完美架構重構】前端負責展示邏輯處理
+ * 高效演算法：O(n) 時間複雜度，使用 Map 進行快速查找
+ * 
+ * @param categories - 扁平的分類陣列（已排序）
  * @returns 樹狀結構的分類陣列
  */
-function buildCategoryTree(groupedCategories: Record<string, any[]>): CategoryNode[] {
-  // 確保數據是有效的對象
-  if (!groupedCategories || typeof groupedCategories !== 'object') {
-    return [];
-  }
-
-  // 建立 ID 到節點的映射，方便查找
+function buildCategoryTreeFromFlat(categories: Category[]): CategoryNode[] {
+  // Step 1: 創建所有節點的查找表
   const nodeMap = new Map<number, CategoryNode>();
   
-  // 第一步：將所有分類轉換為 CategoryNode，初始化 children 為空陣列
-  Object.values(groupedCategories).forEach(categoryGroup => {
-    if (Array.isArray(categoryGroup)) {
-      categoryGroup.forEach(cat => {
-        if (cat && typeof cat.id === 'number') {
-          const node: CategoryNode = {
-            id: cat.id,
-            name: cat.name || '',
-            description: cat.description || null,
-            parent_id: cat.parent_id || null,
-            sort_order: cat.sort_order || 0,
-            created_at: cat.created_at || '',
-            updated_at: cat.updated_at || '',
-            products_count: cat.products_count || 0,
-            total_products_count: cat.total_products_count || 0,
-            children: []
-          };
-          nodeMap.set(cat.id, node);
-        }
-      });
-    }
+  // Step 2: 初始化所有節點
+  categories.forEach(cat => {
+    const node: CategoryNode = {
+      id: cat.id,
+      name: cat.name || '',
+      description: cat.description || null,
+      parent_id: cat.parent_id || null,
+      sort_order: cat.sort_order || 0,
+      created_at: cat.created_at || '',
+      updated_at: cat.updated_at || '',
+      products_count: cat.products_count || 0,
+      total_products_count: cat.total_products_count || 0,
+      children: []
+    };
+    nodeMap.set(cat.id, node);
   });
-
-  // 第二步：根據 parent_id 分組關係建立樹狀結構
-  const rootNodes: CategoryNode[] = [];
   
-  Object.entries(groupedCategories).forEach(([parentIdStr, categoryGroup]) => {
-    if (Array.isArray(categoryGroup)) {
-      const parentId = parentIdStr === '' || parentIdStr === 'null' ? null : Number(parentIdStr);
-      
-      categoryGroup.forEach(cat => {
-        const node = nodeMap.get(cat.id);
-        if (node) {
-          if (parentId === null) {
-            // 頂層分類
-            rootNodes.push(node);
-          } else {
-            // 子分類：找到父節點並添加到其 children
-            const parentNode = nodeMap.get(parentId);
-            if (parentNode) {
-              parentNode.children.push(node);
-            }
-          }
-        }
-      });
+  // Step 3: 建構父子關係
+  const roots: CategoryNode[] = [];
+  
+  categories.forEach(cat => {
+    const node = nodeMap.get(cat.id)!;
+    
+    if (cat.parent_id === null || cat.parent_id === undefined) {
+      // 頂層分類
+      roots.push(node);
+    } else {
+      // 子分類：添加到父節點
+      const parent = nodeMap.get(cat.parent_id);
+      if (parent) {
+        parent.children.push(node);
+      } else {
+        // 如果找不到父節點，當作頂層分類處理
+        console.warn(`找不到父分類 ID ${cat.parent_id}，將分類 "${cat.name}" 當作頂層分類處理`);
+        roots.push(node);
+      }
     }
   });
-
-  // 第三步：保持原始排序（已由後端按 sort_order 排序）
-  // 只需要遞迴處理子節點，不再重新排序
-  const processNodes = (nodes: CategoryNode[]): CategoryNode[] => {
-    return nodes.map(node => ({
-      ...node,
-      children: processNodes(node.children)
-    }));
-  };
-
-  return processNodes(rootNodes);
+  
+  return roots;
 }
 
 /**
  * 分類列表查詢 Hook
+ * 
+ * 【完美架構重構】適配新的扁平響應結構
+ * 使用數據精煉廠模式，在前端建構樹狀結構
  * 
  * @param filters - 篩選參數
  * @returns React Query 查詢結果，返回樹狀結構的分類陣列
@@ -1386,19 +1368,19 @@ export function useCategories(filters: { search?: string } = {}) {
             
             return data;
         },
-        // 🎯 新的數據精煉廠 - 返回已構建好的樹狀結構
+        // 🎯 【完美架構】數據精煉廠 - 從扁平結構建構樹狀結構
         select: (response: any): CategoryNode[] => {
-            // API 返回的是以 parent_id 分組的對象
-            const groupedData = response?.data || response || {};
+            // API 現在返回標準的 { data: Category[] } 結構
+            const categories = response?.data || [];
             
-            // 確保返回的是對象，如果不是則返回空陣列
-            if (typeof groupedData !== 'object' || Array.isArray(groupedData)) {
+            // 確保是陣列格式
+            if (!Array.isArray(categories)) {
+                console.warn('API 響應格式異常，期望陣列但收到:', typeof categories);
                 return [];
             }
             
-            // 在 select 內部調用 buildCategoryTree
-            // 將原始、混亂的分組物件，直接轉換成乾淨的、巢狀的樹狀結構
-            return buildCategoryTree(groupedData);
+            // 🚀 從扁平陣列建構樹狀結構（前端職責）
+            return buildCategoryTreeFromFlat(categories);
         },
         staleTime: 5 * 60 * 1000, // 5 分鐘緩存
     });
@@ -3834,7 +3816,7 @@ export function useCreateRefund() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/refunds", {
         params: { 
           path: { 
-            order_id: payload.orderId
+            order: payload.orderId
           } 
         },
         body: payload.data,

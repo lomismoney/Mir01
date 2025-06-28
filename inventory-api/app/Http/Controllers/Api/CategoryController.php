@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\StoreCategoryRequest;
-use App\Http\Requests\Api\UpdateCategoryRequest;
+use App\Data\CategoryData;
 use App\Http\Requests\Api\ReorderCategoriesRequest;
 use App\Http\Resources\Api\CategoryResource;
 use App\Models\Category;
@@ -13,9 +12,16 @@ use App\Services\CategoryService;
 /**
  * CategoryController 分類控制器
  * 
+ * 【DTO 驅動遷移】已重構為使用 CategoryData DTO 進行數據處理
  * 處理分類相關的 API 請求，提供完整的 CRUD 操作
  * 所有操作都受到 CategoryPolicy 權限保護，僅管理員可執行
- * 支援階層式分類結構管理
+ * 支援階層式分類結構管理和拖曳排序功能
+ * 
+ * 重構內容：
+ * - 使用 CategoryData DTO 替代 FormRequest 驗證
+ * - 自動處理自我循環檢查
+ * - 支援 sort_order 排序欄位
+ * - 簡化控制器邏輯，提升類型安全性
  */
 class CategoryController extends Controller
 {
@@ -41,56 +47,36 @@ class CategoryController extends Controller
     /**
      * 顯示分類列表
      * 
-     * 優化策略：返回一個以 parent_id 分組的集合，讓前端可以極其方便地、
-     * 高效地建構層級樹，而無需自己在前端進行複雜的遞迴或查找。
+     * 【完美架構重構】返回標準的扁平分類結構
+     * 遵循 RESTful 設計原則，分離關注點：
+     * - 後端職責：提供完整、準確的數據
+     * - 前端職責：處理展示邏輯（樹狀結構建構）
      * 
-     * 範例：
-     * - json[''] 或 json[null] 就是所有頂層分類
-     * - json['1'] 就是 id 為 1 的分類下的所有子分類
+     * 架構優勢：
+     * 1. Scramble PRO 完美支援標準 ResourceCollection
+     * 2. 符合 RESTful 最佳實踐
+     * 3. 前後端職責清晰分離
+     * 4. 更好的快取和擴展性
      * 
-     * @group 分類管理
-     * @authenticated
-     * @queryParam include string 可選的關聯，用逗號分隔。例如: products
-     * 
-     * @response 200 scenario="分類列表" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "name": "分類名稱",
-     *       "description": "分類描述",
-     *       "created_at": "2025-01-01T10:00:00.000000Z",
-     *       "updated_at": "2025-01-01T10:00:00.000000Z"
-     *     }
-     *   ]
-     * }
-     * 
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection<\App\Http\Resources\Api\CategoryResource>
      */
     public function index()
     {
-        // 獲取所有分類，並預載入每個分類的直接商品數量
-        // 按照 sort_order 排序，確保拖曳排序的結果能正確顯示
+        // 🚀 【架構重構】獲取所有分類，返回標準的扁平結構
         $categories = Category::withCount('products')
             ->orderBy('sort_order')
             ->orderBy('id') // 次要排序，確保穩定性
             ->get();
+        
+        // 計算包含子分類的商品總數（保持原有業務邏輯）
         $categoryMap = $categories->keyBy('id');
-
-        // 為每個分類計算其包含所有後代的商品總數
-        // 這個遞迴計算是安全的，因為它在一個已經載入的集合上操作，避免了 N+1 問題
         foreach ($categories as $category) {
             $this->calculateTotalProducts($category, $categoryMap);
         }
-
-        // 按 parent_id 分組，以方便前端建構層級樹
-        $grouped = $categories->groupBy(function ($category) {
-            return $category->parent_id ?? '';
-        });
-
-        // 使用 CategoryResource 格式化並返回分組後的資料
-        return response()->json($grouped->map(function ($group) {
-            return CategoryResource::collection($group);
-        }));
+        
+        // 🎯 【完美架構】返回標準的 ResourceCollection
+        // Scramble PRO 將生成完美的 OpenAPI 契約
+        return CategoryResource::collection($categories);
     }
 
     /**
@@ -125,17 +111,21 @@ class CategoryController extends Controller
     /**
      * 儲存新建立的分類資源
      * 
-     * 使用 StoreCategoryRequest 進行數據驗證，確保：
+     * 【DTO 驅動遷移】使用 CategoryData DTO 進行數據驗證和轉換
+     * 驗證邏輯已遷移至 CategoryData，支援：
      * - 分類名稱必填且不超過255字符
      * - 父分類ID必須存在於資料表中
      * - 描述為可選欄位
+     * - 排序順序支援
      * 
-     * @param \App\Http\Requests\Api\StoreCategoryRequest $request
+     * @param \App\Data\CategoryData $categoryData
      * @return \App\Http\Resources\Api\CategoryResource
      */
-    public function store(StoreCategoryRequest $request)
+    public function store(CategoryData $categoryData)
     {
-        $category = Category::create($request->validated());
+        // 直接使用 DTO 數據創建分類，無需手動驗證
+        $category = Category::create($categoryData->toArray());
+        
         return new CategoryResource($category);
     }
 
@@ -145,7 +135,6 @@ class CategoryController extends Controller
      * 返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出
      * 包含該分類的商品數量統計
      * 
-     * @urlParam category integer required 分類 ID Example: 1
      * @param \App\Models\Category $category
      * @return \App\Http\Resources\Api\CategoryResource
      */
@@ -185,19 +174,22 @@ class CategoryController extends Controller
     /**
      * 更新指定的分類資源
      * 
-     * 使用 UpdateCategoryRequest 進行數據驗證，包含：
+     * 【DTO 驅動遷移】使用 CategoryData DTO 進行數據驗證和轉換
+     * 驗證邏輯已遷移至 CategoryData，支援：
      * - 部分更新支援（sometimes 規則）
      * - 防止自我循環的業務邏輯保護
      * - 確保父分類存在性檢查
+     * - 排序順序支援
      * 
-     * @urlParam category integer required 分類 ID Example: 1
-     * @param \App\Http\Requests\Api\UpdateCategoryRequest $request
+     * @param \App\Data\CategoryData $categoryData
      * @param \App\Models\Category $category
      * @return \App\Http\Resources\Api\CategoryResource
      */
-    public function update(UpdateCategoryRequest $request, Category $category)
+    public function update(CategoryData $categoryData, Category $category)
     {
-        $category->update($request->validated());
+        // 直接使用 DTO 數據更新分類，自我循環檢查已在 CategoryData 中處理
+        $category->update($categoryData->toArray());
+        
         return new CategoryResource($category);
     }
 
@@ -208,7 +200,6 @@ class CategoryController extends Controller
      * - 當分類被刪除時，其子分類也會被級聯刪除
      * - 關聯的商品 category_id 會被設為 null
      * 
-     * @urlParam category integer required 分類 ID Example: 1
      * @param \App\Models\Category $category
      * @return \Illuminate\Http\Response
      */

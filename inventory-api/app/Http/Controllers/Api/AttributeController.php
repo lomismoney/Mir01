@@ -3,26 +3,22 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\StoreAttributeRequest;
-use App\Http\Requests\Api\UpdateAttributeRequest;
 use App\Http\Resources\Api\AttributeResource;
 use App\Models\Attribute;
+use Illuminate\Http\Request;
 
 /**
- * AttributeController 商品屬性控制器
+ * 商品屬性管理控制器
  * 
- * 處理商品屬性的 CRUD 操作，支援 SPU/SKU 架構
- * 僅允許管理員進行操作，透過 AttributePolicy 進行權限控制
- * 
- * @group 商品屬性管理
- * @authenticated
+ * 此控制器提供商品屬性（如顏色、尺寸、材質）的完整 CRUD 操作。
+ * 所有操作都需要 admin 權限。
  */
 class AttributeController extends Controller
 {
     /**
-     * 建構函式
+     * 構造函數
      * 
-     * 自動綁定權限檢查，所有操作都會自動檢查 AttributePolicy
+     * 設置資源授權，確保所有操作都經過權限檢查
      */
     public function __construct()
     {
@@ -30,64 +26,56 @@ class AttributeController extends Controller
     }
 
     /**
-     * 獲取所有屬性列表
+     * 顯示屬性列表
      * 
-     * 返回系統中所有的商品屬性，包含其相關的屬性值
-     * 使用 Eager Loading 避免 N+1 查詢問題
+     * 獲取所有可用的商品屬性，支援篩選條件。
+     * 預設包含每個屬性的所有可能值。
      * 
-     * @authenticated
-     * @queryParam filter[attribute_name] string 對屬性名稱進行篩選。 Example: 顏色
-     * @queryParam include string 可選的關聯，用逗號分隔。例如: values
-     * 
-     * @response 200 scenario="屬性列表" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "name": "顏色",
-     *       "description": "商品顏色屬性",
-     *       "created_at": "2025-01-01T10:00:00.000000Z",
-     *       "updated_at": "2025-01-01T10:00:00.000000Z"
-     *     }
-     *   ]
-     * }
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection<\App\Http\Resources\Api\AttributeResource>
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 獲取所有屬性並加載關聯
-        $attributes = Attribute::with('values')->get();
+        $query = Attribute::query();
         
-        // 確保每個屬性都有 products_count
-        // 強制調用 accessor 來確保值被計算
-        $attributes->each(function ($attribute) {
-            $attribute->append('products_count');
-        });
+        // 預設加載屬性值
+        $query->with('values');
+        
+        // 支援按名稱篩選
+        if ($request->has('filter.attribute_name')) {
+            $query->where('name', 'like', '%' . $request->input('filter.attribute_name') . '%');
+        }
+        
+        $attributes = $query->get();
         
         return AttributeResource::collection($attributes);
     }
 
     /**
-     * 創建新屬性
+     * 儲存新建立的屬性
      * 
-     * 創建一個新的商品屬性，屬性名稱必須唯一
-     * 
-     * @bodyParam name string required 屬性名稱，例如：顏色、尺寸、材質 Example: 顏色
-     * 
-     * @response 201 App\Http\Resources\Api\V1\AttributeResource
+     * @param  \Illuminate\Http\Request  $request
+     * @return \App\Http\Resources\Api\AttributeResource
      */
-    public function store(StoreAttributeRequest $request)
+    public function store(Request $request)
     {
-        $attribute = Attribute::create($request->validated());
-        return new AttributeResource($attribute);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:attributes,name',
+        ], [
+            'name.required' => '屬性名稱為必填項目',
+            'name.unique' => '此屬性名稱已經存在',
+        ]);
+
+        $attribute = Attribute::create($validated);
+        
+        return new AttributeResource($attribute->load('values'));
     }
 
     /**
-     * 獲取指定屬性
+     * 顯示指定的屬性
      * 
-     * 返回指定的商品屬性詳細資訊，包含其所有屬性值
-     * 
-     * @urlParam attribute int required 屬性 ID Example: 1
-     * 
-     * @response App\Http\Resources\Api\V1\AttributeResource
+     * @param  \App\Models\Attribute  $attribute
+     * @return \App\Http\Resources\Api\AttributeResource
      */
     public function show(Attribute $attribute)
     {
@@ -95,34 +83,36 @@ class AttributeController extends Controller
     }
 
     /**
-     * 更新指定屬性
+     * 更新指定的屬性
      * 
-     * 更新指定的商品屬性，屬性名稱必須唯一（忽略當前屬性）
-     * 
-     * @urlParam attribute int required 屬性 ID Example: 1
-     * @bodyParam name string required 屬性名稱 Example: 顏色
-     * 
-     * @response App\Http\Resources\Api\V1\AttributeResource
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Attribute  $attribute
+     * @return \App\Http\Resources\Api\AttributeResource
      */
-    public function update(UpdateAttributeRequest $request, Attribute $attribute)
+    public function update(Request $request, Attribute $attribute)
     {
-        $attribute->update($request->validated());
-        return new AttributeResource($attribute);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:attributes,name,' . $attribute->id,
+        ], [
+            'name.required' => '屬性名稱為必填項目',
+            'name.unique' => '此屬性名稱已經存在',
+        ]);
+
+        $attribute->update($validated);
+        
+        return new AttributeResource($attribute->load('values'));
     }
 
     /**
-     * 刪除指定屬性
+     * 刪除指定的屬性
      * 
-     * 刪除指定的商品屬性及其所有相關的屬性值
-     * 注意：如果有商品變體正在使用此屬性的值，刪除操作可能會失敗
-     * 
-     * @urlParam attribute int required 屬性 ID Example: 1
-     * 
-     * @response 204
+     * @param  \App\Models\Attribute  $attribute
+     * @return \Illuminate\Http\Response
      */
     public function destroy(Attribute $attribute)
     {
         $attribute->delete();
+        
         return response()->noContent();
     }
 }

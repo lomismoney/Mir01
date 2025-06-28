@@ -199,10 +199,7 @@ class StoreCategoryRequestTest extends TestCase
     /** @test */
     public function body_parameters_returns_correct_structure()
     {
-        $request = new StoreCategoryRequest();
-        $bodyParams = $request->bodyParameters();
-        
-        $this->assertArrayHasKey('name', $bodyParams);
+        $request = new StoreCategoryRequest();        $this->assertArrayHasKey('name', $bodyParams);
         $this->assertArrayHasKey('description', $bodyParams);
         $this->assertArrayHasKey('parent_id', $bodyParams);
         
@@ -225,10 +222,7 @@ class StoreCategoryRequestTest extends TestCase
     /** @test */
     public function body_parameters_have_correct_examples()
     {
-        $request = new StoreCategoryRequest();
-        $bodyParams = $request->bodyParameters();
-        
-        $this->assertEquals('電子產品', $bodyParams['name']['example']);
+        $request = new StoreCategoryRequest();        $this->assertEquals('電子產品', $bodyParams['name']['example']);
         $this->assertEquals('包含所有電子相關產品', $bodyParams['description']['example']);
         $this->assertEquals(1, $bodyParams['parent_id']['example']);
     }
@@ -236,10 +230,7 @@ class StoreCategoryRequestTest extends TestCase
     /** @test */
     public function body_parameters_have_correct_descriptions()
     {
-        $request = new StoreCategoryRequest();
-        $bodyParams = $request->bodyParameters();
-        
-        $this->assertEquals('分類名稱', $bodyParams['name']['description']);
+        $request = new StoreCategoryRequest();        $this->assertEquals('分類名稱', $bodyParams['name']['description']);
         $this->assertEquals('分類描述', $bodyParams['description']['description']);
         $this->assertEquals('父分類ID，必須是存在的分類ID', $bodyParams['parent_id']['description']);
     }

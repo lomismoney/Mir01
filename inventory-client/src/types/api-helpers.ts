@@ -2,58 +2,55 @@ import { Category } from '@/types/category';
 import { operations } from '@/types/api';
 
 /**
- * 將 API 回傳的分組分類資料轉換為正確的類型
+ * 【已移除】transformCategoriesGroupedResponse
  * 
- * @param groupedCategories - 從 API 獲取的分組分類資料
- * @returns 轉換後的分組分類資料，具有正確的 Category 類型
- * 
- * 功能說明：
- * 1. 將 API 回傳的 Record<string, unknown[]> 轉換為 Record<string, Category[]>
- * 2. 確保類型安全，避免運行時錯誤
- * 3. 處理可能的 null 或 undefined 值
+ * 此函數專為舊的分組響應格式設計，現已不再需要
+ * 新的扁平結構由標準的 OpenAPI 類型直接處理
  */
-export function transformCategoriesGroupedResponse(
-  groupedCategories: Record<string, unknown[]> | undefined
-): Record<string, Category[]> {
-  if (!groupedCategories) {
-    return {};
-  }
 
-  const transformed: Record<string, Category[]> = {};
+/**
+ * 扁平化分類樹為陣列（用於表單選擇等場景）
+ * 
+ * 【完美架構重構】提供扁平化工具函數
+ * 將樹狀結構轉換為包含層級資訊的扁平陣列
+ * 
+ * @param categories - 樹狀結構的分類陣列
+ * @returns 扁平化的分類陣列，包含層級資訊
+ */
+export function flattenCategoryTree(categories: Category[]): Array<Category & { depth: number }> {
+  const result: Array<Category & { depth: number }> = [];
   
-  for (const [key, categories] of Object.entries(groupedCategories)) {
-    if (Array.isArray(categories)) {
-      transformed[key] = categories.map(category => {
-        // 確保每個分類物件都有必要的屬性
-        if (typeof category === 'object' && category !== null) {
-          const cat = category as Record<string, unknown>;
-          return {
-            id: cat.id,
-            name: cat.name || '',
-            description: cat.description || null,
-            parent_id: cat.parent_id || null,
-            created_at: cat.created_at || '',
-            updated_at: cat.updated_at || '',
-            children: cat.children || []
-          } as Category;
-        }
-        // 如果資料格式不正確，回傳一個預設的分類物件
-        return {
-          id: 0,
-          name: 'Unknown Category',
-          description: null,
-          parent_id: null,
-          created_at: '',
-          updated_at: '',
-          children: []
-        } as Category;
-      });
-    } else {
-      transformed[key] = [];
+  function traverse(nodes: Category[], depth: number = 0) {
+    nodes.forEach(node => {
+      result.push({ ...node, depth });
+      if (node.children && node.children.length > 0) {
+        traverse(node.children, depth + 1);
+      }
+    });
+  }
+  
+  traverse(categories);
+  return result;
+}
+
+/**
+ * 根據 ID 在分類樹中查找特定分類
+ * 
+ * @param categories - 樹狀結構的分類陣列
+ * @param id - 要查找的分類 ID
+ * @returns 找到的分類，若不存在則返回 null
+ */
+export function findCategoryById(categories: Category[], id: number): Category | null {
+  for (const category of categories) {
+    if (category.id === id) {
+      return category;
+    }
+    if (category.children && category.children.length > 0) {
+      const found = findCategoryById(category.children, id);
+      if (found) return found;
     }
   }
-  
-  return transformed;
+  return null;
 }
 
 /**

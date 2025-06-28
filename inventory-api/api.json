@@ -1,0 +1,499 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Inventory API - DTO Enhanced",
+        "version": "2.0.0",
+        "description": "\u4f7f\u7528 Scramble PRO \u751f\u6210\u7684 API \u6587\u6a94\u3002\u63a1\u7528 DTO \u67b6\u69cb\uff0c\u63d0\u4f9b\u7cbe\u78ba\u7684\u985e\u578b\u63a8\u65b7\u548c\u5b8c\u6574\u7684 OpenAPI 3.0 \u5951\u7d04\u5b9a\u7fa9\u3002"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000/api"
+        }
+    ],
+    "paths": {
+        "/categories": {
+            "get": {
+                "operationId": "categories.index",
+                "description": "\u3010\u5b8c\u7f8e\u67b6\u69cb\u91cd\u69cb\u3011\u8fd4\u56de\u6a19\u6e96\u7684\u6241\u5e73\u5206\u985e\u7d50\u69cb\n\u9075\u5faa RESTful \u8a2d\u8a08\u539f\u5247\uff0c\u5206\u96e2\u95dc\u6ce8\u9ede\uff1a\n- \u5f8c\u7aef\u8077\u8cac\uff1a\u63d0\u4f9b\u5b8c\u6574\u3001\u6e96\u78ba\u7684\u6578\u64da\n- \u524d\u7aef\u8077\u8cac\uff1a\u8655\u7406\u5c55\u793a\u908f\u8f2f\uff08\u6a39\u72c0\u7d50\u69cb\u5efa\u69cb\uff09\n\n\u67b6\u69cb\u512a\u52e2\uff1a\n1. Scramble PRO \u5b8c\u7f8e\u652f\u63f4\u6a19\u6e96 ResourceCollection\n2. \u7b26\u5408 RESTful \u6700\u4f73\u5be6\u8e10\n3. \u524d\u5f8c\u7aef\u8077\u8cac\u6e05\u6670\u5206\u96e2\n4. \u66f4\u597d\u7684\u5feb\u53d6\u548c\u64f4\u5c55\u6027",
+                "summary": "\u986f\u793a\u5206\u985e\u5217\u8868",
+                "tags": [
+                    "Category"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `CategoryResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CategoryResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "categories.store",
+                "description": "\u3010DTO \u9a45\u52d5\u9077\u79fb\u3011\u4f7f\u7528 CategoryData DTO \u9032\u884c\u6578\u64da\u9a57\u8b49\u548c\u8f49\u63db\n\u9a57\u8b49\u908f\u8f2f\u5df2\u9077\u79fb\u81f3 CategoryData\uff0c\u652f\u63f4\uff1a\n- \u5206\u985e\u540d\u7a31\u5fc5\u586b\u4e14\u4e0d\u8d85\u904e255\u5b57\u7b26\n- \u7236\u5206\u985eID\u5fc5\u9808\u5b58\u5728\u65bc\u8cc7\u6599\u8868\u4e2d\n- \u63cf\u8ff0\u70ba\u53ef\u9078\u6b04\u4f4d\n- \u6392\u5e8f\u9806\u5e8f\u652f\u63f4",
+                "summary": "\u5132\u5b58\u65b0\u5efa\u7acb\u7684\u5206\u985e\u8cc7\u6e90",
+                "tags": [
+                    "Category"
+                ],
+                "requestBody": {
+                    "description": "`CategoryData`",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CategoryData"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`App.Http.Resources.Api.CategoryResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/App.Http.Resources.Api.CategoryResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/categories/{category}": {
+            "get": {
+                "operationId": "categories.show",
+                "description": "\u8fd4\u56de\u55ae\u4e00\u5206\u985e\u7684\u8a73\u7d30\u8cc7\u8a0a\uff0c\u4f7f\u7528 CategoryResource \u683c\u5f0f\u5316\u8f38\u51fa\n\u5305\u542b\u8a72\u5206\u985e\u7684\u5546\u54c1\u6578\u91cf\u7d71\u8a08",
+                "summary": "\u986f\u793a\u6307\u5b9a\u7684\u5206\u985e\u8cc7\u6e90",
+                "tags": [
+                    "Category"
+                ],
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "description": "The category ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`App.Http.Resources.Api.CategoryResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/App.Http.Resources.Api.CategoryResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "categories.update",
+                "description": "\u3010DTO \u9a45\u52d5\u9077\u79fb\u3011\u4f7f\u7528 CategoryData DTO \u9032\u884c\u6578\u64da\u9a57\u8b49\u548c\u8f49\u63db\n\u9a57\u8b49\u908f\u8f2f\u5df2\u9077\u79fb\u81f3 CategoryData\uff0c\u652f\u63f4\uff1a\n- \u90e8\u5206\u66f4\u65b0\u652f\u63f4\uff08sometimes \u898f\u5247\uff09\n- \u9632\u6b62\u81ea\u6211\u5faa\u74b0\u7684\u696d\u52d9\u908f\u8f2f\u4fdd\u8b77\n- \u78ba\u4fdd\u7236\u5206\u985e\u5b58\u5728\u6027\u6aa2\u67e5\n- \u6392\u5e8f\u9806\u5e8f\u652f\u63f4",
+                "summary": "\u66f4\u65b0\u6307\u5b9a\u7684\u5206\u985e\u8cc7\u6e90",
+                "tags": [
+                    "Category"
+                ],
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "description": "The category ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "`CategoryData`",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CategoryData"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`App.Http.Resources.Api.CategoryResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/App.Http.Resources.Api.CategoryResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "categories.destroy",
+                "description": "\u57f7\u884c\u8edf\u522a\u9664\u64cd\u4f5c\uff0c\u6839\u64da\u8cc7\u6599\u8868\u5916\u9375\u7d04\u675f\u8a2d\u5b9a\uff1a\n- \u7576\u5206\u985e\u88ab\u522a\u9664\u6642\uff0c\u5176\u5b50\u5206\u985e\u4e5f\u6703\u88ab\u7d1a\u806f\u522a\u9664\n- \u95dc\u806f\u7684\u5546\u54c1 category_id \u6703\u88ab\u8a2d\u70ba null",
+                "summary": "\u522a\u9664\u6307\u5b9a\u7684\u5206\u985e\u8cc7\u6e90",
+                "tags": [
+                    "Category"
+                ],
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "description": "The category ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/categories/batch-reorder": {
+            "post": {
+                "operationId": "category.reorder",
+                "description": "\u8655\u7406\u524d\u7aef\u62d6\u66f3\u6392\u5e8f\u529f\u80fd\u7684\u6279\u91cf\u66f4\u65b0\u8acb\u6c42\n\u4f7f\u7528\u4e8b\u52d9\u78ba\u4fdd\u64cd\u4f5c\u7684\u539f\u5b50\u6027",
+                "summary": "\u6279\u91cf\u91cd\u65b0\u6392\u5e8f\u5206\u985e",
+                "tags": [
+                    "Category"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "\u5206\u985e\u9806\u5e8f\u5df2\u6210\u529f\u66f4\u65b0\u3002"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "App.Http.Resources.Api.CategoryResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "sort_order": {
+                        "type": "integer"
+                    },
+                    "products_count": {
+                        "type": "integer"
+                    },
+                    "total_products_count": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "parent_id",
+                    "sort_order",
+                    "total_products_count"
+                ],
+                "title": "App.Http.Resources.Api.CategoryResource"
+            },
+            "CategoryData": {
+                "type": "object",
+                "description": "CategoryData DTO\r\n\r\n\u5206\u985e\u7ba1\u7406\u7684\u55ae\u4e00\u4e8b\u5be6\u4f86\u6e90\uff0c\u6574\u5408\u6578\u64da\u7d50\u69cb\u8207\u9a57\u8b49\u898f\u5247\r\n\u652f\u63f4\u968e\u5c64\u5f0f\u5206\u985e\u7d50\u69cb\u3001\u81ea\u6211\u5faa\u74b0\u6aa2\u67e5\u548c\u62d6\u66f3\u6392\u5e8f\u529f\u80fd\r\n\r\n\u6b64 DTO \u5c07\u53d6\u4ee3 StoreCategoryRequest \u548c UpdateCategoryRequest\r\n\u63d0\u4f9b\u985e\u578b\u5b89\u5168\u7684\u8cc7\u6599\u8f49\u63db\u548c 100% \u6e96\u78ba\u7684 OpenAPI \u5951\u7d04\u751f\u6210",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 1000
+                    },
+                    "parent_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "minimum": 0
+                    }
+                },
+                "title": "CategoryData"
+            },
+            "CategoryResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "sort_order": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "parent_id",
+                    "sort_order",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "CategoryResource"
+            }
+        },
+        "responses": {
+            "AuthorizationException": {
+                "description": "Authorization error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "AuthenticationException": {
+                "description": "Unauthenticated",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ValidationException": {
+                "description": "Validation error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Errors overview."
+                                },
+                                "errors": {
+                                    "type": "object",
+                                    "description": "A detailed description of each field that failed validation.",
+                                    "additionalProperties": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "required": [
+                                "message",
+                                "errors"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

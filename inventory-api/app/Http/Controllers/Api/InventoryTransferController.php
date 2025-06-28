@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @group 庫存轉移
+
  *
  * 庫存轉移 API 端點，用於在不同門市之間轉移庫存
  */
@@ -29,15 +29,15 @@ class InventoryTransferController extends Controller
     /**
      * 獲取庫存轉移記錄列表
      * 
-     * @queryParam from_store_id integer 來源門市ID. Example: 1
-     * @queryParam to_store_id integer 目標門市ID. Example: 2
-     * @queryParam status string 轉移狀態. Example: completed
-     * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
-     * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
-     * @queryParam product_name string 按商品名稱搜尋. Example: T恤
-     * @queryParam per_page integer 每頁項目數，預設 15
+
+
+
+
+
+
+
      * 
-     * @response 200 scenario="庫存調撥列表" {
+
      *   "data": [
      *     {
      *       "id": 1,
@@ -58,7 +58,7 @@ class InventoryTransferController extends Controller
      *   }
      * }
      * 
-     * @authenticated
+
      * @param Request $request
      * @return AnonymousResourceCollection
      */
@@ -110,7 +110,7 @@ class InventoryTransferController extends Controller
     /**
      * 獲取單筆庫存轉移記錄
      * 
-     * @authenticated
+
      * 
      * @param int $id
      * @return JsonResponse
@@ -132,16 +132,7 @@ class InventoryTransferController extends Controller
 
     /**
      * 創建庫存轉移記錄並執行轉移
-     * 
-     * @bodyParam from_store_id integer required 來源門市ID. Example: 1
-     * @bodyParam to_store_id integer required 目標門市ID. Example: 2
-     * @bodyParam product_variant_id integer required 商品變體ID. Example: 1
-     * @bodyParam quantity integer required 轉移數量. Example: 5
-     * @bodyParam notes string 備註. Example: 調配門市庫存
-     * @bodyParam status string 狀態，預設為 completed. Example: completed
-     * 
-     * @authenticated
-     * 
+ * 
      * @param InventoryTransferRequest $request
      * @return JsonResponse
      */
@@ -233,13 +224,7 @@ class InventoryTransferController extends Controller
 
     /**
      * 更新庫存轉移記錄狀態
-     * 
-     * @urlParam id integer required 轉移記錄ID. Example: 1
-     * @bodyParam status string required 新狀態. Example: completed
-     * @bodyParam notes string 備註. Example: 已確認收到貨品
-     * 
-     * @authenticated
-     * 
+ * 
      * @param Request $request
      * @param int $id
      * @return JsonResponse
@@ -320,12 +305,7 @@ class InventoryTransferController extends Controller
 
     /**
      * 取消庫存轉移
-     * 
-     * @urlParam id integer required 轉移記錄ID. Example: 1
-     * @bodyParam reason string required 取消原因. Example: 商品損壞，不需要轉移
-     * 
-     * @authenticated
-     * 
+ * 
      * @param Request $request
      * @param int $id
      * @return JsonResponse

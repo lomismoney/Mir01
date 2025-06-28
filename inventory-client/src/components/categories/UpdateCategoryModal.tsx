@@ -8,10 +8,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  useCategories,
+  useScrambleCategories,
   useUpdateCategory,
   type CategoryNode,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks/useScrambleCategories";
 import { CategoryForm, type FormValues } from "./CategoryForm";
 import { toast } from "sonner";
 
@@ -39,7 +39,7 @@ export function UpdateCategoryModal({
   category,
   onSuccess,
 }: UpdateCategoryModalProps) {
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [] } = useScrambleCategories();
   const updateCategory = useUpdateCategory();
 
   /**
@@ -68,19 +68,8 @@ export function UpdateCategoryModal({
     );
   };
 
-  // 將樹狀結構扁平化為列表，供 CategoryForm 使用
-  const flatCategories = categories.reduce<CategoryNode[]>((acc, category) => {
-    const flatten = (cat: CategoryNode): CategoryNode[] => {
-      const result = [cat];
-      if (cat.children) {
-        cat.children.forEach((child) => {
-          result.push(...flatten(child));
-        });
-      }
-      return result;
-    };
-    return [...acc, ...flatten(category)];
-  }, []);
+  // 【完美架構重構】直接使用樹狀結構，不需要扁平化
+  // CategoryForm 現在接受 CategoryNode[] 樹狀結構
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} data-oid="ji6-5v_">
@@ -96,7 +85,7 @@ export function UpdateCategoryModal({
           onSubmit={handleSubmit}
           isLoading={updateCategory.isPending}
           initialData={category}
-          categories={flatCategories}
+          categories={categories}
           data-oid=":vx:twg"
         />
       </DialogContent>

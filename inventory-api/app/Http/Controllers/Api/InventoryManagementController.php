@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @group 庫存管理
+
  *
  * 庫存管理 API 端點，用於管理商品庫存
  */
@@ -28,15 +28,14 @@ class InventoryManagementController extends Controller
     /**
      * 獲取庫存列表
      * 
-     * @queryParam store_id integer 門市ID，用於篩選特定門市的庫存. Example: 1
-     * @queryParam low_stock boolean 是否只顯示低庫存商品. Example: true
-     * @queryParam out_of_stock boolean 是否只顯示無庫存商品. Example: false
-     * @queryParam product_name string 按商品名稱搜尋. Example: T恤
-     * @queryParam paginate boolean 是否分頁. Example: true
-     * @queryParam per_page integer 每頁顯示數量，預設15. Example: 25
+
+
+
+
+
+
      * 
-     * @authenticated
-     * @response 200 scenario="庫存列表" {
+
      *   "data": [
      *     {
      *       "id": 1,
@@ -117,8 +116,7 @@ class InventoryManagementController extends Controller
     /**
      * 獲取單條庫存記錄詳情
      * 
-     * @authenticated
-     * @urlParam id integer required 庫存ID. Example: 1
+
      * 
      * @param int $id
      * @return JsonResponse
@@ -140,15 +138,7 @@ class InventoryManagementController extends Controller
 
     /**
      * 調整庫存
-     * 
-     * @bodyParam product_variant_id integer required 商品變體ID. Example: 1
-     * @bodyParam store_id integer required 門市ID. Example: 1
-     * @bodyParam action string required 操作類型 (add: 添加, reduce: 減少, set: 設定). Example: add
-     * @bodyParam quantity integer required 數量. Example: 10
-     * @bodyParam notes string 備註. Example: 週末促銷活動增加庫存
-     * 
-     * @authenticated
-     * 
+ * 
      * @param InventoryAdjustmentRequest $request
      * @return JsonResponse
      */
@@ -214,14 +204,13 @@ class InventoryManagementController extends Controller
     /**
      * 獲取庫存交易歷史
      * 
-     * @urlParam id integer required 庫存ID. Example: 1
-     * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
-     * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
-     * @queryParam type string 交易類型. Example: addition
-     * @queryParam per_page integer 每頁顯示數量，預設15. Example: 20
+
+
+
+
+
      * 
-     * @authenticated
-     * @response 200 {
+
      *   "current_page": 1,
      *   "data": [
      *     {
@@ -280,12 +269,7 @@ class InventoryManagementController extends Controller
 
     /**
      * 批量獲取多個商品變體的庫存情況
-     * 
-     * @bodyParam product_variant_ids array required 要查詢的商品變體ID數組. Example: [1, 2, 3]
-     * @bodyParam store_id integer 門市ID，如果提供則只返回該門市的庫存. Example: 1
-     * 
-     * @authenticated
-     * 
+ * 
      * @param Request $request
      * @return JsonResponse
      */
@@ -313,19 +297,7 @@ class InventoryManagementController extends Controller
      * 獲取特定 SKU 的所有庫存歷史記錄
      * 
      * 查詢指定 SKU 在所有門市的庫存變動歷史，支援多種篩選條件
-     * 
-     * @group 庫存管理
-     * @authenticated
-     * 
-     * @urlParam sku string required 商品SKU編號. Example: T001-M-RED
-     * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
-     * @queryParam type string 交易類型篩選 (addition, reduction, adjustment, transfer_in, transfer_out, transfer_cancel). Example: transfer_in
-     * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
-     * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
-     * @queryParam per_page integer 每頁顯示數量，預設20，最大100. Example: 50
-     * @queryParam page integer 頁碼. Example: 1
-     * 
-     * @response 200 scenario="SKU 庫存歷史" {
+ * 
      *   "data": [
      *     {
      *       "id": 1,
@@ -478,16 +450,15 @@ class InventoryManagementController extends Controller
     /**
      * 獲取所有庫存交易歷史記錄
      * 
-     * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
-     * @queryParam type string 交易類型篩選. Example: transfer_in
-     * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
-     * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
-     * @queryParam product_name string 商品名稱搜尋. Example: T恤
-     * @queryParam per_page integer 每頁顯示數量，預設20. Example: 50
-     * @queryParam page integer 頁碼. Example: 1
+
+
+
+
+
+
+
      * 
-     * @authenticated
-     * @response 200 {
+
      *   "message": "成功獲取庫存交易記錄",
      *   "data": [
      *     {

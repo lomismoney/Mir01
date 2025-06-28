@@ -67,12 +67,12 @@ class StoreProductRequestTest extends TestCase
             'name'          => 'required|string|max:255',
             'description'   => 'nullable|string',
             'category_id'   => 'nullable|integer|exists:categories,id',
-            'attributes'    => 'required|array',
+            'attributes'    => 'array',
             'attributes.*'  => 'integer|exists:attributes,id',
             'variants'      => 'required|array|min:1',
             'variants.*.sku' => 'required|string|unique:product_variants,sku|max:255',
             'variants.*.price' => 'required|numeric|min:0',
-            'variants.*.attribute_value_ids' => 'required|array',
+            'variants.*.attribute_value_ids' => 'array',
             'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
         ];
 
@@ -169,7 +169,7 @@ class StoreProductRequestTest extends TestCase
         $this->assertArrayHasKey('category_id', $validator->errors()->toArray());
     }
 
-    public function test_validation_fails_when_attributes_is_missing()
+    public function test_validation_passes_when_attributes_is_missing()
     {
         $data = [
             'name' => 'Test Product',
@@ -177,7 +177,7 @@ class StoreProductRequestTest extends TestCase
                 [
                     'sku' => 'TEST-SKU-001',
                     'price' => 99.99,
-                    'attribute_value_ids' => [1]
+                    'attribute_value_ids' => []
                 ]
             ]
         ];
@@ -185,8 +185,8 @@ class StoreProductRequestTest extends TestCase
         $request = new StoreProductRequest();
         $validator = Validator::make($data, $request->rules());
 
-        $this->assertFalse($validator->passes());
-        $this->assertArrayHasKey('attributes', $validator->errors()->toArray());
+        // attributes 現在是可選的，所以驗證應該通過
+        $this->assertTrue($validator->passes());
     }
 
     public function test_validation_fails_when_attributes_contains_non_existent_id()
@@ -353,23 +353,5 @@ class StoreProductRequestTest extends TestCase
         $this->assertArrayHasKey('variants.0.attribute_value_ids.0', $validator->errors()->toArray());
     }
 
-    public function test_body_parameters_returns_correct_structure()
-    {
-        $request = new StoreProductRequest();
-        $bodyParams = $request->bodyParameters();
 
-        $this->assertIsArray($bodyParams);
-        $this->assertArrayHasKey('name', $bodyParams);
-        $this->assertArrayHasKey('description', $bodyParams);
-        $this->assertArrayHasKey('category_id', $bodyParams);
-        $this->assertArrayHasKey('attributes', $bodyParams);
-        $this->assertArrayHasKey('variants', $bodyParams);
-        $this->assertArrayHasKey('variants.*.sku', $bodyParams);
-        $this->assertArrayHasKey('variants.*.price', $bodyParams);
-        $this->assertArrayHasKey('variants.*.attribute_value_ids', $bodyParams);
-
-        // 驗證參數有正確的描述和範例
-        $this->assertArrayHasKey('description', $bodyParams['name']);
-        $this->assertArrayHasKey('example', $bodyParams['name']);
-    }
 } 

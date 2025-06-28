@@ -49,20 +49,18 @@ class ProductController extends Controller
     /**
      * 顯示所有商品列表，支援分頁、排序和篩選功能
      * 
-     * @group 商品管理
-     * @authenticated
-     * @queryParam page integer 頁碼，預設為 1。 Example: 1
-     * @queryParam per_page integer 每頁項目數，預設為 15。 Example: 15
-     * @queryParam search string 搜尋商品名稱或 SKU。 Example: 椅子
-     * @queryParam product_name string 專門用於商品名稱模糊搜尋。 Example: 辦公椅
-     * @queryParam store_id integer 按特定門市篩選庫存。 Example: 1
-     * @queryParam category_id integer 按商品分類篩選。 Example: 2
-     * @queryParam low_stock boolean 只顯示低庫存商品。 Example: true
-     * @queryParam out_of_stock boolean 只顯示缺貨商品。 Example: false
-     * @queryParam sort_by string 排序欄位 (name, created_at)。 Example: name
-     * @queryParam sort_order string 排序方向 (asc, desc)，預設為 asc。 Example: desc
+
+
+
+
+
+
+
+
+
+
      * 
-     * @response scenario="商品列表" {
+
      *   "data": [
      *     {
      *       "id": 1,
@@ -162,17 +160,15 @@ class ProductController extends Controller
 
     /**
      * 建立新商品 (SPU/SKU)
-     * @group 商品管理
-     * @authenticated
-     * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
-     * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
-     * @bodyParam category_id integer 分類ID。 Example: 1
-     * @bodyParam attributes integer[] required 該 SPU 擁有的屬性 ID 陣列。 Example: [1, 2]
-     * @bodyParam variants object[] required SKU 變體陣列，至少需要一項。
-     * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
-     * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
-     * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
-     * @response 201 scenario="商品創建成功" {
+
+
+
+
+
+
+
+
+
      *   "data": {
      *     "id": 1,
      *     "name": "經典棉質T-shirt",
@@ -250,9 +246,8 @@ class ProductController extends Controller
     /**
      * 顯示指定的商品
      * 
-     * @group 商品管理
-     * @urlParam product integer required 商品的 ID。 Example: 1
-     * @response 200 scenario="商品詳情" {
+
+
      *   "data": {
      *     "id": 1,
      *     "name": "商品名稱",
@@ -277,19 +272,17 @@ class ProductController extends Controller
     /**
      * 更新指定的商品及其變體
      * 
-     * @group 商品管理
-     * @authenticated
-     * @urlParam product integer required 商品的 ID。 Example: 1
-     * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
-     * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
-     * @bodyParam category_id integer 分類ID。 Example: 1
-     * @bodyParam attributes integer[] 該 SPU 擁有的屬性 ID 陣列。 Example: [1, 2]
-     * @bodyParam variants object[] SKU 變體陣列。
-     * @bodyParam variants.*.id integer 變體的 ID（用於更新現有變體）。 Example: 1
-     * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
-     * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
-     * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
-     * @response 200 scenario="商品更新成功" {
+
+
+
+
+
+
+
+
+
+
+
      *   "data": {
      *     "id": 1,
      *     "name": "經典棉質T-shirt",
@@ -332,10 +325,9 @@ class ProductController extends Controller
     /**
      * 刪除指定的商品
      * 
-     * @group 商品管理
-     * @urlParam product integer required 商品的 ID。 Example: 1
+
      * 
-     * @response 204 scenario="商品刪除成功"
+
      */
     public function destroy(Product $product)
     {
@@ -377,10 +369,8 @@ class ProductController extends Controller
      * 批量刪除商品
      *
      * 根據提供的商品 ID 陣列批量刪除商品。
-     * @group 商品管理
-     * @authenticated
-     * @bodyParam ids integer[] required 要刪除的商品 ID 陣列。 Example: [1, 2, 3]
-     * @response 204
+
+
      */
     public function destroyMultiple(DestroyMultipleProductsRequest $request)
     {
@@ -439,14 +429,7 @@ class ProductController extends Controller
      * - 實施完整的錯誤處理和日誌記錄
      * - 使用 singleFile 行為自動替換現有圖片
      * - 返回所有轉換版本的 URL
-     * 
-     * @group 商品管理
-     * @authenticated
-     * 
-     * @urlParam product integer required 商品 ID Example: 1
-     * @bodyParam image file required 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
-     * 
-     * @response 200 {
+ * 
      *   "success": true,
      *   "message": "圖片上傳成功",
      *   "data": {
@@ -462,12 +445,12 @@ class ProductController extends Controller
      *   }
      * }
      * 
-     * @response 404 {
+
      *   "success": false,
      *   "message": "找不到指定的商品"
      * }
      * 
-     * @response 422 {
+
      *   "success": false,
      *   "message": "圖片上傳驗證失敗",
      *   "errors": {
@@ -475,7 +458,7 @@ class ProductController extends Controller
      *   }
      * }
      * 
-     * @response 500 {
+
      *   "success": false,
      *   "message": "圖片上傳失敗",
      *   "error": "詳細錯誤訊息"

@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * @group 報表與分析
+
  *
  * 報表與分析 API 端點，提供各種統計數據和分析報表
  */
@@ -32,29 +32,21 @@ class ReportController extends Controller
      * 
      * 返回指定商品變體在特定日期範圍內的每日庫存水平數據，
      * 用於顯示庫存趨勢圖表。
-     * 
-     * @group 報表與分析
-     * @authenticated
-     * 
-     * @queryParam product_variant_id integer required 商品變體ID. Example: 1
-     * @queryParam start_date string required 開始日期 (格式: Y-m-d). Example: 2025-01-01
-     * @queryParam end_date string required 結束日期 (格式: Y-m-d). Example: 2025-01-31
-     * 
-     * @response 200 scenario="成功獲取庫存趨勢數據" {
+ * 
      *   "data": [
      *     {"date": "2025-01-01", "quantity": 100},
      *     {"date": "2025-01-02", "quantity": 105}
      *   ]
      * }
      * 
-     * @response 422 scenario="驗證錯誤" {
+
      *   "message": "The given data was invalid.",
      *   "errors": {
      *     "product_variant_id": ["商品變體ID為必填欄位"]
      *   }
      * }
      * 
-     * @response 500 scenario="服務錯誤" {
+
      *   "message": "庫存數據獲取失敗",
      *   "error": "服務暫時不可用，請稍後再試"
      * }

@@ -11,19 +11,12 @@ use Illuminate\Support\Facades\DB;
 class OrderItemController extends Controller
 {
     /**
-     * @group 訂單項目管理
-     * @authenticated
+
      * 更新訂單項目狀態
      * 
      * 此端點用於更新單個訂單項目的狀態，並自動記錄狀態變更歷史。
      * 適用於逐項追蹤訂單進度的場景。
-     * 
-     * @urlParam order_item integer required 訂單項目 ID. Example: 1
-     * 
-     * @bodyParam status string required 新的項目狀態。Example: 已叫貨
-     * @bodyParam notes string 狀態變更備註。Example: 商品已從倉庫叫貨
-     * 
-     * @response 200 {
+ * 
      *   "data": {
      *     "id": 1,
      *     "order_number": "PO-20250619-001",
@@ -37,13 +30,13 @@ class OrderItemController extends Controller
      *     ]
      *   }
      * }
-     * @response 422 scenario="驗證失敗" {
+
      *   "message": "驗證失敗",
      *   "errors": {
      *     "status": ["項目狀態必須是：待處理、已叫貨、已出貨、完成 其中之一"]
      *   }
      * }
-     * @response 404 scenario="項目不存在" {
+
      *   "message": "找不到指定的訂單項目"
      * }
      */
