@@ -119,16 +119,18 @@ return [
     'routes' => [
         /*
          * Include only routes matching these patterns.
-         * 暫時只生成分類模組文檔，確保核心功能正常
+         * 添加門市模組到 API 文檔生成範圍
          */
         'include' => [
             'api/categories',
             'api/categories/*',
+            'api/stores',
+            'api/stores/*',
         ],
         
         /*
          * Exclude routes matching these patterns.
-         * 排除所有其他路由
+         * 移除門市模組的排除規則
          */
         'exclude' => [
             'api/login',
@@ -138,7 +140,6 @@ return [
             'api/purchases/*',
             'api/orders/*',
             'api/users/*',
-            'api/stores/*',
             'api/customers/*',
             'api/attributes/*',
             'api/inventory/*',

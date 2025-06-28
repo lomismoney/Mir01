@@ -6,7 +6,8 @@
 
 **當前狀態**：
 - ✅ **分類管理模組**：已完成遷移（POC 成功）
-- ❌ **其他 11 個模組**：待遷移
+- ✅ **門市管理模組**：已完成遷移（DTO + Controller 重構）
+- ❌ **其他 10 個模組**：待遷移
 - ✅ **Scribe 殘留**：已完全清除
 
 **預期收益**：
@@ -170,59 +171,138 @@ php artisan test --filter=模組名ControllerTest
 - **關聯模型**：Product, ProductVariant, Inventory, Attribute, AttributeValue, Category
 - **特殊功能**：批量操作、圖片上傳、複雜篩選、SKU/SPU 架構
 
-#### 詳細執行步驟
+#### ⚠️ 商品模組特殊複雜度警告
 
-**Phase 1.1: 核心 DTO 設計**
+**多層資料結構**：
 ```php
-// 需要創建的 DTO 文件
-app/Data/ProductData.php           // 主商品 DTO
-app/Data/ProductVariantData.php    // 變體 DTO  
-app/Data/BatchDeleteProductsData.php // 批量刪除 DTO
-app/Data/ProductImageUploadData.php  // 圖片上傳 DTO
+// 商品有多層結構 - 比分類複雜度高 3-4 倍
+Product (SPU - 標準產品單位)
+  └── ProductVariant (SKU - 庫存保管單位)
+        ├── Inventory (庫存記錄)
+        └── AttributeValue (屬性值組合)
 ```
 
-**Phase 1.2: ProductData DTO 核心功能**
+**關鍵挑戰**：
+1. **複雜關聯處理** - 一個商品操作可能影響多張表
+2. **資料一致性** - SKU 變更必須同步庫存和屬性
+3. **批量操作複雜度** - 需要考慮級聯影響
+4. **圖片上傳特殊性** - Scramble 對檔案處理的限制
+
+**建議策略**：
+- 📊 **首要任務**：先畫出完整的資料關係圖
+- 🔄 **分步實施**：先基礎 CRUD，再複雜功能
+- 🧪 **充分測試**：每個層級都要有完整測試
+
+#### 詳細執行步驟
+
+**Phase 1.1: 資料關係圖設計**
+```mermaid
+// 建議先完成這個步驟，確保理解所有關聯
+Product ||--o{ ProductVariant : has_many
+ProductVariant ||--o{ Inventory : has_many  
+ProductVariant }o--o{ AttributeValue : belongs_to_many
+Product }o--|| Category : belongs_to
+Product ||--o{ Media : has_many (圖片)
+```
+
+**Phase 1.2: 核心 DTO 設計**
+```php
+// 需要創建的 DTO 文件 - 升級版設計
+app/Data/ProductData.php           // 主商品 DTO (SPU)
+app/Data/ProductVariantData.php    // 變體 DTO (SKU) 
+app/Data/BatchProductOperationData.php // 批量操作專用 DTO
+app/Data/ProductImageUploadData.php    // 圖片上傳專用 DTO
+```
+
+**Phase 1.3: 批量操作 DTO 特殊設計**
+```php
+// 建議為批量操作設計專門的 DTO
+class BatchProductOperationData extends Data
+{
+    /** @var int[] 商品 ID 陣列 */
+    #[Rule(['required', 'array', 'min:1'])]
+    #[Rule(['*.integer', '*.exists:products,id'])]
+    public array $product_ids;
+    
+    /** 操作類型 */
+    #[Rule(['required', 'in:delete,update_status,update_category'])]
+    public string $operation;
+    
+    /** 操作相關的資料（根據 operation 而定） */
+    #[Rule(['nullable', 'array'])]
+    public ?array $data;
+    
+    // 業務邏輯方法
+    public function isDeleteOperation(): bool;
+    public function getAffectedProductsCount(): int;
+}
+```
+
+**Phase 1.4: 圖片上傳 DTO 特殊處理**
+```php
+// Scramble 對檔案上傳的支援需要特別處理
+class ProductImageUploadData extends Data
+{
+    /** 上傳的圖片檔案 */
+    #[Rule(['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:5120'])]
+    public UploadedFile $image;
+    
+    /** 圖片類型 */
+    #[Rule(['required', 'in:main,gallery,thumbnail'])]
+    public string $type;
+    
+    /** 是否設為主圖 */
+    #[Rule(['boolean'])]
+    public bool $is_primary = false;
+    
+    /** 圖片說明 */
+    #[Rule(['nullable', 'string', 'max:255'])]
+    public ?string $alt_text = null;
+}
+```
+
+**Phase 1.5: ProductData DTO 核心功能（升級版）**
 ```php
 class ProductData extends Data
 {
     // SPU 基本信息
-    public readonly string $name;
-    public readonly ?string $description;
-    public readonly ?int $category_id;
+    #[Rule(['required', 'string', 'max:255'])]
+    public string $name;
     
-    // 屬性關聯
-    public readonly array $attributes;
+    #[Rule(['nullable', 'string', 'max:1000'])]
+    public ?string $description;
     
-    // SKU 變體集合
-    public readonly DataCollection $variants;
+    #[Rule(['nullable', 'exists:categories,id'])]
+    public ?int $category_id;
+    
+    // 屬性關聯（複雜結構）
+    #[Rule(['array'])]
+    public array $attributes = [];
+    
+    // SKU 變體集合（最複雜的部分）
+    public DataCollection $variants;
     
     // 業務邏輯方法
-    public function isSingleVariant(): bool;
-    public function getAllSkus(): array;
-    public function getPriceRange(): array;
+    public function isSingleVariant(): bool {
+        return $this->variants->count() === 1;
+    }
+    
+    public function getAllSkus(): array {
+        return $this->variants->pluck('sku')->toArray();
+    }
+    
+    public function getPriceRange(): array {
+        $prices = $this->variants->pluck('price');
+        return [
+            'min' => $prices->min(),
+            'max' => $prices->max()
+        ];
+    }
+    
+    public function hasInventoryTracking(): bool {
+        return $this->variants->some(fn($variant) => $variant->track_inventory);
+    }
 }
-```
-
-**Phase 1.3: Controller 重構清單**
-```php
-// ProductController 需要更新的方法
-✅ store(ProductData $data)
-✅ update(ProductData $data, Product $product)  
-✅ show() - 無需修改，只需確保 Resource 正確
-
-// 專用 Controller 重構
-✅ BatchDeleteProductController::__invoke(BatchDeleteProductsData $data)
-✅ ProductImageUploadController::__invoke(ProductImageUploadData $data, Product $product)
-```
-
-**Phase 1.4: Scramble 配置更新**
-```php
-'include' => [
-    'api/categories',
-    'api/categories/*',
-    'api/products',              // 新增基本商品路由
-    'api/products/*',            // 新增所有商品子路由
-],
 ```
 
 ### 🔥 第二優先級：訂單管理模組遷移
@@ -418,6 +498,136 @@ type UpdateCategoryParams = {
 2. **自動化測試**：考慮添加 API 調用的自動化測試
 3. **文檔即程式碼**：確保測試頁面與實際使用方式保持一致
 
+#### 問題 4: 商品模組多層資料結構複雜度 🔴
+**問題描述**：
+商品模組具有比分類模組複雜 3-4 倍的多層資料結構，一個操作可能影響多張表。
+
+**具體挑戰**：
+```php
+// 複雜的資料層級關係
+Product (SPU)
+  └── ProductVariant (SKU)
+        ├── Inventory (庫存)
+        ├── AttributeValue (屬性值)
+        └── Media (圖片)
+
+// 一個商品刪除操作的級聯影響
+1. 檢查是否有未完成訂單
+2. 刪除所有 ProductVariant
+3. 清理相關 Inventory 記錄
+4. 刪除 AttributeValue 關聯
+5. 清理 Media 檔案
+```
+
+**解決方案**：
+1. **資料關係圖優先**：先完成完整的 ER 圖設計
+2. **分層 DTO 設計**：每個層級都有對應的 DTO
+3. **事務處理**：確保複雜操作的原子性
+4. **軟刪除策略**：避免硬刪除造成的資料不一致
+
+**預防措施**：
+```php
+// 建議的 DTO 設計模式
+class ProductCreateData extends Data {
+    // 只包含創建 SPU 需要的基本欄位
+}
+
+class ProductVariantCreateData extends Data {
+    // 專門處理 SKU 創建
+    public int $product_id;
+    public array $attribute_value_ids;
+}
+
+class ProductWithVariantsData extends Data {
+    // 處理完整商品創建（SPU + SKU）
+    public ProductCreateData $product;
+    public DataCollection $variants; // ProductVariantCreateData[]
+}
+```
+
+#### 問題 5: 批量操作 DTO 設計複雜度 🟡
+**問題描述**：
+批量操作需要處理不同類型的操作，每種操作的參數結構不同，單一 DTO 難以涵蓋所有情況。
+
+**具體挑戰**：
+```php
+// 不同批量操作的參數差異很大
+批量刪除：只需要 ID 陣列
+批量更新分類：需要 ID 陣列 + 新分類 ID
+批量更新狀態：需要 ID 陣列 + 新狀態值
+批量設定促銷：需要 ID 陣列 + 促銷規則
+```
+
+**解決方案**：
+1. **操作類型驅動設計**：根據 operation 類型動態驗證
+2. **策略模式**：不同操作類型使用不同的處理策略
+3. **泛型 DTO**：設計通用的批量操作結構
+
+**最佳實踐**：
+```php
+class BatchProductOperationData extends Data
+{
+    public array $product_ids;
+    public string $operation;
+    public ?array $data;
+    
+    // 動態驗證規則
+    public static function rules(): array
+    {
+        return [
+            'product_ids' => ['required', 'array', 'min:1'],
+            'product_ids.*' => ['integer', 'exists:products,id'],
+            'operation' => ['required', 'in:delete,update_category,update_status'],
+            'data' => ['nullable', 'array'],
+            // 根據 operation 動態添加規則
+            'data.category_id' => [
+                Rule::requiredIf(fn() => $this->operation === 'update_category'),
+                'exists:categories,id'
+            ],
+            'data.status' => [
+                Rule::requiredIf(fn() => $this->operation === 'update_status'),
+                'in:active,inactive,discontinued'
+            ],
+        ];
+    }
+}
+```
+
+#### 問題 6: Scramble 圖片上傳處理限制 🟡
+**問題描述**：
+Scramble 對 `UploadedFile` 類型的自動推斷可能不完整，需要特殊處理才能正確生成 API 文檔。
+
+**具體挑戰**：
+```php
+// Scramble 可能無法正確推斷檔案上傳的 Schema
+class ProductImageUploadData extends Data
+{
+    public UploadedFile $image; // 可能不會生成正確的 OpenAPI Schema
+}
+```
+
+**解決方案**：
+1. **手動 Schema 定義**：使用 Scramble 的手動 Schema 覆蓋
+2. **分離式設計**：將檔案上傳與資料更新分離
+3. **充分測試**：確保前端類型生成正確
+
+**最佳實踐**：
+```php
+#[OpenApi\Schema(
+    schema: 'ProductImageUpload',
+    properties: [
+        'image' => ['type' => 'string', 'format' => 'binary'],
+        'type' => ['type' => 'string', 'enum' => ['main', 'gallery', 'thumbnail']],
+        'is_primary' => ['type' => 'boolean'],
+        'alt_text' => ['type' => 'string', 'nullable' => true]
+    ]
+)]
+class ProductImageUploadData extends Data
+{
+    // ...
+}
+```
+
 ### 🛠️ 最佳實踐總結
 
 #### 後續模組遷移檢查清單
@@ -434,11 +644,21 @@ type UpdateCategoryParams = {
 - [ ] 運行 `tsc --noEmit` 檢查類型錯誤
 - [ ] 確保編譯無錯誤
 
+**商品模組特殊檢查（高複雜度模組適用）**
+- [ ] 完成完整的資料關係圖設計
+- [ ] 確認多層資料結構的 DTO 設計
+- [ ] 檢查批量操作的動態驗證邏輯
+- [ ] 驗證圖片上傳的 Scramble Schema 生成
+- [ ] 測試級聯操作的事務完整性
+- [ ] 確認軟刪除策略的實施
+
 **功能驗證檢查**
 - [ ] 基本 CRUD 操作測試
 - [ ] 錯誤處理測試
 - [ ] 前端介面操作驗證
 - [ ] API 響應格式檢查
+- [ ] 批量操作功能驗證
+- [ ] 檔案上傳功能測試
 ```
 
 #### 推薦工作流程
@@ -478,7 +698,40 @@ npx tsc --noEmit --skipLibCheck
 - 複雜業務邏輯放在 Service 層
 - 分階段實施，先基礎功能再高級功能
 
-#### 2. 大量關聯數據的性能 🟡
+#### 2. 商品模組多層資料結構複雜度 🔴
+**風險**：商品模組的 SPU→SKU→Inventory→AttributeValue 多層結構可能導致：
+- DTO 設計過於複雜
+- 級聯操作的資料一致性問題
+- 批量操作的事務處理複雜度
+- 圖片上傳與 Scramble 的兼容性問題
+
+**緩解措施**：
+- **📊 資料關係圖優先**：先完成完整的 ER 圖設計
+- **🔄 分層實施**：先完成 Product (SPU) 層，再處理 ProductVariant (SKU) 層
+- **🛡️ 事務保護**：所有複雜操作使用資料庫事務
+- **🧪 充分測試**：每個層級都建立完整的測試覆蓋
+- **📝 軟刪除策略**：避免硬刪除造成的關聯資料問題
+
+#### 3. 批量操作 DTO 設計複雜度 🟡
+**風險**：不同批量操作類型的參數結構差異巨大，可能導致：
+- 單一 DTO 無法涵蓋所有操作類型
+- 動態驗證邏輯過於複雜
+- 錯誤處理困難
+
+**緩解措施**：
+- **策略模式**：為不同操作類型設計獨立的處理策略
+- **動態驗證**：使用 Laravel 的條件驗證規則
+- **明確文檔**：每種操作類型都有清晰的使用範例
+
+#### 4. Scramble 檔案上傳支援限制 🟡
+**風險**：Scramble 對 `UploadedFile` 類型的自動推斷可能不完整
+
+**緩解措施**：
+- **手動 Schema 定義**：使用 Scramble 的 OpenAPI 註解覆蓋
+- **分離式設計**：檔案上傳與資料更新使用不同的端點
+- **前端測試**：確保生成的 TypeScript 類型正確
+
+#### 5. 大量關聯數據的性能 🟡
 **風險**：複雜關聯查詢可能影響 API 性能
 
 **緩解措施**：
@@ -486,7 +739,7 @@ npx tsc --noEmit --skipLibCheck
 - 適當使用 Lazy Loading
 - 監控查詢性能
 
-#### 3. 前後端類型同步 🟡
+#### 6. 前後端類型同步 🟡
 **風險**：API 變更可能導致前端類型不同步
 
 **緩解措施**：
@@ -525,13 +778,13 @@ cd inventory-client && npm run api:types
 | 模組 | DTO 設計 | Controller 重構 | Scramble 配置 | 測試驗證 | 完成狀態 | 經驗教訓 |
 |------|----------|----------------|---------------|----------|----------|----------|
 | 分類管理 | ✅ | ✅ | ✅ | ✅ | ✅ **完成** | ⚠️ Hook命名一致性 |
-| 商品管理 | ⏳ | ⏳ | ⏳ | ⏳ | 🚧 **進行中** | |
+| 門市管理 | ✅ | ✅ | ⏳ | ⏳ | 🚧 **後端完成** | ✅ DTO驅動架構 |
+| 商品管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
 | 商品變體 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
 | 訂單管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
 | 庫存管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
 | 進貨管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
 | 用戶管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
-| 門市管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
 | 客戶管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
 | 屬性管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
 | 安裝管理 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ **待開始** | |
@@ -540,9 +793,9 @@ cd inventory-client && npm run api:types
 ### 關鍵指標追蹤
 | 指標 | 目標 | 當前值 | 達成率 |
 |------|------|--------|--------|
-| 模組遷移完成率 | 100% | 8.3% (1/12) | 8.3% |
-| API 端點覆蓋率 | 100% | ~5% | 5% |
-| 類型安全覆蓋率 | 100% | ~5% | 5% |
+| 模組遷移完成率 | 100% | 16.7% (2/12) | 16.7% |
+| API 端點覆蓋率 | 100% | ~15% | 15% |
+| 類型安全覆蓋率 | 100% | ~15% | 15% |
 | 自動化測試通過率 | 100% | 100% | 100% |
 
 ---
@@ -632,7 +885,30 @@ cd inventory-client && npm run api:types
 
 ---
 
-*文檔版本：v1.1*  
+*文檔版本：v1.2*  
 *創建日期：2024年*  
-*最後更新：2024年（添加分類模組遷移經驗教訓）*  
+*最後更新：2024年（添加商品模組複雜度分析與風險評估）*  
 *負責人：開發團隊*
+
+## 📈 文檔更新記錄
+
+**v1.3** (最新)
+- ✅ 門市管理模組遷移完成：DTO 設計 + Controller 重構
+- ✅ 成功實施 StoreData DTO 驅動架構，包含動態驗證和用戶關聯邏輯
+- ✅ 清理舊 FormRequest 文件，完成架構轉型
+- ✅ 更新進度追蹤表：模組完成率提升至 16.7% (2/12)
+
+**v1.2**
+- ✅ 添加商品模組特殊複雜度警告與詳細設計方案
+- ✅ 新增 3 個商品模組相關的風險項目評估
+- ✅ 補充批量操作、圖片上傳、多層資料結構的最佳實踐
+- ✅ 更新檢查清單，包含高複雜度模組的特殊檢查項目
+
+**v1.1**
+- ✅ 添加分類模組遷移經驗教訓
+- ✅ 建立常見問題與解決方案章節
+- ✅ 完善最佳實踐和檢查清單
+
+**v1.0**
+- ✅ 初始遷移計劃建立
+- ✅ 基礎架構與流程定義

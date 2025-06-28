@@ -122,11 +122,11 @@ function isDescendantInTree(
       for (const child of node.children) {
         if (child.id === targetId) return true;
         if (checkDescendant(child, targetId)) return true;
-      }
-    }
-    return false;
   }
-  
+    }
+  return false;
+}
+
   const parentNode = findNode(categories, parentId);
   return parentNode ? checkDescendant(parentNode, targetId) : false;
 }
@@ -161,9 +161,9 @@ function buildCategoryOptions(categories: CategoryNode[]): CategoryOption[] {
     // 遞迴處理子分類
     if (category.children && category.children.length > 0) {
       category.children.forEach((child) => {
-        addCategoryOption(child, depth + 1, displayName);
-      });
-    }
+      addCategoryOption(child, depth + 1, displayName);
+    });
+  }
   }
 
   // 處理所有頂層分類

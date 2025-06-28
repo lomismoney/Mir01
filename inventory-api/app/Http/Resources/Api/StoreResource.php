@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Resources\Api\InventoryResource;
 use App\Http\Resources\Api\PurchaseResource;
+use App\Http\Resources\Api\SaleResource;
 use App\Http\Resources\Api\InventoryTransferResource;
 
 class StoreResource extends JsonResource
@@ -29,6 +30,7 @@ class StoreResource extends JsonResource
             'users' => UserResource::collection($this->whenLoaded('users')),
             'inventories' => InventoryResource::collection($this->whenLoaded('inventories')),
             'purchases' => PurchaseResource::collection($this->whenLoaded('purchases')),
+            'sales' => SaleResource::collection($this->whenLoaded('sales')),
             'transfers_out' => InventoryTransferResource::collection($this->whenLoaded('transfersOut')),
             'transfers_in' => InventoryTransferResource::collection($this->whenLoaded('transfersIn')),
         ];

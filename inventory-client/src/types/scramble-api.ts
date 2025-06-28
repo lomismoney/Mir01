@@ -142,13 +142,6 @@ export interface components {
             /** Format: date-time */
             updated_at: string | null;
         };
-        /** ReorderCategoriesRequest */
-        ReorderCategoriesRequest: {
-            items: {
-                id: number;
-                sort_order: number;
-            }[];
-        };
     };
     responses: {
         /** @description Authorization error */
@@ -358,11 +351,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReorderCategoriesRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {
@@ -377,7 +366,6 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
-            422: components["responses"]["ValidationException"];
         };
     };
 }

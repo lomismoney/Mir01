@@ -3,7 +3,7 @@
     "info": {
         "title": "Inventory API - DTO Enhanced",
         "version": "2.0.0",
-        "description": "\u5df2\u8f49\u63db\u70ba DTO \u67b6\u69cb\u7684\u6a21\u7d44\u6587\u6a94\uff08\u8207 Scribe \u4e26\u884c\u904b\u884c\uff09\u3002\u6b64\u6587\u6a94\u5c08\u9580\u5c55\u793a\u4f7f\u7528 spatie/laravel-data DTO \u7684\u6a21\u7d44\uff0c\u63d0\u4f9b\u66f4\u7cbe\u78ba\u7684 API \u5951\u7d04\u5b9a\u7fa9\u3002"
+        "description": "\u4f7f\u7528 Scramble PRO \u751f\u6210\u7684 API \u6587\u6a94\u3002\u63a1\u7528 DTO \u67b6\u69cb\uff0c\u63d0\u4f9b\u7cbe\u78ba\u7684\u985e\u578b\u63a8\u65b7\u548c\u5b8c\u6574\u7684 OpenAPI 3.0 \u5951\u7d04\u5b9a\u7fa9\u3002"
     },
     "servers": [
         {
@@ -249,16 +249,6 @@
                 "tags": [
                     "Category"
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ReorderCategoriesRequest"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
                         "description": "",
@@ -286,9 +276,6 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -417,34 +404,6 @@
                     "updated_at"
                 ],
                 "title": "CategoryResource"
-            },
-            "ReorderCategoriesRequest": {
-                "type": "object",
-                "properties": {
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "type": "integer"
-                                },
-                                "sort_order": {
-                                    "type": "integer",
-                                    "minimum": 0
-                                }
-                            },
-                            "required": [
-                                "id",
-                                "sort_order"
-                            ]
-                        }
-                    }
-                },
-                "required": [
-                    "items"
-                ],
-                "title": "ReorderCategoriesRequest"
             }
         },
         "responses": {
