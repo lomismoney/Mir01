@@ -2,6 +2,15 @@
 
 namespace App\Models;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Laravel\Eloquent\Filter\SearchFilter;
+use ApiPlatform\Laravel\Eloquent\Filter\OrderFilter;
+use ApiPlatform\Metadata\QueryParameter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +23,43 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * 與 AttributeValue 是一對多關係（一個屬性類型可以有多個值）
  * 與 Product（SPU）通過樞紐表建立多對多關係
  */
+#[ApiResource(
+    shortName: 'Attribute',
+    description: '商品屬性管理',
+    operations: [
+        new GetCollection(
+            // security: "is_granted('viewAny', 'App\\Models\\Attribute')"
+        ),
+        new Get(
+            // security: "is_granted('view', object)"
+        ),
+        new Post(
+            // security: "is_granted('create', 'App\\Models\\Attribute')"
+        ),
+        new Put(
+            // security: "is_granted('update', object)"
+        ),
+        new Delete(
+            // security: "is_granted('delete', object) and !object.values()->exists()"
+        )
+    ],
+    paginationItemsPerPage: 20,
+    paginationClientEnabled: true,
+    paginationClientItemsPerPage: true
+)]
+#[QueryParameter(
+    key: 'search',
+    filter: SearchFilter::class,
+    property: 'name'
+)]
+#[QueryParameter(
+    key: 'order[name]',
+    filter: OrderFilter::class
+)]
+#[QueryParameter(
+    key: 'order[created_at]',
+    filter: OrderFilter::class
+)]
 class Attribute extends Model
 {
     use HasFactory;

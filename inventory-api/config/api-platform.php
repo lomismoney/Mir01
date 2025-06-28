@@ -24,8 +24,8 @@ return [
 
     'routes' => [
         'domain' => null,
-        // 全域中間件 - 使用 Sanctum 認證
-        'middleware' => ['auth:sanctum']
+        // 全域中間件在 defaults 中配置
+        'middleware' => [],
     ],
 
     'resources' => [
@@ -53,6 +53,9 @@ return [
     ],
 
     'defaults' => [
+        'extra_properties' => [
+            'rfc_7807_compliant_errors' => false
+        ],
         'pagination_enabled' => true,
         'pagination_partial' => false,
         'pagination_client_enabled' => true,
@@ -61,7 +64,7 @@ return [
         'pagination_items_per_page' => 15, // 與現有系統一致
         'pagination_maximum_items_per_page' => 100,
         'route_prefix' => '/api',
-        'middleware' => ['auth:sanctum'],
+        'middleware' => ['auth:sanctum'], // 啟用 Sanctum 認證
     ],
 
     'pagination' => [
@@ -82,9 +85,21 @@ return [
     // 保持 snake_case 與現有 API 一致
     'name_converter' => null,
 
+    // 暫時註釋掉以獲得更詳細的錯誤信息
     'exception_to_status' => [
-        AuthenticationException::class => 401,
-        AuthorizationException::class => 403,
+        // 根據 API Platform 官方文檔的標準映射
+        \Symfony\Component\Serializer\Exception\ExceptionInterface::class => 400,
+        \ApiPlatform\Exception\InvalidArgumentException::class => \Illuminate\Http\Response::HTTP_BAD_REQUEST,
+        \ApiPlatform\ParameterValidator\Exception\ValidationExceptionInterface::class => 400,
+
+        // 驗證異常
+        \ApiPlatform\Validator\Exception\ValidationException::class => \Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY,
+        
+        // Laravel 特定異常
+        \Illuminate\Validation\ValidationException::class => 422,
+        \Illuminate\Database\QueryException::class => 500,
+        \Illuminate\Auth\AuthenticationException::class => 401,
+        \Illuminate\Auth\Access\AuthorizationException::class => 403,
     ],
 
     'swagger_ui' => [

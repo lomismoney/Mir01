@@ -133,7 +133,8 @@ Route::middleware('auth:sanctum')->group(function () {
      * PUT    /api/stores/{id}   - 更新指定分店
      * DELETE /api/stores/{id}   - 刪除指定分店
      */
-    Route::apiResource('stores', StoreController::class)->parameters(['stores' => 'store']);
+    // 暫時註釋掉原有的 stores 路由以測試 API Platform
+    // Route::apiResource('stores', StoreController::class)->parameters(['stores' => 'store']);
     
     /**
      * 用戶分店管理路由
@@ -158,7 +159,8 @@ Route::middleware('auth:sanctum')->group(function () {
      * PUT    /api/categories/{id}   - 更新指定分類
      * DELETE /api/categories/{id}   - 刪除指定分類
      */
-    Route::apiResource('categories', CategoryController::class)->parameters(['categories' => 'category']);
+    // 暫時註釋掉原有的 categories 路由以測試 API Platform
+    // Route::apiResource('categories', CategoryController::class)->parameters(['categories' => 'category']);
     
     /**
      * 批量重新排序分類路由
@@ -167,7 +169,8 @@ Route::middleware('auth:sanctum')->group(function () {
      * 
      * POST   /api/categories/batch-reorder  - 批量更新分類順序
      */
-    Route::post('/categories/batch-reorder', [CategoryController::class, 'reorder'])->middleware('auth:sanctum');
+    // 暫時註釋掉原有的批量排序路由以測試 API Platform
+    // Route::post('/categories/batch-reorder', [CategoryController::class, 'reorder'])->middleware('auth:sanctum');
 
     /**
      * 商品屬性管理路由
@@ -181,7 +184,8 @@ Route::middleware('auth:sanctum')->group(function () {
      * PUT    /api/attributes/{id}   - 更新指定屬性
      * DELETE /api/attributes/{id}   - 刪除指定屬性
      */
-    Route::apiResource('attributes', AttributeController::class)->parameters(['attributes' => 'attribute']);
+    // 暫時註釋掉原有的 attributes 路由以測試 API Platform
+    // Route::apiResource('attributes', AttributeController::class)->parameters(['attributes' => 'attribute']);
 
     /**
      * 屬性值管理路由（巢狀資源，使用淺層路由）

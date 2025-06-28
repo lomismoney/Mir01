@@ -3,10 +3,45 @@
 namespace App\Models;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Laravel\Eloquent\Filter\PartialSearchFilter;
+use ApiPlatform\Metadata\QueryParameter;
+// use App\Http\Requests\StoreFormRequest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-#[ApiResource]
+#[ApiResource(
+    shortName: 'Store',
+    description: '分店管理',
+    operations: [
+        new GetCollection(),
+        new Get(),
+        new Post(),
+        new Put(),
+        new Delete()
+    ],
+    paginationItemsPerPage: 15,
+    paginationClientEnabled: true,
+    paginationClientItemsPerPage: true,
+    rules: [
+        'name' => 'required|string|max:255',
+        'address' => 'nullable|string|max:500',
+        'code' => 'nullable|string|max:50', // 允許 code 為空
+        'phone' => 'nullable|string|max:50',
+        'manager_id' => 'nullable|integer|exists:users,id',
+        'is_active' => 'nullable|boolean',
+        'description' => 'nullable|string|max:1000',
+    ]
+)]
+#[QueryParameter(
+    key: 'search',
+    filter: PartialSearchFilter::class,
+    property: 'name'
+)]
 class Store extends Model
 {
     use HasFactory;
@@ -14,7 +49,31 @@ class Store extends Model
     /**
      * 允許大量賦值的屬性設定
      */
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'address',
+        'code',
+        'phone',
+        'manager_id',
+        'is_active',
+        'description'
+    ];
+
+    /**
+     * 類型轉換
+     */
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    /**
+     * 預設屬性值
+     * 解決 API Platform POST 請求時 code 欄位沒有預設值的問題
+     */
+    protected $attributes = [
+        'is_active' => true,
+        'code' => null, // 允許 code 為 null
+    ];
 
     /**
      * 獲取該門市的所有用戶
@@ -47,6 +106,14 @@ class Store extends Model
     public function sales()
     {
         return $this->hasMany(Sale::class);
+    }
+
+    /**
+     * 獲取該門市的所有訂單
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 
     /**

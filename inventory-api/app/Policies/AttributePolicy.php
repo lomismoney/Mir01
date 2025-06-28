@@ -18,38 +18,38 @@ class AttributePolicy
      * 在執行任何權限檢查之前，先檢查使用者是否為管理員
      * 如果是管理員，直接允許所有操作；如果不是，繼續執行個別權限檢查
      * 
-     * @param User $user
+     * @param User|null $user
      * @param string $ability
      * @return bool|null
      */
-    public function before(User $user, string $ability): ?bool
+    public function before(?User $user, string $ability): ?bool
     {
-        return $user->isAdmin() ? true : null;
+        return $user && $user->isAdmin() ? true : null;
     }
 
     /**
      * 檢查使用者是否可以查看屬性列表
-     * 所有認證用戶都可以查看屬性列表（用於建立商品變體）
+     * 所有用戶都可以查看屬性列表（包括未認證用戶）
      * 
-     * @param User $user
+     * @param User|null $user
      * @return bool
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user = null): bool
     {
-        return true; // 所有認證用戶都可以查看屬性列表
+        return true; // 所有用戶都可以查看屬性列表
     }
 
     /**
      * 檢查使用者是否可以查看特定屬性
-     * 所有認證用戶都可以查看屬性詳情
+     * 所有用戶都可以查看屬性詳情（包括未認證用戶）
      * 
-     * @param User $user
+     * @param User|null $user
      * @param Attribute $attribute
      * @return bool
      */
-    public function view(User $user, Attribute $attribute): bool
+    public function view(?User $user, Attribute $attribute): bool
     {
-        return true; // 所有認證用戶都可以查看屬性詳情
+        return true; // 所有用戶都可以查看屬性詳情
     }
 
     /**

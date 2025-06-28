@@ -16,25 +16,25 @@ class CategoryPolicy
 {
     /**
      * 檢視所有分類列表的權限
-     * 所有認證用戶都可以查看分類列表（用於商品分類選擇）
+     * 所有用戶都可以查看分類列表（包括未認證用戶）
      * 
-     * @param User $user 當前用戶
+     * @param User|null $user 當前用戶（可為 null）
      * @return bool
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user = null): bool
     {
         return true; 
     }
 
     /**
      * 檢視單一分類的權限
-     * 所有認證用戶都可以查看分類詳情
+     * 所有用戶都可以查看分類詳情（包括未認證用戶）
      * 
-     * @param User $user 當前用戶
+     * @param User|null $user 當前用戶（可為 null）
      * @param Category $category 分類實例
      * @return bool
      */
-    public function view(User $user, Category $category): bool
+    public function view(?User $user, Category $category): bool
     {
         return true;
     }

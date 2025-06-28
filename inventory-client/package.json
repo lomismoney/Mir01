@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "api:types": "openapi-typescript openapi.yaml -o src/types/api.ts"
+    "api:types": "openapi-typescript openapi.yaml -o src/types/api.ts",
+    "api:types:scribe": "openapi-typescript openapi.yaml -o src/types/api-scribe.ts",
+    "api:types:platform": "openapi-typescript http://127.0.0.1:8000/api/docs.jsonopenapi -o src/types/api-platform.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

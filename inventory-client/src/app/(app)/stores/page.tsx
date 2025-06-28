@@ -4,11 +4,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Store as StoreIcon, PlusSquare, Edit, Trash } from "lucide-react";
 import {
-  useStores,
-  useCreateStore,
-  useUpdateStore,
-  useDeleteStore,
-} from "@/hooks/queries/useEntityQueries";
+  useStoresPlatform,
+  useCreateStorePlatform,
+  useUpdateStorePlatform,
+  useDeleteStorePlatform,
+} from "@/hooks/queries/useStoresPlatform";
 import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ import {
   StoreActions,
 } from "@/components/stores/stores-columns";
 import { StoresDataTable } from "@/components/stores/stores-data-table";
+// import { AuthDebugger } from '@/components/debug/AuthDebugger'; // 暫時註釋
 
 // Store 類型定義
 type Store = {
@@ -62,10 +63,10 @@ export default function StoresPage() {
   const isAdmin = user?.isAdmin || false;
 
   // API Hooks
-  const { data: storesResponse, isLoading } = useStores();
-  const createStoreMutation = useCreateStore();
-  const updateStoreMutation = useUpdateStore();
-  const deleteStoreMutation = useDeleteStore();
+  const { data: storesResponse, isLoading } = useStoresPlatform();
+  const createStoreMutation = useCreateStorePlatform();
+  const updateStoreMutation = useUpdateStorePlatform();
+  const deleteStoreMutation = useDeleteStorePlatform();
 
   // 對話框狀態
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -190,8 +191,18 @@ export default function StoresPage() {
     setEditStoreAddress("");
   };
 
-  // 從響應中提取 stores 數據
-  const stores = storesResponse?.data || [];
+  // 從響應中提取 stores 數據，並確保類型相容
+  const stores = (storesResponse?.stores || []).map((store): Store => ({
+    id: store.id || 0,
+    name: store.name || '',
+    address: store.address || null,
+    phone: store.phone || null,
+    status: store.is_active === "1" ? 'active' : 'inactive',
+    created_at: store.created_at || '',
+    updated_at: store.updated_at || '',
+    inventory_count: 0, // API Platform 暫時不提供此數據
+    users_count: 0, // API Platform 暫時不提供此數據
+  }));
 
   // 分店動作定義
   const storeActions: StoreActions = {
@@ -204,6 +215,9 @@ export default function StoresPage() {
 
   return (
     <div className="container mx-auto py-8 space-y-6" data-oid="xh5wzz:">
+      {/* 暫時添加認證調試組件 */}
+      {/* <AuthDebugger /> */}
+      
       {/* 頁面標題 */}
       <div className="flex items-center justify-between" data-oid="ir3x0zi">
         <div data-oid=".w-f3ei">

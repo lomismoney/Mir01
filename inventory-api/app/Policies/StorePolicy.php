@@ -11,16 +11,16 @@ class StorePolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user = null): bool
     {
-        // 所有用戶都可以查看分店列表
+        // 測試：絕對允許訪問（包括未認證用戶）
         return true;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Store $store): bool
+    public function view(?User $user, Store $store): bool
     {
         // 所有用戶都可以查看分店詳情
         return true;
