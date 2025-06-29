@@ -678,18 +678,28 @@ export function useUsers(filters?: UserQueryParams) {
       const users = response?.data?.data || response?.data || response || [];
       
       // 確保返回的是陣列
-      if (!Array.isArray(users)) return [];
+      if (!Array.isArray(users)) return { data: [], meta: {} };
       
       // 🔧 數據轉換層：在此處理所有用戶數據的統一格式化
-      return users.map((user: any) => {
+      const processedUsers = users.map((user: any) => {
         // 處理 stores 屬性，確保它總是存在且為陣列
         const stores = user.stores || [];
+        const roles = user.roles || [];
         
         return {
           ...user,
-          stores: Array.isArray(stores) ? stores : []
+          id: user.id || 0,
+          name: user.name || '未知用戶',
+          username: user.username || 'n/a',
+          stores: Array.isArray(stores) ? stores : [],
+          roles: Array.isArray(roles) ? roles.map(String) : [] // 確保 roles 是 string[]
         };
       });
+
+      return {
+        data: processedUsers,
+        meta: response?.data?.meta || {}
+      }
     },
     
     // 🚀 體驗優化配置（第二階段淨化行動）
@@ -3381,8 +3391,8 @@ export function useOrderDetail(orderId: number | null) {
     queryKey: QUERY_KEYS.ORDER(orderId!), // 使用 ['orders', orderId] 作為唯一鍵
     queryFn: async () => {
       if (!orderId) return null; // 如果沒有 ID，則不執行查詢
-      const { data, error } = await apiClient.GET("/api/orders/{order}", {
-        params: { path: { order: orderId } },
+      const { data, error } = await apiClient.GET("/api/orders/{id}", {
+        params: { path: { id: orderId } },
       });
       if (error) {
         const errorMessage = parseApiError(error);
@@ -3662,8 +3672,8 @@ export function useUpdateOrder() {
 
   return useMutation({
     mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
-      const { data, error } = await apiClient.PUT("/api/orders/{order}", {
-        params: { path: { order: payload.id } },
+      const { data, error } = await apiClient.PUT("/api/orders/{id}", {
+        params: { path: { id: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -3694,8 +3704,8 @@ export function useDeleteOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/orders/{order}", {
-        params: { path: { order: orderId } },
+      const { data, error } = await apiClient.DELETE("/api/orders/{id}", {
+        params: { path: { id: orderId } },
       });
       if (error) throw error;
       return data;

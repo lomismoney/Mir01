@@ -63,10 +63,14 @@ export default function UsersPage() {
 
   // 使用搜索功能的 useUsers hook（類型安全版本）
   const {
-    data: users = [],
+    data: usersResponse,
     isLoading,
     error,
   } = useUsers(searchQuery ? { "filter[search]": searchQuery } : undefined);
+
+  const usersData = usersResponse?.data || [];
+  const meta = usersResponse?.meta;
+
   const createUserMutation = useCreateUser();
   const deleteUserMutation = useDeleteUser();
 
@@ -77,6 +81,7 @@ export default function UsersPage() {
   // 新用戶表單狀態
   const [newUserName, setNewUserName] = useState("");
   const [newUsername, setNewUsername] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newRoles, setNewRoles] = useState<string[]>([]); // 多角色支持
 
@@ -84,6 +89,7 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [editUserName, setEditUserName] = useState("");
   const [editUsername, setEditUsername] = useState("");
+  const [editUserEmail, setEditUserEmail] = useState("");
   const [editPassword, setEditPassword] = useState("");
   const [editRoles, setEditRoles] = useState<string[]>([]); // 多角色支持
 
@@ -125,7 +131,7 @@ export default function UsersPage() {
    */
   const handleCreateUser = () => {
     // 基本驗證
-    if (!newUserName.trim() || !newUsername.trim() || !newPassword.trim()) {
+    if (!newUserName.trim() || !newUsername.trim() || !newPassword.trim() || !newUserEmail.trim()) {
       toast.error("請填寫所有必填欄位");
       return;
     }
@@ -147,9 +153,9 @@ export default function UsersPage() {
         name: newUserName,
         username: newUsername,
         password: newPassword,
-        password_confirmation: newPassword,
-        roles: newRoles,
-      } as any, // 暫時使用 any 處理 API 類型定義問題
+        roles: newRoles as ("admin" | "staff" | "viewer" | "installer")[],
+        role: newRoles[0] || "viewer", // API 要求的單一 role 字段
+      },
       {
         onSuccess: () => {
           toast.success("用戶建立成功！");
@@ -193,11 +199,10 @@ export default function UsersPage() {
   const handleEditUser = (userToEdit: UserItem) => {
     setEditingUser(userToEdit);
     setEditUserName(userToEdit.name || "");
-    // 使用 username 字段
-    setEditUsername((userToEdit as any).username || "");
+    setEditUsername(userToEdit.username || "");
+    setEditUserEmail(userToEdit.email || "");
     setEditPassword(""); // 密碼留空，表示不更改
-    // 設置用戶的角色陣列
-    setEditRoles((userToEdit as any).roles || []);
+    setEditRoles((userToEdit.roles || []) as ("admin" | "staff" | "viewer" | "installer")[]);
     setIsEditDialogOpen(true);
   };
 
@@ -222,29 +227,23 @@ export default function UsersPage() {
       return;
     }
 
-    // 準備更新資料（只包含有值的欄位）
-    const updateData: {
-      name: string;
-      username: string;
-      roles: string[];
-      password?: string;
-      password_confirmation?: string;
-    } = {
+    // 構建更新資料 - 條件性包含密碼欄位
+    const updatePayload: any = {
       name: editUserName,
       username: editUsername,
-      roles: editRoles,
+      email: editUserEmail,
+      roles: editRoles as ("admin" | "staff" | "viewer" | "installer")[],
     };
 
-    // 如果有填寫密碼，則包含密碼更新
+    // 只有當用戶輸入新密碼時，才包含密碼欄位
     if (editPassword.trim()) {
-      updateData.password = editPassword;
-      updateData.password_confirmation = editPassword;
+      updatePayload.password = editPassword;
     }
 
     updateUserMutation.mutate(
       {
         path: { user: editingUser.id },
-        body: updateData as any, // 暫時使用 any 處理 API 類型定義問題
+        body: updatePayload,
       },
       {
         onSuccess: () => {
@@ -291,6 +290,7 @@ export default function UsersPage() {
   const resetForm = () => {
     setNewUserName("");
     setNewUsername("");
+    setNewUserEmail("");
     setNewPassword("");
     setNewRoles([]);
   };
@@ -302,6 +302,7 @@ export default function UsersPage() {
     setEditingUser(null);
     setEditUserName("");
     setEditUsername("");
+    setEditUserEmail("");
     setEditPassword("");
     setEditRoles([]);
   };
@@ -395,7 +396,7 @@ export default function UsersPage() {
       <div className="space-y-4" data-oid="ql8wyy0">
         <UsersDataTable
           columns={columns}
-          data={users}
+          data={usersData}
           isLoading={isLoading}
           showAddButton={user?.isAdmin}
           onAddUser={handleAddUser}
@@ -475,6 +476,29 @@ export default function UsersPage() {
               />
             </div>
 
+            {/* Email 欄位 */}
+            <div
+              className="grid grid-cols-4 items-center gap-4"
+              data-oid="email-field"
+            >
+              <Label
+                htmlFor="email"
+                className="text-right font-medium"
+              >
+                電子郵件{" "}
+                <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="輸入電子郵件"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                className="col-span-3"
+                disabled={createUserMutation.isPending}
+              />
+            </div>
+
             {/* 密碼欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
@@ -515,7 +539,7 @@ export default function UsersPage() {
               <div className="col-span-3">
                 <RoleSelector
                   selectedRoles={newRoles}
-                  onRolesChange={setNewRoles}
+                  onRolesChange={(roles) => setNewRoles(roles)}
                   disabled={createUserMutation.isPending}
                 />
               </div>
@@ -626,6 +650,21 @@ export default function UsersPage() {
               />
             </div>
 
+            {/* Email 編輯欄位 */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-email" className="text-right">
+                電子郵件 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editUserEmail}
+                onChange={(e) => setEditUserEmail(e.target.value)}
+                className="col-span-3"
+                disabled={updateUserMutation.isPending}
+              />
+            </div>
+
             {/* 密碼欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
@@ -661,7 +700,7 @@ export default function UsersPage() {
               <div className="col-span-3">
                 <RoleSelector
                   selectedRoles={editRoles}
-                  onRolesChange={setEditRoles}
+                  onRolesChange={(roles) => setEditRoles(roles)}
                   disabled={updateUserMutation.isPending}
                 />
               </div>

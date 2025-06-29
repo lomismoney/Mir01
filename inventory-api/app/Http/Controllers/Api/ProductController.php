@@ -62,46 +62,8 @@ class ProductController extends Controller
      * @queryParam sort_by string 排序欄位 (name, created_at)。 Example: name
      * @queryParam sort_order string 排序方向 (asc, desc)，預設為 asc。 Example: desc
      * 
-     * @response scenario="商品列表" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "name": "高階人體工學辦公椅",
-     *       "sku": "CHAIR-ERG-001",
-     *       "description": "具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。",
-     *       "selling_price": 399.99,
-     *       "cost_price": 150.00,
-     *       "category_id": 1,
-     *       "created_at": "2024-01-01T10:00:00.000000Z",
-     *       "updated_at": "2024-01-01T10:00:00.000000Z"
-     *     },
-     *     {
-     *       "id": 2,
-     *       "name": "無線藍牙滑鼠",
-     *       "sku": "MOUSE-BT-002",
-     *       "description": "2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。",
-     *       "selling_price": 79.99,
-     *       "cost_price": 25.00,
-     *       "category_id": null,
-     *       "created_at": "2024-01-01T11:30:00.000000Z",
-     *       "updated_at": "2024-01-01T11:30:00.000000Z"
-     *     }
-     *   ],
-     *   "meta": {
-     *     "current_page": 1,
-     *     "from": 1,
-     *     "last_page": 3,
-     *     "per_page": 15,
-     *     "to": 2,
-     *     "total": 45
-     *   },
-     *   "links": {
-     *     "first": "http://localhost/api/products?page=1",
-     *     "last": "http://localhost/api/products?page=3",
-     *     "prev": null,
-     *     "next": "http://localhost/api/products?page=2"
-     *   }
-     * }
+     * @apiResourceCollection \App\Http\Resources\Api\ProductCollection
+     * @apiResourceModel \App\Models\Product
      */
     public function index(Request $request)
     {

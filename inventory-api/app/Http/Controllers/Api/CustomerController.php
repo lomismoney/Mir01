@@ -36,28 +36,8 @@ class CustomerController extends Controller
      * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
      * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
      * 
-     * @response 200 scenario="客戶列表" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "name": "客戶名稱",
-     *       "phone": "0912345678",
-     *       "email": "customer@example.com",
-     *       "is_company": false,
-     *       "tax_id": null,
-     *       "industry_type": "設計師",
-     *       "payment_type": "現金付款",
-     *       "contact_address": "台北市信義區",
-     *       "created_at": "2025-01-01T10:00:00.000000Z",
-     *       "updated_at": "2025-01-01T10:00:00.000000Z"
-     *     }
-     *   ],
-     *   "meta": {
-     *     "current_page": 1,
-     *     "per_page": 15,
-     *     "total": 100
-     *   }
-     * }
+     * @apiResourceCollection \App\Http\Resources\Api\CustomerResource
+     * @apiResourceModel \App\Models\Customer
      */
     public function index(Request $request)
     {

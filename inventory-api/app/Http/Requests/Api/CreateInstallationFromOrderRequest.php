@@ -90,5 +90,43 @@ class CreateInstallationFromOrderRequest extends FormRequest
         });
     }
     
-
+    /**
+     * 為 Scribe 提供 API 文件所需的 body 參數
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'order_id' => [
+                'description' => '要從中創建安裝單的訂單 ID',
+                'example' => 1,
+            ],
+            'installer_user_id' => [
+                'description' => '預先指派的安裝師傅用戶 ID (可選)',
+                'example' => null,
+            ],
+            'installation_address' => [
+                'description' => '安裝地址 (可選，若不提供則自動使用訂單的送貨地址)',
+                'example' => null,
+            ],
+            'scheduled_date' => [
+                'description' => '預計安裝日期 (Y-m-d)',
+                'example' => now()->addDays(3)->toDateString(),
+            ],
+            'notes' => [
+                'description' => '安裝單備註',
+                'example' => '從訂單 #123 轉入',
+            ],
+            'order_item_ids' => [
+                'description' => '需要安裝的訂單項目 ID 列表',
+                'example' => [1, 2],
+            ],
+            'specifications' => [
+                'description' => '每個訂單項目的特定安裝規格 (可選)',
+                'example' => [
+                    '1' => '安裝在主臥門',
+                    '2' => '安裝在後門，需要加裝防水盒',
+                ]
+            ],
+        ];
+    }
 } 

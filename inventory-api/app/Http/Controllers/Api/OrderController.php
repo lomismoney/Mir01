@@ -31,6 +31,9 @@ class OrderController extends Controller
      * @queryParam payment_status string 按付款進度篩選。Example: 待付款
      * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
      * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-19
+     * 
+     * @apiResourceCollection \App\Http\Resources\Api\OrderResource
+     * @apiResourceModel \App\Models\Order
      */
     public function index(Request $request)
     {

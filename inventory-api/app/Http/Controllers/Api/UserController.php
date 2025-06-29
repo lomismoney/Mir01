@@ -83,6 +83,8 @@ class UserController extends Controller
      *     "total": 100
      *   }
      * }
+     * @apiResourceCollection App\Http\Resources\Api\UserResource
+     * @apiResourceModel App\Models\User paginate=15
      */
     public function index()
     {
