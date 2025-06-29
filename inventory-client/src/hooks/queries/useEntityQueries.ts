@@ -3381,7 +3381,7 @@ export function useOrderDetail(orderId: number | null) {
     queryKey: QUERY_KEYS.ORDER(orderId!), // 使用 ['orders', orderId] 作為唯一鍵
     queryFn: async () => {
       if (!orderId) return null; // 如果沒有 ID，則不執行查詢
-      const { data, error } = await apiClient.GET("/api/orders/{id}", {
+      const { data, error } = await apiClient.GET("/api/orders/{order}", {
         params: { path: { order: orderId } },
       });
       if (error) {
@@ -3662,7 +3662,7 @@ export function useUpdateOrder() {
 
   return useMutation({
     mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
-      const { data, error } = await apiClient.PUT("/api/orders/{id}", {
+      const { data, error } = await apiClient.PUT("/api/orders/{order}", {
         params: { path: { order: payload.id } },
         body: payload.data,
       });
@@ -3694,7 +3694,7 @@ export function useDeleteOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/orders/{id}", {
+      const { data, error } = await apiClient.DELETE("/api/orders/{order}", {
         params: { path: { order: orderId } },
       });
       if (error) throw error;
