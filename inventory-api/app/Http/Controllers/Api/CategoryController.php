@@ -145,7 +145,6 @@ class CategoryController extends Controller
      * 返回單一分類的詳細資訊，使用 CategoryResource 格式化輸出
      * 包含該分類的商品數量統計
      * 
-     * @urlParam category integer required 分類 ID Example: 1
      * @param \App\Models\Category $category
      * @return \App\Http\Resources\Api\CategoryResource
      */
@@ -190,7 +189,6 @@ class CategoryController extends Controller
      * - 防止自我循環的業務邏輯保護
      * - 確保父分類存在性檢查
      * 
-     * @urlParam category integer required 分類 ID Example: 1
      * @param \App\Http\Requests\Api\UpdateCategoryRequest $request
      * @param \App\Models\Category $category
      * @return \App\Http\Resources\Api\CategoryResource
@@ -208,7 +206,6 @@ class CategoryController extends Controller
      * - 當分類被刪除時，其子分類也會被級聯刪除
      * - 關聯的商品 category_id 會被設為 null
      * 
-     * @urlParam category integer required 分類 ID Example: 1
      * @param \App\Models\Category $category
      * @return \Illuminate\Http\Response
      */

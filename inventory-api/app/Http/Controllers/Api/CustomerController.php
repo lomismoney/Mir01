@@ -153,7 +153,6 @@ class CustomerController extends Controller
      *
      * @group 客戶管理
      * @authenticated
-     * @urlParam customer integer required 客戶的 ID。 Example: 1
      * 
      * @response 200 scenario="客戶詳情" {
      *   "data": {
@@ -188,7 +187,6 @@ class CustomerController extends Controller
      *
      * @group 客戶管理
      * @authenticated
-     * @urlParam customer integer required 客戶的 ID。 Example: 1
      * @bodyParam name string required 客戶名稱或公司抬頭. Example: 測試客戶（已更新）
      * @bodyParam phone string 手機號碼. Example: 0987654321
      * @bodyParam email string 電子郵件地址. Example: customer@example.com
@@ -258,7 +256,6 @@ class CustomerController extends Controller
      *
      * @group 客戶管理
      * @authenticated
-     * @urlParam customer integer required 要刪除的客戶的 ID。 Example: 1
      * @response 204 scenario="刪除成功"
      */
     public function destroy(Customer $customer)

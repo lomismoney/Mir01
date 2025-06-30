@@ -245,7 +245,7 @@ export function InventoryHistory({
             變動記錄
           </CardTitle>
           <CardDescription data-oid="qjw083:">
-            {historyData?.total && `共 ${historyData.total} 筆記錄`}
+            {historyData?.data && `共 ${historyData.data.length} 筆記錄`}
           </CardDescription>
         </CardHeader>
         <CardContent data-oid="-5.mh5h">
@@ -346,18 +346,6 @@ export function InventoryHistory({
                         </span>{" "}
                         {transaction.after_quantity ?? "未知"}
                       </div>
-                      {transaction.user && (
-                        <div
-                          className="flex items-center gap-1"
-                          data-oid="45iqvbn"
-                        >
-                          <User className="h-3 w-3" data-oid="vxv7o74" />
-                          <span className="font-medium" data-oid="_hr_9px">
-                            操作人:
-                          </span>{" "}
-                          {transaction.user.name}
-                        </div>
-                      )}
                     </div>
 
                     {transaction.notes && (
@@ -429,52 +417,7 @@ export function InventoryHistory({
                 </div>
               ))}
 
-              {/* 分頁控制 */}
-              {(historyData.last_page || 0) > 1 && (
-                <div
-                  className="flex items-center justify-between pt-4"
-                  data-oid="g7846i."
-                >
-                  <div
-                    className="text-sm text-muted-foreground"
-                    data-oid="q68wbr:"
-                  >
-                    顯示第 {historyData.from || 0} - {historyData.to || 0}{" "}
-                    筆，共 {historyData.total || 0} 筆
-                  </div>
-                  <div className="flex items-center gap-2" data-oid="duhx2y4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={(historyData.current_page || 1) <= 1}
-                      onClick={() =>
-                        setFilters((prev) => ({ ...prev, page: prev.page - 1 }))
-                      }
-                      data-oid="s0b8w_3"
-                    >
-                      上一頁
-                    </Button>
-                    <span className="text-sm" data-oid="x6xbev9">
-                      第 {historyData.current_page || 1} /{" "}
-                      {historyData.last_page || 1} 頁
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={
-                        (historyData.current_page || 1) >=
-                        (historyData.last_page || 1)
-                      }
-                      onClick={() =>
-                        setFilters((prev) => ({ ...prev, page: prev.page + 1 }))
-                      }
-                      data-oid="zh:2pbd"
-                    >
-                      下一頁
-                    </Button>
-                  </div>
-                </div>
-              )}
+
             </div>
           ) : (
             <div

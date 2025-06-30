@@ -1494,7 +1494,7 @@ export function useUpdateCategory() {
   return useMutation({
     mutationFn: async (payload: UpdateCategoryPayload) => {
       const { data, error } = await apiClient.PUT("/api/categories/{id}", {
-        params: { path: { category: payload.id } },
+        params: { path: { id: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -3026,7 +3026,7 @@ export function usePurchase(id: number | string) {
     queryKey: ['purchase', id],
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/purchases/{id}', {
-        params: { path: { purchase: Number(id) } }
+        params: { path: { id: String(id) } }
       });
       
       if (error) {
@@ -3091,7 +3091,7 @@ export function useUpdatePurchase() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: number | string; data: any }) => {
               const { data: responseData, error } = await apiClient.PUT('/api/purchases/{id}', {
-          params: { path: { id: Number(id) } },
+          params: { path: { id: String(id) } },
         body: data
       })
       
@@ -3117,7 +3117,7 @@ export function useUpdatePurchaseStatus() {
   return useMutation({
     mutationFn: async ({ id, status }: { id: number | string; status: string }) => {
       const { data, error } = await apiClient.PATCH('/api/purchases/{purchase}/status', {
-        params: { path: { purchase: Number(id) } },
+        params: { path: { purchase: String(id) } },
         body: { status }
       })
       
@@ -3143,7 +3143,7 @@ export function useCancelPurchase() {
   return useMutation({
     mutationFn: async (id: number | string) => {
       const { data, error } = await apiClient.PATCH('/api/purchases/{purchase}/cancel', {
-        params: { path: { purchase: Number(id) } }
+        params: { path: { purchase: String(id) } }
       })
       
       if (error) {
@@ -3167,7 +3167,7 @@ export function useDeletePurchase() {
   return useMutation({
     mutationFn: async (id: number | string) => {
       const { data, error } = await apiClient.DELETE('/api/purchases/{id}', {
-        params: { path: { purchase: Number(id) } }
+        params: { path: { id: String(id) } }
       })
       
       if (error) {
@@ -3537,7 +3537,7 @@ export function useCreateOrderShipment() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/create-shipment", {
         params: { 
           path: { 
-            order: payload.orderId
+            order_id: payload.orderId
           } 
         },
         body: payload.data,
@@ -3587,7 +3587,7 @@ export function useAddOrderPayment() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/add-payment", {
         params: { 
           path: { 
-            order: payload.orderId
+            order_id: payload.orderId
           } 
         },
         body: payload.data,
@@ -3763,7 +3763,7 @@ export function useUpdateOrderItemStatus() {
       };
       
       const { data, error } = await apiClient.PATCH('/api/order-items/{order_item_id}/status', {
-        params: { path: { order_item: orderItemId } },
+        params: { path: { order_item_id: orderItemId } },
         body: requestBody,
       });
       
@@ -3893,7 +3893,7 @@ export function useCancelOrder() {
   return useMutation({
     mutationFn: async ({ orderId, reason }: { orderId: number; reason?: string }) => {
       const { error } = await apiClient.POST('/api/orders/{order_id}/cancel', {
-        params: { path: { order: orderId } },
+        params: { path: { order_id: orderId } },
         body: { reason },
       });
 
@@ -4312,7 +4312,7 @@ export function useInstallation(id: number) {
     queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(id),
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/installations/{id}', {
-        params: { path: { installation: id } }
+        params: { path: { id: id } }
       });
       
       if (error) {
@@ -4457,7 +4457,7 @@ export function useUpdateInstallation() {
   return useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & UpdateInstallationRequest) => {
       const { data: response, error } = await apiClient.PUT('/api/installations/{id}', {
-        params: { path: { installation: id } },
+        params: { path: { id: id } },
         body: data as any
       });
       
@@ -4507,7 +4507,7 @@ export function useDeleteInstallation() {
   return useMutation({
     mutationFn: async (id: number) => {
       const { data, error } = await apiClient.DELETE('/api/installations/{id}', {
-        params: { path: { installation: id } }
+        params: { path: { id: id } }
       });
       
       if (error) {
@@ -4553,7 +4553,7 @@ export function useAssignInstaller() {
   return useMutation({
     mutationFn: async ({ installationId, ...data }: { installationId: number } & AssignInstallerRequest) => {
       const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/assign', {
-        params: { path: { installation: installationId } },
+        params: { path: { installation_id: installationId } },
         body: data
       });
       
@@ -4612,7 +4612,7 @@ export function useUpdateInstallationStatus() {
   return useMutation({
     mutationFn: async ({ installationId, ...data }: { installationId: number } & UpdateInstallationStatusRequest) => {
       const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/status', {
-        params: { path: { installation: installationId } },
+        params: { path: { installation_id: installationId } },
         body: data
       });
       

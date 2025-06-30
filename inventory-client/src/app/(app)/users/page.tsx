@@ -242,7 +242,7 @@ export default function UsersPage() {
 
     updateUserMutation.mutate(
       {
-        path: { user: editingUser.id },
+        path: { id: editingUser.id },
         body: updatePayload,
       },
       {

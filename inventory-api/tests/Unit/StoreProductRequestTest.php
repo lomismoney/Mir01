@@ -67,12 +67,12 @@ class StoreProductRequestTest extends TestCase
             'name'          => 'required|string|max:255',
             'description'   => 'nullable|string',
             'category_id'   => 'nullable|integer|exists:categories,id',
-            'attributes'    => 'required|array',
+            'attributes'    => 'array', // 🎯 允許空陣列，支援單規格商品
             'attributes.*'  => 'integer|exists:attributes,id',
             'variants'      => 'required|array|min:1',
             'variants.*.sku' => 'required|string|unique:product_variants,sku|max:255',
             'variants.*.price' => 'required|numeric|min:0',
-            'variants.*.attribute_value_ids' => 'required|array',
+            'variants.*.attribute_value_ids' => 'array', // 🎯 允許空陣列，支援單規格商品
             'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
         ];
 
@@ -169,7 +169,7 @@ class StoreProductRequestTest extends TestCase
         $this->assertArrayHasKey('category_id', $validator->errors()->toArray());
     }
 
-    public function test_validation_fails_when_attributes_is_missing()
+    public function test_validation_passes_when_attributes_is_missing()
     {
         $data = [
             'name' => 'Test Product',
@@ -177,7 +177,7 @@ class StoreProductRequestTest extends TestCase
                 [
                     'sku' => 'TEST-SKU-001',
                     'price' => 99.99,
-                    'attribute_value_ids' => [1]
+                    'attribute_value_ids' => []
                 ]
             ]
         ];
@@ -185,8 +185,8 @@ class StoreProductRequestTest extends TestCase
         $request = new StoreProductRequest();
         $validator = Validator::make($data, $request->rules());
 
-        $this->assertFalse($validator->passes());
-        $this->assertArrayHasKey('attributes', $validator->errors()->toArray());
+        // 🎯 支援單規格商品，attributes 可以缺失
+        $this->assertTrue($validator->passes());
     }
 
     public function test_validation_fails_when_attributes_contains_non_existent_id()
@@ -311,16 +311,16 @@ class StoreProductRequestTest extends TestCase
         $this->assertArrayHasKey('variants.0.price', $validator->errors()->toArray());
     }
 
-    public function test_validation_fails_when_variant_attribute_value_ids_is_missing()
+    public function test_validation_passes_when_variant_attribute_value_ids_is_missing()
     {
         $data = [
             'name' => 'Test Product',
-            'attributes' => [1],
+            'attributes' => [],
             'variants' => [
                 [
                     'sku' => 'TEST-SKU-001',
                     'price' => 99.99
-                    // 缺少 attribute_value_ids
+                    // 🎯 缺少 attribute_value_ids 在單規格商品中是允許的
                 ]
             ]
         ];
@@ -328,8 +328,8 @@ class StoreProductRequestTest extends TestCase
         $request = new StoreProductRequest();
         $validator = Validator::make($data, $request->rules());
 
-        $this->assertFalse($validator->passes());
-        $this->assertArrayHasKey('variants.0.attribute_value_ids', $validator->errors()->toArray());
+        // 🎯 支援單規格商品，attribute_value_ids 可以缺失
+        $this->assertTrue($validator->passes());
     }
 
     public function test_validation_fails_when_attribute_value_does_not_exist()

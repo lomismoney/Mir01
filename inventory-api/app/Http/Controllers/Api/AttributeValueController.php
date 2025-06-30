@@ -28,7 +28,6 @@ class AttributeValueController extends Controller
      * 
      * 返回指定屬性下的所有屬性值列表
      * 
-     * @urlParam attribute int required 屬性 ID Example: 1
      * @queryParam filter[value] string 對屬性值進行篩選。 Example: 紅色
      * @queryParam include string 可選的關聯，用逗號分隔。例如: attribute
      * 
@@ -57,7 +56,6 @@ class AttributeValueController extends Controller
      * 在指定屬性下創建一個新的屬性值
      * 屬性值在同一屬性下必須唯一
      * 
-     * @urlParam attribute int required 屬性 ID Example: 1
      * @bodyParam value string required 屬性值，例如：紅色、藍色、S、M、L Example: 紅色
      * 
      * @response 201 App\Http\Resources\Api\V1\AttributeValueResource

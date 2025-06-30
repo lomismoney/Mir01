@@ -213,7 +213,6 @@ class ProductController extends Controller
      * 顯示指定的商品
      * 
      * @group 商品管理
-     * @urlParam product integer required 商品的 ID。 Example: 1
      * @response 200 scenario="商品詳情" {
      *   "data": {
      *     "id": 1,
@@ -241,7 +240,6 @@ class ProductController extends Controller
      * 
      * @group 商品管理
      * @authenticated
-     * @urlParam product integer required 商品的 ID。 Example: 1
      * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
      * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
      * @bodyParam category_id integer 分類ID。 Example: 1
@@ -295,7 +293,6 @@ class ProductController extends Controller
      * 刪除指定的商品
      * 
      * @group 商品管理
-     * @urlParam product integer required 商品的 ID。 Example: 1
      * 
      * @response 204 scenario="商品刪除成功"
      */
@@ -405,7 +402,6 @@ class ProductController extends Controller
      * @group 商品管理
      * @authenticated
      * 
-     * @urlParam product integer required 商品 ID Example: 1
      * @bodyParam image file required 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
      * 
      * @response 200 {

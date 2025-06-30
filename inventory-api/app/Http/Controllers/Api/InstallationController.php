@@ -184,7 +184,6 @@ class InstallationController extends Controller
     /**
      * 查看安裝單詳情
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
      * @queryParam include 包含關聯資源。可選值：items,order,installer,creator。Example: items,order
      * 
      * @authenticated
@@ -221,7 +220,6 @@ class InstallationController extends Controller
     /**
      * 更新安裝單
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
      * @bodyParam installer_user_id integer 分配的安裝師傅ID。Example: 2
      * @bodyParam customer_name string 客戶姓名。Example: 王小明
      * @bodyParam customer_phone string nullable 客戶電話。Example: 0912345678
@@ -267,7 +265,6 @@ class InstallationController extends Controller
     /**
      * 刪除安裝單
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
      * @authenticated
      * @response 204
      */
@@ -283,7 +280,6 @@ class InstallationController extends Controller
     /**
      * 分配安裝師傅
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
      * @bodyParam installer_user_id integer required 安裝師傅用戶ID。Example: 2
      * 
      * @authenticated
@@ -314,7 +310,6 @@ class InstallationController extends Controller
     /**
      * 更新安裝單狀態
      * 
-     * @urlParam installation integer required 安裝單 ID. Example: 1
      * @bodyParam status string required 新狀態。可選值：pending, scheduled, in_progress, completed, cancelled。Example: in_progress
      * @bodyParam reason string 取消原因（當狀態為cancelled時）。Example: 客戶要求取消
      * 

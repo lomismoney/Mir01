@@ -173,7 +173,7 @@ export function InstallationClientComponent() {
       {
         installationId: updatingStatus.installation.id,
         status: updatingStatus.status,
-        notes: updatingStatus.status === 'cancelled' ? statusUpdateReason : undefined,
+        reason: updatingStatus.status === 'cancelled' ? statusUpdateReason : undefined,
       },
       {
         onSuccess: () => {
@@ -296,7 +296,7 @@ export function InstallationClientComponent() {
               <SelectContent>
                 <SelectItem value="all">👥 全部師傅</SelectItem>
                 <SelectItem value="0">❓ 未分配</SelectItem>
-                {usersData?.map((user: any) => (
+                {usersData?.data?.map((user: any) => (
                   <SelectItem key={user.id} value={user.id.toString()}>
                     👨‍🔧 {user.name || user.username}
                   </SelectItem>
@@ -503,7 +503,7 @@ export function InstallationClientComponent() {
                   } />
                 </SelectTrigger>
                 <SelectContent>
-                  {usersData?.map((user: any) => (
+                  {usersData?.data?.map((user: any) => (
                     <SelectItem key={user.id} value={user.id.toString()}>
                       {user.name || user.username}
                       {user.email && (

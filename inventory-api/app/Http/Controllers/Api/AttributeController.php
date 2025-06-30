@@ -85,8 +85,6 @@ class AttributeController extends Controller
      * 
      * 返回指定的商品屬性詳細資訊，包含其所有屬性值
      * 
-     * @urlParam attribute int required 屬性 ID Example: 1
-     * 
      * @response App\Http\Resources\Api\V1\AttributeResource
      */
     public function show(Attribute $attribute)
@@ -99,7 +97,6 @@ class AttributeController extends Controller
      * 
      * 更新指定的商品屬性，屬性名稱必須唯一（忽略當前屬性）
      * 
-     * @urlParam attribute int required 屬性 ID Example: 1
      * @bodyParam name string required 屬性名稱 Example: 顏色
      * 
      * @response App\Http\Resources\Api\V1\AttributeResource
@@ -115,8 +112,6 @@ class AttributeController extends Controller
      * 
      * 刪除指定的商品屬性及其所有相關的屬性值
      * 注意：如果有商品變體正在使用此屬性的值，刪除操作可能會失敗
-     * 
-     * @urlParam attribute int required 屬性 ID Example: 1
      * 
      * @response 204
      */

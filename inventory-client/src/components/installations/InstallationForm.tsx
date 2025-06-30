@@ -95,7 +95,7 @@ export function InstallationForm({
   const { data: allUsersData, isLoading: isLoadingUsers } = useUsers();
   
   // 篩選有 installer 角色的用戶
-  const usersData = allUsersData?.filter((user: any) => 
+  const usersData = allUsersData?.data?.filter((user: any) => 
     user.roles && user.roles.includes('installer')
   ) || [];
 

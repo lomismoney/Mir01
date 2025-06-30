@@ -18,7 +18,6 @@ class StoreFactory extends Factory
     {
         return [
             'name' => $this->faker->unique()->company(),
-            'code' => $this->faker->unique()->postcode,
             'address' => $this->faker->address(),
             'created_at' => now(),
             'updated_at' => now(),
