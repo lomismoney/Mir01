@@ -140,5 +140,79 @@ class UpdateInstallationRequest extends FormRequest
         });
     }
     
-
+    /**
+     * 為 Scribe 提供 API 文件所需的 body 參數
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'installer_user_id' => [
+                'description' => '負責安裝的師傅用戶 ID',
+                'example' => 1,
+            ],
+            'customer_name' => [
+                'description' => '客戶姓名',
+                'example' => '王大明(更新)',
+            ],
+            'customer_phone' => [
+                'description' => '客戶聯絡電話',
+                'example' => '0987654321',
+            ],
+            'installation_address' => [
+                'description' => '安裝地址',
+                'example' => '新北市板橋區文化路一段1號',
+            ],
+            'status' => [
+                'description' => '安裝狀態 (pending, scheduled, in_progress, completed, cancelled)',
+                'example' => 'scheduled',
+            ],
+            'scheduled_date' => [
+                'description' => '預計安裝日期 (Y-m-d)',
+                'example' => now()->addDays(5)->toDateString(),
+            ],
+            'actual_start_time' => [
+                'description' => '實際開始時間 (Y-m-d H:i:s)',
+                'example' => null,
+            ],
+            'actual_end_time' => [
+                'description' => '實際結束時間 (Y-m-d H:i:s)',
+                'example' => null,
+            ],
+            'notes' => [
+                'description' => '安裝單備註',
+                'example' => '客戶更改安裝地址',
+            ],
+            'items' => [
+                'description' => '安裝項目列表 (提供此參數時會同步所有項目)',
+            ],
+            'items.*.id' => [
+                'description' => '要更新的安裝項目 ID (新項目則不提供)',
+                'example' => 1,
+            ],
+            'items.*.product_name' => [
+                'description' => '商品名稱',
+                'example' => 'A500 智能電子鎖 (維修品)',
+            ],
+            'items.*.sku' => [
+                'description' => '商品 SKU',
+                'example' => 'LOCK-A500-BLK-R',
+            ],
+            'items.*.quantity' => [
+                'description' => '安裝數量',
+                'example' => 1,
+            ],
+            'items.*.specifications' => [
+                'description' => '商品規格描述',
+                'example' => '黑色，右手開門，已更換零件',
+            ],
+            'items.*.status' => [
+                'description' => '項目狀態 (pending, completed)',
+                'example' => 'pending',
+            ],
+            'items.*.notes' => [
+                'description' => '單項目的備註',
+                'example' => '此為維修後更換的項目',
+            ],
+        ];
+    }
 } 

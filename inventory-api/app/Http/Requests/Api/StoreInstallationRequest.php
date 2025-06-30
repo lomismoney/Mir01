@@ -85,5 +85,67 @@ class StoreInstallationRequest extends FormRequest
         });
     }
     
-
+    /**
+     * 為 Scribe 提供 API 文件所需的 body 參數
+     */
+    public function bodyParameters(): array
+    {
+        return [
+            'order_id' => [
+                'description' => '關聯的訂單 ID',
+                'example' => null,
+            ],
+            'installer_user_id' => [
+                'description' => '負責安裝的師傅用戶 ID',
+                'example' => null,
+            ],
+            'customer_name' => [
+                'description' => '客戶姓名',
+                'example' => '王大明',
+            ],
+            'customer_phone' => [
+                'description' => '客戶聯絡電話',
+                'example' => '0912345678',
+            ],
+            'installation_address' => [
+                'description' => '安裝地址',
+                'example' => '台北市信義區信義路五段7號',
+            ],
+            'scheduled_date' => [
+                'description' => '預計安裝日期 (Y-m-d)',
+                'example' => now()->addDays(3)->toDateString(),
+            ],
+            'notes' => [
+                'description' => '安裝單備註',
+                'example' => '客戶希望下午時段安裝',
+            ],
+            'items' => [
+                'description' => '安裝項目列表',
+            ],
+            'items.*.order_item_id' => [
+                'description' => '關聯的訂單項目 ID (如果從訂單轉入)',
+                'example' => null,
+            ],
+            'items.*.product_name' => [
+                'description' => '商品名稱',
+                'example' => 'A500 智能電子鎖',
+            ],
+            'items.*.sku' => [
+                'description' => '商品 SKU',
+                'example' => 'LOCK-A500-BLK',
+            ],
+            'items.*.quantity' => [
+                'description' => '安裝數量',
+                'example' => 1,
+            ],
+            'items.*.specifications' => [
+                'description' => '商品規格描述',
+                'example' => '黑色，右手開門',
+            ],
+            'items.*.notes' => [
+                'description' => '單項目的備註',
+                'example' => '需要特殊工具',
+            ],
+        ];
+    }
 } 

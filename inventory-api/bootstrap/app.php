@@ -21,13 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // 處理API認證異常，返回JSON而不是重定向到login頁面
         $exceptions->render(function (AuthenticationException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'message' => 'Unauthenticated.',
-                    'error' => 'Authentication required to access this resource.'
-                ], 401);
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
             }
         });
     })->create();

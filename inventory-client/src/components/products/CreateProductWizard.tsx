@@ -18,7 +18,6 @@ import { toast } from "sonner";
 // 導入 API Hooks
 import {
   useCreateProduct,
-  useCreateSimpleProduct,
   useUpdateProduct,
   useProductDetail,
   useAttributes,
@@ -257,66 +256,7 @@ function transformWizardDataToApiPayload(
   };
 }
 
-/**
- * 轉換為單規格商品數據 (v3.0 雙軌制 API)
- *
- * 專門處理單規格商品的數據轉換，只提取最核心的商品資訊。
- * 無需處理複雜的屬性和變體結構，後端會自動處理這些細節。
- *
- * @param formData 嚮導表單數據
- * @returns 簡化的單規格商品數據
- */
-function transformToSimplePayload(formData: WizardFormData) {
-  const { basicInfo, variants } = formData;
 
-  // 取得第一個（也是唯一的）變體資訊
-  const firstVariant = variants.items[0];
-
-  // 驗證價格並提供詳細的錯誤信息
-  if (
-    !firstVariant ||
-    !firstVariant.price ||
-    firstVariant.price.trim() === ""
-  ) {
-    throw new Error("商品價格為必填項目，請在步驟3中設定價格");
-  }
-
-  const price = parseFloat(firstVariant.price);
-  if (isNaN(price) || price <= 0) {
-    throw new Error("商品價格必須為大於 0 的有效數字");
-  }
-
-  // 驗證 SKU
-  if (!firstVariant.sku || firstVariant.sku.trim() === "") {
-    throw new Error("商品 SKU 為必填項目，請在步驟3中設定 SKU");
-  }
-
-  return {
-    name: basicInfo.name,
-    sku: firstVariant.sku.trim(),
-    price: price,
-    category_id: basicInfo.category_id,
-    description: basicInfo.description || undefined,
-  };
-}
-
-/**
- * 轉換為多規格商品數據 (v3.0 雙軌制 API)
- *
- * 處理多規格商品的完整數據結構，包含屬性和變體的複雜關聯。
- * 這是原有 transformWizardDataToApiPayload 函數的簡化版本。
- *
- * @param formData 嚮導表單數據
- * @param attributesData 屬性數據
- * @returns 完整的多規格商品數據
- */
-function transformToVariantPayload(
-  formData: WizardFormData,
-  attributesData?: AttributesDataForTransform,
-): paths["/api/products"]["post"]["requestBody"]["content"]["application/json"] {
-  // 直接使用現有的轉換邏輯
-  return transformWizardDataToApiPayload(formData, attributesData);
-}
 
 /**
  * 商品創建/編輯嚮導主組件 Props
@@ -350,7 +290,6 @@ export function CreateProductWizard({
 
   // API Hooks
   const createProductMutation = useCreateProduct();
-  const createSimpleProductMutation = useCreateSimpleProduct();
   const updateProductMutation = useUpdateProduct();
   const uploadImageMutation = useUploadProductImage();
   const { data: attributesData } = useAttributes();
@@ -702,41 +641,31 @@ export function CreateProductWizard({
           description: `商品「${productName}」已成功更新`,
         });
       } else {
-        // 創建模式：根據商品類型選擇 API 通道
+        // 創建模式：統一使用多規格 API（支援單規格和多規格）
+        const apiPayload = transformWizardDataToApiPayload(
+          formData,
+          attributesData,
+        );
+
         const isSingleVariant = !formData.specifications.isVariable;
 
-        if (isSingleVariant) {
-          // === 走「簡易創建」通道 ===
-          const simplePayload = transformToSimplePayload(formData);
+        toast.loading(
+          isSingleVariant ? "正在創建單規格商品..." : "正在創建多規格商品...", 
+          { id: "submit-progress" }
+        );
 
-          toast.loading("正在創建單規格商品...", { id: "submit-progress" });
+        productResult = await createProductMutation.mutateAsync(apiPayload);
+        productName = apiPayload.name;
 
-          productResult =
-            await createSimpleProductMutation.mutateAsync(simplePayload);
-          productName = simplePayload.name;
-
-          toast.success("單規格商品創建成功！", {
+        toast.success(
+          isSingleVariant ? "單規格商品創建成功！" : "多規格商品創建成功！",
+          {
             id: "submit-progress",
-            description: `商品「${productName}」已成功創建為單規格商品`,
-          });
-        } else {
-          // === 走「多規格創建」通道 ===
-          const variantPayload = transformToVariantPayload(
-            formData,
-            attributesData,
-          );
-
-          toast.loading("正在創建多規格商品...", { id: "submit-progress" });
-
-          productResult =
-            await createProductMutation.mutateAsync(variantPayload);
-          productName = variantPayload.name;
-
-          toast.success("多規格商品創建成功！", {
-            id: "submit-progress",
-            description: `商品「${productName}」已成功創建，包含 ${variantPayload.variants.length} 個變體`,
-          });
-        }
+            description: isSingleVariant 
+              ? `商品「${productName}」已成功創建為單規格商品`
+              : `商品「${productName}」已成功創建，包含 ${apiPayload.variants.length} 個變體`,
+          }
+        );
       }
 
       // 步驟3：處理圖片上傳（如果有選擇圖片）

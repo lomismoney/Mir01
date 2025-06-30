@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\ProductResource;
 use App\Http\Resources\Api\ProductCollection;
 use App\Http\Requests\Api\StoreProductRequest;
-use App\Http\Requests\Api\StoreSimpleProductRequest;
+
 use App\Http\Requests\Api\UpdateProductRequest;
 use App\Http\Requests\Api\DestroyMultipleProductsRequest;
 use App\Filters\SearchFilter;
@@ -62,46 +62,8 @@ class ProductController extends Controller
      * @queryParam sort_by string 排序欄位 (name, created_at)。 Example: name
      * @queryParam sort_order string 排序方向 (asc, desc)，預設為 asc。 Example: desc
      * 
-     * @response scenario="商品列表" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "name": "高階人體工學辦公椅",
-     *       "sku": "CHAIR-ERG-001",
-     *       "description": "具備可調節腰靠和 4D 扶手，提供全天候舒適支撐。",
-     *       "selling_price": 399.99,
-     *       "cost_price": 150.00,
-     *       "category_id": 1,
-     *       "created_at": "2024-01-01T10:00:00.000000Z",
-     *       "updated_at": "2024-01-01T10:00:00.000000Z"
-     *     },
-     *     {
-     *       "id": 2,
-     *       "name": "無線藍牙滑鼠",
-     *       "sku": "MOUSE-BT-002",
-     *       "description": "2.4GHz 無線連接，DPI 可調，適合辦公和遊戲。",
-     *       "selling_price": 79.99,
-     *       "cost_price": 25.00,
-     *       "category_id": null,
-     *       "created_at": "2024-01-01T11:30:00.000000Z",
-     *       "updated_at": "2024-01-01T11:30:00.000000Z"
-     *     }
-     *   ],
-     *   "meta": {
-     *     "current_page": 1,
-     *     "from": 1,
-     *     "last_page": 3,
-     *     "per_page": 15,
-     *     "to": 2,
-     *     "total": 45
-     *   },
-     *   "links": {
-     *     "first": "http://localhost/api/products?page=1",
-     *     "last": "http://localhost/api/products?page=3",
-     *     "prev": null,
-     *     "next": "http://localhost/api/products?page=2"
-     *   }
-     * }
+     * @apiResourceCollection \App\Http\Resources\Api\ProductCollection
+     * @apiResourceModel \App\Models\Product
      */
     public function index(Request $request)
     {
@@ -198,8 +160,10 @@ class ProductController extends Controller
                     'category_id' => $validatedData['category_id'],
                 ]);
 
-                // 2. 關聯 SPU 與其擁有的屬性 (attributes)
-                $product->attributes()->attach($validatedData['attributes']);
+                // 2. 關聯 SPU 與其擁有的屬性 (attributes) - 只有非空時才關聯
+                if (!empty($validatedData['attributes'])) {
+                    $product->attributes()->attach($validatedData['attributes']);
+                }
 
                 // 3. 遍歷並建立每一個 SKU (ProductVariant)
                 foreach ($validatedData['variants'] as $variantData) {
@@ -208,8 +172,10 @@ class ProductController extends Controller
                         'price' => $variantData['price'],
                     ]);
 
-                    // 4. 關聯 SKU 與其對應的屬性值 (attribute_values)
-                    $variant->attributeValues()->attach($variantData['attribute_value_ids']);
+                    // 4. 關聯 SKU 與其對應的屬性值 (attribute_values) - 只有非空時才關聯
+                    if (!empty($variantData['attribute_value_ids'])) {
+                        $variant->attributeValues()->attach($variantData['attribute_value_ids']);
+                    }
 
                     // 5. 為每一個 SKU 在所有門市建立初始庫存記錄
                     $stores = \App\Models\Store::all();
@@ -241,58 +207,7 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * 創建單規格商品 (v3.0 雙軌制 API 端點)
-     * 
-     * 專門處理單規格商品的快速創建，無需前端處理複雜的 SPU/SKU 屬性結構。
-     * 此端點在後端內部自動處理標準屬性的創建和關聯，提供最簡化的創建體驗。
-     * 
-     * @group 商品管理
-     * @authenticated
-     * @bodyParam name string required 商品名稱。 Example: "經典白色T恤"
-     * @bodyParam sku string required 唯一的庫存單位編號。 Example: "TSHIRT-WHITE-001"
-     * @bodyParam price number required 商品價格。 Example: 299.99
-     * @bodyParam category_id integer 商品分類 ID，可為空。 Example: 1
-     * @bodyParam description string 商品描述，可為空。 Example: "100% 純棉材質，舒適透氣"
-     * @response 201 scenario="單規格商品創建成功" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "經典白色T恤",
-     *     "sku": "TSHIRT-WHITE-001",
-     *     "price": 299.99,
-     *     "category_id": 1,
-     *     "description": "100% 純棉材質，舒適透氣",
-     *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
-     *   }
-     * }
-     */
-    public function storeSimple(StoreSimpleProductRequest $request)
-    {
-        $this->authorize('create', Product::class);
-        $validatedData = $request->validated();
 
-        try {
-            // 使用 ProductService 的 createSimpleProduct 方法處理所有複雜邏輯
-            $product = $this->productService->createSimpleProduct($validatedData);
-
-            // 回傳經過完整關聯加載的 SPU 資源
-            return new ProductResource($product->load([
-                'category',
-                'attributes', // ✅ 包含自動創建的標準屬性
-                'variants.attributeValues.attribute', 
-                'variants.inventory',
-                'media' // 📸 媒體關聯（雖然新建商品可能還沒有圖片）
-            ]));
-
-        } catch (\Exception $e) {
-            // 如果創建過程中有任何錯誤發生，回傳伺服器錯誤
-            return response()->json([
-                'message' => '創建單規格商品時發生錯誤', 
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
 
     /**
      * 顯示指定的商品
