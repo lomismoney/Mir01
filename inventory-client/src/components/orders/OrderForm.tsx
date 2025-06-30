@@ -46,6 +46,23 @@ import { OrderFormProductBadge } from "./OrderFormProductBadge";
 import { useCreateCustomer } from "@/hooks/queries/useEntityQueries";
 import { Customer, ProductVariant, OrderFormData } from "@/types/api-helpers";
 import { useAppFieldArray } from "@/hooks/useAppFieldArray";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // 🎯 使用 Zod 提前定義表單驗證規則
 const orderFormSchema = z.object({
@@ -324,30 +341,50 @@ export function OrderForm({
                                           SKU: {form.watch(`items.${index}.sku`)}
                                         </div>
                                         {/* 🎯 智能徽章系統：顯示商品狀態 */}
-                                        <div className="flex items-center gap-2 mt-1">
-                                          <OrderFormProductBadge 
-                                            item={{
-                                              product_variant_id: field.product_variant_id,
-                                              is_stocked_sale: field.is_stocked_sale,
-                                              custom_specifications: field.custom_specifications || null,
-                                              quantity: Number(form.watch(`items.${index}.quantity`) || 0),
-                                              stock: field.stock || 0
-                                            }}
-                                            className="text-xs"
-                                          />
-                                          {/* 🎯 庫存信息顯示 */}
-                                          {field.is_stocked_sale && field.stock !== undefined && (
-                                            <span className="text-xs text-muted-foreground">
-                                              庫存: {field.stock}
-                                            </span>
-                                          )}
-                                          {/* 🎯 訂製商品額外資訊顯示 */}
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                          {/* 🎯 徽章區域：確保不被壓縮 */}
+                                          <div className="flex items-center gap-2 flex-shrink-0">
+                                            <OrderFormProductBadge 
+                                              item={{
+                                                product_variant_id: field.product_variant_id,
+                                                is_stocked_sale: field.is_stocked_sale,
+                                                custom_specifications: field.custom_specifications || null,
+                                                quantity: Number(form.watch(`items.${index}.quantity`) || 0),
+                                                stock: field.stock || 0
+                                              }}
+                                              className="text-xs"
+                                            />
+                                            {/* 🎯 庫存信息顯示 */}
+                                            {field.is_stocked_sale && field.stock !== undefined && (
+                                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                                庫存: {field.stock}
+                                              </span>
+                                            )}
+                                          </div>
+                                          
+                                          {/* 🎯 訂製商品規格顯示：限制寬度並添加 Tooltip */}
                                           {field.product_variant_id === null && field.custom_specifications && (
-                                            <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                              {Object.entries(field.custom_specifications)
-                                                .map(([k, v]) => `${k}: ${v}`)
-                                                .join("; ")}
-                                            </span>
+                                            <TooltipProvider>
+                                              <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px] cursor-help">
+                                                    {Object.entries(field.custom_specifications)
+                                                      .map(([k, v]) => `${k}: ${v}`)
+                                                      .join("; ")}
+                                                  </span>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="bottom" className="max-w-[300px]">
+                                                  <div className="space-y-1">
+                                                    <p className="font-medium">訂製規格：</p>
+                                                    {Object.entries(field.custom_specifications).map(([key, value]) => (
+                                                      <p key={key} className="text-sm">
+                                                        <span className="font-medium">{key}:</span> {value}
+                                                      </p>
+                                                    ))}
+                                                  </div>
+                                                </TooltipContent>
+                                              </Tooltip>
+                                            </TooltipProvider>
                                           )}
                                         </div>
                                       </div>
