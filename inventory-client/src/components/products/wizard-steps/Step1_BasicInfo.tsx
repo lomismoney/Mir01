@@ -71,18 +71,107 @@ export function Step1_BasicInfo({
     error: categoriesError,
   } = useCategories();
 
-  // 將分組的分類資料轉換為平面陣列
-  const categoriesList = React.useMemo(() => {
-    if (!categoriesGrouped) return [];
+  // 處理分類資料，分離父分類和子分類
+  const { parentCategories, allCategoriesMap } = React.useMemo(() => {
+    if (!categoriesGrouped) return { parentCategories: [], allCategoriesMap: new Map() };
 
-    // 將分組的分類資料扁平化為單一陣列
-    const allCategories = Object.values(categoriesGrouped).flat();
+    let allCategories: Category[] = [];
+    
+    if (Array.isArray(categoriesGrouped)) {
+      allCategories = categoriesGrouped as Category[];
+    } else if (categoriesGrouped && typeof categoriesGrouped === 'object') {
+      allCategories = Object.values(categoriesGrouped).flat() as Category[];
+    }
 
-    // 過濾有效的分類資料
-    return allCategories.filter(
-      (category) => category && category.id && category.name,
-    );
+    // 建立所有分類的映射（包括子分類）
+    const categoriesMap = new Map<number, Category>();
+    
+    const addToMap = (categories: Category[]) => {
+      for (const category of categories) {
+        if (category && category.id && category.name) {
+          categoriesMap.set(category.id, category);
+          if (category.children && category.children.length > 0) {
+            addToMap(category.children);
+          }
+        }
+      }
+    };
+    
+    addToMap(allCategories);
+
+    // 提取父分類（parent_id 為 null 的分類）
+    const parents = allCategories.filter(cat => cat && cat.parent_id === null);
+
+    return { 
+      parentCategories: parents, 
+      allCategoriesMap: categoriesMap 
+    };
   }, [categoriesGrouped]);
+
+  // 動態多階段分類選擇狀態
+  const [categoryPath, setCategoryPath] = React.useState<number[]>([]);
+  const currentCategory = formData.basicInfo.category_id ? allCategoriesMap.get(formData.basicInfo.category_id) : null;
+  
+  // 根據當前選中的分類，建立分類路徑
+  React.useEffect(() => {
+    if (currentCategory) {
+      // 建立從根分類到當前分類的完整路徑
+      const buildPath = (category: Category): number[] => {
+        if (!category.parent_id) {
+          // 這是根分類
+          return [category.id];
+        } else {
+          // 遞歸建立路徑
+          const parentCategory = allCategoriesMap.get(category.parent_id);
+          if (parentCategory) {
+            return [...buildPath(parentCategory), category.id];
+          } else {
+            return [category.id];
+          }
+        }
+      };
+      
+      const path = buildPath(currentCategory);
+      setCategoryPath(path);
+    } else {
+      setCategoryPath([]);
+    }
+  }, [currentCategory, allCategoriesMap]);
+
+  // 動態計算每個階段的分類選項
+  const categoryStages = React.useMemo(() => {
+    const stages: Array<{
+      level: number;
+      parentCategory: Category | null;
+      options: Category[];
+      selectedId: number | null;
+    }> = [];
+
+    // 第一階段：根分類
+    stages.push({
+      level: 0,
+      parentCategory: null,
+      options: parentCategories,
+      selectedId: categoryPath[0] || null,
+    });
+
+    // 動態建立後續階段
+    for (let i = 0; i < categoryPath.length; i++) {
+      const selectedId = categoryPath[i];
+      const selectedCategory = allCategoriesMap.get(selectedId);
+      
+      if (selectedCategory && selectedCategory.children && selectedCategory.children.length > 0) {
+        stages.push({
+          level: i + 1,
+          parentCategory: selectedCategory,
+          options: selectedCategory.children,
+          selectedId: categoryPath[i + 1] || null,
+        });
+      }
+    }
+
+    return stages;
+  }, [categoryPath, parentCategories, allCategoriesMap]);
 
   // 本地驗證狀態
   const [validationErrors, setValidationErrors] = useState<
@@ -378,45 +467,99 @@ export function Step1_BasicInfo({
                 </TooltipContent>
               </Tooltip>
             </div>
-            <Select
-              value={formData.basicInfo.category_id?.toString() || "none"}
-              onValueChange={(value) =>
-                handleFieldChange(
-                  "category_id",
-                  value === "none" ? null : Number(value),
-                )
-              }
-              data-oid="kd5r3p."
-            >
-              <SelectTrigger data-oid="o3j2qk2">
-                <SelectValue
-                  placeholder="請選擇商品分類（選填）"
-                  data-oid="vrp.yre"
-                />
-              </SelectTrigger>
-              <SelectContent data-oid="1gt63l_">
-                <SelectItem value="none" data-oid="f:t.w6u">
-                  未分類
-                </SelectItem>
-                {categoriesLoading ? (
-                  <SelectItem value="loading" disabled data-oid="emki.u-">
-                    載入分類中...
-                  </SelectItem>
-                ) : (
-                  categoriesList.map((category) =>
-                    category.id ? (
-                      <SelectItem
-                        key={category.id}
-                        value={category.id.toString()}
-                        data-oid="5g5.v3-"
-                      >
-                        {category.name}
-                      </SelectItem>
-                    ) : null,
-                  )
-                )}
-              </SelectContent>
-            </Select>
+            <div className="space-y-3">
+              {/* 動態多階段分類選擇器 */}
+              {categoryStages.map((stage, stageIndex) => (
+                <div key={`stage-${stage.level}`}>
+                  <Label 
+                    htmlFor={`category-stage-${stage.level}`} 
+                    className="text-sm font-medium"
+                  >
+                    {stage.level === 0 ? '主分類' : `${stage.parentCategory?.name} 的子分類`}
+                    {stage.level > 0 && (
+                      <span className="text-xs text-muted-foreground ml-1">
+                        (可選，不選則使用 "{stage.parentCategory?.name}")
+                      </span>
+                    )}
+                  </Label>
+                  <Select
+                    value={
+                      stage.selectedId?.toString() || 
+                      (stage.level === 0 ? "none" : `parent_${stage.parentCategory?.id}`)
+                    }
+                    onValueChange={(value) => {
+                      if (value === "none") {
+                        // 清除所有選擇
+                        setCategoryPath([]);
+                        handleFieldChange("category_id", null);
+                      } else if (value.startsWith("parent_")) {
+                        // 選擇使用父分類
+                        const newPath = categoryPath.slice(0, stage.level);
+                        setCategoryPath(newPath);
+                        const categoryId = newPath[newPath.length - 1] || null;
+                        handleFieldChange("category_id", categoryId);
+                      } else {
+                        // 選擇特定分類
+                        const categoryId = Number(value);
+                        const newPath = [...categoryPath.slice(0, stage.level), categoryId];
+                        setCategoryPath(newPath);
+                        handleFieldChange("category_id", categoryId);
+                      }
+                    }}
+                    data-oid="kd5r3p."
+                  >
+                    <SelectTrigger id={`category-stage-${stage.level}`} data-oid="o3j2qk2">
+                      <SelectValue
+                        placeholder={
+                          stage.level === 0 
+                            ? "請選擇主分類（可選）" 
+                            : `選擇 ${stage.parentCategory?.name} 的子分類（可選）`
+                        }
+                        data-oid="vrp.yre"
+                      />
+                    </SelectTrigger>
+                    <SelectContent data-oid="1gt63l_">
+                      {stage.level === 0 ? (
+                        <SelectItem value="none" data-oid="f:t.w6u">
+                          未分類
+                        </SelectItem>
+                      ) : (
+                        <SelectItem value={`parent_${stage.parentCategory?.id}`}>
+                          使用：{stage.parentCategory?.name}
+                        </SelectItem>
+                      )}
+                      {categoriesLoading && stage.level === 0 ? (
+                        <SelectItem value="loading" disabled data-oid="emki.u-">
+                          載入分類中...
+                        </SelectItem>
+                      ) : (
+                        stage.options.map((category) =>
+                          category.id ? (
+                            <SelectItem
+                              key={category.id}
+                              value={category.id.toString()}
+                              data-oid="5g5.v3-"
+                            >
+                              {category.name}
+                              {category.description && (
+                                <span className="text-xs text-muted-foreground ml-2">
+                                  - {category.description}
+                                </span>
+                              )}
+                              {category.children && category.children.length > 0 && (
+                                <span className="text-xs text-blue-500 ml-2">
+                                  ({category.children.length} 子分類)
+                                </span>
+                              )}
+                            </SelectItem>
+                          ) : null,
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
             <div className="text-xs text-gray-500" data-oid="q_beutj">
               選填，稍後您也可以在商品管理中修改分類
             </div>

@@ -266,27 +266,27 @@ export function InstallationForm({
                                     </div>
                                   ) : (
                                     /* 沒有選擇時顯示ProductSelector */
-                                    <ProductSelector
+                                  <ProductSelector
                                       key={`product-selector-${index}`}
                                       value={0}
-                                      onValueChange={(variantId, variant) => {
-                                        field.onChange(variantId);
-                                        // 自動填入商品名稱和 SKU
-                                        if (variant) {
-                                          form.setValue(
-                                            `items.${index}.product_name`,
-                                            variant.product?.name || "",
-                                          );
-                                          form.setValue(
-                                            `items.${index}.sku`,
-                                            variant.sku || "",
-                                          );
-                                        }
-                                      }}
-                                      placeholder="搜尋並選擇商品規格"
-                                      disabled={isSubmitting}
-                                      showCurrentStock={true}
-                                    />
+                                    onValueChange={(variantId, variant) => {
+                                      field.onChange(variantId);
+                                      // 自動填入商品名稱和 SKU
+                                      if (variant) {
+                                        form.setValue(
+                                          `items.${index}.product_name`,
+                                          variant.product?.name || "",
+                                        );
+                                        form.setValue(
+                                          `items.${index}.sku`,
+                                          variant.sku || "",
+                                        );
+                                      }
+                                    }}
+                                    placeholder="搜尋並選擇商品規格"
+                                    disabled={isSubmitting}
+                                    showCurrentStock={true}
+                                  />
                                   )}
                                 </FormControl>
                                 <FormMessage />

@@ -276,9 +276,9 @@ export function useProductDetail(productId: number | string | undefined) {
                 throw new Error('商品 ID 無效');
             }
 
-            const { data, error } = await apiClient.GET('/api/products/{id}', {
-                params: { path: { id: numericId } }
-            });
+                    const { data, error } = await apiClient.GET('/api/products/{id}', {
+            params: { path: { id: numericId } }
+        });
             
             if (error) {
                 const errorMessage = parseApiError(error);
@@ -3122,7 +3122,7 @@ export function useUpdatePurchase() {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: number | string; data: any }) => {
-              const { data: responseData, error } = await apiClient.PUT('/api/purchases/{id}', {
+      const { data: responseData, error } = await apiClient.PUT('/api/purchases/{id}', {
           params: { path: { id: String(id) } },
         body: data
       })

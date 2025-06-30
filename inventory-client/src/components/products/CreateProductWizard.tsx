@@ -256,8 +256,6 @@ function transformWizardDataToApiPayload(
   };
 }
 
-
-
 /**
  * 商品創建/編輯嚮導主組件 Props
  */
