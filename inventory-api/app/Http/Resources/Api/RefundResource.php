@@ -15,22 +15,60 @@ class RefundResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            /**
+             * 退款 ID
+             */
             'id' => $this->id,
+            
+            /**
+             * 關聯的訂單 ID
+             */
             'order_id' => $this->order_id,
-            'refund_number' => $this->refund_number,
+            
+            /**
+             * 退款總金額
+             */
             'total_refund_amount' => $this->total_refund_amount,
-            'refund_method' => $this->refund_method,
+            
+            /**
+             * 退款原因
+             */
             'reason' => $this->reason,
+            
+            /**
+             * 退款備註
+             */
             'notes' => $this->notes,
+            
+            /**
+             * 是否回補庫存
+             */
             'should_restock' => $this->should_restock,
-            'status' => $this->status,
-            'refunded_at' => $this->refunded_at,
+            
+            /**
+             * 創建時間
+             */
             'created_at' => $this->created_at,
+            
+            /**
+             * 更新時間
+             */
             'updated_at' => $this->updated_at,
-            // 關聯的用戶資訊（退款處理者）
-            'user' => new UserResource($this->whenLoaded('user')),
-            // 退款項目詳情（如果有載入）
-            'refund_items' => $this->whenLoaded('refundItems'),
+            
+            /**
+             * 創建退款的操作員（如果有載入）
+             */
+            'creator' => new UserResource($this->whenLoaded('creator')),
+            
+            /**
+             * 關聯的訂單資訊（如果有載入）
+             */
+            'order' => new OrderResource($this->whenLoaded('order')),
+            
+            /**
+             * 退款項目詳情（如果有載入）
+             */
+            'refund_items' => RefundItemResource::collection($this->whenLoaded('refundItems')),
         ];
     }
 }
