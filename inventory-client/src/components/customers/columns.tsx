@@ -22,11 +22,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useDeleteCustomer } from "@/hooks/queries/useEntityQueries";
-import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowUpDown } from "lucide-react";
 
-export const columns: ColumnDef<Customer>[] = [
+// 🎯 【Task 3】columns 函數參數類型定義
+interface ColumnsProps {
+  onEditCustomer: (customer: Customer) => void;
+}
+
+// 🎯 【Task 3】將 columns 改為函數，接收編輯回調
+export const columns = (props: ColumnsProps): ColumnDef<Customer>[] => [
   // 選擇欄位
   {
     id: "select",
@@ -123,15 +128,10 @@ export const columns: ColumnDef<Customer>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" data-oid="xmi_:5l">
-              <DropdownMenuItem asChild data-oid="134k:9v">
-                <Link
-                  href={`/customers/${customer.id}/edit`}
-                  className="flex items-center"
-                  data-oid="l5h5uja"
-                >
-                  <Edit className="mr-2 h-4 w-4" data-oid="j66lb4m" />
-                  編輯
-                </Link>
+              {/* 🎯 【Task 3】編輯按鈕：移除 Link，改為 onClick 事件 */}
+              <DropdownMenuItem onClick={() => props.onEditCustomer(customer)} data-oid="134k:9v">
+                <Edit className="mr-2 h-4 w-4" data-oid="j66lb4m" />
+                編輯
               </DropdownMenuItem>
               <AlertDialogTrigger asChild data-oid="dpctrga">
                 <DropdownMenuItem
