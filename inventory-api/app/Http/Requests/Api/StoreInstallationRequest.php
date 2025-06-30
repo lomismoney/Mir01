@@ -31,6 +31,7 @@ class StoreInstallationRequest extends FormRequest
             // 安裝項目
             'items' => ['required', 'array', 'min:1'],
             'items.*.order_item_id' => ['nullable', 'integer', 'exists:order_items,id'],
+            'items.*.product_variant_id' => ['nullable', 'integer', 'exists:product_variants,id'],
             'items.*.product_name' => ['required', 'string', 'max:255'],
             'items.*.sku' => ['required', 'string', 'max:100'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],

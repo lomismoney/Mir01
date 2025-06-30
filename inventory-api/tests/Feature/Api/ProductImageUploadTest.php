@@ -60,29 +60,23 @@ class ProductImageUploadTest extends TestCase
         // 驗證響應
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'success',
-                'message',
                 'data' => [
-                    'media_id',
-                    'file_name',
-                    'file_size',
-                    'mime_type',
+                    'id',
+                    'name',
+                    'has_image',
                     'image_urls' => [
                         'original',
                         'thumb',
                         'medium',
                         'large',
                     ],
-                    'conversions_generated' => [
-                        'thumb',
-                        'medium',
-                        'large',
-                    ],
+                    'image_info'
                 ],
             ])
             ->assertJson([
-                'success' => true,
-                'message' => '商品圖片上傳成功',
+                'data' => [
+                    'has_image' => true
+                ]
             ]);
 
         // 驗證商品現在有圖片

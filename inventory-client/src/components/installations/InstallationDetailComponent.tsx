@@ -338,11 +338,13 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
                   {installation.installer ? (
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
-                        {installation.installer.name}
+                        {installation.installer.name || installation.installer.username || '未知師傅'}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        @{installation.installer.username}
-                      </span>
+                      {installation.installer.username && (
+                        <span className="text-xs text-muted-foreground">
+                          @{installation.installer.username}
+                        </span>
+                      )}
                     </div>
                   ) : (
                     <span className="text-muted-foreground italic">尚未分配師傅</span>
@@ -393,7 +395,7 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
                 <label className="text-sm font-medium text-muted-foreground">建立者</label>
                 <div className="mt-1 flex items-center gap-2">
                   <Badge variant="secondary">
-                    {installation.creator.name}
+                    {installation.creator.name || installation.creator.username || '未知用戶'}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     於 {format(new Date(installation.created_at), "MM/dd HH:mm", { locale: zhTW })} 建立

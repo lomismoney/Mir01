@@ -210,10 +210,13 @@ class CategoryControllerTest extends TestCase
             ->getJson('/api/categories');
             
         // 檢查響應，普通用戶應該可以查看分類
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data'
+            ]);
         
         // 驗證響應結構
-        $responseArray = $response->json();
+        $responseArray = $response->json('data');
         $this->assertIsArray($responseArray);
     }
     
@@ -367,7 +370,7 @@ class CategoryControllerTest extends TestCase
     }
 
     /** @test */
-    public function index_returns_categories_grouped_by_parent_id()
+    public function index_returns_flat_categories_list()
     {
         // 創建父分類
         $parentCategory = Category::factory()->create([
@@ -390,22 +393,40 @@ class CategoryControllerTest extends TestCase
         $response = $this->actingAsAdmin()
             ->getJson('/api/categories');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'parent_id',
+                        'sort_order',
+                        'products_count',
+                        'total_products_count'
+                    ]
+                ]
+            ]);
 
-        $data = $response->json();
+        $data = $response->json('data');
 
-        // 檢查是否有按 parent_id 分組的結構
+        // 檢查是否返回扁平化的分類列表
         $this->assertIsArray($data);
+        $this->assertCount(3, $data);
         
-        // 檢查是否有頂層分類組（parent_id 為 null 的分類）
-        if (isset($data[''])) {
-            $this->assertIsArray($data['']);
-        }
+        // 檢查是否包含所有創建的分類
+        $categoryIds = collect($data)->pluck('id')->toArray();
+        $this->assertContains($parentCategory->id, $categoryIds);
+        $this->assertContains($childCategory1->id, $categoryIds);
+        $this->assertContains($anotherParent->id, $categoryIds);
         
-        // 檢查是否有子分類組
-        if (isset($data[(string)$parentCategory->id])) {
-            $this->assertIsArray($data[(string)$parentCategory->id]);
-        }
+        // 檢查parent_id關係是否正確
+        $parentData = collect($data)->firstWhere('id', $parentCategory->id);
+        $childData = collect($data)->firstWhere('id', $childCategory1->id);
+        $anotherParentData = collect($data)->firstWhere('id', $anotherParent->id);
+        
+        $this->assertNull($parentData['parent_id']);
+        $this->assertEquals($parentCategory->id, $childData['parent_id']);
+        $this->assertNull($anotherParentData['parent_id']);
     }
 
     /** @test */
@@ -416,22 +437,31 @@ class CategoryControllerTest extends TestCase
         $response = $this->actingAsAdmin()
             ->getJson('/api/categories');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'parent_id',
+                        'sort_order',
+                        'products_count',
+                        'total_products_count'
+                    ]
+                ]
+            ]);
 
-        $data = $response->json();
+        $data = $response->json('data');
         
         // 檢查返回的資料結構包含商品計數
         $this->assertIsArray($data);
         
-        // 如果有資料，檢查第一個分組的第一個分類
+        // 如果有資料，檢查第一個分類
         if (!empty($data)) {
-            $firstGroup = reset($data);
-            if (!empty($firstGroup)) {
-                $firstCategory = reset($firstGroup);
-                $this->assertArrayHasKey('id', $firstCategory);
-                $this->assertArrayHasKey('products_count', $firstCategory);
-                $this->assertArrayHasKey('total_products_count', $firstCategory);
-            }
+            $firstCategory = $data[0];
+            $this->assertArrayHasKey('id', $firstCategory);
+            $this->assertArrayHasKey('products_count', $firstCategory);
+            $this->assertArrayHasKey('total_products_count', $firstCategory);
         }
     }
 
@@ -464,10 +494,14 @@ class CategoryControllerTest extends TestCase
         $response = $this->actingAsAdmin()
             ->getJson('/api/categories');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data'
+            ]);
 
-        $data = $response->json();
+        $data = $response->json('data');
         $this->assertIsArray($data);
+        $this->assertEmpty($data);
     }
 
     /** @test */
@@ -482,15 +516,39 @@ class CategoryControllerTest extends TestCase
         $response = $this->actingAsAdmin()
             ->getJson('/api/categories');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'parent_id',
+                        'sort_order',
+                        'products_count',
+                        'total_products_count'
+                    ]
+                ]
+            ]);
 
-        $data = $response->json();
+        $data = $response->json('data');
 
-        // 檢查各層級分類是否正確分組
-        $this->assertArrayHasKey('', $data); // Level 1
-        $this->assertArrayHasKey((string)$level1->id, $data); // Level 2
-        $this->assertArrayHasKey((string)$level2->id, $data); // Level 3
-        $this->assertArrayHasKey((string)$level3->id, $data); // Level 4
+        // 檢查各層級分類是否都包含在扁平化列表中
+        $categoryIds = collect($data)->pluck('id')->toArray();
+        $this->assertContains($level1->id, $categoryIds);
+        $this->assertContains($level2->id, $categoryIds);
+        $this->assertContains($level3->id, $categoryIds);
+        $this->assertContains($level4->id, $categoryIds);
+
+        // 檢查parent_id關係是否正確
+        $level1Data = collect($data)->firstWhere('id', $level1->id);
+        $level2Data = collect($data)->firstWhere('id', $level2->id);
+        $level3Data = collect($data)->firstWhere('id', $level3->id);
+        $level4Data = collect($data)->firstWhere('id', $level4->id);
+
+        $this->assertNull($level1Data['parent_id']);
+        $this->assertEquals($level1->id, $level2Data['parent_id']);
+        $this->assertEquals($level2->id, $level3Data['parent_id']);
+        $this->assertEquals($level3->id, $level4Data['parent_id']);
     }
 
     /** @test */

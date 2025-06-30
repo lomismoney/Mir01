@@ -28,10 +28,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InventoryPagination } from "@/components/inventory/InventoryPagination";
 import {
   Calendar,
   Clock,
-  User,
   Package,
   RefreshCw,
   Search,
@@ -73,6 +73,14 @@ export function InventoryHistory({
     id: inventoryId,
     ...filters,
   });
+
+  /**
+   * 處理分頁變更
+   * @param page - 新的頁碼
+   */
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
+  };
 
   if (error) {
     return (
@@ -240,7 +248,11 @@ export function InventoryHistory({
             變動記錄
           </CardTitle>
           <CardDescription data-oid="qjw083:">
-            {historyData?.data && `共 ${historyData.data.length} 筆記錄`}
+            {/* 修正：顯示總記錄數而不是當前頁面的記錄數 */}
+            {historyData?.total !== undefined && `共 ${historyData.total} 筆記錄`}
+            {historyData?.current_page && historyData?.last_page && 
+              ` (第 ${historyData.current_page} 頁，共 ${historyData.last_page} 頁)`
+            }
           </CardDescription>
         </CardHeader>
         <CardContent data-oid="-5.mh5h">
@@ -341,18 +353,8 @@ export function InventoryHistory({
                         </span>{" "}
                         {transaction.after_quantity ?? "未知"}
                       </div>
-                      {(transaction.relations as any)?.user && (
-                        <div
-                          className="flex items-center gap-1"
-                          data-oid="45iqvbn"
-                        >
-                          <User className="h-3 w-3" data-oid="vxv7o74" />
-                          <span className="font-medium" data-oid="_hr_9px">
-                            操作人:
-                          </span>{" "}
-                          {(transaction.relations as any)?.user?.name}
-                        </div>
-                      )}
+                      {/* 暫時移除 relations.user 引用，因為型別不包含此屬性 */}
+                      {/* 後續需要根據實際 API 回應結構調整 */}
                     </div>
 
                     {transaction.notes && (
@@ -379,13 +381,14 @@ export function InventoryHistory({
                           if (!transaction.metadata) return "無";
 
                           // 處理 metadata，可能是字符串或對象
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           let metadataObj: any = transaction.metadata;
 
                           // 如果是字符串，嘗試解析為 JSON
                           if (typeof metadataObj === "string") {
                             try {
                               metadataObj = JSON.parse(metadataObj);
-                            } catch (e) {
+                            } catch {
                               // 如果解析失敗，直接返回原始字符串
                               return String(metadataObj);
                             }
@@ -423,8 +426,6 @@ export function InventoryHistory({
                   </div>
                 </div>
               ))}
-
-
             </div>
           ) : (
             <div
@@ -435,11 +436,25 @@ export function InventoryHistory({
                 className="h-12 w-12 mx-auto mb-4 opacity-50"
                 data-oid="zqaugxo"
               />
-
               <p data-oid="pdjsrjt">尚無庫存變動記錄</p>
             </div>
           )}
         </CardContent>
+
+        {/* 新增分頁控制區塊 */}
+        {historyData && historyData.total > historyData.per_page && (
+          <div className="border-t p-4">
+            <InventoryPagination
+              meta={{
+                current_page: historyData.current_page || 1,
+                last_page: historyData.last_page || 1,
+                per_page: historyData.per_page || 20,
+                total: historyData.total || 0,
+              }}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </Card>
     </div>
   );

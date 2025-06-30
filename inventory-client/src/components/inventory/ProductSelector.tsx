@@ -104,20 +104,25 @@ export function ProductSelector({
     isLoading: isLoadingAllVariants,
   } = useProductVariants(
     { per_page: 500 }, // 載入大量變體以確保能找到對應的變體
-    { enabled: true }, // 始終載入變體列表
+    { enabled: true }, // 始終載入變體列表以支持編輯模式
   );
 
   // 當 selectedProductId 變化時，立即清除之前的變體選擇
+  // 但是要避免在初始化時清除currentVariant設置的值
+  const [isInitializing, setIsInitializing] = useState(true);
+  
   useEffect(() => {
-    if (selectedProductId) {
+    if (selectedProductId && !isInitializing) {
       setSelectedVariant(null);
       // 清除選擇，但不調用回調避免無限循環
     }
-  }, [selectedProductId]);
+  }, [selectedProductId, isInitializing]);
 
   // 使用 useMemo 計算當前應該選中的變體（避免 useEffect 循環）
   const currentVariant = useMemo(() => {
-    if (!value || value <= 0) return null;
+    if (!value || value <= 0) {
+      return null;
+    }
     
     // 首先在當前商品的變體中查找
     let variant = variants.find((v: any) => v.id === value);
@@ -155,12 +160,17 @@ export function ProductSelector({
         inventory: currentVariant.inventory,
       };
       setSelectedVariant(newSelectedVariant);
-    } else {
-      // 沒有變體時清除選擇
+      
+      // 初始化完成
+      setIsInitializing(false);
+    } else if ((!value || value <= 0) && !isLoadingAllVariants) {
+      // 沒有變體時清除選擇（但只有在確實沒有value且不在載入中時）
       setSelectedVariant(null);
       setSelectedProductId(null);
+      setIsInitializing(false);
     }
-  }, [currentVariant]); // 只依賴計算出的變體
+    // 如果 currentVariant 是 null 但 isLoadingAllVariants 是 true，則不做任何操作
+  }, [currentVariant, value, isLoadingAllVariants]); // 依賴計算出的變體、value和載入狀態
 
   // 處理商品選擇
   const handleProductSelect = (productId: number) => {

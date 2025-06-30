@@ -1009,20 +1009,13 @@ class ProductControllerTest extends TestCase
             ]);
             
         $response->assertStatus(201)
-            ->assertJson([
-                'success' => true,
-                'message' => '商品圖片上傳成功',
-            ])
             ->assertJsonStructure([
-                'success',
-                'message',
                 'data' => [
-                    'media_id',
-                    'file_name',
-                    'file_size',
-                    'mime_type',
+                    'id',
+                    'name',
+                    'has_image',
                     'image_urls',
-                    'conversions_generated'
+                    'image_info'
                 ]
             ]);
             

@@ -145,7 +145,10 @@ class CustomerController extends Controller
             ], 500);
 
         } catch (\Exception $e) {
-            abort(500, '客戶創建失敗: ' . $e->getMessage());
+            return response()->json([
+                'message' => '客戶創建失敗',
+                'error' => '系統錯誤，請稍後再試',
+            ], 500);
         }
     }
 
@@ -215,7 +218,10 @@ class CustomerController extends Controller
             ], 500);
 
         } catch (\Exception $e) {
-            abort(500, '客戶更新失敗: ' . $e->getMessage());
+            return response()->json([
+                'message' => '客戶更新失敗',
+                'error' => '系統錯誤，請稍後再試',
+            ], 500);
         }
     }
 

@@ -1398,16 +1398,26 @@ export function useCategories(filters: { search?: string } = {}) {
         },
         // 🎯 新的數據精煉廠 - 返回已構建好的樹狀結構
         select: (response: any): CategoryNode[] => {
-            // API 返回的是以 parent_id 分組的對象
-            const groupedData = response?.data || response || {};
+            // API 返回的是 CategoryResource 集合（陣列格式）
+            const categories = response?.data || response || [];
             
-            // 確保返回的是對象，如果不是則返回空陣列
-            if (typeof groupedData !== 'object' || Array.isArray(groupedData)) {
+            // 確保返回的是陣列，如果不是則返回空陣列
+            if (!Array.isArray(categories)) {
                 return [];
             }
             
+            // 將陣列轉換為以 parent_id 分組的物件格式
+            const groupedData: Record<string, any[]> = {};
+            categories.forEach((category: any) => {
+                const parentKey = category.parent_id?.toString() || '';
+                if (!groupedData[parentKey]) {
+                    groupedData[parentKey] = [];
+                }
+                groupedData[parentKey].push(category);
+            });
+            
             // 在 select 內部調用 buildCategoryTree
-            // 將原始、混亂的分組物件，直接轉換成乾淨的、巢狀的樹狀結構
+            // 將分組物件轉換成乾淨的、巢狀的樹狀結構
             return buildCategoryTree(groupedData);
         },
         staleTime: 5 * 60 * 1000, // 5 分鐘緩存
@@ -3351,7 +3361,7 @@ export function useCreateOrder() {
             console.log('✅ 訂單創建成功:', data);
             return data;
         },
-        onSuccess: async (data: { data?: { total_refund_amount?: number } }, payload) => {
+        onSuccess: async (data, payload) => {
             // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
             await Promise.all([
                 // 1. 失效所有訂單查詢緩存
@@ -3414,7 +3424,7 @@ export function useOrderDetail(orderId: number | null) {
     queryFn: async () => {
       if (!orderId) return null; // 如果沒有 ID，則不執行查詢
       const { data, error } = await apiClient.GET("/api/orders/{id}", {
-        params: { path: { order: orderId } },
+        params: { path: { id: orderId } },
       });
       if (error) {
         const errorMessage = parseApiError(error);
@@ -3695,7 +3705,7 @@ export function useUpdateOrder() {
   return useMutation({
     mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
       const { data, error } = await apiClient.PUT("/api/orders/{id}", {
-        params: { path: { order: payload.id } },
+        params: { path: { id: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -3727,7 +3737,7 @@ export function useDeleteOrder() {
   return useMutation({
     mutationFn: async (orderId: number) => {
       const { data, error } = await apiClient.DELETE("/api/orders/{id}", {
-        params: { path: { order: orderId } },
+        params: { path: { id: orderId } },
       });
       if (error) throw error;
       return data;
@@ -4334,7 +4344,12 @@ export function useInstallation(id: number) {
     queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(id),
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/installations/{id}', {
-        params: { path: { id: id } }
+        params: { 
+          path: { id: id },
+          query: {
+            include: 'items,installer,creator,order'
+          }
+        }
       });
       
       if (error) {

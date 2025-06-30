@@ -45,6 +45,7 @@ class UpdateInstallationRequest extends FormRequest
             // 安裝項目（僅當提供時才驗證）
             'items' => ['sometimes', 'array'],
             'items.*.id' => ['nullable', 'integer', 'exists:installation_items,id'],
+            'items.*.product_variant_id' => ['nullable', 'integer', 'exists:product_variants,id'],
             'items.*.product_name' => ['required', 'string', 'max:255'],
             'items.*.sku' => ['required', 'string', 'max:100'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],

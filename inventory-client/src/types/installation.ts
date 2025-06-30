@@ -155,7 +155,7 @@ export interface Installation {
  */
 export interface CreateInstallationItemRequest {
   /** 商品變體 ID */
-  product_variant_id: number;
+  product_variant_id?: number | null;
   /** 商品名稱 */
   product_name: string;
   /** 商品 SKU */
@@ -195,7 +195,7 @@ export interface UpdateInstallationItemRequest {
   /** 項目 ID（編輯現有項目時提供） */
   id?: number;
   /** 商品變體 ID */
-  product_variant_id: number;
+  product_variant_id?: number | null;
   /** 商品名稱 */
   product_name: string;
   /** 商品 SKU */

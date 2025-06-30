@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -57,7 +57,7 @@ const installationFormSchema = z.object({
   items: z
     .array(
       z.object({
-        product_variant_id: z.number().min(0, "請選擇商品規格"),
+        product_variant_id: z.number().min(0, "請選擇商品規格").optional(),
         product_name: z.string().optional(), // 自動填入，但保留以便顯示
         sku: z.string().optional(), // 自動填入，但保留以便顯示
         quantity: z.number().min(1, "數量至少為 1"),
@@ -67,7 +67,11 @@ const installationFormSchema = z.object({
     )
     .min(1, "安裝單至少需要一個項目")
     .refine(
-      (items) => items.some((item) => item.product_variant_id > 0),
+      (items) => items.some((item) => {
+        // 如果商品名稱存在，視為有效項目（支援編輯模式的歷史資料）
+        return (item.product_variant_id && item.product_variant_id > 0) || 
+               (item.product_name && item.product_name.trim() !== '');
+      }),
       {
         message: "至少需要選擇一個商品規格",
       }
@@ -101,7 +105,7 @@ export function InstallationForm({
 
   const form = useForm<InstallationFormValues>({
     resolver: zodResolver(installationFormSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       customer_name: "",
       customer_phone: "",
       installation_address: "",
@@ -109,7 +113,6 @@ export function InstallationForm({
       scheduled_date: "",
       notes: "",
       items: [
-        // 為新增模式預設新增一個空項目
         {
           product_variant_id: 0,
           product_name: "",
@@ -123,23 +126,13 @@ export function InstallationForm({
   });
 
   // 初始化 useFieldArray 來管理 items 字段
-  const { fields, append, remove, update, replace } = useAppFieldArray({
+  const { fields, append, remove } = useAppFieldArray({
     control: form.control,
     name: "items",
   });
 
-  // 監聽 initialData 變化，當資料載入完成時更新表單
-  useEffect(() => {
-    if (initialData && !isLoadingUsers) {
-      // 確保用戶數據已載入完成後再重置表單
-      form.reset(initialData);
-      
-      // 特別處理 items 陣列 - 使用 replace 方法確保 useFieldArray 正確更新
-      if (initialData.items && Array.isArray(initialData.items)) {
-        replace(initialData.items);
-      }
-    }
-  }, [initialData, form, replace, isLoadingUsers]);
+  // 🎯 移除所有 useEffect 邏輯，完全依賴 defaultValues
+  // useFieldArray 會自動使用 form 的 defaultValues.items 初始化
 
   // 處理新增安裝項目
   const handleAddItem = () => {
@@ -240,27 +233,61 @@ export function InstallationForm({
                                   商品規格 <span className="text-destructive">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                  <ProductSelector
-                                    key={`product-${index}-${field.value || '0'}`}
-                                    value={field.value}
-                                    onValueChange={(variantId, variant) => {
-                                      field.onChange(variantId);
-                                      // 自動填入商品名稱和 SKU
-                                      if (variant) {
-                                        form.setValue(
-                                          `items.${index}.product_name`,
-                                          variant.product?.name || "",
-                                        );
-                                        form.setValue(
-                                          `items.${index}.sku`,
-                                          variant.sku || "",
-                                        );
-                                      }
-                                    }}
-                                    placeholder="搜尋並選擇商品規格"
-                                    disabled={isSubmitting}
-                                    showCurrentStock={true}
-                                  />
+                                  {/* 🎯 簡化：只要有商品名稱，就顯示商品信息 */}
+                                  {form.watch(`items.${index}.product_name`) && form.watch(`items.${index}.product_name`)?.trim() !== '' ? (
+                                    <div className="space-y-2">
+                                      {/* 當前選中的商品顯示 */}
+                                      <div className="p-3 bg-muted/50 rounded-lg border">
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <div className="font-medium text-sm">
+                                              {form.watch(`items.${index}.product_name`) || '商品名稱'}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                              SKU: {form.watch(`items.${index}.sku`) || '未知SKU'}
+                                              {field.value && field.value > 0 && <span className="text-green-600"> • ID: {field.value}</span>}
+                                            </div>
+                                          </div>
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                              // 清除選擇，切換回選擇模式
+                                              field.onChange(0);
+                                              form.setValue(`items.${index}.product_name`, "");
+                                              form.setValue(`items.${index}.sku`, "");
+                                            }}
+                                          >
+                                            更換商品
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    /* 沒有選擇時顯示ProductSelector */
+                                    <ProductSelector
+                                      key={`product-selector-${index}`}
+                                      value={0}
+                                      onValueChange={(variantId, variant) => {
+                                        field.onChange(variantId);
+                                        // 自動填入商品名稱和 SKU
+                                        if (variant) {
+                                          form.setValue(
+                                            `items.${index}.product_name`,
+                                            variant.product?.name || "",
+                                          );
+                                          form.setValue(
+                                            `items.${index}.sku`,
+                                            variant.sku || "",
+                                          );
+                                        }
+                                      }}
+                                      placeholder="搜尋並選擇商品規格"
+                                      disabled={isSubmitting}
+                                      showCurrentStock={true}
+                                    />
+                                  )}
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -484,7 +511,6 @@ export function InstallationForm({
                           }
                           value={field.value?.toString() || "0"}
                           disabled={isLoadingUsers}
-                          key={`installer-${field.value || '0'}`}
                         >
                           <FormControl>
                             <SelectTrigger>

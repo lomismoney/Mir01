@@ -110,6 +110,7 @@ class InstallationService
             foreach ($order->items as $orderItem) {
                 $installationData['items'][] = [
                     'order_item_id' => $orderItem->id,
+                    'product_variant_id' => $orderItem->product_variant_id, // 🔧 修復：複製商品變體ID
                     'product_name' => $orderItem->product_name,
                     'sku' => $orderItem->sku,
                     'quantity' => $orderItem->quantity,

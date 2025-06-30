@@ -24,6 +24,8 @@ export default function EditInstallationPage() {
   
   const { data: installation, isLoading, isError, error } = useInstallation(installationId);
   const { mutate: updateInstallation, isPending } = useUpdateInstallation();
+  
+
 
   if (!installationId || isNaN(installationId)) {
     return (
@@ -81,7 +83,7 @@ export default function EditInstallationPage() {
       notes: values.notes || null,
       // 加入項目更新
       items: values.items.map((item) => ({
-        product_variant_id: item.product_variant_id,
+        product_variant_id: item.product_variant_id && item.product_variant_id > 0 ? item.product_variant_id : null,
         product_name: item.product_name || "",
         sku: item.sku || "",
         quantity: item.quantity,
@@ -112,25 +114,27 @@ export default function EditInstallationPage() {
         },
       }
     );
-  };
+      };
 
   // 準備初始資料供表單使用
   const initialData: Partial<InstallationFormValues> = {
-    customer_name: installation.customer_name || "",
-    customer_phone: installation.customer_phone || "",
-    installation_address: installation.installation_address || "",
-    installer_user_id: installation.installer_user_id || undefined,
-    scheduled_date: installation.scheduled_date || undefined,
-    notes: installation.notes || "",
-    items: installation.items?.length > 0 
-      ? installation.items.map((item: any) => ({
-          product_variant_id: item.product_variant_id || 0,
-          product_name: item.product_name || "",
-          sku: item.sku || "",
-          quantity: item.quantity || 1,
-          specifications: item.specifications || "",
-          notes: item.notes || "",
-        }))
+    customer_name: installation?.customer_name || "",
+    customer_phone: installation?.customer_phone || "",
+    installation_address: installation?.installation_address || "",
+    installer_user_id: installation?.installer_user_id || undefined,
+    scheduled_date: installation?.scheduled_date || undefined,
+    notes: installation?.notes || "",
+    items: installation?.items?.length > 0 
+      ? installation.items.map((item: any) => {
+          return {
+            product_variant_id: item.product_variant_id ? Number(item.product_variant_id) : 0,
+            product_name: item.product_name || "",
+            sku: item.sku || "",
+            quantity: Number(item.quantity) || 1,
+            specifications: item.specifications || "",
+            notes: item.notes || "",
+          };
+        })
       : [
           // 如果沒有項目，提供一個空項目讓用戶可以編輯
           {
@@ -158,6 +162,7 @@ export default function EditInstallationPage() {
 
       {/* 安裝單編輯表單 */}
       <InstallationForm
+        key={`installation-form-${installationId}-${installation?.updated_at}`}
         initialData={initialData}
         isSubmitting={isPending}
         onSubmit={handleSubmit}
