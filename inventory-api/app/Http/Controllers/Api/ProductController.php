@@ -24,6 +24,7 @@ use App\Http\Requests\Api\UploadProductImageRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Response;
 
 class ProductController extends Controller
 {
@@ -47,10 +48,11 @@ class ProductController extends Controller
     }
 
     /**
-     * 顯示所有商品列表，支援分頁、排序和篩選功能
-     * 
      * @group 商品管理
      * @authenticated
+     * @summary 獲取商品列表
+     * @description 顯示所有商品列表，支援分頁、排序和篩選功能。
+     * 
      * @queryParam page integer 頁碼，預設為 1。 Example: 1
      * @queryParam per_page integer 每頁項目數，預設為 15。 Example: 15
      * @queryParam search string 搜尋商品名稱或 SKU。 Example: 椅子
@@ -123,9 +125,9 @@ class ProductController extends Controller
     }
 
     /**
-     * 建立新商品 (SPU/SKU)
      * @group 商品管理
      * @authenticated
+     * @summary 建立新商品 (SPU/SKU)
      * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
      * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
      * @bodyParam category_id integer 分類ID。 Example: 1
@@ -134,16 +136,9 @@ class ProductController extends Controller
      * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
      * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
      * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
-     * @response 201 scenario="商品創建成功" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "經典棉質T-shirt",
-     *     "description": "100% 純棉",
-     *     "category_id": 1,
-     *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * 
+     * @apiResource \App\Http\Resources\Api\ProductResource
+     * @apiResourceModel \App\Models\Product
      */
     public function store(StoreProductRequest $request)
     {
@@ -193,37 +188,28 @@ class ProductController extends Controller
             });
 
             // 回傳經過完整關聯加載的 SPU 資源
-            return new ProductResource($product->load([
+            return (new ProductResource($product->load([
                 'category',
                 'attributes', // ✅ 建立後也要加載 SPU 的屬性關聯
                 'variants.attributeValues.attribute', 
                 'variants.inventory',
                 'media' // 📸 建立後也要加載媒體關聯
-            ]));
+            ])))->response()->setStatusCode(201);
 
         } catch (\Exception $e) {
             // 如果事務中有任何錯誤發生，回傳伺服器錯誤
-            return response()->json(['message' => '建立商品時發生錯誤', 'error' => $e->getMessage()], 500);
+            abort(500, '建立商品時發生錯誤: ' . $e->getMessage());
         }
     }
 
-
-
     /**
-     * 顯示指定的商品
-     * 
      * @group 商品管理
+     * @authenticated
+     * @summary 顯示指定的商品
      * @urlParam product integer required 商品的 ID。 Example: 1
-     * @response 200 scenario="商品詳情" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "商品名稱",
-     *     "description": "商品描述",
-     *     "category_id": 1,
-     *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * 
+     * @apiResource \App\Http\Resources\Api\ProductResource
+     * @apiResourceModel \App\Models\Product
      */
     public function show(Product $product)
     {
@@ -237,10 +223,9 @@ class ProductController extends Controller
     }
 
     /**
-     * 更新指定的商品及其變體
-     * 
      * @group 商品管理
      * @authenticated
+     * @summary 更新指定的商品及其變體
      * @urlParam product integer required 商品的 ID。 Example: 1
      * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
      * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
@@ -251,15 +236,9 @@ class ProductController extends Controller
      * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
      * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
      * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
-     * @response 200 scenario="商品更新成功" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "經典棉質T-shirt",
-     *     "description": "100% 純棉",
-     *     "category_id": 1,
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * 
+     * @apiResource \App\Http\Resources\Api\ProductResource
+     * @apiResourceModel \App\Models\Product
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
@@ -284,22 +263,19 @@ class ProductController extends Controller
             
         } catch (\Exception $e) {
             // 如果更新過程中有任何錯誤發生，回傳伺服器錯誤
-            return response()->json([
-                'message' => '更新商品時發生錯誤', 
-                'error' => $e->getMessage()
-            ], 500);
+            abort(500, '更新商品時發生錯誤: ' . $e->getMessage());
         }
     }
 
     /**
-     * 刪除指定的商品
-     * 
      * @group 商品管理
+     * @authenticated
+     * @summary 刪除指定的商品
      * @urlParam product integer required 商品的 ID。 Example: 1
      * 
      * @response 204 scenario="商品刪除成功"
      */
-    public function destroy(Product $product)
+    public function destroy(Product $product): Response
     {
         $this->authorize('delete', $product); // 檢查是否有權限刪除這個 $product
         
@@ -327,24 +303,21 @@ class ProductController extends Controller
                 'error' => $e->getMessage(),
             ]);
             
-            // 返回友好的錯誤訊息
-            return response()->json([
-                'message' => $e->getMessage(),
-                'error' => '刪除失敗'
-            ], 422);
+            // 返回標準的 422 錯誤
+            abort(422, $e->getMessage());
         }
     }
 
     /**
-     * 批量刪除商品
-     *
-     * 根據提供的商品 ID 陣列批量刪除商品。
      * @group 商品管理
      * @authenticated
+     * @summary 批量刪除商品
+     * @description 根據提供的商品 ID 陣列批量刪除商品。
      * @bodyParam ids integer[] required 要刪除的商品 ID 陣列。 Example: [1, 2, 3]
+     * 
      * @response 204
      */
-    public function destroyMultiple(DestroyMultipleProductsRequest $request)
+    public function destroyMultiple(DestroyMultipleProductsRequest $request): Response
     {
         $this->authorize('deleteMultiple', Product::class); // 檢查是否有'批量刪除'權限
         
@@ -385,63 +358,26 @@ class ProductController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
             
-            // 返回友好的錯誤訊息
-            return response()->json([
-                'message' => $e->getMessage(),
-                'error' => '批量刪除失敗'
-            ], 422);
+            // 返回標準的 422 錯誤
+            abort(422, $e->getMessage());
         }
     }
 
     /**
-     * 上傳商品圖片
-     * 
-     * 遵循 Spatie Media Library v11 官方最佳實踐：
-     * - 使用專用的 FormRequest 進行驗證
-     * - 實施完整的錯誤處理和日誌記錄
-     * - 使用 singleFile 行為自動替換現有圖片
-     * - 返回所有轉換版本的 URL
-     * 
      * @group 商品管理
      * @authenticated
+     * @summary 上傳商品圖片
+     * @description 遵循 Spatie Media Library v11 官方最佳實踐
      * 
      * @urlParam product integer required 商品 ID Example: 1
      * @bodyParam image file required 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
      * 
-     * @response 200 {
-     *   "success": true,
-     *   "message": "圖片上傳成功",
-     *   "data": {
-     *     "id": 1,
-     *     "name": "商品名稱",
-     *     "has_image": true,
-     *     "image_urls": {
-     *       "original": "http://localhost/storage/1/product-image.jpg",
-     *       "thumb": "http://localhost/storage/1/conversions/product-image-thumb.jpg",
-     *       "medium": "http://localhost/storage/1/conversions/product-image-medium.jpg",
-     *       "large": "http://localhost/storage/1/conversions/product-image-large.jpg"
-     *     }
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\ProductResource
+     * @apiResourceModel \App\Models\Product
      * 
-     * @response 404 {
-     *   "success": false,
-     *   "message": "找不到指定的商品"
-     * }
-     * 
-     * @response 422 {
-     *   "success": false,
-     *   "message": "圖片上傳驗證失敗",
-     *   "errors": {
-     *     "image": ["圖片格式必須是：JPEG、JPG、PNG、GIF 或 WebP。"]
-     *   }
-     * }
-     * 
-     * @response 500 {
-     *   "success": false,
-     *   "message": "圖片上傳失敗",
-     *   "error": "詳細錯誤訊息"
-     * }
+     * @response 404
+     * @response 422
+     * @response 500
      */
     public function uploadImage(UploadProductImageRequest $request, Product $product)
     {
@@ -520,26 +456,8 @@ class ProductController extends Controller
             // 重新載入產品以獲取最新的媒體關聯
             $product->refresh();
 
-            // 準備回應資料
-            $responseData = [
-                'media_id' => $media->id,
-                'file_name' => $media->file_name,
-                'file_size' => $media->size,
-                'mime_type' => $media->mime_type,
-                'image_urls' => $product->getImageUrls(),
-                'conversions_generated' => [
-                    'thumb' => $media->hasGeneratedConversion('thumb'),
-                    'medium' => $media->hasGeneratedConversion('medium'),
-                    'large' => $media->hasGeneratedConversion('large'),
-                ],
-                'conversion_results' => $conversionResults,
-            ];
-
-            return response()->json([
-                'success' => true,
-                'message' => '商品圖片上傳成功',
-                'data' => $responseData,
-            ], 201);
+            // 返回標準化的商品資源
+            return (new ProductResource($product))->response()->setStatusCode(201);
 
         } catch (AuthorizationException $e) {
             Log::warning('圖片上傳授權失敗', [
@@ -548,10 +466,7 @@ class ProductController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => '您沒有權限上傳此商品的圖片',
-            ], 403);
+            abort(403, '您沒有權限上傳此商品的圖片');
 
         } catch (\Exception $e) {
             Log::error('圖片上傳失敗', [
@@ -563,11 +478,7 @@ class ProductController extends Controller
                 'line' => $e->getLine(),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => '圖片上傳失敗',
-                'error' => config('app.debug') ? $e->getMessage() : '內部伺服器錯誤',
-            ], 500);
+            abort(500, '圖片上傳失敗: ' . $e->getMessage());
         }
     }
 }

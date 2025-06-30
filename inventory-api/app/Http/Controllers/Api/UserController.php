@@ -114,6 +114,8 @@ class UserController extends Controller
      * @bodyParam password string required 密碼
      * @bodyParam roles array 角色陣列
      * 
+     * @apiResource \App\Http\Resources\Api\UserResource
+     * @apiResourceModel \App\Models\User
      * @response 201 scenario="用戶創建成功" {
      *   "data": {
      *     "id": 1,

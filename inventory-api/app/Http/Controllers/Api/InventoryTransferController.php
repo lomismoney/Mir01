@@ -9,7 +9,6 @@ use App\Models\Inventory;
 use App\Models\InventoryTransaction;
 use App\Models\InventoryTransfer;
 use App\Models\ProductVariant;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * @group 庫存轉移
+ * @authenticated
  *
  * 庫存轉移 API 端點，用於在不同門市之間轉移庫存
  */
@@ -24,11 +24,13 @@ class InventoryTransferController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum');
+        // 授權中間件已在 api.php 路由中定義
     }
+
     /**
      * 獲取庫存轉移記錄列表
      * 
+     * @summary 獲取庫存轉移列表
      * @queryParam from_store_id integer 來源門市ID. Example: 1
      * @queryParam to_store_id integer 目標門市ID. Example: 2
      * @queryParam status string 轉移狀態. Example: completed
@@ -37,30 +39,8 @@ class InventoryTransferController extends Controller
      * @queryParam product_name string 按商品名稱搜尋. Example: T恤
      * @queryParam per_page integer 每頁項目數，預設 15
      * 
-     * @response 200 scenario="庫存調撥列表" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "product_variant_id": 1,
-     *       "from_store_id": 1,
-     *       "to_store_id": 2,
-     *       "quantity": 10,
-     *       "status": "pending",
-     *       "notes": "調撥備註",
-     *       "created_at": "2025-01-01T10:00:00.000000Z",
-     *       "updated_at": "2025-01-01T10:00:00.000000Z"
-     *     }
-     *   ],
-     *   "meta": {
-     *     "current_page": 1,
-     *     "per_page": 15,
-     *     "total": 100
-     *   }
-     * }
-     * 
-     * @authenticated
-     * @param Request $request
-     * @return AnonymousResourceCollection
+     * @apiResourceCollection \App\Http\Resources\Api\InventoryTransferResource
+     * @apiResourceModel \App\Models\InventoryTransfer
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -110,12 +90,13 @@ class InventoryTransferController extends Controller
     /**
      * 獲取單筆庫存轉移記錄
      * 
-     * @authenticated
+     * @summary 獲取庫存轉移詳情
+     * @urlParam id integer required 庫存轉移記錄的ID。 Example: 1
      * 
-     * @param int $id
-     * @return JsonResponse
+     * @apiResource \App\Http\Resources\Api\InventoryTransferResource
+     * @apiResourceModel \App\Models\InventoryTransfer
      */
-    public function show(int $id): JsonResponse
+    public function show(int $id): InventoryTransferResource
     {
         $transfer = InventoryTransfer::with([
             'fromStore', 
@@ -127,25 +108,17 @@ class InventoryTransferController extends Controller
         
         $this->authorize('view', $transfer);
         
-        return response()->json($transfer);
+        return new InventoryTransferResource($transfer);
     }
 
     /**
      * 創建庫存轉移記錄並執行轉移
      * 
-     * @bodyParam from_store_id integer required 來源門市ID. Example: 1
-     * @bodyParam to_store_id integer required 目標門市ID. Example: 2
-     * @bodyParam product_variant_id integer required 商品變體ID. Example: 1
-     * @bodyParam quantity integer required 轉移數量. Example: 5
-     * @bodyParam notes string 備註. Example: 調配門市庫存
-     * @bodyParam status string 狀態，預設為 completed. Example: completed
-     * 
-     * @authenticated
-     * 
-     * @param InventoryTransferRequest $request
-     * @return JsonResponse
+     * @summary 創建庫存轉移
+     * @apiResource \App\Http\Resources\Api\InventoryTransferResource
+     * @apiResourceModel \App\Models\InventoryTransfer
      */
-    public function store(InventoryTransferRequest $request): JsonResponse
+    public function store(InventoryTransferRequest $request): InventoryTransferResource
     {
         $this->authorize('create', InventoryTransfer::class);
         
@@ -165,9 +138,7 @@ class InventoryTransferController extends Controller
             );
             
             if ($fromInventory->quantity < $quantity) {
-                return response()->json([
-                    'message' => '來源門市庫存不足，無法完成轉移',
-                ], 400);
+                abort(422, '來源門市庫存不足，無法完成轉移');
             }
             
             // 檢查或創建目標門市的庫存記錄
@@ -194,18 +165,14 @@ class InventoryTransferController extends Controller
             if ($status === InventoryTransfer::STATUS_COMPLETED) {
                 // 減少來源門市庫存
                 if (!$fromInventory->reduceStock($quantity, $user->id, "轉出至門市 #{$toStoreId}: {$notes}", $transferMetadata)) {
-                    return response()->json([
-                        'message' => '減少來源門市庫存失敗',
-                    ], 400);
+                    abort(500, '減少來源門市庫存失敗');
                 }
                 
                 // 增加目標門市庫存
                 if (!$toInventory->addStock($quantity, $user->id, "轉入自門市 #{$fromStoreId}: {$notes}", $transferMetadata)) {
                     // 如果增加目標門市庫存失敗，需要恢復來源門市庫存
                     $fromInventory->addStock($quantity, $user->id, "庫存轉移失敗後回滾", $transferMetadata);
-                    return response()->json([
-                        'message' => '增加目標門市庫存失敗',
-                    ], 400);
+                    abort(500, '增加目標門市庫存失敗');
                 }
                 
                 // 將庫存交易記錄更新為轉移類型
@@ -224,27 +191,22 @@ class InventoryTransferController extends Controller
                 'productVariant.product'
             ]);
             
-            return response()->json([
-                'message' => '庫存轉移成功',
-                'transfer' => $transfer
-            ], 201);
+            return new InventoryTransferResource($transfer);
         });
     }
 
     /**
      * 更新庫存轉移記錄狀態
      * 
+     * @summary 更新轉移狀態
      * @urlParam id integer required 轉移記錄ID. Example: 1
      * @bodyParam status string required 新狀態. Example: completed
      * @bodyParam notes string 備註. Example: 已確認收到貨品
-     * 
-     * @authenticated
-     * 
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
+     *
+     * @apiResource \App\Http\Resources\Api\InventoryTransferResource
+     * @apiResourceModel \App\Models\InventoryTransfer
      */
-    public function updateStatus(Request $request, int $id): JsonResponse
+    public function updateStatus(Request $request, int $id): InventoryTransferResource
     {
         $request->validate([
             'status' => ['required', 'string', 'in:pending,in_transit,completed,cancelled'],
@@ -262,14 +224,12 @@ class InventoryTransferController extends Controller
             
             // 如果狀態沒有變化，直接返回
             if ($oldStatus === $newStatus) {
-                return response()->json(['message' => '狀態未變更']);
+                return new InventoryTransferResource($transfer->load(['fromStore', 'toStore', 'user', 'productVariant.product']));
             }
             
             // 如果已經是完成或取消狀態，不允許更改
             if ($oldStatus === InventoryTransfer::STATUS_COMPLETED || $oldStatus === InventoryTransfer::STATUS_CANCELLED) {
-                return response()->json([
-                    'message' => '已完成或已取消的轉移記錄不能更改狀態',
-                ], 400);
+                abort(422, '已完成或已取消的轉移記錄不能更改狀態');
             }
             
             // 更新轉移記錄的狀態
@@ -298,9 +258,7 @@ class InventoryTransferController extends Controller
                 $transfer->status = $oldStatus;
                 $transfer->save();
                 
-                return response()->json([
-                    'message' => $e->getMessage(),
-                ], 400);
+                abort(400, $e->getMessage());
             }
             
             // 重新加載關聯數據
@@ -311,26 +269,21 @@ class InventoryTransferController extends Controller
                 'productVariant.product'
             ]);
             
-            return response()->json([
-                'message' => '庫存轉移狀態更新成功',
-                'transfer' => $transfer
-            ]);
+            return new InventoryTransferResource($transfer);
         });
     }
 
     /**
      * 取消庫存轉移
      * 
+     * @summary 取消庫存轉移
      * @urlParam id integer required 轉移記錄ID. Example: 1
      * @bodyParam reason string required 取消原因. Example: 商品損壞，不需要轉移
      * 
-     * @authenticated
-     * 
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
+     * @apiResource \App\Http\Resources\Api\InventoryTransferResource
+     * @apiResourceModel \App\Models\InventoryTransfer
      */
-    public function cancel(Request $request, int $id): JsonResponse
+    public function cancel(Request $request, int $id): InventoryTransferResource
     {
         $request->validate([
             'reason' => ['required', 'string', 'max:1000'],
@@ -343,9 +296,7 @@ class InventoryTransferController extends Controller
             
             // 如果已經是完成或取消狀態，不允許再取消
             if ($transfer->status === InventoryTransfer::STATUS_COMPLETED || $transfer->status === InventoryTransfer::STATUS_CANCELLED) {
-                return response()->json([
-                    'message' => '已完成或已取消的轉移記錄不能再次取消',
-                ], 400);
+                abort(422, '已完成或已取消的轉移記錄不能再次取消');
             }
             
             $oldStatus = $transfer->status;
@@ -355,9 +306,7 @@ class InventoryTransferController extends Controller
                 try {
                     $this->restoreInventoryFromInTransit($transfer, Auth::user(), $request->reason);
                 } catch (\Exception $e) {
-                    return response()->json([
-                        'message' => '取消轉移失敗：' . $e->getMessage(),
-                    ], 400);
+                    abort(400, '取消轉移失敗：' . $e->getMessage());
                 }
             }
             
@@ -374,10 +323,7 @@ class InventoryTransferController extends Controller
                 'productVariant.product'
             ]);
             
-            return response()->json([
-                'message' => '庫存轉移已取消',
-                'transfer' => $transfer
-            ]);
+            return new InventoryTransferResource($transfer);
         });
     }
     

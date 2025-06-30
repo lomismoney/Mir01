@@ -72,12 +72,7 @@ export function InventoryHistory({
   } = useInventoryHistory({
     id: inventoryId,
     ...filters,
-  }) as {
-    data: InventoryHistoryResponse;
-    isLoading: boolean;
-    error: any;
-    refetch: () => void;
-  };
+  });
 
   if (error) {
     return (
@@ -346,7 +341,7 @@ export function InventoryHistory({
                         </span>{" "}
                         {transaction.after_quantity ?? "未知"}
                       </div>
-                      {transaction.user && (
+                      {(transaction.relations as any)?.user && (
                         <div
                           className="flex items-center gap-1"
                           data-oid="45iqvbn"
@@ -355,7 +350,7 @@ export function InventoryHistory({
                           <span className="font-medium" data-oid="_hr_9px">
                             操作人:
                           </span>{" "}
-                          {transaction.user.name}
+                          {(transaction.relations as any)?.user?.name}
                         </div>
                       )}
                     </div>

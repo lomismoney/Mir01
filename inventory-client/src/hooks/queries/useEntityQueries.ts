@@ -387,7 +387,7 @@ export function useCreateProduct() {
             
             return data;
         },
-        onSuccess: async (data) => {
+        onSuccess: async (data: { data?: { name?: string } }) => {
             // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
             await Promise.all([
                 // 1. 失效所有商品查詢緩存
@@ -736,7 +736,7 @@ export function useCreateUser() {
       }
       return data;
     },
-    onSuccess: async (data) => {
+    onSuccess: async (data: { data?: { name?: string } }) => {
       // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
       await Promise.all([
         // 1. 失效所有用戶查詢緩存
@@ -805,7 +805,7 @@ export function useUpdateUser() {
       }
       return data;
     },
-    onSuccess: async (data, variables) => {
+    onSuccess: async (data: { data?: { name?: string } }, variables) => {
       // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
       await Promise.all([
         // 1. 失效所有用戶查詢緩存
@@ -991,7 +991,7 @@ export function useCreateCustomer() {
 
       return data;
     },
-    onSuccess: async (data) => {
+    onSuccess: async (data: { data?: { name?: string } }) => {
       // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
       await Promise.all([
         // 1. 失效所有客戶查詢緩存
@@ -2185,14 +2185,36 @@ export function useInventoryHistory(params: {
       return data;
     },
     
-    // 🎯 數據精煉廠 - 統一處理庫存歷史數據格式
+    // 🎯 數據精煉廠 - 保持分頁結構並處理庫存歷史數據
     select: (response: any) => {
-      // 解包：處理分頁或普通陣列數據結構
-      const history = response?.data || response || [];
-      if (!Array.isArray(history)) return [];
+      // 如果響應有分頁結構，直接返回
+      if (response && typeof response === 'object' && response.data && Array.isArray(response.data)) {
+        return response;
+      }
       
-      // 返回純淨的歷史記錄陣列
-      return history;
+      // 如果響應是純陣列，包裝成分頁結構
+      if (Array.isArray(response)) {
+        return {
+          data: response,
+          total: response.length,
+          per_page: params.per_page || 15,
+          current_page: params.page || 1,
+          last_page: 1,
+          from: response.length > 0 ? 1 : 0,
+          to: response.length
+        };
+      }
+      
+      // 預設空結構
+      return {
+        data: [],
+        total: 0,
+        per_page: params.per_page || 15,
+        current_page: params.page || 1,
+        last_page: 1,
+        from: 0,
+        to: 0
+      };
     },
     
     enabled: !!params.id,
@@ -3329,7 +3351,7 @@ export function useCreateOrder() {
             console.log('✅ 訂單創建成功:', data);
             return data;
         },
-        onSuccess: async (data) => {
+        onSuccess: async (data: { data?: { total_refund_amount?: number } }, payload) => {
             // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
             await Promise.all([
                 // 1. 失效所有訂單查詢緩存
@@ -3392,7 +3414,7 @@ export function useOrderDetail(orderId: number | null) {
     queryFn: async () => {
       if (!orderId) return null; // 如果沒有 ID，則不執行查詢
       const { data, error } = await apiClient.GET("/api/orders/{id}", {
-        params: { path: { id: orderId } },
+        params: { path: { order: orderId } },
       });
       if (error) {
         const errorMessage = parseApiError(error);
@@ -3673,7 +3695,7 @@ export function useUpdateOrder() {
   return useMutation({
     mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
       const { data, error } = await apiClient.PUT("/api/orders/{id}", {
-        params: { path: { id: payload.id } },
+        params: { path: { order: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -3705,7 +3727,7 @@ export function useDeleteOrder() {
   return useMutation({
     mutationFn: async (orderId: number) => {
       const { data, error } = await apiClient.DELETE("/api/orders/{id}", {
-        params: { path: { id: orderId } },
+        params: { path: { order: orderId } },
       });
       if (error) throw error;
       return data;
@@ -3774,7 +3796,7 @@ export function useUpdateOrderItemStatus() {
       
       return data;
     },
-    onSuccess: async (data, variables) => {
+    onSuccess: async (data: { data?: { id?: number } }, variables) => {
       // 從返回的訂單資料中提取訂單 ID
       const orderId = data?.data?.id;
       
@@ -3852,7 +3874,7 @@ export function useCreateRefund() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data, payload) => {
+    onSuccess: (data: { data?: { total_refund_amount?: number } }, payload) => {
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
         toast.success("退款已成功處理", {
@@ -4353,7 +4375,7 @@ export function useCreateInstallation() {
       
       return response;
     },
-    onSuccess: async (data) => {
+    onSuccess: async (data: { data?: { installation_number?: string } }) => {
       // 🚀 「失效並強制重取」標準快取處理模式
       await Promise.all([
         queryClient.invalidateQueries({
@@ -4407,7 +4429,7 @@ export function useCreateInstallationFromOrder() {
       
       return response;
     },
-    onSuccess: async (data, variables) => {
+    onSuccess: async (data: { data?: { installation_number?: string } }, variables) => {
       // 🚀 「失效並強制重取」標準快取處理模式
       await Promise.all([
         // 失效安裝單列表

@@ -10,6 +10,8 @@ use App\Models\Customer;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 class CustomerController extends Controller
 {
@@ -32,6 +34,7 @@ class CustomerController extends Controller
     /**
      * @group 客戶管理
      * @authenticated
+     * @summary 獲取客戶列表
      * @queryParam search string 關鍵字搜尋，將匹配姓名、電話、統一編號。Example: 設計公司
      * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
      * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-18
@@ -39,7 +42,7 @@ class CustomerController extends Controller
      * @apiResourceCollection \App\Http\Resources\Api\CustomerResource
      * @apiResourceModel \App\Models\Customer
      */
-    public function index(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
         // 1. 權限驗證
         $this->authorize('viewAny', Customer::class);
@@ -79,10 +82,9 @@ class CustomerController extends Controller
     }
 
     /**
-     * 創建新客戶
-     *
      * @group 客戶管理
      * @authenticated
+     * @summary 創建新客戶
      * @bodyParam name string required 客戶名稱或公司抬頭. Example: 測試客戶
      * @bodyParam phone string 手機號碼. Example: 0987654321
      * @bodyParam email string 電子郵件地址. Example: customer@example.com
@@ -95,6 +97,8 @@ class CustomerController extends Controller
      * @bodyParam addresses.*.address string required 地址內容. Example: 台北市大安區
      * @bodyParam addresses.*.is_default boolean required 是否為預設地址. Example: true
      * 
+     * @apiResource \App\Http\Resources\Api\CustomerResource
+     * @apiResourceModel \App\Models\Customer
      * @response 201 scenario="客戶創建成功" {
      *   "data": {
      *     "id": 1,
@@ -141,37 +145,20 @@ class CustomerController extends Controller
             ], 500);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => '客戶創建失敗',
-                'error' => '系統錯誤，請稍後再試',
-            ], 500);
+            abort(500, '客戶創建失敗: ' . $e->getMessage());
         }
     }
 
     /**
-     * 顯示指定的客戶詳細資訊
-     *
      * @group 客戶管理
      * @authenticated
+     * @summary 顯示指定的客戶詳細資訊
      * @urlParam customer integer required 客戶的 ID。 Example: 1
      * 
-     * @response 200 scenario="客戶詳情" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "客戶名稱",
-     *     "phone": "0912345678",
-     *     "email": "customer@example.com",
-     *     "is_company": false,
-     *     "tax_id": null,
-     *     "industry_type": "設計師",
-     *     "payment_type": "現金付款",
-     *     "contact_address": "台北市信義區",
-     *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\CustomerResource
+     * @apiResourceModel \App\Models\Customer
      */
-    public function show(Customer $customer)
+    public function show(Customer $customer): CustomerResource
     {
         // 1. 權限驗證
         $this->authorize('view', $customer);
@@ -184,10 +171,9 @@ class CustomerController extends Controller
     }
 
     /**
-     * 更新指定的客戶資訊
-     *
      * @group 客戶管理
      * @authenticated
+     * @summary 更新指定的客戶資訊
      * @urlParam customer integer required 客戶的 ID。 Example: 1
      * @bodyParam name string required 客戶名稱或公司抬頭. Example: 測試客戶（已更新）
      * @bodyParam phone string 手機號碼. Example: 0987654321
@@ -202,21 +188,8 @@ class CustomerController extends Controller
      * @bodyParam addresses.*.address string required 地址內容. Example: 台北市大安區
      * @bodyParam addresses.*.is_default boolean required 是否為預設地址. Example: true
      * 
-     * @response 200 scenario="客戶更新成功" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "測試客戶（已更新）",
-     *     "phone": "0987654321",
-     *     "email": "customer@example.com",
-     *     "is_company": false,
-     *     "tax_id": null,
-     *     "industry_type": "設計師",
-     *     "payment_type": "現金付款",
-     *     "contact_address": "台北市信義區",
-     *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T12:00:00.000000Z"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\CustomerResource
+     * @apiResourceModel \App\Models\Customer
      */
     public function update(UpdateCustomerRequest $request, Customer $customer): JsonResponse
     {
@@ -246,22 +219,18 @@ class CustomerController extends Controller
             ], 500);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => '客戶更新失敗',
-                'error' => '系統錯誤，請稍後再試',
-            ], 500);
+            abort(500, '客戶更新失敗: ' . $e->getMessage());
         }
     }
 
     /**
-     * 刪除指定的客戶
-     *
      * @group 客戶管理
      * @authenticated
+     * @summary 刪除指定的客戶
      * @urlParam customer integer required 要刪除的客戶的 ID。 Example: 1
      * @response 204 scenario="刪除成功"
      */
-    public function destroy(Customer $customer)
+    public function destroy(Customer $customer): Response
     {
         // 1. 權限驗證
         $this->authorize('delete', $customer);
@@ -274,10 +243,9 @@ class CustomerController extends Controller
     }
 
     /**
-     * 檢查客戶名稱是否存在
-     *
      * @group 客戶管理
      * @authenticated
+     * @summary 檢查客戶名稱是否存在
      * @queryParam name string required 要檢查的客戶名稱。Example: 測試客戶
      * @response 200 scenario="檢查成功" {"exists": true}
      * @response 200 scenario="名稱不存在" {"exists": false}

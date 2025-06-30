@@ -11,13 +11,13 @@ use App\Http\Resources\Api\InstallationResource;
 use App\Models\Installation;
 use App\Services\InstallationService;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 
 /**
  * @group 安裝管理
- * 
+ * @authenticated
  * 管理安裝單的相關 API
  */
 class InstallationController extends Controller
@@ -51,6 +51,7 @@ class InstallationController extends Controller
     /**
      * 獲取安裝單列表
      * 
+     * @summary 獲取安裝單列表
      * @queryParam filter[status] 按狀態篩選。可選值：pending, scheduled, in_progress, completed, cancelled。Example: pending
      * @queryParam filter[installer_user_id] 按安裝師傅篩選。Example: 1
      * @queryParam filter[scheduled_date] 按預計安裝日期篩選。Example: 2025-06-24
@@ -60,22 +61,10 @@ class InstallationController extends Controller
      * @queryParam sort 排序欄位。可選值：created_at,-created_at,scheduled_date,-scheduled_date。Example: -created_at
      * @queryParam per_page 每頁顯示筆數。Example: 15
      * 
-     * @authenticated
-     * @response 200 {
-     *   "data": [{
-     *     "id": 1,
-     *     "installation_number": "I-202506-0001",
-     *     "customer_name": "王小明",
-     *     "status": "pending",
-     *     "scheduled_date": "2025-06-25"
-     *   }],
-     *   "meta": {
-     *     "current_page": 1,
-     *     "total": 10
-     *   }
-     * }
+     * @apiResourceCollection \App\Http\Resources\Api\InstallationResource
+     * @apiResourceModel \App\Models\Installation
      */
-    public function index(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
         $this->authorize('viewAny', Installation::class);
 
@@ -104,6 +93,7 @@ class InstallationController extends Controller
     /**
      * 建立新的安裝單
      * 
+     * @summary 建立新的安裝單
      * @bodyParam order_id integer 關聯的訂單ID（可選）。Example: 1
      * @bodyParam installer_user_id integer 分配的安裝師傅ID（可選）。Example: 2
      * @bodyParam customer_name string required 客戶姓名。Example: 王小明
@@ -119,17 +109,10 @@ class InstallationController extends Controller
      * @bodyParam items.*.specifications string 安裝規格說明（可選）。Example: 靠窗安裝
      * @bodyParam items.*.notes string 項目備註（可選）。Example: 需要特殊固定器
      * 
-     * @authenticated
-     * @response 201 {
-     *   "data": {
-     *     "id": 1,
-     *     "installation_number": "I-202506-0001",
-     *     "customer_name": "王小明",
-     *     "status": "pending"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\InstallationResource
+     * @apiResourceModel \App\Models\Installation
      */
-    public function store(StoreInstallationRequest $request)
+    public function store(StoreInstallationRequest $request): InstallationResource
     {
         $this->authorize('create', Installation::class);
 
@@ -144,6 +127,7 @@ class InstallationController extends Controller
     /**
      * 從訂單建立安裝單
      * 
+     * @summary 從訂單建立安裝單
      * @bodyParam order_id integer required 訂單ID。Example: 1
      * @bodyParam order_item_ids array required 要安裝的訂單項目ID清單。Example: [1, 2, 3]
      * @bodyParam order_item_ids.* integer required 訂單項目ID。Example: 1
@@ -154,18 +138,10 @@ class InstallationController extends Controller
      * @bodyParam specifications array 安裝規格（按訂單項目ID）。Example: ["靠窗安裝", "靠牆安裝"]
      * @bodyParam specifications.* string 安裝規格說明。Example: 靠窗安裝
      * 
-     * @authenticated
-     * @response 201 {
-     *   "data": {
-     *     "id": 1,
-     *     "installation_number": "I-202506-0001",
-     *     "order_id": 1,
-     *     "customer_name": "王小明",
-     *     "status": "pending"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\InstallationResource
+     * @apiResourceModel \App\Models\Installation
      */
-    public function createFromOrder(CreateInstallationFromOrderRequest $request)
+    public function createFromOrder(CreateInstallationFromOrderRequest $request): InstallationResource
     {
         $this->authorize('createFromOrder', Installation::class);
 
@@ -184,25 +160,14 @@ class InstallationController extends Controller
     /**
      * 查看安裝單詳情
      * 
+     * @summary 查看安裝單詳情
      * @urlParam installation integer required 安裝單 ID. Example: 1
      * @queryParam include 包含關聯資源。可選值：items,order,installer,creator。Example: items,order
      * 
-     * @authenticated
-     * @response 200 {
-     *   "data": {
-     *     "id": 1,
-     *     "installation_number": "I-202506-0001",
-     *     "customer_name": "王小明",
-     *     "status": "pending",
-     *     "items": [{
-     *       "id": 1,
-     *       "product_name": "辦公桌",
-     *       "quantity": 2
-     *     }]
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\InstallationResource
+     * @apiResourceModel \App\Models\Installation
      */
-    public function show(Request $request, Installation $installation)
+    public function show(Request $request, Installation $installation): InstallationResource
     {
         $this->authorize('view', $installation);
 
@@ -218,6 +183,7 @@ class InstallationController extends Controller
     /**
      * 更新安裝單
      * 
+     * @summary 更新安裝單
      * @urlParam installation integer required 安裝單 ID. Example: 1
      * @bodyParam installer_user_id integer 分配的安裝師傅ID。Example: 2
      * @bodyParam customer_name string 客戶姓名。Example: 王小明
@@ -237,16 +203,10 @@ class InstallationController extends Controller
      * @bodyParam items.*.status string 項目狀態。可選值：pending, completed。Example: completed
      * @bodyParam items.*.notes string 項目備註（可選）。Example: 已安裝完成
      * 
-     * @authenticated
-     * @response 200 {
-     *   "data": {
-     *     "id": 1,
-     *     "installation_number": "I-202506-0001",
-     *     "status": "scheduled"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\InstallationResource
+     * @apiResourceModel \App\Models\Installation
      */
-    public function update(UpdateInstallationRequest $request, Installation $installation)
+    public function update(UpdateInstallationRequest $request, Installation $installation): InstallationResource
     {
         $this->authorize('update', $installation);
 
@@ -261,6 +221,7 @@ class InstallationController extends Controller
     /**
      * 刪除安裝單
      * 
+     * @summary 刪除安裝單
      * @urlParam installation integer required 安裝單 ID. Example: 1
      * @authenticated
      * @response 204
@@ -277,19 +238,14 @@ class InstallationController extends Controller
     /**
      * 分配安裝師傅
      * 
+     * @summary 分配安裝師傅
      * @urlParam installation integer required 安裝單 ID. Example: 1
      * @bodyParam installer_user_id integer required 安裝師傅用戶ID。Example: 2
      * 
-     * @authenticated
-     * @response 200 {
-     *   "data": {
-     *     "id": 1,
-     *     "installer_user_id": 2,
-     *     "status": "scheduled"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\InstallationResource
+     * @apiResourceModel \App\Models\Installation
      */
-    public function assignInstaller(Request $request, Installation $installation)
+    public function assignInstaller(Request $request, Installation $installation): InstallationResource
     {
         $this->authorize('assignInstaller', $installation);
 
@@ -308,20 +264,15 @@ class InstallationController extends Controller
     /**
      * 更新安裝單狀態
      * 
+     * @summary 更新安裝單狀態
      * @urlParam installation integer required 安裝單 ID. Example: 1
      * @bodyParam status string required 新狀態。可選值：pending, scheduled, in_progress, completed, cancelled。Example: in_progress
      * @bodyParam reason string 取消原因（當狀態為cancelled時）。Example: 客戶要求取消
      * 
-     * @authenticated
-     * @response 200 {
-     *   "data": {
-     *     "id": 1,
-     *     "status": "in_progress",
-     *     "actual_start_time": "2025-06-25 09:00:00"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\InstallationResource
+     * @apiResourceModel \App\Models\Installation
      */
-    public function updateStatus(Request $request, Installation $installation)
+    public function updateStatus(Request $request, Installation $installation): InstallationResource
     {
         $this->authorize('updateStatus', $installation);
 
@@ -348,21 +299,15 @@ class InstallationController extends Controller
     /**
      * 獲取安裝師傅的行程
      * 
+     * @summary 獲取安裝行程
      * @queryParam installer_user_id integer required 安裝師傅的用戶ID。Example: 1
      * @queryParam start_date string required 起始日期（格式：Y-m-d）。Example: 2025-06-01
      * @queryParam end_date string required 結束日期（格式：Y-m-d）。Example: 2025-06-30
      * 
-     * @authenticated
-     * @response 200 {
-     *   "data": [{
-     *     "id": 1,
-     *     "installation_number": "I-202506-0001",
-     *     "scheduled_date": "2025-06-25",
-     *     "customer_name": "王小明"
-     *   }]
-     * }
+     * @apiResourceCollection \App\Http\Resources\Api\InstallationResource
+     * @apiResourceModel \App\Models\Installation
      */
-    public function getSchedule(GetInstallationScheduleRequest $request)
+    public function getSchedule(GetInstallationScheduleRequest $request): AnonymousResourceCollection
     {
         $this->authorize('viewAny', Installation::class);
 

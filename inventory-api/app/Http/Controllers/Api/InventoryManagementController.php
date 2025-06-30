@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * @group 庫存管理
+ * @authenticated
  *
  * 庫存管理 API 端點，用於管理商品庫存
  */
@@ -28,6 +29,9 @@ class InventoryManagementController extends Controller
     /**
      * 獲取庫存列表
      * 
+     * @summary 獲取商品庫存列表
+     * @description 此端點返回的是商品列表，但每個商品都附帶了其在各門市的庫存資訊。
+     * 
      * @queryParam store_id integer 門市ID，用於篩選特定門市的庫存. Example: 1
      * @queryParam low_stock boolean 是否只顯示低庫存商品. Example: true
      * @queryParam out_of_stock boolean 是否只顯示無庫存商品. Example: false
@@ -35,28 +39,8 @@ class InventoryManagementController extends Controller
      * @queryParam paginate boolean 是否分頁. Example: true
      * @queryParam per_page integer 每頁顯示數量，預設15. Example: 25
      * 
-     * @authenticated
-     * @response 200 scenario="庫存列表" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "product_variant_id": 1,
-     *       "store_id": 1,
-     *       "quantity": 100,
-     *       "low_stock_threshold": 10,
-     *       "created_at": "2025-01-01T10:00:00.000000Z",
-     *       "updated_at": "2025-01-01T10:00:00.000000Z"
-     *     }
-     *   ],
-     *   "meta": {
-     *     "current_page": 1,
-     *     "per_page": 15,
-     *     "total": 100
-     *   }
-     * }
-     * 
-     * @param Request $request
-     * @return AnonymousResourceCollection
+     * @apiResourceCollection \App\Http\Resources\Api\ProductResource
+     * @apiResourceModel \App\Models\Product
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -117,13 +101,13 @@ class InventoryManagementController extends Controller
     /**
      * 獲取單條庫存記錄詳情
      * 
-     * @authenticated
+     * @summary 獲取庫存詳情
      * @urlParam id integer required 庫存ID. Example: 1
      * 
-     * @param int $id
-     * @return JsonResponse
+     * @apiResource \App\Http\Resources\Api\InventoryResource
+     * @apiResourceModel \App\Models\Inventory
      */
-    public function show(int $id): JsonResponse
+    public function show(int $id): InventoryResource
     {
         $inventory = Inventory::with([
             'productVariant.product', 
@@ -135,24 +119,19 @@ class InventoryManagementController extends Controller
             'transactions.user'
         ])->findOrFail($id);
         
-        return response()->json($inventory);
+        return new InventoryResource($inventory);
     }
 
     /**
      * 調整庫存
      * 
-     * @bodyParam product_variant_id integer required 商品變體ID. Example: 1
-     * @bodyParam store_id integer required 門市ID. Example: 1
-     * @bodyParam action string required 操作類型 (add: 添加, reduce: 減少, set: 設定). Example: add
-     * @bodyParam quantity integer required 數量. Example: 10
-     * @bodyParam notes string 備註. Example: 週末促銷活動增加庫存
+     * @summary 調整庫存數量
+     * @description 提供 `add`, `reduce`, `set` 三種操作模式來調整指定門市中特定商品變體的庫存。
      * 
-     * @authenticated
-     * 
-     * @param InventoryAdjustmentRequest $request
-     * @return JsonResponse
+     * @apiResource \App\Http\Resources\Api\InventoryResource
+     * @apiResourceModel \App\Models\Inventory
      */
-    public function adjust(InventoryAdjustmentRequest $request): JsonResponse
+    public function adjust(InventoryAdjustmentRequest $request): InventoryResource
     {
         return DB::transaction(function () use ($request) {
             $user = Auth::user();
@@ -189,9 +168,8 @@ class InventoryManagementController extends Controller
             }
             
             if (!$result) {
-                return response()->json([
-                    'message' => '庫存調整失敗，請檢查操作是否有效',
-                ], 400);
+                // 使用 HTTP 422 狀態碼表示業務邏輯驗證失敗
+                abort(422, '庫存調整失敗，請檢查操作是否有效。');
             }
             
             // 重新加載最新庫存狀態和交易記錄
@@ -204,34 +182,25 @@ class InventoryManagementController extends Controller
                 'transactions.user'
             ]);
             
-            return response()->json([
-                'message' => '庫存調整成功',
-                'inventory' => $inventory
-            ]);
+            return new InventoryResource($inventory);
         });
     }
 
     /**
      * 獲取庫存交易歷史
      * 
+     * @summary 獲取單個庫存項目的交易歷史
      * @urlParam id integer required 庫存ID. Example: 1
      * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
      * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
      * @queryParam type string 交易類型. Example: addition
      * @queryParam per_page integer 每頁顯示數量，預設15. Example: 20
      * 
-     * @authenticated
      * @apiResourceCollection \App\Http\Resources\Api\InventoryTransactionResource
      * @apiResourceModel \App\Models\InventoryTransaction
-     * 
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
      */
-    public function history(Request $request, int $id): JsonResponse
+    public function history(Request $request, Inventory $inventory): AnonymousResourceCollection
     {
-        $inventory = Inventory::findOrFail($id);
-        
         $query = $inventory->transactions()->with('user');
         
         // 按日期範圍篩選
@@ -248,22 +217,22 @@ class InventoryManagementController extends Controller
         $perPage = $request->input('per_page', 15);
         $transactions = $query->latest()->paginate($perPage);
         
-        // 確保即使沒有記錄也返回一個有效的響應結構
-        return response()->json($transactions);
+        return InventoryTransactionResource::collection($transactions);
     }
 
     /**
      * 批量獲取多個商品變體的庫存情況
      * 
+     * @summary 批量檢查庫存
+     * @description 根據提供的商品變體ID列表，批量獲取其庫存資訊。
+     * 
      * @bodyParam product_variant_ids array required 要查詢的商品變體ID數組. Example: [1, 2, 3]
      * @bodyParam store_id integer 門市ID，如果提供則只返回該門市的庫存. Example: 1
      * 
-     * @authenticated
-     * 
-     * @param Request $request
-     * @return JsonResponse
+     * @apiResourceCollection \App\Http\Resources\Api\InventoryResource
+     * @apiResourceModel \App\Models\Inventory
      */
-    public function batchCheck(Request $request): JsonResponse
+    public function batchCheck(Request $request): AnonymousResourceCollection
     {
         $request->validate([
             'product_variant_ids' => 'required|array',
@@ -280,16 +249,14 @@ class InventoryManagementController extends Controller
         
         $inventories = $query->get();
         
-        return response()->json($inventories);
+        return InventoryResource::collection($inventories);
     }
 
     /**
      * 獲取特定 SKU 的所有庫存歷史記錄
      * 
-     * 查詢指定 SKU 在所有門市的庫存變動歷史，支援多種篩選條件
-     * 
-     * @group 庫存管理
-     * @authenticated
+     * @summary 獲取 SKU 庫存歷史
+     * @description 查詢指定 SKU 在所有門市的庫存變動歷史，支援多種篩選條件。
      * 
      * @urlParam sku string required 商品SKU編號. Example: T001-M-RED
      * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
@@ -299,25 +266,10 @@ class InventoryManagementController extends Controller
      * @queryParam per_page integer 每頁顯示數量，預設20，最大100. Example: 50
      * @queryParam page integer 頁碼. Example: 1
      * 
-     * @response 200 scenario="SKU 庫存歷史" {
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "type": "purchase",
-     *       "quantity_change": 10,
-     *       "quantity_after": 110,
-     *       "reference_type": "purchase",
-     *       "reference_id": 1,
-     *       "created_at": "2025-01-01T10:00:00.000000Z"
-     *     }
-     *   ]
-     * }
-     * 
-     * @param Request $request
-     * @param string $sku
-     * @return JsonResponse
+     * @apiResourceCollection \App\Http\Resources\Api\InventoryTransactionResource
+     * @apiResourceModel \App\Models\InventoryTransaction
      */
-    public function getSkuHistory(Request $request, string $sku): JsonResponse
+    public function getSkuHistory(Request $request, string $sku): AnonymousResourceCollection
     {
         $request->validate([
             'store_id' => ['nullable', 'integer', 'exists:stores,id'],
@@ -335,16 +287,10 @@ class InventoryManagementController extends Controller
             ->get();
 
         if ($inventories->isEmpty()) {
-            return response()->json([
+            // 當找不到 SKU 時，返回一個空的資源集合，並附帶元數據
+            return InventoryTransactionResource::collection(collect())->additional([
                 'message' => "找不到 SKU 為 '{$sku}' 的庫存項目",
-                'data' => [],
-                'inventories' => [],
-                'pagination' => [
-                    'current_page' => 1,
-                    'per_page' => $request->input('per_page', 20),
-                    'total' => 0,
-                    'last_page' => 1,
-                ]
+                'inventories' => []
             ]);
         }
 
@@ -436,22 +382,24 @@ class InventoryManagementController extends Controller
             ];
         });
 
-        return response()->json([
-            'message' => '成功獲取 SKU 歷史記錄',
-            'data' => $formattedTransactions,
-            'inventories' => $inventoryData,
-            'pagination' => [
-                'current_page' => $transactions->currentPage(),
-                'per_page' => $transactions->perPage(),
-                'total' => $transactions->total(),
-                'last_page' => $transactions->lastPage(),
-            ]
-        ]);
+        // 使用 Resource Collection 並附加額外資訊
+        return (InventoryTransactionResource::collection($formattedTransactions))
+            ->additional([
+                'message' => '成功獲取 SKU 歷史記錄',
+                'inventories' => $inventoryData,
+                'pagination' => [
+                    'current_page' => $transactions->currentPage(),
+                    'per_page' => $transactions->perPage(),
+                    'total' => $transactions->total(),
+                    'last_page' => $transactions->lastPage(),
+                ]
+            ]);
     }
 
     /**
      * 獲取所有庫存交易歷史記錄
      * 
+     * @summary 獲取所有庫存交易記錄
      * @queryParam store_id integer 門市ID，用於篩選特定門市的歷史記錄. Example: 1
      * @queryParam type string 交易類型篩選. Example: transfer_in
      * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
@@ -460,45 +408,8 @@ class InventoryManagementController extends Controller
      * @queryParam per_page integer 每頁顯示數量，預設20. Example: 50
      * @queryParam page integer 頁碼. Example: 1
      * 
-     * @authenticated
-     * @response 200 {
-     *   "message": "成功獲取庫存交易記錄",
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "inventory_id": 1,
-     *       "user_id": 1,
-     *       "type": "addition",
-     *       "quantity": 10,
-     *       "before_quantity": 0,
-     *       "after_quantity": 10,
-     *       "notes": "初始庫存",
-     *       "metadata": {},
-     *       "created_at": "2023-01-01T10:00:00.000000Z",
-     *       "updated_at": "2023-01-01T10:00:00.000000Z",
-     *       "store": {
-     *         "id": 1,
-     *         "name": "台中店"
-     *       },
-     *       "user": {
-     *         "name": "Admin User"
-     *       },
-     *       "product": {
-     *         "name": "商品名稱",
-     *         "sku": "T001-M-RED"
-     *       }
-     *     }
-     *   ],
-     *   "pagination": {
-     *     "current_page": 1,
-     *     "per_page": 20,
-     *     "total": 100,
-     *     "last_page": 5
-     *   }
-     * }
-     * 
-     * @param Request $request
-     * @return JsonResponse
+     * @apiResourceCollection \App\Http\Resources\Api\InventoryTransactionResource
+     * @apiResourceModel \App\Models\InventoryTransaction
      */
     public function getAllTransactions(Request $request): AnonymousResourceCollection
     {
