@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 /**
+ * @group 認證管理
+ * 
  * 認證控制器
  * 
  * 負責處理使用者的登入、登出等認證相關功能
@@ -19,10 +22,9 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * 處理使用者登入請求
+     * @summary 處理使用者登入請求
+     * @description 驗證使用者憑證，成功後返回使用者資訊和 API Token。
      *
-     * @group 認證管理
-     * 
      * @bodyParam username string required 使用者名稱 Example: superadmin
      * @bodyParam password string required 密碼 Example: password
      * 
@@ -31,16 +33,16 @@ class AuthController extends Controller
      *     "id": 1,
      *     "name": "Super Admin",
      *     "username": "superadmin",
-     *     "role": "admin",
-     *     "role_display": "管理員",
-     *     "is_admin": true,
+     *     "email": "super@admin.com",
+     *     "roles": ["admin"],
      *     "created_at": "2024-01-01T00:00:00.000000Z",
-     *     "updated_at": "2024-01-01T00:00:00.000000Z"
+     *     "updated_at": "2024-01-01T00:00:00.000000Z",
+     *     "stores": []
      *   },
      *   "token": "1|abcdefghijklmnopqrstuvwxyz"
      * }
      * 
-     * @response 422 {
+     * @response 422 scenario="驗證失敗" {
      *   "message": "The given data was invalid.",
      *   "errors": {
      *     "username": ["您提供的憑證不正確。"]
@@ -82,15 +84,14 @@ class AuthController extends Controller
         // 回傳使用者資訊和 Token
         return response()->json([
             // 使用 UserResource 來格式化 user 物件
-            'user' => new UserResource($user),
+            'user' => new UserResource($user->load('stores')),
             'token' => $token,
         ]);
     }
 
     /**
-     * 處理使用者登出請求
-     *
-     * @group 認證管理
+     * @summary 處理使用者登出請求
+     * @description 讓當前認證的使用者登出，並使其 API Token 失效。
      * 
      * @authenticated
      * 
@@ -108,7 +109,7 @@ class AuthController extends Controller
      * - 僅刪除當前 Token，不影響使用者的其他活動 Token
      * - 確保精準的登出控制
      */
-    public function logout(Request $request)
+    public function logout(Request $request): Response
     {
         // 刪除當前使用的 Access Token
         $request->user()->currentAccessToken()->delete();

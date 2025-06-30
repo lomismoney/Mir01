@@ -15,6 +15,7 @@ use App\Http\Requests\Api\BatchDeleteOrdersRequest;
 use App\Http\Requests\Api\BatchUpdateStatusRequest;
 use App\Services\OrderService;
 use App\Services\RefundService;
+use Illuminate\Http\Response;
 
 class OrderController extends Controller
 {
@@ -26,6 +27,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
+     * @summary 獲取訂單列表
      * @queryParam search string 關鍵字搜尋，將匹配訂單號、客戶名稱。Example: PO-20250619-001
      * @queryParam shipping_status string 按貨物進度篩選。Example: 待出貨
      * @queryParam payment_status string 按付款進度篩選。Example: 待付款
@@ -94,7 +96,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 創建新訂單
+     * @summary 創建新訂單
      * 
      * 此端點用於創建新的訂單，包含訂單頭資訊和訂單項目明細。
      * 系統會自動生成訂單號、計算總金額，並記錄初始狀態歷史。
@@ -123,7 +125,8 @@ class OrderController extends Controller
      * @bodyParam items.*.price number required 單價。Example: 5000
      * @bodyParam items.*.quantity integer required 數量。Example: 2
      * 
-     * @response 201
+     * @apiResource \App\Http\Resources\Api\OrderResource
+     * @apiResourceModel \App\Models\Order
      * @response 422 scenario="庫存不足" {
      *   "message": "庫存不足",
      *   "stockCheckResults": [...],
@@ -179,18 +182,8 @@ class OrderController extends Controller
      * @group 訂單管理
      * @authenticated
      * 
-     * @response 200 scenario="訂單詳情" {
-     *   "data": {
-     *     "id": 1,
-     *     "order_number": "ORD-20250101-001",
-     *     "customer_id": 1,
-     *     "store_id": 1,
-     *     "total_amount": 299.99,
-     *     "status": "pending",
-     *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\OrderResource
+     * @apiResourceModel \App\Models\Order
      */
     public function show(Order $order)
     {
@@ -213,7 +206,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 更新訂單
+     * @summary 更新訂單
      * 
      * 此端點用於更新現有訂單的資訊。支援部分更新（PATCH），
      * 只需提供要更新的欄位即可。當更新訂單項目時，
@@ -243,7 +236,8 @@ class OrderController extends Controller
      * @bodyParam items.*.custom_product_name string 訂製商品名稱。Example: 客製化辦公椅
      * @bodyParam items.*.custom_product_specs string 訂製商品規格。Example: 高度可調，藍色布料
      * 
-     * @response 200
+     * @apiResource \App\Http\Resources\Api\OrderResource
+     * @apiResourceModel \App\Models\Order
      */
     public function update(UpdateOrderRequest $request, Order $order)
     {
@@ -262,7 +256,7 @@ class OrderController extends Controller
      * @authenticated
      * @response 204 scenario="刪除成功"
      */
-    public function destroy(Order $order)
+    public function destroy(Order $order): Response
     {
         // 1. 權限驗證
         $this->authorize('delete', $order);
@@ -277,7 +271,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 確認訂單付款
+     * @summary 確認訂單付款
      * 
      * 此端點用於確認訂單的付款狀態，將付款狀態從「待付款」更新為「已付款」。
      * 系統會自動記錄狀態變更歷史，並更新相關時間戳。
@@ -322,7 +316,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 新增部分付款記錄
+     * @summary 新增部分付款記錄
      * 
      * 此端點用於為訂單新增部分付款記錄，支援訂金、分期付款等場景。
      * 系統會自動計算已付金額，並根據付款進度更新訂單的付款狀態。
@@ -333,29 +327,8 @@ class OrderController extends Controller
      * @bodyParam payment_date string 付款日期（格式: Y-m-d H:i:s），不填則使用當前時間。Example: 2025-06-20 10:30:00
      * @bodyParam notes string 付款備註，最多 500 字符。Example: 收到現金付款，找零 50 元
      * 
-     * @response 200 {
-     *   "data": {
-     *     "id": 1,
-     *     "order_number": "PO-20250619-001",
-     *     "payment_status": "partial",
-     *     "paid_amount": 1500.50,
-     *     "grand_total": 5000.00,
-     *     "payment_records": [
-     *       {
-     *         "id": 1,
-     *         "amount": 1500.50,
-     *         "payment_method": "cash",
-     *         "payment_date": "2025-06-20T10:30:00.000000Z",
-     *         "notes": "收到現金付款，找零 50 元",
-     *         "creator": {
-     *           "id": 1,
-     *           "name": "管理員"
-     *         }
-     *       }
-     *     ],
-     *     "updated_at": "2025-06-20T10:30:00.000000Z"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\OrderResource
+     * @apiResourceModel \App\Models\Order
      * @response 422 scenario="付款金額超過剩餘未付金額" {
      *   "message": "收款金額不能超過剩餘未付金額：3499.50",
      *   "errors": {
@@ -404,7 +377,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 創建訂單出貨記錄
+     * @summary 創建訂單出貨記錄
      * 
      * 此端點用於為訂單創建出貨記錄，將貨物狀態更新為「已出貨」。
      * 可以提供物流追蹤號碼等出貨相關資訊。
@@ -415,16 +388,8 @@ class OrderController extends Controller
      * @bodyParam estimated_delivery_date string 預計送達日期（格式: Y-m-d）。Example: 2025-06-21
      * @bodyParam notes string 出貨備註。Example: 易碎物品，請小心處理
      * 
-     * @response 200 {
-     *   "data": {
-     *     "id": 1,
-     *     "order_number": "PO-20250619-001",
-     *     "shipping_status": "shipped",
-     *     "tracking_number": "SF1234567890",
-     *     "shipped_at": "2025-06-19T14:30:00.000000Z",
-     *     "updated_at": "2025-06-19T14:30:00.000000Z"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\OrderResource
+     * @apiResourceModel \App\Models\Order
      * @response 422 scenario="訂單狀態不允許此操作" {
      *   "message": "此訂單的貨物狀態不允許出貨操作",
      *   "errors": {
@@ -466,7 +431,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 取消訂單
+     * @summary 取消訂單
      * 
      * 此端點用於取消訂單，將訂單狀態更新為已取消，
      * 並自動返還所有庫存銷售商品的庫存數量。
@@ -474,15 +439,8 @@ class OrderController extends Controller
      * 
      * @bodyParam reason string 取消原因。Example: 客戶要求取消
      * 
-     * @response 200 {
-     *   "data": {
-     *     "id": 1,
-     *     "order_number": "PO-20250619-001",
-     *     "shipping_status": "cancelled",
-     *     "payment_status": "cancelled",
-     *     "updated_at": "2025-06-19T12:00:00.000000Z"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\OrderResource
+     * @apiResourceModel \App\Models\Order
      * @response 422 scenario="訂單狀態不允許此操作" {
      *   "message": "此訂單的狀態不允許取消操作",
      *   "errors": {
@@ -520,7 +478,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 創建訂單退款
+     * @summary 創建訂單退款
      * 
      * 此端點用於為訂單創建品項級別的退款，支援部分品項退貨。
      * 系統會自動計算退款金額、更新訂單狀態，並可選擇性回補庫存。
@@ -533,35 +491,8 @@ class OrderController extends Controller
      * @bodyParam items.*.order_item_id integer required 訂單品項 ID，必須屬於當前訂單。Example: 1
      * @bodyParam items.*.quantity integer required 退貨數量，必須大於 0 且不超過可退數量。Example: 2
      * 
-     * @response 201 {
-     *   "data": {
-     *     "id": 1,
-     *     "order_id": 1,
-     *     "total_refund_amount": 3000.00,
-     *     "reason": "商品品質不符合要求，客戶要求退貨",
-     *     "notes": "商品外觀無損，已檢查確認可回庫",
-     *     "should_restock": true,
-     *     "creator": {
-     *       "id": 1,
-     *       "name": "管理員"
-     *     },
-     *     "refund_items": [
-     *       {
-     *         "id": 1,
-     *         "order_item_id": 1,
-     *         "quantity": 2,
-     *         "refund_subtotal": 3000.00,
-     *         "order_item": {
-     *           "id": 1,
-     *           "product_name": "標準辦公桌",
-     *           "sku": "DESK-001",
-     *           "price": 1500.00
-     *         }
-     *       }
-     *     ],
-     *     "created_at": "2025-06-20T15:30:00.000000Z"
-     *   }
-     * }
+     * @apiResource \App\Http\Resources\Api\RefundResource
+     * @apiResourceModel \App\Models\Refund
      * @response 422 scenario="退貨數量超過可退數量" {
      *   "message": "品項 DESK-001 的退貨數量 (5) 超過可退數量 (3)",
      *   "errors": {
@@ -584,36 +515,11 @@ class OrderController extends Controller
             // 2. 委派給 RefundService 處理所有業務邏輯
             $refund = $this->refundService->createRefund($order, $request->validated());
 
-            // 3. 返回創建的退款記錄，使用 201 Created 狀態碼
-            return response()->json([
-                'data' => [
-                    'id' => $refund->id,
-                    'order_id' => $refund->order_id,
-                    'total_refund_amount' => $refund->total_refund_amount,
-                    'reason' => $refund->reason,
-                    'notes' => $refund->notes,
-                    'should_restock' => $refund->should_restock,
-                    'creator' => [
-                        'id' => $refund->creator->id,
-                        'name' => $refund->creator->name,
-                    ],
-                    'refund_items' => $refund->refundItems->map(function ($item) {
-                        return [
-                            'id' => $item->id,
-                            'order_item_id' => $item->order_item_id,
-                            'quantity' => $item->quantity,
-                            'refund_subtotal' => $item->refund_subtotal,
-                            'order_item' => [
-                                'id' => $item->orderItem->id,
-                                'product_name' => $item->orderItem->product_name,
-                                'sku' => $item->orderItem->sku,
-                                'price' => $item->orderItem->price,
-                            ],
-                        ];
-                    }),
-                    'created_at' => $refund->created_at,
-                ]
-            ], 201);
+            // 3. 返回創建的退款記錄，並附帶 201 Created 狀態碼
+            // 為了符合 RESTful 實踐並提供一致的 API，我們返回標準化的 RefundResource
+            return (new \App\Http\Resources\Api\RefundResource($refund))
+                ->response()
+                ->setStatusCode(201);
 
         } catch (\Exception $e) {
             // 4. 處理業務邏輯錯誤
@@ -629,7 +535,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 批量刪除訂單
+     * @summary 批量刪除訂單
      * 
      * 此端點用於批量刪除多個訂單，同時處理庫存返還和相關清理操作。
      * 系統會在事務中執行所有操作，確保資料一致性。
@@ -638,11 +544,7 @@ class OrderController extends Controller
      * @bodyParam ids array required 要刪除的訂單 ID 清單，至少包含一個 ID。Example: [1, 2, 3]
      * @bodyParam ids.* integer required 訂單 ID，必須存在於系統中。Example: 1
      * 
-     * @response 200 {
-     *   "message": "訂單已成功批量刪除",
-     *   "deleted_count": 3,
-     *   "deleted_ids": [1, 2, 3]
-     * }
+     * @response 204 scenario="刪除成功"
      * @response 422 scenario="包含不可刪除的訂單" {
      *   "message": "部分訂單無法刪除",
      *   "errors": {
@@ -696,12 +598,8 @@ class OrderController extends Controller
                 ];
             });
 
-            // 3. 返回成功響應
-            return response()->json([
-                'message' => '訂單已成功批量刪除',
-                'deleted_count' => $result['deleted_count'],
-                'deleted_ids' => $result['deleted_ids']
-            ], 200);
+            // 3. 返回成功響應 - 204 No Content 是批量刪除成功的標準實踐
+            return response()->noContent();
 
         } catch (\Exception $e) {
             // 4. 處理業務邏輯錯誤
@@ -717,7 +615,7 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * 批量更新訂單狀態
+     * @summary 批量更新訂單狀態
      * 
      * 此端點用於批量更新多個訂單的狀態，支援付款狀態和貨物狀態的批量變更。
      * 系統會在事務中執行所有操作，確保資料一致性，並記錄每個訂單的狀態變更歷史。
@@ -731,10 +629,7 @@ class OrderController extends Controller
      * 
      * @response 200 {
      *   "message": "訂單狀態已成功批量更新",
-     *   "updated_count": 3,
-     *   "updated_ids": [1, 2, 3],
-     *   "status_type": "payment_status",
-     *   "status_value": "paid"
+     *   "updated_count": 3
      * }
      * @response 422 scenario="驗證失敗" {
      *   "message": "驗證失敗",
@@ -767,9 +662,6 @@ class OrderController extends Controller
             return response()->json([
                 'message' => '訂單狀態已成功批量更新',
                 'updated_count' => count($validated['ids']),
-                'updated_ids' => $validated['ids'],
-                'status_type' => $validated['status_type'],
-                'status_value' => $validated['status_value']
             ], 200);
 
         } catch (\Exception $e) {

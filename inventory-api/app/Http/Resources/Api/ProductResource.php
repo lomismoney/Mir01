@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * @mixin \App\Models\Product
  * 商品資源轉換器 (SPU 級別)
  * 
  * 負責將 Product 模型轉換為 API 響應格式
