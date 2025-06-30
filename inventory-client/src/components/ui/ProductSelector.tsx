@@ -332,7 +332,11 @@ export function ProductSelector({
     >
       <DialogContent
         className={cn(
-          "h-[85vh] flex flex-col",
+          "flex flex-col",
+          // 🎯 動態高度設置：訂製模式下使用最大高度而非固定高度
+          selectedProduct && isAddingCustom 
+            ? "max-h-[90vh] h-auto" // 訂製模式：允許內容自適應，但不超過90vh
+            : "h-[85vh]", // 其他模式：固定高度
           selectedProduct === null || isAddingCustom
             ? "max-w-[800px] w-[90vw]" // 選擇商品或訂製規格時的寬度（較窄）
             : "!max-w-[1400px] w-[90vw] [&>div]:max-w-full", // 選擇 SKU 規格時的寬度（較寬）
@@ -614,7 +618,8 @@ export function ProductSelector({
 
                 {/* 表單內容區 */}
                 <div
-                  className="flex-1 overflow-y-auto px-6 py-8"
+                  className="overflow-y-auto px-6 py-8 flex-shrink"
+                  style={{ maxHeight: "calc(90vh - 200px)" }}
                   data-oid="2vx.2mn"
                 >
                   <div
@@ -705,11 +710,16 @@ export function ProductSelector({
                         />
                       </div>
                     </div>
+                  </div>
+                </div>
 
-                    {/* 小計顯示 */}
+                {/* 🎯 合併的底部區域：小計顯示 + 確認按鈕 */}
+                <div className="border-t p-6 bg-background" data-oid="73gbu72">
+                  <div className="max-w-xl mx-auto space-y-4" data-oid="8p1giq4">
+                    {/* 小計顯示卡片 */}
                     {customPrice && customQuantity && (
                       <div
-                        className="p-4 bg-muted/50 rounded-lg space-y-2"
+                        className="p-4 bg-muted/50 rounded-lg space-y-2 border"
                         data-oid="ibv8cls"
                       >
                         <div
@@ -752,44 +762,49 @@ export function ProductSelector({
                         </div>
                       </div>
                     )}
-                  </div>
-                </div>
-
-                {/* 底部操作按鈕 */}
-                <div className="border-t p-6 bg-background" data-oid="73gbu72">
-                  <div className="max-w-xl mx-auto" data-oid="8p1giq4">
-                    <Button
-                      className="w-full h-11 text-base"
-                      size="lg"
-                      onClick={() => {
-                        if (
-                          !selectedProduct ||
-                          !customSpec ||
-                          !customPrice ||
-                          !customQuantity
-                        ) {
-                          toast.error("請填寫所有必填欄位");
-                          return;
-                        }
-                        const customItem = {
-                          product_id: selectedProduct.id,
-                          product_variant_id: null, // 標示為訂製商品
-                          custom_product_name: `${selectedProduct.name} (訂製)`,
-                          custom_specifications: { 規格: customSpec },
-                          price: customPrice,
-                          quantity: customQuantity,
-                          sku: `CUSTOM-${selectedProduct.id}-${Date.now()}`, // 生成一個臨時唯一 SKU
-                        };
-                        onCustomItemAdd(customItem);
-                        setIsAddingCustom(false); // 重置視圖
-                        setCustomSpec("");
-                        setCustomPrice("");
-                        setCustomQuantity(1);
-                      }}
-                      data-oid="zbw_v8x"
-                    >
-                      確認添加訂製商品
-                    </Button>
+                    
+                    {/* 操作按鈕組 */}
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        className="flex-1 h-11"
+                        onClick={() => setIsAddingCustom(false)}
+                      >
+                        取消
+                      </Button>
+                      <Button
+                        className="flex-1 h-11 text-base"
+                        size="lg"
+                        onClick={() => {
+                          if (
+                            !selectedProduct ||
+                            !customSpec ||
+                            !customPrice ||
+                            !customQuantity
+                          ) {
+                            toast.error("請填寫所有必填欄位");
+                            return;
+                          }
+                          const customItem = {
+                            product_id: selectedProduct.id,
+                            product_variant_id: null, // 標示為訂製商品
+                            custom_product_name: `${selectedProduct.name} (訂製)`,
+                            custom_specifications: { 規格: customSpec },
+                            price: customPrice,
+                            quantity: customQuantity,
+                            sku: `CUSTOM-${selectedProduct.id}-${Date.now()}`, // 生成一個臨時唯一 SKU
+                          };
+                          onCustomItemAdd(customItem);
+                          setIsAddingCustom(false); // 重置視圖
+                          setCustomSpec("");
+                          setCustomPrice("");
+                          setCustomQuantity(1);
+                        }}
+                        data-oid="zbw_v8x"
+                      >
+                        確認添加訂製商品
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -942,50 +957,53 @@ export function ProductSelector({
           </div>
         )}
 
-        <DialogFooter data-oid="deabc5q">
-          {selectedProduct === null ? (
-            // 主列表的按鈕
-            <>
-              <Button
-                variant="outline"
-                onClick={handleCancel}
-                data-oid="ghnuhyk"
-              >
-                取消
-              </Button>
-              <Button
-                onClick={handleConfirmSelection}
-                disabled={selectedVariants.size === 0}
-                data-oid="2lwmhz9"
-              >
-                確認選擇{" "}
-                {selectedVariants.size > 0 && `(${selectedVariants.size})`}
-              </Button>
-            </>
-          ) : isAddingCustom ? null : ( // 訂製表單的按鈕（已在表單內部處理）
-            // 詳細視圖的按鈕
-            <>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedProduct(null);
-                  setIsAddingCustom(false);
-                }}
-                data-oid="pu1tizp"
-              >
-                返回列表
-              </Button>
-              <Button
-                onClick={handleConfirmSelection}
-                disabled={selectedVariants.size === 0}
-                data-oid="k3asifx"
-              >
-                確認選擇{" "}
-                {selectedVariants.size > 0 && `(${selectedVariants.size})`}
-              </Button>
-            </>
-          )}
-        </DialogFooter>
+        {/* 🎯 條件性渲染 DialogFooter - 訂製模式下完全不顯示 */}
+        {!(selectedProduct && isAddingCustom) && (
+          <DialogFooter data-oid="deabc5q">
+            {selectedProduct === null ? (
+              // 主列表的按鈕
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleCancel}
+                  data-oid="ghnuhyk"
+                >
+                  取消
+                </Button>
+                <Button
+                  onClick={handleConfirmSelection}
+                  disabled={selectedVariants.size === 0}
+                  data-oid="2lwmhz9"
+                >
+                  確認選擇{" "}
+                  {selectedVariants.size > 0 && `(${selectedVariants.size})`}
+                </Button>
+              </>
+            ) : (
+              // 詳細視圖的按鈕
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedProduct(null);
+                    setIsAddingCustom(false);
+                  }}
+                  data-oid="pu1tizp"
+                >
+                  返回列表
+                </Button>
+                <Button
+                  onClick={handleConfirmSelection}
+                  disabled={selectedVariants.size === 0}
+                  data-oid="k3asifx"
+                >
+                  確認選擇{" "}
+                  {selectedVariants.size > 0 && `(${selectedVariants.size})`}
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
