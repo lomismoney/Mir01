@@ -7,6 +7,9 @@ use App\Models\Product;
 use App\Policies\ProductPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * 測試不同用戶角色對商品操作的權限控制

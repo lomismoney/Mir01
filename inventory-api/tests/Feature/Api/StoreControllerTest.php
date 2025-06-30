@@ -9,6 +9,9 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 use App\Models\Inventory;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class StoreControllerTest extends TestCase
 {
@@ -28,7 +31,7 @@ class StoreControllerTest extends TestCase
         $this->staff->assignRole('staff');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_get_all_stores()
     {
         Store::factory()->count(3)->create();
@@ -45,7 +48,7 @@ class StoreControllerTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_create_store()
     {
         $storeData = [
@@ -67,7 +70,7 @@ class StoreControllerTest extends TestCase
         $this->assertDatabaseHas('stores', $storeData);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_show_store_details()
     {
         $store = Store::factory()->create();
@@ -85,7 +88,7 @@ class StoreControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_store()
     {
         $store = Store::factory()->create();
@@ -113,7 +116,7 @@ class StoreControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_delete_store()
     {
         $store = Store::factory()->create();
@@ -128,7 +131,7 @@ class StoreControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function staff_cannot_create_store()
     {
         $storeData = [
@@ -144,7 +147,7 @@ class StoreControllerTest extends TestCase
         $this->assertDatabaseMissing('stores', $storeData);
     }
 
-    /** @test */
+    #[Test]
     public function staff_cannot_update_store()
     {
         $store = Store::factory()->create();
@@ -166,7 +169,7 @@ class StoreControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function staff_cannot_delete_store()
     {
         $store = Store::factory()->create();
@@ -181,7 +184,7 @@ class StoreControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function show_endpoint_can_include_relations()
     {
         $store = Store::factory()->create();
@@ -198,7 +201,7 @@ class StoreControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function show_endpoint_handles_array_include_parameter()
     {
         $store = Store::factory()->create();
@@ -219,7 +222,7 @@ class StoreControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function show_endpoint_handles_malformed_include_parameter_gracefully()
     {
         $store = Store::factory()->create();
@@ -236,7 +239,7 @@ class StoreControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function show_endpoint_handles_empty_include_parameter()
     {
         $store = Store::factory()->create();
@@ -253,7 +256,7 @@ class StoreControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function show_endpoint_handles_null_include_parameter()
     {
         $store = Store::factory()->create();

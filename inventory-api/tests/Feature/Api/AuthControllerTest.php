@@ -9,12 +9,15 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class AuthControllerTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
     
-    /** @test */
+    #[Test]
     public function user_can_login_with_valid_credentials()
     {
         // 創建測試用戶
@@ -58,7 +61,7 @@ class AuthControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function user_cannot_login_with_invalid_username()
     {
         // 創建測試用戶
@@ -88,7 +91,7 @@ class AuthControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function user_cannot_login_with_invalid_password()
     {
         // 創建測試用戶
@@ -118,7 +121,7 @@ class AuthControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function login_requires_username_and_password()
     {
         // 測試缺少username
@@ -144,7 +147,7 @@ class AuthControllerTest extends TestCase
                  ->assertJsonValidationErrors(['username', 'password']);
     }
     
-    /** @test */
+    #[Test]
     public function authenticated_user_can_logout()
     {
         // 創建並認證用戶
@@ -163,7 +166,7 @@ class AuthControllerTest extends TestCase
         $this->assertEmpty($response->getContent());
     }
     
-    /** @test */
+    #[Test]
     public function unauthenticated_user_cannot_logout()
     {
         // 發送登出請求（未認證）

@@ -9,12 +9,15 @@ use App\Models\CustomerAddress;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class CustomerControllerTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function admin_can_get_customers_list()
     {
         // 創建測試客戶
@@ -48,7 +51,7 @@ class CustomerControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_search_customers_by_name()
     {
         // 創建測試客戶
@@ -63,7 +66,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonPath('data.0.name', '測試設計公司');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_search_customers_by_phone()
     {
         // 創建測試客戶
@@ -78,7 +81,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonPath('data.0.phone', '0987654321');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_customers_by_date_range()
     {
         // 創建不同日期的客戶
@@ -100,7 +103,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonPath('data.0.name', '新客戶');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_create_individual_customer()
     {
         $customerData = [
@@ -154,7 +157,7 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_create_company_customer()
     {
         $customerData = [
@@ -180,7 +183,7 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function customer_creation_validates_required_fields()
     {
         $response = $this->actingAsAdmin()
@@ -190,7 +193,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['name', 'is_company', 'industry_type', 'payment_type']);
     }
 
-    /** @test */
+    #[Test]
     public function company_customer_requires_tax_id()
     {
         $customerData = [
@@ -208,7 +211,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['tax_id']);
     }
 
-    /** @test */
+    #[Test]
     public function phone_number_must_be_unique()
     {
         // 創建已存在的客戶
@@ -229,7 +232,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['phone']);
     }
 
-    /** @test */
+    #[Test]
     public function tax_id_must_be_unique()
     {
         // 創建已存在的公司客戶
@@ -253,7 +256,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['tax_id']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_customer_details()
     {
         $customer = Customer::factory()->create();
@@ -286,7 +289,7 @@ class CustomerControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_customer()
     {
         $customer = Customer::factory()->create(['name' => '原始名稱']);
@@ -313,7 +316,7 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_customer_with_addresses()
     {
         $customer = Customer::factory()->create();
@@ -359,7 +362,7 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_delete_customer()
     {
         $customer = Customer::factory()->create();
@@ -375,7 +378,7 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function staff_user_can_view_customers()
     {
         Customer::factory()->count(3)->create();
@@ -386,7 +389,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_user_cannot_access_customers()
     {
         $response = $this->getJson('/api/customers');
@@ -394,7 +397,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function customer_creation_ensures_single_default_address()
     {
         $customerData = [
@@ -426,7 +429,7 @@ class CustomerControllerTest extends TestCase
         $this->assertEquals(1, $defaultAddressCount);
     }
 
-    /** @test */
+    #[Test]
     public function customer_creation_sets_first_address_as_default_when_none_specified()
     {
         $customerData = [
@@ -458,7 +461,7 @@ class CustomerControllerTest extends TestCase
         $this->assertTrue($firstAddress->is_default);
     }
 
-    /** @test */
+    #[Test]
     public function date_range_validation_works()
     {
         $response = $this->actingAsAdmin()
@@ -468,7 +471,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['end_date']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_search_customers_by_tax_id()
     {
         // 創建測試客戶
@@ -489,7 +492,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonPath('data.0.tax_id', '12345678');
     }
 
-    /** @test */
+    #[Test]
     public function index_validates_date_format()
     {
         $response = $this->actingAsAdmin()
@@ -499,7 +502,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['start_date']);
     }
 
-    /** @test */
+    #[Test]
     public function index_returns_empty_when_no_customers_match_search()
     {
         Customer::factory()->create(['name' => '測試客戶']);
@@ -511,7 +514,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonCount(0, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function index_works_with_pagination_parameters()
     {
         Customer::factory()->count(20)->create();
@@ -524,7 +527,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonCount(5, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function show_returns_404_for_non_existent_customer()
     {
         $response = $this->actingAsAdmin()
@@ -533,7 +536,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function staff_can_view_single_customer()
     {
         $customer = Customer::factory()->create();
@@ -545,7 +548,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonPath('data.id', $customer->id);
     }
 
-    /** @test */
+    #[Test]
     public function show_returns_customer_with_all_addresses()
     {
         $customer = Customer::factory()->create();
@@ -577,7 +580,7 @@ class CustomerControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function update_returns_404_for_non_existent_customer()
     {
         $updateData = [
@@ -593,7 +596,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function update_validates_required_fields()
     {
         $customer = Customer::factory()->create();
@@ -605,7 +608,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['name', 'is_company', 'industry_type', 'payment_type']);
     }
 
-    /** @test */
+    #[Test]
     public function update_validates_phone_uniqueness_excluding_current_customer()
     {
         $customer1 = Customer::factory()->create(['phone' => '0987654321']);
@@ -627,7 +630,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['phone']);
     }
 
-    /** @test */
+    #[Test]
     public function update_allows_keeping_same_phone_number()
     {
         $customer = Customer::factory()->create(['phone' => '0987654321']);
@@ -646,7 +649,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function update_validates_tax_id_uniqueness_excluding_current_customer()
     {
         $customer1 = Customer::factory()->create([
@@ -673,7 +676,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['tax_id']);
     }
 
-    /** @test */
+    #[Test]
     public function update_can_update_existing_addresses()
     {
         $customer = Customer::factory()->create();
@@ -710,7 +713,7 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function update_validates_company_customer_requires_tax_id()
     {
         $customer = Customer::factory()->create(['is_company' => false]);
@@ -729,7 +732,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['tax_id']);
     }
 
-    /** @test */
+    #[Test]
     public function destroy_returns_404_for_non_existent_customer()
     {
         $response = $this->actingAsAdmin()
@@ -738,7 +741,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function destroy_also_soft_deletes_customer_addresses()
     {
         $customer = Customer::factory()->create();
@@ -756,7 +759,7 @@ class CustomerControllerTest extends TestCase
         $this->assertSoftDeleted('customer_addresses', ['id' => $address->id]);
     }
 
-    /** @test */
+    #[Test]
     public function staff_can_create_customer()
     {
         $customerData = [
@@ -773,7 +776,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(201);
     }
 
-    /** @test */
+    #[Test]
     public function staff_can_update_customer()
     {
         $customer = Customer::factory()->create();
@@ -792,7 +795,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function staff_can_delete_customer()
     {
         $customer = Customer::factory()->create();
@@ -804,7 +807,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(204);
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_user_cannot_access_any_customer_endpoints()
     {
         $customer = Customer::factory()->create();
@@ -828,7 +831,7 @@ class CustomerControllerTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function create_validates_phone_format()
     {
         $customerData = [
@@ -847,7 +850,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(201); // 如果沒有格式驗證，應該會通過
     }
 
-    /** @test */
+    #[Test]
     public function create_accepts_short_tax_id()
     {
         $customerData = [
@@ -870,7 +873,7 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function create_handles_address_validation_errors()
     {
         $customerData = [
@@ -893,7 +896,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['addresses.0.address']);
     }
 
-    /** @test */
+    #[Test]
     public function create_handles_empty_addresses_array()
     {
         $customerData = [
@@ -914,7 +917,7 @@ class CustomerControllerTest extends TestCase
         $this->assertEquals(0, $customer->addresses()->count());
     }
 
-    /** @test */
+    #[Test]
     public function index_search_is_case_insensitive()
     {
         Customer::factory()->create(['name' => '測試設計公司']);
@@ -926,7 +929,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function index_search_handles_special_characters()
     {
         Customer::factory()->create(['name' => 'ABC & DEF 公司']);
@@ -938,7 +941,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function index_filters_customers_by_end_date_only()
     {
         // 創建不同日期的客戶 - 測試 end_date 篩選分支
@@ -961,7 +964,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonPath('data.0.name', '舊客戶');
     }
 
-    /** @test */
+    #[Test]
     public function store_handles_database_integrity_constraint_violation()
     {
         // 先創建一個客戶，確保有唯一性約束
@@ -985,7 +988,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
-    /** @test */
+    #[Test]
     public function store_handles_service_layer_exceptions()
     {
         // 使用 Mock 來模擬服務層異常
@@ -1013,21 +1016,21 @@ class CustomerControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function update_handles_database_connection_errors()
     {
         // 移除這個測試 - 有同樣的 TypeError 問題
         $this->markTestSkipped('由於返回類型限制，此測試會導致 TypeError');
     }
 
-    /** @test */
+    #[Test]
     public function update_handles_integrity_constraint_violation_with_specific_error_code()
     {
         // 移除這個測試 - 有同樣的 TypeError 問題
         $this->markTestSkipped('由於返回類型限制，此測試會導致 TypeError');
     }
 
-    /** @test */
+    #[Test]
     public function update_handles_service_layer_exceptions_correctly()
     {
         $customer = Customer::factory()->create();
@@ -1056,7 +1059,7 @@ class CustomerControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function update_handles_database_constraint_violations()
     {
         $customer = Customer::factory()->create();
@@ -1078,7 +1081,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['phone']);
     }
 
-    /** @test */
+    #[Test]
     public function update_successfully_updates_customer_with_complete_data()
     {
         $customer = Customer::factory()->create([
@@ -1131,7 +1134,7 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function store_handles_database_query_exception_with_integrity_constraint()
     {
         // 創建一個具有相同電話號碼的客戶，這將觸發唯一性約束錯誤
@@ -1153,7 +1156,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['phone']);
     }
 
-    /** @test */
+    #[Test]
     public function store_handles_general_database_query_exception()
     {
         // 模擬一般資料庫錯誤
@@ -1188,7 +1191,7 @@ class CustomerControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function store_handles_general_exception_and_logs_error()
     {
         // 模擬一般異常
@@ -1216,7 +1219,7 @@ class CustomerControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function update_handles_query_exception_with_integrity_constraint()
     {
         $customer = Customer::factory()->create();
@@ -1238,7 +1241,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonValidationErrors(['phone']);
     }
 
-    /** @test */
+    #[Test]
     public function update_handles_general_query_exception()
     {
         $customer = Customer::factory()->create();

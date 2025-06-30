@@ -6,12 +6,15 @@ use Tests\TestCase;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class CategoryModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function category_has_parent_relationship()
     {
         $parent = Category::factory()->create();
@@ -21,7 +24,7 @@ class CategoryModelTest extends TestCase
         $this->assertEquals($parent->id, $child->parent->id);
     }
 
-    /** @test */
+    #[Test]
     public function category_has_children_relationship()
     {
         $parent = Category::factory()->create();
@@ -33,7 +36,7 @@ class CategoryModelTest extends TestCase
         $this->assertTrue($parent->children->contains($child2));
     }
 
-    /** @test */
+    #[Test]
     public function category_has_descendants_relationship()
     {
         $grandparent = Category::factory()->create();
@@ -50,7 +53,7 @@ class CategoryModelTest extends TestCase
         $this->assertEquals($child->id, $descendants->first()->descendants->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function category_has_products_relationship()
     {
         $category = Category::factory()->create();
@@ -62,7 +65,7 @@ class CategoryModelTest extends TestCase
         $this->assertTrue($category->products->contains($product2));
     }
 
-    /** @test */
+    #[Test]
     public function category_has_correct_fillable_attributes()
     {
         $fillable = ['name', 'description', 'parent_id', 'sort_order'];
@@ -71,7 +74,7 @@ class CategoryModelTest extends TestCase
         $this->assertEquals($fillable, $category->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function category_can_be_created_with_mass_assignment()
     {
         $data = [
@@ -88,7 +91,7 @@ class CategoryModelTest extends TestCase
         $this->assertNull($category->parent_id);
     }
 
-    /** @test */
+    #[Test]
     public function category_can_have_parent_category()
     {
         $parent = Category::factory()->create(['name' => '電子產品']);
@@ -101,7 +104,7 @@ class CategoryModelTest extends TestCase
         $this->assertEquals($parent->name, $child->parent->name);
     }
 
-    /** @test */
+    #[Test]
     public function category_can_have_multiple_levels()
     {
         $level1 = Category::factory()->create(['name' => '電子產品']);
@@ -121,13 +124,13 @@ class CategoryModelTest extends TestCase
         $this->assertEquals($level2->id, $level1->children->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function category_uses_has_factory_trait()
     {
         $this->assertTrue(method_exists(Category::class, 'factory'));
     }
 
-    /** @test */
+    #[Test]
     public function category_can_have_null_parent()
     {
         $category = Category::factory()->create(['parent_id' => null]);
@@ -136,7 +139,7 @@ class CategoryModelTest extends TestCase
         $this->assertNull($category->parent);
     }
 
-    /** @test */
+    #[Test]
     public function category_can_have_null_description()
     {
         $category = Category::factory()->create(['description' => null]);

@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * AttributeControllerTest 商品屬性控制器測試
@@ -48,10 +51,8 @@ class AttributeControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-index
-     */
+    #[Test]
+    #[Group('attribute-index')]
     public function 管理員可以獲取所有屬性列表()
     {
         // 創建額外的屬性
@@ -89,10 +90,8 @@ class AttributeControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-index
-     */
+    #[Test]
+    #[Group('attribute-index')]
     public function 一般用戶可以獲取所有屬性列表()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -110,10 +109,8 @@ class AttributeControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-index
-     */
+    #[Test]
+    #[Group('attribute-index')]
     public function 未認證用戶無法獲取屬性列表()
     {
         $response = $this->getJson('/api/attributes');
@@ -122,10 +119,8 @@ class AttributeControllerTest extends TestCase
             ->assertJson(['message' => 'Unauthenticated.']);
     }
 
-    /**
-     * @test
-     * @group attribute-store
-     */
+    #[Test]
+    #[Group('attribute-store')]
     public function 管理員可以創建新屬性()
     {
         $attributeData = ['name' => '材質'];
@@ -145,10 +140,8 @@ class AttributeControllerTest extends TestCase
         $this->assertDatabaseHas('attributes', ['name' => '材質']);
     }
 
-    /**
-     * @test
-     * @group attribute-store
-     */
+    #[Test]
+    #[Group('attribute-store')]
     public function 一般用戶無法創建新屬性()
     {
         $attributeData = ['name' => '材質'];
@@ -162,10 +155,8 @@ class AttributeControllerTest extends TestCase
         $this->assertDatabaseMissing('attributes', ['name' => '材質']);
     }
 
-    /**
-     * @test
-     * @group attribute-store
-     */
+    #[Test]
+    #[Group('attribute-store')]
     public function 創建屬性時名稱為必填()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -176,10 +167,8 @@ class AttributeControllerTest extends TestCase
             ->assertJson(['errors' => ['name' => ['屬性名稱為必填欄位']]]);
     }
 
-    /**
-     * @test
-     * @group attribute-store
-     */
+    #[Test]
+    #[Group('attribute-store')]
     public function 創建屬性時名稱必須唯一()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -190,10 +179,8 @@ class AttributeControllerTest extends TestCase
             ->assertJson(['errors' => ['name' => ['此屬性名稱已存在，請使用其他名稱']]]);
     }
 
-    /**
-     * @test
-     * @group attribute-store
-     */
+    #[Test]
+    #[Group('attribute-store')]
     public function 創建屬性時名稱不能超過255字元()
     {
         // 創建一個確實超過 255 字元的字串
@@ -207,10 +194,8 @@ class AttributeControllerTest extends TestCase
             ->assertJson(['errors' => ['name' => ['屬性名稱不能超過 255 個字元']]]);
     }
 
-    /**
-     * @test
-     * @group attribute-show
-     */
+    #[Test]
+    #[Group('attribute-show')]
     public function 管理員可以查看指定屬性()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -236,10 +221,8 @@ class AttributeControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-show
-     */
+    #[Test]
+    #[Group('attribute-show')]
     public function 一般用戶可以查看指定屬性()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -254,10 +237,8 @@ class AttributeControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-show
-     */
+    #[Test]
+    #[Group('attribute-show')]
     public function 查看不存在的屬性返回404錯誤()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -266,10 +247,8 @@ class AttributeControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /**
-     * @test
-     * @group attribute-update
-     */
+    #[Test]
+    #[Group('attribute-update')]
     public function 管理員可以更新屬性()
     {
         $updateData = ['name' => '顏色分類'];
@@ -291,10 +270,8 @@ class AttributeControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-update
-     */
+    #[Test]
+    #[Group('attribute-update')]
     public function 一般用戶無法更新屬性()
     {
         $updateData = ['name' => '顏色分類'];
@@ -312,10 +289,8 @@ class AttributeControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-update
-     */
+    #[Test]
+    #[Group('attribute-update')]
     public function 更新屬性時可以使用相同名稱()
     {
         $updateData = ['name' => '顏色']; // 使用相同名稱
@@ -331,10 +306,8 @@ class AttributeControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-update
-     */
+    #[Test]
+    #[Group('attribute-update')]
     public function 更新屬性時名稱不能與其他屬性重複()
     {
         // 創建另一個屬性
@@ -350,10 +323,8 @@ class AttributeControllerTest extends TestCase
             ->assertJson(['errors' => ['name' => ['此屬性名稱已存在，請使用其他名稱']]]);
     }
 
-    /**
-     * @test
-     * @group attribute-update
-     */
+    #[Test]
+    #[Group('attribute-update')]
     public function 更新不存在的屬性返回404錯誤()
     {
         $updateData = ['name' => '新名稱'];
@@ -364,10 +335,8 @@ class AttributeControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /**
-     * @test
-     * @group attribute-destroy
-     */
+    #[Test]
+    #[Group('attribute-destroy')]
     public function 管理員可以刪除屬性()
     {
         $attributeId = $this->attribute->id;
@@ -383,10 +352,8 @@ class AttributeControllerTest extends TestCase
         $this->assertDatabaseMissing('attribute_values', ['attribute_id' => $attributeId]);
     }
 
-    /**
-     * @test
-     * @group attribute-destroy
-     */
+    #[Test]
+    #[Group('attribute-destroy')]
     public function 一般用戶無法刪除屬性()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -398,10 +365,8 @@ class AttributeControllerTest extends TestCase
         $this->assertDatabaseHas('attributes', ['id' => $this->attribute->id]);
     }
 
-    /**
-     * @test
-     * @group attribute-destroy
-     */
+    #[Test]
+    #[Group('attribute-destroy')]
     public function 刪除不存在的屬性返回404錯誤()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -410,10 +375,8 @@ class AttributeControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /**
-     * @test
-     * @group attribute-authorization
-     */
+    #[Test]
+    #[Group('attribute-authorization')]
     public function 未認證用戶無法進行任何修改操作()
     {
         // 測試創建
@@ -429,10 +392,8 @@ class AttributeControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /**
-     * @test
-     * @group attribute-edge-cases
-     */
+    #[Test]
+    #[Group('attribute-edge-cases')]
     public function 創建屬性時名稱前後空白會被自動清理()
     {
         $attributeData = ['name' => ' 材質 '];
@@ -449,10 +410,8 @@ class AttributeControllerTest extends TestCase
         $this->assertDatabaseHas('attributes', ['name' => '材質']);
     }
 
-    /**
-     * @test
-     * @group attribute-edge-cases
-     */
+    #[Test]
+    #[Group('attribute-edge-cases')]
     public function 屬性名稱大小寫敏感()
     {
         // 創建一個大寫的屬性
@@ -472,10 +431,8 @@ class AttributeControllerTest extends TestCase
         $response->assertStatus(201);
     }
 
-    /**
-     * @test
-     * @group attribute-performance
-     */
+    #[Test]
+    #[Group('attribute-performance')]
     public function 屬性列表包含正確的eager_loading資料()
     {
         // 這個測試確保我們正確使用了 with('values') 來避免 N+1 查詢
@@ -489,10 +446,8 @@ class AttributeControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-api-structure
-     */
+    #[Test]
+    #[Group('attribute-api-structure')]
     public function API回應結構符合規範()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -509,10 +464,10 @@ class AttributeControllerTest extends TestCase
                         'values' => [
                             '*' => [
                                 'id',
-                                'value',
                                 'attribute_id',
+                                'value',
                                 'created_at',
-                                'updated_at'
+                                'updated_at',
                             ]
                         ]
                     ]

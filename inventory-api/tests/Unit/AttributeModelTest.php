@@ -7,12 +7,15 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class AttributeModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function attribute_has_many_values()
     {
         $attribute = Attribute::factory()->create();
@@ -22,7 +25,7 @@ class AttributeModelTest extends TestCase
         $this->assertInstanceOf(AttributeValue::class, $attribute->values->first());
     }
 
-    /** @test */
+    #[Test]
     public function attribute_has_many_products()
     {
         $attribute = Attribute::factory()->create();
@@ -34,7 +37,7 @@ class AttributeModelTest extends TestCase
         $this->assertInstanceOf(Product::class, $attribute->products->first());
     }
 
-    /** @test */
+    #[Test]
     public function attribute_has_correct_fillable_attributes()
     {
         $attribute = new Attribute();
@@ -43,7 +46,7 @@ class AttributeModelTest extends TestCase
         $this->assertEquals($expected, $attribute->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function attribute_has_correct_casts()
     {
         $attribute = new Attribute();
@@ -59,7 +62,7 @@ class AttributeModelTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function attribute_can_be_created_with_mass_assignment()
     {
         $data = [
@@ -73,13 +76,13 @@ class AttributeModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function attribute_uses_has_factory_trait()
     {
         $this->assertTrue(in_array('Illuminate\Database\Eloquent\Factories\HasFactory', class_uses(Attribute::class)));
     }
 
-    /** @test */
+    #[Test]
     public function attribute_can_attach_and_detach_products()
     {
         $attribute = Attribute::factory()->create();
@@ -92,7 +95,7 @@ class AttributeModelTest extends TestCase
         $this->assertCount(0, $attribute->fresh()->products);
     }
 
-    /** @test */
+    #[Test]
     public function attribute_products_relation_uses_pivot_table()
     {
         $attribute = Attribute::factory()->create();
@@ -106,7 +109,7 @@ class AttributeModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function attribute_can_have_multiple_values_with_different_names()
     {
         $colorAttribute = Attribute::factory()->create(['name' => 'Color']);
@@ -128,7 +131,7 @@ class AttributeModelTest extends TestCase
         $this->assertTrue($values->contains('Blue'));
     }
 
-    /** @test */
+    #[Test]
     public function attribute_cascade_deletion_with_values()
     {
         $attribute = Attribute::factory()->create();

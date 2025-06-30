@@ -6,12 +6,15 @@ use Tests\TestCase;
 use App\Models\Customer;
 use App\Models\CustomerAddress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class CustomerAddressModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function customer_address_belongs_to_customer()
     {
         $customer = Customer::factory()->create();
@@ -21,7 +24,7 @@ class CustomerAddressModelTest extends TestCase
         $this->assertEquals($customer->id, $address->customer->id);
     }
 
-    /** @test */
+    #[Test]
     public function customer_address_has_correct_fillable_attributes()
     {
         $address = new CustomerAddress();
@@ -30,7 +33,7 @@ class CustomerAddressModelTest extends TestCase
         $this->assertEquals($fillable, $address->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function customer_address_has_correct_casts()
     {
         $address = new CustomerAddress();
@@ -40,7 +43,7 @@ class CustomerAddressModelTest extends TestCase
         $this->assertEquals('boolean', $casts['is_default']);
     }
 
-    /** @test */
+    #[Test]
     public function customer_address_can_be_set_as_default()
     {
         $customer = Customer::factory()->create();
@@ -60,7 +63,7 @@ class CustomerAddressModelTest extends TestCase
         $this->assertIsBool($address2->is_default);
     }
 
-    /** @test */
+    #[Test]
     public function customer_address_can_be_created_with_mass_assignment()
     {
         $customer = Customer::factory()->create();
@@ -80,7 +83,7 @@ class CustomerAddressModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function only_one_default_address_per_customer()
     {
         $customer = Customer::factory()->create();
@@ -103,7 +106,7 @@ class CustomerAddressModelTest extends TestCase
         $this->assertEquals($addresses[0]->id, $defaultAddresses->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function customer_address_uses_has_factory_trait()
     {
         $address = CustomerAddress::factory()->make();

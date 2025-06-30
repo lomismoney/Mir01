@@ -9,6 +9,9 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * 商品圖片上傳功能測試

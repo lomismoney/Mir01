@@ -32,35 +32,35 @@ class InventoryTransactionResource extends JsonResource
             'updated_at' => $this->updated_at,
 
             // --- 🔗 關聯資訊 ---
-            'user' => $this->whenLoaded('user', function() {
-                return [
-                    'id' => $this->user->id,
-                    'name' => $this->user->name,
-                ];
-            }),
-            'store' => $this->whenLoaded('inventory', function() {
-                return $this->when(
-                    $this->inventory?->relationLoaded('store'),
-                    function() {
-                        return [
-                            'id' => $this->inventory->store->id,
-                            'name' => $this->inventory->store->name,
-                        ];
-                    }
-                );
-            }),
-            'product' => $this->whenLoaded('inventory', function() {
-                return $this->when(
-                    $this->inventory?->relationLoaded('productVariant') && 
-                    $this->inventory?->productVariant?->relationLoaded('product'),
-                    function() {
-                        return [
-                            'name' => $this->inventory->productVariant->product->name,
-                            'sku' => $this->inventory->productVariant->sku,
-                        ];
-                    }
-                );
-            }),
+                'user' => $this->whenLoaded('user', function() {
+                    return [
+                        'id' => $this->user->id,
+                        'name' => $this->user->name,
+                    ];
+                }),
+                'store' => $this->whenLoaded('inventory', function() {
+                    return $this->when(
+                        $this->inventory?->relationLoaded('store'),
+                        function() {
+                            return [
+                                'id' => $this->inventory->store->id,
+                                'name' => $this->inventory->store->name,
+                            ];
+                        }
+                    );
+                }),
+                'product' => $this->whenLoaded('inventory', function() {
+                    return $this->when(
+                        $this->inventory?->relationLoaded('productVariant') && 
+                        $this->inventory?->productVariant?->relationLoaded('product'),
+                        function() {
+                            return [
+                                'name' => $this->inventory->productVariant->product->name,
+                                'sku' => $this->inventory->productVariant->sku,
+                            ];
+                        }
+                    );
+                }),
         ];
     }
 }

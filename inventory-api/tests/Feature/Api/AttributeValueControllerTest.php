@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * AttributeValueControllerTest 商品屬性值控制器測試
@@ -57,10 +60,8 @@ class AttributeValueControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 管理員可以獲取指定屬性的所有值()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -85,10 +86,8 @@ class AttributeValueControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-value-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 一般用戶可以獲取指定屬性的所有值()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -104,10 +103,8 @@ class AttributeValueControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-value-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 未認證用戶無法獲取屬性值列表()
     {
         $response = $this->getJson("/api/attributes/{$this->colorAttribute->id}/values");
@@ -116,10 +113,8 @@ class AttributeValueControllerTest extends TestCase
             ->assertJson(['message' => 'Unauthenticated.']);
     }
 
-    /**
-     * @test
-     * @group attribute-value-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 查詢不存在的屬性的值返回404錯誤()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -128,10 +123,8 @@ class AttributeValueControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /**
-     * @test
-     * @group attribute-value-store
-     */
+    #[Test]
+    #[Group('attribute-value-store')]
     public function 管理員可以為指定屬性創建新值()
     {
         $valueData = ['value' => '綠色'];
@@ -154,10 +147,8 @@ class AttributeValueControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-store
-     */
+    #[Test]
+    #[Group('attribute-value-store')]
     public function 一般用戶無法創建新屬性值()
     {
         $valueData = ['value' => '綠色'];
@@ -174,10 +165,8 @@ class AttributeValueControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-store
-     */
+    #[Test]
+    #[Group('attribute-value-store')]
     public function 創建屬性值時值為必填()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -188,10 +177,8 @@ class AttributeValueControllerTest extends TestCase
             ->assertJson(['errors' => ['value' => ['屬性值為必填欄位']]]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-store
-     */
+    #[Test]
+    #[Group('attribute-value-store')]
     public function 創建屬性值時值必須在同一屬性下唯一()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -202,10 +189,8 @@ class AttributeValueControllerTest extends TestCase
             ->assertJson(['errors' => ['value' => ['此屬性值在當前屬性下已存在，請使用其他值']]]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-store
-     */
+    #[Test]
+    #[Group('attribute-value-store')]
     public function 不同屬性下可以有相同的屬性值()
     {
         // 在尺寸屬性下創建「紅色」值（顏色屬性下已有「紅色」）
@@ -230,10 +215,8 @@ class AttributeValueControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-store
-     */
+    #[Test]
+    #[Group('attribute-value-store')]
     public function 創建屬性值時值不能超過255字元()
     {
         $longValue = str_repeat('很長的屬性值', 50); // 確保超過 255 字元
@@ -246,10 +229,8 @@ class AttributeValueControllerTest extends TestCase
             ->assertJson(['errors' => ['value' => ['屬性值不能超過 255 個字元']]]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-show
-     */
+    #[Test]
+    #[Group('attribute-value-show')]
     public function 管理員可以查看指定屬性值()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -265,10 +246,8 @@ class AttributeValueControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-value-show
-     */
+    #[Test]
+    #[Group('attribute-value-show')]
     public function 一般用戶可以查看指定屬性值()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -282,10 +261,8 @@ class AttributeValueControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-value-show
-     */
+    #[Test]
+    #[Group('attribute-value-show')]
     public function 查看不存在的屬性值返回404錯誤()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -294,10 +271,8 @@ class AttributeValueControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /**
-     * @test
-     * @group attribute-value-update
-     */
+    #[Test]
+    #[Group('attribute-value-update')]
     public function 管理員可以更新屬性值()
     {
         $updateData = ['value' => '深紅色'];
@@ -320,10 +295,8 @@ class AttributeValueControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-update
-     */
+    #[Test]
+    #[Group('attribute-value-update')]
     public function 一般用戶無法更新屬性值()
     {
         $updateData = ['value' => '深紅色'];
@@ -341,10 +314,8 @@ class AttributeValueControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-update
-     */
+    #[Test]
+    #[Group('attribute-value-update')]
     public function 更新屬性值時可以使用相同值()
     {
         $updateData = ['value' => '紅色']; // 使用相同值
@@ -360,10 +331,8 @@ class AttributeValueControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-update
-     */
+    #[Test]
+    #[Group('attribute-value-update')]
     public function 更新屬性值時值不能與同屬性下其他值重複()
     {
         $updateData = ['value' => '藍色']; // 嘗試使用同屬性下另一個值
@@ -376,10 +345,8 @@ class AttributeValueControllerTest extends TestCase
             ->assertJson(['errors' => ['value' => ['此屬性值在當前屬性下已存在，請使用其他值']]]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-update
-     */
+    #[Test]
+    #[Group('attribute-value-update')]
     public function 更新屬性值時可以使用不同屬性下的相同值()
     {
         // 將紅色值更新為 'M'（尺寸屬性下已有 'M'）
@@ -396,10 +363,8 @@ class AttributeValueControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group attribute-value-destroy
-     */
+    #[Test]
+    #[Group('attribute-value-destroy')]
     public function 管理員可以刪除屬性值()
     {
         $valueId = $this->redValue->id;
@@ -412,10 +377,8 @@ class AttributeValueControllerTest extends TestCase
         $this->assertDatabaseMissing('attribute_values', ['id' => $valueId]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-destroy
-     */
+    #[Test]
+    #[Group('attribute-value-destroy')]
     public function 一般用戶無法刪除屬性值()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -427,10 +390,8 @@ class AttributeValueControllerTest extends TestCase
         $this->assertDatabaseHas('attribute_values', ['id' => $this->redValue->id]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-destroy
-     */
+    #[Test]
+    #[Group('attribute-value-destroy')]
     public function 刪除不存在的屬性值返回404錯誤()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -439,10 +400,8 @@ class AttributeValueControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /**
-     * @test
-     * @group attribute-value-authorization
-     */
+    #[Test]
+    #[Group('attribute-value-authorization')]
     public function 未認證用戶無法進行任何修改操作()
     {
         // 測試創建
@@ -458,10 +417,8 @@ class AttributeValueControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /**
-     * @test
-     * @group attribute-value-edge-cases
-     */
+    #[Test]
+    #[Group('attribute-value-edge-cases')]
     public function 創建屬性值時值前後空白會被自動清理()
     {
         $valueData = ['value' => ' 綠色 '];
@@ -478,10 +435,8 @@ class AttributeValueControllerTest extends TestCase
         $this->assertDatabaseHas('attribute_values', ['value' => '綠色']);
     }
 
-    /**
-     * @test
-     * @group attribute-value-edge-cases
-     */
+    #[Test]
+    #[Group('attribute-value-edge-cases')]
     public function 屬性值大小寫敏感()
     {
         // 創建大寫值
@@ -503,10 +458,8 @@ class AttributeValueControllerTest extends TestCase
         $response->assertStatus(201);
     }
 
-    /**
-     * @test
-     * @group attribute-value-relationships
-     */
+    #[Test]
+    #[Group('attribute-value-relationships')]
     public function 屬性值正確關聯到其父屬性()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -524,10 +477,8 @@ class AttributeValueControllerTest extends TestCase
         $this->assertEquals('顏色', $value->attribute->name);
     }
 
-    /**
-     * @test
-     * @group attribute-value-api-structure
-     */
+    #[Test]
+    #[Group('attribute-value-api-structure')]
     public function 屬性值API回應結構符合規範()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -547,10 +498,8 @@ class AttributeValueControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
-     * @group attribute-value-nested-routes
-     */
+    #[Test]
+    #[Group('attribute-value-nested-routes')]
     public function 巢狀路由正確運作()
     {
         // index 路由：/attributes/{attribute}/values

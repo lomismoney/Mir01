@@ -11,6 +11,8 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnitFrameworkAttributesTest;
+
+
 class InventoryModelTest extends TestCase
 {
     use RefreshDatabase;

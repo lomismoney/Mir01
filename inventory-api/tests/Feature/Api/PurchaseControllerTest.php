@@ -14,6 +14,9 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Support\Carbon;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class PurchaseControllerTest extends TestCase
 {
@@ -38,7 +41,7 @@ class PurchaseControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_create_purchase_successfully()
     {
         // 準備進貨單數據
@@ -101,7 +104,7 @@ class PurchaseControllerTest extends TestCase
         $this->assertEquals(10, $inventory->quantity);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_create_purchase_with_multiple_items()
     {
         // 創建第二個商品變體
@@ -171,7 +174,7 @@ class PurchaseControllerTest extends TestCase
         $this->assertEquals(5, $inventory2->quantity);
     }
 
-    /** @test */
+    #[Test]
     public function purchase_creation_requires_valid_store_id()
     {
         $purchaseData = [
@@ -194,7 +197,7 @@ class PurchaseControllerTest extends TestCase
                  ->assertJsonValidationErrors(['store_id']);
     }
 
-    /** @test */
+    #[Test]
     public function purchase_creation_requires_valid_product_variant_id()
     {
         $purchaseData = [
@@ -217,7 +220,7 @@ class PurchaseControllerTest extends TestCase
                  ->assertJsonValidationErrors(['items.0.product_variant_id']);
     }
 
-    /** @test */
+    #[Test]
     public function purchase_creation_requires_unique_order_number()
     {
         // 創建一個已存在的進貨單
@@ -249,7 +252,7 @@ class PurchaseControllerTest extends TestCase
                  ->assertJsonValidationErrors(['order_number']);
     }
 
-    /** @test */
+    #[Test]
     public function purchase_creation_validates_required_fields()
     {
         // 測試缺少必填字段
@@ -264,7 +267,7 @@ class PurchaseControllerTest extends TestCase
                  ]);
     }
 
-    /** @test */
+    #[Test]
     public function purchase_creation_validates_positive_values()
     {
         $purchaseData = [
@@ -291,7 +294,7 @@ class PurchaseControllerTest extends TestCase
                  ]);
     }
 
-    /** @test */
+    #[Test]
     public function staff_cannot_create_purchase()
     {
         $purchaseData = [
@@ -318,7 +321,7 @@ class PurchaseControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_user_cannot_create_purchase()
     {
         $purchaseData = [
@@ -344,7 +347,7 @@ class PurchaseControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function purchase_creation_requires_at_least_one_item()
     {
         $purchaseData = [
@@ -361,7 +364,7 @@ class PurchaseControllerTest extends TestCase
                  ->assertJsonValidationErrors(['items']);
     }
 
-    /** @test */
+    #[Test]
     public function pending_purchase_does_not_create_inventory()
     {
         // 測試pending狀態的進貨單不會自動入庫
@@ -398,7 +401,7 @@ class PurchaseControllerTest extends TestCase
         $this->assertNull($inventory, '待處理狀態的進貨單不應該創建庫存記錄');
     }
 
-    /** @test */
+    #[Test]
     public function completed_purchase_creates_inventory_automatically()
     {
         // 測試completed狀態的進貨單會自動入庫
@@ -436,7 +439,7 @@ class PurchaseControllerTest extends TestCase
         $this->assertEquals(15, $inventory->quantity, '庫存數量應該正確增加');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_get_purchases_list()
     {
         // 創建多個進貨單進行測試
@@ -473,7 +476,7 @@ class PurchaseControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_purchases_by_store()
     {
         // 創建不同門市的進貨單
@@ -488,7 +491,7 @@ class PurchaseControllerTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_purchases_by_status()
     {
         // 創建不同狀態的進貨單
@@ -502,7 +505,7 @@ class PurchaseControllerTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_show_single_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -536,7 +539,7 @@ class PurchaseControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function show_returns_404_for_non_existent_purchase()
     {
         $response = $this->actingAsAdmin()
@@ -545,7 +548,7 @@ class PurchaseControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_pending_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -592,7 +595,7 @@ class PurchaseControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_update_completed_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -622,7 +625,7 @@ class PurchaseControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_purchase_status()
     {
         $purchase = Purchase::factory()->create([
@@ -643,7 +646,7 @@ class PurchaseControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_make_invalid_status_transition()
     {
         $purchase = Purchase::factory()->create([
@@ -660,7 +663,7 @@ class PurchaseControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_cancel_pending_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -679,7 +682,7 @@ class PurchaseControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_cancel_completed_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -696,7 +699,7 @@ class PurchaseControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_delete_pending_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -717,7 +720,7 @@ class PurchaseControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_delete_non_pending_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -738,7 +741,7 @@ class PurchaseControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function staff_cannot_update_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -763,7 +766,7 @@ class PurchaseControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function staff_cannot_delete_purchase()
     {
         $purchase = Purchase::factory()->create([
@@ -777,7 +780,7 @@ class PurchaseControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_user_cannot_access_purchases()
     {
         $response = $this->getJson('/api/purchases');

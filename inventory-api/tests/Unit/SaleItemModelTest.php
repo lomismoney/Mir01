@@ -8,12 +8,15 @@ use App\Models\SaleItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class SaleItemModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function sale_item_belongs_to_sale()
     {
         $sale = Sale::factory()->create();
@@ -23,7 +26,7 @@ class SaleItemModelTest extends TestCase
         $this->assertEquals($sale->id, $saleItem->sale->id);
     }
 
-    /** @test */
+    #[Test]
     public function sale_item_belongs_to_product()
     {
         $product = Product::factory()->create();
@@ -33,14 +36,14 @@ class SaleItemModelTest extends TestCase
         $this->assertEquals($product->id, $saleItem->product->id);
     }
 
-    /** @test */
+    #[Test]
     public function sale_item_has_guarded_property_set()
     {
         $saleItem = new SaleItem();
         $this->assertEquals([], $saleItem->getGuarded());
     }
 
-    /** @test */
+    #[Test]
     public function sale_item_can_be_created_with_mass_assignment()
     {
         $sale = Sale::factory()->create();
@@ -63,7 +66,7 @@ class SaleItemModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function sale_item_calculates_subtotal()
     {
         $saleItem = SaleItem::factory()->create([
@@ -76,7 +79,7 @@ class SaleItemModelTest extends TestCase
         $this->assertEquals(200, $subtotal); // 100 * 2
     }
 
-    /** @test */
+    #[Test]
     public function sale_item_subtotal_equals_unit_price_times_quantity()
     {
         $saleItem = SaleItem::factory()->create([

@@ -11,12 +11,15 @@ use App\Models\Inventory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class ProductModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function product_belongs_to_category()
     {
         $category = Category::factory()->create();
@@ -26,7 +29,7 @@ class ProductModelTest extends TestCase
         $this->assertEquals($category->id, $product->category->id);
     }
 
-    /** @test */
+    #[Test]
     public function product_has_many_variants()
     {
         $product = Product::factory()->create();
@@ -36,7 +39,7 @@ class ProductModelTest extends TestCase
         $this->assertInstanceOf(ProductVariant::class, $product->variants->first());
     }
 
-    /** @test */
+    #[Test]
     public function product_has_many_attributes()
     {
         $product = Product::factory()->create();
@@ -48,7 +51,7 @@ class ProductModelTest extends TestCase
         $this->assertInstanceOf(Attribute::class, $product->attributes->first());
     }
 
-    /** @test */
+    #[Test]
     public function product_has_inventories_through_variants()
     {
         $product = Product::factory()->create();
@@ -59,7 +62,7 @@ class ProductModelTest extends TestCase
         $this->assertInstanceOf(Inventory::class, $product->inventories->first());
     }
 
-    /** @test */
+    #[Test]
     public function product_has_correct_fillable_attributes()
     {
         $product = new Product();
@@ -68,7 +71,7 @@ class ProductModelTest extends TestCase
         $this->assertEquals($expected, $product->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function product_has_correct_casts()
     {
         $product = new Product();
@@ -85,7 +88,7 @@ class ProductModelTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function by_category_scope_filters_products_by_category()
     {
         $category1 = Category::factory()->create();
@@ -103,7 +106,7 @@ class ProductModelTest extends TestCase
         $this->assertFalse($result->contains($product3));
     }
 
-    /** @test */
+    #[Test]
     public function search_name_scope_filters_products_by_name()
     {
         $product1 = Product::factory()->create(['name' => 'Red T-Shirt']);
@@ -118,7 +121,7 @@ class ProductModelTest extends TestCase
         $this->assertFalse($result->contains($product3));
     }
 
-    /** @test */
+    #[Test]
     public function get_total_stock_attribute_calculates_total_inventory()
     {
         $product = Product::factory()->create();
@@ -131,7 +134,7 @@ class ProductModelTest extends TestCase
         $this->assertEquals(25, $product->total_stock);
     }
 
-    /** @test */
+    #[Test]
     public function get_variant_count_attribute_counts_variants()
     {
         $product = Product::factory()->create();
@@ -140,7 +143,7 @@ class ProductModelTest extends TestCase
         $this->assertEquals(3, $product->variant_count);
     }
 
-    /** @test */
+    #[Test]
     public function get_price_range_attribute_returns_min_max_prices()
     {
         $product = Product::factory()->create();
@@ -154,7 +157,7 @@ class ProductModelTest extends TestCase
         $this->assertEquals(150, $priceRange['max']);
     }
 
-    /** @test */
+    #[Test]
     public function has_image_returns_false_when_no_image()
     {
         $product = Product::factory()->create();
@@ -162,7 +165,7 @@ class ProductModelTest extends TestCase
         $this->assertFalse($product->hasImage());
     }
 
-    /** @test */
+    #[Test]
     public function get_image_url_returns_null_when_no_image()
     {
         $product = Product::factory()->create();
@@ -170,7 +173,7 @@ class ProductModelTest extends TestCase
         $this->assertNull($product->getImageUrl());
     }
 
-    /** @test */
+    #[Test]
     public function get_image_urls_returns_empty_array_when_no_image()
     {
         $product = Product::factory()->create();
@@ -185,7 +188,7 @@ class ProductModelTest extends TestCase
         $this->assertNull($imageUrls['original']);
     }
 
-    /** @test */
+    #[Test]
     public function get_image_paths_returns_empty_strings_when_no_image()
     {
         $product = Product::factory()->create();
@@ -199,7 +202,7 @@ class ProductModelTest extends TestCase
         $this->assertEquals('', $imagePaths['large']);
     }
 
-    /** @test */
+    #[Test]
     public function has_conversion_returns_false_when_no_image()
     {
         $product = Product::factory()->create();
@@ -207,7 +210,7 @@ class ProductModelTest extends TestCase
         $this->assertFalse($product->hasConversion('thumb'));
     }
 
-    /** @test */
+    #[Test]
     public function get_available_image_url_returns_empty_string_when_no_image()
     {
         $product = Product::factory()->create();
@@ -215,7 +218,7 @@ class ProductModelTest extends TestCase
         $this->assertEquals('', $product->getAvailableImageUrl());
     }
 
-    /** @test */
+    #[Test]
     public function product_can_be_created_with_mass_assignment()
     {
         $category = Category::factory()->create();
@@ -234,7 +237,7 @@ class ProductModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function product_implements_has_media_interface()
     {
         $product = Product::factory()->create();
@@ -242,19 +245,19 @@ class ProductModelTest extends TestCase
         $this->assertInstanceOf(\Spatie\MediaLibrary\HasMedia::class, $product);
     }
 
-    /** @test */
+    #[Test]
     public function product_uses_has_factory_trait()
     {
         $this->assertTrue(in_array('Illuminate\Database\Eloquent\Factories\HasFactory', class_uses(Product::class)));
     }
 
-    /** @test */
+    #[Test]
     public function product_uses_interacts_with_media_trait()
     {
         $this->assertTrue(in_array('Spatie\MediaLibrary\InteractsWithMedia', class_uses(Product::class)));
     }
 
-    /** @test */
+    #[Test]
     public function product_can_attach_and_detach_attributes()
     {
         $product = Product::factory()->create();
