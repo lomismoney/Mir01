@@ -36,7 +36,7 @@ interface TransferFormValues {
   product_variant_id: number;
   quantity: string;
   notes: string;
-  status: string;
+  status: 'pending' | 'in_transit' | 'completed' | 'cancelled';
 }
 
 interface InventoryTransferFormProps {

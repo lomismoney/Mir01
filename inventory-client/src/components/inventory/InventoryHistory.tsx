@@ -40,10 +40,31 @@ import { formatDistanceToNow } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import type { paths } from "@/types/api";
 
-// 使用正確的 API 型別定義
-type InventoryHistoryResponse =
-  paths["/api/inventory/{id}/history"]["get"]["responses"]["200"]["content"]["application/json"];
-type InventoryTransaction = NonNullable<InventoryHistoryResponse["data"]>[0];
+// 使用更安全的類型定義方式
+interface InventoryTransaction {
+  id?: number;
+  inventory_id?: number;
+  user_id?: number;
+  type?: string;
+  quantity?: number;
+  before_quantity?: number;
+  after_quantity?: number;
+  notes?: string;
+  metadata?: Record<string, any>;
+  created_at?: string;
+  updated_at?: string;
+  store?: {
+    id?: number;
+    name?: string;
+  };
+  user?: {
+    name?: string;
+  };
+  product?: {
+    name?: string;
+    sku?: string;
+  };
+}
 
 interface InventoryHistoryProps {
   inventoryId: number;

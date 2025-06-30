@@ -15,7 +15,6 @@ import {
   IconSearch,
   IconSettings,
   IconShoppingCart,
-  IconTruck,
   IconUsers,
   IconBuilding,
   IconBuildingStore,
@@ -130,11 +129,6 @@ const data = {
       title: "客戶管理",
       url: "/customers",
       icon: IconUserCheck,
-    },
-    {
-      title: "供應商管理",
-      url: "/suppliers",
-      icon: IconTruck,
     },
     {
       title: "分店管理",

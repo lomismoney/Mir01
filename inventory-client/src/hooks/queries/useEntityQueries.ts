@@ -2430,7 +2430,7 @@ export function useCreateInventoryTransfer() {
       product_variant_id: number;
       quantity: number;
       notes?: string;
-      status?: string;
+      status?: 'pending' | 'in_transit' | 'completed' | 'cancelled';
     }) => {
       const { data, error } = await apiClient.POST('/api/inventory/transfers', {
         body: transfer,
@@ -3884,11 +3884,13 @@ export function useCreateRefund() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data: { data?: { total_refund_amount?: number } }, payload) => {
+    onSuccess: (data: { data?: { total_refund_amount?: string | number } }, payload) => {
       if (typeof window !== 'undefined') {
         const { toast } = require('sonner');
+        const amount = data?.data?.total_refund_amount;
+        const displayAmount = typeof amount === 'string' ? parseFloat(amount) : (amount || 0);
         toast.success("退款已成功處理", {
-          description: `退款金額：$${data?.data?.total_refund_amount || 0}`
+          description: `退款金額：$${displayAmount}`
         });
       }
       // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
