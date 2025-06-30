@@ -82,9 +82,14 @@ export type ProductVariantItem = NonNullable<
 >[number];
 
 // 用戶項目型別（擴展版本，包含 stores 欄位）
-export type UserItem = NonNullable<
-  import('@/types/api').paths['/api/users']['get']['responses'][200]['content']['application/json']['data']
->[number] & {
+export type UserItem = {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  roles?: string[];
+  created_at?: string;
+  updated_at?: string;
   stores?: StoreItem[];
 };
 

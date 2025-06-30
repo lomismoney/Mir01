@@ -118,6 +118,7 @@ class InventoryManagementController extends Controller
      * 獲取單條庫存記錄詳情
      * 
      * @authenticated
+     * @urlParam id integer required 庫存ID. Example: 1
      * 
      * @param int $id
      * @return JsonResponse
@@ -220,34 +221,8 @@ class InventoryManagementController extends Controller
      * @queryParam per_page integer 每頁顯示數量，預設15. Example: 20
      * 
      * @authenticated
-     * @response 200 {
-     *   "current_page": 1,
-     *   "data": [
-     *     {
-     *       "id": 1,
-     *       "inventory_id": 1,
-     *       "user_id": 1,
-     *       "type": "addition",
-     *       "quantity": 10,
-     *       "before_quantity": 0,
-     *       "after_quantity": 10,
-     *       "notes": "初始庫存",
-     *       "metadata": {},
-     *       "created_at": "2023-01-01T10:00:00.000000Z",
-     *       "updated_at": "2023-01-01T10:00:00.000000Z",
-     *       "user": {
-     *         "name": "Admin User"
-     *       }
-     *     }
-     *   ],
-     *   "first_page_url": "http://localhost/api/inventory/1/history?page=1",
-     *   "from": 1,
-     *   "last_page": 1,
-     *   "last_page_url": "http://localhost/api/inventory/1/history?page=1",
-     *   "per_page": 15,
-     *   "to": 1,
-     *   "total": 1
-     * }
+     * @apiResourceCollection \App\Http\Resources\Api\InventoryTransactionResource
+     * @apiResourceModel \App\Models\InventoryTransaction
      * 
      * @param Request $request
      * @param int $id

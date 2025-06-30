@@ -38,6 +38,9 @@ return [
             'exclude' => [
                 // 'GET /health', 'admin.*'
             ],
+
+            // 🎯 禁用 Laravel 路由模型綁定的自動推斷，強制 Scribe 只信任 PHPDoc @urlParam 註解
+            'bindings' => false,
         ],
     ],
 

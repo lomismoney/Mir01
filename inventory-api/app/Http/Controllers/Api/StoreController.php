@@ -132,6 +132,7 @@ class StoreController extends Controller
      * @apiResource App\Http\Resources\Api\StoreResource
      * @apiResourceModel App\Models\Store
      * 
+     * @urlParam store integer required 分店 ID. Example: 1
      * @param StoreUpdateRequest $request
      * @param Store $store
      * @return StoreResource
@@ -150,6 +151,7 @@ class StoreController extends Controller
      * 
      * 刪除指定ID的分店。
      * 
+     * @urlParam store integer required 分店 ID. Example: 1
      * @param Store $store
      * @return JsonResponse
      */

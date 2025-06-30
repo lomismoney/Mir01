@@ -89,46 +89,37 @@ Route::middleware('auth:sanctum')->group(function () {
      */
     Route::post('/products/{product}/upload-image', [ProductController::class, 'uploadImage']);
     
-    /**
-     * 單規格商品快速創建路由 (v3.0 雙軌制 API)
-     * 專門處理單規格商品的創建，無需前端處理複雜的 SPU/SKU 結構
-     * 
-     * 注意：此路由必須在 products resource 路由之前定義，
-     * 避免 /api/products/{id} 路由將 'simple' 誤解為產品 ID
-     * 
-     * POST   /api/products/simple   - 創建單規格商品（簡化版）
-     */
-    Route::post('/products/simple', [ProductController::class, 'storeSimple']);
+
     
     /**
      * 商品資源路由
      * 提供完整的 CRUD 操作 (index, store, show, update, destroy)
      */
-    Route::apiResource('products', ProductController::class);
+    Route::apiResource('products', ProductController::class)->parameters(['products' => 'product']);
 
     /**
      * 進貨單管理路由
      * 提供完整的進貨單 CRUD 操作，包含狀態管理功能
      * 
      * 路由列表：
-     * GET    /api/purchases              - 獲取進貨單列表（支援篩選和排序）
-     * POST   /api/purchases              - 創建新的進貨單
-     * GET    /api/purchases/{id}         - 獲取指定進貨單
-     * PUT    /api/purchases/{id}         - 更新指定進貨單
-     * DELETE /api/purchases/{id}         - 刪除指定進貨單
-     * PATCH  /api/purchases/{id}/status  - 更新進貨單狀態
-     * PATCH  /api/purchases/{id}/cancel  - 取消進貨單
+     * GET    /api/purchases                      - 獲取進貨單列表（支援篩選和排序）
+     * POST   /api/purchases                      - 創建新的進貨單
+     * GET    /api/purchases/{purchase}           - 獲取指定進貨單
+     * PUT    /api/purchases/{purchase}           - 更新指定進貨單
+     * DELETE /api/purchases/{purchase}           - 刪除指定進貨單
+     * PATCH  /api/purchases/{purchase}/status    - 更新進貨單狀態
+     * PATCH  /api/purchases/{purchase}/cancel    - 取消進貨單
      */
-    Route::apiResource('purchases', PurchaseController::class);
-    Route::patch('purchases/{id}/status', [PurchaseController::class, 'updateStatus']);
-    Route::patch('purchases/{id}/cancel', [PurchaseController::class, 'cancel']);
+    Route::apiResource('purchases', PurchaseController::class)->parameters(['purchases' => 'purchase']);
+    Route::patch('purchases/{purchase}/status', [PurchaseController::class, 'updateStatus']);
+    Route::patch('purchases/{purchase}/cancel', [PurchaseController::class, 'cancel']);
 
     /**
      * 用戶管理路由
      * 提供完整的用戶 CRUD 操作，受 UserPolicy 權限保護
      * 只有管理員可以管理用戶，且不能刪除自己
      */
-    Route::apiResource('users', UserController::class);
+    Route::apiResource('users', UserController::class)->parameters(['users' => 'user']);
     
     /**
      * 分店管理路由
@@ -142,7 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * PUT    /api/stores/{store}      - 更新指定分店
      * DELETE /api/stores/{store}      - 刪除指定分店
      */
-    Route::apiResource('stores', StoreController::class);
+    Route::apiResource('stores', StoreController::class)->parameters(['stores' => 'store']);
     
     /**
      * 用戶分店管理路由
@@ -167,7 +158,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * PUT    /api/categories/{category}     - 更新指定分類
      * DELETE /api/categories/{category}     - 刪除指定分類
      */
-    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('categories', CategoryController::class)->parameters(['categories' => 'category']);
     
     /**
      * 批量重新排序分類路由
@@ -190,7 +181,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * PUT    /api/attributes/{id}   - 更新指定屬性
      * DELETE /api/attributes/{id}   - 刪除指定屬性
      */
-    Route::apiResource('attributes', AttributeController::class);
+    Route::apiResource('attributes', AttributeController::class)->parameters(['attributes' => 'attribute']);
 
     /**
      * 屬性值管理路由（巢狀資源，使用淺層路由）
@@ -234,7 +225,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * DELETE /api/customers/{id}   - 刪除指定客戶
      */
     Route::get('/customers/check-existence', [App\Http\Controllers\Api\CustomerController::class, 'checkExistence']);
-    Route::apiResource('customers', App\Http\Controllers\Api\CustomerController::class);
+    Route::apiResource('customers', App\Http\Controllers\Api\CustomerController::class)->parameters(['customers' => 'customer']);
 
     /**
      * 訂單批量操作路由
@@ -258,7 +249,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * PUT    /api/orders/{id}   - 更新指定訂單
      * DELETE /api/orders/{id}   - 刪除指定訂單
      */
-    Route::apiResource('orders', App\Http\Controllers\Api\OrderController::class);
+    Route::apiResource('orders', App\Http\Controllers\Api\OrderController::class)->parameters(['orders' => 'order']);
     
     /**
      * 訂單狀態管理路由
@@ -320,7 +311,7 @@ Route::middleware('auth:sanctum')->group(function () {
      */
     Route::post('/installations/create-from-order', [App\Http\Controllers\Api\InstallationController::class, 'createFromOrder']);
     Route::get('/installations/schedule', [App\Http\Controllers\Api\InstallationController::class, 'getSchedule']);
-    Route::apiResource('installations', App\Http\Controllers\Api\InstallationController::class);
+    Route::apiResource('installations', App\Http\Controllers\Api\InstallationController::class)->parameters(['installations' => 'installation']);
     Route::post('/installations/{installation}/assign', [App\Http\Controllers\Api\InstallationController::class, 'assignInstaller']);
     Route::post('/installations/{installation}/status', [App\Http\Controllers\Api\InstallationController::class, 'updateStatus']);
 });

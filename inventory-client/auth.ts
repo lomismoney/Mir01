@@ -46,30 +46,48 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         try {
-          // 使用專用的認證 API 客戶端呼叫後端登入 API
-          const { data, error } = await authApiClient.POST("/api/login", {
+          // openapi-typescript 對 /api/login 的 response 未定義，導致 data 類型為 never
+          // 這裡手動定義回應結構以恢復型別安全
+          type LoginSuccess = {
+            user: {
+              id: number;
+              name: string;
+              username: string;
+              role: string;
+              role_display: string;
+              is_admin: boolean;
+            };
+            token: string;
+          };
+
+          const { data, error } = await authApiClient.POST(
+            "/api/login",
+            {
             body: {
               username: String(credentials.username),
               password: String(credentials.password),
             },
-          });
+            },
+          );
 
-          if (error || !data?.user) {
+          if (error || !data || !("user" in data)) {
             // 登入失敗，回傳 null
             console.error("登入失敗:", error);
             return null;
           }
 
+          const loginData = data as LoginSuccess;
+
           // 登入成功，回傳包含後端 token 和用戶資訊的物件
           // Auth.js 會將此物件加密儲存在 session cookie 中
           return {
-            id: String(data.user.id),
-            name: data.user.name,
-            username: data.user.username,
-            role: data.user.role,
-            roleDisplay: data.user.role_display,
-            isAdmin: data.user.is_admin,
-            apiToken: data.token, // 儲存後端 API Token
+            id: String(loginData.user.id),
+            name: loginData.user.name,
+            username: loginData.user.username,
+            role: loginData.user.role,
+            roleDisplay: loginData.user.role_display,
+            isAdmin: loginData.user.is_admin,
+            apiToken: loginData.token, // 儲存後端 API Token
           };
         } catch (error) {
           console.error("認證過程發生錯誤:", error);
