@@ -29,10 +29,14 @@ import {
   Package,
   Tag,
   HelpCircle,
+  Loader2,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { WizardFormData } from "../CreateProductWizard";
-import { useAttributes } from "@/hooks/queries/useEntityQueries";
+import { 
+  useAttributes, 
+  useCreateAttributeValue
+} from "@/hooks/queries/useEntityQueries";
 import { Attribute } from "@/types/products";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
@@ -64,7 +68,11 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
     data: attributesData,
     isLoading: attributesLoading,
     error: attributesError,
+    refetch: refetchAttributes, // 🎯 Task 2: 獲取 refetch 函數用於數據同步
   } = useAttributes();
+
+  // 🎯 Task 2: 初始化屬性值創建的 Mutation Hook
+  const createAttributeValueMutation = useCreateAttributeValue();
 
   // 修正：處理 API 回應結構 {data: [...]}
   const attributes: Attribute[] = React.useMemo(() => {
@@ -161,11 +169,19 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
   };
 
   /**
-   * 添加屬性值
+   * 🎯 升級版屬性值添加函數（真正的資料庫同步）
+   * 
+   * 此函數將：
+   * 1. 驗證輸入內容
+   * 2. 調用 API 將屬性值保存到資料庫
+   * 3. 成功後更新本地狀態
+   * 4. 重新獲取屬性列表確保數據一致性
+   * 5. 提供用戶反饋和載入狀態
    */
-  const handleAddAttributeValue = (attributeId: number) => {
+  const handleAddAttributeValue = async (attributeId: number) => {
     const inputValue = inputValues[attributeId]?.trim();
 
+    // 🎯 步驟 1: 輸入驗證
     if (!inputValue) {
       toast.error("請輸入屬性值");
       return;
@@ -174,29 +190,48 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
     const currentValues =
       formData.specifications.attributeValues[attributeId] || [];
 
-    // 檢查是否重複
+    // 檢查是否重複（本地檢查，避免不必要的 API 調用）
     if (currentValues.includes(inputValue)) {
       toast.error("該屬性值已存在");
       return;
     }
 
-    // 添加新值
-    const newAttributeValues = {
-      ...formData.specifications.attributeValues,
-      [attributeId]: [...currentValues, inputValue],
-    };
+    try {
+      // 🎯 步驟 2: 調用 API 將屬性值保存到資料庫
+      await createAttributeValueMutation.mutateAsync({
+        attributeId: attributeId,
+        body: {
+          value: inputValue,
+        },
+      });
 
-    updateFormData("specifications", {
-      attributeValues: newAttributeValues,
-    });
+      // 🎯 步驟 3: 成功後更新本地狀態
+      const newAttributeValues = {
+        ...formData.specifications.attributeValues,
+        [attributeId]: [...currentValues, inputValue],
+      };
 
-    // 清空輸入框
-    setInputValues((prev) => ({
-      ...prev,
-      [attributeId]: "",
-    }));
+      updateFormData("specifications", {
+        attributeValues: newAttributeValues,
+      });
 
-    toast.success(`已添加屬性值：${inputValue}`);
+      // 清空輸入框
+      setInputValues((prev) => ({
+        ...prev,
+        [attributeId]: "",
+      }));
+
+      // 🎯 步驟 4: 重新獲取屬性列表，確保資料一致性
+      await refetchAttributes();
+
+      // 🎯 步驟 5: 成功反饋
+      toast.success(`屬性值「${inputValue}」已成功保存到資料庫`);
+    } catch (error) {
+      // 🛡️ 完整的錯誤處理
+      console.error("創建屬性值失敗:", error);
+      const errorMessage = error instanceof Error ? error.message : '未知錯誤';
+      toast.error(`創建屬性值失敗：${errorMessage}`);
+    }
   };
 
   /**
@@ -430,7 +465,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                     <span data-oid="-o_wii6">管理屬性值</span>
                   </CardTitle>
                   <CardDescription data-oid="8czdgfg">
-                    為選中的屬性添加或管理屬性值，這些值將用於生成商品變體。
+                    為選中的屬性添加或管理屬性值，這些值將即時保存到資料庫並用於生成商品變體。
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6" data-oid="pxou8nj">
@@ -466,7 +501,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                             </Badge>
                           </div>
 
-                          {/* 添加屬性值 */}
+                          {/* 🎯 升級版添加屬性值區域（含載入狀態） */}
                           <div className="flex space-x-2" data-oid=":jdwmz_">
                             <Input
                               placeholder={`輸入${attribute.name}的值，如：紅色、藍色`}
@@ -483,6 +518,7 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                                   handleAddAttributeValue(attributeId);
                                 }
                               }}
+                              disabled={createAttributeValueMutation.isPending} // 🎯 載入時禁用輸入框
                               data-oid="1d25s0b"
                             />
 
@@ -491,14 +527,24 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                               onClick={() =>
                                 handleAddAttributeValue(attributeId)
                               }
+                              disabled={
+                                createAttributeValueMutation.isPending || 
+                                !inputValues[attributeId]?.trim()
+                              } // 🎯 智能按鈕狀態：載入中或輸入為空時禁用
                               className="shrink-0"
                               data-oid="x.y3uiq"
                             >
-                              <Plus
-                                className="h-4 w-4 mr-1"
-                                data-oid="lu9lau7"
-                              />
-                              添加
+                              {createAttributeValueMutation.isPending ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                  保存中
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="h-4 w-4 mr-1" />
+                                  添加
+                                </>
+                              )}
                             </Button>
                           </div>
 
