@@ -203,8 +203,8 @@ export function OrderPreviewModal({
                     <TableRow>
                       <TableHead>商品名稱</TableHead>
                       <TableHead className="text-center w-20">數量</TableHead>
-                      <TableHead className="text-right w-24">單價</TableHead>
-                      <TableHead className="text-right w-28">小計</TableHead>
+                      <TableHead className="text-right w-32 whitespace-nowrap">單價</TableHead>
+                      <TableHead className="text-right w-36 whitespace-nowrap">小計</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -227,10 +227,10 @@ export function OrderPreviewModal({
                         <TableCell className="text-center text-sm">
                           {item.quantity}
                         </TableCell>
-                        <TableCell className="text-right text-sm">
+                        <TableCell className="text-right text-sm whitespace-nowrap">
                           {formatCurrency(item.price)}
                         </TableCell>
-                        <TableCell className="text-right font-medium text-sm">
+                        <TableCell className="text-right font-medium text-sm whitespace-nowrap">
                           {formatCurrency(item.price * item.quantity)}
                         </TableCell>
                       </TableRow>
@@ -258,7 +258,7 @@ export function OrderPreviewModal({
                         <TableRow>
                           <TableHead>付款日期</TableHead>
                           <TableHead>付款方式</TableHead>
-                          <TableHead className="text-right">金額</TableHead>
+                          <TableHead className="text-right w-32 whitespace-nowrap">金額</TableHead>
                           <TableHead>備註</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -279,7 +279,7 @@ export function OrderPreviewModal({
                                 {record.payment_method}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right font-medium text-sm">
+                            <TableCell className="text-right font-medium text-sm whitespace-nowrap">
                               {formatCurrency(record.amount)}
                             </TableCell>
                             <TableCell className="text-muted-foreground text-sm">
@@ -308,20 +308,20 @@ export function OrderPreviewModal({
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">商品小計</span>
-                        <span>{formatCurrency(order.subtotal)}</span>
+                        <span className="whitespace-nowrap text-right min-w-[100px]">{formatCurrency(order.subtotal)}</span>
                       </div>
                       
                       {order.shipping_fee !== null && order.shipping_fee > 0 && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">運費</span>
-                          <span>{formatCurrency(order.shipping_fee)}</span>
+                          <span className="whitespace-nowrap text-right min-w-[100px]">{formatCurrency(order.shipping_fee)}</span>
                         </div>
                       )}
                       
                       {order.discount_amount && order.discount_amount > 0 && (
                         <div className="flex justify-between text-sm text-success">
                           <span>折扣優惠</span>
-                          <span>-{formatCurrency(order.discount_amount)}</span>
+                          <span className="whitespace-nowrap text-right min-w-[100px]">-{formatCurrency(order.discount_amount)}</span>
                         </div>
                       )}
                       
@@ -329,7 +329,7 @@ export function OrderPreviewModal({
                       
                       <div className="flex justify-between font-bold text-base pt-1">
                         <span>總計</span>
-                        <span className="text-primary">{formatCurrency(order.grand_total)}</span>
+                        <span className="text-primary whitespace-nowrap text-right min-w-[100px]">{formatCurrency(order.grand_total)}</span>
                       </div>
 
                       {/* 付款進度 */}
@@ -347,14 +347,14 @@ export function OrderPreviewModal({
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
                             <p className="text-muted-foreground">已付</p>
-                            <p className="font-semibold text-success">
+                            <p className="font-semibold text-success whitespace-nowrap">
                               {formatCurrency(order.paid_amount)}
                             </p>
                           </div>
                           {remainingAmount > 0 && (
                             <div className="text-right">
                               <p className="text-muted-foreground">待付</p>
-                              <p className="font-semibold text-warning">
+                              <p className="font-semibold text-warning whitespace-nowrap">
                                 {formatCurrency(remainingAmount)}
                               </p>
                             </div>
