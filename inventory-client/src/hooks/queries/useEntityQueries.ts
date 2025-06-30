@@ -272,9 +272,9 @@ export function useProductDetail(productId: number | string | undefined): any {
                 throw new Error('商品 ID 無效');
             }
 
-            const { data, error } = await apiClient.GET('/api/products/{id}' as any, {
-                params: { path: { id: numericId } }
-            });
+                    const { data, error } = await apiClient.GET('/api/products/{id}', {
+            params: { path: { id: numericId } }
+        });
             
             if (error) {
                 const errorMessage = parseApiError(error);
@@ -502,7 +502,7 @@ export function useUpdateProduct() {
     return useMutation({
         mutationFn: async ({ id, ...productData }: { id: number } & UpdateProductRequestBody) => {
             const { data, error } = await apiClient.PUT('/api/products/{id}', {
-                params: { path: { id, product: id } },
+                params: { path: { id } },
                 body: productData
             });
             
@@ -558,7 +558,7 @@ export function useDeleteProduct() {
     return useMutation({
         mutationFn: async (id: number) => {
             const { data, error } = await apiClient.DELETE('/api/products/{id}', {
-                params: { path: { id, product: id } }
+                params: { path: { id } }
             });
             
             if (error) {
@@ -960,7 +960,7 @@ export function useCustomerDetail(customerId: number | null) {
       if (!customerId) return null; // 如果沒有 ID，則不執行查詢
       
       const { data, error } = await apiClient.GET('/api/customers/{id}', {
-        params: { path: { id: customerId, customer: customerId } },
+        params: { path: { id: customerId } },
       });
 
       if (error) {
@@ -1091,7 +1091,7 @@ export function useDeleteCustomer() {
   return useMutation({
     mutationFn: async (customerId: number) => {
       const { error } = await apiClient.DELETE('/api/customers/{id}', {
-        params: { path: { id: customerId, customer: customerId } }
+        params: { path: { id: customerId } }
       });
       if (error) throw error;
     },
@@ -1273,10 +1273,10 @@ export function useUpdateCustomer() {
   
   return useMutation({
     mutationFn: async ({ id, data }: UpdateCustomerPayload) => {
-      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}' as any, {
-        params: { path: { id, customer: id } },
+      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}', {
+        params: { path: { id } },
         body: data,
-      } as any);
+      });
       if (error) throw error;
       return responseData;
     },
@@ -1600,8 +1600,8 @@ export function useDeleteCategory() {
   
   return useMutation({
     mutationFn: async (categoryId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/categories/{category}" as any, {
-        params: { path: { category: categoryId } },
+      const { data, error } = await apiClient.DELETE("/api/categories/{id}", {
+        params: { path: { id: categoryId } },
       });
       if (error) throw error;
       return data;
@@ -1797,7 +1797,7 @@ export function useUpdateAttribute() {
   return useMutation({
     mutationFn: async (variables: { id: number; body: { name: string } }) => {
       const { data, error } = await apiClient.PUT('/api/attributes/{id}', {
-        params: { path: { id: variables.id, attribute: variables.id } },
+        params: { path: { id: variables.id } },
         body: variables.body,
       });
       if (error) { 
@@ -1872,7 +1872,7 @@ export function useCreateAttributeValue() {
   return useMutation({
     mutationFn: async (variables: { attributeId: number; body: CreateAttributeValueRequestBody }) => {
       const { data, error } = await apiClient.POST('/api/attributes/{attribute_id}/values', {
-        params: { path: { attribute_id: variables.attributeId, attribute: variables.attributeId } },
+        params: { path: { attribute_id: variables.attributeId } },
         body: variables.body,
       });
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '新增選項失敗'); }
@@ -1916,7 +1916,7 @@ export function useUpdateAttributeValue() {
   return useMutation({
     mutationFn: async (variables: { valueId: number; body: UpdateAttributeValueRequestBody }) => {
       const { data, error } = await apiClient.PUT('/api/values/{id}', {
-        params: { path: { id: variables.valueId, value: variables.valueId } },
+        params: { path: { id: variables.valueId } },
         body: variables.body,
       });
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '更新選項失敗'); }
@@ -1960,7 +1960,7 @@ export function useDeleteAttributeValue() {
   return useMutation({
     mutationFn: async (valueId: number) => {
       const { error } = await apiClient.DELETE('/api/values/{id}', {
-        params: { path: { id: valueId, value: valueId } },
+        params: { path: { id: valueId } },
       });
       if (error) { throw new Error('刪除選項失敗'); }
     },
@@ -2016,7 +2016,7 @@ export function useAttributeValues(attributeId: number | null) {
       if (!attributeId) return null;
 
       const { data, error } = await apiClient.GET('/api/attributes/{attribute_id}/values', {
-        params: { path: { attribute_id: attributeId, attribute: attributeId } },
+        params: { path: { attribute_id: attributeId } },
       });
 
       if (error) {
@@ -3138,7 +3138,7 @@ export function useUpdatePurchase() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: number | string; data: any }) => {
       const { data: responseData, error } = await apiClient.PUT('/api/purchases/{id}' as any, {
-        params: { path: { purchase: Number(id) } },
+        params: { path: { id: Number(id) } },
         body: data
       })
       
@@ -3439,7 +3439,7 @@ export function useOrderDetail(orderId: number | null) {
     queryFn: async () => {
       if (!orderId) return null; // 如果沒有 ID，則不執行查詢
       const { data, error } = await apiClient.GET("/api/orders/{id}", {
-        params: { path: { id: orderId, order: orderId } },
+        params: { path: { id: orderId } },
       });
       if (error) {
         const errorMessage = parseApiError(error);
@@ -3517,8 +3517,7 @@ export function useConfirmOrderPayment() {
       const { data, error } = await apiClient.POST("/api/orders/{order_id}/confirm-payment", {
         params: { 
           path: { 
-            order_id: orderId,
-            order: orderId
+            order_id: orderId
           } 
         },
       });
@@ -3941,8 +3940,8 @@ export function useCancelOrder() {
   return useMutation({
     mutationFn: async ({ orderId, reason }: { orderId: number; reason?: string }) => {
       // @ts-expect-error 新端點尚未同步到類型定義
-      const { error } = await apiClient.POST('/api/orders/{order}/cancel', {
-        params: { path: { order: orderId } },
+      const { error } = await apiClient.POST('/api/orders/{id}/cancel', {
+        params: { path: { id: orderId } },
         body: { reason },
       });
 

@@ -71,9 +71,9 @@ export function useStore(id: number) {
   return useQuery({
     queryKey: ["stores", id],
     queryFn: async () => {
-      // 使用正確的 API 類型定義，只傳入 id 路徑參數
-      const { data, error } = await apiClient.GET("/api/stores/{id}" as any, {
-        params: { path: { id } }
+      // 使用正確的 API 類型定義，使用 store 路徑參數
+      const { data, error } = await apiClient.GET("/api/stores/{store}" as any, {
+        params: { path: { store: id } }
       });
 
       if (error) {
@@ -118,9 +118,9 @@ export function useUpdateStore() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateStoreBody }) => {
-      // 使用正確的 API 類型定義，只傳入 id 路徑參數
-      const { data: responseData, error } = await apiClient.PUT("/api/stores/{id}" as any, {
-        params: { path: { id } },
+      // 使用正確的 API 類型定義，使用 store 路徑參數
+      const { data: responseData, error } = await apiClient.PUT("/api/stores/{store}" as any, {
+        params: { path: { store: id } },
         body: data,
       });
 
@@ -145,9 +145,9 @@ export function useDeleteStore() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      // 使用正確的 API 類型定義，只傳入 id 路徑參數
-      const { error } = await apiClient.DELETE("/api/stores/{id}", {
-        params: { path: { id } as any }
+      // 使用正確的 API 類型定義，使用 store 路徑參數
+      const { error } = await apiClient.DELETE("/api/stores/{store}" as any, {
+        params: { path: { store: id } as any }
       });
 
       if (error) {

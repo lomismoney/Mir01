@@ -120,7 +120,7 @@ export default function EditInstallationPage() {
     customer_phone: installation.customer_phone || "",
     installation_address: installation.installation_address || "",
     installer_user_id: installation.installer_user_id || undefined,
-    scheduled_date: installation.scheduled_date || "",
+    scheduled_date: installation.scheduled_date || undefined,
     notes: installation.notes || "",
     items: installation.items?.length > 0 
       ? installation.items.map((item: any) => ({

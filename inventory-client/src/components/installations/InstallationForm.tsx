@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -57,7 +57,7 @@ const installationFormSchema = z.object({
   items: z
     .array(
       z.object({
-        product_variant_id: z.number().min(1, "請選擇商品規格"),
+        product_variant_id: z.number().min(0, "請選擇商品規格"),
         product_name: z.string().optional(), // 自動填入，但保留以便顯示
         sku: z.string().optional(), // 自動填入，但保留以便顯示
         quantity: z.number().min(1, "數量至少為 1"),
@@ -65,7 +65,13 @@ const installationFormSchema = z.object({
         notes: z.string().optional(),
       }),
     )
-    .min(1, "安裝單至少需要一個項目"),
+    .min(1, "安裝單至少需要一個項目")
+    .refine(
+      (items) => items.some((item) => item.product_variant_id > 0),
+      {
+        message: "至少需要選擇一個商品規格",
+      }
+    ),
 });
 
 export type InstallationFormValues = z.infer<typeof installationFormSchema>;
@@ -85,17 +91,22 @@ export function InstallationForm({
 }: InstallationFormProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   
-  // 載入用戶列表作為師傅選項 - 只載入角色為 installer 的用戶
-  const { data: usersData, isLoading: isLoadingUsers } = useUsers({
-    'filter[role]': 'installer'
-  });
+  // 載入所有用戶，然後在前端篩選有 installer 角色的用戶
+  const { data: allUsersData, isLoading: isLoadingUsers } = useUsers();
+  
+  // 篩選有 installer 角色的用戶
+  const usersData = allUsersData?.filter((user: any) => 
+    user.roles && user.roles.includes('installer')
+  ) || [];
 
   const form = useForm<InstallationFormValues>({
     resolver: zodResolver(installationFormSchema),
-    defaultValues: initialData || {
+    defaultValues: {
       customer_name: "",
       customer_phone: "",
       installation_address: "",
+      installer_user_id: undefined,
+      scheduled_date: "",
       notes: "",
       items: [
         // 為新增模式預設新增一個空項目
@@ -112,10 +123,23 @@ export function InstallationForm({
   });
 
   // 初始化 useFieldArray 來管理 items 字段
-  const { fields, append, remove, update } = useAppFieldArray({
+  const { fields, append, remove, update, replace } = useAppFieldArray({
     control: form.control,
     name: "items",
   });
+
+  // 監聽 initialData 變化，當資料載入完成時更新表單
+  useEffect(() => {
+    if (initialData && !isLoadingUsers) {
+      // 確保用戶數據已載入完成後再重置表單
+      form.reset(initialData);
+      
+      // 特別處理 items 陣列 - 使用 replace 方法確保 useFieldArray 正確更新
+      if (initialData.items && Array.isArray(initialData.items)) {
+        replace(initialData.items);
+      }
+    }
+  }, [initialData, form, replace, isLoadingUsers]);
 
   // 處理新增安裝項目
   const handleAddItem = () => {
@@ -217,6 +241,7 @@ export function InstallationForm({
                                 </FormLabel>
                                 <FormControl>
                                   <ProductSelector
+                                    key={`product-${index}-${field.value || '0'}`}
                                     value={field.value}
                                     onValueChange={(variantId, variant) => {
                                       field.onChange(variantId);
@@ -459,6 +484,7 @@ export function InstallationForm({
                           }
                           value={field.value?.toString() || "0"}
                           disabled={isLoadingUsers}
+                          key={`installer-${field.value || '0'}`}
                         >
                           <FormControl>
                             <SelectTrigger>
