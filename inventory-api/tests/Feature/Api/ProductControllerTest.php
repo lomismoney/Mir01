@@ -11,12 +11,15 @@ use App\Models\AttributeValue;
 use App\Models\ProductVariant;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class ProductControllerTest extends TestCase
 {
     use WithFaker;
     
-    /** @test */
+    #[Test]
     public function admin_can_get_all_products()
     {
         // 創建分類
@@ -38,7 +41,7 @@ class ProductControllerTest extends TestCase
         $this->assertCount(3, Product::all());
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_create_simple_product()
     {
         // 創建分類
@@ -89,7 +92,7 @@ class ProductControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_create_product_with_variants()
     {
         // 創建分類
@@ -176,7 +179,7 @@ class ProductControllerTest extends TestCase
         $this->assertCount(4, $createdProduct->variants);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_show_product_details()
     {
         // 創建分類
@@ -232,7 +235,7 @@ class ProductControllerTest extends TestCase
         $this->assertArrayHasKey('variants', $response->json('data'));
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_update_product()
     {
         // 創建分類
@@ -306,7 +309,7 @@ class ProductControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_successfully_update_product_with_variants()
     {
         // 創建分類
@@ -418,7 +421,7 @@ class ProductControllerTest extends TestCase
         $this->assertCount(2, $product->fresh()->variants);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_delete_product()
     {
         // 創建產品
@@ -434,7 +437,7 @@ class ProductControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_batch_delete_products()
     {
         // 創建多個產品
@@ -456,7 +459,7 @@ class ProductControllerTest extends TestCase
         }
     }
     
-    /** @test */
+    #[Test]
     public function staff_can_view_products()
     {
         // 創建多個產品
@@ -470,7 +473,7 @@ class ProductControllerTest extends TestCase
         $response->assertStatus(200);
     }
     
-    /** @test */
+    #[Test]
     public function staff_cannot_create_product()
     {
         // 創建分類
@@ -515,7 +518,7 @@ class ProductControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function staff_cannot_update_product()
     {
         // 創建屬性和屬性值
@@ -574,7 +577,7 @@ class ProductControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function staff_cannot_delete_product()
     {
         // 創建產品
@@ -592,7 +595,7 @@ class ProductControllerTest extends TestCase
 
     // 🚀 TD-004 解決方案：新增篩選功能測試案例
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_products_by_product_name()
     {
         // 創建測試商品
@@ -611,7 +614,7 @@ class ProductControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_products_by_category_id()
     {
         // 創建分類
@@ -633,7 +636,7 @@ class ProductControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_products_by_store_id()
     {
         // 創建門市
@@ -671,7 +674,7 @@ class ProductControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_products_by_low_stock()
     {
         // 創建門市
@@ -711,7 +714,7 @@ class ProductControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_products_by_out_of_stock()
     {
         // 創建門市
@@ -749,7 +752,7 @@ class ProductControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_combine_multiple_filters()
     {
         // 創建分類和門市
@@ -796,7 +799,7 @@ class ProductControllerTest extends TestCase
             });
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_fully_update_a_product_with_spu_and_sku_changes()
     {
         // 戰術指令 4: 核心功能測試
@@ -980,7 +983,7 @@ class ProductControllerTest extends TestCase
     // 🎯 移除未實現的simple產品功能測試
     // store_simple_handles_service_exceptions - 功能未實現
     
-    /** @test */
+    #[Test]
     public function admin_can_upload_product_image()
     {
         $product = Product::factory()->create();
@@ -1023,7 +1026,7 @@ class ProductControllerTest extends TestCase
         @unlink($tempImagePath);
     }
     
-    /** @test */
+    #[Test]
     public function staff_cannot_upload_product_image()
     {
         $product = Product::factory()->create();
@@ -1056,7 +1059,7 @@ class ProductControllerTest extends TestCase
         @unlink($tempImagePath);
     }
     
-    /** @test */
+    #[Test]
     public function upload_image_validates_file_requirements()
     {
         $product = Product::factory()->create();
@@ -1094,7 +1097,7 @@ class ProductControllerTest extends TestCase
         @unlink($tempTextPath);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_sort_products_by_name()
     {
         Product::factory()->create(['name' => 'Z 產品']);
@@ -1124,7 +1127,7 @@ class ProductControllerTest extends TestCase
         $this->assertEquals('A 產品', $products[2]['name']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_sort_products_by_created_at()
     {
         $oldProduct = Product::factory()->create(['created_at' => now()->subDays(2)]);
@@ -1143,7 +1146,7 @@ class ProductControllerTest extends TestCase
         $this->assertEquals($newProduct->id, $products[2]['id']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_search_products_with_search_filter()
     {
         Product::factory()->create(['name' => '紅色T恤']);
@@ -1160,7 +1163,7 @@ class ProductControllerTest extends TestCase
         $this->assertEquals('紅色T恤', $products[0]['name']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_paginate_products()
     {
         Product::factory()->count(20)->create();
@@ -1194,7 +1197,7 @@ class ProductControllerTest extends TestCase
         $this->assertCount(5, $response->json('data'));
     }
     
-    /** @test */
+    #[Test]
     public function store_method_handles_validation_errors()
     {
         $category = Category::factory()->create();
@@ -1227,7 +1230,7 @@ class ProductControllerTest extends TestCase
             ->assertJsonValidationErrors(['variants.0.attribute_value_ids.0']);
     }
     
-    /** @test */
+    #[Test]
     public function update_method_handles_validation_errors()
     {
         $product = Product::factory()->create();
@@ -1256,7 +1259,7 @@ class ProductControllerTest extends TestCase
             ->assertJsonValidationErrors(['variants.0.attribute_value_ids.0']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_by_empty_search_parameters()
     {
         Product::factory()->count(3)->create();
@@ -1269,7 +1272,7 @@ class ProductControllerTest extends TestCase
         $this->assertCount(3, $response->json('data'));
     }
     
-    /** @test */
+    #[Test]
     public function batch_delete_validates_request_data()
     {
         $response = $this->actingAsAdmin()
@@ -1286,7 +1289,7 @@ class ProductControllerTest extends TestCase
         $response->assertStatus(422);
     }
     
-    /** @test */
+    #[Test]
     public function batch_delete_validates_existing_ids()
     {
         // 測試刪除不存在的商品ID會返回驗證錯誤
@@ -1299,7 +1302,7 @@ class ProductControllerTest extends TestCase
             ->assertJsonValidationErrors(['ids.0', 'ids.1', 'ids.2']);
     }
     
-    /** @test */
+    #[Test]
     public function show_method_loads_all_necessary_relationships()
     {
         $category = Category::factory()->create();
@@ -1357,10 +1360,8 @@ class ProductControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
-     * @dataProvider storeProductValidationProvider
-     */
+    #[Test]
+    #[DataProvider('storeProductValidationProvider')]
     public function store_product_validation_fails_for_invalid_data($data, $expectedErrors)
     {
         $category = Category::factory()->create();

@@ -8,11 +8,15 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 class CategoryControllerTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
     
-    /** @test */
+    #[Test]
     public function admin_can_get_all_categories()
     {
         // 創建多個分類
@@ -45,7 +49,7 @@ class CategoryControllerTest extends TestCase
         }
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_create_category()
     {
         $categoryData = [
@@ -67,7 +71,7 @@ class CategoryControllerTest extends TestCase
         $this->assertDatabaseHas('categories', $categoryData);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_create_subcategory()
     {
         // 創建父分類
@@ -95,7 +99,7 @@ class CategoryControllerTest extends TestCase
         $this->assertDatabaseHas('categories', $subcategoryData);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_show_category_details()
     {
         $category = Category::factory()->create();
@@ -113,7 +117,7 @@ class CategoryControllerTest extends TestCase
             });
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_update_category()
     {
         $category = Category::factory()->create();
@@ -138,7 +142,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_update_category_parent()
     {
         // 創建兩個分類
@@ -167,7 +171,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_delete_category()
     {
         $category = Category::factory()->create();
@@ -182,7 +186,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function staff_can_view_categories()
     {
         // 修改 CategoryPolicy 中 viewAny 方法以允許普通員工查看分類
@@ -220,7 +224,7 @@ class CategoryControllerTest extends TestCase
         $this->assertIsArray($responseArray);
     }
     
-    /** @test */
+    #[Test]
     public function staff_cannot_create_category()
     {
         $categoryData = [
@@ -236,7 +240,7 @@ class CategoryControllerTest extends TestCase
         $this->assertDatabaseMissing('categories', $categoryData);
     }
     
-    /** @test */
+    #[Test]
     public function staff_cannot_update_category()
     {
         $category = Category::factory()->create([
@@ -258,7 +262,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function staff_cannot_delete_category()
     {
         $category = Category::factory()->create();
@@ -273,7 +277,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function show_returns_404_for_non_existent_category()
     {
         $response = $this->actingAsAdmin()
@@ -282,7 +286,7 @@ class CategoryControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function update_returns_404_for_non_existent_category()
     {
         $updateData = [
@@ -295,7 +299,7 @@ class CategoryControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function destroy_returns_404_for_non_existent_category()
     {
         $response = $this->actingAsAdmin()
@@ -304,7 +308,7 @@ class CategoryControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function create_validates_required_fields()
     {
         $response = $this->actingAsAdmin()
@@ -314,7 +318,7 @@ class CategoryControllerTest extends TestCase
             ->assertJsonValidationErrors(['name']);
     }
 
-    /** @test */
+    #[Test]
     public function create_validates_name_length()
     {
         $longName = str_repeat('a', 256); // 超過 255 字符限制
@@ -328,7 +332,7 @@ class CategoryControllerTest extends TestCase
             ->assertJsonValidationErrors(['name']);
     }
 
-    /** @test */
+    #[Test]
     public function create_validates_parent_id_exists()
     {
         $response = $this->actingAsAdmin()
@@ -341,7 +345,7 @@ class CategoryControllerTest extends TestCase
             ->assertJsonValidationErrors(['parent_id']);
     }
 
-    /** @test */
+    #[Test]
     public function update_validates_required_fields_when_provided()
     {
         $category = Category::factory()->create();
@@ -355,7 +359,7 @@ class CategoryControllerTest extends TestCase
             ->assertJsonValidationErrors(['name']);
     }
 
-    /** @test */
+    #[Test]
     public function update_validates_parent_id_exists()
     {
         $category = Category::factory()->create();
@@ -369,7 +373,7 @@ class CategoryControllerTest extends TestCase
             ->assertJsonValidationErrors(['parent_id']);
     }
 
-    /** @test */
+    #[Test]
     public function index_returns_flat_categories_list()
     {
         // 創建父分類
@@ -429,7 +433,7 @@ class CategoryControllerTest extends TestCase
         $this->assertNull($anotherParentData['parent_id']);
     }
 
-    /** @test */
+    #[Test]
     public function index_includes_products_count()
     {
         $category = Category::factory()->create();
@@ -465,7 +469,7 @@ class CategoryControllerTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function show_includes_products_count()
     {
         $category = Category::factory()->create();
@@ -485,7 +489,7 @@ class CategoryControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function index_works_with_empty_categories()
     {
         // 確保沒有分類存在
@@ -504,7 +508,7 @@ class CategoryControllerTest extends TestCase
         $this->assertEmpty($data);
     }
 
-    /** @test */
+    #[Test]
     public function index_handles_deep_category_hierarchy()
     {
         // 創建深層級分類結構
@@ -551,7 +555,7 @@ class CategoryControllerTest extends TestCase
         $this->assertEquals($level3->id, $level4Data['parent_id']);
     }
 
-    /** @test */
+    #[Test]
     public function update_allows_setting_parent_to_null()
     {
         $parentCategory = Category::factory()->create();
@@ -570,7 +574,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function update_allows_partial_updates()
     {
         $category = Category::factory()->create([
@@ -593,7 +597,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function category_name_is_trimmed_when_created()
     {
         $response = $this->actingAsAdmin()
@@ -608,7 +612,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function category_name_is_trimmed_when_updated()
     {
         $category = Category::factory()->create();
@@ -626,7 +630,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_user_cannot_access_categories()
     {
         $category = Category::factory()->create();
@@ -650,7 +654,7 @@ class CategoryControllerTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function destroy_removes_category_from_database()
     {
         $category = Category::factory()->create();
@@ -666,7 +670,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function create_allows_duplicate_names()
     {
         $existingCategory = Category::factory()->create(['name' => '重複名稱']);
@@ -684,7 +688,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function update_allows_duplicate_names()
     {
         $category1 = Category::factory()->create(['name' => '分類1']);
@@ -705,7 +709,7 @@ class CategoryControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function update_allows_keeping_same_name()
     {
         $category = Category::factory()->create(['name' => '保持相同名稱']);

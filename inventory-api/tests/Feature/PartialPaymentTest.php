@@ -10,6 +10,9 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\PaymentRecord;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * 部分收款功能測試
@@ -34,7 +37,7 @@ class PartialPaymentTest extends TestCase
         $this->actingAs($this->user, 'sanctum');
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_partial_payment_to_order()
     {
         // 準備：創建一個總金額為 1000 的測試訂單
@@ -83,7 +86,7 @@ class PartialPaymentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_updates_payment_status_to_paid_when_fully_paid()
     {
         // 準備：創建一個總金額為 1000 元，已付 700 元的訂單
@@ -115,7 +118,7 @@ class PartialPaymentTest extends TestCase
         $this->assertNotNull($order->paid_at);
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_payment_amount_exceeding_remaining_balance()
     {
         // 準備：創建一個總金額為 1000 元，已付 700 元的訂單
@@ -152,7 +155,7 @@ class PartialPaymentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_payment_for_fully_paid_order()
     {
         // 準備：創建一個已全額付清的訂單
@@ -178,7 +181,7 @@ class PartialPaymentTest extends TestCase
         $response->assertJsonValidationErrors(['amount']);
     }
 
-    /** @test */
+    #[Test]
     public function it_validates_required_fields()
     {
         // 準備：創建測試訂單
@@ -199,7 +202,7 @@ class PartialPaymentTest extends TestCase
         $response->assertJsonValidationErrors(['amount', 'payment_method']);
     }
 
-    /** @test */
+    #[Test]
     public function it_validates_payment_method_enum()
     {
         // 準備：創建測試訂單

@@ -7,12 +7,15 @@ use App\Models\Sale;
 use App\Models\Store;
 use App\Models\SaleItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class SaleModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function sale_belongs_to_store()
     {
         $store = Store::factory()->create();
@@ -22,7 +25,7 @@ class SaleModelTest extends TestCase
         $this->assertEquals($store->id, $sale->store->id);
     }
 
-    /** @test */
+    #[Test]
     public function sale_has_many_items()
     {
         $sale = Sale::factory()->create();
@@ -32,14 +35,14 @@ class SaleModelTest extends TestCase
         $this->assertInstanceOf(SaleItem::class, $sale->items->first());
     }
 
-    /** @test */
+    #[Test]
     public function sale_has_guarded_property_set()
     {
         $sale = new Sale();
         $this->assertEquals([], $sale->getGuarded());
     }
 
-    /** @test */
+    #[Test]
     public function sale_can_be_created_with_mass_assignment()
     {
         $store = Store::factory()->create();
@@ -59,7 +62,7 @@ class SaleModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function sale_can_calculate_total_from_items()
     {
         $sale = Sale::factory()->create();

@@ -3,6 +3,9 @@
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class ExampleTest extends TestCase
 {

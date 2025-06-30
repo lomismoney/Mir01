@@ -14,6 +14,9 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class InventoryManagementControllerTest extends TestCase
 {
@@ -72,7 +75,7 @@ class InventoryManagementControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_get_inventory_list()
     {
         // 建立額外的庫存記錄作為測試資料
@@ -129,7 +132,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertGreaterThanOrEqual(1, count($response->json('data')));
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_inventory_by_store()
     {
         // 建立另一個門市的庫存
@@ -164,7 +167,7 @@ class InventoryManagementControllerTest extends TestCase
         }
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_low_stock_inventory()
     {
         // 建立低庫存記錄
@@ -203,7 +206,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertTrue($hasLowStock, '應該包含低庫存記錄');
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_out_of_stock_inventory()
     {
         // 建立無庫存記錄
@@ -242,7 +245,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertTrue($hasOutOfStock, '應該包含缺貨記錄');
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_search_inventory_by_product_name()
     {
         // 建立另一個商品，使用英文避免編碼問題
@@ -283,7 +286,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertTrue($foundSpecialProduct, '返回的商品中應該包含名稱含有"Special"的商品');
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_view_single_inventory_detail()
     {
         // 建立一些交易記錄
@@ -342,7 +345,7 @@ class InventoryManagementControllerTest extends TestCase
             ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_adjust_inventory_add_stock()
     {
         $adjustmentData = [
@@ -388,7 +391,7 @@ class InventoryManagementControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_adjust_inventory_reduce_stock()
     {
         $adjustmentData = [
@@ -426,7 +429,7 @@ class InventoryManagementControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_adjust_inventory_set_stock()
     {
         $adjustmentData = [
@@ -464,7 +467,7 @@ class InventoryManagementControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_reduce_stock_below_zero()
     {
         $adjustmentData = [
@@ -490,7 +493,7 @@ class InventoryManagementControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_set_negative_stock()
     {
         $adjustmentData = [
@@ -513,7 +516,7 @@ class InventoryManagementControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function viewer_cannot_adjust_inventory()
     {
         $adjustmentData = [
@@ -538,7 +541,7 @@ class InventoryManagementControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function viewer_can_view_inventory_list()
     {
         $response = $this->actingAsUser()
@@ -547,7 +550,7 @@ class InventoryManagementControllerTest extends TestCase
         $response->assertStatus(200);
     }
     
-    /** @test */
+    #[Test]
     public function viewer_can_view_inventory_details()
     {
         $response = $this->actingAsUser()
@@ -556,7 +559,7 @@ class InventoryManagementControllerTest extends TestCase
         $response->assertStatus(200);
     }
     
-    /** @test */
+    #[Test]
     public function requires_authentication_for_inventory_access()
     {
         $response = $this->getJson('/api/inventory');
@@ -569,7 +572,7 @@ class InventoryManagementControllerTest extends TestCase
         $response->assertStatus(401);
     }
     
-    /** @test */
+    #[Test]
     public function inventory_adjustment_validation_works()
     {
         // 測試缺少必要欄位
@@ -604,7 +607,7 @@ class InventoryManagementControllerTest extends TestCase
             ->assertJsonValidationErrors(['quantity']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_get_inventory_history()
     {
         // 建立一些交易記錄
@@ -660,7 +663,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertIsArray($data);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_inventory_history_by_date_range()
     {
         $admin = $this->createAdminUser();
@@ -708,7 +711,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $todayRecords->count(), '應該包含今天的記錄');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_inventory_history_by_type()
     {
         $admin = $this->createAdminUser();
@@ -745,7 +748,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertEquals('進貨記錄', $data[0]['notes']);
     }
 
-    /** @test */
+    #[Test]
     public function history_returns_404_for_non_existent_inventory()
     {
         $response = $this->actingAsAdmin()
@@ -754,7 +757,7 @@ class InventoryManagementControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_batch_check_inventory()
     {
         // 建立額外的商品變體和庫存
@@ -805,7 +808,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertContains($variant2->id, $variantIds);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_batch_check_inventory_by_store()
     {
         // 建立另一個門市和庫存
@@ -835,7 +838,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertEquals(50, $data[0]['quantity']); // 原本設置的數量
     }
 
-    /** @test */
+    #[Test]
     public function batch_check_validates_required_fields()
     {
         $response = $this->actingAsAdmin()
@@ -845,7 +848,7 @@ class InventoryManagementControllerTest extends TestCase
             ->assertJsonValidationErrors(['product_variant_ids']);
     }
 
-    /** @test */
+    #[Test]
     public function batch_check_validates_product_variant_exists()
     {
         $requestData = [
@@ -859,7 +862,7 @@ class InventoryManagementControllerTest extends TestCase
             ->assertJsonValidationErrors(['product_variant_ids.0']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_get_sku_history()
     {
         $admin = $this->createAdminUser();
@@ -926,7 +929,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertEquals('SKU 歷史測試', $data[0]['notes']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_sku_history_by_store()
     {
         $admin = $this->createAdminUser();
@@ -973,7 +976,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertEquals($this->store->id, $data[0]['store']['id']);
     }
 
-    /** @test */
+    #[Test]
     public function sku_history_returns_empty_for_non_existent_sku()
     {
         $response = $this->actingAsAdmin()
@@ -987,7 +990,7 @@ class InventoryManagementControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_get_all_transactions()
     {
         $admin = $this->createAdminUser();
@@ -1040,7 +1043,7 @@ class InventoryManagementControllerTest extends TestCase
         $this->assertGreaterThanOrEqual(2, count($data));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_all_transactions_by_type()
     {
         $admin = $this->createAdminUser();
@@ -1077,7 +1080,7 @@ class InventoryManagementControllerTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_filter_all_transactions_by_store()
     {
         $admin = $this->createAdminUser();

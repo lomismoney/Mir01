@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Policies\CategoryPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class CategoryPolicyTest extends TestCase
 {

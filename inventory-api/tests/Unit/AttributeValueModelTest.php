@@ -7,12 +7,15 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\ProductVariant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class AttributeValueModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function attribute_value_belongs_to_attribute()
     {
         $attribute = Attribute::factory()->create();
@@ -22,7 +25,7 @@ class AttributeValueModelTest extends TestCase
         $this->assertEquals($attribute->id, $attributeValue->attribute->id);
     }
 
-    /** @test */
+    #[Test]
     public function attribute_value_has_many_product_variants()
     {
         $attributeValue = AttributeValue::factory()->create();
@@ -34,7 +37,7 @@ class AttributeValueModelTest extends TestCase
         $this->assertInstanceOf(ProductVariant::class, $attributeValue->productVariants->first());
     }
 
-    /** @test */
+    #[Test]
     public function attribute_value_has_correct_fillable_attributes()
     {
         $attributeValue = new AttributeValue();
@@ -43,7 +46,7 @@ class AttributeValueModelTest extends TestCase
         $this->assertEquals($expected, $attributeValue->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function attribute_value_has_correct_casts()
     {
         $attributeValue = new AttributeValue();
@@ -60,7 +63,7 @@ class AttributeValueModelTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function attribute_value_can_be_created_with_mass_assignment()
     {
         $attribute = Attribute::factory()->create();
@@ -77,7 +80,7 @@ class AttributeValueModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function by_attribute_scope_filters_values_by_attribute_id()
     {
         $attribute1 = Attribute::factory()->create();
@@ -95,13 +98,13 @@ class AttributeValueModelTest extends TestCase
         $this->assertFalse($result->contains($value3));
     }
 
-    /** @test */
+    #[Test]
     public function attribute_value_uses_has_factory_trait()
     {
         $this->assertTrue(in_array('Illuminate\Database\Eloquent\Factories\HasFactory', class_uses(AttributeValue::class)));
     }
 
-    /** @test */
+    #[Test]
     public function attribute_value_can_detach_from_product_variants()
     {
         $attributeValue = AttributeValue::factory()->create();

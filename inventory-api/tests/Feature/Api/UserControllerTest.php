@@ -6,6 +6,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class UserControllerTest extends TestCase
 {
@@ -29,7 +32,7 @@ class UserControllerTest extends TestCase
     // Authorization Tests
     // =================================================================
 
-    /** @test */
+    #[Test]
     public function unauthenticated_user_cannot_access_any_user_endpoints(): void
     {
         $this->getJson('/api/users')->assertUnauthorized();
@@ -39,7 +42,7 @@ class UserControllerTest extends TestCase
         $this->deleteJson('/api/users/1')->assertUnauthorized();
     }
 
-    /** @test */
+    #[Test]
     public function viewer_user_is_forbidden_from_accessing_user_endpoints(): void
     {
         $anotherUser = User::factory()->create();
@@ -57,7 +60,7 @@ class UserControllerTest extends TestCase
     // CRUD Tests for Admin
     // =================================================================
 
-    /** @test */
+    #[Test]
     public function admin_can_get_users_list_with_pagination_and_filtering(): void
     {
         User::factory()->count(20)->create();
@@ -89,7 +92,7 @@ class UserControllerTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_create_user(): void
     {
         $userData = [
@@ -114,7 +117,7 @@ class UserControllerTest extends TestCase
         $this->assertTrue($createdUser->hasRole(User::ROLE_VIEWER));
     }
 
-    /** @test */
+    #[Test]
     public function user_creation_requires_valid_data(): void
     {
         $this->actingAs($this->admin);
@@ -143,7 +146,7 @@ class UserControllerTest extends TestCase
         ])->assertStatus(422)->assertJsonValidationErrors(['username']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_show_user(): void
     {
         $this->actingAs($this->admin);
@@ -153,14 +156,14 @@ class UserControllerTest extends TestCase
              ->assertJsonFragment(['id' => $this->viewer->id]);
     }
     
-    /** @test */
+    #[Test]
     public function show_returns_404_for_non_existent_user(): void
     {
         $this->actingAs($this->admin);
         $this->getJson('/api/users/9999')->assertNotFound();
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_user(): void
     {
         $userToUpdate = User::factory()->create();
@@ -182,7 +185,7 @@ class UserControllerTest extends TestCase
         $this->assertTrue($userToUpdate->hasRole('admin'));
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_update_user_password(): void
     {
         $userToUpdate = User::factory()->create();
@@ -202,7 +205,7 @@ class UserControllerTest extends TestCase
         $this->assertTrue(Hash::check('new-secret-password', $userToUpdate->password));
     }
 
-    /** @test */
+    #[Test]
     public function user_update_validates_data(): void
     {
         $userToUpdate = User::factory()->create();
@@ -220,7 +223,7 @@ class UserControllerTest extends TestCase
             ->assertOk();
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_delete_user(): void
     {
         $userToDelete = User::factory()->create();
@@ -232,7 +235,7 @@ class UserControllerTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $userToDelete->id]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_cannot_delete_own_account(): void
     {
         $this->actingAs($this->admin);
@@ -243,7 +246,7 @@ class UserControllerTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $this->admin->id]);
     }
 
-    /** @test */
+    #[Test]
     public function delete_returns_404_for_non_existent_user(): void
     {
         $this->actingAs($this->admin);

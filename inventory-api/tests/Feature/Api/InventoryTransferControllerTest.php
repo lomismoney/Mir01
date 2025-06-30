@@ -15,6 +15,9 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class InventoryTransferControllerTest extends TestCase
 {
@@ -88,7 +91,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_get_transfer_list()
     {
         // 建立一些轉移記錄
@@ -159,7 +162,7 @@ class InventoryTransferControllerTest extends TestCase
         $this->assertCount(2, $response->json('data'));
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_transfers_by_store()
     {
         $user = $this->createAdminUser();
@@ -195,7 +198,7 @@ class InventoryTransferControllerTest extends TestCase
         $this->assertEquals($this->fromStore->id, $transfers[0]['from_store_id']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_transfers_by_status()
     {
         $user = $this->createAdminUser();
@@ -228,7 +231,7 @@ class InventoryTransferControllerTest extends TestCase
         $this->assertEquals('pending', $transfers[0]['status']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_view_single_transfer_detail()
     {
         $user = $this->createAdminUser();
@@ -275,7 +278,7 @@ class InventoryTransferControllerTest extends TestCase
             ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_create_inventory_transfer()
     {
         $transferData = [
@@ -327,7 +330,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_transfer_more_than_available_stock()
     {
         $transferData = [
@@ -354,7 +357,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_transfer_to_same_store()
     {
         $transferData = [
@@ -372,7 +375,7 @@ class InventoryTransferControllerTest extends TestCase
             ->assertJsonValidationErrors(['to_store_id']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_update_transfer_status_to_in_transit()
     {
         $user = $this->createAdminUser();
@@ -414,7 +417,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_complete_transfer()
     {
         $user = $this->createAdminUser();
@@ -459,7 +462,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_cancel_pending_transfer()
     {
         $user = $this->createAdminUser();
@@ -493,7 +496,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_cancel_in_transit_transfer()
     {
         $user = $this->createAdminUser();
@@ -538,7 +541,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_cancel_completed_transfer()
     {
         $user = $this->createAdminUser();
@@ -564,7 +567,7 @@ class InventoryTransferControllerTest extends TestCase
             ]);
     }
     
-    /** @test */
+    #[Test]
     public function viewer_cannot_create_transfers()
     {
         $transferData = [
@@ -582,7 +585,7 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(403);
     }
     
-    /** @test */
+    #[Test]
     public function viewer_cannot_update_transfer_status()
     {
         $user = $this->createAdminUser();
@@ -605,7 +608,7 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(403);
     }
     
-    /** @test */
+    #[Test]
     public function viewer_can_view_transfers()
     {
         $response = $this->actingAsUser()
@@ -614,7 +617,7 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(200);
     }
     
-    /** @test */
+    #[Test]
     public function requires_authentication_for_transfer_access()
     {
         $response = $this->getJson('/api/inventory/transfers');
@@ -624,7 +627,7 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(401);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_validation_works()
     {
         // 測試缺少必要欄位
@@ -664,7 +667,7 @@ class InventoryTransferControllerTest extends TestCase
             ->assertJsonValidationErrors(['from_store_id']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_update_transfer_from_pending_directly_to_completed()
     {
         $user = $this->createAdminUser();
@@ -719,7 +722,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_update_status_to_same_status()
     {
         $user = $this->createAdminUser();
@@ -746,7 +749,7 @@ class InventoryTransferControllerTest extends TestCase
             ]);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_update_completed_transfer_status()
     {
         $user = $this->createAdminUser();
@@ -771,7 +774,7 @@ class InventoryTransferControllerTest extends TestCase
             ]);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_update_cancelled_transfer_status()
     {
         $user = $this->createAdminUser();
@@ -796,7 +799,7 @@ class InventoryTransferControllerTest extends TestCase
             ]);
     }
     
-    /** @test */
+    #[Test]
     public function update_status_handles_insufficient_stock_error()
     {
         $user = $this->createAdminUser();
@@ -830,7 +833,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_transfers_by_date_range()
     {
         $user = $this->createAdminUser();
@@ -874,7 +877,7 @@ class InventoryTransferControllerTest extends TestCase
         $this->assertEquals($recentTransfer->id, $transfers[0]['id']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_transfers_by_product_name()
     {
         $user = $this->createAdminUser();
@@ -915,7 +918,7 @@ class InventoryTransferControllerTest extends TestCase
         $this->assertEquals($this->variant->id, $transfers[0]['product_variant_id']);
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_filter_transfers_by_target_store()
     {
         $user = $this->createAdminUser();
@@ -949,7 +952,7 @@ class InventoryTransferControllerTest extends TestCase
         $this->assertEquals($thirdStore->id, $transfers[0]['to_store_id']);
     }
     
-    /** @test */
+    #[Test]
     public function show_returns_404_for_non_existent_transfer()
     {
         $response = $this->actingAsAdmin()
@@ -958,7 +961,7 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(404);
     }
     
-    /** @test */
+    #[Test]
     public function update_status_returns_404_for_non_existent_transfer()
     {
         $response = $this->actingAsAdmin()
@@ -969,7 +972,7 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(404);
     }
     
-    /** @test */
+    #[Test]
     public function cancel_returns_404_for_non_existent_transfer()
     {
         $response = $this->actingAsAdmin()
@@ -980,7 +983,7 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(404);
     }
     
-    /** @test */
+    #[Test]
     public function update_status_validates_status_field()
     {
         $user = $this->createAdminUser();
@@ -1013,7 +1016,7 @@ class InventoryTransferControllerTest extends TestCase
             ->assertJsonValidationErrors(['status']);
     }
     
-    /** @test */
+    #[Test]
     public function cancel_validates_reason_field()
     {
         $user = $this->createAdminUser();
@@ -1044,7 +1047,7 @@ class InventoryTransferControllerTest extends TestCase
             ->assertJsonValidationErrors(['reason']);
     }
     
-    /** @test */
+    #[Test]
     public function cannot_cancel_already_cancelled_transfer()
     {
         $user = $this->createAdminUser();
@@ -1069,7 +1072,7 @@ class InventoryTransferControllerTest extends TestCase
             ]);
     }
     
-    /** @test */
+    #[Test]
     public function index_works_with_pagination()
     {
         $user = $this->createAdminUser();
@@ -1114,7 +1117,7 @@ class InventoryTransferControllerTest extends TestCase
         $this->assertCount(5, $response->json('data'));
     }
     
-    /** @test */
+    #[Test]
     public function viewer_cannot_cancel_transfer()
     {
         $user = $this->createAdminUser();
@@ -1136,7 +1139,7 @@ class InventoryTransferControllerTest extends TestCase
         $response->assertStatus(403);
     }
     
-    /** @test */
+    #[Test]
     public function store_creates_inventory_records_if_not_exist()
     {
         // 刪除目標門市的庫存記錄，測試自動創建功能
@@ -1164,7 +1167,7 @@ class InventoryTransferControllerTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function store_with_pending_status_does_not_modify_inventory()
     {
         $transferData = [

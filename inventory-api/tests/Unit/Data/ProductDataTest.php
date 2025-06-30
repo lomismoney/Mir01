@@ -7,10 +7,13 @@ use App\Data\ProductData;
 use App\Models\Product;
 use Illuminate\Support\Carbon;
 use Spatie\LaravelData\Lazy;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class ProductDataTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function can_create_product_data_from_array()
     {
         $data = [
@@ -35,7 +38,7 @@ class ProductDataTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $productData->created_at);
     }
 
-    /** @test */
+    #[Test]
     public function can_create_product_data_with_null_values()
     {
         $data = [
@@ -57,7 +60,7 @@ class ProductDataTest extends TestCase
         $this->assertNull($productData->updated_at);
     }
 
-    /** @test */
+    #[Test]
     public function can_create_product_data_from_model()
     {
         // 由於 Product 模型本身沒有 sku、selling_price 和 cost_price
@@ -87,7 +90,7 @@ class ProductDataTest extends TestCase
         $this->assertEquals(150, $productData->cost_price);
     }
 
-    /** @test */
+    #[Test]
     public function can_convert_product_data_to_array()
     {
         $data = [
@@ -113,7 +116,7 @@ class ProductDataTest extends TestCase
         $this->assertEquals(75, $array['cost_price']);
     }
 
-    /** @test */
+    #[Test]
     public function datetime_cast_handles_timezone_correctly()
     {
         $utcTime = '2025-01-01T00:00:00+00:00';
@@ -137,7 +140,7 @@ class ProductDataTest extends TestCase
         $this->assertEquals('2025-01-01', $productData->updated_at->toDateString());
     }
 
-    /** @test */
+    #[Test]
     public function handles_float_and_int_prices_correctly()
     {
         // 測試整數價格

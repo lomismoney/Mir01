@@ -17,6 +17,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Spatie\LaravelData\DataCollection;
 use App\Models\Purchase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class CostCalculationTest extends TestCase
 {
@@ -80,7 +83,7 @@ class CostCalculationTest extends TestCase
         $this->variant2->attributeValues()->attach([$blueValue->id, $sValue->id]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_purchase_with_cost_calculation()
     {
         $this->actingAs($this->user);
@@ -158,7 +161,7 @@ class CostCalculationTest extends TestCase
         $this->assertEquals(99.0, round($this->variant2->profit_margin, 2));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_handle_multiple_purchases_with_average_cost_calculation()
     {
         $this->actingAs($this->user);

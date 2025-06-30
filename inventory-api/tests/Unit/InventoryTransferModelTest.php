@@ -10,6 +10,10 @@ use App\Models\ProductVariant;
 use App\Models\InventoryTransfer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnitFrameworkAttributesTest;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 class InventoryTransferModelTest extends TestCase
 {
     use RefreshDatabase;
@@ -57,7 +61,7 @@ class InventoryTransferModelTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_belongs_to_from_store()
     {
         $this->assertInstanceOf(Store::class, $this->transfer->fromStore);
@@ -65,7 +69,7 @@ class InventoryTransferModelTest extends TestCase
         $this->assertEquals('來源門市', $this->transfer->fromStore->name);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_belongs_to_to_store()
     {
         $this->assertInstanceOf(Store::class, $this->transfer->toStore);
@@ -73,14 +77,14 @@ class InventoryTransferModelTest extends TestCase
         $this->assertEquals('目標門市', $this->transfer->toStore->name);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_belongs_to_user()
     {
         $this->assertInstanceOf(User::class, $this->transfer->user);
         $this->assertEquals($this->user->id, $this->transfer->user->id);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_belongs_to_product_variant()
     {
         $this->assertInstanceOf(ProductVariant::class, $this->transfer->productVariant);
@@ -88,7 +92,7 @@ class InventoryTransferModelTest extends TestCase
         $this->assertEquals('TRANSFER-TEST-001', $this->transfer->productVariant->sku);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_has_correct_fillable_attributes()
     {
         $fillable = $this->transfer->getFillable();
@@ -106,7 +110,7 @@ class InventoryTransferModelTest extends TestCase
         $this->assertEquals($expectedFillable, $fillable);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_has_correct_casts()
     {
         $casts = $this->transfer->getCasts();
@@ -120,7 +124,7 @@ class InventoryTransferModelTest extends TestCase
         $this->assertEquals('datetime', $casts['updated_at']);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_constants_are_defined()
     {
         $this->assertEquals('pending', InventoryTransfer::STATUS_PENDING);
@@ -129,7 +133,7 @@ class InventoryTransferModelTest extends TestCase
         $this->assertEquals('cancelled', InventoryTransfer::STATUS_CANCELLED);
     }
     
-    /** @test */
+    #[Test]
     public function of_status_scope_filters_correctly()
     {
         // 建立不同狀態的轉移記錄
@@ -151,7 +155,7 @@ class InventoryTransferModelTest extends TestCase
         $this->assertFalse($inTransitTransfers->contains($this->transfer));
     }
     
-    /** @test */
+    #[Test]
     public function from_store_scope_filters_correctly()
     {
         $otherStore = Store::create(['name' => '其他門市', 'address' => '其他地址']);
@@ -170,7 +174,7 @@ class InventoryTransferModelTest extends TestCase
         $this->assertFalse($fromStoreTransfers->contains($otherTransfer));
     }
     
-    /** @test */
+    #[Test]
     public function to_store_scope_filters_correctly()
     {
         $otherToStore = Store::create(['name' => '另一個目標門市', 'address' => '另一個目標地址']);
@@ -189,7 +193,7 @@ class InventoryTransferModelTest extends TestCase
         $this->assertFalse($toStoreTransfers->contains($otherTransfer));
     }
     
-    /** @test */
+    #[Test]
     public function transfer_can_store_and_retrieve_notes()
     {
         $this->assertEquals('測試轉移', $this->transfer->notes);

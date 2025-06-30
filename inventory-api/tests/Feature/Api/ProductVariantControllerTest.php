@@ -13,6 +13,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * ProductVariantControllerTest 商品變體控制器測試
@@ -140,10 +143,8 @@ class ProductVariantControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 管理員可以獲取所有商品變體列表()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -168,10 +169,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 一般用戶可以獲取所有商品變體列表()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -185,10 +184,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 未認證用戶無法獲取商品變體列表()
     {
         $response = $this->getJson('/api/products/variants');
@@ -197,10 +194,8 @@ class ProductVariantControllerTest extends TestCase
             ->assertJson(['message' => 'Unauthenticated.']);
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 可以按商品ID篩選變體()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -222,10 +217,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 可以按SKU篩選變體()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -243,10 +236,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 可以按商品名稱搜尋變體()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -264,10 +255,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 可以使用部分商品名稱搜尋變體()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -285,10 +274,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 可以設置每頁顯示數量()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -308,10 +295,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-index
-     */
+    #[Test]
+    #[Group('attribute-value-index')]
     public function 預設使用分頁每頁15筆()
     {
         // 創建更多變體以測試預設分頁
@@ -332,10 +317,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-show
-     */
+    #[Test]
+    #[Group('product-variant-show')]
     public function 管理員可以查看指定商品變體()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -357,10 +340,8 @@ class ProductVariantControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
-     * @group product-variant-show
-     */
+    #[Test]
+    #[Group('product-variant-show')]
     public function 一般用戶可以查看指定商品變體()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -373,10 +354,8 @@ class ProductVariantControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
-     * @group product-variant-show
-     */
+    #[Test]
+    #[Group('product-variant-show')]
     public function 查看不存在的商品變體返回404錯誤()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -385,10 +364,8 @@ class ProductVariantControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /**
-     * @test
-     * @group product-variant-relationships
-     */
+    #[Test]
+    #[Group('product-variant-relationships')]
     public function 商品變體包含正確的關聯資料()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -438,10 +415,8 @@ class ProductVariantControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
-     * @group product-variant-calculated-fields
-     */
+    #[Test]
+    #[Group('product-variant-calculated-fields')]
     public function 商品變體包含計算欄位()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -459,10 +434,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-api-structure
-     */
+    #[Test]
+    #[Group('product-variant-api-structure')]
     public function 商品變體列表API回應結構符合規範()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -505,10 +478,8 @@ class ProductVariantControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
-     * @group product-variant-edge-cases
-     */
+    #[Test]
+    #[Group('product-variant-edge-cases')]
     public function 空的篩選參數返回所有變體()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -522,10 +493,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-edge-cases
-     */
+    #[Test]
+    #[Group('product-variant-edge-cases')]
     public function 不存在的商品ID篩選返回空結果()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -539,10 +508,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-edge-cases
-     */
+    #[Test]
+    #[Group('product-variant-edge-cases')]
     public function 不存在的SKU篩選返回空結果()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -556,10 +523,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-sorting
-     */
+    #[Test]
+    #[Group('product-variant-sorting')]
     public function 商品變體按建立時間降序排列()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -576,10 +541,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-pagination
-     */
+    #[Test]
+    #[Group('product-variant-pagination')]
     public function 分頁功能正常運作()
     {
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -620,10 +583,8 @@ class ProductVariantControllerTest extends TestCase
             );
     }
 
-    /**
-     * @test
-     * @group product-variant-authorization
-     */
+    #[Test]
+    #[Group('product-variant-authorization')]
     public function 未認證用戶無法進行任何查詢操作()
     {
         // 測試列表查詢

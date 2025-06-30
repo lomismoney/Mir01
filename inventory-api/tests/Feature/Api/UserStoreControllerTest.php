@@ -9,12 +9,15 @@ use App\Services\UserStoreService;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Support\Facades\Log;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class UserStoreControllerTest extends TestCase
 {
     use WithFaker;
     
-    /** @test */
+    #[Test]
     public function admin_can_get_user_stores()
     {
         // 創建用戶
@@ -34,7 +37,7 @@ class UserStoreControllerTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_assign_stores_to_user()
     {
         // 創建用戶
@@ -69,7 +72,7 @@ class UserStoreControllerTest extends TestCase
         }
     }
     
-    /** @test */
+    #[Test]
     public function admin_can_update_user_store_assignments()
     {
         // 創建用戶
@@ -107,7 +110,7 @@ class UserStoreControllerTest extends TestCase
         $this->assertDatabaseHas('store_user', ['user_id' => $user->id, 'store_id' => $stores[4]->id]);
     }
     
-    /** @test */
+    #[Test]
     public function staff_cannot_get_other_user_stores()
     {
         // 創建另一個用戶
@@ -122,7 +125,7 @@ class UserStoreControllerTest extends TestCase
         $response->assertStatus(403);
     }
     
-    /** @test */
+    #[Test]
     public function staff_can_view_own_stores_list()
     {
         $staff = User::factory()->create();
@@ -136,7 +139,7 @@ class UserStoreControllerTest extends TestCase
                  ->assertJsonCount(2, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function staff_cannot_assign_stores_to_any_user()
     {
         $staff = User::factory()->create();
@@ -157,7 +160,7 @@ class UserStoreControllerTest extends TestCase
         $responseToSelf->assertStatus(403);
     }
     
-    /** @test */
+    #[Test]
     public function assigning_stores_to_non_existent_user_returns_404()
     {
         $stores = Store::factory()->count(1)->create();
@@ -169,7 +172,7 @@ class UserStoreControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function assigning_non_existent_stores_returns_validation_error()
     {
         $user = User::factory()->create();
@@ -181,7 +184,7 @@ class UserStoreControllerTest extends TestCase
                  ->assertJsonValidationErrors(['store_ids.0', 'store_ids.1']);
     }
 
-    /** @test */
+    #[Test]
     public function assigning_empty_array_clears_user_stores()
     {
         $user = User::factory()->create();
@@ -195,7 +198,7 @@ class UserStoreControllerTest extends TestCase
         $this->assertCount(0, $user->refresh()->stores);
     }
 
-    /** @test */
+    #[Test]
     public function assigning_stores_requires_array_of_ids()
     {
         $user = User::factory()->create();
@@ -206,7 +209,7 @@ class UserStoreControllerTest extends TestCase
                  ->assertJsonValidationErrors(['store_ids']);
     }
 
-    /** @test */
+    #[Test]
     public function store_assignment_works_with_valid_stores()
     {
         $user = User::factory()->create();
@@ -223,7 +226,7 @@ class UserStoreControllerTest extends TestCase
         $this->assertEquals($store->id, $user->stores->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function store_assignment_handles_service_exceptions()
     {
         Log::shouldReceive('error')
@@ -255,7 +258,7 @@ class UserStoreControllerTest extends TestCase
                  ]);
     }
 
-    /** @test */
+    #[Test]
     public function store_assignment_logs_error_with_correct_context()
     {
         $user = User::factory()->create();

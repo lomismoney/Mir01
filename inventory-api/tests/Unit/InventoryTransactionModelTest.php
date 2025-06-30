@@ -11,6 +11,10 @@ use App\Models\Inventory;
 use App\Models\InventoryTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
+
 class InventoryTransactionModelTest extends TestCase
 {
     use RefreshDatabase;
@@ -53,21 +57,21 @@ class InventoryTransactionModelTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_belongs_to_inventory()
     {
         $this->assertInstanceOf(Inventory::class, $this->transaction->inventory);
         $this->assertEquals($this->inventory->id, $this->transaction->inventory->id);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_belongs_to_user()
     {
         $this->assertInstanceOf(User::class, $this->transaction->user);
         $this->assertEquals($this->user->id, $this->transaction->user->id);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_has_correct_fillable_attributes()
     {
         $fillable = $this->transaction->getFillable();
@@ -86,7 +90,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals($expectedFillable, $fillable);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_has_correct_casts()
     {
         $casts = $this->transaction->getCasts();
@@ -101,7 +105,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals('datetime', $casts['updated_at']);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_constants_are_defined()
     {
         $this->assertEquals('addition', InventoryTransaction::TYPE_ADDITION);
@@ -111,7 +115,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals('transfer_out', InventoryTransaction::TYPE_TRANSFER_OUT);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_stores_basic_information_correctly()
     {
         $this->assertEquals($this->inventory->id, $this->transaction->inventory_id);
@@ -123,7 +127,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals('測試進貨', $this->transaction->notes);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_handles_metadata_correctly()
     {
         $metadata = $this->transaction->metadata;
@@ -156,7 +160,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals('Test Supplier', $storedMetadata['supplier']);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_can_have_null_metadata()
     {
         $transaction = InventoryTransaction::create([
@@ -173,7 +177,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertNull($transaction->metadata);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_can_have_null_notes()
     {
         $transaction = InventoryTransaction::create([
@@ -189,7 +193,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertNull($transaction->notes);
     }
     
-    /** @test */
+    #[Test]
     public function addition_transaction_has_positive_quantity()
     {
         $transaction = InventoryTransaction::create([
@@ -206,7 +210,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals(30, $transaction->quantity);
     }
     
-    /** @test */
+    #[Test]
     public function reduction_transaction_has_negative_quantity()
     {
         $transaction = InventoryTransaction::create([
@@ -223,7 +227,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals(-15, $transaction->quantity);
     }
     
-    /** @test */
+    #[Test]
     public function adjustment_transaction_can_be_positive_or_negative()
     {
         // 正向調整
@@ -253,7 +257,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertTrue($negativeAdjustment->quantity < 0);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_in_transaction_has_positive_quantity()
     {
         $transaction = InventoryTransaction::create([
@@ -276,7 +280,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals('TRF-001', $metadata['transfer_id']);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_out_transaction_has_negative_quantity()
     {
         $transaction = InventoryTransaction::create([
@@ -299,7 +303,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals('TRF-002', $metadata['transfer_id']);
     }
     
-    /** @test */
+    #[Test]
     public function transfer_cancel_transaction_restores_quantity()
     {
         $transaction = InventoryTransaction::create([
@@ -324,7 +328,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals('TRF-003', $metadata['transfer_id']);
     }
     
-    /** @test */
+    #[Test]
     public function transaction_quantity_change_is_calculated_correctly()
     {
         // 測試增加庫存
@@ -345,7 +349,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals(35 - 50, $reductionTransaction->quantity); // after - before
     }
     
-    /** @test */
+    #[Test]
     public function transactions_are_ordered_by_creation_time()
     {
         // 建立第一個交易記錄（較早的時間）
@@ -393,7 +397,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertEquals($transaction2->id, $transactions->last()->id);
     }
 
-    /** @test */
+    #[Test]
     public function of_type_scope_filters_transactions_by_type()
     {
         // 創建不同類型的交易記錄
@@ -445,7 +449,7 @@ class InventoryTransactionModelTest extends TestCase
         $this->assertCount(0, $nonexistentTransactions);
     }
 
-    /** @test */
+    #[Test]
     public function between_dates_scope_filters_transactions_by_date_range()
     {
         // 清除所有現有的交易記錄，避免干擾

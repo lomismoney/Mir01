@@ -7,12 +7,15 @@ use App\Http\Requests\Api\StoreCategoryRequest;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class StoreCategoryRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function authorize_returns_true()
     {
         $request = new StoreCategoryRequest();
@@ -20,7 +23,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertTrue($request->authorize());
     }
 
-    /** @test */
+    #[Test]
     public function validation_rules_are_correct()
     {
         $request = new StoreCategoryRequest();
@@ -35,7 +38,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertEquals($expectedRules, $rules);
     }
 
-    /** @test */
+    #[Test]
     public function validation_passes_with_valid_data()
     {
         $parent = Category::factory()->create();
@@ -51,7 +54,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /** @test */
+    #[Test]
     public function validation_passes_with_minimal_data()
     {
         $data = [
@@ -64,7 +67,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /** @test */
+    #[Test]
     public function validation_fails_when_name_is_missing()
     {
         $data = [
@@ -78,7 +81,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertArrayHasKey('name', $validator->errors()->toArray());
     }
 
-    /** @test */
+    #[Test]
     public function validation_fails_when_name_exceeds_max_length()
     {
         $data = [
@@ -92,7 +95,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertArrayHasKey('name', $validator->errors()->toArray());
     }
 
-    /** @test */
+    #[Test]
     public function validation_fails_when_parent_id_does_not_exist()
     {
         $data = [
@@ -107,7 +110,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertArrayHasKey('parent_id', $validator->errors()->toArray());
     }
 
-    /** @test */
+    #[Test]
     public function validation_fails_when_parent_id_is_not_integer()
     {
         $data = [
@@ -122,7 +125,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertArrayHasKey('parent_id', $validator->errors()->toArray());
     }
 
-    /** @test */
+    #[Test]
     public function validation_passes_with_null_parent_id()
     {
         $data = [
@@ -136,7 +139,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /** @test */
+    #[Test]
     public function validation_passes_with_null_description()
     {
         $data = [
@@ -150,7 +153,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /** @test */
+    #[Test]
     public function attributes_returns_correct_mapping()
     {
         $request = new StoreCategoryRequest();
@@ -165,7 +168,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertEquals($expectedAttributes, $attributes);
     }
 
-    /** @test */
+    #[Test]
     public function messages_returns_correct_custom_messages()
     {
         $request = new StoreCategoryRequest();
@@ -183,7 +186,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertEquals($expectedMessages, $messages);
     }
 
-    /** @test */
+    #[Test]
     public function validation_error_uses_custom_messages()
     {
         $data = [];
@@ -196,7 +199,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertStringContainsString('分類名稱為必填項目', $errors['name'][0]);
     }
 
-    /** @test */
+    #[Test]
     public function body_parameters_returns_correct_structure()
     {
         $request = new StoreCategoryRequest();
@@ -222,7 +225,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertFalse($bodyParams['parent_id']['required']);
     }
 
-    /** @test */
+    #[Test]
     public function body_parameters_have_correct_examples()
     {
         $request = new StoreCategoryRequest();
@@ -233,7 +236,7 @@ class StoreCategoryRequestTest extends TestCase
         $this->assertEquals(1, $bodyParams['parent_id']['example']);
     }
 
-    /** @test */
+    #[Test]
     public function body_parameters_have_correct_descriptions()
     {
         $request = new StoreCategoryRequest();

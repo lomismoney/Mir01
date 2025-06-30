@@ -10,12 +10,15 @@ use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\InventoryTransfer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class StoreModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function store_has_many_users()
     {
         $store = Store::factory()->create();
@@ -27,7 +30,7 @@ class StoreModelTest extends TestCase
         $this->assertInstanceOf(User::class, $store->users->first());
     }
 
-    /** @test */
+    #[Test]
     public function store_has_many_inventories()
     {
         $store = Store::factory()->create();
@@ -37,7 +40,7 @@ class StoreModelTest extends TestCase
         $this->assertInstanceOf(Inventory::class, $store->inventories->first());
     }
 
-    /** @test */
+    #[Test]
     public function store_has_many_purchases()
     {
         $store = Store::factory()->create();
@@ -47,7 +50,7 @@ class StoreModelTest extends TestCase
         $this->assertInstanceOf(Purchase::class, $store->purchases->first());
     }
 
-    /** @test */
+    #[Test]
     public function store_has_many_sales()
     {
         $store = Store::factory()->create();
@@ -57,7 +60,7 @@ class StoreModelTest extends TestCase
         $this->assertInstanceOf(Sale::class, $store->sales->first());
     }
 
-    /** @test */
+    #[Test]
     public function store_has_many_transfers_out()
     {
         $store = Store::factory()->create();
@@ -71,7 +74,7 @@ class StoreModelTest extends TestCase
         $this->assertInstanceOf(InventoryTransfer::class, $store->transfersOut->first());
     }
 
-    /** @test */
+    #[Test]
     public function store_has_many_transfers_in()
     {
         $store = Store::factory()->create();
@@ -85,14 +88,14 @@ class StoreModelTest extends TestCase
         $this->assertInstanceOf(InventoryTransfer::class, $store->transfersIn->first());
     }
 
-    /** @test */
+    #[Test]
     public function store_has_guarded_property_set()
     {
         $store = new Store();
         $this->assertEquals([], $store->getGuarded());
     }
 
-    /** @test */
+    #[Test]
     public function store_can_be_created_with_mass_assignment()
     {
         $data = [
@@ -108,7 +111,7 @@ class StoreModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function store_users_relation_uses_pivot_table()
     {
         $store = Store::factory()->create();
@@ -122,7 +125,7 @@ class StoreModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function store_can_attach_and_detach_users()
     {
         $store = Store::factory()->create();
@@ -135,13 +138,13 @@ class StoreModelTest extends TestCase
         $this->assertCount(0, $store->fresh()->users);
     }
 
-    /** @test */
+    #[Test]
     public function store_uses_has_factory_trait()
     {
         $this->assertTrue(in_array('Illuminate\Database\Eloquent\Factories\HasFactory', class_uses(Store::class)));
     }
 
-    /** @test */
+    #[Test]
     public function store_transfers_out_and_in_are_different_relations()
     {
         $storeA = Store::factory()->create();
@@ -161,7 +164,7 @@ class StoreModelTest extends TestCase
         $this->assertCount(1, $storeB->transfersIn);
     }
 
-    /** @test */
+    #[Test]
     public function store_timestamps_are_tracked_in_user_pivot_table()
     {
         $store = Store::factory()->create();

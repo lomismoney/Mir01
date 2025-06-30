@@ -6,10 +6,13 @@ use Tests\TestCase;
 use App\Data\StoreData;
 use App\Models\Store;
 use Illuminate\Support\Carbon;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class StoreDataTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function can_create_store_data_from_array()
     {
         $data = [
@@ -33,7 +36,7 @@ class StoreDataTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $storeData->updated_at);
     }
 
-    /** @test */
+    #[Test]
     public function can_create_store_data_with_null_values()
     {
         $data = [
@@ -57,7 +60,7 @@ class StoreDataTest extends TestCase
         $this->assertNull($storeData->updated_at);
     }
 
-    /** @test */
+    #[Test]
     public function can_create_store_data_from_model()
     {
         $store = Store::factory()->create([
@@ -83,7 +86,7 @@ class StoreDataTest extends TestCase
         $this->assertEquals('active', $storeData->status);
     }
 
-    /** @test */
+    #[Test]
     public function can_convert_store_data_to_array()
     {
         $data = [
@@ -107,7 +110,7 @@ class StoreDataTest extends TestCase
         $this->assertEquals('active', $array['status']);
     }
 
-    /** @test */
+    #[Test]
     public function can_create_multiple_store_data_objects()
     {
         $stores = Store::factory()->count(3)->create();
@@ -120,7 +123,7 @@ class StoreDataTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function store_data_handles_different_statuses()
     {
         $statuses = ['active', 'inactive', 'maintenance'];

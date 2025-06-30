@@ -12,6 +12,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class StoreProductRequestTest extends TestCase
 {
@@ -22,7 +25,7 @@ class StoreProductRequestTest extends TestCase
         parent::setUp();
     }
 
-    /** @test */
+    #[Test]
     public function it_authorizes_admin_to_store_product()
     {
         $admin = User::factory()->create();
@@ -34,7 +37,7 @@ class StoreProductRequestTest extends TestCase
         $this->assertTrue($request->authorize());
     }
     
-    /** @test */
+    #[Test]
     public function it_denies_viewer_to_store_product()
     {
         $viewer = User::factory()->create();
@@ -46,7 +49,7 @@ class StoreProductRequestTest extends TestCase
         $this->assertFalse($request->authorize());
     }
     
-    /** @test */
+    #[Test]
     public function it_allows_staff_to_store_product()
     {
         $staff = User::factory()->create();

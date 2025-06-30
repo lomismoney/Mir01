@@ -7,6 +7,7 @@ use App\Data\Transformers\MoneyTransformer;
 use Spatie\LaravelData\Support\DataProperty;
 use Spatie\LaravelData\Support\Transformation\TransformationContext;
 use Mockery;
+use PHPUnit\Framework\Attributes\Test;
 
 class MoneyTransformerTest extends TestCase
 {
@@ -28,7 +29,7 @@ class MoneyTransformerTest extends TestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_transforms_cents_to_dollars()
     {
         $result = $this->transformer->transform($this->mockProperty, 10000, $this->mockContext);
@@ -36,7 +37,7 @@ class MoneyTransformerTest extends TestCase
         $this->assertEquals(100, $result);
     }
 
-    /** @test */
+    #[Test]
     public function it_rounds_down_when_less_than_half()
     {
         $result = $this->transformer->transform($this->mockProperty, 10049, $this->mockContext);
@@ -44,7 +45,7 @@ class MoneyTransformerTest extends TestCase
         $this->assertEquals(100, $result);
     }
 
-    /** @test */
+    #[Test]
     public function it_rounds_up_when_half_or_more()
     {
         $result = $this->transformer->transform($this->mockProperty, 10050, $this->mockContext);
@@ -52,7 +53,7 @@ class MoneyTransformerTest extends TestCase
         $this->assertEquals(101, $result);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_zero_value()
     {
         $result = $this->transformer->transform($this->mockProperty, 0, $this->mockContext);
@@ -60,7 +61,7 @@ class MoneyTransformerTest extends TestCase
         $this->assertEquals(0, $result);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_negative_values()
     {
         $result = $this->transformer->transform($this->mockProperty, -10000, $this->mockContext);
@@ -68,7 +69,7 @@ class MoneyTransformerTest extends TestCase
         $this->assertEquals(-100, $result);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_small_values()
     {
         $result = $this->transformer->transform($this->mockProperty, 49, $this->mockContext);
@@ -80,7 +81,7 @@ class MoneyTransformerTest extends TestCase
         $this->assertEquals(1, $result);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_large_values()
     {
         $result = $this->transformer->transform($this->mockProperty, 999999999, $this->mockContext);
@@ -88,7 +89,7 @@ class MoneyTransformerTest extends TestCase
         $this->assertEquals(10000000, $result);
     }
 
-    /** @test */
+    #[Test]
     public function it_always_returns_integer()
     {
         $testCases = [10000, 15050, 99, 0, -5000];
@@ -99,7 +100,7 @@ class MoneyTransformerTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_implements_transformer_interface()
     {
         $this->assertInstanceOf('Spatie\LaravelData\Transformers\Transformer', $this->transformer);
