@@ -127,11 +127,11 @@ Route::middleware('auth:sanctum')->group(function () {
      * 只有管理員可以管理分店
      * 
      * 路由列表：
-     * GET    /api/stores        - 獲取所有分店列表
-     * POST   /api/stores        - 創建新分店
-     * GET    /api/stores/{id}   - 獲取指定分店
-     * PUT    /api/stores/{id}   - 更新指定分店
-     * DELETE /api/stores/{id}   - 刪除指定分店
+     * GET    /api/stores              - 獲取所有分店列表
+     * POST   /api/stores              - 創建新分店
+     * GET    /api/stores/{store}      - 獲取指定分店
+     * PUT    /api/stores/{store}      - 更新指定分店
+     * DELETE /api/stores/{store}      - 刪除指定分店
      */
     Route::apiResource('stores', StoreController::class)->parameters(['stores' => 'store']);
     
@@ -152,11 +152,11 @@ Route::middleware('auth:sanctum')->group(function () {
      * 只有管理員可以管理分類，支援階層式分類結構
      * 
      * 路由列表：
-     * GET    /api/categories        - 獲取所有分類列表
-     * POST   /api/categories        - 創建新分類
-     * GET    /api/categories/{id}   - 獲取指定分類
-     * PUT    /api/categories/{id}   - 更新指定分類
-     * DELETE /api/categories/{id}   - 刪除指定分類
+     * GET    /api/categories                - 獲取所有分類列表
+     * POST   /api/categories                - 創建新分類
+     * GET    /api/categories/{category}     - 獲取指定分類
+     * PUT    /api/categories/{category}     - 更新指定分類
+     * DELETE /api/categories/{category}     - 刪除指定分類
      */
     Route::apiResource('categories', CategoryController::class)->parameters(['categories' => 'category']);
     
@@ -208,7 +208,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/inventory/transactions', [App\Http\Controllers\Api\InventoryManagementController::class, 'getAllTransactions']);
     Route::get('/inventory/{id}', [App\Http\Controllers\Api\InventoryManagementController::class, 'show']);
     Route::post('/inventory/adjust', [App\Http\Controllers\Api\InventoryManagementController::class, 'adjust']);
-    Route::get('/inventory/{id}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'history']);
+    Route::get('/inventory/{inventory}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'history']);
     Route::get('/inventory/sku/{sku}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'getSkuHistory']);
     Route::post('/inventory/batch-check', [App\Http\Controllers\Api\InventoryManagementController::class, 'batchCheck']);
 

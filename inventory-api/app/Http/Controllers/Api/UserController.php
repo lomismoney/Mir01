@@ -59,6 +59,7 @@ class UserController extends Controller
      * @queryParam filter[name] string 對用戶名稱進行模糊搜尋。 Example: admin
      * @queryParam filter[username] string 對用戶帳號進行模糊搜尋。 Example: superadmin
      * @queryParam filter[search] string 對名稱或帳號進行全域模糊搜尋。 Example: admin
+     * @queryParam filter[role] string 按角色篩選用戶。 Example: installer
      * @queryParam user_name string 按用戶名稱篩選
      * @queryParam email string 按電子郵件篩選
      * @queryParam per_page integer 每頁項目數量，預設 15
@@ -86,17 +87,25 @@ class UserController extends Controller
      * @apiResourceCollection App\Http\Resources\Api\UserResource
      * @apiResourceModel App\Models\User paginate=15
      */
-    public function index()
+    public function index(Request $request)
     {
         // 授權檢查已由 __construct 中的 authorizeResource 處理
         
-        $users = QueryBuilder::for(User::class)
+        $query = QueryBuilder::for(User::class)
             ->allowedFilters([
-                'name', 'username',
+                'name', 
+                'username',
                 AllowedFilter::custom('search', new UserSearchFilter()),
+                // 添加角色篩選器
+                AllowedFilter::callback('role', function ($query, $value) {
+                    $query->whereHas('roles', function ($q) use ($value) {
+                        $q->where('name', $value);
+                    });
+                }),
             ])
-            ->with('stores')
-            ->paginate(15);
+            ->with('stores');
+            
+        $users = $query->paginate(15);
 
         return UserResource::collection($users);
     }
@@ -161,7 +170,6 @@ class UserController extends Controller
      * 權限檢查：需要通過 UserPolicy::view() 方法（僅管理員可存取）
      * 
      * @param \App\Models\User $user 要查看的用戶模型實例（透過路由模型綁定自動解析）
-     * @urlParam user integer required 用戶的 ID。 Example: 1
      * 
      * @response 200 scenario="用戶詳情" {
      *   "data": {
@@ -197,7 +205,6 @@ class UserController extends Controller
      * 
      * @param \App\Http\Requests\Api\UpdateUserRequest $request 已驗證的請求資料
      * @param \App\Models\User $user 要更新的用戶模型實例（透過路由模型綁定自動解析）
-     * @urlParam user integer required 用戶的 ID。 Example: 1
      * @bodyParam name string required 用戶名稱
      * @bodyParam email string required 電子郵件地址
      * @bodyParam roles array 角色陣列
@@ -251,7 +258,6 @@ class UserController extends Controller
      * - 檢視者無法執行刪除操作
      * 
      * @param \App\Models\User $user 要刪除的用戶模型實例（透過路由模型綁定自動解析）
-     * @urlParam user integer required 用戶的 ID。 Example: 1
      * @response 204
      * @return \Illuminate\Http\Response 204 No Content 回應
      */

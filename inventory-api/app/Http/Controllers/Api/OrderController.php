@@ -181,8 +181,6 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * @summary 顯示指定的訂單詳細資訊
-     * @urlParam order integer required 訂單的 ID。 Example: 1
      * 
      * @apiResource \App\Http\Resources\Api\OrderResource
      * @apiResourceModel \App\Models\Order
@@ -213,8 +211,6 @@ class OrderController extends Controller
      * 此端點用於更新現有訂單的資訊。支援部分更新（PATCH），
      * 只需提供要更新的欄位即可。當更新訂單項目時，
      * 系統會自動處理項目的新增、更新和刪除，並重新計算訂單總額。
-     * 
-     * @urlParam order integer required 訂單的 ID。Example: 1
      * 
      * @bodyParam customer_id integer 客戶ID。Example: 2
      * @bodyParam shipping_status string 貨物狀態（pending, processing, shipped, delivered）。Example: processing
@@ -258,8 +254,6 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
-     * @summary 刪除指定的訂單
-     * @urlParam order integer required 要刪除的訂單的 ID。 Example: 1
      * @response 204 scenario="刪除成功"
      */
     public function destroy(Order $order): Response
@@ -282,10 +276,14 @@ class OrderController extends Controller
      * 此端點用於確認訂單的付款狀態，將付款狀態從「待付款」更新為「已付款」。
      * 系統會自動記錄狀態變更歷史，並更新相關時間戳。
      * 
-     * @urlParam order integer required 要確認付款的訂單 ID。Example: 1
-     * 
-     * @apiResource \App\Http\Resources\Api\OrderResource
-     * @apiResourceModel \App\Models\Order
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "order_number": "PO-20250619-001",
+     *     "payment_status": "paid",
+     *     "updated_at": "2025-06-19T10:30:00.000000Z"
+     *   }
+     * }
      * @response 422 scenario="訂單狀態不允許此操作" {
      *   "message": "此訂單的付款狀態不允許確認付款操作",
      *   "errors": {
@@ -323,8 +321,6 @@ class OrderController extends Controller
      * 此端點用於為訂單新增部分付款記錄，支援訂金、分期付款等場景。
      * 系統會自動計算已付金額，並根據付款進度更新訂單的付款狀態。
      * 每次付款都會記錄詳細的付款歷史，便於追蹤和對帳。
-     * 
-     * @urlParam order integer required 訂單 ID。Example: 1
      * 
      * @bodyParam amount number required 付款金額，必須大於 0.01 且不超過剩餘未付金額。Example: 1500.50
      * @bodyParam payment_method string required 付款方式（cash, transfer, credit_card）。Example: cash
@@ -386,8 +382,6 @@ class OrderController extends Controller
      * 此端點用於為訂單創建出貨記錄，將貨物狀態更新為「已出貨」。
      * 可以提供物流追蹤號碼等出貨相關資訊。
      * 
-     * @urlParam order integer required 訂單 ID。Example: 1
-     * 
      * @bodyParam tracking_number string required 物流追蹤號碼。Example: SF1234567890
      * @bodyParam carrier string 承運商名稱。Example: 順豐速運
      * @bodyParam shipped_at string 實際出貨時間（格式: Y-m-d H:i:s）。Example: 2025-06-19 14:30:00
@@ -443,8 +437,6 @@ class OrderController extends Controller
      * 並自動返還所有庫存銷售商品的庫存數量。
      * 注意：已出貨或已交付的訂單無法取消。
      * 
-     * @urlParam order integer required 要取消的訂單 ID。Example: 1
-     * 
      * @bodyParam reason string 取消原因。Example: 客戶要求取消
      * 
      * @apiResource \App\Http\Resources\Api\OrderResource
@@ -491,8 +483,6 @@ class OrderController extends Controller
      * 此端點用於為訂單創建品項級別的退款，支援部分品項退貨。
      * 系統會自動計算退款金額、更新訂單狀態，並可選擇性回補庫存。
      * 每筆退款都會記錄詳細的退貨明細和操作歷史。
-     * 
-     * @urlParam order_id integer required 訂單 ID。Example: 1
      * 
      * @bodyParam reason string required 退款原因，10-500 字符。Example: 商品品質不符合要求，客戶要求退貨
      * @bodyParam notes string 退款備註，最多 1000 字符。Example: 商品外觀無損，已檢查確認可回庫

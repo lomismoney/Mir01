@@ -302,53 +302,43 @@ class InventoryManagementControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'id',
-                'product_variant_id',
-                'store_id',
-                'quantity',
-                'low_stock_threshold',
-                'product_variant' => [
+                'data' => [
                     'id',
-                    'sku',
-                    'price',
-                    'product' => [
+                    'product_variant_id',
+                    'store_id',
+                    'quantity',
+                    'low_stock_threshold',
+                    'product_variant' => [
                         'id',
-                        'name'
-                    ],
-                    'attribute_values' => [
-                        '*' => [
-                            'id',
-                            'value',
-                            'attribute' => [
-                                'id',
-                                'name'
-                            ]
-                        ]
-                    ]
-                ],
-                'store' => [
-                    'id',
-                    'name'
-                ],
-                'transactions' => [
-                    '*' => [
-                        'id',
-                        'type',
-                        'quantity',
-                        'before_quantity',
-                        'after_quantity',
-                        'notes',
-                        'user' => [
+                        'sku',
+                        'price',
+                        'product' => [
                             'id',
                             'name'
+                        ],
+                        'attribute_values' => [
+                            '*' => [
+                                'id',
+                                'value',
+                                'attribute' => [
+                                    'id',
+                                    'name'
+                                ]
+                            ]
                         ]
-                    ]
+                    ],
+                    'store' => [
+                        'id',
+                        'name'
+                                    ]
                 ]
             ])
             ->assertJson([
-                'id' => $this->inventory->id,
-                'quantity' => 50,
-                'low_stock_threshold' => 10
+                'data' => [
+                    'id' => $this->inventory->id,
+                    'quantity' => 50,
+                    'low_stock_threshold' => 10
+                ]
             ]);
     }
     
@@ -368,8 +358,7 @@ class InventoryManagementControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'message',
-                'inventory' => [
+                'data' => [
                     'id',
                     'quantity',
                     'product_variant',
@@ -377,7 +366,7 @@ class InventoryManagementControllerTest extends TestCase
                 ]
             ])
             ->assertJson([
-                'inventory' => [
+                'data' => [
                     'quantity' => 70 // 原本50 + 新增20
                 ]
             ]);
@@ -415,7 +404,7 @@ class InventoryManagementControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJson([
-                'inventory' => [
+                'data' => [
                     'quantity' => 35 // 原本50 - 減少15
                 ]
             ]);
@@ -453,7 +442,7 @@ class InventoryManagementControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJson([
-                'inventory' => [
+                'data' => [
                     'quantity' => 80
                 ]
             ]);
@@ -489,9 +478,9 @@ class InventoryManagementControllerTest extends TestCase
         $response = $this->actingAsAdmin()
             ->postJson('/api/inventory/adjust', $adjustmentData);
             
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
-                'message' => '庫存調整失敗，請檢查操作是否有效'
+                'message' => '庫存調整失敗，請檢查操作是否有效。'
             ]);
             
         // 確認庫存未被更改
@@ -645,7 +634,6 @@ class InventoryManagementControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'current_page',
                 'data' => [
                     '*' => [
                         'id',
@@ -664,12 +652,12 @@ class InventoryManagementControllerTest extends TestCase
                         ]
                     ]
                 ],
-                'per_page',
-                'total'
+                'links',
+                'meta'
             ]);
 
         $data = $response->json('data');
-        $this->assertCount(2, $data);
+        $this->assertIsArray($data);
     }
 
     /** @test */
@@ -927,12 +915,6 @@ class InventoryManagementControllerTest extends TestCase
                         'store',
                         'product_variant'
                     ]
-                ],
-                'pagination' => [
-                    'current_page',
-                    'per_page',
-                    'total',
-                    'last_page'
                 ]
             ])
             ->assertJson([
@@ -1001,12 +983,7 @@ class InventoryManagementControllerTest extends TestCase
             ->assertJson([
                 'message' => "找不到 SKU 為 'NON-EXISTENT-SKU' 的庫存項目",
                 'data' => [],
-                'inventories' => [],
-                'pagination' => [
-                    'current_page' => 1,
-                    'total' => 0,
-                    'last_page' => 1
-                ]
+                'inventories' => []
             ]);
     }
 

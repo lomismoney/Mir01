@@ -73,8 +73,7 @@ class AttributeController extends Controller
      * 
      * @urlParam attribute integer required 屬性 ID Example: 1
      * 
-     * @apiResource \App\Http\Resources\Api\AttributeResource
-     * @apiResourceModel \App\Models\Attribute
+     * @response App\Http\Resources\Api\V1\AttributeResource
      */
     public function show(Attribute $attribute): AttributeResource
     {
@@ -85,7 +84,7 @@ class AttributeController extends Controller
      * @summary 更新指定屬性
      * @description 更新指定的商品屬性，屬性名稱必須唯一（忽略當前屬性）。
      * 
-     * @urlParam attribute integer required 屬性 ID Example: 1
+     * @bodyParam name string required 屬性名稱 Example: 顏色
      * 
      * @apiResource \App\Http\Resources\Api\AttributeResource
      * @apiResourceModel \App\Models\Attribute

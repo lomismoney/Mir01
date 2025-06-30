@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Check, ChevronDown, Search, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -98,51 +98,79 @@ export function ProductSelector({
     { enabled: !!selectedProductId },
   );
 
+  // 當需要根據 value 查找商品時，載入所有變體
+  const {
+    data: allVariants = [],
+    isLoading: isLoadingAllVariants,
+  } = useProductVariants(
+    { per_page: 500 }, // 載入大量變體以確保能找到對應的變體
+    { enabled: true }, // 始終載入變體列表以支持編輯模式
+  );
+
   // 當 selectedProductId 變化時，立即清除之前的變體選擇
+  // 但是要避免在初始化時清除currentVariant設置的值
+  const [isInitializing, setIsInitializing] = useState(true);
+  
   useEffect(() => {
-    if (selectedProductId) {
+    if (selectedProductId && !isInitializing) {
       setSelectedVariant(null);
       // 清除選擇，但不調用回調避免無限循環
     }
-  }, [selectedProductId]);
+  }, [selectedProductId, isInitializing]);
 
-  // 找到當前選中的變體
-  useEffect(() => {
-    if (value && variants.length > 0) {
-      const variant = variants.find((v: any) => v.id === value);
-      if (variant) {
-        // 確保變體屬於當前選中的商品
-        if (variant.product_id === selectedProductId) {
-          setSelectedVariant({
-            id: variant.id,
-            sku: variant.sku,
-            price: variant.price?.toString(),
-            product_id: variant.product_id,
-            created_at: variant.created_at,
-            updated_at: variant.updated_at,
-            product: variant.product
-              ? {
-                  id: variant.product.id!,
-                  name: variant.product.name!,
-                  description: variant.product.description,
-                }
-              : undefined,
-            attribute_values: variant.attribute_values,
-            inventory: variant.inventory,
-          });
-          setSelectedProductId(variant.product_id || null);
-        } else {
-          // 如果變體不屬於當前商品，清除選擇
-          setSelectedVariant(null);
-          setSelectedProductId(null);
-          onValueChange?.(0);
-        }
-      }
-    } else if (value === 0 || !value) {
-      // 如果 value 為 0 或空，清除選擇
-      setSelectedVariant(null);
+  // 使用 useMemo 計算當前應該選中的變體（避免 useEffect 循環）
+  const currentVariant = useMemo(() => {
+    if (!value || value <= 0) {
+      return null;
     }
-  }, [value, variants, selectedProductId]);
+    
+    // 首先在當前商品的變體中查找
+    let variant = variants.find((v: any) => v.id === value);
+    
+    // 如果找不到，在所有變體中查找
+    if (!variant && allVariants.length > 0) {
+      variant = allVariants.find((v: any) => v.id === value);
+    }
+    
+    return variant || null;
+  }, [value, variants, allVariants]);
+
+  // 根據計算出的變體更新狀態（React 會自動忽略相同的狀態設置）
+  useEffect(() => {
+    if (currentVariant) {
+      // 直接設置商品ID，React 會處理重複設置
+      setSelectedProductId(currentVariant.product_id || null);
+      
+      // 直接設置選中的變體
+      const newSelectedVariant = {
+        id: currentVariant.id,
+        sku: currentVariant.sku,
+        price: currentVariant.price?.toString(),
+        product_id: currentVariant.product_id,
+        created_at: currentVariant.created_at,
+        updated_at: currentVariant.updated_at,
+        product: currentVariant.product
+          ? {
+              id: currentVariant.product.id!,
+              name: currentVariant.product.name!,
+              description: currentVariant.product.description,
+            }
+          : undefined,
+        attribute_values: currentVariant.attribute_values,
+        inventory: currentVariant.inventory,
+      };
+      setSelectedVariant(newSelectedVariant);
+      
+      // 初始化完成
+      setIsInitializing(false);
+    } else if ((!value || value <= 0) && !isLoadingAllVariants) {
+      // 沒有變體時清除選擇（但只有在確實沒有value且不在載入中時）
+      setSelectedVariant(null);
+      setSelectedProductId(null);
+      setIsInitializing(false);
+    }
+    // 如果 currentVariant 是 null 但 isLoadingAllVariants 是 true，則不做任何操作
+  }, [currentVariant, value, isLoadingAllVariants]); // 依賴計算出的變體、value和載入狀態
 
   // 處理商品選擇
   const handleProductSelect = (productId: number) => {

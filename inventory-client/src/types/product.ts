@@ -17,11 +17,9 @@ export type ProductResponse = paths['/api/products/{id}']['get']['responses'][20
 // 更新商品的請求類型
 export type UpdateProductRequest = paths['/api/products/{id}']['put']['requestBody']['content']['application/json'];
 
-// 分頁信息類型
-export type PaginationMeta = NonNullable<ProductListResponse['meta']>;
-
-// 分頁連結類型
-export type PaginationLinks = NonNullable<ProductListResponse['links']>;
+// 產品API沒有分頁信息，直接返回數據數組
+// export type PaginationMeta = NonNullable<ProductListResponse['meta']>;
+// export type PaginationLinks = NonNullable<ProductListResponse['links']>;
 
 // 商品查詢參數類型
 export type ProductQueryParams = paths['/api/products']['get']['parameters']['query'];

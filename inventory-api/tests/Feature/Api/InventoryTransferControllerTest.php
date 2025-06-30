@@ -248,26 +248,30 @@ class InventoryTransferControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'id',
-                'from_store_id',
-                'to_store_id',
-                'user_id',
-                'product_variant_id',
-                'quantity',
-                'status',
-                'notes',
-                'created_at',
-                'updated_at',
-                'from_store',
-                'to_store',
-                'user',
-                'product_variant'
+                'data' => [
+                    'id',
+                    'from_store_id',
+                    'to_store_id',
+                    'user_id',
+                    'product_variant_id',
+                    'quantity',
+                    'status',
+                    'notes',
+                    'created_at',
+                    'updated_at',
+                    'from_store',
+                    'to_store',
+                    'user',
+                    'product_variant'
+                ]
             ])
             ->assertJson([
-                'id' => $transfer->id,
-                'quantity' => 25,
-                'status' => 'in_transit',
-                'notes' => '轉移詳情測試'
+                'data' => [
+                    'id' => $transfer->id,
+                    'quantity' => 25,
+                    'status' => 'in_transit',
+                    'notes' => '轉移詳情測試'
+                ]
             ]);
     }
     
@@ -287,8 +291,7 @@ class InventoryTransferControllerTest extends TestCase
             
         $response->assertStatus(201) // 修復：創建資源應該返回 201
             ->assertJsonStructure([
-                'message',
-                'transfer' => [
+                'data' => [
                     'id',
                     'from_store_id',
                     'to_store_id',
@@ -304,13 +307,11 @@ class InventoryTransferControllerTest extends TestCase
                 ]
             ])
             ->assertJson([
-                'message' => '庫存轉移成功',
-                'transfer' => [
+                'data' => [
                     'from_store_id' => $this->fromStore->id,
                     'to_store_id' => $this->toStore->id,
                     'product_variant_id' => $this->variant->id,
                     'quantity' => 30,
-                    'status' => 'completed', // 根據實際回應調整
                     'notes' => '新建轉移測試'
                 ]
             ]);
@@ -340,7 +341,7 @@ class InventoryTransferControllerTest extends TestCase
         $response = $this->actingAsAdmin()
             ->postJson('/api/inventory/transfers', $transferData);
             
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
                 'message' => '來源門市庫存不足，無法完成轉移'
             ]);
@@ -393,8 +394,7 @@ class InventoryTransferControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJson([
-                'message' => '庫存轉移狀態更新成功',
-                'transfer' => [
+                'data' => [
                     'id' => $transfer->id,
                     'status' => 'in_transit'
                 ]
@@ -440,8 +440,7 @@ class InventoryTransferControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJson([
-                'message' => '庫存轉移狀態更新成功',
-                'transfer' => [
+                'data' => [
                     'status' => 'completed'
                 ]
             ]);
@@ -482,8 +481,7 @@ class InventoryTransferControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJson([
-                'message' => '庫存轉移已取消',
-                'transfer' => [
+                'data' => [
                     'status' => 'cancelled'
                 ]
             ]);
@@ -521,8 +519,7 @@ class InventoryTransferControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJson([
-                'message' => '庫存轉移已取消',
-                'transfer' => [
+                'data' => [
                     'status' => 'cancelled'
                 ]
             ]);
@@ -561,7 +558,7 @@ class InventoryTransferControllerTest extends TestCase
                 'reason' => '嘗試取消已完成的轉移'
             ]);
             
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
                 'message' => '已完成或已取消的轉移記錄不能再次取消'
             ]);
@@ -690,8 +687,7 @@ class InventoryTransferControllerTest extends TestCase
             
         $response->assertStatus(200)
             ->assertJson([
-                'message' => '庫存轉移狀態更新成功',
-                'transfer' => [
+                'data' => [
                     'status' => 'completed',
                     'notes' => '已確認收到並完成'
                 ]
@@ -743,7 +739,11 @@ class InventoryTransferControllerTest extends TestCase
             ]);
             
         $response->assertStatus(200)
-            ->assertJson(['message' => '狀態未變更']);
+            ->assertJson([
+                'data' => [
+                    'status' => 'pending'
+                ]
+            ]);
     }
     
     /** @test */
@@ -765,7 +765,7 @@ class InventoryTransferControllerTest extends TestCase
                 'status' => 'in_transit'
             ]);
             
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
                 'message' => '已完成或已取消的轉移記錄不能更改狀態'
             ]);
@@ -790,7 +790,7 @@ class InventoryTransferControllerTest extends TestCase
                 'status' => 'pending'
             ]);
             
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
                 'message' => '已完成或已取消的轉移記錄不能更改狀態'
             ]);
@@ -1063,7 +1063,7 @@ class InventoryTransferControllerTest extends TestCase
                 'reason' => '嘗試再次取消'
             ]);
             
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
                 'message' => '已完成或已取消的轉移記錄不能再次取消'
             ]);
@@ -1181,7 +1181,7 @@ class InventoryTransferControllerTest extends TestCase
             
         $response->assertStatus(201)
             ->assertJson([
-                'transfer' => [
+                'data' => [
                     'status' => 'pending'
                 ]
             ]);

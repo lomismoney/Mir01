@@ -126,7 +126,6 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
      */
     public function show(string $id)
     {
@@ -140,7 +139,6 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
      * @bodyParam store_id integer 門市ID Example: 1
      * @bodyParam order_number string 進貨單號 Example: PO-20240101-001
      * @bodyParam purchased_at string 進貨日期 Example: 2024-01-01T10:00:00+08:00
@@ -169,7 +167,6 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
      * @bodyParam status string required 新狀態 Example: in_transit
      */
     public function updateStatus(string $purchase, Request $request)
@@ -198,7 +195,6 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
      */
     public function cancel(string $purchase)
     {
@@ -218,7 +214,6 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
-     * @urlParam purchase integer required 進貨單ID Example: 1
      */
     public function destroy(string $id)
     {

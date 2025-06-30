@@ -62,6 +62,7 @@ class InstallationService
                 InstallationItem::create([
                     'installation_id' => $installation->id,
                     'order_item_id' => $item['order_item_id'] ?? null,
+                    'product_variant_id' => $item['product_variant_id'] ?? null,
                     'product_name' => $item['product_name'],
                     'sku' => $item['sku'],
                     'quantity' => $item['quantity'],
@@ -109,6 +110,7 @@ class InstallationService
             foreach ($order->items as $orderItem) {
                 $installationData['items'][] = [
                     'order_item_id' => $orderItem->id,
+                    'product_variant_id' => $orderItem->product_variant_id, // 🔧 修復：複製商品變體ID
                     'product_name' => $orderItem->product_name,
                     'sku' => $orderItem->sku,
                     'quantity' => $orderItem->quantity,
@@ -182,6 +184,9 @@ class InstallationService
                         // 準備項目更新資料 - 只包含明確提供的欄位
                         $itemUpdateData = [];
                         
+                        if (array_key_exists('product_variant_id', $itemData)) {
+                            $itemUpdateData['product_variant_id'] = $itemData['product_variant_id'];
+                        }
                         if (array_key_exists('product_name', $itemData)) {
                             $itemUpdateData['product_name'] = $itemData['product_name'];
                         }
@@ -211,6 +216,7 @@ class InstallationService
                         $newItem = InstallationItem::create([
                             'installation_id' => $installation->id,
                             'order_item_id' => $itemData['order_item_id'] ?? null,
+                            'product_variant_id' => $itemData['product_variant_id'] ?? null,
                             'product_name' => $itemData['product_name'],
                             'sku' => $itemData['sku'],
                             'quantity' => $itemData['quantity'],
