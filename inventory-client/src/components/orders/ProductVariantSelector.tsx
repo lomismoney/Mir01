@@ -262,7 +262,7 @@ export function ProductVariantSelector({
                         className="text-right font-medium"
                         data-oid="fyuiboh"
                       >
-                        ${parseFloat(variant.price || "0").toFixed(2)}
+                        ${Math.round(parseFloat(variant.price || "0")).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-center" data-oid="yqxzns:">
                         {variant.total_inventory}

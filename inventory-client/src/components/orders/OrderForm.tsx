@@ -451,7 +451,7 @@ export function OrderForm({
                                     />
                                   </TableCell>
                                   <TableCell className="font-mono text-right w-[120px]">
-                                    ${subtotal.toFixed(2)}
+                                    ${Math.round(subtotal).toLocaleString()}
                                   </TableCell>
                                   <TableCell>
                                     <Button
@@ -564,14 +564,14 @@ export function OrderForm({
                       <div className="flex justify-between text-sm">
                         <span>小計：</span>
                         <span className="font-medium text-right w-[120px]">
-                          ${subtotal.toFixed(2)}
+                          ${Math.round(subtotal).toLocaleString()}
                         </span>
                       </div>
                       {shippingFee > 0 && (
                         <div className="flex justify-between text-sm">
                           <span>運費：</span>
                           <span className="font-medium text-right w-[120px]">
-                            ${shippingFee.toFixed(2)}
+                            ${Math.round(shippingFee).toLocaleString()}
                           </span>
                         </div>
                       )}
@@ -579,7 +579,7 @@ export function OrderForm({
                         <div className="flex justify-between text-sm">
                           <span>稅金：</span>
                           <span className="font-medium text-right w-[120px]">
-                            ${tax.toFixed(2)}
+                            ${Math.round(tax).toLocaleString()}
                           </span>
                         </div>
                       )}
@@ -587,14 +587,14 @@ export function OrderForm({
                         <div className="flex justify-between text-sm text-green-600">
                           <span>折扣：</span>
                           <span className="font-medium text-right w-[120px]">
-                            -${discountAmount.toFixed(2)}
+                            -${Math.round(discountAmount).toLocaleString()}
                           </span>
                         </div>
                       )}
                       <div className="flex justify-between text-lg font-bold border-t pt-2">
                         <span>總計：</span>
                         <span className="text-primary text-right w-[120px]">
-                          ${grandTotal.toFixed(2)}
+                          ${Math.round(grandTotal).toLocaleString()}
                         </span>
                       </div>
                     </div>

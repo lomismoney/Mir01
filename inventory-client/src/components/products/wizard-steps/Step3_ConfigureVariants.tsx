@@ -746,8 +746,8 @@ export function Step3_ConfigureVariants({
                     return sum + (isNaN(price) ? 0 : price);
                   }, 0)
                   .toLocaleString("zh-TW", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
                   })}
               </div>
               <p

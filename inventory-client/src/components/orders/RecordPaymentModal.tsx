@@ -11,6 +11,8 @@ import {
   DollarSign,
   CreditCard,
   Clock,
+  Receipt,
+  CheckCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -68,7 +70,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 /**
@@ -99,7 +101,7 @@ const createPaymentSchema = (remainingAmount: number) =>
       notes: z.string().optional(),
     })
     .refine((data) => data.amount <= remainingAmount, {
-      message: `收款金額不能超過剩餘未付金額：${remainingAmount.toFixed(2)} 元`,
+      message: `收款金額不能超過剩餘未付金額：${Math.round(remainingAmount).toLocaleString()} 元`,
       path: ["amount"],
     });
 
@@ -200,7 +202,7 @@ export default function RecordPaymentModal({
 
       // 成功處理
       toast.success(
-        `成功記錄 ${data.amount.toFixed(2)} 元的${
+        `成功記錄 ${Math.round(data.amount).toLocaleString()} 元的${
           PAYMENT_METHODS.find((m) => m.value === data.payment_method)?.label
         }收款`,
       );
@@ -235,12 +237,12 @@ export default function RecordPaymentModal({
   return (
     <Dialog open={open} onOpenChange={handleClose} data-oid="66chh:5">
       <DialogContent
-        className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
         data-oid="qpkcj1."
       >
         <DialogHeader data-oid="ivrtjwk">
           <DialogTitle className="flex items-center gap-2" data-oid="kw.4if6">
-                            <DollarSign className="h-5 w-5 text-success" data-oid="y1uu5fx" />
+            <DollarSign className="h-5 w-5 text-success" data-oid="y1uu5fx" />
             記錄部分收款
           </DialogTitle>
           <DialogDescription data-oid=".wkgxln">
@@ -248,49 +250,74 @@ export default function RecordPaymentModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* 訂單金額概覽卡片 */}
-        <Card
-                          className="bg-muted border-l-4 border-l-info"
-          data-oid="rdivghs"
-        >
-          <CardContent className="pt-4" data-oid=".dh4sno">
-            <div className="grid grid-cols-3 gap-4 text-sm" data-oid="ca-suov">
-              <div className="text-center" data-oid="uv8cx2w">
-                <div className="text-muted-foreground font-medium" data-oid="xkeoynw">
-                  訂單總額
-                </div>
-                <div
-                                      className="text-lg font-bold text-foreground"
-                  data-oid="ybxzfh9"
-                >
-                  ${order.grand_total.toFixed(2)}
-                </div>
+        {/* 訂單金額概覽卡片 - 優化佈局 */}
+        <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-3 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs my-6">
+          {/* 訂單總額卡片 */}
+          <Card data-slot="card" className="@container/card">
+            <CardHeader className="space-y-1 pb-2">
+              <CardDescription className="text-xs font-medium">
+                訂單總額
+              </CardDescription>
+              <CardTitle className="text-xl font-semibold tabular-nums @[200px]/card:text-2xl">
+                ${Math.round(order.grand_total).toLocaleString()}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 pb-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Receipt className="h-3 w-3" />
+                <span>應收總計</span>
               </div>
-              <div className="text-center" data-oid="-ryg7jz">
-                                  <div className="text-muted-foreground font-medium" data-oid="4za:2xe">
-                  已付金額
-                </div>
-                <div
-                                      className="text-lg font-bold text-success"
-                  data-oid="b7dwmno"
-                >
-                  ${order.paid_amount.toFixed(2)}
-                </div>
+            </CardContent>
+          </Card>
+
+          {/* 已付金額卡片 */}
+          <Card data-slot="card" className="@container/card">
+            <CardHeader className="space-y-1 pb-2">
+              <CardDescription className="text-xs font-medium">
+                已付金額
+              </CardDescription>
+              <CardTitle className="text-xl font-semibold tabular-nums @[200px]/card:text-2xl text-success">
+                ${Math.round(order.paid_amount).toLocaleString()}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 pb-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <CheckCircle className="h-3 w-3" />
+                <span>已收總計</span>
               </div>
-              <div className="text-center" data-oid="onbnl2y">
-                                  <div className="text-muted-foreground font-medium" data-oid=":vugby1">
-                  剩餘未付
-                </div>
-                <div
-                                      className="text-lg font-bold text-error"
-                  data-oid=":72:t.b"
-                >
-                  ${remainingAmount.toFixed(2)}
-                </div>
+            </CardContent>
+          </Card>
+
+          {/* 剩餘未付卡片 */}
+          <Card data-slot="card" className="@container/card">
+            <CardHeader className="space-y-1 pb-2">
+              <CardDescription className="text-xs font-medium">
+                剩餘未付
+              </CardDescription>
+              <CardTitle className={cn(
+                "text-xl font-semibold tabular-nums @[200px]/card:text-2xl",
+                remainingAmount > 0 ? "text-destructive" : "text-success"
+              )}>
+                ${Math.round(remainingAmount).toLocaleString()}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 pb-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {remainingAmount > 0 ? (
+                  <>
+                    <Clock className="h-3 w-3" />
+                    <span>待收金額</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-3 w-3" />
+                    <span>已付清</span>
+                  </>
+                )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         <Form {...form} data-oid="j3enj2b">
           <form

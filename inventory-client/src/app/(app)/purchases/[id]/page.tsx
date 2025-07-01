@@ -394,8 +394,8 @@ export default function PurchaseDetailPage() {
                           >
                             NT${" "}
                             {averageCostPerUnit.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
                             })}
                           </span>
                         </div>

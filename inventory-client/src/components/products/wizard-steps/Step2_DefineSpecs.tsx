@@ -208,20 +208,20 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
       });
 
       // 🎯 步驟 3: 成功後更新本地狀態
-      const newAttributeValues = {
-        ...formData.specifications.attributeValues,
-        [attributeId]: [...currentValues, inputValue],
-      };
+    const newAttributeValues = {
+      ...formData.specifications.attributeValues,
+      [attributeId]: [...currentValues, inputValue],
+    };
 
-      updateFormData("specifications", {
-        attributeValues: newAttributeValues,
-      });
+    updateFormData("specifications", {
+      attributeValues: newAttributeValues,
+    });
 
-      // 清空輸入框
-      setInputValues((prev) => ({
-        ...prev,
-        [attributeId]: "",
-      }));
+    // 清空輸入框
+    setInputValues((prev) => ({
+      ...prev,
+      [attributeId]: "",
+    }));
 
       // 🎯 步驟 4: 重新獲取屬性列表，確保資料一致性
       await refetchAttributes();
@@ -403,29 +403,29 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                         {/* 🎯 頂部區域：選擇框和名稱 */}
                         <div className="flex items-start space-x-2">
                           <div className="flex-shrink-0 mt-0.5">
-                            <Checkbox
-                              id={`attr-${attribute.id}`}
-                              checked={formData.specifications.selectedAttributes.includes(
-                                attribute.id,
-                              )}
+                        <Checkbox
+                          id={`attr-${attribute.id}`}
+                          checked={formData.specifications.selectedAttributes.includes(
+                            attribute.id,
+                          )}
                               onCheckedChange={(checked) => {
-                                handleAttributeToggle(
-                                  attribute.id,
-                                  checked as boolean,
+                            handleAttributeToggle(
+                              attribute.id,
+                              checked as boolean,
                                 );
                               }}
                               className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                              data-oid="qbgrwi5"
-                            />
+                          data-oid="qbgrwi5"
+                        />
                           </div>
-                          
+
                           <div className="flex-1 min-w-0">
-                            <Label
-                              htmlFor={`attr-${attribute.id}`}
+                        <Label
+                          htmlFor={`attr-${attribute.id}`}
                               className="font-medium text-sm cursor-pointer group-hover:text-primary transition-colors"
-                              data-oid="gq8i9iv"
-                            >
-                              {attribute.name}
+                          data-oid="gq8i9iv"
+                        >
+                            {attribute.name}
                             </Label>
                             <div className="text-xs text-muted-foreground">
                               {attribute.values?.length || 0} 個預設值
@@ -440,24 +440,24 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                               {/* 🎯 單行顯示所有徽章 */}
                               <div className="flex flex-wrap gap-1 items-center overflow-hidden">
                                 {attribute.values.slice(0, 4).map((value) => (
-                                  <Badge
-                                    key={value.id}
-                                    variant="outline"
+                                    <Badge
+                                      key={value.id}
+                                      variant="outline"
                                     className="text-[9px] px-1 py-0.5 h-4 text-muted-foreground border-muted-foreground/30 flex-shrink-0"
-                                    data-oid="gh23x:u"
-                                  >
-                                    {value.value}
-                                  </Badge>
-                                ))}
+                                      data-oid="gh23x:u"
+                                    >
+                                      {value.value}
+                                    </Badge>
+                                  ))}
                                 {attribute.values.length > 4 && (
-                                  <Badge
+                                    <Badge
                                     variant="secondary"
                                     className="text-[9px] px-1 py-0.5 h-4 bg-muted text-muted-foreground flex-shrink-0"
-                                    data-oid="8d4no88"
-                                  >
+                                      data-oid="8d4no88"
+                                    >
                                     +{attribute.values.length - 4}
-                                  </Badge>
-                                )}
+                                    </Badge>
+                                  )}
                               </div>
                             </div>
                           ) : (
@@ -465,8 +465,8 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                               <span className="text-xs text-muted-foreground italic">
                                 尚無預設值
                               </span>
-                            </div>
-                          )}
+                                </div>
+                              )}
                         </div>
 
                         {/* 🎯 右上角：選中指示器 */}

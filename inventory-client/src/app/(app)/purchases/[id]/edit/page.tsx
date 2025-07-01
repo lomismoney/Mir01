@@ -588,7 +588,8 @@ export default function PurchaseEditPage() {
                       <div className="text-lg font-semibold" data-oid="ailg1w5">
                         NT${" "}
                         {calculateTotal().toLocaleString("zh-TW", {
-                          minimumFractionDigits: 2,
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
                         })}
                       </div>
                     </div>

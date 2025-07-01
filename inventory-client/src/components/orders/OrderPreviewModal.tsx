@@ -114,7 +114,7 @@ const statusConfig = {
 
 // 格式化金額
 const formatCurrency = (amount: number): string => {
-  return `NT$ ${amount.toLocaleString('zh-TW')}`;
+  return `NT$ ${Math.round(amount).toLocaleString('zh-TW')}`;
 };
 
 export function OrderPreviewModal({

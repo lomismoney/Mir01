@@ -559,13 +559,13 @@ export default function RefundModal({
                                 className="text-right font-medium"
                                 data-oid="hicfrq-"
                               >
-                                ${(field.price || 0).toFixed(2)}
+                                ${Math.round(field.price || 0).toLocaleString()}
                               </TableCell>
                               <TableCell
                                 className="text-right font-medium text-destructive"
                                 data-oid="1j1k-sj"
                               >
-                                ${subtotal.toFixed(2)}
+                                ${Math.round(subtotal).toLocaleString()}
                               </TableCell>
                             </TableRow>
                           );
@@ -698,7 +698,7 @@ export default function RefundModal({
                         訂單總額
                       </span>
                       <span className="font-medium" data-oid="wvlc_t8">
-                        ${fullOrder.grand_total.toFixed(2)}
+                        ${Math.round(fullOrder.grand_total).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between" data-oid="fvbpww2">
@@ -712,7 +712,7 @@ export default function RefundModal({
                         className="font-medium text-success"
                         data-oid="ybt_1_g"
                       >
-                        ${fullOrder.paid_amount.toFixed(2)}
+                        ${Math.round(fullOrder.paid_amount).toLocaleString()}
                       </span>
                     </div>
 
@@ -757,7 +757,7 @@ export default function RefundModal({
                         className="text-2xl font-bold text-destructive"
                         data-oid="pdv_989"
                       >
-                        ${totalRefundAmount.toFixed(2)}
+                        ${Math.round(totalRefundAmount).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -842,7 +842,7 @@ export default function RefundModal({
               ) : (
                 <>
                   <DollarSign className="mr-2 h-4 w-4" data-oid="s3ui-1p" />
-                  確認退款 ${totalRefundAmount.toFixed(2)}
+                  確認退款 ${Math.round(totalRefundAmount).toLocaleString()}
                 </>
               )}
             </Button>
@@ -860,6 +860,7 @@ export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("zh-TW", {
     style: "currency",
     currency: "TWD",
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount);
 }

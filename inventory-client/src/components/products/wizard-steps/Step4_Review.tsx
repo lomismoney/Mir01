@@ -432,8 +432,8 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
             >
               $
               {statistics.totalValue.toLocaleString("zh-TW", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
               })}
             </div>
             <p
@@ -466,8 +466,8 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
             >
               $
               {statistics.averagePrice.toLocaleString("zh-TW", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
               })}
             </div>
             <p
