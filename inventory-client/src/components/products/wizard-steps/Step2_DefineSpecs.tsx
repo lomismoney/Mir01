@@ -30,6 +30,7 @@ import {
   Tag,
   HelpCircle,
   Loader2,
+  Check,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { WizardFormData } from "../CreateProductWizard";
@@ -40,6 +41,7 @@ import {
 import { Attribute } from "@/types/products";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { cn } from "@/lib/utils";
 
 /**
  * 步驟2組件Props
@@ -378,71 +380,103 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
                   </Alert>
                 ) : (
                   <div
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                     data-oid="w1ecrax"
                   >
                     {attributes.map((attribute) => (
                       <div
                         key={attribute.id}
-                        className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                        className={cn(
+                          "group relative p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer",
+                          "hover:shadow-md hover:border-primary/20 hover:bg-primary/5",
+                          "flex flex-col h-24", // 🎯 減少高度：從 h-32 (128px) 改為 h-24 (96px)
+                          formData.specifications.selectedAttributes.includes(attribute.id)
+                            ? "border-primary bg-primary/10 shadow-sm"
+                            : "border-border/60 bg-card"
+                        )}
+                        onClick={() => {
+                          const isSelected = formData.specifications.selectedAttributes.includes(attribute.id);
+                          handleAttributeToggle(attribute.id, !isSelected);
+                        }}
                         data-oid="7f6.z0r"
                       >
-                        <Checkbox
-                          id={`attr-${attribute.id}`}
-                          checked={formData.specifications.selectedAttributes.includes(
-                            attribute.id,
-                          )}
-                          onCheckedChange={(checked) =>
-                            handleAttributeToggle(
-                              attribute.id,
-                              checked as boolean,
-                            )
-                          }
-                          data-oid="qbgrwi5"
-                        />
-
-                        <Label
-                          htmlFor={`attr-${attribute.id}`}
-                          className="flex-1 cursor-pointer"
-                          data-oid="gq8i9iv"
-                        >
-                          <div className="font-medium" data-oid="4qzxqf8">
-                            {attribute.name}
-                          </div>
-                          <div
-                            className="text-sm text-muted-foreground"
-                            data-oid="fyc96-a"
-                          >
-                            {attribute.values?.length || 0} 個預設值
-                            {attribute.values &&
-                              attribute.values.length > 0 && (
-                                <div
-                                  className="mt-1 flex flex-wrap gap-1"
-                                  data-oid="archgay"
-                                >
-                                  {attribute.values.slice(0, 3).map((value) => (
-                                    <Badge
-                                      key={value.id}
-                                      variant="outline"
-                                      className="text-xs"
-                                      data-oid="gh23x:u"
-                                    >
-                                      {value.value}
-                                    </Badge>
-                                  ))}
-                                  {attribute.values.length > 3 && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                      data-oid="8d4no88"
-                                    >
-                                      +{attribute.values.length - 3} 更多
-                                    </Badge>
-                                  )}
-                                </div>
+                        {/* 🎯 頂部區域：選擇框和名稱 */}
+                        <div className="flex items-start space-x-2">
+                          <div className="flex-shrink-0 mt-0.5">
+                            <Checkbox
+                              id={`attr-${attribute.id}`}
+                              checked={formData.specifications.selectedAttributes.includes(
+                                attribute.id,
                               )}
+                              onCheckedChange={(checked) => {
+                                handleAttributeToggle(
+                                  attribute.id,
+                                  checked as boolean,
+                                );
+                              }}
+                              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              data-oid="qbgrwi5"
+                            />
                           </div>
-                        </Label>
+                          
+                          <div className="flex-1 min-w-0">
+                            <Label
+                              htmlFor={`attr-${attribute.id}`}
+                              className="font-medium text-sm cursor-pointer group-hover:text-primary transition-colors"
+                              data-oid="gq8i9iv"
+                            >
+                              {attribute.name}
+                            </Label>
+                            <div className="text-xs text-muted-foreground">
+                              {attribute.values?.length || 0} 個預設值
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 🎯 中間區域：屬性值預覽（緊湊高度） */}
+                        <div className="flex-1 mt-2 overflow-hidden">
+                          {attribute.values && attribute.values.length > 0 ? (
+                            <div className="flex items-center h-full">
+                              {/* 🎯 單行顯示所有徽章 */}
+                              <div className="flex flex-wrap gap-1 items-center overflow-hidden">
+                                {attribute.values.slice(0, 4).map((value) => (
+                                  <Badge
+                                    key={value.id}
+                                    variant="outline"
+                                    className="text-[9px] px-1 py-0.5 h-4 text-muted-foreground border-muted-foreground/30 flex-shrink-0"
+                                    data-oid="gh23x:u"
+                                  >
+                                    {value.value}
+                                  </Badge>
+                                ))}
+                                {attribute.values.length > 4 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[9px] px-1 py-0.5 h-4 bg-muted text-muted-foreground flex-shrink-0"
+                                    data-oid="8d4no88"
+                                  >
+                                    +{attribute.values.length - 4}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center h-full">
+                              <span className="text-xs text-muted-foreground italic">
+                                尚無預設值
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 🎯 右上角：選中指示器 */}
+                        {formData.specifications.selectedAttributes.includes(attribute.id) && (
+                          <div className="absolute top-2 right-2">
+                            <div className="w-2.5 h-2.5 bg-primary rounded-full flex items-center justify-center">
+                              <Check className="w-1.5 h-1.5 text-primary-foreground" />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
