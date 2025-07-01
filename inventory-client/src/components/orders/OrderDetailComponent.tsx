@@ -357,27 +357,27 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                     ${subtotal.toLocaleString()}
                   </span>
                 </div>
-                {order.shipping_fee && order.shipping_fee > 0 && (
+                {(order.shipping_fee ?? 0) > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">運費</span>
                     <span className="text-right w-[120px]">
-                      ${order.shipping_fee.toLocaleString()}
+                      ${(order.shipping_fee ?? 0).toLocaleString()}
                     </span>
                   </div>
                 )}
-                {order.discount_amount > 0 && (
+                {(order.discount_amount ?? 0) > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">折扣</span>
                     <span className="text-success text-right w-[120px]">
-                      -${order.discount_amount.toLocaleString()}
+                      -${(order.discount_amount ?? 0).toLocaleString()}
                     </span>
                   </div>
                 )}
-                {order.tax_amount > 0 && (
+                {(order.tax_amount ?? 0) > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">稅額</span>
                     <span className="text-right w-[120px]">
-                      ${order.tax_amount.toLocaleString()}
+                      ${(order.tax_amount ?? 0).toLocaleString()}
                     </span>
                   </div>
                 )}
