@@ -283,8 +283,17 @@ export function CreateProductWizard({
 }: CreateProductWizardProps = {}) {
   const router = useRouter();
 
-  // 判斷是否為編輯模式
-  const isEditMode = !!productId;
+  // 🔧 修復：增強編輯模式判斷，確保 productId 有效
+  const numericProductId = productId ? Number(productId) : undefined;
+  const isEditMode = !!numericProductId && !isNaN(numericProductId) && numericProductId > 0;
+
+  // 🛡️ 防護性檢查：記錄組件初始化信息
+  console.info('[CreateProductWizard] 組件初始化', {
+    productId,
+    numericProductId,
+    isEditMode,
+    timestamp: new Date().toISOString()
+  });
 
   // API Hooks
   const createProductMutation = useCreateProduct();
@@ -292,18 +301,57 @@ export function CreateProductWizard({
   const uploadImageMutation = useUploadProductImage();
   const { data: attributesData } = useAttributes();
 
-  // 編輯模式：獲取商品詳情
+  // 編輯模式：獲取商品詳情 (只有在有效的編輯模式下才調用)
   const {
     data: productDetail,
     isLoading: isLoadingProduct,
     error: productError,
-  } = useProductDetail(productId);
+  } = useProductDetail(isEditMode ? numericProductId : undefined);
 
   // 核心狀態：當前步驟
   const [step, setStep] = useState(1);
 
   // 提交狀態
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 🛡️ 錯誤邊界處理：檢查商品詳情獲取錯誤
+  if (isEditMode && productError) {
+    console.error('[CreateProductWizard] 商品詳情獲取失敗', {
+      productId,
+      numericProductId,
+      error: productError,
+      timestamp: new Date().toISOString()
+    });
+    
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <div className="space-y-4">
+              <div className="text-red-500 text-2xl">⚠️</div>
+              <h2 className="text-xl font-semibold text-red-700">無法載入商品資料</h2>
+              <p className="text-gray-600">
+                商品 ID: {productId} 無法載入，請檢查商品是否存在或重新整理頁面。
+              </p>
+              <div className="space-x-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => router.back()}
+                >
+                  返回上一頁
+                </Button>
+                <Button 
+                  onClick={() => window.location.reload()}
+                >
+                  重新整理
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // 核心狀態：嚮導表單資料聚合
   const [formData, setFormData] = useState<WizardFormData>({
@@ -339,6 +387,13 @@ export function CreateProductWizard({
    */
   useEffect(() => {
     if (isEditMode && productDetail) {
+      // 🔧 修復：記錄編輯模式資料載入
+      console.info('[CreateProductWizard] 編輯模式資料載入', {
+        productId,
+        numericProductId,
+        productDetail
+      });
+      
       // 🎯 零容忍：現在 productDetail 直接是 ProcessedProduct | null 類型
       const productData = productDetail;
 
@@ -436,7 +491,7 @@ export function CreateProductWizard({
       // 預填表單數據
       setFormData(transformedData);
     }
-  }, [isEditMode, productDetail]);
+  }, [isEditMode, productDetail, numericProductId]);
 
   /**
    * 更新表單資料的通用函數
@@ -618,7 +673,13 @@ export function CreateProductWizard({
       let productName: string;
 
       // 步驟1：判斷創建模式並選擇合適的 API 通道 (v3.0 雙軌制 API)
-      if (isEditMode && productId) {
+      if (isEditMode && numericProductId) {
+        // 🔧 修復：編輯模式使用驗證過的 numericProductId
+        console.info('[CreateProductWizard] 執行商品更新', {
+          productId,
+          numericProductId
+        });
+        
         // 編輯模式：始終使用完整的多規格 API
         const apiPayload = transformWizardDataToApiPayload(
           formData,
@@ -628,7 +689,7 @@ export function CreateProductWizard({
         toast.loading("正在更新商品資訊...", { id: "submit-progress" });
 
         productResult = await updateProductMutation.mutateAsync({
-          id: Number(productId),
+          id: numericProductId,
           ...apiPayload,
         });
 
@@ -729,7 +790,7 @@ export function CreateProductWizard({
         return (
           <Step1_BasicInfoWithImage
             {...commonProps}
-            productId={productId}
+            productId={isEditMode ? numericProductId : undefined}
             isEditMode={isEditMode}
             data-oid="m_p_oo9"
           />

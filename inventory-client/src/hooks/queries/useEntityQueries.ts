@@ -266,25 +266,42 @@ export interface ProcessedProductAttributeValue {
  * @returns React Query 查詢結果，返回 ProcessedProduct 類型
  */
 export function useProductDetail(productId: number | string | undefined) {
-    // 確保 productId 是有效的數字
+    // 🔧 修復：確保 productId 是有效的數字並增強驗證
     const numericId = productId ? Number(productId) : undefined;
     
     return useQuery({
         queryKey: [...QUERY_KEYS.PRODUCT(numericId!), 'detail'],
         queryFn: async () => {
-            if (!numericId) {
-                throw new Error('商品 ID 無效');
+            // 🛡️ 防護性檢查：確保 ID 有效且為正整數
+            if (!numericId || isNaN(numericId) || numericId <= 0) {
+                const errorMsg = `商品 ID 無效: ${productId} (轉換後: ${numericId})`;
+                console.error('[useProductDetail]', errorMsg);
+                throw new Error(errorMsg);
             }
 
-                    const { data, error } = await apiClient.GET('/api/products/{product}', {
-            params: { path: { product: numericId } }
-        });
+            // 📝 添加錯誤日誌：記錄 API 調用信息
+            console.info('[useProductDetail] 正在獲取商品詳情', { productId, numericId });
+
+            const { data, error } = await apiClient.GET('/api/products/{product}', {
+                params: { path: { product: numericId } }
+            });
             
             if (error) {
+                // 🔴 增強錯誤日誌：記錄詳細的錯誤信息
+                console.error('[useProductDetail] API 錯誤', {
+                    productId,
+                    numericId,
+                    error,
+                    errorType: typeof error,
+                    timestamp: new Date().toISOString()
+                });
+                
                 const errorMessage = parseApiError(error);
                 throw new Error(errorMessage || '獲取商品詳情失敗');
             }
 
+            // ✅ 成功日誌
+            console.info('[useProductDetail] 成功獲取商品詳情', { productId, numericId });
             return data;
         },
         // 🎯 數據精煉廠 - 確保類型完整性和數據一致性
@@ -349,9 +366,17 @@ export function useProductDetail(productId: number | string | undefined) {
                 ...rawProduct
             };
         },
-        enabled: !!numericId, // 只有當有效的 ID 存在時才執行查詢
+        // 🔧 修復：增強條件檢查，確保只有有效的正整數 ID 才執行查詢
+        enabled: !!numericId && !isNaN(numericId) && numericId > 0,
         staleTime: 5 * 60 * 1000, // 5 分鐘緩存時間，編輯期間避免重複請求
-        retry: 2, // 失敗時重試 2 次
+        retry: (failureCount, error) => {
+            // 🛡️ 防護性重試：422 錯誤不重試，避免無效請求循環
+            if (error instanceof Error && error.message.includes('422')) {
+                console.warn('[useProductDetail] 422 錯誤不重試', { productId, numericId, error: error.message });
+                return false;
+            }
+            return failureCount < 2;
+        }
     });
 }
 

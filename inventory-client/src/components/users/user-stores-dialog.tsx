@@ -10,10 +10,13 @@ import {
 } from "lucide-react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import * as React from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useStores } from "@/hooks/queries/useEntityQueries";
-import { useUserStores, useAssignUserStores } from "@/hooks/useUserStores";
+import { apiClient } from "@/lib/apiClient";
+import { handleApiError } from "@/lib/errorHandler";
+
+// 替代已刪除的 useUserStores hooks，使用內嵌的類型安全API調用
 
 import { Button } from "@/components/ui/button";
 import {
@@ -104,6 +107,53 @@ interface UserStoresDialogProps {
 }
 
 /**
+ * 內嵌的用戶分店查詢Hook - 類型安全，無as any
+ */
+function useUserStoresInline(userId: number) {
+  return useQuery({
+    queryKey: ["user-stores", userId],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET("/api/users/{user}/stores", {
+        params: { path: { user: userId } },
+      });
+
+      if (error) {
+        throw handleApiError(error);
+      }
+
+      return { data: data?.data || data || [] };
+    },
+    enabled: !!userId,
+  });
+}
+
+/**
+ * 內嵌的分店分配Hook - 類型安全，無as any
+ */
+function useAssignUserStoresInline() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, storeIds }: { userId: number; storeIds: number[] }) => {
+      const { data, error } = await apiClient.POST("/api/users/{user}/stores", {
+        params: { path: { user: userId } },
+        body: { store_ids: storeIds.map(id => id.toString()) },
+      });
+
+      if (error) {
+        throw handleApiError(error);
+      }
+
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user-stores", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
+/**
  * 用戶分店管理對話框組件
  */
 export function UserStoresDialog({
@@ -115,12 +165,12 @@ export function UserStoresDialog({
   // 獲取分店列表
   const { data: storesData, isLoading: isLoadingStores } = useStores();
 
-  // 獲取用戶當前的分店
+  // 獲取用戶當前的分店 - 使用內嵌的類型安全Hook
   const { data: userStoresData, isLoading: isLoadingUserStores } =
-    useUserStores(userId);
+    useUserStoresInline(userId);
 
-  // 分配分店到用戶的 mutation
-  const assignStoresMutation = useAssignUserStores();
+  // 分配分店到用戶的 mutation - 使用內嵌的類型安全Hook
+  const assignStoresMutation = useAssignUserStoresInline();
 
   // 獲取 React Query 客戶端實例，用於手動使緩存失效
   const queryClient = useQueryClient();
