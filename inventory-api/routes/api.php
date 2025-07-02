@@ -72,11 +72,11 @@ Route::middleware('auth:sanctum')->group(function () {
      * 避免 /api/products/{id} 路由將 'variants' 誤解為產品 ID
      * 
      * 路由列表：
-     * GET    /api/products/variants        - 獲取所有商品變體列表
-     * GET    /api/products/variants/{id}   - 獲取指定商品變體
+     * GET    /api/products/variants            - 獲取所有商品變體列表
+     * GET    /api/products/variants/{variant}  - 獲取指定商品變體
      */
     Route::get('/products/variants', [ProductVariantController::class, 'index']);
-    Route::get('/products/variants/{id}', [ProductVariantController::class, 'show']);
+    Route::get('/products/variants/{variant}', [ProductVariantController::class, 'show']);
     
     /**
      * 商品圖片上傳路由
@@ -198,15 +198,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 庫存轉移 - 必須放在前面，避免和庫存管理的路由衝突
     Route::get('/inventory/transfers', [App\Http\Controllers\Api\InventoryTransferController::class, 'index']);
-    Route::get('/inventory/transfers/{id}', [App\Http\Controllers\Api\InventoryTransferController::class, 'show']);
+    Route::get('/inventory/transfers/{transfer}', [App\Http\Controllers\Api\InventoryTransferController::class, 'show']);
     Route::post('/inventory/transfers', [App\Http\Controllers\Api\InventoryTransferController::class, 'store']);
-    Route::patch('/inventory/transfers/{id}/status', [App\Http\Controllers\Api\InventoryTransferController::class, 'updateStatus']);
-    Route::patch('/inventory/transfers/{id}/cancel', [App\Http\Controllers\Api\InventoryTransferController::class, 'cancel']);
+    Route::patch('/inventory/transfers/{transfer}/status', [App\Http\Controllers\Api\InventoryTransferController::class, 'updateStatus']);
+    Route::patch('/inventory/transfers/{transfer}/cancel', [App\Http\Controllers\Api\InventoryTransferController::class, 'cancel']);
     
     // 庫存管理
     Route::get('/inventory', [App\Http\Controllers\Api\InventoryManagementController::class, 'index']);
     Route::get('/inventory/transactions', [App\Http\Controllers\Api\InventoryManagementController::class, 'getAllTransactions']);
-    Route::get('/inventory/{id}', [App\Http\Controllers\Api\InventoryManagementController::class, 'show']);
+    Route::get('/inventory/{inventory}', [App\Http\Controllers\Api\InventoryManagementController::class, 'show']);
     Route::post('/inventory/adjust', [App\Http\Controllers\Api\InventoryManagementController::class, 'adjust']);
     Route::get('/inventory/{inventory}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'history']);
     Route::get('/inventory/sku/{sku}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'getSkuHistory']);

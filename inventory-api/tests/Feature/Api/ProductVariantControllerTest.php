@@ -326,16 +326,18 @@ class ProductVariantControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'id' => $this->variant1->id,
-                'sku' => 'TSHIRT-RED-M',
-                'price' => '299.00',
-                'cost_price' => '150.00',
-                'average_cost' => '165.50',
-                'product_id' => $this->product1->id,
-                'product' => [
-                    'id' => $this->product1->id,
-                    'name' => '經典棉質T-shirt',
-                    'category_id' => $this->category->id
+                'data' => [
+                    'id' => $this->variant1->id,
+                    'sku' => 'TSHIRT-RED-M',
+                    'price' => '299.00',
+                    'cost_price' => '150.00',
+                    'average_cost' => '165.50',
+                    'product_id' => $this->product1->id,
+                    'product' => [
+                        'id' => $this->product1->id,
+                        'name' => '經典棉質T-shirt',
+                        'category_id' => $this->category->id
+                    ]
                 ]
             ]);
     }
@@ -349,8 +351,10 @@ class ProductVariantControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'id' => $this->variant1->id,
-                'sku' => 'TSHIRT-RED-M'
+                'data' => [
+                    'id' => $this->variant1->id,
+                    'sku' => 'TSHIRT-RED-M'
+                ]
             ]);
     }
 
@@ -373,42 +377,44 @@ class ProductVariantControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'id',
-                'sku',
-                'price',
-                'cost_price',
-                'average_cost',
-                'product_id',
-                'created_at',
-                'updated_at',
-                'product' => [
+                'data' => [
                     'id',
-                    'name',
-                    'description',
-                    'category_id'
-                ],
-                'attribute_values' => [ // 注意是蛇形命名法
-                    '*' => [
+                    'sku',
+                    'price',
+                    'cost_price',
+                    'average_cost',
+                    'product_id',
+                    'created_at',
+                    'updated_at',
+                    'product' => [
                         'id',
-                        'value',
-                        'attribute_id',
-                        'attribute' => [
+                        'name',
+                        'description',
+                        'category_id'
+                    ],
+                    'attribute_values' => [ // 注意是蛇形命名法
+                        '*' => [
                             'id',
-                            'name'
+                            'value',
+                            'attribute_id',
+                            'attribute' => [
+                                'id',
+                                'name'
+                            ]
                         ]
-                    ]
-                ],
-                'inventory' => [
-                    '*' => [
-                        'id',
-                        'product_variant_id',
-                        'store_id',
-                        'quantity',
-                        'low_stock_threshold',
-                        'store' => [
+                    ],
+                    'inventory' => [
+                        '*' => [
                             'id',
-                            'name',
-                            'address'
+                            'product_variant_id',
+                            'store_id',
+                            'quantity',
+                            'low_stock_threshold',
+                            'store' => [
+                                'id',
+                                'name',
+                                'address'
+                            ]
                         ]
                     ]
                 ]

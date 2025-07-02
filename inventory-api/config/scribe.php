@@ -38,9 +38,6 @@ return [
             'exclude' => [
                 // 'GET /health', 'admin.*'
             ],
-
-            // 🎯 禁用 Laravel 路由模型綁定的自動推斷，強制 Scribe 只信任 PHPDoc @urlParam 註解
-            'bindings' => false,
         ],
     ],
 
@@ -220,8 +217,9 @@ return [
             ]),
         ],
         'urlParameters' => [
-            // 只使用 Laravel API 策略來識別路由模型綁定參數
-            Strategies\UrlParameters\GetFromLaravelAPI::class,
+            // ✅ 先 Laravel API 自動推斷，再 PHPDoc 註解覆蓋
+            \Knuckles\Scribe\Extracting\Strategies\UrlParameters\GetFromLaravelAPI::class,
+            \Knuckles\Scribe\Extracting\Strategies\UrlParameters\GetFromUrlParamTag::class,
         ],
         'queryParameters' => [
             ...Defaults::QUERY_PARAMETERS_STRATEGIES,

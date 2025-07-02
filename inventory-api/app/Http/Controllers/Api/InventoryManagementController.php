@@ -102,14 +102,14 @@ class InventoryManagementController extends Controller
      * 獲取單條庫存記錄詳情
      * 
      * @summary 獲取庫存詳情
-     * @urlParam id integer required 庫存ID. Example: 1
+     * @urlParam inventory integer required 庫存ID. Example: 1
      * 
      * @apiResource \App\Http\Resources\Api\InventoryResource
      * @apiResourceModel \App\Models\Inventory
      */
-    public function show(int $id): InventoryResource
+    public function show(int $inventory): InventoryResource
     {
-        $inventory = Inventory::with([
+        $inventoryModel = Inventory::with([
             'productVariant.product', 
             'productVariant.attributeValues.attribute',
             'store',
@@ -117,9 +117,9 @@ class InventoryManagementController extends Controller
                 $query->latest()->limit(10);
             },
             'transactions.user'
-        ])->findOrFail($id);
+        ])->findOrFail($inventory);
         
-        return new InventoryResource($inventory);
+        return new InventoryResource($inventoryModel);
     }
 
     /**
@@ -190,7 +190,7 @@ class InventoryManagementController extends Controller
      * 獲取庫存交易歷史
      * 
      * @summary 獲取單個庫存項目的交易歷史
-     * @urlParam id integer required 庫存ID. Example: 1
+     * @urlParam inventory integer required 庫存ID. Example: 1
      * @queryParam start_date string 起始日期 (格式: Y-m-d). Example: 2023-01-01
      * @queryParam end_date string 結束日期 (格式: Y-m-d). Example: 2023-12-31
      * @queryParam type string 交易類型. Example: addition

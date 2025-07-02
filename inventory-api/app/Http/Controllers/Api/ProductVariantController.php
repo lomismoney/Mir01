@@ -70,18 +70,22 @@ class ProductVariantController extends Controller
      * 獲取單個商品變體詳情
      * 
      * @authenticated
+     * @urlParam variant integer required 商品變體ID. Example: 1
      * 
-     * @param int $id
-     * @return JsonResponse
+     * @apiResource \App\Http\Resources\Api\ProductVariantResource
+     * @apiResourceModel \App\Models\ProductVariant
+     * 
+     * @param int $variant
+     * @return ProductVariantResource
      */
-    public function show(int $id): JsonResponse
+    public function show(int $variant): ProductVariantResource
     {
-        $variant = ProductVariant::with([
+        $variantModel = ProductVariant::with([
             'product',
             'attributeValues.attribute',
             'inventory.store'
-        ])->findOrFail($id);
+        ])->findOrFail($variant);
 
-        return response()->json($variant);
+        return new ProductVariantResource($variantModel);
     }
 }

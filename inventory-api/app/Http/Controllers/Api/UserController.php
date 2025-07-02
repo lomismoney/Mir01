@@ -119,9 +119,11 @@ class UserController extends Controller
      * 
      * @param \App\Http\Requests\Api\StoreUserRequest $request 已驗證的請求資料
      * @bodyParam name string required 用戶名稱
-     * @bodyParam email string required 電子郵件地址
-     * @bodyParam password string required 密碼
+     * @bodyParam username string required 用戶帳號（唯一）
+     * @bodyParam password string required 密碼（至少8個字元）
+     * @bodyParam password_confirmation string required 密碼確認（必須與密碼相同）
      * @bodyParam roles array 角色陣列
+     * @bodyParam role string required 用戶角色
      * 
      * @apiResource \App\Http\Resources\Api\UserResource
      * @apiResourceModel \App\Models\User
@@ -169,6 +171,7 @@ class UserController extends Controller
      * 根據用戶 ID 返回特定用戶的完整資料。
      * 權限檢查：需要通過 UserPolicy::view() 方法（僅管理員可存取）
      * 
+     * @urlParam user integer required 用戶ID. Example: 1
      * @param \App\Models\User $user 要查看的用戶模型實例（透過路由模型綁定自動解析）
      * 
      * @response 200 scenario="用戶詳情" {
@@ -203,11 +206,15 @@ class UserController extends Controller
      * 如果請求中包含密碼，會自動進行 bcrypt 雜湊處理。
      * 權限檢查：需要通過 UserPolicy::update() 方法（僅管理員可執行）
      * 
+     * @urlParam user integer required 用戶ID. Example: 1
      * @param \App\Http\Requests\Api\UpdateUserRequest $request 已驗證的請求資料
      * @param \App\Models\User $user 要更新的用戶模型實例（透過路由模型綁定自動解析）
      * @bodyParam name string required 用戶名稱
-     * @bodyParam email string required 電子郵件地址
+     * @bodyParam username string required 用戶帳號（可選更新）
+     * @bodyParam password string 用戶密碼（可選更新，如不提供則保持原密碼）
+     * @bodyParam password_confirmation string 密碼確認（當提供密碼時必需）
      * @bodyParam roles array 角色陣列
+     * @bodyParam email string required 電子郵件地址
      * 
      * @response 200 scenario="用戶更新成功" {
      *   "data": {
@@ -257,6 +264,7 @@ class UserController extends Controller
      * - 管理員不能刪除自己的帳號（在 UserPolicy 中檢查）
      * - 檢視者無法執行刪除操作
      * 
+     * @urlParam user integer required 用戶ID. Example: 1
      * @param \App\Models\User $user 要刪除的用戶模型實例（透過路由模型綁定自動解析）
      * @response 204
      * @return \Illuminate\Http\Response 204 No Content 回應

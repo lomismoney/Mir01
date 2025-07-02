@@ -91,24 +91,24 @@ class InventoryTransferController extends Controller
      * 獲取單筆庫存轉移記錄
      * 
      * @summary 獲取庫存轉移詳情
-     * @urlParam id integer required 庫存轉移記錄的ID。 Example: 1
+     * @urlParam transfer integer required 庫存轉移記錄的ID。 Example: 1
      * 
      * @apiResource \App\Http\Resources\Api\InventoryTransferResource
      * @apiResourceModel \App\Models\InventoryTransfer
      */
-    public function show(int $id): InventoryTransferResource
+    public function show(int $transfer): InventoryTransferResource
     {
-        $transfer = InventoryTransfer::with([
+        $transferModel = InventoryTransfer::with([
             'fromStore', 
             'toStore', 
             'user',
             'productVariant.product',
             'productVariant.attributeValues.attribute',
-        ])->findOrFail($id);
+        ])->findOrFail($transfer);
         
-        $this->authorize('view', $transfer);
+        $this->authorize('view', $transferModel);
         
-        return new InventoryTransferResource($transfer);
+        return new InventoryTransferResource($transferModel);
     }
 
     /**
@@ -199,32 +199,32 @@ class InventoryTransferController extends Controller
      * 更新庫存轉移記錄狀態
      * 
      * @summary 更新轉移狀態
-     * @urlParam id integer required 轉移記錄ID. Example: 1
+     * @urlParam transfer integer required 轉移記錄ID. Example: 1
      * @bodyParam status string required 新狀態. Example: completed
      * @bodyParam notes string 備註. Example: 已確認收到貨品
      *
      * @apiResource \App\Http\Resources\Api\InventoryTransferResource
      * @apiResourceModel \App\Models\InventoryTransfer
      */
-    public function updateStatus(Request $request, int $id): InventoryTransferResource
+    public function updateStatus(Request $request, int $transfer): InventoryTransferResource
     {
         $request->validate([
             'status' => ['required', 'string', 'in:pending,in_transit,completed,cancelled'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
         
-        return DB::transaction(function () use ($request, $id) {
+        return DB::transaction(function () use ($request, $transfer) {
             $user = Auth::user();
-            $transfer = InventoryTransfer::findOrFail($id);
+            $transferModel = InventoryTransfer::findOrFail($transfer);
             
-            $this->authorize('update', $transfer);
+            $this->authorize('update', $transferModel);
             
-            $oldStatus = $transfer->status;
+            $oldStatus = $transferModel->status;
             $newStatus = $request->status;
             
             // 如果狀態沒有變化，直接返回
             if ($oldStatus === $newStatus) {
-                return new InventoryTransferResource($transfer->load(['fromStore', 'toStore', 'user', 'productVariant.product']));
+                return new InventoryTransferResource($transferModel->load(['fromStore', 'toStore', 'user', 'productVariant.product']));
             }
             
             // 如果已經是完成或取消狀態，不允許更改
@@ -233,43 +233,43 @@ class InventoryTransferController extends Controller
             }
             
             // 更新轉移記錄的狀態
-            $transfer->status = $newStatus;
+            $transferModel->status = $newStatus;
             if ($request->has('notes')) {
-                $transfer->notes = $request->notes;
+                $transferModel->notes = $request->notes;
             }
-            $transfer->save();
+            $transferModel->save();
             
             try {
                 // 處理庫存實際轉移
                 if ($newStatus === InventoryTransfer::STATUS_IN_TRANSIT && $oldStatus === InventoryTransfer::STATUS_PENDING) {
                     // 從 pending 轉為 in_transit：只扣減來源門市庫存
-                    $this->handleInTransitTransfer($transfer, $user);
+                    $this->handleInTransitTransfer($transferModel, $user);
                 } elseif ($newStatus === InventoryTransfer::STATUS_COMPLETED) {
                     if ($oldStatus === InventoryTransfer::STATUS_PENDING) {
                         // 從 pending 直接轉為 completed：扣減來源庫存並增加目標庫存
-                        $this->handleCompletedTransfer($transfer, $user);
+                        $this->handleCompletedTransfer($transferModel, $user);
                     } elseif ($oldStatus === InventoryTransfer::STATUS_IN_TRANSIT) {
                         // 從 in_transit 轉為 completed：只增加目標門市庫存（來源已扣減）
-                        $this->handleCompletedFromInTransit($transfer, $user);
+                        $this->handleCompletedFromInTransit($transferModel, $user);
                     }
                 }
             } catch (\Exception $e) {
                 // 如果庫存操作失敗，回滾狀態
-                $transfer->status = $oldStatus;
-                $transfer->save();
+                $transferModel->status = $oldStatus;
+                $transferModel->save();
                 
                 abort(400, $e->getMessage());
             }
             
             // 重新加載關聯數據
-            $transfer->load([
+            $transferModel->load([
                 'fromStore',
                 'toStore',
                 'user',
                 'productVariant.product'
             ]);
             
-            return new InventoryTransferResource($transfer);
+            return new InventoryTransferResource($transferModel);
         });
     }
 
@@ -277,53 +277,53 @@ class InventoryTransferController extends Controller
      * 取消庫存轉移
      * 
      * @summary 取消庫存轉移
-     * @urlParam id integer required 轉移記錄ID. Example: 1
+     * @urlParam transfer integer required 轉移記錄ID. Example: 1
      * @bodyParam reason string required 取消原因. Example: 商品損壞，不需要轉移
      * 
      * @apiResource \App\Http\Resources\Api\InventoryTransferResource
      * @apiResourceModel \App\Models\InventoryTransfer
      */
-    public function cancel(Request $request, int $id): InventoryTransferResource
+    public function cancel(Request $request, int $transfer): InventoryTransferResource
     {
         $request->validate([
             'reason' => ['required', 'string', 'max:1000'],
         ]);
         
-        return DB::transaction(function () use ($request, $id) {
-            $transfer = InventoryTransfer::findOrFail($id);
+        return DB::transaction(function () use ($request, $transfer) {
+            $transferModel = InventoryTransfer::findOrFail($transfer);
             
-            $this->authorize('cancel', $transfer);
+            $this->authorize('cancel', $transferModel);
             
             // 如果已經是完成或取消狀態，不允許再取消
-            if ($transfer->status === InventoryTransfer::STATUS_COMPLETED || $transfer->status === InventoryTransfer::STATUS_CANCELLED) {
+            if ($transferModel->status === InventoryTransfer::STATUS_COMPLETED || $transferModel->status === InventoryTransfer::STATUS_CANCELLED) {
                 abort(422, '已完成或已取消的轉移記錄不能再次取消');
             }
             
-            $oldStatus = $transfer->status;
+            $oldStatus = $transferModel->status;
             
             // 如果是 in_transit 狀態，需要恢復來源門市庫存
             if ($oldStatus === InventoryTransfer::STATUS_IN_TRANSIT) {
                 try {
-                    $this->restoreInventoryFromInTransit($transfer, Auth::user(), $request->reason);
+                    $this->restoreInventoryFromInTransit($transferModel, Auth::user(), $request->reason);
                 } catch (\Exception $e) {
                     abort(400, '取消轉移失敗：' . $e->getMessage());
                 }
             }
             
             // 更新轉移記錄為已取消
-            $transfer->status = InventoryTransfer::STATUS_CANCELLED;
-            $transfer->notes = "已取消。原因：{$request->reason}" . ($transfer->notes ? "\n原始備註：{$transfer->notes}" : '');
-            $transfer->save();
+            $transferModel->status = InventoryTransfer::STATUS_CANCELLED;
+            $transferModel->notes = "已取消。原因：{$request->reason}" . ($transferModel->notes ? "\n原始備註：{$transferModel->notes}" : '');
+            $transferModel->save();
             
             // 重新加載關聯數據
-            $transfer->load([
+            $transferModel->load([
                 'fromStore',
                 'toStore',
                 'user',
                 'productVariant.product'
             ]);
             
-            return new InventoryTransferResource($transfer);
+            return new InventoryTransferResource($transferModel);
         });
     }
     

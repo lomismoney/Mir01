@@ -18,6 +18,8 @@ use Illuminate\Validation\Rule;
  * @bodyParam name string required 用戶姓名。例如：張三
  * @bodyParam username string required 用戶名（唯一）。例如：zhangsan
  * @bodyParam password string required 用戶密碼（至少8個字元）。例如：password123
+ * @bodyParam password_confirmation string required 確認密碼，必須與密碼欄位一致。例如：password123
+ * @bodyParam roles array 角色陣列（可選）。例如：["admin"]
  * @bodyParam role string required 用戶角色，必須是 admin 或 viewer。例如：admin
  */
 class StoreUserRequest extends FormRequest
