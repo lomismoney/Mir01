@@ -467,10 +467,10 @@ export function CreatePurchaseDialog({
                           data-oid="8:qa7xk"
                         >
                           NT${" "}
-                                                  {calculateTotal().toLocaleString("zh-TW", {
+                          {calculateTotal().toLocaleString("zh-TW", {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0,
-                        })}
+                          })}
                         </div>
                       </div>
                     </div>

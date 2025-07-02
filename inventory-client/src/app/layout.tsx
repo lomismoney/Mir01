@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/toaster";
+import { StagewiseToolbar } from "@stagewise/toolbar-next";
+import { ReactPlugin } from "@stagewise-plugins/react";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -50,6 +52,11 @@ export default function RootLayout({
             <QueryProvider data-oid="ok99bhf">
               {children}
               <Toaster data-oid="tm249ru" />
+              <StagewiseToolbar
+                config={{
+                  plugins: [ReactPlugin],
+                }}
+              />
             </QueryProvider>
           </SessionProvider>
         </ThemeProvider>

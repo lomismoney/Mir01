@@ -9,13 +9,13 @@ export type Product = NonNullable<
 export type ProductListResponse = paths['/api/products']['get']['responses'][200]['content']['application/json'];
 
 // 單一商品響應類型
-export type ProductResponse = paths['/api/products/{id}']['get']['responses'][200]['content']['application/json'];
+export type ProductResponse = paths['/api/products/{product}']['get']['responses'][200]['content']['application/json'];
 
 // 創建商品的請求類型 (暫時停用 - 等待後端端點實現)
 // export type CreateProductRequest = paths['/api/products']['post']['requestBody']['content']['application/json'];
 
 // 更新商品的請求類型
-export type UpdateProductRequest = paths['/api/products/{id}']['put']['requestBody']['content']['application/json'];
+export type UpdateProductRequest = paths['/api/products/{product}']['put']['requestBody']['content']['application/json'];
 
 // 產品API沒有分頁信息，直接返回數據數組
 // export type PaginationMeta = NonNullable<ProductListResponse['meta']>;

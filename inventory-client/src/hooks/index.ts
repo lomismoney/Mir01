@@ -8,6 +8,9 @@
 // 主要實體查詢鉤子（來自新的統一檔案）
 export * from './queries/useEntityQueries';
 
+// 專門的樂觀更新鉤子
+export { useUpdateOrderItemStatusOptimistic } from './useUpdateOrderItemStatusOptimistic';
+
 // 其他專門的鉤子
 export * from './use-admin-auth';
 export { useDebounce } from './use-debounce';

@@ -15,8 +15,8 @@ import type { paths } from './api';
 
 // === 基礎商品類型 ===
 type ProductsGetResponse = paths['/api/products']['get']['responses'][200]['content']['application/json'];
-type ProductGetResponse = paths['/api/products/{id}']['get']['responses'][200]['content']['application/json'];
-type ProductCreateRequest = paths['/api/products/{id}']['put']['requestBody']['content']['application/json'];
+type ProductGetResponse = paths['/api/products/{product}']['get']['responses'][200]['content']['application/json'];
+type ProductCreateRequest = paths['/api/products/{product}']['put']['requestBody']['content']['application/json'];
 
 /**
  * 商品基礎資料類型

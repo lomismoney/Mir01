@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ProductStatusBadge } from '@/components/orders/ProductStatusBadge';
+import { ItemStatusSelector } from '@/components/orders/ItemStatusSelector';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -27,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useOrderDetail } from '@/hooks/queries/useEntityQueries';
+import { useUpdateOrderItemStatusOptimistic } from '@/hooks/useUpdateOrderItemStatusOptimistic';
 import { ProcessedOrder, ProcessedOrderItem, PaymentRecord } from '@/types/api-helpers';
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -130,6 +132,30 @@ export function OrderPreviewModal({
 }: OrderPreviewModalProps) {
   const router = useRouter();
   const { data: order, isLoading, error } = useOrderDetail(orderId);
+  
+  // 🚀 樂觀更新 Hook：實現零延遲的狀態更新體驗
+  const { 
+    mutate: updateItemStatus, 
+    isPending: isUpdatingStatus 
+  } = useUpdateOrderItemStatusOptimistic();
+
+  /**
+   * 處理訂單項目狀態變更
+   * 
+   * 此函數實現樂觀更新機制：
+   * 1. 立即更新 UI 顯示新狀態
+   * 2. 後台發送 API 請求驗證
+   * 3. 如果失敗，自動回滾到原始狀態
+   * 
+   * @param {number} itemId - 訂單項目 ID
+   * @param {string} newStatus - 新的狀態值
+   */
+  const handleItemStatusChange = (itemId: number, newStatus: string) => {
+    updateItemStatus({
+      orderItemId: itemId,
+      status: newStatus,
+    });
+  };
 
   if (!orderId || !order || isLoading) return null;
 
@@ -202,6 +228,7 @@ export function OrderPreviewModal({
                   <TableHeader>
                     <TableRow>
                       <TableHead>商品名稱</TableHead>
+                      <TableHead className="text-center w-32">狀態</TableHead>
                       <TableHead className="text-center w-20">數量</TableHead>
                       <TableHead className="text-right w-32 whitespace-nowrap">單價</TableHead>
                       <TableHead className="text-right w-36 whitespace-nowrap">小計</TableHead>
@@ -224,6 +251,16 @@ export function OrderPreviewModal({
                             )}
                           </div>
                         </TableCell>
+                        
+                        {/* 🎯 狀態選擇器：樂觀更新 + 即時反饋 */}
+                        <TableCell className="text-center">
+                          <ItemStatusSelector
+                            item={item}
+                            isLoading={isUpdatingStatus}
+                            onStatusChange={handleItemStatusChange}
+                          />
+                        </TableCell>
+                        
                         <TableCell className="text-center text-sm">
                           {item.quantity}
                         </TableCell>

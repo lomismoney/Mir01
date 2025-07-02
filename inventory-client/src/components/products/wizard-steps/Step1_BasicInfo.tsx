@@ -280,11 +280,10 @@ export function Step1_BasicInfo({
 
       // 使用類型安全的 API 客戶端進行圖片上傳
       const { data, error, response } = await apiClient.POST(
-        "/api/products/{product_id}/upload-image",
+        "/api/products/{product}/upload-image",
         {
           params: {
             path: {
-              product_id: Number(productId),
               product: Number(productId),
             },
           },

@@ -344,22 +344,22 @@ export function OrderForm({
                                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                                           {/* 🎯 徽章區域：確保不被壓縮 */}
                                           <div className="flex items-center gap-2 flex-shrink-0">
-                                            <OrderFormProductBadge 
-                                              item={{
-                                                product_variant_id: field.product_variant_id,
-                                                is_stocked_sale: field.is_stocked_sale,
-                                                custom_specifications: field.custom_specifications || null,
-                                                quantity: Number(form.watch(`items.${index}.quantity`) || 0),
-                                                stock: field.stock || 0
-                                              }}
-                                              className="text-xs"
-                                            />
-                                            {/* 🎯 庫存信息顯示 */}
-                                            {field.is_stocked_sale && field.stock !== undefined && (
+                                          <OrderFormProductBadge 
+                                            item={{
+                                              product_variant_id: field.product_variant_id,
+                                              is_stocked_sale: field.is_stocked_sale,
+                                              custom_specifications: field.custom_specifications || null,
+                                              quantity: Number(form.watch(`items.${index}.quantity`) || 0),
+                                              stock: field.stock || 0
+                                            }}
+                                            className="text-xs"
+                                          />
+                                          {/* 🎯 庫存信息顯示 */}
+                                          {field.is_stocked_sale && field.stock !== undefined && (
                                               <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                                庫存: {field.stock}
-                                              </span>
-                                            )}
+                                              庫存: {field.stock}
+                                            </span>
+                                          )}
                                           </div>
                                           
                                           {/* 🎯 訂製商品規格顯示：限制寬度並添加 Tooltip */}
@@ -368,10 +368,10 @@ export function OrderForm({
                                               <Tooltip>
                                                 <TooltipTrigger asChild>
                                                   <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px] cursor-help">
-                                                    {Object.entries(field.custom_specifications)
-                                                      .map(([k, v]) => `${k}: ${v}`)
-                                                      .join("; ")}
-                                                  </span>
+                                              {Object.entries(field.custom_specifications)
+                                                .map(([k, v]) => `${k}: ${v}`)
+                                                .join("; ")}
+                                            </span>
                                                 </TooltipTrigger>
                                                 <TooltipContent side="bottom" className="max-w-[300px]">
                                                   <div className="space-y-1">

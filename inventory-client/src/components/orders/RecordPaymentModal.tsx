@@ -242,7 +242,7 @@ export default function RecordPaymentModal({
       >
         <DialogHeader data-oid="ivrtjwk">
           <DialogTitle className="flex items-center gap-2" data-oid="kw.4if6">
-            <DollarSign className="h-5 w-5 text-success" data-oid="y1uu5fx" />
+                            <DollarSign className="h-5 w-5 text-success" data-oid="y1uu5fx" />
             記錄部分收款
           </DialogTitle>
           <DialogDescription data-oid=".wkgxln">
@@ -256,7 +256,7 @@ export default function RecordPaymentModal({
           <Card data-slot="card" className="@container/card">
             <CardHeader className="space-y-1 pb-2">
               <CardDescription className="text-xs font-medium">
-                訂單總額
+                  訂單總額
               </CardDescription>
               <CardTitle className="text-xl font-semibold tabular-nums @[200px]/card:text-2xl">
                 ${Math.round(order.grand_total).toLocaleString()}
@@ -274,7 +274,7 @@ export default function RecordPaymentModal({
           <Card data-slot="card" className="@container/card">
             <CardHeader className="space-y-1 pb-2">
               <CardDescription className="text-xs font-medium">
-                已付金額
+                  已付金額
               </CardDescription>
               <CardTitle className="text-xl font-semibold tabular-nums @[200px]/card:text-2xl text-success">
                 ${Math.round(order.paid_amount).toLocaleString()}
@@ -292,7 +292,7 @@ export default function RecordPaymentModal({
           <Card data-slot="card" className="@container/card">
             <CardHeader className="space-y-1 pb-2">
               <CardDescription className="text-xs font-medium">
-                剩餘未付
+                  剩餘未付
               </CardDescription>
               <CardTitle className={cn(
                 "text-xl font-semibold tabular-nums @[200px]/card:text-2xl",
@@ -314,9 +314,9 @@ export default function RecordPaymentModal({
                     <span>已付清</span>
                   </>
                 )}
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
         </div>
 
         <Form {...form} data-oid="j3enj2b">

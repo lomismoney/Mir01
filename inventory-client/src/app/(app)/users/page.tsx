@@ -153,6 +153,7 @@ export default function UsersPage() {
         name: newUserName,
         username: newUsername,
         password: newPassword,
+        password_confirmation: newPassword,  // ✅ 新增確認密碼字段
         roles: newRoles as ("admin" | "staff" | "viewer" | "installer")[],
         role: newRoles[0] || "viewer", // API 要求的單一 role 字段
       },
@@ -238,11 +239,12 @@ export default function UsersPage() {
     // 只有當用戶輸入新密碼時，才包含密碼欄位
     if (editPassword.trim()) {
       updatePayload.password = editPassword;
+      updatePayload.password_confirmation = editPassword;  // ✅ 新增確認密碼字段
     }
 
     updateUserMutation.mutate(
       {
-        path: { id: editingUser.id },
+        path: { user: editingUser.id },
         body: updatePayload,
       },
       {

@@ -276,8 +276,8 @@ export function useProductDetail(productId: number | string | undefined) {
                 throw new Error('商品 ID 無效');
             }
 
-                    const { data, error } = await apiClient.GET('/api/products/{id}', {
-            params: { path: { id: numericId } }
+                    const { data, error } = await apiClient.GET('/api/products/{product}', {
+            params: { path: { product: numericId } }
         });
             
             if (error) {
@@ -426,7 +426,7 @@ export function useCreateProduct() {
 
 
 // 導入由 openapi-typescript 生成的精確類型
-type UpdateProductRequestBody = import('@/types/api').paths["/api/products/{id}"]["put"]["requestBody"]["content"]["application/json"];
+type UpdateProductRequestBody = import('@/types/api').paths["/api/products/{product}"]["put"]["requestBody"]["content"]["application/json"];
 
 /**
  * 更新商品的 Hook (SPU/SKU 架構升級版)
@@ -444,8 +444,8 @@ export function useUpdateProduct() {
 
     return useMutation({
         mutationFn: async ({ id, ...productData }: { id: number } & UpdateProductRequestBody) => {
-            const { data, error } = await apiClient.PUT('/api/products/{id}', {
-                params: { path: { id } },
+            const { data, error } = await apiClient.PUT('/api/products/{product}', {
+                params: { path: { product: id } },
                 body: productData
             });
             
@@ -500,8 +500,8 @@ export function useDeleteProduct() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const { data, error } = await apiClient.DELETE('/api/products/{id}', {
-                params: { path: { id } }
+            const { data, error } = await apiClient.DELETE('/api/products/{product}', {
+                params: { path: { product: id } }
             });
             
             if (error) {
@@ -633,8 +633,8 @@ export function useDeleteMultipleProducts() {
 // 這些類型現在將由 api.ts 精確提供
 type UserQueryParams = import('@/types/api').paths["/api/users"]["get"]["parameters"]["query"];
 type CreateUserRequestBody = import('@/types/api').paths["/api/users"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateUserRequestBody = import('@/types/api').paths["/api/users/{id}"]["put"]["requestBody"]["content"]["application/json"];
-type UserPathParams = import('@/types/api').paths["/api/users/{id}"]["get"]["parameters"]["path"];
+type UpdateUserRequestBody = import('@/types/api').paths["/api/users/{user}"]["put"]["requestBody"]["content"]["application/json"];
+type UserPathParams = import('@/types/api').paths["/api/users/{user}"]["get"]["parameters"]["path"];
 
 /**
  * 獲取用戶列表（高性能版本 - 整合第二階段優化）
@@ -794,8 +794,8 @@ export function useUpdateUser() {
   
   return useMutation({
     mutationFn: async ({ path, body }: UpdateUserPayload) => {
-      const { data, error } = await apiClient.PUT('/api/users/{id}', {
-        params: { path },
+      const { data, error } = await apiClient.PUT('/api/users/{user}', {
+        params: { path: { user: path.user } },
         body,
       });
       if (error) { 
@@ -858,8 +858,8 @@ export function useDeleteUser() {
   
   return useMutation({
     mutationFn: async (pathParams: UserPathParams) => {
-      const { error } = await apiClient.DELETE('/api/users/{id}', {
-        params: { path: pathParams }
+      const { error } = await apiClient.DELETE('/api/users/{user}', {
+        params: { path: { user: pathParams.user } }
       });
       if (error) throw error;
     },
@@ -912,8 +912,8 @@ export function useCustomerDetail(customerId: number | null) {
     queryFn: async () => {
       if (!customerId) return null; // 如果沒有 ID，則不執行查詢
       
-      const { data, error } = await apiClient.GET('/api/customers/{id}', {
-        params: { path: { id: customerId } },
+      const { data, error } = await apiClient.GET('/api/customers/{customer}', {
+        params: { path: { customer: customerId } },
       });
 
       if (error) {
@@ -1043,8 +1043,8 @@ export function useDeleteCustomer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (customerId: number) => {
-      const { error } = await apiClient.DELETE('/api/customers/{id}', {
-        params: { path: { id: customerId } }
+      const { error } = await apiClient.DELETE('/api/customers/{customer}', {
+        params: { path: { customer: customerId } }
       });
       if (error) throw error;
     },
@@ -1226,8 +1226,8 @@ export function useUpdateCustomer() {
   
   return useMutation({
     mutationFn: async ({ id, data }: UpdateCustomerPayload) => {
-      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}', {
-        params: { path: { id } },
+      const { data: responseData, error } = await apiClient.PUT('/api/customers/{customer}', {
+        params: { path: { customer: id } },
         body: data,
       });
       if (error) throw error;
@@ -1503,8 +1503,8 @@ export function useUpdateCategory() {
   
   return useMutation({
     mutationFn: async (payload: UpdateCategoryPayload) => {
-      const { data, error } = await apiClient.PUT("/api/categories/{id}", {
-        params: { path: { id: payload.id } },
+      const { data, error } = await apiClient.PUT("/api/categories/{category}", {
+        params: { path: { category: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -1563,8 +1563,8 @@ export function useDeleteCategory() {
   
   return useMutation({
     mutationFn: async (categoryId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/categories/{id}", {
-        params: { path: { id: categoryId } },
+      const { data, error } = await apiClient.DELETE("/api/categories/{category}", {
+        params: { path: { category: categoryId } },
       });
       if (error) throw error;
       return data;
@@ -1759,8 +1759,8 @@ export function useUpdateAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (variables: { id: number; body: { name: string } }) => {
-      const { data, error } = await apiClient.PUT('/api/attributes/{id}', {
-        params: { path: { id: variables.id } },
+      const { data, error } = await apiClient.PUT('/api/attributes/{attribute}', {
+        params: { path: { attribute: variables.id } },
         body: variables.body,
       });
       if (error) { 
@@ -1791,8 +1791,8 @@ export function useDeleteAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (pathParams: AttributePathParams) => {
-      const { error } = await apiClient.DELETE('/api/attributes/{id}', {
-        params: { path: pathParams },
+      const { error } = await apiClient.DELETE('/api/attributes/{attribute}', {
+        params: { path: { attribute: pathParams.id } },
       });
       if (error) { 
         throw new Error('刪除屬性失敗'); 
@@ -1823,9 +1823,9 @@ export function useDeleteAttribute() {
 }
 
 // 導入屬性值管理的精確類型定義
-type CreateAttributeValueRequestBody = import('@/types/api').paths["/api/attributes/{attribute_id}/values"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateAttributeValueRequestBody = import('@/types/api').paths["/api/values/{id}"]["put"]["requestBody"]["content"]["application/json"];
-type AttributeValuePathParams = import('@/types/api').paths["/api/values/{id}"]["get"]["parameters"]["path"];
+type CreateAttributeValueRequestBody = import('@/types/api').paths["/api/attributes/{attribute}/values"]["post"]["requestBody"]["content"]["application/json"];
+type UpdateAttributeValueRequestBody = import('@/types/api').paths["/api/values/{value}"]["put"]["requestBody"]["content"]["application/json"];
+type AttributeValuePathParams = import('@/types/api').paths["/api/values/{value}"]["get"]["parameters"]["path"];
 
 /**
  * 為指定屬性建立新屬性值的 Mutation
@@ -1834,8 +1834,8 @@ export function useCreateAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (variables: { attributeId: number; body: CreateAttributeValueRequestBody }) => {
-      const { data, error } = await apiClient.POST('/api/attributes/{attribute_id}/values', {
-        params: { path: { attribute_id: variables.attributeId } },
+      const { data, error } = await apiClient.POST('/api/attributes/{attribute}/values', {
+        params: { path: { attribute: variables.attributeId } },
         body: variables.body,
       });
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '新增選項失敗'); }
@@ -1878,8 +1878,8 @@ export function useUpdateAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (variables: { valueId: number; body: UpdateAttributeValueRequestBody }) => {
-      const { data, error } = await apiClient.PUT('/api/values/{id}', {
-        params: { path: { id: variables.valueId } },
+      const { data, error } = await apiClient.PUT('/api/values/{value}', {
+        params: { path: { value: variables.valueId } },
         body: variables.body,
       });
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '更新選項失敗'); }
@@ -1922,8 +1922,8 @@ export function useDeleteAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (valueId: number) => {
-      const { error } = await apiClient.DELETE('/api/values/{id}', {
-        params: { path: { id: valueId } },
+      const { error } = await apiClient.DELETE('/api/values/{value}', {
+        params: { path: { value: valueId } },
       });
       if (error) { throw new Error('刪除選項失敗'); }
     },
@@ -1978,8 +1978,8 @@ export function useAttributeValues(attributeId: number | null) {
       // 只有在 attributeId 有效時才發起請求
       if (!attributeId) return null;
 
-      const { data, error } = await apiClient.GET('/api/attributes/{attribute_id}/values', {
-        params: { path: { attribute_id: attributeId } },
+      const { data, error } = await apiClient.GET('/api/attributes/{attribute}/values', {
+        params: { path: { attribute: attributeId } },
       });
 
       if (error) {
@@ -2093,9 +2093,9 @@ export function useInventoryDetail(id: number) {
   return useQuery({
     queryKey: ['inventory', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/{id}' as any, {
-        params: { path: { id } },
-      } as any);
+      const { data, error } = await apiClient.GET('/api/inventory/{inventory}', {
+        params: { path: { inventory: id } },
+      });
       if (error) {
         throw new Error('獲取庫存詳情失敗');
       }
@@ -2183,12 +2183,12 @@ export function useInventoryHistory(params: {
       if (params.per_page) queryParams.per_page = params.per_page;
       if (params.page) queryParams.page = params.page;
       
-      const { data, error } = await apiClient.GET('/api/inventory/{id}/history' as any, {
+      const { data, error } = await apiClient.GET('/api/inventory/{inventory}/history', {
         params: {
-          path: { id: params.id },
+          path: { inventory: params.id },
           query: queryParams
         }
-      } as any);
+      });
       if (error) {
         throw new Error('獲取庫存歷史記錄失敗');
       }
@@ -2404,9 +2404,9 @@ export function useInventoryTransferDetail(id: number) {
   return useQuery({
     queryKey: ['inventory', 'transfer', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/transfers/{id}' as any, {
-        params: { path: { id: id.toString() } },
-      } as any);
+      const { data, error } = await apiClient.GET('/api/inventory/transfers/{transfer}', {
+        params: { path: { transfer: id } },
+      });
       if (error) {
         throw new Error('獲取庫存轉移詳情失敗');
       }
@@ -2483,8 +2483,8 @@ export function useUpdateInventoryTransferStatus() {
       status: string;
       notes?: string;
     }) => {
-      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{id}/status', {
-        params: { path: { id: params.id.toString() } },
+      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{transfer}/status', {
+        params: { path: { transfer: params.id } },
         body: { status: params.status, notes: params.notes },
       });
       if (error) {
@@ -2534,8 +2534,8 @@ export function useCancelInventoryTransfer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (params: { id: number; reason: string }) => {
-      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{id}/cancel', {
-        params: { path: { id: params.id.toString() } },
+      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{transfer}/cancel', {
+        params: { path: { transfer: params.id } },
         body: { reason: params.reason },
       });
       if (error) {
@@ -2635,9 +2635,9 @@ export function useStore(id: number) {
   return useQuery({
     queryKey: ['stores', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/stores/{id}' as any, {
-        params: { path: { id } },
-      } as any);
+      const { data, error } = await apiClient.GET('/api/stores/{store}', {
+        params: { path: { store: id } },
+      });
       if (error) {
         throw new Error('獲取門市詳情失敗');
       }
@@ -2709,10 +2709,10 @@ export function useUpdateStore() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (params: { id: number; data: any }) => {
-      const { data, error } = await apiClient.PUT('/api/stores/{id}' as any, {
-        params: { path: { id: params.id } },
+      const { data, error } = await apiClient.PUT('/api/stores/{store}', {
+        params: { path: { store: params.id } },
         body: params.data,
-      } as any);
+      });
       if (error) {
         throw new Error('更新門市失敗');
       }
@@ -2755,8 +2755,8 @@ export function useDeleteStore() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: number) => {
-      const { error } = await apiClient.DELETE('/api/stores/{id}' as any, {
-        params: { path: { id: id } },
+      const { error } = await apiClient.DELETE('/api/stores/{store}', {
+        params: { path: { store: id } },
       });
       if (error) {
         throw new Error('刪除門市失敗');
@@ -2856,9 +2856,9 @@ export function useProductVariantDetail(id: number) {
   return useQuery({
     queryKey: ['product-variants', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/products/variants/{id}' as any, {
-        params: { path: { id: id.toString() } },
-      } as any);
+      const { data, error } = await apiClient.GET('/api/products/variants/{variant}', {
+        params: { path: { variant: id } },
+      });
       if (error) {
         throw new Error('獲取商品變體詳情失敗');
       }
@@ -3057,8 +3057,8 @@ export function usePurchase(id: number | string) {
   return useQuery({
     queryKey: ['purchase', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/purchases/{id}', {
-        params: { path: { id: String(id) } }
+      const { data, error } = await apiClient.GET('/api/purchases/{purchase}', {
+        params: { path: { purchase: String(id) } }
       });
       
       if (error) {
@@ -3122,8 +3122,8 @@ export function useUpdatePurchase() {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: number | string; data: any }) => {
-      const { data: responseData, error } = await apiClient.PUT('/api/purchases/{id}', {
-          params: { path: { id: String(id) } },
+      const { data: responseData, error } = await apiClient.PUT('/api/purchases/{purchase}', {
+          params: { path: { purchase: String(id) } },
         body: data
       })
       
@@ -3198,8 +3198,8 @@ export function useDeletePurchase() {
   
   return useMutation({
     mutationFn: async (id: number | string) => {
-      const { data, error } = await apiClient.DELETE('/api/purchases/{id}', {
-        params: { path: { id: String(id) } }
+      const { data, error } = await apiClient.DELETE('/api/purchases/{purchase}', {
+        params: { path: { purchase: String(id) } }
       })
       
       if (error) {
@@ -3423,8 +3423,8 @@ export function useOrderDetail(orderId: number | null) {
     queryKey: QUERY_KEYS.ORDER(orderId!), // 使用 ['orders', orderId] 作為唯一鍵
     queryFn: async () => {
       if (!orderId) return null; // 如果沒有 ID，則不執行查詢
-      const { data, error } = await apiClient.GET("/api/orders/{id}", {
-        params: { path: { id: orderId } },
+      const { data, error } = await apiClient.GET("/api/orders/{order}", {
+        params: { path: { order: orderId } },
       });
       if (error) {
         const errorMessage = parseApiError(error);
@@ -3499,10 +3499,10 @@ export function useConfirmOrderPayment() {
   return useMutation({
     mutationFn: async (orderId: number) => {
       // 🚀 使用精確的 API 類型，完全移除 any 斷言
-      const { data, error } = await apiClient.POST("/api/orders/{order_id}/confirm-payment", {
+      const { data, error } = await apiClient.POST("/api/orders/{order}/confirm-payment", {
         params: { 
           path: { 
-            order_id: orderId
+            order: orderId
           } 
         },
       });
@@ -3561,15 +3561,15 @@ export function useCreateOrderShipment() {
   const queryClient = useQueryClient();
   
   // 🚀 使用 API 生成的精確類型定義
-  type CreateShipmentRequestBody = import('@/types/api').paths["/api/orders/{order_id}/create-shipment"]["post"]["requestBody"]["content"]["application/json"];
+  type CreateShipmentRequestBody = import('@/types/api').paths["/api/orders/{order}/create-shipment"]["post"]["requestBody"]["content"]["application/json"];
   
   return useMutation({
     mutationFn: async (payload: { orderId: number; data: CreateShipmentRequestBody }) => {
       // 🚀 使用精確的 API 類型，完全移除 any 斷言
-      const { data, error } = await apiClient.POST("/api/orders/{order_id}/create-shipment", {
+      const { data, error } = await apiClient.POST("/api/orders/{order}/create-shipment", {
         params: { 
           path: { 
-            order_id: payload.orderId
+            order: payload.orderId
           } 
         },
         body: payload.data,
@@ -3611,15 +3611,15 @@ export function useAddOrderPayment() {
   const queryClient = useQueryClient();
   
   // 🚀 使用 API 生成的精確類型定義
-  type AddPaymentRequestBody = import('@/types/api').paths["/api/orders/{order_id}/add-payment"]["post"]["requestBody"]["content"]["application/json"];
+  type AddPaymentRequestBody = import('@/types/api').paths["/api/orders/{order}/add-payment"]["post"]["requestBody"]["content"]["application/json"];
   
   return useMutation({
     mutationFn: async (payload: { orderId: number; data: AddPaymentRequestBody }) => {
       // 🚀 使用精確的 API 類型，完全移除 any 斷言
-      const { data, error } = await apiClient.POST("/api/orders/{order_id}/add-payment", {
+      const { data, error } = await apiClient.POST("/api/orders/{order}/add-payment", {
         params: { 
           path: { 
-            order_id: payload.orderId
+            order: payload.orderId
           } 
         },
         body: payload.data,
@@ -3704,8 +3704,8 @@ export function useUpdateOrder() {
 
   return useMutation({
     mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
-      const { data, error } = await apiClient.PUT("/api/orders/{id}", {
-        params: { path: { id: payload.id } },
+      const { data, error } = await apiClient.PUT("/api/orders/{order}", {
+        params: { path: { order: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -3736,8 +3736,8 @@ export function useDeleteOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/orders/{id}", {
-        params: { path: { id: orderId } },
+      const { data, error } = await apiClient.DELETE("/api/orders/{order}", {
+        params: { path: { order: orderId } },
       });
       if (error) throw error;
       return data;
@@ -3780,7 +3780,7 @@ export function useUpdateOrderItemStatus() {
   const queryClient = useQueryClient();
   
   // 使用 API 生成的類型定義
-  type UpdateOrderItemStatusRequestBody = import('@/types/api').paths['/api/order-items/{order_item_id}/status']['patch']['requestBody']['content']['application/json'];
+  type UpdateOrderItemStatusRequestBody = import('@/types/api').paths['/api/order-items/{order_item}/status']['patch']['requestBody']['content']['application/json'];
   type UpdateOrderItemStatusPayload = {
     orderItemId: number;
     status: string;
@@ -3794,8 +3794,8 @@ export function useUpdateOrderItemStatus() {
         ...(notes && { notes })
       };
       
-      const { data, error } = await apiClient.PATCH('/api/order-items/{order_item_id}/status', {
-        params: { path: { order_item_id: orderItemId } },
+      const { data, error } = await apiClient.PATCH('/api/order-items/{order_item}/status', {
+        params: { path: { order_item: orderItemId } },
         body: requestBody,
       });
       
@@ -3868,15 +3868,15 @@ export function useCreateRefund() {
   const queryClient = useQueryClient();
   
   // 🚀 使用 API 生成的精確類型定義
-  type CreateRefundRequestBody = import('@/types/api').paths["/api/orders/{order_id}/refunds"]["post"]["requestBody"]["content"]["application/json"];
+  type CreateRefundRequestBody = import('@/types/api').paths["/api/orders/{order}/refunds"]["post"]["requestBody"]["content"]["application/json"];
   
   return useMutation({
     mutationFn: async (payload: { orderId: number; data: CreateRefundRequestBody }) => {
       // 🚀 使用精確的 API 類型，完全移除 any 斷言
-      const { data, error } = await apiClient.POST("/api/orders/{order_id}/refunds", {
+      const { data, error } = await apiClient.POST("/api/orders/{order}/refunds", {
         params: { 
           path: { 
-            order_id: payload.orderId
+            order: payload.orderId
           } 
         },
         body: payload.data,
@@ -3926,8 +3926,8 @@ export function useCancelOrder() {
   
   return useMutation({
     mutationFn: async ({ orderId, reason }: { orderId: number; reason?: string }) => {
-      const { error } = await apiClient.POST('/api/orders/{order_id}/cancel', {
-        params: { path: { order_id: orderId } },
+      const { error } = await apiClient.POST('/api/orders/{order}/cancel', {
+        params: { path: { order: orderId } },
         body: { reason },
       });
 
@@ -4345,9 +4345,9 @@ export function useInstallation(id: number) {
   return useQuery({
     queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(id),
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/installations/{id}', {
+      const { data, error } = await apiClient.GET('/api/installations/{installation}', {
         params: { 
-          path: { id: id },
+          path: { installation: id },
           query: {
             include: 'items,installer,creator,order'
           }
@@ -4495,8 +4495,8 @@ export function useUpdateInstallation() {
 
   return useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & UpdateInstallationRequest) => {
-      const { data: response, error } = await apiClient.PUT('/api/installations/{id}', {
-        params: { path: { id: id } },
+      const { data: response, error } = await apiClient.PUT('/api/installations/{installation}', {
+        params: { path: { installation: id } },
         body: data as any
       });
       
@@ -4545,8 +4545,8 @@ export function useDeleteInstallation() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const { data, error } = await apiClient.DELETE('/api/installations/{id}', {
-        params: { path: { id: id } }
+      const { data, error } = await apiClient.DELETE('/api/installations/{installation}', {
+        params: { path: { installation: id } }
       });
       
       if (error) {
@@ -4591,8 +4591,8 @@ export function useAssignInstaller() {
 
   return useMutation({
     mutationFn: async ({ installationId, ...data }: { installationId: number } & AssignInstallerRequest) => {
-      const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/assign', {
-        params: { path: { installation_id: installationId } },
+      const { data: response, error } = await apiClient.POST('/api/installations/{installation}/assign', {
+        params: { path: { installation: installationId } },
         body: data
       });
       
@@ -4650,8 +4650,8 @@ export function useUpdateInstallationStatus() {
 
   return useMutation({
     mutationFn: async ({ installationId, ...data }: { installationId: number } & UpdateInstallationStatusRequest) => {
-      const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/status', {
-        params: { path: { installation_id: installationId } },
+      const { data: response, error } = await apiClient.POST('/api/installations/{installation}/status', {
+        params: { path: { installation: installationId } },
         body: data
       });
       

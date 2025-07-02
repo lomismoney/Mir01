@@ -92,53 +92,57 @@ apiClient.use({
 });
 
 /**
- * 創建類型安全的 API 客戶端包裝器
+ * 創建類型安全的 API 客戶端包裝器 - 語義化RESTful升級版
  * 
- * 提供特定端點的安全包裝，處理類型不一致問題
- * 同時保持統一的認證機制
+ * ✅ 語義化RESTful設計：使用語義化參數名稱 ({inventory}, {transfer}, {store}, {variant})
+ * ✅ 完整類型安全：移除所有 as any 強制轉換，恢復 TypeScript 智能提示
+ * ✅ 統一認證機制：集成 next-auth Session 認證
+ * ✅ 開發體驗提升：精確的類型推導和錯誤檢測
  */
 export const safeApiClient = {
   ...apiClient,
   
-  // 修復庫存詳情端點
+  // ✅ 修復庫存詳情端點 - 語義化參數升級
   getInventoryDetail: async (id: number) => {
-    return apiClient.GET('/api/inventory/{id}' as any, {
-      params: { path: { id } }
-    } as any);
+    return apiClient.GET('/api/inventory/{inventory}', {
+      params: { path: { inventory: id } }
+    });
   },
 
-  // 修復轉移詳情端點
+  // ✅ 修復轉移詳情端點 - 語義化參數升級
   getInventoryTransferDetail: async (id: number) => {
-    return apiClient.GET('/api/inventory/transfers/{id}' as any, {
-      params: { path: { id } }
-    } as any);
+    return apiClient.GET('/api/inventory/transfers/{transfer}', {
+      params: { path: { transfer: id } }
+    });
   },
 
-  // 修復門市相關端點
+  // ✅ 修復門市詳情端點 - 語義化參數升級
   getStore: async (id: number) => {
-    return apiClient.GET('/api/stores/{id}' as any, {
-      params: { path: { id } }
-    } as any);
+    return apiClient.GET('/api/stores/{store}', {
+      params: { path: { store: id } }
+    });
   },
 
+  // ✅ 門市創建端點 - 移除 as any 強制轉換
   createStore: async (data: any) => {
-    return apiClient.POST('/api/stores' as any, {
+    return apiClient.POST('/api/stores', {
       body: data
-    } as any);
+    });
   },
 
+  // ✅ 修復門市更新端點 - 語義化參數升級
   updateStore: async (id: number, data: any) => {
-    return apiClient.PUT('/api/stores/{id}' as any, {
-      params: { path: { id } },
+    return apiClient.PUT('/api/stores/{store}', {
+      params: { path: { store: id } },
       body: data
-    } as any);
+    });
   },
 
-  // 修復商品變體詳情端點
+  // ✅ 修復商品變體詳情端點 - 語義化參數升級
   getProductVariantDetail: async (id: number) => {
-    return apiClient.GET('/api/products/variants/{id}' as any, {
-      params: { path: { id } }
-    } as any);
+    return apiClient.GET('/api/products/variants/{variant}', {
+      params: { path: { variant: id } }
+    });
   },
 };
 
