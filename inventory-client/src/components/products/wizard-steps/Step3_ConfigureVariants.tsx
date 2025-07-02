@@ -425,13 +425,15 @@ export function Step3_ConfigureVariants({
                     className="border-b hover:bg-transparent"
                     data-oid="tk88pnt"
                   >
-                    {/* 變體組合 */}
-                    <TableHead
-                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="drrztn3"
-                    >
-                      變體組合
-                    </TableHead>
+                    {/* 變體組合 - 只在多規格商品時顯示 */}
+                    {formData.specifications.isVariable && (
+                      <TableHead
+                        className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                        data-oid="drrztn3"
+                      >
+                        變體組合
+                      </TableHead>
+                    )}
                     {/* SKU */}
                     <TableHead
                       className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
