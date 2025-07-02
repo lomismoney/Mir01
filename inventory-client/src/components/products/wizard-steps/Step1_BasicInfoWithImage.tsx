@@ -70,8 +70,10 @@ export function Step1_BasicInfoWithImage({
     error: categoriesError,
   } = useCategories();
 
-  // 圖片選擇邏輯
-  const imageSelection = useImageSelection();
+  // 圖片選擇邏輯（支援編輯模式初始化）
+  const imageSelection = useImageSelection(
+    isEditMode ? formData.imageData.previewUrl : null
+  );
 
   // 處理分類資料，分離父分類和子分類
   const { parentCategories, allCategoriesMap } = React.useMemo(() => {
@@ -182,6 +184,16 @@ export function Step1_BasicInfoWithImage({
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+
+  /**
+   * 編輯模式下的反向同步：formData → imageSelection
+   * 當商品數據加載完成後，初始化圖片預覽
+   */
+  useEffect(() => {
+    if (isEditMode && formData.imageData.previewUrl && !imageSelection.imageData.preview) {
+      imageSelection.setExternalPreview(formData.imageData.previewUrl);
+    }
+  }, [isEditMode, formData.imageData.previewUrl, imageSelection.imageData.preview, imageSelection]);
 
   /**
    * 同步圖片選擇到父組件
@@ -521,8 +533,8 @@ export function Step1_BasicInfoWithImage({
         <div className="space-y-2" data-oid="avzxsmq">
           <Label data-oid="nkl8vge">商品圖片</Label>
           <div className="flex items-start gap-4" data-oid="txp.uk5">
-            {formData.imageData.selectedFile ||
-            formData.imageData.previewUrl ? (
+            {/* 優化的圖片顯示邏輯：統一處理所有圖片來源 */}
+            {imageSelection.imageData.preview || formData.imageData.previewUrl ? (
               /* 已上傳圖片的預覽區 */
               <div className="relative" data-oid="rop2ug9">
                 <div
@@ -530,11 +542,7 @@ export function Step1_BasicInfoWithImage({
                   data-oid="qh1qm1s"
                 >
                   <img
-                    src={
-                      imageSelection.imageData.preview ||
-                      formData.imageData.previewUrl ||
-                      ""
-                    }
+                    src={imageSelection.imageData.preview || formData.imageData.previewUrl || ""}
                     alt="商品圖片預覽"
                     className="w-full h-full object-cover"
                     data-oid="ak6b2r8"

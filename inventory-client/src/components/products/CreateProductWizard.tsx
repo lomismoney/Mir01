@@ -466,9 +466,9 @@ export function CreateProductWizard({
         },
         imageData: {
           selectedFile: null,
-          // 如果商品有圖片，使用原圖 URL 作為預覽（現在可以安全訪問）
+          // 🔧 修復：使用正確的 API 契約字段 image_urls
           previewUrl:
-            productData.image_url || productData.thumbnail_url || null,
+            productData.image_urls?.original || productData.image_urls?.thumb || null,
         },
         specifications: {
           isVariable: isVariable,

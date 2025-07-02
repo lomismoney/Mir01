@@ -69,13 +69,15 @@ const extractImageMetadata = (file: File) => {
  * - 自動生成預覽 URL
  * - 記憶體管理（自動清理 blob URL）
  * - 圖片元數據提取
+ * - 支援外部圖片 URL 初始化（編輯模式）
  * 
+ * @param initialPreviewUrl - 初始預覽圖片 URL（用於編輯模式）
  * @returns 圖片選擇相關的狀態和方法
  */
-export function useImageSelection() {
+export function useImageSelection(initialPreviewUrl?: string | null) {
   const [imageData, setImageData] = useState<ImageSelectionData>({
     file: null,
-    preview: null,
+    preview: initialPreviewUrl || null,
     isValid: true,
   });
 
@@ -89,8 +91,8 @@ export function useImageSelection() {
     const validation = validateImageFile(file);
     
     if (validation.isValid) {
-      // 清理舊的預覽 URL
-      if (imageData.preview) {
+      // 清理舊的 blob URL（不清理外部 URL）
+      if (imageData.preview && imageData.preview.startsWith('blob:')) {
         URL.revokeObjectURL(imageData.preview);
       }
       
@@ -104,7 +106,7 @@ export function useImageSelection() {
       });
     } else {
       // 驗證失敗，清理狀態
-      if (imageData.preview) {
+      if (imageData.preview && imageData.preview.startsWith('blob:')) {
         URL.revokeObjectURL(imageData.preview);
       }
       
@@ -121,8 +123,8 @@ export function useImageSelection() {
    * 清除圖片選擇
    */
   const clearImage = useCallback(() => {
-    // 清理預覽 URL
-    if (imageData.preview) {
+    // 清理預覽 URL（只清理 blob URL，不清理外部 URL）
+    if (imageData.preview && imageData.preview.startsWith('blob:')) {
       URL.revokeObjectURL(imageData.preview);
     }
     
@@ -131,6 +133,25 @@ export function useImageSelection() {
       preview: null,
       isValid: true,
     });
+  }, [imageData.preview]);
+
+  /**
+   * 設置外部圖片 URL（用於編輯模式）
+   * 
+   * @param url - 外部圖片 URL
+   */
+  const setExternalPreview = useCallback((url: string | null) => {
+    // 清理舊的 blob URL
+    if (imageData.preview && imageData.preview.startsWith('blob:')) {
+      URL.revokeObjectURL(imageData.preview);
+    }
+    
+    setImageData(prev => ({
+      ...prev,
+      preview: url,
+      file: null, // 外部 URL 時清空文件
+      isValid: true,
+    }));
   }, [imageData.preview]);
 
   /**
@@ -153,6 +174,7 @@ export function useImageSelection() {
     imageData,
     selectImage,
     clearImage,
+    setExternalPreview,
     getImageMetadata,
   };
 } 
