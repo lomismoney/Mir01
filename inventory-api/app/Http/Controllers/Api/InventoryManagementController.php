@@ -236,7 +236,7 @@ class InventoryManagementController extends Controller
      * @apiResourceCollection \App\Http\Resources\Api\InventoryResource
      * @apiResourceModel \App\Models\Inventory
      */
-    public function batchCheck(Request $request): JsonResponse
+    public function batchCheck(Request $request): AnonymousResourceCollection
     {
         $request->validate([
             'product_variant_ids' => 'required|array',
@@ -253,26 +253,7 @@ class InventoryManagementController extends Controller
         
         $inventories = $query->get();
         
-        // 返回簡化的格式以符合測試期望
-        $data = $inventories->map(function($inventory) {
-            return [
-                'id' => $inventory->id,
-                'product_variant_id' => $inventory->product_variant_id,
-                'store_id' => $inventory->store_id,
-                'quantity' => $inventory->quantity,
-                'low_stock_threshold' => $inventory->low_stock_threshold,
-                'product_variant' => [
-                    'id' => $inventory->productVariant->id,
-                    'sku' => $inventory->productVariant->sku,
-                ],
-                'store' => [
-                    'id' => $inventory->store->id,
-                    'name' => $inventory->store->name,
-                ]
-            ];
-        });
-        
-        return response()->json($data);
+        return InventoryResource::collection($inventories);
     }
 
     /**

@@ -782,24 +782,26 @@ class InventoryManagementControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                '*' => [
-                    'id',
-                    'product_variant_id',
-                    'store_id',
-                    'quantity',
-                    'low_stock_threshold',
-                    'product_variant' => [
+                'data' => [
+                    '*' => [
                         'id',
-                        'sku'
-                    ],
-                    'store' => [
-                        'id',
-                        'name'
+                        'product_variant_id',
+                        'store_id',
+                        'quantity',
+                        'low_stock_threshold',
+                        'product_variant' => [
+                            'id',
+                            'sku'
+                        ],
+                        'store' => [
+                            'id',
+                            'name'
+                        ]
                     ]
                 ]
             ]);
 
-        $data = $response->json();
+        $data = $response->json('data');
         $this->assertCount(2, $data);
         
         // 驗證返回的庫存記錄
@@ -830,7 +832,7 @@ class InventoryManagementControllerTest extends TestCase
             ->postJson('/api/inventory/batch-check', $requestData);
 
         $response->assertStatus(200);
-        $data = $response->json();
+        $data = $response->json('data');
         
         // 只應該返回指定門市的庫存
         $this->assertCount(1, $data);
