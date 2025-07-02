@@ -15,6 +15,16 @@ use App\Http\Resources\Api\PurchaseResource;
 class PurchaseController extends Controller
 {
     /**
+     * 建構函式 - 設置資源授權
+     */
+    public function __construct()
+    {
+        // 🔐 使用 authorizeResource 自動將控制器方法與 PurchasePolicy 中的
+        // viewAny、view、create、update、delete 方法進行映射
+        $this->authorizeResource(Purchase::class, 'purchase');
+    }
+
+    /**
      * Display a listing of the resource.
      * 
      * @group 進貨管理
@@ -66,7 +76,7 @@ class PurchaseController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', Purchase::class);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         $purchases = QueryBuilder::for(Purchase::class)
             ->allowedFilters([
@@ -116,7 +126,7 @@ class PurchaseController extends Controller
      */
     public function store(PurchaseData $purchaseData, PurchaseService $purchaseService)
     {
-        $this->authorize('create', Purchase::class);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
         $purchase = $purchaseService->createPurchase($purchaseData);
         return new PurchaseResource($purchase->load(['store', 'items.productVariant.product']));
     }
@@ -127,10 +137,10 @@ class PurchaseController extends Controller
      * @group 進貨管理
      * @authenticated
      */
-    public function show(string $id)
+    public function show(Purchase $purchase)
     {
-        $purchase = Purchase::with(['store', 'items.productVariant.product'])->findOrFail($id);
-        $this->authorize('view', $purchase);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
+        $purchase->load(['store', 'items.productVariant.product']);
         return new PurchaseResource($purchase);
     }
 
@@ -149,10 +159,9 @@ class PurchaseController extends Controller
      * @bodyParam items[].quantity integer 數量 Example: 10
      * @bodyParam items[].cost_price number 成本價格 Example: 150.00
      */
-    public function update(PurchaseData $purchaseData, string $id, PurchaseService $purchaseService)
+    public function update(PurchaseData $purchaseData, Purchase $purchase, PurchaseService $purchaseService)
     {
-        $purchase = Purchase::findOrFail($id);
-        $this->authorize('update', $purchase);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         if (!$purchase->canBeModified()) {
             return response()->json(['message' => "進貨單狀態為 {$purchase->status_description}，無法修改"], 422);
@@ -169,9 +178,8 @@ class PurchaseController extends Controller
      * @authenticated
      * @bodyParam status string required 新狀態 Example: in_transit
      */
-    public function updateStatus(string $purchase, Request $request)
+    public function updateStatus(Purchase $purchase, Request $request)
     {
-        $purchase = Purchase::findOrFail($purchase);
         $this->authorize('update', $purchase);
 
         $request->validate([
@@ -196,9 +204,8 @@ class PurchaseController extends Controller
      * @group 進貨管理
      * @authenticated
      */
-    public function cancel(string $purchase)
+    public function cancel(Purchase $purchase)
     {
-        $purchase = Purchase::findOrFail($purchase);
         $this->authorize('update', $purchase);
 
         if (!$purchase->canBeCancelled()) {
@@ -215,11 +222,9 @@ class PurchaseController extends Controller
      * @group 進貨管理
      * @authenticated
      */
-    public function destroy(string $id)
+    public function destroy(Purchase $purchase)
     {
-        $purchase = Purchase::findOrFail($id);
-        
-        $this->authorize('delete', $purchase);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         if ($purchase->status !== Purchase::STATUS_PENDING) {
             return response()->json([

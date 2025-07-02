@@ -23,6 +23,9 @@ class OrderController extends Controller
         protected OrderService $orderService,
         protected RefundService $refundService
     ) {
+        // 🔐 使用 authorizeResource 自動將控制器方法與 OrderPolicy 中的
+        // viewAny、view、create、update、delete 方法進行映射
+        $this->authorizeResource(Order::class, 'order');
     }
     /**
      * @group 訂單管理
@@ -39,10 +42,9 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. 權限驗證
-        $this->authorize('viewAny', Order::class);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-        // 2. 驗證請求參數
+        // 驗證請求參數
         $request->validate([
             'search'          => 'nullable|string',
             'shipping_status' => 'nullable|string',
@@ -143,8 +145,7 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        // 1. 權限驗證
-        $this->authorize('create', Order::class);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         try {
             // 2. 將所有業務邏輯委派給 Service 層
@@ -187,10 +188,9 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        // 1. 權限驗證
-        $this->authorize('view', $order);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-        // 2. 預加載所有需要的關聯數據，包括嵌套關聯，以優化性能
+        // 預加載所有需要的關聯數據，包括嵌套關聯，以優化性能
         $order->load([
             'items.productVariant', // 訂單項目及其關聯的商品變體
             'customer.defaultAddress', // 客戶及其預設地址
@@ -241,10 +241,9 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, Order $order)
     {
-        // 1. 權限驗證
-        $this->authorize('update', $order);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-        // 2. 將所有業務邏輯委派給 Service 層
+        // 將所有業務邏輯委派給 Service 層
         $updatedOrder = $this->orderService->updateOrder($order, $request->validated());
 
         // 3. 返回標準化的單一資源
@@ -258,10 +257,9 @@ class OrderController extends Controller
      */
     public function destroy(Order $order): Response
     {
-        // 1. 權限驗證
-        $this->authorize('delete', $order);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-        // 2. 委派給 Service 層處理，包含庫存返還邏輯
+        // 委派給 Service 層處理，包含庫存返還邏輯
         $this->orderService->deleteOrder($order);
 
         // 3. 返回 204 No Content 響應，這是 RESTful API 中成功刪除操作的標準實踐

@@ -38,13 +38,17 @@ class ProductController extends Controller
     /**
      * 建構函式
      * 
-     * 控制器初始化，注入 ProductService 依賴
+     * 控制器初始化，注入 ProductService 依賴並設置資源授權
      * 
      * @param ProductService $productService 商品服務
      */
     public function __construct(ProductService $productService)
     {
         $this->productService = $productService;
+        
+        // 🔐 使用 authorizeResource 自動將控制器方法與 ProductPolicy 中的
+        // viewAny、view、create、update、delete 方法進行映射
+        $this->authorizeResource(Product::class, 'product');
     }
 
     /**
@@ -142,7 +146,7 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $this->authorize('create', Product::class);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
         $validatedData = $request->validated();
 
         try {
@@ -244,7 +248,7 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $this->authorize('update', $product); // 檢查是否有權限更新這個 $product
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
         
         try {
             $validatedData = $request->validated();
@@ -276,7 +280,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): Response
     {
-        $this->authorize('delete', $product); // 檢查是否有權限刪除這個 $product
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
         
         try {
             // 檢查是否有商品存在相關聯的進貨單或訂單

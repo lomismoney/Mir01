@@ -28,11 +28,15 @@ class InstallationController extends Controller
     private InstallationService $installationService;
 
     /**
-     * 建構子
+     * 建構子 - 注入服務並設置資源授權
      */
     public function __construct(InstallationService $installationService)
     {
         $this->installationService = $installationService;
+        
+        // 🔐 使用 authorizeResource 自動將控制器方法與 InstallationPolicy 中的
+        // viewAny、view、create、update、delete 方法進行映射
+        $this->authorizeResource(Installation::class, 'installation');
     }
 
     /**
@@ -66,7 +70,7 @@ class InstallationController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $this->authorize('viewAny', Installation::class);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         $query = QueryBuilder::for(Installation::class)
             ->allowedIncludes(['items', 'order', 'installer', 'creator'])
@@ -114,7 +118,7 @@ class InstallationController extends Controller
      */
     public function store(StoreInstallationRequest $request): InstallationResource
     {
-        $this->authorize('create', Installation::class);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         $installation = $this->installationService->createInstallation(
             $request->validated(),
@@ -167,7 +171,7 @@ class InstallationController extends Controller
      */
     public function show(Request $request, Installation $installation): InstallationResource
     {
-        $this->authorize('view', $installation);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         // 只有在 include 參數有值時才載入關聯資源
         $includeParam = $request->input('include', '');
@@ -207,7 +211,7 @@ class InstallationController extends Controller
      */
     public function update(UpdateInstallationRequest $request, Installation $installation): InstallationResource
     {
-        $this->authorize('update', $installation);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         $installation = $this->installationService->updateInstallation(
             $installation,
@@ -228,7 +232,7 @@ class InstallationController extends Controller
      */
     public function destroy(Installation $installation)
     {
-        $this->authorize('delete', $installation);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
         $installation->delete();
 

@@ -23,13 +23,17 @@ class CustomerController extends Controller
     protected $customerService;
 
     /**
-     * 建構函數 - 注入 CustomerService
+     * 建構函數 - 注入 CustomerService 並設置資源授權
      *
      * @param CustomerService $customerService
      */
     public function __construct(CustomerService $customerService)
     {
         $this->customerService = $customerService;
+        
+        // 🔐 使用 authorizeResource 自動將控制器方法與 CustomerPolicy 中的
+        // viewAny、view、create、update、delete 方法進行映射
+        $this->authorizeResource(Customer::class, 'customer');
     }
     /**
      * @group 客戶管理
@@ -44,10 +48,9 @@ class CustomerController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        // 1. 權限驗證
-        $this->authorize('viewAny', Customer::class);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-        // 2. 驗證請求參數
+        // 驗證請求參數
         $request->validate([
             'search'     => 'nullable|string',
             'start_date' => 'nullable|date_format:Y-m-d',
@@ -118,10 +121,9 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request): JsonResponse
     {
         try {
-            // 1. 權限驗證 - 檢查使用者是否有權限創建客戶
-            $this->authorize('create', Customer::class);
+            // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-            // 2. 將驗證過的數據傳遞給 Service 層處理
+            // 將驗證過的數據傳遞給 Service 層處理
             $customer = $this->customerService->createCustomer($request->validated());
 
             // 3. 返回標準化的 API 資源，並附帶 201 Created 狀態碼
@@ -161,10 +163,9 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer): CustomerResource
     {
-        // 1. 權限驗證
-        $this->authorize('view', $customer);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-        // 2. 預加載所有需要的關聯數據，以優化性能
+        // 預加載所有需要的關聯數據，以優化性能
         $customer->load(['addresses', 'defaultAddress']);
 
         // 3. 返回標準化的單一資源
@@ -193,10 +194,9 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, Customer $customer): JsonResponse
     {
         try {
-            // 1. 權限驗證 - 檢查使用者是否有權限更新此客戶
-            $this->authorize('update', $customer);
+            // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-            // 2. 將驗證過的數據傳遞給 Service 層處理
+            // 將驗證過的數據傳遞給 Service 層處理
             $updatedCustomer = $this->customerService->updateCustomer($customer, $request->validated());
 
             // 3. 返回標準化的單一資源
@@ -232,10 +232,9 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer): Response
     {
-        // 1. 權限驗證
-        $this->authorize('delete', $customer);
+        // 授權檢查已由 __construct 中的 authorizeResource 處理
 
-        // 2. 執行刪除操作
+        // 執行刪除操作
         $customer->delete();
 
         // 3. 返回 204 No Content 響應，這是 RESTful API 中成功刪除操作的標準實踐
