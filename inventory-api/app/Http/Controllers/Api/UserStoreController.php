@@ -28,10 +28,10 @@ class UserStoreController extends Controller
     /**
      * @group User Store Management
      * @authenticated
+     * @summary 獲取用戶的所有分店
+     * @description 獲取指定用戶所屬的所有分店列表。
      * 
-     * 獲取用戶的所有分店
-     * 
-     * 獲取指定用戶所屬的所有分店列表。
+     * @urlParam user integer required 用戶ID。 Example: 1
      * 
      * @apiResource App\Http\Resources\Api\StoreResource
      * @apiResourceModel App\Models\Store
@@ -50,10 +50,11 @@ class UserStoreController extends Controller
     /**
      * @group User Store Management
      * @authenticated
+     * @summary 為用戶分配分店
+     * @description 將指定分店分配給用戶。提供的 store_ids 將替換用戶當前的所有分店關聯。
      * 
-     * 為用戶分配分店
-     * 
-     * 將指定分店分配給用戶。提供的 store_ids 將替換用戶當前的所有分店關聯。
+     * @urlParam user integer required 用戶ID。 Example: 1
+     * @bodyParam store_ids integer[] required 要分配給用戶的分店ID陣列。 Example: [1, 2, 3]
      * 
      * @apiResource App\Http\Resources\Api\UserResource
      * @apiResourceModel App\Models\User

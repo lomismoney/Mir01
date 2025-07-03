@@ -115,6 +115,11 @@ class CategoryController extends Controller
      * @summary 顯示指定的分類
      * @description 返回單一分類的詳細資訊，包含該分類的商品數量統計。
      * 
+     * @urlParam category integer required 分類ID。 Example: 1
+     * 
+     * @apiResource \App\Http\Resources\Api\CategoryResource
+     * @apiResourceModel \App\Models\Category
+     * 
      * @param \App\Models\Category $category
      * @return \App\Http\Resources\Api\CategoryResource
      */
@@ -155,6 +160,11 @@ class CategoryController extends Controller
      * @summary 更新指定的分類
      * @description 使用 UpdateCategoryRequest 進行數據驗證。
      * 
+     * @urlParam category integer required 分類ID。 Example: 1
+     * 
+     * @apiResource \App\Http\Resources\Api\CategoryResource
+     * @apiResourceModel \App\Models\Category
+     * 
      * @param \App\Http\Requests\Api\UpdateCategoryRequest $request
      * @param \App\Models\Category $category
      * @return \App\Http\Resources\Api\CategoryResource
@@ -168,6 +178,10 @@ class CategoryController extends Controller
     /**
      * @summary 刪除指定的分類
      * @description 執行軟刪除操作，子分類將級聯刪除，商品關聯將設為 null。
+     * 
+     * @urlParam category integer required 分類ID。 Example: 1
+     * 
+     * @response 204 scenario="刪除成功"
      * 
      * @param \App\Models\Category $category
      * @return \Illuminate\Http\Response

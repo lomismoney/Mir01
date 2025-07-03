@@ -136,6 +136,13 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
+     * @summary 獲取進貨單詳情
+     * @description 顯示指定進貨單的詳細資訊，包含進貨項目和相關資料。
+     * 
+     * @urlParam purchase integer required 進貨單ID。 Example: 1
+     * 
+     * @apiResource \App\Http\Resources\Api\PurchaseResource
+     * @apiResourceModel \App\Models\Purchase
      */
     public function show(Purchase $purchase)
     {
@@ -149,6 +156,10 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
+     * @summary 更新進貨單
+     * @description 更新指定進貨單的資訊和進貨項目。
+     * 
+     * @urlParam purchase integer required 進貨單ID。 Example: 1
      * @bodyParam store_id integer 門市ID Example: 1
      * @bodyParam order_number string 進貨單號 Example: PO-20240101-001
      * @bodyParam purchased_at string 進貨日期 Example: 2024-01-01T10:00:00+08:00
@@ -158,6 +169,9 @@ class PurchaseController extends Controller
      * @bodyParam items[].product_variant_id integer 商品變體ID Example: 1
      * @bodyParam items[].quantity integer 數量 Example: 10
      * @bodyParam items[].cost_price number 成本價格 Example: 150.00
+     * 
+     * @apiResource \App\Http\Resources\Api\PurchaseResource
+     * @apiResourceModel \App\Models\Purchase
      */
     public function update(PurchaseData $purchaseData, Purchase $purchase, PurchaseService $purchaseService)
     {
@@ -176,7 +190,14 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
+     * @summary 更新進貨單狀態
+     * @description 更新指定進貨單的狀態，會檢查狀態轉換的合法性。
+     * 
+     * @urlParam purchase integer required 進貨單ID。 Example: 1
      * @bodyParam status string required 新狀態 Example: in_transit
+     * 
+     * @apiResource \App\Http\Resources\Api\PurchaseResource
+     * @apiResourceModel \App\Models\Purchase
      */
     public function updateStatus(Purchase $purchase, Request $request)
     {
@@ -203,6 +224,13 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
+     * @summary 取消進貨單
+     * @description 取消指定的進貨單，只有特定狀態的進貨單才能被取消。
+     * 
+     * @urlParam purchase integer required 進貨單ID。 Example: 1
+     * 
+     * @apiResource \App\Http\Resources\Api\PurchaseResource
+     * @apiResourceModel \App\Models\Purchase
      */
     public function cancel(Purchase $purchase)
     {
@@ -221,6 +249,12 @@ class PurchaseController extends Controller
      * 
      * @group 進貨管理
      * @authenticated
+     * @summary 刪除進貨單
+     * @description 刪除指定的進貨單，只有待處理狀態的進貨單才能被刪除。
+     * 
+     * @urlParam purchase integer required 進貨單ID。 Example: 1
+     * 
+     * @response 200 scenario="刪除成功" {"message": "進貨單已刪除"}
      */
     public function destroy(Purchase $purchase)
     {

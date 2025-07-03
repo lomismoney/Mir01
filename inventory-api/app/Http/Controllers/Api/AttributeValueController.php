@@ -29,8 +29,7 @@ class AttributeValueController extends Controller
      * @summary 獲取指定屬性的所有值
      * @description 返回指定屬性下的所有屬性值列表。
      * 
-     * 返回指定屬性下的所有屬性值列表
-     * 
+     * @urlParam attribute integer required 屬性ID。 Example: 1
      * @queryParam filter[value] string 對屬性值進行篩選。 Example: 紅色
      * @queryParam include string 可選的關聯，用逗號分隔。例如: attribute
      * 

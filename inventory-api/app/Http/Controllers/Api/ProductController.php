@@ -135,11 +135,11 @@ class ProductController extends Controller
      * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
      * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
      * @bodyParam category_id integer 分類ID。 Example: 1
-     * @bodyParam attributes integer[] required 該 SPU 擁有的屬性 ID 陣列。 Example: [1, 2]
+     * @bodyParam attributes integer[] 該 SPU 擁有的屬性 ID 陣列（單規格商品可為空陣列）。 Example: [1, 2]
      * @bodyParam variants object[] required SKU 變體陣列，至少需要一項。
      * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
      * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
-     * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
+     * @bodyParam variants.*.attribute_value_ids integer[] 組成此 SKU 的屬性值 ID 陣列（單規格商品可為空陣列）。 Example: [10, 25]
      * 
      * @apiResource \App\Http\Resources\Api\ProductResource
      * @apiResourceModel \App\Models\Product
@@ -208,6 +208,15 @@ class ProductController extends Controller
 
     /**
      * @group 商品管理
+     * @authenticated
+     * @summary 獲取商品詳情
+     * @description 顯示指定商品的詳細資訊，包含變體、庫存和圖片等完整資料。
+     * 
+     * @urlParam product integer required 商品ID。 Example: 1
+     * 
+     * @apiResource \App\Http\Resources\Api\ProductResource
+     * @apiResourceModel \App\Models\Product
+     * 
      * @response 200 scenario="商品詳情" {
      *   "data": {
      *     "id": 1,
@@ -233,6 +242,10 @@ class ProductController extends Controller
     /**
      * @group 商品管理
      * @authenticated
+     * @summary 更新商品資訊
+     * @description 更新指定商品的基本資訊和變體資料，支援複雜的 SPU/SKU 架構更新。
+     * 
+     * @urlParam product integer required 商品ID。 Example: 1
      * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
      * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
      * @bodyParam category_id integer 分類ID。 Example: 1
@@ -241,7 +254,7 @@ class ProductController extends Controller
      * @bodyParam variants.*.id integer 變體的 ID（用於更新現有變體）。 Example: 1
      * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
      * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
-     * @bodyParam variants.*.attribute_value_ids integer[] required 組成此 SKU 的屬性值 ID 陣列。 Example: [10, 25]
+     * @bodyParam variants.*.attribute_value_ids integer[] 組成此 SKU 的屬性值 ID 陣列（單規格商品可為空陣列）。 Example: [10, 25]
      * 
      * @apiResource \App\Http\Resources\Api\ProductResource
      * @apiResourceModel \App\Models\Product
@@ -275,8 +288,14 @@ class ProductController extends Controller
 
     /**
      * @group 商品管理
+     * @authenticated
+     * @summary 刪除商品
+     * @description 刪除指定商品，會檢查是否有相關的進貨單或訂單記錄，有關聯記錄時無法刪除。
+     * 
+     * @urlParam product integer required 商品ID。 Example: 1
      * 
      * @response 204 scenario="商品刪除成功"
+     * @response 422 scenario="刪除失敗" {"message": "無法刪除商品，因為該商品已有相關的進貨單或訂單記錄。"}
      */
     public function destroy(Product $product): Response
     {
@@ -372,6 +391,7 @@ class ProductController extends Controller
      * @summary 上傳商品圖片
      * @description 遵循 Spatie Media Library v11 官方最佳實踐
      * 
+     * @urlParam product integer required 商品ID。 Example: 1
      * @bodyParam image file required 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
      * 
      * @apiResource \App\Http\Resources\Api\ProductResource

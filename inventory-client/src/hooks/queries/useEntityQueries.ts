@@ -3079,7 +3079,7 @@ export function usePurchase(id: number | string) {
     queryKey: ['purchase', id],
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/purchases/{purchase}', {
-        params: { path: { purchase: String(id) } }
+        params: { path: { purchase: Number(id) } }
       });
       
       if (error) {
@@ -3144,7 +3144,7 @@ export function useUpdatePurchase() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: number | string; data: any }) => {
       const { data: responseData, error } = await apiClient.PUT('/api/purchases/{purchase}', {
-          params: { path: { purchase: String(id) } },
+          params: { path: { purchase: Number(id) } },
         body: data
       })
       
@@ -3170,7 +3170,7 @@ export function useUpdatePurchaseStatus() {
   return useMutation({
     mutationFn: async ({ id, status }: { id: number | string; status: string }) => {
       const { data, error } = await apiClient.PATCH('/api/purchases/{purchase}/status', {
-        params: { path: { purchase: String(id) } },
+        params: { path: { purchase: Number(id) } },
         body: { status }
       })
       
@@ -3196,7 +3196,7 @@ export function useCancelPurchase() {
   return useMutation({
     mutationFn: async (id: number | string) => {
       const { data, error } = await apiClient.PATCH('/api/purchases/{purchase}/cancel', {
-        params: { path: { purchase: String(id) } }
+        params: { path: { purchase: Number(id) } }
       })
       
       if (error) {
@@ -3220,7 +3220,7 @@ export function useDeletePurchase() {
   return useMutation({
     mutationFn: async (id: number | string) => {
       const { data, error } = await apiClient.DELETE('/api/purchases/{purchase}', {
-        params: { path: { purchase: String(id) } }
+        params: { path: { purchase: Number(id) } }
       })
       
       if (error) {

@@ -157,6 +157,10 @@ class CustomerController extends Controller
     /**
      * @group 客戶管理
      * @authenticated
+     * @summary 獲取客戶詳情
+     * @description 顯示指定客戶的詳細資訊，包含所有關聯的地址資料。
+     * 
+     * @urlParam customer integer required 客戶ID。 Example: 1
      * 
      * @apiResource \App\Http\Resources\Api\CustomerResource
      * @apiResourceModel \App\Models\Customer
@@ -175,6 +179,10 @@ class CustomerController extends Controller
     /**
      * @group 客戶管理
      * @authenticated
+     * @summary 更新客戶資訊
+     * @description 更新指定客戶的基本資訊和地址列表，支援複雜的地址管理操作。
+     * 
+     * @urlParam customer integer required 客戶ID。 Example: 1
      * @bodyParam name string required 客戶名稱或公司抬頭. Example: 測試客戶（已更新）
      * @bodyParam phone string 手機號碼. Example: 0987654321
      * @bodyParam email string 電子郵件地址. Example: customer@example.com
@@ -228,6 +236,11 @@ class CustomerController extends Controller
     /**
      * @group 客戶管理
      * @authenticated
+     * @summary 刪除客戶
+     * @description 刪除指定客戶及其相關的地址資料。
+     * 
+     * @urlParam customer integer required 客戶ID。 Example: 1
+     * 
      * @response 204 scenario="刪除成功"
      */
     public function destroy(Customer $customer): Response
