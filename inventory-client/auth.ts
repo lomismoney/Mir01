@@ -53,8 +53,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               id: number;
               name: string;
               username: string;
-              role: string;
-              role_display: string;
+              roles: string[];              // 🔧 修復：角色陣列
+              roles_display: string[];      // 🔧 修復：角色顯示名稱陣列
               is_admin: boolean;
             };
             token: string;
@@ -84,8 +84,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: String(loginData.user.id),
             name: loginData.user.name,
             username: loginData.user.username,
-            role: loginData.user.role,
-            roleDisplay: loginData.user.role_display,
+            role: loginData.user.roles[0] || 'user',                    // 🔧 修復：使用角色陣列的第一個
+            roleDisplay: loginData.user.roles_display[0] || 'unknown',  // 🔧 修復：使用角色顯示陣列的第一個
             isAdmin: loginData.user.is_admin,
             apiToken: loginData.token, // 儲存後端 API Token
           };

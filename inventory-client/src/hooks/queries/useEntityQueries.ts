@@ -209,8 +209,6 @@ export interface ProcessedProduct {
   category?: any;
   attributes: Array<ProcessedProductAttribute>;
   variants: Array<ProcessedProductVariant>;
-  image_url?: string;
-  thumbnail_url?: string;
   has_image: boolean;
   image_urls?: any;
   created_at: string;
@@ -357,8 +355,6 @@ export function useProductDetail(productId: number | string | undefined) {
                         ...v
                     };
                 }),
-                image_url: rawProduct.image_url,
-                thumbnail_url: rawProduct.thumbnail_url,
                 has_image: rawProduct.has_image || false,
                 image_urls: rawProduct.image_urls,
                 created_at: rawProduct.created_at || '',

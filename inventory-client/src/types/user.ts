@@ -23,13 +23,15 @@ type Store = {
  * 
  * 從 API 響應中提取的用戶資料結構
  * 確保前後端類型完全同步
+ * 
+ * 🔧 已修復：支援多角色系統，與後端 UserResource 完全匹配
  */
 export interface User {
   id: number;
   name: string;
   username: string;
-  role: string;
-  role_display: string;
+  roles: string[];              // 🔧 修復：用戶的所有角色（陣列）
+  roles_display: string[];      // 🔧 修復：角色顯示名稱（陣列）
   is_admin: boolean;
   created_at: string;
   updated_at: string;
