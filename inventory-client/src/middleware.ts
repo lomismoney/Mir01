@@ -45,10 +45,11 @@ export default auth((req) => {
   const publicRoutes = ['/login'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
-  // 🔥 第三層優化：智能登入頁面邏輯
+  // 🔥 第三層優化：智能登入頁面邏輯（與 Auth.js 修復相容）
   if (pathname === '/login') {
     if (isLoggedIn) {
-      // 已登入用戶訪問登入頁 → 重定向到儀表板
+      // 🔧 修復：已登入用戶訪問登入頁 → 重定向到儀表板
+      // 由於 Auth.js 的 authorized 回調已簡化，這裡需要處理重定向
       return NextResponse.redirect(new URL('/dashboard', nextUrl));
     }
     // 未登入用戶訪問登入頁 → 允許

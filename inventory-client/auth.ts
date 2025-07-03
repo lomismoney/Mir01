@@ -103,6 +103,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      * 採用「預設保護」策略：除了明確定義的公開路由外，所有路由都需要登入
      * 此策略能確保系統安全性，並根除登入循環問題
      * 
+     * 🔧 重定向修復：
+     * 1. 簡化重定向邏輯，避免與 Server Actions 衝突
+     * 2. 確保登入成功後能正確跳轉
+     * 3. 移除可能導致衝突的自動重定向
+     * 
      * 在 Edge Runtime 中執行，效能極佳
      * 
      * @param auth - 當前用戶的認證狀態
@@ -112,27 +117,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       
-      // 定義不需要登入即可訪問的公開路由（未來可以擴展，例如加入 /register）
+      // 定義不需要登入即可訪問的公開路由
       const publicRoutes = ['/login'];
       const isPublicRoute = publicRoutes.some(route => nextUrl.pathname.startsWith(route));
 
+      // 🔧 關鍵修復：簡化公開路由處理
       if (isPublicRoute) {
-        if (isLoggedIn) {
-          // 如果用戶已登入，但試圖訪問登入頁等公開路由，
-          // 將他們重定向到儀表板，提供更好的使用者體驗。
-          return Response.redirect(new URL('/dashboard', nextUrl));
-        }
-        // 如果用戶未登入，允許他們訪問公開路由。
-        return true; 
+        // 如果是公開路由，直接允許訪問
+        // 登入後的重定向由 Server Action 手動處理
+        return true;
       }
 
       // 對於所有其他的非公開路由：
       if (isLoggedIn) {
-        // 如果用戶已登入，允許訪問。
+        // 如果用戶已登入，允許訪問
         return true;
       }
       
-      // 如果用戶未登入，則拒絕訪問，Auth.js 會自動將他們重定向到 `pages.signIn` 中定義的登入頁。
+      // 如果用戶未登入，則拒絕訪問，Auth.js 會自動將他們重定向到登入頁
       return false; 
     },
     /**
