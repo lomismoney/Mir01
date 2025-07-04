@@ -7,7 +7,7 @@ import {
   useCategories,
   useDeleteCategory,
   type CategoryNode,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { DraggableCategoriesTable } from "./DraggableCategoriesTable";
 import { createCategoryColumns } from "./categories-columns";
 import { Button } from "@/components/ui/button";

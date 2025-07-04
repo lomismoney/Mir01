@@ -17,7 +17,7 @@ import {
 import { format } from "date-fns";
 
 import { ProcessedOrder } from "@/types/api-helpers";
-import { useAddOrderPayment } from "@/hooks/queries/useEntityQueries";
+import { useAddOrderPayment } from "@/hooks";
 
 /**
  * 正確的付款記錄請求類型定義

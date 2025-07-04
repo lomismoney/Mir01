@@ -12,11 +12,9 @@ import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import * as React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { useStores } from "@/hooks/queries/useEntityQueries";
+import { useStores } from "@/hooks";
 import { apiClient } from "@/lib/apiClient";
 import { handleApiError } from "@/lib/errorHandler";
-
-// 替代已刪除的 useUserStores hooks，使用內嵌的類型安全API調用
 
 import { Button } from "@/components/ui/button";
 import {
@@ -113,15 +111,15 @@ function useUserStoresInline(userId: number) {
   return useQuery({
     queryKey: ["user-stores", userId],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET("/api/users/{user}/stores", {
-        params: { path: { user: userId } },
+      const { data, error } = await apiClient.GET("/api/users/{user_id}/stores", {
+        params: { path: { user_id: userId } },
       });
 
       if (error) {
         throw handleApiError(error);
       }
 
-      return { data: data?.data || data || [] };
+      return { data: data || [] };
     },
     enabled: !!userId,
   });
@@ -135,8 +133,8 @@ function useAssignUserStoresInline() {
 
   return useMutation({
     mutationFn: async ({ userId, storeIds }: { userId: number; storeIds: number[] }) => {
-      const { data, error } = await apiClient.POST("/api/users/{user}/stores", {
-        params: { path: { user: userId } },
+      const { data, error } = await apiClient.POST("/api/users/{user_id}/stores", {
+        params: { path: { user_id: userId } },
         body: { store_ids: storeIds.map(id => id.toString()) },
       });
 

@@ -56,7 +56,7 @@ import {
   useProducts,
   useDeleteProduct,
   useDeleteMultipleProducts,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { useDebounce } from "@/hooks/use-debounce";
 import { columns, type ExpandedProductItem } from "./columns";

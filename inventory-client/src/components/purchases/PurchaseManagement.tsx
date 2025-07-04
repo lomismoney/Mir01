@@ -10,7 +10,7 @@ import {
   useCancelPurchase,
   useDeletePurchase,
   useStores,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import {
   PURCHASE_STATUS_LABELS,
   PURCHASE_STATUS_COLORS,
@@ -171,7 +171,7 @@ export function PurchaseManagement() {
    */
   const handleCancel = async (purchaseId: number) => {
     try {
-      await cancelMutation.mutateAsync(purchaseId);
+      await cancelMutation.mutateAsync({ id: purchaseId });
       toast.success("進貨單已取消");
     } catch (error) {
       toast.error("取消進貨單失敗");

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { InventoryTransferItem } from "@/types/api-helpers";
-import { useUpdateInventoryTransferStatus } from "@/hooks/queries/useEntityQueries";
+import { useUpdateInventoryTransferStatus } from "@/hooks";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,

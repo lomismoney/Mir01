@@ -269,11 +269,14 @@ class Product extends Model implements HasMedia
 
         $media = $this->getFirstMedia('images');
         
+        // 由於轉換被禁用，暫時都使用原始路徑
+        $originalPath = $media->getPath();
+        
         return [
-            'original' => $media->getPath(),
-            'thumb' => $media->getPath('thumb'),
-            'medium' => $media->getPath('medium'),
-            'large' => $media->getPath('large'),
+            'original' => $originalPath,
+            'thumb' => $originalPath,
+            'medium' => $originalPath,
+            'large' => $originalPath,
         ];
     }
 

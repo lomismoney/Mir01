@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useInventoryTimeSeries } from "@/hooks/queries/useEntityQueries";
+import { useInventoryTimeSeries } from "@/hooks";
 import {
   Area,
   AreaChart,
@@ -103,7 +103,7 @@ export function ChartAreaInteractive({
     const change = endQuantity - startQuantity;
     const changePercent =
       startQuantity > 0 ? (change / startQuantity) * 100 : 0;
-    const quantities = chartData.map((d) => d.quantity);
+    const quantities = chartData.map((d: { date: string; quantity: number }) => d.quantity);
     const maxQuantity = Math.max(...quantities);
     const minQuantity = Math.min(...quantities);
 

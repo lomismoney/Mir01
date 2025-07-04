@@ -27,7 +27,7 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useOrderDetail } from '@/hooks/queries/useEntityQueries';
+import { useOrderDetail } from '@/hooks';
 import { useUpdateOrderItemStatusOptimistic } from '@/hooks/useUpdateOrderItemStatusOptimistic';
 import { ProcessedOrder, ProcessedOrderItem, PaymentRecord } from '@/types/api-helpers';
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';

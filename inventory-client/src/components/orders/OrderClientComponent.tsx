@@ -9,7 +9,7 @@ import {
   useCancelOrder,
   useBatchDeleteOrders,
   useBatchUpdateStatus,
-} from "@/hooks/queries/useEntityQueries"; // 🎯 新增 useCancelOrder & useBatchDeleteOrders & useBatchUpdateStatus
+} from "@/hooks"; // 🎯 新增 useCancelOrder & useBatchDeleteOrders & useBatchUpdateStatus
 import { toast } from "sonner"; // 🎯 新增 toast 導入
 import { OrderPreviewModal } from "@/components/orders/OrderPreviewModal";
 import { ShipmentFormModal } from "@/components/orders/ShipmentFormModal";

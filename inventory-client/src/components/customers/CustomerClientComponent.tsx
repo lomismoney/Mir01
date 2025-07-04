@@ -6,7 +6,7 @@ import {
   useCreateCustomer,
   useUpdateCustomer,
   useCustomerDetail,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import { Input } from "@/components/ui/input";

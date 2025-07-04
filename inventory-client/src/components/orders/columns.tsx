@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { Order, ProcessedOrder } from "@/types/api-helpers";
-import { useDeleteOrder } from "@/hooks/queries/useEntityQueries";
+import { useDeleteOrder } from "@/hooks";
 
 // 創建 columns 函數，接受預覽、出貨、收款、退款、取消和刪除回調
 export const createColumns = ({

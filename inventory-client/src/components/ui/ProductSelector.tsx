@@ -11,7 +11,7 @@ import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { ArrowLeft, Plus } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useProducts } from "@/hooks/queries/useEntityQueries";
+import { useProducts } from "@/hooks";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 

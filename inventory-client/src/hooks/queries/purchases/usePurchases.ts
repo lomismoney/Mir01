@@ -1,0 +1,202 @@
+/**
+ * 進貨管理相關的 React Query Hooks
+ */
+
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import apiClient from '@/lib/apiClient';
+import { parseApiError } from '@/lib/errorHandler';
+
+/**
+ * 創建進貨單類型
+ */
+type CreatePurchasePayload = {
+  store_id: number;
+  order_number?: string;
+  purchased_at?: string;
+  shipping_cost: number;
+  status?: string;
+  items: {
+    product_variant_id: number;
+    quantity: number;
+    cost_price: number;
+  }[];
+};
+
+/**
+ * 進貨單相關查詢 Hooks
+ */
+export function usePurchases(params?: {
+  store_id?: number
+  status?: string
+  order_number?: string
+  start_date?: string
+  end_date?: string
+  page?: number
+  per_page?: number
+  sort?: string
+}) {
+  return useQuery({
+    queryKey: ['purchases', params],
+    queryFn: async () => {
+      const query: Record<string, string | number> = {}
+      
+      if (params?.store_id) query['filter[store_id]'] = params.store_id
+      if (params?.status) query['filter[status]'] = params.status
+      if (params?.order_number) query['filter[order_number]'] = params.order_number
+      if (params?.start_date) query['filter[start_date]'] = params.start_date
+      if (params?.end_date) query['filter[end_date]'] = params.end_date
+      if (params?.page) query.page = params.page
+      if (params?.per_page) query.per_page = params.per_page
+      if (params?.sort) query.sort = params.sort
+
+      const { data, error } = await apiClient.GET('/api/purchases', {
+        params: { query }
+      })
+      
+      if (error) {
+        throw new Error('獲取進貨單列表失敗')
+      }
+      
+      return data
+    },
+    select: (response: any) => {
+      const data = response?.data || response || [];
+      const meta = response?.meta || null;
+      const links = response?.links || null;
+      
+      return {
+        data: Array.isArray(data) ? data : [],
+        meta: meta,
+        links: links
+      };
+    },
+    placeholderData: keepPreviousData,
+  })
+}
+
+/**
+ * 獲取單一進貨單
+ */
+export function usePurchase(id: number | string) {
+  return useQuery({
+    queryKey: ['purchase', id],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET('/api/purchases/{id}', {
+        params: { path: { id: String(id) } }
+      });
+      
+      if (error) {
+        throw new Error('獲取進貨單失敗');
+      }
+      
+      return data;
+    },
+    select: (response: any) => response?.data,
+    enabled: !!id,
+  });
+}
+
+/**
+ * 創建進貨單
+ */
+export function useCreatePurchase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: CreatePurchasePayload) => {
+      const { data: response, error } = await apiClient.POST('/api/purchases', { body: data });
+      if (error) {
+        throw new Error('創建進貨單失敗');
+      }
+      return response;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['purchases'] });
+    },
+  });
+}
+
+/**
+ * 更新進貨單
+ */
+export function useUpdatePurchase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<CreatePurchasePayload> }) => {
+      const { data: response, error } = await apiClient.PUT('/api/purchases/{id}', {
+        params: { path: { id: id.toString() } },
+        body: data
+      });
+      if (error) {
+        throw new Error('更新進貨單失敗');
+      }
+      return response;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['purchases'] });
+    },
+  });
+}
+
+/**
+ * 更新進貨單狀態
+ */
+export function useUpdatePurchaseStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status, notes }: { id: number; status: string; notes?: string }) => {
+      const { data, error } = await apiClient.PATCH('/api/purchases/{id}/status' as any, {
+        params: { path: { id: id.toString() } },
+        body: { status, notes }
+      } as any);
+      if (error) {
+        throw new Error('更新進貨單狀態失敗');
+      }
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['purchases'] });
+    },
+  });
+}
+
+/**
+ * 取消進貨單
+ */
+export function useCancelPurchase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: number; reason?: string }) => {
+      const { data, error } = await apiClient.POST('/api/purchases/{id}/cancel' as any, {
+        params: { path: { id: id.toString() } },
+        body: { reason }
+      } as any);
+      if (error) {
+        throw new Error('取消進貨單失敗');
+      }
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['purchases'] });
+    },
+  });
+}
+
+/**
+ * 刪除進貨單
+ */
+export function useDeletePurchase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await apiClient.DELETE('/api/purchases/{id}', {
+        params: { path: { id: id.toString() } }
+      });
+      if (error) {
+        throw new Error('刪除進貨單失敗');
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['purchases'] });
+    },
+  });
+}

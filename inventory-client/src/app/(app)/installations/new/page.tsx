@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useCreateInstallation } from "@/hooks/queries/useEntityQueries";
+import { useCreateInstallation } from "@/hooks";
 import { InstallationForm, InstallationFormValues } from "@/components/installations";
 import { CreateInstallationRequest } from "@/types/installation";
 import { toast } from "sonner";

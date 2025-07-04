@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   useInventoryAdjustment,
   useStores,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import {

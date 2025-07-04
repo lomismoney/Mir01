@@ -37,7 +37,9 @@ class OrderItemResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             // 關聯的產品變體資訊（如果有載入）
-            'product_variant' => $this->whenLoaded('productVariant'),
+            'product_variant' => $this->whenLoaded('productVariant', function() {
+                return new ProductVariantResource($this->productVariant);
+            }),
         ];
     }
 }

@@ -28,7 +28,11 @@ class InventoryTransferRequest extends FormRequest
                 'required', 
                 'integer', 
                 'exists:stores,id',
-                Rule::notIn([$this->from_store_id]), // 不能轉移到同一個門市
+                function ($attribute, $value, $fail) {
+                    if ($value == $this->input('from_store_id')) {
+                        $fail('目標門市不能與來源門市相同');
+                    }
+                },
             ],
             'product_variant_id' => ['required', 'integer', 'exists:product_variants,id'],
             'quantity' => ['required', 'integer', 'min:1'],
@@ -50,15 +54,19 @@ class InventoryTransferRequest extends FormRequest
     {
         return [
             'from_store_id.required' => '請選擇來源門市',
+            'from_store_id.integer' => 'from_store_id 欄位必須為整數',
             'from_store_id.exists' => '所選來源門市不存在',
             'to_store_id.required' => '請選擇目標門市',
+            'to_store_id.integer' => 'to_store_id 欄位必須為整數',
             'to_store_id.exists' => '所選目標門市不存在',
             'to_store_id.not_in' => '目標門市不能與來源門市相同',
             'product_variant_id.required' => '請選擇商品變體',
+            'product_variant_id.integer' => 'product_variant_id 欄位必須為整數',
             'product_variant_id.exists' => '所選商品變體不存在',
             'quantity.required' => '請輸入數量',
             'quantity.integer' => '數量必須為整數',
             'quantity.min' => '數量必須大於0',
+            'status.string' => '狀態值無效',
             'status.in' => '狀態值無效',
         ];
     }

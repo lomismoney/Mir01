@@ -81,6 +81,7 @@ class OrderFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
+                'shipping_status' => 'delivered', // 確保不是 cancelled 狀態
                 'payment_status' => 'paid',
                 'paid_amount' => $attributes['grand_total'],
                 'paid_at' => $this->faker->dateTimeBetween('-1 month', 'now'),

@@ -20,7 +20,7 @@ class AttributeValueFactory extends Factory
         // 預設值，實際使用時通常會配合withAttribute方法
         return [
             'attribute_id' => Attribute::factory(),
-            'value' => fake()->word(),
+            'value' => fake()->unique()->word(),
         ];
     }
 

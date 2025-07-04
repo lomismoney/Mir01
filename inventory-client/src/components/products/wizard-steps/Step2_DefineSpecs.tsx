@@ -37,7 +37,7 @@ import { WizardFormData } from "../CreateProductWizard";
 import { 
   useAttributes, 
   useCreateAttributeValue
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { Attribute } from "@/types/products";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";

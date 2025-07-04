@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useProducts } from "@/hooks/queries/useEntityQueries";
+import { useProducts } from "@/hooks";
 
 /**
  * 商品管理頁面

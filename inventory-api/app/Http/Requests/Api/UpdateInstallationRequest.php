@@ -84,6 +84,16 @@ class UpdateInstallationRequest extends FormRequest
         $validator->after(function ($validator) {
             $installation = $this->route('installation');
             
+            // 如果在測試環境中，installation 可能是字串，需要找到對應的模型
+            if (is_string($installation)) {
+                $installation = \App\Models\Installation::find($installation);
+            }
+            
+            // 如果找不到安裝記錄，跳過驗證
+            if (!$installation) {
+                return;
+            }
+            
             // 檢查狀態轉換的合法性
             if ($this->has('status')) {
                 $currentStatus = $installation->status;
@@ -185,6 +195,17 @@ class UpdateInstallationRequest extends FormRequest
             ],
             'items' => [
                 'description' => '安裝項目列表 (提供此參數時會同步所有項目)',
+                'example' => [
+                    [
+                        'id' => 1,
+                        'product_name' => 'A500 智能電子鎖 (維修品)',
+                        'sku' => 'LOCK-A500-BLK-R',
+                        'quantity' => 1,
+                        'specifications' => '黑色，右手開門，已更換零件',
+                        'status' => 'pending',
+                        'notes' => '此為維修後更換的項目',
+                    ],
+                ],
             ],
             'items.*.id' => [
                 'description' => '要更新的安裝項目 ID (新項目則不提供)',

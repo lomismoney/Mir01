@@ -1,0 +1,223 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SiteHeader 應該匹配快照 - 已登入狀態 1`] = `
+<header
+  class="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)"
+  data-oid="-ve9yzh"
+>
+  <div
+    class="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6"
+    data-oid="c3itd91"
+  >
+    <button
+      class="-ml-1"
+      data-oid="7brw2i6"
+    >
+      側邊欄觸發器
+    </button>
+    <div
+      class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px mx-2 data-[orientation=vertical]:h-4"
+      data-oid="buozhm6"
+      data-orientation="vertical"
+      data-slot="separator"
+      role="none"
+    />
+    <nav
+      aria-label="breadcrumb"
+      data-oid="5-42:3s"
+    >
+      <ol
+        class="flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5"
+        data-oid="nnvnk56"
+      >
+        <li
+          class="inline-flex items-center gap-1.5"
+          data-oid="1x:j62:"
+        >
+          <span
+            class="font-normal text-muted-foreground"
+            data-oid=".wzqq5y"
+          >
+            商品管理
+          </span>
+        </li>
+        <li
+          aria-hidden="true"
+          class="[&>svg]:size-3.5"
+          data-oid="y5zk6bi"
+          role="presentation"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-right"
+            data-oid="9kuo:1m"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m9 18 6-6-6-6"
+            />
+          </svg>
+        </li>
+        <li
+          class="inline-flex items-center gap-1.5"
+          data-oid="1x:j62:"
+        >
+          <span
+            aria-current="page"
+            aria-disabled="true"
+            class="font-normal text-foreground"
+            data-oid="hgt0_l-"
+            role="link"
+          >
+            商品列表
+          </span>
+        </li>
+      </ol>
+    </nav>
+    <div
+      class="ml-auto flex items-center gap-2"
+      data-oid="mbnvy_g"
+    >
+      <div
+        class="flex items-center gap-2"
+        data-oid="r8txgk."
+      >
+        <span
+          class="relative flex size-8 shrink-0 overflow-hidden rounded-full h-6 w-6"
+          data-oid="0by:gc-"
+          data-slot="avatar"
+        >
+          <span
+            class="bg-muted flex size-full items-center justify-center rounded-full text-xs"
+            data-oid="3.f9ghj"
+            data-slot="avatar-fallback"
+          >
+            張
+          </span>
+        </span>
+        <span
+          class="text-sm font-medium hidden md:inline"
+          data-oid="93f548c"
+        >
+          張三
+        </span>
+      </div>
+      <div
+        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px h-4"
+        data-oid="buozhm6"
+        data-orientation="vertical"
+        data-slot="separator"
+        role="none"
+      />
+      <a
+        class="items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 hidden sm:flex dark:text-foreground"
+        data-oid="pr.clfq"
+        data-slot="button"
+        href="/help"
+      >
+        幫助
+      </a>
+      <a
+        class="items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 hidden sm:flex dark:text-foreground"
+        data-oid="_v58_5u"
+        data-slot="button"
+        href="/settings"
+      >
+        設定
+      </a>
+      <button>
+        主題切換
+      </button>
+    </div>
+  </div>
+</header>
+`;
+
+exports[`SiteHeader 應該匹配快照 - 未登入狀態 1`] = `
+<header
+  class="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)"
+  data-oid="-ve9yzh"
+>
+  <div
+    class="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6"
+    data-oid="c3itd91"
+  >
+    <button
+      class="-ml-1"
+      data-oid="7brw2i6"
+    >
+      側邊欄觸發器
+    </button>
+    <div
+      class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px mx-2 data-[orientation=vertical]:h-4"
+      data-oid="buozhm6"
+      data-orientation="vertical"
+      data-slot="separator"
+      role="none"
+    />
+    <nav
+      aria-label="breadcrumb"
+      data-oid="5-42:3s"
+    >
+      <ol
+        class="flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5"
+        data-oid="nnvnk56"
+      >
+        <li
+          class="inline-flex items-center gap-1.5"
+          data-oid="1x:j62:"
+        >
+          <span
+            aria-current="page"
+            aria-disabled="true"
+            class="font-normal text-foreground"
+            data-oid="hgt0_l-"
+            role="link"
+          >
+            儀表板
+          </span>
+        </li>
+      </ol>
+    </nav>
+    <div
+      class="ml-auto flex items-center gap-2"
+      data-oid="mbnvy_g"
+    >
+      <div
+        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px h-4"
+        data-oid="buozhm6"
+        data-orientation="vertical"
+        data-slot="separator"
+        role="none"
+      />
+      <a
+        class="items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 hidden sm:flex dark:text-foreground"
+        data-oid="pr.clfq"
+        data-slot="button"
+        href="/help"
+      >
+        幫助
+      </a>
+      <a
+        class="items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 hidden sm:flex dark:text-foreground"
+        data-oid="_v58_5u"
+        data-slot="button"
+        href="/settings"
+      >
+        設定
+      </a>
+      <button>
+        主題切換
+      </button>
+    </div>
+  </div>
+</header>
+`;

@@ -272,7 +272,8 @@ Route::middleware('auth:sanctum')->group(function () {
      * 路由列表：
      * PATCH  /api/order-items/{order_item}/status  - 更新訂單項目狀態
      */
-    Route::patch('/order-items/{order_item}/status', [App\Http\Controllers\Api\OrderItemController::class, 'updateStatus']);
+    Route::patch('/order-items/{order_item}/status', [App\Http\Controllers\Api\OrderItemController::class, 'updateStatus'])
+         ->name('api.order-items.updateStatus');
     
     /**
      * 訂單取消路由
@@ -290,8 +291,9 @@ Route::middleware('auth:sanctum')->group(function () {
      * 路由列表：
      * GET    /api/reports/inventory-time-series  - 獲取商品變體的庫存時序數據
      */
-    Route::prefix('reports')->group(function () {
-        Route::get('/inventory-time-series', [App\Http\Controllers\Api\ReportController::class, 'inventoryTimeSeries']);
+    Route::prefix('reports')->name('api.reports.')->group(function () {
+        Route::get('/inventory-time-series', [App\Http\Controllers\Api\ReportController::class, 'inventoryTimeSeries'])
+             ->name('inventory-time-series');
     });
 
     /**

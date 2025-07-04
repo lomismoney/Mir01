@@ -7,12 +7,12 @@ import {
   useStores,
   useCategories,
   useInventoryList,
-} from "@/hooks/queries/useEntityQueries";
+  CategoryNode,
+} from "@/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useToast } from "@/components/ui/use-toast";
 import { InventoryNestedTable } from "@/components/inventory/InventoryNestedTable";
 import { ProductFilters } from "@/types/api-helpers";
-import { CategoryNode } from "@/hooks/queries/useEntityQueries";
 import { Input } from "@/components/ui/input";
 import {
   Select,

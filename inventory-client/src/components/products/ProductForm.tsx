@@ -28,7 +28,7 @@ import {
 import {
   useAttributes,
   useCreateProduct, // 新增：導入商品創建 Hook
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { type Attribute, type ProductSubmissionData } from "@/types/products";
 import { Plus, X, Package, Settings, Loader2 } from "lucide-react";
 import { toast } from "sonner";

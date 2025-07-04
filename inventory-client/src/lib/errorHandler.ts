@@ -75,6 +75,16 @@ export function parseApiError(error: UnknownError): string {
     return ERROR_MESSAGES.HTML_RESPONSE;
   }
   
+  // 網絡錯誤 - 優先檢查特定錯誤類型
+  if (errorObj.name === 'TypeError' && typeof errorObj.message === 'string' && errorObj.message.includes('fetch')) {
+    return ERROR_MESSAGES.NETWORK_ERROR;
+  }
+  
+  // 超時錯誤
+  if (errorObj.name === 'AbortError') {
+    return ERROR_MESSAGES.TIMEOUT;
+  }
+
   // Laravel 表單驗證錯誤格式處理
   if (errorObj.errors && typeof errorObj.errors === 'object') {
     const errorsObj = errorObj.errors as Record<string, unknown>;
@@ -123,16 +133,6 @@ export function parseApiError(error: UnknownError): string {
     return ERROR_MESSAGES[errorObj.status as keyof typeof ERROR_MESSAGES];
   }
   
-  // 網絡錯誤
-  if (errorObj.name === 'TypeError' && typeof errorObj.message === 'string' && errorObj.message.includes('fetch')) {
-    return ERROR_MESSAGES.NETWORK_ERROR;
-  }
-  
-  // 超時錯誤
-  if (errorObj.name === 'AbortError') {
-    return ERROR_MESSAGES.TIMEOUT;
-  }
-  
   // 預設錯誤訊息
   return '發生未知錯誤，請聯繫系統管理員';
 }
@@ -145,7 +145,14 @@ export function parseApiError(error: UnknownError): string {
  * @returns 錯誤訊息字串
  */
 export function handleApiError(error: UnknownError, fallbackMessage?: string): string {
-  const message = fallbackMessage || parseApiError(error);
+  let message: string;
+  
+  try {
+    message = fallbackMessage || parseApiError(error);
+  } catch {
+    // 如果解析錯誤失敗，使用預設訊息
+    message = '發生未知錯誤，請聯繫系統管理員';
+  }
   
   toast.error(message);
   

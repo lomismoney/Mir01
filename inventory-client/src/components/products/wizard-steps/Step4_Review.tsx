@@ -25,8 +25,8 @@ import {
 } from "lucide-react";
 
 import { WizardFormData } from "../CreateProductWizard";
-import { useAttributes } from "@/hooks/queries/useEntityQueries";
-import { useCategories } from "@/hooks/queries/useEntityQueries";
+import { useAttributes } from "@/hooks";
+import { useCategories } from "@/hooks";
 import { Attribute } from "@/types/products";
 import { Category } from "@/types/category";
 

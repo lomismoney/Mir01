@@ -279,7 +279,7 @@ class PurchaseService
                     throw new \InvalidArgumentException('用戶必須經過認證才能處理庫存操作');
                 }
                 
-                $inventory->subtractStock(
+                $inventory->reduceStock(
                     $item->quantity,
                     $userId,
                     "進貨單 #{$purchase->order_number} 狀態變更回退",

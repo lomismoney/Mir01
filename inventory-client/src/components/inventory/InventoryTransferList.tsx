@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { InventoryTransferItem } from "@/types/api-helpers";
-import { useInventoryTransfers } from "@/hooks/queries/useEntityQueries";
+import { useInventoryTransfers } from "@/hooks";
 import { useToast } from "@/components/ui/use-toast";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

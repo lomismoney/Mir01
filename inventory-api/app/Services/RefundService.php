@@ -209,19 +209,14 @@ class RefundService
                     );
                 }
                 
-                // 通過庫存服務返還庫存
-                $storeId = $refund->order->store_id;
-                if (!$storeId) {
-                    throw new \InvalidArgumentException('訂單必須有有效的門市ID才能進行庫存回補');
-                }
-                
-                $this->inventoryService->returnStock(
-                    $productVariant->id,
-                    $refundItem->quantity,
-                    $storeId,
-                    "退款回補庫存 - 退款單 #{$refund->id}",
-                    ['refund_id' => $refund->id]
-                );
+                        // 通過庫存服務返還庫存（使用預設門市）
+        $this->inventoryService->returnStock(
+            $productVariant->id,
+            $refundItem->quantity,
+            null, // 使用預設門市
+            "退款回補庫存 - 退款單 #{$refund->id}",
+            ['refund_id' => $refund->id]
+        );
             }
             // 如果是訂製商品（product_variant_id 為 null），則跳過庫存回補
         }
@@ -276,9 +271,11 @@ class RefundService
     {
         OrderStatusHistory::create([
             'order_id' => $order->id,
-            'status' => '退款處理',
+            'status_type' => 'refund',
+            'from_status' => $order->payment_status,
+            'to_status' => 'refund_processed',
             'notes' => "處理退款 #{$refund->id}，退款金額：$" . number_format($refund->total_refund_amount, 2),
-            'created_by' => Auth::id(),
+            'user_id' => Auth::id(),
         ]);
     }
 

@@ -29,7 +29,7 @@ import {
   useCreateUser,
   useUpdateUser,
   useDeleteUser,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { UsersDataTable } from "@/components/users/users-data-table";

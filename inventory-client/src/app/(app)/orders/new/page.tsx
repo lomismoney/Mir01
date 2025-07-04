@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCreateOrder } from "@/hooks/queries/useEntityQueries";
+import { useCreateOrder } from "@/hooks";
 import { OrderForm, OrderFormValues } from "@/components/orders/OrderForm";
 // StockCheckDialog 已移除，預訂系統現在為自動模式
 import { toast } from "sonner";

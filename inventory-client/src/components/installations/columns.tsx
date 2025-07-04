@@ -41,7 +41,7 @@ import {
   InstallationWithRelations, 
   InstallationStatus 
 } from "@/types/installation";
-import { useDeleteInstallation } from "@/hooks/queries/useEntityQueries";
+import { useDeleteInstallation } from "@/hooks";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { InstallationProgressTracker } from "./InstallationProgressTracker";

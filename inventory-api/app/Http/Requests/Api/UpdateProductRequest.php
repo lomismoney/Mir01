@@ -36,26 +36,30 @@ class UpdateProductRequest extends FormRequest
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
-                    // 解析陣列索引 - 更健壯的方式
-                    $attributeParts = explode('.', $attribute);
-                    if (count($attributeParts) < 3) {
+                    // 解析陣列索引
+                    preg_match('/variants\.(\d+)\.sku/', $attribute, $matches);
+                    if (!isset($matches[1])) {
                         $fail('無效的屬性路徑格式。');
                         return;
                     }
                     
-                    $index = $attributeParts[1];
-                    $currentVariantId = $this->input("variants.{$index}.id");
+                    $currentIndex = (int)$matches[1];
+                    $currentVariantId = $this->input("variants.{$currentIndex}.id");
                     
                     // 1. 檢查同一請求中的重複 SKU
                     $allVariants = $this->input('variants', []);
-                    $skuCount = 0;
-                    foreach ($allVariants as $variantIndex => $variant) {
-                        if (isset($variant['sku']) && $variant['sku'] === $value) {
-                            $skuCount++;
+                    $duplicateFound = false;
+                    
+                    foreach ($allVariants as $index => $variant) {
+                        if ($index != $currentIndex && 
+                            isset($variant['sku']) && 
+                            $variant['sku'] === $value) {
+                            $duplicateFound = true;
+                            break;
                         }
                     }
                     
-                    if ($skuCount > 1) {
+                    if ($duplicateFound) {
                         $fail("SKU「{$value}」在此次請求中重複出現，每個變體必須有唯一的 SKU。");
                         return;
                     }

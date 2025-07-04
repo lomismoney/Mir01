@@ -10,7 +10,7 @@ import {
   useUpdateAttributeValue,
   useDeleteAttributeValue,
   useAttributeValues,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";
@@ -246,6 +246,8 @@ const AttributesClientPage = () => {
     return (
       <div
         className="flex justify-center items-center min-h-[400px]"
+        role="status"
+        aria-label="loading"
         data-oid="0n.m-lj"
       >
         <Loader2 className="h-8 w-8 animate-spin" data-oid="xakl14v" />

@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   useProducts,
   useProductVariants,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useSession } from "next-auth/react";
 
 interface ProductSelectorProps {
@@ -119,7 +119,7 @@ export function ProductSelector({
   }, [selectedProductId, isInitializing]);
 
   // 使用 useMemo 計算當前應該選中的變體（避免 useEffect 循環）
-  const currentVariant = useMemo(() => {
+  const currentVariant = useMemo((): any => {
     if (!value || value <= 0) {
       return null;
     }

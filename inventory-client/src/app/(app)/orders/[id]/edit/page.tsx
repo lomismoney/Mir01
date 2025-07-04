@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   useOrderDetail,
   useUpdateOrder,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { OrderForm, OrderFormValues } from "@/components/orders/OrderForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";

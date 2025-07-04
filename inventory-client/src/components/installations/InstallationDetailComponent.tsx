@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useInstallation, useUpdateInstallationStatus, useDeleteInstallation } from "@/hooks/queries/useEntityQueries";
+import { useInstallation, useUpdateInstallationStatus, useDeleteInstallation } from "@/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";

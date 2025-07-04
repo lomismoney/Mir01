@@ -8,8 +8,8 @@ import {
   useInstallations,
   useAssignInstaller,
   useUpdateInstallationStatus,
-  useUsers,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
+import { useUsers } from "@/hooks";
 import { toast } from "sonner";
 import { useDebounce } from "@/hooks/use-debounce";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
