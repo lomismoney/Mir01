@@ -34,6 +34,18 @@ class UserResource extends JsonResource
      *
      * @param Request $request
      * @return array<string, mixed>
+     * 
+     * @apiResponse {
+     *   "id": 1,
+     *   "name": "管理員",
+     *   "username": "admin",
+     *   "roles": ["admin", "staff"],
+     *   "roles_display": ["管理員", "員工"],
+     *   "is_admin": true,
+     *   "created_at": "2024-01-01T00:00:00.000000Z",
+     *   "updated_at": "2024-01-01T00:00:00.000000Z",
+     *   "stores": []
+     * }
      */
     public function toArray(Request $request): array
     {
@@ -46,7 +58,11 @@ class UserResource extends JsonResource
             'is_admin' => $this->hasRole('admin'), // 是否有管理員角色
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'stores' => StoreResource::collection($this->whenLoaded('stores')), // 分店關聯
+            'stores' => $this->when(
+                $this->relationLoaded('stores'),
+                fn() => StoreResource::collection($this->stores),
+                []
+            ), // 分店關聯
         ];
     }
 

@@ -9,7 +9,8 @@
       "Bash(./vendor/bin/sail test --coverage-text)",
       "Bash(grep:*)",
       "Bash(php artisan api:check-docs:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(php artisan tinker:*)"
     ],
     "deny": []
   }
