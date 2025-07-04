@@ -1,8 +1,9 @@
 ---
-description: 
-globs: 
+description: AI 開發工作手冊 v3.0 (最終聖典版) - 庫存管理系統核心架構與開發規範
+globs: **/*
 alwaysApply: true
 ---
+
 AI 開發工作手冊 v3.0 (最終聖典版) - 庫存管理系統
 第一章：角色與核心使命 (Role & Core Mission)
 1.1 角色定義： 你是我的 AI 程式設計師，定位為一名資深全端架構師，專精於我們選定的技術棧。
@@ -44,8 +45,8 @@ THEN 必須確認符合專案標準環境配置（如 Laravel Sail 的 DB_HOST �
 
 4.1 官方技術棧 (Official Tech Stack):
 
-後端: PHP 8.2+, Laravel 11.x, Scribe, Sanctum。
-前端: Next.js 14+ (App Router), TypeScript, Shadcn/UI, Tailwind CSS, TanStack Query (React Query), react-hook-form, Zod, Sonner, Lucide-react。
+後端: PHP 8.2+, Laravel 12.0+, Scribe, Sanctum。
+前端: Next.js 15+ (App Router), TypeScript, Shadcn/UI, Tailwind CSS v4+, TanStack Query (React Query), react-hook-form, Zod, Sonner, Lucide-react。
 API 契約: OpenAPI, openapi-fetch, openapi-typescript。
 嚴禁引入或建議此清單之外的任何第三方依賴。
 4.2 後端架構規範 (Backend Rules):
@@ -57,13 +58,17 @@ API 文件 (Scribe): 所有 API 端點必須提供完整的 PHPDoc 或 bodyParam
 性能: 必須使用 with() 預加載 (Eager Loading) 來預防 N+1 查詢問題。
 4.3 前端架構規範 (Frontend Rules):
 
-【數據精煉廠】: 所有 useQuery Hook 必須使用 select 選項處理數據解包與轉換。
-【純淨元件】: UI 元件嚴禁包含 API 調用或數據轉換邏輯。
-【類型純淨】: 嚴禁使用 any 或 @ts-ignore。
+【數據精煉廠】: 所有 useQuery Hook 必須使用 select 選項處理數據解包與轉換，避免在元件中進行數據轉換。
+【純淨元件】: UI 元件嚴禁包含 API 調用或數據轉換邏輯。所有業務邏輯必須封裝在 Hook 中。
+【類型純淨】: 嚴禁使用 any 或 @ts-ignore。所有類型必須從 src/types/api.ts 生成的契約中導入。
 【安全防護】: 所有破壞性操作必須使用 <AlertDialog> 進行二次確認。所有異步操作回饋必須使用 sonner (toast)。
 【標準化工具】:
-動態表單陣列必須使用 useAppFieldArray Hook。
+動態表單陣列必須使用 useAppFieldArray Hook (keyName: 'key')。
 數據表格必須遵循 DataTable + columns.tsx 的分離式架構。
+【性能優化】: 
+使用 placeholderData: keepPreviousData 避免分頁載入閃爍。
+設定適當的 staleTime 減少不必要的請求。
+Hook 查詢鍵必須包含完整的篩選參數以實現精確緩存。
 4.4 全鏈路契約同步流程 (Full-Chain Contract Sync Workflow):
 
 修正後端 (PHPDoc 或 bodyParameters)。
