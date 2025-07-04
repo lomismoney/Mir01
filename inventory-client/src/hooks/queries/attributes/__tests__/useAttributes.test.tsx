@@ -265,8 +265,8 @@ describe('useAttributes hooks', () => {
       });
       expect(mutateResult).toEqual(mockResponse);
 
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/attributes/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/attributes/{attribute}', {
+        params: { path: { attribute: 1 } },
         body: { name: '更新後的屬性' },
       });
     });
@@ -307,10 +307,10 @@ describe('useAttributes hooks', () => {
       });
 
       // Assert
-      await result.current.mutateAsync({ id: 1, attribute: 1 });
+      await result.current.mutateAsync({ id: 1 });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/attributes/{id}', {
-        params: { path: { id: 1, attribute: 1 } },
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/attributes/{attribute}', {
+        params: { path: { attribute: 1 } },
       });
     });
 
@@ -328,7 +328,7 @@ describe('useAttributes hooks', () => {
 
       // Assert
       await expect(
-        result.current.mutateAsync({ id: 1, attribute: 1 })
+        result.current.mutateAsync({ id: 1 })
       ).rejects.toThrow('刪除屬性失敗');
     });
   });
@@ -360,8 +360,8 @@ describe('useAttributes hooks', () => {
       });
       expect(mutateResult).toEqual(mockResponse);
 
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/attributes/{attribute_id}/values', {
-        params: { path: { attribute_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/attributes/{attribute}/values', {
+        params: { path: { attribute: 1 } },
         body: { value: '新值' },
       });
     });
@@ -442,8 +442,8 @@ describe('useAttributes hooks', () => {
         },
       });
 
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/attributes/{attribute_id}/values', {
-        params: { path: { attribute_id: 1 } },
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/attributes/{attribute}/values', {
+        params: { path: { attribute: 1 } },
       });
     });
 
@@ -515,8 +515,8 @@ describe('useAttributes hooks', () => {
       });
       expect(mutateResult).toEqual(mockResponse);
 
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/values/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/values/{value}', {
+        params: { path: { value: 1 } },
         body: { value: '更新後的值' },
       });
     });
@@ -565,8 +565,8 @@ describe('useAttributes hooks', () => {
       // Assert
       await result.current.mutateAsync(1);
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/values/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/values/{value}', {
+        params: { path: { value: 1 } },
       });
     });
 

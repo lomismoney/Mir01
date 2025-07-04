@@ -1,0 +1,36 @@
+# Docker 部署環境設定範例
+# 請複製此檔案為 .env 並填入實際的配置值
+
+# 應用程式環境
+APP_ENV=production
+APP_DEBUG=false
+
+# 域名設定
+API_URL=https://api.lomis.com.tw
+NEXTAUTH_URL=https://los.lomis.com.tw
+NEXT_PUBLIC_API_BASE_URL=https://api.lomis.com.tw
+
+# 資料庫設定
+DB_ROOT_PASSWORD=strong_root_password_here
+DB_DATABASE=inventory
+DB_USERNAME=inventory_user
+DB_PASSWORD=strong_password_here
+DB_PORT=3306
+
+# Redis 設定
+REDIS_PORT=6379
+
+# 端口設定
+API_PORT=8080
+FRONTEND_PORT=3000
+PMA_PORT=8888
+
+# Session 和 Cookie 設定
+SESSION_DOMAIN=.lomis.com.tw
+SANCTUM_STATEFUL_DOMAINS=los.lomis.com.tw
+
+# NextAuth 密鑰（請使用 openssl rand -base64 32 生成）
+NEXTAUTH_SECRET=your_nextauth_secret_here
+
+# Laravel 應用程式密鑰（會在第一次啟動時自動生成）
+APP_KEY= 

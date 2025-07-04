@@ -18,6 +18,11 @@ jest.mock('../../../auth', () => ({
   signIn: jest.fn(),
 }));
 
+// Mock Next.js navigation
+jest.mock('next/navigation', () => ({
+  redirect: jest.fn(),
+}));
+
 const mockedSignIn = signIn as jest.Mock;
 
 describe('loginAction', () => {
@@ -35,7 +40,6 @@ describe('loginAction', () => {
     expect(mockedSignIn).toHaveBeenCalledWith('credentials', {
       username: 'testuser',
       password: 'password123',
-      redirectTo: '/dashboard',
     });
   });
 

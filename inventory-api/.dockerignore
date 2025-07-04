@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# 開發和測試
+tests/
+phpunit.xml
+.phpunit.result.cache
+coverage/
+
+# 環境和配置
+.env
+.env.*
+!.env.example
+
+# 依賴
+vendor/
+node_modules/
+
+# 儲存和快取
+storage/app/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+storage/logs/*
+!storage/app/public/
+!storage/framework/cache/.gitignore
+!storage/framework/sessions/.gitignore
+!storage/framework/testing/.gitignore
+!storage/framework/views/.gitignore
+!storage/logs/.gitignore
+
+# IDE 和編輯器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+
+# 文檔
+*.md
+docs/
+
+# 其他
+.editorconfig
+.styleci.yml 

@@ -249,8 +249,8 @@ export function useProductDetail(productId: number | string | undefined) {
                 throw new Error('商品 ID 無效');
             }
 
-            const { data, error } = await apiClient.GET('/api/products/{id}', {
-                params: { path: { id: numericId } }
+            const { data, error } = await apiClient.GET('/api/products/{product}', {
+                params: { path: { product: numericId } }
             });
             
             if (error) {
@@ -394,8 +394,8 @@ export function useCreateProduct() {
     });
 }
 
-// 導入由 openapi-typescript 生成的精確類型
-type UpdateProductRequestBody = import('@/types/api').paths["/api/products/{id}"]["put"]["requestBody"]["content"]["application/json"];
+// 🎯 使用精確的 API 類型定義，從生成的類型文件中獲取確切的請求體結構
+type UpdateProductRequestBody = import('@/types/api').paths["/api/products/{product}"]["put"]["requestBody"]["content"]["application/json"];
 
 /**
  * 更新商品的 Hook (SPU/SKU 架構升級版)
@@ -412,10 +412,10 @@ export function useUpdateProduct() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ id, ...productData }: { id: number } & UpdateProductRequestBody) => {
-            const { data, error } = await apiClient.PUT('/api/products/{id}', {
-                params: { path: { id } },
-                body: productData
+        mutationFn: async ({ id, data }: { id: number; data: UpdateProductRequestBody }) => {
+            const { data: result, error } = await apiClient.PUT('/api/products/{product}', {
+                params: { path: { product: id } },
+                body: data,
             });
             
             if (error) {
@@ -423,7 +423,7 @@ export function useUpdateProduct() {
                 throw new Error(errorMessage || '更新商品失敗');
             }
             
-            return data;
+            return result;
         },
         onSuccess: async (data, variables) => {
             // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
@@ -469,8 +469,8 @@ export function useDeleteProduct() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const { data, error } = await apiClient.DELETE('/api/products/{id}', {
-                params: { path: { id } }
+            const { data, error } = await apiClient.DELETE('/api/products/{product}', {
+                params: { path: { product: id } },
             });
             
             if (error) {
@@ -529,9 +529,9 @@ export function useDeleteMultipleProducts() {
 
     return useMutation({
         mutationFn: async (payload: { ids: number[] }) => {
-            const { data, error } = await apiClient.DELETE('/api/products/batch' as any, {
-                body: payload
-            } as any);
+            const { data, error } = await apiClient.POST('/api/products/batch-delete', {
+                body: { ids: payload.ids.map(String) }
+            });
             
             if (error) {
                 const errorMessage = parseApiError(error);
@@ -560,7 +560,7 @@ export function useDeleteMultipleProducts() {
             if (typeof window !== 'undefined') {
                 const { toast } = require('sonner');
                 toast.success('批量刪除成功！', {
-                    description: `已成功刪除 ${data?.data?.deleted_count || 0} 個商品。`
+                    description: `已成功刪除 ${(data as any)?.data?.deleted_count || 0} 個商品。`
                 });
             }
         },
@@ -602,7 +602,7 @@ export function useProductVariants(params: {
             if (params.page) queryParams.page = params.page;
             if (params.per_page) queryParams.per_page = params.per_page;
 
-            const { data, error } = await apiClient.GET('/api/product-variants' as any, {
+            const { data, error } = await apiClient.GET('/api/products/variants' as any, {
                 params: { 
                     query: Object.keys(queryParams).length > 0 ? queryParams : undefined 
                 }
@@ -614,6 +614,54 @@ export function useProductVariants(params: {
             }
 
             return data;
+        },
+        // 🎯 數據精煉廠 - 確保類型安全和數據一致性
+        select: (response: any) => {
+            // 解包 API 響應數據，確保返回陣列格式
+            const variants = response?.data || [];
+            if (!Array.isArray(variants)) return [];
+            
+            // 進行數據清理和類型轉換
+            return variants.map((variant: any) => ({
+                id: variant.id || 0,
+                sku: variant.sku || '',
+                price: parseFloat(variant.price || '0'),
+                product_id: variant.product_id || 0,
+                created_at: variant.created_at || '',
+                updated_at: variant.updated_at || '',
+                // 商品資訊
+                product: variant.product ? {
+                    id: variant.product.id || 0,
+                    name: variant.product.name || '未知商品',
+                    description: variant.product.description || null,
+                } : null,
+                // 屬性值資訊
+                attribute_values: Array.isArray(variant.attribute_values) 
+                    ? variant.attribute_values.map((av: any) => ({
+                        id: av.id || 0,
+                        value: av.value || '',
+                        attribute_id: av.attribute_id || 0,
+                        attribute: av.attribute ? {
+                            id: av.attribute.id || 0,
+                            name: av.attribute.name || '',
+                        } : null,
+                    }))
+                    : [],
+                // 庫存資訊
+                inventory: Array.isArray(variant.inventory) 
+                    ? variant.inventory.map((inv: any) => ({
+                        id: inv.id || 0,
+                        quantity: parseInt(inv.quantity || '0', 10),
+                        low_stock_threshold: parseInt(inv.low_stock_threshold || '0', 10),
+                        store: inv.store ? {
+                            id: inv.store.id || 0,
+                            name: inv.store.name || '未知門市',
+                        } : null,
+                    }))
+                    : [],
+                // 保留原始數據
+                ...variant
+            }));
         },
         enabled: options?.enabled !== false,
         staleTime: 2 * 60 * 1000, // 2 分鐘緩存時間
@@ -631,8 +679,8 @@ export function useProductVariantDetail(id: number) {
     return useQuery({
         queryKey: [...QUERY_KEYS.PRODUCT_VARIANT(id), 'detail'],
         queryFn: async () => {
-            const { data, error } = await apiClient.GET('/api/product-variants/{id}' as any, {
-                params: { path: { id } }
+            const { data, error } = await apiClient.GET('/api/products/variants/{variant}' as any, {
+                params: { path: { variant: id } }
             } as any);
             
             if (error) {
@@ -665,8 +713,8 @@ export function useUploadProductImage() {
             const formData = new FormData();
             formData.append('image', image);
 
-            const { data, error } = await apiClient.POST('/api/products/{id}/image' as any, {
-                params: { path: { id: productId } },
+            const { data, error } = await apiClient.POST('/api/products/{product}/upload-image' as any, {
+                params: { path: { product: productId } },
                 body: formData
             } as any);
             

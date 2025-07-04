@@ -319,9 +319,9 @@ describe('useInstallations hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData.data);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/installations/{id}', {
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/installations/{installation}', {
         params: {
-          path: { id: 1 },
+          path: { installation: 1 },
           query: { include: 'items,installer,creator,order' }
         }
       });
@@ -496,8 +496,8 @@ describe('useInstallations hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/installations/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/installations/{installation}', {
+        params: { path: { installation: 1 } },
         body: {
           customer_name: 'John Doe Updated',
           installation_address: '789 Pine St',
@@ -551,8 +551,8 @@ describe('useInstallations hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/installations/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/installations/{installation}', {
+        params: { path: { installation: 1 } }
       });
     });
 
@@ -601,8 +601,8 @@ describe('useInstallations hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/installations/{installation_id}/assign', {
-        params: { path: { installation_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/installations/{installation}/assign', {
+        params: { path: { installation: 1 } },
         body: {
           installer_user_id: 2,
           scheduled_date: '2023-01-02'

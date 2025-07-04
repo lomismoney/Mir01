@@ -171,7 +171,6 @@ const AttributesClientPage = () => {
     try {
       await deleteAttributeMutation.mutateAsync({
         id: selectedAttribute.id,
-        attribute: selectedAttribute.id,
       });
       toast.success("規格刪除成功！");
       setSelectedAttribute(null);

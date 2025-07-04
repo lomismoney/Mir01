@@ -4,7 +4,6 @@ import { useState } from "react";
 import { SectionCards } from "@/components/section-cards";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { useProductVariants } from "@/hooks";
-import { ProductVariant } from "@/types/api-helpers";
 import {
   Select,
   SelectContent,
@@ -13,6 +12,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+/**
+ * 商品變體類型定義（適用於 Dashboard 頁面）
+ */
+interface DashboardProductVariant {
+  id: number;
+  sku: string;
+  price: number;
+  product_id: number;
+  product?: {
+    id: number;
+    name: string;
+    description?: string | null;
+  } | null;
+  attribute_values?: Array<{
+    id: number;
+    value: string;
+    attribute_id: number;
+    attribute?: {
+      id: number;
+      name: string;
+    } | null;
+  }>;
+  [key: string]: any;
+}
 
 /**
  * 儀表板頁面（Auth.js 中間件保護版本）
@@ -42,8 +66,8 @@ export default function DashboardPage() {
       per_page: 100, // 獲取較多商品供選擇
     });
 
-  // 使用類型斷言來處理數據類型
-  const variants = productVariants as ProductVariant[] | undefined;
+  // 使用 useProductVariants 返回的處理過的變體陣列
+  const variants: DashboardProductVariant[] = productVariants || [];
 
   return (
     <div className="flex flex-1 flex-col" data-oid="durq1z4">
@@ -88,7 +112,7 @@ export default function DashboardPage() {
                       />
                     </SelectTrigger>
                     <SelectContent data-oid="bfoo:8_">
-                      {variants?.map((variant) => (
+                      {variants?.map((variant: DashboardProductVariant) => (
                         <SelectItem
                           key={variant.id}
                           value={variant.id?.toString() || ""}

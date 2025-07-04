@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
-import { QUERY_KEYS } from '@/hooks/queries/useEntityQueries';
+import { QUERY_KEYS } from '@/hooks/queries/shared/queryKeys';
 
 /**
  * 訂單項目狀態更新載荷類型定義

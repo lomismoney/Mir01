@@ -238,8 +238,8 @@ describe('usePurchases hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData.data);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/purchases/{id}', {
-        params: { path: { id: '1' } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/purchases/{purchase}', {
+        params: { path: { purchase: 1 } }
       });
     });
 
@@ -259,8 +259,8 @@ describe('usePurchases hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/purchases/{id}', {
-        params: { path: { id: '1' } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/purchases/{purchase}', {
+        params: { path: { purchase: 1 } }
       });
     });
 
@@ -423,8 +423,8 @@ describe('usePurchases hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/purchases/{id}', {
-        params: { path: { id: '1' } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/purchases/{purchase}', {
+        params: { path: { purchase: 1 } },
         body: updateData
       });
     });
@@ -468,8 +468,7 @@ describe('usePurchases hooks', () => {
 
       result.current.mutate({
         id: 1,
-        status: 'completed',
-        notes: 'Purchase completed successfully'
+        status: 'completed'
       });
 
       await waitFor(() => {
@@ -477,9 +476,9 @@ describe('usePurchases hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/purchases/{id}/status', {
-        params: { path: { id: '1' } },
-        body: { status: 'completed', notes: 'Purchase completed successfully' }
+      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/purchases/{purchase}/status', {
+        params: { path: { purchase: 1 } },
+        body: { status: 'completed' }
       });
     });
 
@@ -504,9 +503,9 @@ describe('usePurchases hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/purchases/{id}/status', {
-        params: { path: { id: '1' } },
-        body: { status: 'cancelled', notes: undefined }
+      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/purchases/{purchase}/status', {
+        params: { path: { purchase: 1 } },
+        body: { status: 'cancelled' }
       });
     });
 
@@ -537,7 +536,7 @@ describe('usePurchases hooks', () => {
     it('should cancel purchase successfully', async () => {
       const mockData = { id: 1, status: 'cancelled' };
 
-      mockApiClient.POST.mockResolvedValueOnce({
+      mockApiClient.PATCH.mockResolvedValueOnce({
         data: mockData,
         error: null
       });
@@ -546,26 +545,22 @@ describe('usePurchases hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate({
-        id: 1,
-        reason: 'Supplier unavailable'
-      });
+      result.current.mutate(1);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/purchases/{id}/cancel', {
-        params: { path: { id: '1' } },
-        body: { reason: 'Supplier unavailable' }
+      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/purchases/{purchase}/cancel', {
+        params: { path: { purchase: 1 } }
       });
     });
 
     it('should cancel purchase without reason', async () => {
       const mockData = { id: 1, status: 'cancelled' };
 
-      mockApiClient.POST.mockResolvedValueOnce({
+      mockApiClient.PATCH.mockResolvedValueOnce({
         data: mockData,
         error: null
       });
@@ -574,20 +569,19 @@ describe('usePurchases hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate({ id: 1 });
+      result.current.mutate(1);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/purchases/{id}/cancel', {
-        params: { path: { id: '1' } },
-        body: { reason: undefined }
+      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/purchases/{purchase}/cancel', {
+        params: { path: { purchase: 1 } }
       });
     });
 
     it('should handle error during cancellation', async () => {
-      mockApiClient.POST.mockResolvedValueOnce({
+      mockApiClient.PATCH.mockResolvedValueOnce({
         data: null,
         error: { message: 'Cannot cancel completed purchase' }
       });
@@ -596,7 +590,7 @@ describe('usePurchases hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate({ id: 1 });
+      result.current.mutate(1);
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -623,8 +617,8 @@ describe('usePurchases hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/purchases/{id}', {
-        params: { path: { id: '1' } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/purchases/{purchase}', {
+        params: { path: { purchase: 1 } }
       });
     });
 
@@ -663,8 +657,8 @@ describe('usePurchases hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/purchases/{id}', {
-        params: { path: { id: '999' } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/purchases/{purchase}', {
+        params: { path: { purchase: 999 } }
       });
     });
   });

@@ -64,8 +64,8 @@ describe('API Client 測試套件', () => {
       
       await safeApiClient.getInventoryDetail(123);
 
-      expect(mockGET).toHaveBeenCalledWith('/api/inventory/{id}', {
-        params: { path: { id: 123 } }
+      expect(mockGET).toHaveBeenCalledWith('/api/inventory/{inventory}', {
+        params: { path: { inventory: 123 } }
       });
     });
 
@@ -74,8 +74,8 @@ describe('API Client 測試套件', () => {
       
       await safeApiClient.getInventoryTransferDetail(456);
 
-      expect(mockGET).toHaveBeenCalledWith('/api/inventory/transfers/{id}', {
-        params: { path: { id: 456 } }
+      expect(mockGET).toHaveBeenCalledWith('/api/inventory/transfers/{transfer}', {
+        params: { path: { transfer: 456 } }
       });
     });
 
@@ -84,8 +84,8 @@ describe('API Client 測試套件', () => {
       
       await safeApiClient.getStore(789);
 
-      expect(mockGET).toHaveBeenCalledWith('/api/stores/{id}', {
-        params: { path: { id: 789 } }
+      expect(mockGET).toHaveBeenCalledWith('/api/stores/{store}', {
+        params: { path: { store: 789 } }
       });
     });
 
@@ -106,8 +106,8 @@ describe('API Client 測試套件', () => {
       
       await safeApiClient.updateStore(123, storeData);
 
-      expect(mockPUT).toHaveBeenCalledWith('/api/stores/{id}', {
-        params: { path: { id: 123 } },
+      expect(mockPUT).toHaveBeenCalledWith('/api/stores/{store}', {
+        params: { path: { store: 123 } },
         body: storeData
       });
     });
@@ -117,8 +117,8 @@ describe('API Client 測試套件', () => {
       
       await safeApiClient.getProductVariantDetail(999);
 
-      expect(mockGET).toHaveBeenCalledWith('/api/products/variants/{id}', {
-        params: { path: { id: 999 } }
+      expect(mockGET).toHaveBeenCalledWith('/api/products/variants/{variant}', {
+        params: { path: { variant: 999 } }
       });
     });
   });

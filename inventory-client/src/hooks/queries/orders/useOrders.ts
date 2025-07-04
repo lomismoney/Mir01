@@ -226,8 +226,8 @@ export function useOrderDetail(orderId: number | null) {
     queryKey: QUERY_KEYS.ORDER(orderId!), // 使用 ['orders', orderId] 作為唯一鍵
     queryFn: async () => {
       if (!orderId) return null; // 如果沒有 ID，則不執行查詢
-      const { data, error } = await apiClient.GET("/api/orders/{id}", {
-        params: { path: { id: orderId } },
+      const { data, error } = await apiClient.GET("/api/orders/{order}", {
+        params: { path: { order: orderId } },
       });
       if (error) {
         const errorMessage = parseApiError(error);
@@ -299,13 +299,14 @@ export function useOrderDetail(orderId: number | null) {
  */
 export function useConfirmOrderPayment() {
   const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: async (orderId: number) => {
-      // 🚀 使用精確的 API 類型，完全移除 any 斷言
-      const { data, error } = await apiClient.POST("/api/orders/{order_id}/confirm-payment", {
+      // 🚀 confirm-payment API 不需要請求體
+      const { data, error } = await apiClient.POST("/api/orders/{order}/confirm-payment", {
         params: { 
           path: { 
-            order_id: orderId
+            order: orderId
           } 
         },
       });
@@ -364,15 +365,15 @@ export function useCreateOrderShipment() {
   const queryClient = useQueryClient();
   
   // 🚀 使用 API 生成的精確類型定義
-  type CreateShipmentRequestBody = import('@/types/api').paths["/api/orders/{order_id}/create-shipment"]["post"]["requestBody"]["content"]["application/json"];
+  type CreateShipmentRequestBody = import('@/types/api').paths["/api/orders/{order}/create-shipment"]["post"]["requestBody"]["content"]["application/json"];
   
   return useMutation({
     mutationFn: async (payload: { orderId: number; data: CreateShipmentRequestBody }) => {
       // 🚀 使用精確的 API 類型，完全移除 any 斷言
-      const { data, error } = await apiClient.POST("/api/orders/{order_id}/create-shipment", {
+      const { data, error } = await apiClient.POST("/api/orders/{order}/create-shipment", {
         params: { 
           path: { 
-            order_id: payload.orderId
+            order: payload.orderId
           } 
         },
         body: payload.data,
@@ -414,15 +415,15 @@ export function useAddOrderPayment() {
   const queryClient = useQueryClient();
   
   // 🚀 使用 API 生成的精確類型定義
-  type AddPaymentRequestBody = import('@/types/api').paths["/api/orders/{order_id}/add-payment"]["post"]["requestBody"]["content"]["application/json"];
+  type AddPaymentRequestBody = import('@/types/api').paths["/api/orders/{order}/add-payment"]["post"]["requestBody"]["content"]["application/json"];
   
   return useMutation({
     mutationFn: async (payload: { orderId: number; data: AddPaymentRequestBody }) => {
       // 🚀 使用精確的 API 類型，完全移除 any 斷言
-      const { data, error } = await apiClient.POST("/api/orders/{order_id}/add-payment", {
+      const { data, error } = await apiClient.POST("/api/orders/{order}/add-payment", {
         params: { 
           path: { 
-            order_id: payload.orderId
+            order: payload.orderId
           } 
         },
         body: payload.data,
@@ -507,8 +508,8 @@ export function useUpdateOrder() {
 
   return useMutation({
     mutationFn: async (payload: { id: number; data: UpdateOrderRequestBody }) => {
-      const { data, error } = await apiClient.PUT("/api/orders/{id}", {
-        params: { path: { id: payload.id } },
+      const { data, error } = await apiClient.PUT("/api/orders/{order}", {
+        params: { path: { order: payload.id } },
         body: payload.data,
       });
       if (error) throw error;
@@ -539,8 +540,8 @@ export function useDeleteOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/orders/{id}", {
-        params: { path: { id: orderId } },
+      const { data, error } = await apiClient.DELETE("/api/orders/{order}", {
+        params: { path: { order: orderId } },
       });
       if (error) throw error;
       return data;
@@ -583,7 +584,7 @@ export function useUpdateOrderItemStatus() {
   const queryClient = useQueryClient();
   
   // 使用 API 生成的類型定義
-  type UpdateOrderItemStatusRequestBody = import('@/types/api').paths['/api/order-items/{order_item_id}/status']['patch']['requestBody']['content']['application/json'];
+  type UpdateOrderItemStatusRequestBody = import('@/types/api').paths['/api/order-items/{order_item}/status']['patch']['requestBody']['content']['application/json'];
   type UpdateOrderItemStatusPayload = {
     orderItemId: number;
     status: string;
@@ -597,8 +598,8 @@ export function useUpdateOrderItemStatus() {
         ...(notes && { notes })
       };
       
-      const { data, error } = await apiClient.PATCH('/api/order-items/{order_item_id}/status', {
-        params: { path: { order_item_id: orderItemId } },
+      const { data, error } = await apiClient.PATCH('/api/order-items/{order_item}/status', {
+        params: { path: { order_item: orderItemId } },
         body: requestBody,
       });
       
@@ -671,15 +672,15 @@ export function useCreateRefund() {
   const queryClient = useQueryClient();
   
   // 🚀 使用 API 生成的精確類型定義
-  type CreateRefundRequestBody = import('@/types/api').paths["/api/orders/{order_id}/refunds"]["post"]["requestBody"]["content"]["application/json"];
+  type CreateRefundRequestBody = import('@/types/api').paths["/api/orders/{order}/refunds"]["post"]["requestBody"]["content"]["application/json"];
   
   return useMutation({
     mutationFn: async (payload: { orderId: number; data: CreateRefundRequestBody }) => {
       // 🚀 使用精確的 API 類型，完全移除 any 斷言
-      const { data, error } = await apiClient.POST("/api/orders/{order_id}/refunds", {
+      const { data, error } = await apiClient.POST("/api/orders/{order}/refunds", {
         params: { 
           path: { 
-            order_id: payload.orderId
+            order: payload.orderId
           } 
         },
         body: payload.data,
@@ -729,8 +730,8 @@ export function useCancelOrder() {
   
   return useMutation({
     mutationFn: async ({ orderId, reason }: { orderId: number; reason?: string }) => {
-      const { error } = await apiClient.POST('/api/orders/{order_id}/cancel', {
-        params: { path: { order_id: orderId } },
+      const { error } = await apiClient.POST('/api/orders/{order}/cancel', {
+        params: { path: { order: orderId } },
         body: { reason },
       });
 

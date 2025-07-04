@@ -24,6 +24,9 @@ return [
         'http://127.0.0.1:3000',
         'http://localhost',
         'http://127.0.0.1',
+        'https://los.lomis.com.tw',
+        'https://www.los.lomis.com.tw',
+        env('FRONTEND_URL', 'https://los.lomis.com.tw'),
     ],
 
     'allowed_origins_patterns' => [],

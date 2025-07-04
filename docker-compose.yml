@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  # MySQL 資料庫
+  mysql:
+    image: mysql:8.0
+    container_name: inventory-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_DATABASE:-inventory}
+      MYSQL_USER: ${DB_USERNAME:-inventory_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-inventory_password}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./inventory-api/mysql-config/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - inventory-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  # Redis 快取
+  redis:
+    image: redis:7-alpine
+    container_name: inventory-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - inventory-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 10
+
+  # Laravel 後端 API
+  api:
+    build:
+      context: ./inventory-api
+      dockerfile: Dockerfile
+    container_name: inventory-api
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${API_URL:-https://api.lomis.com.tw}
+      
+      # 資料庫設定
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-inventory}
+      DB_USERNAME: ${DB_USERNAME:-inventory_user}
+      DB_PASSWORD: ${DB_PASSWORD:-inventory_password}
+      
+      # Redis 設定
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # Session 設定
+      SESSION_DRIVER: redis
+      SESSION_LIFETIME: 120
+      
+      # 快取設定
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      
+      # Sanctum 設定
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-los.lomis.com.tw}
+      SESSION_DOMAIN: ${SESSION_DOMAIN:-.lomis.com.tw}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-8080}:80"
+    volumes:
+      - ./inventory-api/storage:/var/www/html/storage
+      - ./inventory-api/.env:/var/www/html/.env
+    networks:
+      - inventory-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      timeout: 5s
+      retries: 10
+
+  # Next.js 前端
+  frontend:
+    build:
+      context: ./inventory-client
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-https://api.lomis.com.tw}
+    container_name: inventory-frontend
+    restart: unless-stopped
+    environment:
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://los.lomis.com.tw}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-https://api.lomis.com.tw}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - inventory-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      timeout: 5s
+      retries: 10
+
+  # phpMyAdmin (開發環境用)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: inventory-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 50M
+    ports:
+      - "${PMA_PORT:-8888}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - inventory-network
+    volumes:
+      - ./inventory-api/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+    profiles:
+      - dev
+
+# 網路設定
+networks:
+  inventory-network:
+    driver: bridge
+
+# 資料卷設定
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local 

@@ -132,7 +132,7 @@ describe('useCategories hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      const tree = result.current.data as CategoryNode[];
+      const tree = (result.current.data as CategoryNode[]) || [];
       expect(tree).toHaveLength(2); // 2 root categories
 
       // Check Electronics category with children
@@ -197,7 +197,7 @@ describe('useCategories hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual([]);
+      expect(result.current.data!).toEqual([]);
     });
 
     it('should handle non-array response', async () => {
@@ -216,7 +216,7 @@ describe('useCategories hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual([]);
+      expect(result.current.data!).toEqual([]);
     });
 
     it('should handle direct array response', async () => {
@@ -244,8 +244,8 @@ describe('useCategories hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toHaveLength(1);
-      expect(result.current.data[0]).toEqual(
+      expect(result.current.data!).toHaveLength(1);
+      expect(result.current.data![0]).toEqual(
         expect.objectContaining({
           id: 1,
           name: 'Test Category',
@@ -278,7 +278,7 @@ describe('useCategories hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data[0]).toEqual(
+      expect(result.current.data![0]).toEqual(
         expect.objectContaining({
           id: 1,
           name: 'Minimal Category',
@@ -392,8 +392,8 @@ describe('useCategories hooks', () => {
       });
 
       // Only valid category should be included
-      expect(result.current.data).toHaveLength(1);
-      expect(result.current.data[0].name).toBe('Valid Category');
+      expect(result.current.data!).toHaveLength(1);
+      expect(result.current.data![0].name).toBe('Valid Category');
     });
   });
 
@@ -480,8 +480,8 @@ describe('useCategories hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/categories/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/categories/{category}', {
+        params: { path: { category: 1 } },
         body: updateData.data
       });
     });
@@ -509,7 +509,7 @@ describe('useCategories hooks', () => {
         expect(result.current.isError).toBe(true);
       });
 
-      expect(result.current.error).toEqual({ message: 'Update failed' });
+      expect(result.current.error).toEqual(new Error('Update failed'));
     });
   });
 
@@ -533,8 +533,8 @@ describe('useCategories hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/categories/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/categories/{category}', {
+        params: { path: { category: 1 } }
       });
     });
 
