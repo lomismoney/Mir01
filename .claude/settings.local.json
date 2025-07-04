@@ -8,7 +8,8 @@
       "Bash(find:*)",
       "Bash(./vendor/bin/sail test --coverage-text)",
       "Bash(grep:*)",
-      "Bash(php artisan api:check-docs:*)"
+      "Bash(php artisan api:check-docs:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

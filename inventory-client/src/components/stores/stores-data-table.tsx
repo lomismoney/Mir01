@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Store as StoreIcon, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 
 /**
  * 分店資料表格組件的屬性介面
@@ -46,6 +47,10 @@ interface StoresDataTableProps<TData, TValue> {
   onAddStore?: () => void;
   /** 是否正在載入資料 */
   isLoading?: boolean;
+  /** 搜索值 */
+  searchValue?: string;
+  /** 搜索變更處理器 */
+  onSearchChange?: (value: string) => void;
 }
 
 /**
@@ -72,6 +77,8 @@ export function StoresDataTable<TData, TValue>({
   showAddButton = true,
   onAddStore,
   isLoading = false,
+  searchValue = "",
+  onSearchChange,
 }: StoresDataTableProps<TData, TValue>) {
   // 表格狀態管理
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -97,9 +104,21 @@ export function StoresDataTable<TData, TValue>({
   return (
     <div className="w-full space-y-4" data-oid="hf-a-3w">
       {/* 工具列 */}
-      <div className="flex items-center justify-between" data-oid="nj8n4jj">
-        <div className="flex-1" data-oid="u2u_.kg">
-          {/* 可以在這裡添加搜尋或其他過濾器 */}
+      <div className="flex items-center justify-between gap-4" data-oid="nj8n4jj">
+        <div className="flex-1 max-w-sm" data-oid="u2u_.kg">
+          {/* 搜索框 */}
+          {onSearchChange && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="搜索分店名稱或地址..."
+                value={searchValue}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-10"
+                disabled={isLoading}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center space-x-2" data-oid="g47pgd-">
@@ -125,14 +144,12 @@ export function StoresDataTable<TData, TValue>({
                       }
                       data-oid="jjkzmrw"
                     >
-                      {column.id === "id" && "ID"}
                       {column.id === "name" && "名稱"}
                       {column.id === "address" && "地址"}
                       {column.id === "created_at" && "建立時間"}
                       {column.id === "updated_at" && "更新時間"}
                       {column.id === "actions" && "操作"}
                       {![
-                        "id",
                         "name",
                         "address",
                         "created_at",
@@ -162,14 +179,14 @@ export function StoresDataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
-
+                className="border-b hover:bg-transparent"
                 data-oid="j-7qe7-"
               >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
-                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                      className="h-12 px-6 py-4 text-left align-middle font-medium text-muted-foreground"
                       data-oid="_l60.t-"
                     >
                       {header.isPlaceholder
@@ -211,10 +228,15 @@ export function StoresDataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="border-b hover:bg-muted/50 transition-colors"
                   data-oid="7:e2rfa"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} data-oid="5fai-:c">
+                    <TableCell 
+                      key={cell.id} 
+                      className="px-6 py-4 align-top"
+                      data-oid="5fai-:c"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -228,15 +250,23 @@ export function StoresDataTable<TData, TValue>({
               <TableRow data-oid="h6yh9am">
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-32 text-center"
                   data-oid="rwk2f_l"
                 >
                   <div
-                    className="flex flex-col items-center justify-center space-y-2"
+                    className="flex flex-col items-center justify-center space-y-3"
                     data-oid=".7cboyg"
                   >
-                    <div className="text-muted-foreground" data-oid="-s7bonp">
-                      尚無分店資料
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                      <StoreIcon className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-sm font-medium text-muted-foreground" data-oid="-s7bonp">
+                        尚無分店資料
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        建立您的第一個分店開始管理
+                      </div>
                     </div>
                     {showAddButton && onAddStore && (
                       <Button
@@ -266,7 +296,16 @@ export function StoresDataTable<TData, TValue>({
           className="flex-1 text-sm text-muted-foreground"
           data-oid="gv2j2hj"
         >
-          共 {data.length} 個分店
+          {searchValue ? (
+            <span>
+              找到 {data.length} 個分店
+              <span className="text-xs ml-2">
+                {data.length === 0 ? "嘗試調整搜索條件" : ""}
+              </span>
+            </span>
+          ) : (
+            `共 ${data.length} 個分店`
+          )}
         </div>
         <div className="flex items-center space-x-2" data-oid=":d_ubcp">
           <Button
