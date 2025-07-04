@@ -5,6 +5,33 @@ namespace App\Http\Resources\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * OrderItemResource API 資源
+ * 
+ * 用於格式化訂單項目的 API 回應
+ * 
+ * @property int $id
+ * @property int $order_id
+ * @property int|null $product_variant_id
+ * @property bool $is_stocked_sale
+ * @property bool $is_backorder
+ * @property string $status
+ * @property string $product_name
+ * @property string $sku
+ * @property string $price
+ * @property string $cost
+ * @property int $quantity
+ * @property string $tax_rate
+ * @property string $discount_amount
+ * @property string|null $custom_product_name
+ * @property array|null $custom_specifications
+ * @property string|null $custom_product_image
+ * @property string|null $custom_product_category
+ * @property string|null $custom_product_brand
+ * @property string $created_at
+ * @property string $updated_at
+ * @property \App\Http\Resources\Api\ProductVariantResource|null $product_variant
+ */
 class OrderItemResource extends JsonResource
 {
     /**

@@ -16,6 +16,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * 
  * @apiResource App\Http\Resources\Api\UserResource
  * @apiResourceModel App\Models\User
+ * 
+ * @property int $id
+ * @property string $name
+ * @property string $username
+ * @property array<string> $roles
+ * @property array<string> $roles_display
+ * @property bool $is_admin
+ * @property string $created_at
+ * @property string $updated_at
+ * @property \App\Http\Resources\Api\StoreResource[]|null $stores
  */
 class UserResource extends JsonResource
 {
@@ -31,7 +41,7 @@ class UserResource extends JsonResource
             'id' => (int) $this->id,
             'name' => $this->name,
             'username' => $this->username,
-            'roles' => $this->getRoleNames()->toArray(), // 用戶的所有角色
+            'roles' => $this->resource->getRoleNames()->toArray(), // 用戶的所有角色
             'roles_display' => $this->getRolesDisplayNames(), // 角色顯示名稱
             'is_admin' => $this->hasRole('admin'), // 是否有管理員角色
             'created_at' => $this->created_at,
@@ -49,7 +59,7 @@ class UserResource extends JsonResource
     {
         $availableRoles = User::getAvailableRoles();
         
-        return $this->getRoleNames()
+        return $this->resource->getRoleNames()
             ->map(function ($role) use ($availableRoles) {
                 return $availableRoles[$role] ?? $role;
             })
