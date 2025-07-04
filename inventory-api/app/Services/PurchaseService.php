@@ -161,6 +161,7 @@ class PurchaseService
     {
         return DB::transaction(function () use ($purchase, $purchaseData) {
             $oldStatus = $purchase->status;
+            $newStatus = $purchaseData->status ?? $purchase->status;
 
             // 1. 計算新的總金額
             $itemSubtotal = 0;
@@ -172,20 +173,31 @@ class PurchaseService
 
             $totalAmount = $itemSubtotal + $purchaseData->shipping_cost;
 
-            // 2. 更新進貨單主記錄
+            // 2. 如果狀態有變更，先處理庫存回退（如果需要）
+            if ($oldStatus !== $newStatus) {
+                // 驗證狀態轉換合法性
+                if (!$this->isValidStatusTransition($oldStatus, $newStatus)) {
+                    throw new \InvalidArgumentException(
+                        "無法從 " . (Purchase::getStatusOptions()[$oldStatus] ?? $oldStatus) . 
+                        " 轉換到 " . (Purchase::getStatusOptions()[$newStatus] ?? $newStatus)
+                    );
+                }
+
+                // 如果從已完成狀態變更，需要先回退庫存
+                if ($oldStatus === Purchase::STATUS_COMPLETED && $newStatus !== Purchase::STATUS_COMPLETED) {
+                    $this->revertInventoryForPurchase($purchase);
+                }
+            }
+
+            // 3. 更新進貨單主記錄
             $purchase->update([
                 'store_id' => $purchaseData->store_id,
                 'order_number' => $purchaseData->order_number,
                 'purchased_at' => $purchaseData->purchased_at ?? $purchase->purchased_at,
                 'total_amount' => $totalAmount,
                 'shipping_cost' => $purchaseData->shipping_cost,
-                'status' => $purchaseData->status ?? $purchase->status,
+                'status' => $newStatus,
             ]);
-
-            // 3. 如果已完成入庫，需要先回退庫存
-            if ($oldStatus === Purchase::STATUS_COMPLETED && $purchaseData->status !== Purchase::STATUS_COMPLETED) {
-                $this->revertInventoryForPurchase($purchase);
-            }
 
             // 4. 刪除舊的進貨項目
             $purchase->items()->delete();
@@ -194,7 +206,7 @@ class PurchaseService
             $accumulatedShippingCost = 0;
             $itemCount = count($purchaseData->items);
             foreach ($purchaseData->items as $index => $itemData) {
-                // 3a. 計算運費攤銷（按數量比例分攤）
+                // 5a. 計算運費攤銷（按數量比例分攤）
                 $isLastItem = ($index === $itemCount - 1);
 
                 if ($isLastItem) {
@@ -216,8 +228,16 @@ class PurchaseService
             }
 
             // 6. 如果新狀態為已完成，則進行入庫
-            if ($purchase->status === Purchase::STATUS_COMPLETED) {
+            if ($newStatus === Purchase::STATUS_COMPLETED) {
                 $this->processInventoryForCompletedPurchase($purchase);
+            }
+
+            // 7. 如果狀態有變更，記錄日誌
+            if ($oldStatus !== $newStatus) {
+                $userId = Auth::id();
+                if ($userId) {
+                    $this->logStatusChange($purchase, $oldStatus, $newStatus, $userId, '進貨單更新時狀態變更');
+                }
             }
 
             return $purchase->load(['store', 'items.productVariant.product']);
