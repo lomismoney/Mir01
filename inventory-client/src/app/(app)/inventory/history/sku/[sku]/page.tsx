@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useSkuInventoryHistory } from "@/hooks/queries/useEntityQueries";
+import { useSkuInventoryHistory } from "@/hooks";
 import {
   getTransactionIcon,
   getTransactionTypeName,

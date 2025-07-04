@@ -22,7 +22,7 @@ import {
   useProductDetail,
   useAttributes,
   useUploadProductImage,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 
 // 導入步驟組件
 import {
@@ -405,7 +405,7 @@ export function CreateProductWizard({
         const hasAttributes = attributes.length > 0;
         const hasMultipleVariants = variants.length > 1;
         const hasAttributeValues = variants.some(
-          (variant: import('@/hooks/queries/useEntityQueries').ProcessedProductVariant) =>
+          (variant: import('@/hooks').ProcessedProductVariant) =>
             variant.attribute_values && variant.attribute_values.length > 0,
         );
         const isVariable = hasAttributes || hasMultipleVariants || hasAttributeValues;
@@ -415,13 +415,13 @@ export function CreateProductWizard({
 
       if (hasAttributes && attributes.length > 0 && variants.length > 0) {
         // 遍歷每個屬性，收集所有可能的屬性值
-        attributes.forEach((attr: import('@/hooks/queries/useEntityQueries').ProcessedProductAttribute) => {
+        attributes.forEach((attr: import('@/hooks').ProcessedProductAttribute) => {
           const values = new Set<string>();
 
           // 從現有變體中提取屬性值
-          variants.forEach((variant: import('@/hooks/queries/useEntityQueries').ProcessedProductVariant) => {
+          variants.forEach((variant: import('@/hooks').ProcessedProductVariant) => {
             if (variant.attribute_values) {
-              variant.attribute_values.forEach((attrVal: import('@/hooks/queries/useEntityQueries').ProcessedProductAttributeValue) => {
+              variant.attribute_values.forEach((attrVal: import('@/hooks').ProcessedProductAttributeValue) => {
                 if (attrVal.attribute_id === attr.id) {
                   values.add(attrVal.value);
                 }
@@ -434,10 +434,10 @@ export function CreateProductWizard({
       }
 
       // 建構變體配置數據
-      const variantItems = variants.map((variant: import('@/hooks/queries/useEntityQueries').ProcessedProductVariant, index: number) => {
+      const variantItems = variants.map((variant: import('@/hooks').ProcessedProductVariant, index: number) => {
         // 從屬性值中建構選項
         const options =
-          variant.attribute_values?.map((attrVal: import('@/hooks/queries/useEntityQueries').ProcessedProductAttributeValue) => ({
+          variant.attribute_values?.map((attrVal: import('@/hooks').ProcessedProductAttributeValue) => ({
             attributeId: attrVal.attribute_id,
             value: attrVal.value,
           })) || [];
@@ -473,7 +473,7 @@ export function CreateProductWizard({
         specifications: {
           isVariable: isVariable,
           selectedAttributes: hasAttributes
-            ? attributes.map((attr: import('@/hooks/queries/useEntityQueries').ProcessedProductAttribute) => attr.id)
+            ? attributes.map((attr: import('@/hooks').ProcessedProductAttribute) => attr.id)
             : [],
           attributeValues: attributeValues,
         },

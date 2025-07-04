@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SectionCards } from "@/components/section-cards";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { useProductVariants } from "@/hooks/queries/useEntityQueries";
+import { useProductVariants } from "@/hooks";
 import { ProductVariant } from "@/types/api-helpers";
 import {
   Select,

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useInstallation } from "@/hooks/queries/useEntityQueries";
+import { useInstallation } from "@/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";

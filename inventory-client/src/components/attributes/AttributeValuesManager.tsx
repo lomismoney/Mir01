@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAttributeValues } from "@/hooks/queries/useEntityQueries";
+import { useAttributeValues } from "@/hooks";
 import { Attribute } from "@/types/attribute";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -231,6 +231,8 @@ export function AttributeValuesManager({
           {isLoading ? (
             <div
               className="flex justify-center items-center py-8"
+              role="status"
+              aria-label="loading values"
               data-oid=".we:0v:"
             >
               <Loader2 className="h-6 w-6 animate-spin" data-oid="oze9njs" />
@@ -282,6 +284,7 @@ export function AttributeValuesManager({
                           size="icon"
                           onClick={() => onDeleteValue(value.id, value.value)}
                           className="h-8 w-8"
+                          aria-label={`刪除規格值 ${value.value}`}
                           data-oid="16ww9ez"
                         >
                           <Trash2

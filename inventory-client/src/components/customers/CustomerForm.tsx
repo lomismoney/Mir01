@@ -25,7 +25,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trash2, PlusCircle, AlertCircle } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useCheckCustomerExistence } from "@/hooks/queries/useEntityQueries";
+import { useCheckCustomerExistence } from "@/hooks";
 // 假設 Customer 類型已在 api-helpers 中定義
 import { Customer } from "@/types/api-helpers";
 
@@ -390,6 +390,7 @@ export function CustomerForm({
                   variant="ghost"
                   size="icon"
                   onClick={() => remove(index)}
+                  data-testid={`delete-address-${index}`}
                   data-oid="31i.or8"
                 >
                   <Trash2 className="h-4 w-4" data-oid="3h5jig3" />

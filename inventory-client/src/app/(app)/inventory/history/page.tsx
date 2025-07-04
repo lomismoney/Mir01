@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useAllInventoryTransactions } from "@/hooks/queries/useEntityQueries";
+import { useAllInventoryTransactions } from "@/hooks";
 import {
   InventoryTransaction,
 } from "@/types/api-helpers";

@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { WizardFormData } from "../CreateProductWizard";
-import { useAttributes } from "@/hooks/queries/useEntityQueries";
+import { useAttributes } from "@/hooks";
 import { Attribute } from "@/types/products";
 import { toast } from "sonner";
 

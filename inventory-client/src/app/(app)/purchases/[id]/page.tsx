@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { usePurchase } from "@/hooks/queries/useEntityQueries";
+import { usePurchase } from "@/hooks";
 import {
   PURCHASE_STATUS_LABELS,
   PURCHASE_STATUS_COLORS,

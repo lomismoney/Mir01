@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import {
   useCreateRefund,
   useOrderDetail,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useAppFieldArray } from "@/hooks/useAppFieldArray";
 
 // Types

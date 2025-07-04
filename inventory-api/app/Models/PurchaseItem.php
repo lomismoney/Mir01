@@ -65,6 +65,10 @@ class PurchaseItem extends Model
         return $this->hasOneThrough(Product::class, ProductVariant::class, 'id', 'id', 'product_variant_id', 'product_id');
     }
 
+    /**
+     * 金額欄位的取值器（Accessor）
+     * 將資料庫中以分為單位的金額轉換為元
+     */
     protected function getUnitPriceAttribute($value)
     {
         return (int) round($value / 100);

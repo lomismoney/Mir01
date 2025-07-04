@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { WizardFormData } from "../CreateProductWizard";
-import { useCategories } from "@/hooks/queries/useEntityQueries";
+import { useCategories } from "@/hooks";
 import { Category } from "@/types/category";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import apiClient from "@/lib/apiClient";

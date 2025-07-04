@@ -38,7 +38,7 @@ class OrderPolicy
     public function view(User $user, Order $order): bool
     {
         // 管理員可以查看所有訂單，創建者可以查看自己的訂單
-        return $user->isAdmin() || $order->created_by === $user->id;
+        return $user->isAdmin() || $order->creator_user_id === $user->id;
     }
 
     /**
@@ -68,7 +68,7 @@ class OrderPolicy
         }
 
         // 一般用戶可以更新自己創建的且狀態允許修改的訂單
-        if ($order->created_by === $user->id) {
+        if ($order->creator_user_id === $user->id) {
             // 檢查訂單狀態，已出貨或已完成的訂單不能修改
             return !in_array($order->shipping_status, ['shipped', 'delivered']);
         }

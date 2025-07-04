@@ -34,7 +34,7 @@ import {
 import {
   CategoryNode,
   useReorderCategories,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import {
   Table,
   TableBody,

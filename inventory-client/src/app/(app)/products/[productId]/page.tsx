@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { useProductDetail } from "@/hooks/queries/useEntityQueries";
+import { useProductDetail } from "@/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Card,

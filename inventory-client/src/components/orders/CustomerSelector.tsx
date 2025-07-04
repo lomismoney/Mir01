@@ -8,7 +8,7 @@ import {
   UserCircle2,
   Search,
 } from "lucide-react";
-import { useCustomers } from "@/hooks/queries/useEntityQueries";
+import { useCustomers } from "@/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

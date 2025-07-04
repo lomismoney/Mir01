@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { CategoryNode } from "@/hooks/queries/useEntityQueries";
+import { CategoryNode } from "@/hooks";
 
 // 定義分類操作介面
 export interface CategoryActions {

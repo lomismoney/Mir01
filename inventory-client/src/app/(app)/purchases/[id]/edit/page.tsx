@@ -7,7 +7,7 @@ import {
   usePurchase,
   useUpdatePurchase,
   useStores,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useAppFieldArray } from "@/hooks/useAppFieldArray";
 import {
   PURCHASE_STATUS_LABELS,
@@ -215,7 +215,7 @@ export default function PurchaseEditPage() {
     };
 
     updatePurchaseMutation.mutate(
-      { id: purchaseId, data: updateData },
+      { id: Number(purchaseId), data: updateData },
       {
         onSuccess: () => {
           toast.success("進貨單已更新");

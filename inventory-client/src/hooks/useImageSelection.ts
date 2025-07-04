@@ -44,7 +44,7 @@ const extractImageMetadata = (file: File) => {
     originalSize: number;
     dimensions: { width: number; height: number };
     format: string;
-  }>((resolve) => {
+  }>((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
       resolve({
@@ -52,6 +52,9 @@ const extractImageMetadata = (file: File) => {
         dimensions: { width: img.width, height: img.height },
         format: file.type,
       });
+    };
+    img.onerror = (error) => {
+      reject(error);
     };
     img.src = URL.createObjectURL(file);
   });

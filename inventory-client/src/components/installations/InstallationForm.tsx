@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { useUsers } from "@/hooks/queries/useEntityQueries";
+import { useUsers } from "@/hooks";
 import {
   Form,
   FormField,

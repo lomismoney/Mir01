@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import {
   useOrderDetail,
   useUpdateOrderItemStatus,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {

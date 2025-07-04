@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useInventoryHistory } from "@/hooks/queries/useEntityQueries";
+import { useInventoryHistory } from "@/hooks";
 import {
   getTransactionIcon,
   getTransactionTypeName,

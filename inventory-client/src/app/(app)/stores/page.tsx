@@ -8,7 +8,7 @@ import {
   useCreateStore,
   useUpdateStore,
   useDeleteStore,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
@@ -133,7 +133,7 @@ export default function StoresPage() {
     try {
       await updateStoreMutation.mutateAsync({
         id: editingStore.id,
-        data: {
+        body: {
           name: editStoreName.trim(),
           address: editStoreAddress.trim() || undefined,
         },

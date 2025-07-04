@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test:*)",
+      "Bash(./vendor/bin/sail test --coverage-text --coverage-html=coverage)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(./vendor/bin/sail test --coverage-text)",
+      "Bash(grep:*)"
+    ],
+    "deny": []
+  }
+}

@@ -43,7 +43,7 @@ import { CustomerSelector } from "./CustomerSelector";
 import { CustomerForm } from "@/components/customers/CustomerForm";
 import { ProductSelector, type Variant } from "@/components/ui/ProductSelector";
 import { OrderFormProductBadge } from "./OrderFormProductBadge";
-import { useCreateCustomer } from "@/hooks/queries/useEntityQueries";
+import { useCreateCustomer } from "@/hooks";
 import { Customer, ProductVariant, OrderFormData } from "@/types/api-helpers";
 import { useAppFieldArray } from "@/hooks/useAppFieldArray";
 import {

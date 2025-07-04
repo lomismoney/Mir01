@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { InventoryTransferItem } from "@/types/api-helpers";
-import { useAllInventoryTransactions } from "@/hooks/queries/useEntityQueries";
+import { useAllInventoryTransactions } from "@/hooks";
 import {
   Dialog,
   DialogContent,

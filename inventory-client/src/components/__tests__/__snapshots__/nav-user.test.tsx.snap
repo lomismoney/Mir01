@@ -1,0 +1,151 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NavUser 應該匹配快照 - 已登入狀態 1`] = `
+<div
+  class="group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full"
+  data-oid="my3p83z"
+  data-slot="sidebar-wrapper"
+  style="--sidebar-width: 16rem; --sidebar-width-icon: 3rem;"
+>
+  <ul
+    class="flex w-full min-w-0 flex-col gap-1"
+    data-oid="dri9:6p"
+    data-sidebar="menu"
+    data-slot="sidebar-menu"
+  >
+    <li
+      class="group/menu-item relative"
+      data-oid="ng96r2e"
+      data-sidebar="menu-item"
+      data-slot="sidebar-menu-item"
+    >
+      <button
+        aria-expanded="false"
+        aria-haspopup="menu"
+        class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left outline-hidden ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-12 text-sm group-data-[collapsible=icon]:p-0! data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+        data-active="false"
+        data-oid="i2mj19p"
+        data-sidebar="menu-button"
+        data-size="lg"
+        data-slot="dropdown-menu-trigger"
+        data-state="closed"
+        id="radix-«ro»"
+        type="button"
+      >
+        <span
+          class="relative flex size-8 shrink-0 overflow-hidden h-8 w-8 rounded-lg grayscale"
+          data-oid="0by:gc-"
+          data-slot="avatar"
+        >
+          <span
+            class="bg-muted flex size-full items-center justify-center rounded-lg"
+            data-oid="3.f9ghj"
+            data-slot="avatar-fallback"
+          >
+            張
+          </span>
+        </span>
+        <div
+          class="grid flex-1 text-left text-sm leading-tight"
+          data-oid="imx7bi1"
+        >
+          <span
+            class="truncate font-medium"
+            data-oid="cysknfu"
+          >
+            張三
+          </span>
+          <span
+            class="text-muted-foreground truncate text-xs"
+            data-oid="c4hn69i"
+          >
+            zhangsan
+          </span>
+        </div>
+        <svg
+          class="tabler-icon tabler-icon-dots-vertical ml-auto size-4"
+          data-oid="jz5u_0:"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+          />
+          <path
+            d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+          />
+          <path
+            d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+          />
+        </svg>
+      </button>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`NavUser 應該匹配快照 - 載入狀態 1`] = `
+<div
+  class="group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full"
+  data-oid="my3p83z"
+  data-slot="sidebar-wrapper"
+  style="--sidebar-width: 16rem; --sidebar-width-icon: 3rem;"
+>
+  <ul
+    class="flex w-full min-w-0 flex-col gap-1"
+    data-oid="dri9:6p"
+    data-sidebar="menu"
+    data-slot="sidebar-menu"
+  >
+    <li
+      class="group/menu-item relative"
+      data-oid="ng96r2e"
+      data-sidebar="menu-item"
+      data-slot="sidebar-menu-item"
+    >
+      <button
+        class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left outline-hidden ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-12 text-sm group-data-[collapsible=icon]:p-0!"
+        data-active="false"
+        data-oid="i2mj19p"
+        data-sidebar="menu-button"
+        data-size="lg"
+        data-slot="sidebar-menu-button"
+        disabled=""
+      >
+        <div
+          class="bg-accent animate-pulse h-8 w-8 rounded-lg"
+          data-oid="mxq9hx4"
+          data-slot="skeleton"
+        />
+        <div
+          class="grid flex-1 text-left text-sm leading-tight"
+          data-oid=".nd435q"
+        >
+          <div
+            class="bg-accent animate-pulse rounded-md h-4 w-20 mb-1"
+            data-oid="mxq9hx4"
+            data-slot="skeleton"
+          />
+          <div
+            class="bg-accent animate-pulse rounded-md h-3 w-24"
+            data-oid="mxq9hx4"
+            data-slot="skeleton"
+          />
+        </div>
+        <div
+          class="bg-accent animate-pulse rounded-md ml-auto h-4 w-4"
+          data-oid="mxq9hx4"
+          data-slot="skeleton"
+        />
+      </button>
+    </li>
+  </ul>
+</div>
+`;

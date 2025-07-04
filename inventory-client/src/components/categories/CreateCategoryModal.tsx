@@ -11,7 +11,7 @@ import {
   useCategories,
   useCreateCategory,
   type CategoryNode,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { CategoryForm, type FormValues } from "./CategoryForm";
 import { toast } from "sonner";
 

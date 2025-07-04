@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useStores } from "@/hooks/queries/useEntityQueries";
+import { useStores } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Store 類型定義

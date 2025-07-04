@@ -16,7 +16,7 @@ import {
   useOrderDetail,
   useConfirmOrderPayment,
   useCreateOrderShipment,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { Badge } from "@/components/ui/badge";
 import RecordPaymentModal from "@/components/orders/RecordPaymentModal";
 

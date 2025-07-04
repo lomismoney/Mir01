@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   useStores,
   useAllInventoryTransactions,
-} from "@/hooks/queries/useEntityQueries";
+} from "@/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useToast } from "@/components/ui/use-toast";
 import {

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Check, Search, Package } from "lucide-react";
-import { useProducts } from "@/hooks/queries/useEntityQueries";
+import { useProducts } from "@/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";
 import {

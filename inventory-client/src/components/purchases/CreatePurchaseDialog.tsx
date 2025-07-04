@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, useFieldArray } from "react-hook-form";
-import { useCreatePurchase, useStores } from "@/hooks/queries/useEntityQueries";
+import { useCreatePurchase, useStores } from "@/hooks";
 import { useToast } from "@/components/ui/use-toast";
 import { PURCHASE_STATUS_LABELS, PURCHASE_STATUS } from "@/types/purchase";
 import {

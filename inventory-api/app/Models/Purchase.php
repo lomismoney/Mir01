@@ -138,6 +138,10 @@ class Purchase extends Model
         ]);
     }
 
+    /**
+     * 金額欄位的取值器（Accessor）
+     * 將資料庫中以分為單位的金額轉換為元
+     */
     protected function getTotalAmountAttribute($value)
     {
         return (int) round($value / 100);
