@@ -75,7 +75,6 @@ import {
   TrendingUp,
   Calendar,
   Store,
-  Filter,
 } from "lucide-react";
 
 import { CreatePurchaseDialog } from "./CreatePurchaseDialog";
@@ -415,28 +414,23 @@ export function PurchaseManagement() {
             </Card>
           </div>
 
-          {/* 篩選器區域 */}
+          {/* 進貨單列表 */}
           <div className="px-4 lg:px-6">
-            <Card data-oid="u_-3mv5">
-              <CardHeader data-oid="dn7okyo">
-                <CardTitle className="flex items-center gap-2" data-oid="lsg8x8f">
-                  <Filter className="h-5 w-5" data-oid="uc1dp0t" />
-                  篩選進貨單
-                </CardTitle>
-                <CardDescription data-oid="rw3szll">
-                  使用以下篩選器來查找特定的進貨單
-                </CardDescription>
-              </CardHeader>
-              <CardContent data-oid="ef0:.wa">
-                <div
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-                  data-oid="pq0gvr8"
-                >
+            <Card data-oid="jon:6-j">
+            <CardHeader data-oid="yvygm_y">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                {/* 左側：標題區域 */}
+                <div>
+                  <CardTitle data-oid="tlr1ewn">進貨單列表</CardTitle>
+                  <CardDescription data-oid="nbqx4hv">
+                    共 {stats.total} 筆進貨單
+                  </CardDescription>
+                </div>
+                
+                {/* 右側：篩選功能 */}
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-3">
                   {/* 進貨單號搜尋 */}
-                  <div className="space-y-2" data-oid="oor1_q:">
-                    <label className="text-sm font-medium" data-oid="uu3vr.j">
-                      進貨單號
-                    </label>
+                  <div className="min-w-[200px]">
                     <Input
                       placeholder="搜尋進貨單號..."
                       value={orderNumberInput}
@@ -446,10 +440,7 @@ export function PurchaseManagement() {
                   </div>
 
                   {/* 門市篩選 */}
-                  <div className="space-y-2" data-oid="f2oy7ue">
-                    <label className="text-sm font-medium" data-oid="ji.114a">
-                      門市
-                    </label>
+                  <div className="min-w-[140px]">
                     <Select
                       value={filters.store_id?.toString() || "all"}
                       onValueChange={(value) =>
@@ -461,7 +452,7 @@ export function PurchaseManagement() {
                       data-oid="52.yjdr"
                     >
                       <SelectTrigger data-oid="f.ov_xu">
-                        <SelectValue placeholder="選擇門市" data-oid="wvz9c8y" />
+                        <SelectValue placeholder="門市" data-oid="wvz9c8y" />
                       </SelectTrigger>
                       <SelectContent data-oid="760qw0z">
                         <SelectItem value="all" data-oid="bizr1fd">
@@ -481,17 +472,14 @@ export function PurchaseManagement() {
                   </div>
 
                   {/* 狀態篩選 */}
-                  <div className="space-y-2" data-oid="j-75y02">
-                    <label className="text-sm font-medium" data-oid="a4-ionr">
-                      狀態
-                    </label>
+                  <div className="min-w-[120px]">
                     <Select
                       value={filters.status || "all"}
                       onValueChange={(value) => handleFilterChange("status", value)}
                       data-oid="o:u9jqp"
                     >
                       <SelectTrigger data-oid="3f_5h.8">
-                        <SelectValue placeholder="選擇狀態" data-oid="r45hih9" />
+                        <SelectValue placeholder="狀態" data-oid="r45hih9" />
                       </SelectTrigger>
                       <SelectContent data-oid="330n::b">
                         <SelectItem value="all" data-oid="1-jiuk9">
@@ -509,42 +497,26 @@ export function PurchaseManagement() {
                   </div>
 
                   {/* 操作按鈕 */}
-                  <div className="space-y-2" data-oid="papk_o.">
-                    <label
-                      className="text-sm font-medium opacity-0"
-                      data-oid="bqfrnsv"
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResetFilters}
+                      data-oid=":jiz21k"
                     >
-                      操作
-                    </label>
-                    <div className="flex gap-2" data-oid="vuk.5bt">
-                      <Button
-                        variant="outline"
-                        onClick={handleResetFilters}
-                        data-oid=":jiz21k"
-                      >
-                        重置
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => refetch()}
-                        data-oid="f7zbkrf"
-                      >
-                        <RefreshCw className="h-4 w-4" data-oid="zui06y3" />
-                      </Button>
-                    </div>
+                      重置
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => refetch()}
+                      data-oid="f7zbkrf"
+                    >
+                      <RefreshCw className="h-4 w-4" data-oid="zui06y3" />
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* 進貨單列表 */}
-          <Card data-oid="jon:6-j">
-            <CardHeader data-oid="yvygm_y">
-              <CardTitle data-oid="tlr1ewn">進貨單列表</CardTitle>
-              <CardDescription data-oid="nbqx4hv">
-                共 {stats.total} 筆進貨單
-              </CardDescription>
+              </div>
             </CardHeader>
             <CardContent data-oid="4n_y9z:">
               {isLoading ? (
@@ -895,6 +867,7 @@ export function PurchaseManagement() {
               )}
             </CardContent>
           </Card>
+          </div>
           
           {/* 進貨單列表卡片結束 */}
         </div>
