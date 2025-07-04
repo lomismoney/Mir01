@@ -191,4 +191,6 @@ dev-debug.log
 
 # Task files
 # tasks.json
-# tasks/ 
+# tasks/ # Laravel 框架快取檔案（更詳細的排除）
+inventory-api/storage/framework/cache/data/
+inventory-api/storage/framework/cache/data/*
