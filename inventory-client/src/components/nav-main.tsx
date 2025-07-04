@@ -47,7 +47,7 @@ export function NavMain({ items }: { items: NavLink[] }) {
   // 🔧 只在客戶端設置默認展開項目，避免 SSR/客戶端不一致
   useEffect(() => {
     setMounted(true);
-    setOpenItems(["商品管理"]); // 默認展開商品管理
+    setOpenItems([]); // 所有選項預設為閉合狀態
   }, []);
 
   const toggleItem = (title: string) => {
