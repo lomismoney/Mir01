@@ -124,7 +124,7 @@ describe('useStores hooks', () => {
     });
 
     it('should handle direct array response', async () => {
-      const mockData = [
+      const mockData: Array<{ id: number; name: string; address: string; status: string }> = [
         {
           id: 1,
           name: 'Store 1',
@@ -219,7 +219,7 @@ describe('useStores hooks', () => {
     });
 
     it('should handle params in meta generation', async () => {
-      const mockData = [];
+      const mockData: any[] = [];
       const params = { page: 2, per_page: 50 };
 
       mockApiClient.GET.mockResolvedValueOnce({
@@ -287,8 +287,8 @@ describe('useStores hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData.data);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/stores/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/stores/{store}', {
+        params: { path: { store: 1 } }
       });
     });
 
@@ -335,7 +335,7 @@ describe('useStores hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toBeNull();
+      expect(result.current.data).toEqual({ data: null });
     });
   });
 
@@ -477,8 +477,8 @@ describe('useStores hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/stores/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/stores/{store}', {
+        params: { path: { store: 1 } },
         body: updateData.body
       });
     });
@@ -516,6 +516,7 @@ describe('useStores hooks', () => {
       const updateData = {
         id: 1,
         body: {
+          name: 'Store',
           status: 'inactive' as const
         }
       };
@@ -535,9 +536,9 @@ describe('useStores hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/stores/{id}', {
-        params: { path: { id: 1 } },
-        body: { status: 'inactive' }
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/stores/{store}', {
+        params: { path: { store: 1 } },
+        body: { name: 'Store', status: 'inactive' }
       });
     });
   });
@@ -559,8 +560,8 @@ describe('useStores hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/stores/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/stores/{store}', {
+        params: { path: { store: 1 } }
       });
     });
 
@@ -599,8 +600,8 @@ describe('useStores hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/stores/{id}', {
-        params: { path: { id: 999 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/stores/{store}', {
+        params: { path: { store: 999 } }
       });
     });
   });

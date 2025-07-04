@@ -232,11 +232,15 @@ export function useUpdateCategory() {
   
   return useMutation({
     mutationFn: async (payload: UpdateCategoryPayload) => {
-      const { data, error } = await apiClient.PUT("/api/categories/{id}", {
-        params: { path: { id: payload.id } },
+      const { data, error } = await apiClient.PUT("/api/categories/{category}", {
+        params: { path: { category: payload.id } },
         body: payload.data,
       });
-      if (error) throw error;
+
+      if (error) {
+        throw new Error(parseApiError(error) || "更新分類失敗");
+      }
+
       return data;
     },
     onSuccess: async (data, variables) => {
@@ -292,8 +296,8 @@ export function useDeleteCategory() {
   
   return useMutation({
     mutationFn: async (categoryId: number) => {
-      const { data, error } = await apiClient.DELETE("/api/categories/{id}", {
-        params: { path: { id: categoryId } },
+      const { data, error } = await apiClient.DELETE("/api/categories/{category}", {
+        params: { path: { category: categoryId } },
       });
       if (error) throw error;
       return data;

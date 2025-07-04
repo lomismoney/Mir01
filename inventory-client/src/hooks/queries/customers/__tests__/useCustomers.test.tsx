@@ -97,8 +97,8 @@ describe('useCustomers hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData.data);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/customers/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/customers/{customer}', {
+        params: { path: { customer: 1 } }
       });
     });
 
@@ -304,8 +304,8 @@ describe('useCustomers hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/customers/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/customers/{customer}', {
+        params: { path: { customer: 1 } }
       });
     });
 
@@ -593,8 +593,8 @@ describe('useCustomers hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/customers/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/customers/{customer}', {
+        params: { path: { customer: 1 } },
         body: updateData
       });
     });
@@ -644,8 +644,8 @@ describe('useCustomers hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/customers/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/customers/{customer}', {
+        params: { path: { customer: 1 } },
         body: {}
       });
     });

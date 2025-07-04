@@ -171,7 +171,7 @@ export function PurchaseManagement() {
    */
   const handleCancel = async (purchaseId: number) => {
     try {
-      await cancelMutation.mutateAsync({ id: purchaseId });
+      await cancelMutation.mutateAsync(purchaseId);
       toast.success("進貨單已取消");
     } catch (error) {
       toast.error("取消進貨單失敗");

@@ -377,6 +377,8 @@ describe('useUsers hooks', () => {
         username: 'johndoe',
         email: 'john@example.com',
         password: 'password123',
+        password_confirmation: 'password123',
+        role: 'user',
         stores: [1, 2],
         roles: ['admin', 'manager']
       };
@@ -390,7 +392,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(userData);
+      result.current.mutate(userData as any);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -406,7 +408,10 @@ describe('useUsers hooks', () => {
       const userData = {
         name: 'John Doe',
         username: 'johndoe',
-        email: 'john@example.com'
+        email: 'john@example.com',
+        password: 'password123',
+        password_confirmation: 'password123',
+        role: 'user'
       };
 
       mockApiClient.POST.mockResolvedValueOnce({
@@ -418,7 +423,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(userData);
+      result.current.mutate(userData as any);
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -429,7 +434,14 @@ describe('useUsers hooks', () => {
 
     it('should handle success with missing user name', async () => {
       const mockData = { data: { id: 1 } }; // No name field
-      const userData = { name: 'Test User' };
+      const userData = { 
+        name: 'Test User',
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password123',
+        password_confirmation: 'password123',
+        role: 'user'
+      };
 
       mockApiClient.POST.mockResolvedValueOnce({
         data: mockData,
@@ -440,7 +452,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(userData);
+      result.current.mutate(userData as any);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -450,7 +462,14 @@ describe('useUsers hooks', () => {
     });
 
     it('should handle error without message', async () => {
-      const userData = { name: 'Test User' };
+      const userData = { 
+        name: 'Test User',
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password123',
+        password_confirmation: 'password123',
+        role: 'user'
+      };
 
       mockApiClient.POST.mockResolvedValueOnce({
         data: null,
@@ -461,7 +480,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(userData);
+      result.current.mutate(userData as any);
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -476,10 +495,11 @@ describe('useUsers hooks', () => {
       const mockData = {
         data: { id: 1, name: 'John Doe Updated' }
       };
-      const updateData = {
-        path: { id: 1 },
+      const updatePayload = {
+        id: 1,
         body: {
           name: 'John Doe Updated',
+          username: 'johndoe',
           email: 'john.updated@example.com',
           stores: [1],
           roles: ['user']
@@ -495,24 +515,25 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updateData);
+      result.current.mutate(updatePayload as any);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/users/{id}', {
-        params: { path: updateData.path },
-        body: updateData.body
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/users/{user}', {
+        params: { path: { user: 1 } },
+        body: updatePayload.body
       });
     });
 
     it('should handle error during update', async () => {
-      const updateData = {
-        path: { id: 1 },
+      const updatePayload = {
+        id: 1,
         body: {
           name: 'John Doe',
+          username: 'johndoe',
           email: 'invalid-email'
         }
       };
@@ -526,7 +547,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updateData);
+      result.current.mutate(updatePayload as any);
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -539,9 +560,12 @@ describe('useUsers hooks', () => {
       const mockData = {
         data: { id: 1, name: 'John Doe' }
       };
-      const updateData = {
-        path: { id: 1 },
+      const updatePayload = {
+        id: 1,
         body: {
+          name: 'John Doe',
+          username: 'johndoe',
+          email: 'john@example.com',
           stores: [2, 3]
         }
       };
@@ -555,22 +579,26 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updateData);
+      result.current.mutate(updatePayload as any);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/users/{id}', {
-        params: { path: { id: 1 } },
-        body: { stores: [2, 3] }
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/users/{user}', {
+        params: { path: { user: 1 } },
+        body: updatePayload.body
       });
     });
 
     it('should handle error without message', async () => {
-      const updateData = {
-        path: { id: 1 },
-        body: { name: 'Test' }
+      const updatePayload = {
+        id: 1,
+        body: { 
+          name: 'Test',
+          username: 'test',
+          email: 'test@example.com'
+        }
       };
 
       mockApiClient.PUT.mockResolvedValueOnce({
@@ -582,7 +610,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updateData);
+      result.current.mutate(updatePayload as any);
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -593,9 +621,13 @@ describe('useUsers hooks', () => {
 
     it('should handle success with missing user name', async () => {
       const mockData = { data: { id: 1 } }; // No name field
-      const updateData = {
-        path: { id: 1 },
-        body: { name: 'Updated User' }
+      const updatePayload = {
+        id: 1,
+        body: { 
+          name: 'Updated User',
+          username: 'updateduser',
+          email: 'updated@example.com'
+        }
       };
 
       mockApiClient.PUT.mockResolvedValueOnce({
@@ -607,7 +639,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updateData);
+      result.current.mutate(updatePayload as any);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -628,14 +660,14 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate({ id: 1 });
+      result.current.mutate(1);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/users/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/users/{user}', {
+        params: { path: { user: 1 } }
       });
     });
 
@@ -649,7 +681,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate({ id: 1 });
+      result.current.mutate(1);
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -668,14 +700,14 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate({ id: 999 });
+      result.current.mutate(999);
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/users/{id}', {
-        params: { path: { id: 999 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/users/{user}', {
+        params: { path: { user: 999 } }
       });
     });
 
@@ -689,14 +721,19 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate({});
+      // This test is logically flawed, as mutate expects a number.
+      // We are testing that the hook doesn't break with bad input,
+      // but in a typed world this would be a compile error.
+      // For JS robustness, we test it. The hook should handle it gracefully.
+      // @ts-ignore
+      result.current.mutate(); 
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/users/{id}', {
-        params: { path: {} }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/users/{user}', {
+        params: { path: { user: undefined } }
       });
     });
   });

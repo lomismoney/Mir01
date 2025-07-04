@@ -248,8 +248,8 @@ describe('useInventory hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData.data);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/inventory/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/inventory/{inventory}', {
+        params: { path: { inventory: 1 } }
       });
     });
 
@@ -367,9 +367,9 @@ describe('useInventory hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/inventory/{id}/history', {
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/inventory/{inventory}/history', {
         params: {
-          path: { id: '1' },
+          path: { inventory: 1 },
           query: {
             'filter[start_date]': '2023-01-01',
             'filter[end_date]': '2023-12-31'
@@ -557,9 +557,9 @@ describe('useInventory hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/inventory/{id}/history', {
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/inventory/{inventory}/history', {
         params: {
-          path: { id: '1' },
+          path: { inventory: 1 },
           query: {
             'filter[start_date]': '2023-01-01',
             'filter[end_date]': '2023-01-31',
@@ -758,7 +758,7 @@ describe('useInventory hooks', () => {
 
       const filters = {
         product_name: 'Test Product',
-        store_id: '1',
+        store_id: 1,
         type: 'add',
         start_date: '2023-01-01',
         end_date: '2023-01-31',
@@ -778,7 +778,7 @@ describe('useInventory hooks', () => {
         params: {
           query: {
             'filter[product_name]': 'Test Product',
-            'filter[store_id]': '1',
+            'filter[store_id]': 1,
             'filter[type]': 'add',
             'filter[start_date]': '2023-01-01',
             'filter[end_date]': '2023-01-31',
@@ -961,8 +961,8 @@ describe('useInventory hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData.data);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/inventory/transfers/{id}', {
-        params: { path: { id: '1' } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/inventory/transfers/{transfer}', {
+        params: { path: { transfer: 1 } }
       });
     });
 
@@ -1057,8 +1057,8 @@ describe('useInventory hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/inventory/transfers/{id}/status', {
-        params: { path: { id: '1' } },
+      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/inventory/transfers/{transfer}/status', {
+        params: { path: { transfer: 1 } },
         body: { status: 'completed', notes: 'Transfer completed' }
       });
     });
@@ -1090,7 +1090,7 @@ describe('useInventory hooks', () => {
       const mockData = { id: 1, status: 'cancelled' };
       const cancelData = { id: 1, reason: 'No longer needed' };
 
-      mockApiClient.POST.mockResolvedValueOnce({
+      mockApiClient.PATCH.mockResolvedValueOnce({
         data: mockData,
         error: null
       });
@@ -1106,8 +1106,8 @@ describe('useInventory hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/inventory/transfers/{id}/cancel', {
-        params: { path: { id: '1' } },
+      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/inventory/transfers/{transfer}/cancel', {
+        params: { path: { transfer: 1 } },
         body: { reason: 'No longer needed' }
       });
     });
@@ -1115,9 +1115,9 @@ describe('useInventory hooks', () => {
     it('should handle error during cancellation', async () => {
       const cancelData = { id: 1, reason: 'Error occurred' };
 
-      mockApiClient.POST.mockResolvedValueOnce({
+      mockApiClient.PATCH.mockResolvedValueOnce({
         data: null,
-        error: { message: 'Cancellation failed' }
+        error: { message: '取消轉移失敗' }
       });
 
       const { result } = renderHook(() => useCancelInventoryTransfer(), {

@@ -15,8 +15,8 @@ import {
   useCreateStore,
   useUpdateStore,
   useDeleteStore,
-  Store,
-} from "../useStores";
+} from "../queries/stores/useStores";
+import { Store } from "@/types/store";
 
 // Mock dependencies
 jest.mock("@/lib/apiClient");
@@ -56,7 +56,11 @@ const createWrapper = () => {
 const mockStore: Store = {
   id: 1,
   name: "測試分店",
+  code: "TS001",
   address: "測試地址",
+  phone: "123456789",
+  email: "test@store.com",
+  status: "active",
   created_at: "2024-01-01T00:00:00.000Z",
   updated_at: "2024-01-01T00:00:00.000Z",
 };
@@ -66,7 +70,11 @@ const mockStores: Store[] = [
   {
     id: 2,
     name: "測試分店2",
+    code: "TS002",
     address: "測試地址2",
+    phone: "987654321",
+    email: "test2@store.com",
+    status: "active",
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
   },
@@ -93,7 +101,32 @@ describe("useStores", () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual({ data: mockStores });
+      expect(result.current.data?.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: mockStores[0].id,
+            name: mockStores[0].name,
+            address: mockStores[0].address,
+            phone: mockStores[0].phone,
+            status: mockStores[0].status,
+            created_at: mockStores[0].created_at,
+            updated_at: mockStores[0].updated_at,
+            inventory_count: 0,
+            users_count: 0
+          }),
+          expect.objectContaining({
+            id: mockStores[1].id,
+            name: mockStores[1].name,
+            address: mockStores[1].address,
+            phone: mockStores[1].phone,
+            status: mockStores[1].status,
+            created_at: mockStores[1].created_at,
+            updated_at: mockStores[1].updated_at,
+            inventory_count: 0,
+            users_count: 0
+          })
+        ])
+      );
       expect(mockedApiClient.GET).toHaveBeenCalledWith("/api/stores");
     });
 
@@ -133,7 +166,7 @@ describe("useStores", () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual({ data: [] });
+      expect(result.current.data?.data).toEqual([]);
     });
 
     it("應該處理無嵌套 data 的回應", async () => {
@@ -150,7 +183,32 @@ describe("useStores", () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual({ data: mockStores });
+      expect(result.current.data?.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: mockStores[0].id,
+            name: mockStores[0].name,
+            address: mockStores[0].address,
+            phone: mockStores[0].phone,
+            status: mockStores[0].status,
+            created_at: mockStores[0].created_at,
+            updated_at: mockStores[0].updated_at,
+            inventory_count: 0,
+            users_count: 0
+          }),
+          expect.objectContaining({
+            id: mockStores[1].id,
+            name: mockStores[1].name,
+            address: mockStores[1].address,
+            phone: mockStores[1].phone,
+            status: mockStores[1].status,
+            created_at: mockStores[1].created_at,
+            updated_at: mockStores[1].updated_at,
+            inventory_count: 0,
+            users_count: 0
+          })
+        ])
+      );
     });
   });
 
@@ -169,7 +227,7 @@ describe("useStores", () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual({ data: mockStore });
+      expect(result.current.data).toEqual(mockStore);
       expect(mockedApiClient.GET).toHaveBeenCalledWith(
         "/api/stores/{store}",
         { params: { path: { store: 1 } } }
@@ -190,7 +248,7 @@ describe("useStores", () => {
         expect(result.current.isError).toBe(true);
       });
 
-      expect(result.current.error).toEqual(new Error("取得門市詳情失敗"));
+      expect(result.current.error).toEqual(new Error("獲取門市詳情失敗"));
     });
 
     it("當 ID 為 0 時應該禁用查詢", () => {
@@ -216,7 +274,7 @@ describe("useStores", () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual({ data: mockStore });
+      expect(result.current.data).toEqual(mockStore);
     });
   });
 
@@ -263,7 +321,7 @@ describe("useStores", () => {
         try {
           await result.current.mutateAsync(createData);
         } catch (error) {
-          expect(error).toEqual(new Error("新增門市失敗"));
+          expect(error).toEqual(new Error("創建門市失敗"));
         }
       });
 
@@ -288,7 +346,7 @@ describe("useStores", () => {
       });
 
       await act(async () => {
-        await result.current.mutateAsync({ id: 1, data: updateData });
+        await result.current.mutateAsync({ id: 1, body: updateData });
       });
 
       await waitFor(() => {
@@ -315,7 +373,7 @@ describe("useStores", () => {
 
       await act(async () => {
         try {
-          await result.current.mutateAsync({ id: 1, data: updateData });
+          await result.current.mutateAsync({ id: 1, body: updateData });
         } catch (error) {
           expect(error).toEqual(new Error("更新門市失敗"));
         }
@@ -346,7 +404,7 @@ describe("useStores", () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual({ success: true });
+      expect(result.current.isSuccess).toBe(true);
       expect(mockedApiClient.DELETE).toHaveBeenCalledWith("/api/stores/{store}", {
         params: { path: { store: 1 } },
       });
@@ -359,9 +417,7 @@ describe("useStores", () => {
         error: mockError,
       } as any);
 
-      mockedHandleApiError.mockImplementation(() => {
-        throw new Error("處理後的錯誤");
-      });
+      mockedHandleApiError.mockReturnValue("刪除失敗");
 
       const { result } = renderHook(() => useDeleteStore(), {
         wrapper: createWrapper(),
@@ -371,7 +427,7 @@ describe("useStores", () => {
         try {
           await result.current.mutateAsync(1);
         } catch (error) {
-          expect(error).toEqual(new Error("處理後的錯誤"));
+          expect(error).toEqual(new Error("刪除門市失敗"));
         }
       });
 

@@ -302,8 +302,8 @@ describe('CreateProductWizard', () => {
       render(<CreateProductWizard productId={1} />);
 
       // 有錯誤時應該顯示錯誤訊息
-      expect(screen.getByText('無法載入商品')).toBeInTheDocument();
-      expect(screen.getByText('載入失敗')).toBeInTheDocument();
+      expect(screen.getByText('無法載入商品資料')).toBeInTheDocument();
+      expect(screen.getByText(/商品 ID: 1 無法載入/)).toBeInTheDocument();
     });
   });
 
@@ -613,10 +613,11 @@ describe('CreateProductWizard', () => {
         error: new Error('找不到商品'),
       } as any);
 
-      render(<CreateProductWizard productId="invalid" />);
+      render(<CreateProductWizard productId={999} />);
 
       // 應該顯示錯誤訊息
-      expect(screen.getByText('無法載入商品')).toBeInTheDocument();
+      expect(screen.getByText('無法載入商品資料')).toBeInTheDocument();
+      expect(screen.getByText(/商品 ID: 999 無法載入/)).toBeInTheDocument();
     });
 
     test('應該處理空的屬性資料', () => {

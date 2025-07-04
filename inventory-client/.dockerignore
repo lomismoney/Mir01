@@ -1,0 +1,63 @@
+# Git
+.git
+.gitignore
+
+# 開發和測試
+__tests__/
+__mocks__/
+coverage/
+.jest/
+jest.config.js
+jest.setup.js
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+TEST-*.md
+
+# 環境和配置
+.env
+.env.*
+!.env.example
+
+# 依賴和構建
+node_modules/
+.next/
+out/
+dist/
+build/
+.turbo/
+.vercel/
+
+# IDE 和編輯器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# 日誌
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+
+# 文檔
+*.md
+docs/
+
+# 其他
+.eslintrc*
+.prettierrc*
+.stylelintrc*
+.editorconfig 

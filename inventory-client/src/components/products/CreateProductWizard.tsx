@@ -690,7 +690,7 @@ export function CreateProductWizard({
 
         productResult = await updateProductMutation.mutateAsync({
           id: numericProductId,
-          ...apiPayload,
+          data: apiPayload,
         });
 
         productName = apiPayload.name;

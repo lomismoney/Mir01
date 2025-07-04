@@ -379,8 +379,8 @@ describe('useOrders hooks', () => {
 
       // Should return null for non-existing data
       expect(result.current.data).toBeNull();
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/orders/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/orders/{order}', {
+        params: { path: { order: 1 } }
       });
     });
   });
@@ -405,8 +405,8 @@ describe('useOrders hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order_id}/confirm-payment', {
-        params: { path: { order_id: 1 } }
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order}/confirm-payment', {
+        params: { path: { order: 1 } }
       });
     });
 
@@ -455,8 +455,8 @@ describe('useOrders hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order_id}/create-shipment', {
-        params: { path: { order_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order}/create-shipment', {
+        params: { path: { order: 1 } },
         body: shipmentData
       });
     });
@@ -467,7 +467,7 @@ describe('useOrders hooks', () => {
       const mockData = { id: 1, amount: 100 };
       const paymentData = {
         amount: 100,
-        method: 'credit_card',
+        payment_method: 'credit_card',
         notes: 'Partial payment'
       };
 
@@ -487,8 +487,8 @@ describe('useOrders hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order_id}/add-payment', {
-        params: { path: { order_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order}/add-payment', {
+        params: { path: { order: 1 } },
         body: paymentData
       });
     });
@@ -520,8 +520,8 @@ describe('useOrders hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/orders/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/orders/{order}', {
+        params: { path: { order: 1 } },
         body: updateData
       });
     });
@@ -547,8 +547,8 @@ describe('useOrders hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/orders/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/orders/{order}', {
+        params: { path: { order: 1 } }
       });
     });
   });
@@ -578,8 +578,8 @@ describe('useOrders hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/order-items/{order_item_id}/status', {
-        params: { path: { order_item_id: 1 } },
+      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/order-items/{order_item}/status', {
+        params: { path: { order_item: 1 } },
         body: { status: 'shipped', notes: 'Item shipped' }
       });
     });
@@ -606,8 +606,8 @@ describe('useOrders hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/order-items/{order_item_id}/status', {
-        params: { path: { order_item_id: 1 } },
+      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/order-items/{order_item}/status', {
+        params: { path: { order_item: 1 } },
         body: { status: 'delivered' }
       });
     });
@@ -617,8 +617,9 @@ describe('useOrders hooks', () => {
     it('should create refund successfully', async () => {
       const mockData = { data: { total_refund_amount: '50.00' } };
       const refundData = {
-        items: [{ order_item_id: 1, quantity: 1, reason: 'defective' }],
-        restore_stock: true
+        reason: 'defective',
+        should_restock: true,
+        items: ['1']
       };
 
       mockApiClient.POST.mockResolvedValueOnce({
@@ -637,8 +638,8 @@ describe('useOrders hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order_id}/refunds', {
-        params: { path: { order_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order}/refunds', {
+        params: { path: { order: 1 } },
         body: refundData
       });
     });
@@ -646,7 +647,9 @@ describe('useOrders hooks', () => {
     it('should handle refund amount as number', async () => {
       const mockData = { data: { total_refund_amount: 75.5 } };
       const refundData = {
-        items: [{ order_item_id: 1, quantity: 1, reason: 'changed mind' }]
+        reason: 'changed mind',
+        should_restock: false,
+        items: ['1']
       };
 
       mockApiClient.POST.mockResolvedValueOnce({
@@ -685,8 +688,8 @@ describe('useOrders hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order_id}/cancel', {
-        params: { path: { order_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order}/cancel', {
+        params: { path: { order: 1 } },
         body: { reason: 'Customer request' }
       });
     });
@@ -707,8 +710,8 @@ describe('useOrders hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order_id}/cancel', {
-        params: { path: { order_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/orders/{order}/cancel', {
+        params: { path: { order: 1 } },
         body: { reason: undefined }
       });
     });

@@ -409,7 +409,6 @@ export type CustomerFilters = {
  */
 export type AttributePathParams = {
   id: number;
-  attribute: number;
 };
 
 /**

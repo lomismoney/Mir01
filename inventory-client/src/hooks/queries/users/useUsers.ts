@@ -12,8 +12,8 @@ import { QUERY_KEYS } from '../shared/queryKeys';
 // 這些類型現在將由 api.ts 精確提供
 type UserQueryParams = import('@/types/api').paths["/api/users"]["get"]["parameters"]["query"];
 type CreateUserRequestBody = import('@/types/api').paths["/api/users"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateUserRequestBody = import('@/types/api').paths["/api/users/{id}"]["put"]["requestBody"]["content"]["application/json"];
-type UserPathParams = import('@/types/api').paths["/api/users/{id}"]["get"]["parameters"]["path"];
+type UpdateUserRequestBody = import('@/types/api').paths["/api/users/{user}"]["put"]["requestBody"]["content"]["application/json"];
+type UserPathParams = import('@/types/api').paths["/api/users/{user}"]["get"]["parameters"]["path"];
 
 /**
  * 獲取用戶列表（高性能版本 - 整合第二階段優化）
@@ -167,14 +167,14 @@ export function useUpdateUser() {
   const queryClient = useQueryClient();
   
   type UpdateUserPayload = {
-    path: UserPathParams;
+    id: number;
     body: UpdateUserRequestBody;
   };
   
   return useMutation({
-    mutationFn: async ({ path, body }: UpdateUserPayload) => {
-      const { data, error } = await apiClient.PUT('/api/users/{id}', {
-        params: { path },
+    mutationFn: async ({ id, body }: UpdateUserPayload) => {
+      const { data, error } = await apiClient.PUT('/api/users/{user}', {
+        params: { path: { user: id } },
         body,
       });
       if (error) { 
@@ -236,9 +236,9 @@ export function useDeleteUser() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (pathParams: UserPathParams) => {
-      const { error } = await apiClient.DELETE('/api/users/{id}', {
-        params: { path: pathParams }
+    mutationFn: async (id: number) => {
+      const { error } = await apiClient.DELETE('/api/users/{user}', {
+        params: { path: { user: id } },
       });
       if (error) throw error;
     },

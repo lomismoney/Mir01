@@ -244,7 +244,7 @@ export default function UsersPage() {
 
     updateUserMutation.mutate(
       {
-        path: { user: editingUser.id },
+        id: editingUser.id,
         body: updatePayload,
       },
       {
@@ -270,9 +270,7 @@ export default function UsersPage() {
     }
 
     deleteUserMutation.mutate(
-      {
-        user: userToDelete.id,
-      } as any,
+      userToDelete.id,
       {
         onSuccess: () => {
           toast.success("用戶刪除成功！");

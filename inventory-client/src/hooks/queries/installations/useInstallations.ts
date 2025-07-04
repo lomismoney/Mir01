@@ -160,9 +160,9 @@ export function useInstallation(id: number) {
   return useQuery({
     queryKey: INSTALLATION_QUERY_KEYS.INSTALLATION(id),
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/installations/{id}', {
+      const { data, error } = await apiClient.GET('/api/installations/{installation}', {
         params: { 
-          path: { id: id },
+          path: { installation: id },
           query: {
             include: 'items,installer,creator,order'
           }
@@ -276,8 +276,8 @@ export function useUpdateInstallation() {
 
   return useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & UpdateInstallationRequest) => {
-      const { data: response, error } = await apiClient.PUT('/api/installations/{id}', {
-        params: { path: { id: id } },
+      const { data: response, error } = await apiClient.PUT('/api/installations/{installation}', {
+        params: { path: { installation: id } },
         body: data as any
       });
       
@@ -317,8 +317,8 @@ export function useDeleteInstallation() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const { data, error } = await apiClient.DELETE('/api/installations/{id}', {
-        params: { path: { id: id } }
+      const { data, error } = await apiClient.DELETE('/api/installations/{installation}', {
+        params: { path: { installation: id } }
       });
       
       if (error) {
@@ -351,8 +351,8 @@ export function useAssignInstaller() {
 
   return useMutation({
     mutationFn: async ({ installationId, ...data }: { installationId: number } & AssignInstallerRequest) => {
-      const { data: response, error } = await apiClient.POST('/api/installations/{installation_id}/assign', {
-        params: { path: { installation_id: installationId } },
+      const { data: response, error } = await apiClient.POST('/api/installations/{installation}/assign', {
+        params: { path: { installation: installationId } },
         body: data
       });
       

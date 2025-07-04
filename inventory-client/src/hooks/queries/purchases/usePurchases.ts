@@ -81,8 +81,9 @@ export function usePurchase(id: number | string) {
   return useQuery({
     queryKey: ['purchase', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/purchases/{id}', {
-        params: { path: { id: String(id) } }
+      const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+      const { data, error } = await apiClient.GET('/api/purchases/{purchase}', {
+        params: { path: { purchase: numericId } }
       });
       
       if (error) {
@@ -122,8 +123,8 @@ export function useUpdatePurchase() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<CreatePurchasePayload> }) => {
-      const { data: response, error } = await apiClient.PUT('/api/purchases/{id}', {
-        params: { path: { id: id.toString() } },
+      const { data: response, error } = await apiClient.PUT('/api/purchases/{purchase}', {
+        params: { path: { purchase: id } },
         body: data
       });
       if (error) {
@@ -143,11 +144,11 @@ export function useUpdatePurchase() {
 export function useUpdatePurchaseStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, status, notes }: { id: number; status: string; notes?: string }) => {
-      const { data, error } = await apiClient.PATCH('/api/purchases/{id}/status' as any, {
-        params: { path: { id: id.toString() } },
-        body: { status, notes }
-      } as any);
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const { data, error } = await apiClient.PATCH('/api/purchases/{purchase}/status', {
+        params: { path: { purchase: id } },
+        body: { status }
+      });
       if (error) {
         throw new Error('更新進貨單狀態失敗');
       }
@@ -165,11 +166,10 @@ export function useUpdatePurchaseStatus() {
 export function useCancelPurchase() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, reason }: { id: number; reason?: string }) => {
-      const { data, error } = await apiClient.POST('/api/purchases/{id}/cancel' as any, {
-        params: { path: { id: id.toString() } },
-        body: { reason }
-      } as any);
+    mutationFn: async (id: number) => {
+      const { data, error } = await apiClient.PATCH('/api/purchases/{purchase}/cancel', {
+        params: { path: { purchase: id } }
+      });
       if (error) {
         throw new Error('取消進貨單失敗');
       }
@@ -188,8 +188,8 @@ export function useDeletePurchase() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: number) => {
-      const { error } = await apiClient.DELETE('/api/purchases/{id}', {
-        params: { path: { id: id.toString() } }
+      const { error } = await apiClient.DELETE('/api/purchases/{purchase}', {
+        params: { path: { purchase: id } }
       });
       if (error) {
         throw new Error('刪除進貨單失敗');

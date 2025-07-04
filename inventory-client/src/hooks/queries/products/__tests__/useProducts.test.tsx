@@ -450,8 +450,8 @@ describe('useProducts hooks', () => {
         })
       );
 
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/products/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/products/{product}', {
+        params: { path: { product: 1 } }
       });
     });
 
@@ -576,7 +576,13 @@ describe('useProducts hooks', () => {
 
     it('should handle error during creation', async () => {
       const productData = {
-        name: 'New Product'
+        name: 'New Product',
+        variants: [
+          {
+            sku: 'PROD-001',
+            price: 100
+          }
+        ]
       };
 
       mockApiClient.POST.mockResolvedValueOnce({
@@ -605,8 +611,10 @@ describe('useProducts hooks', () => {
       };
       const updateData = {
         id: 1,
-        name: 'Updated Product',
-        description: 'Updated description'
+        data: {
+          name: 'Updated Product',
+          description: 'Updated description'
+        }
       };
 
       mockApiClient.PUT.mockResolvedValueOnce({
@@ -625,8 +633,8 @@ describe('useProducts hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/products/{id}', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.PUT).toHaveBeenCalledWith('/api/products/{product}', {
+        params: { path: { product: 1 } },
         body: { name: 'Updated Product', description: 'Updated description' }
       });
     });
@@ -634,7 +642,9 @@ describe('useProducts hooks', () => {
     it('should handle error during update', async () => {
       const updateData = {
         id: 1,
-        name: 'Updated Product'
+        data: {
+          name: 'Updated Product'
+        }
       };
 
       mockApiClient.PUT.mockResolvedValueOnce({
@@ -673,8 +683,8 @@ describe('useProducts hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/products/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/products/{product}', {
+        params: { path: { product: 1 } }
       });
     });
 
@@ -702,7 +712,7 @@ describe('useProducts hooks', () => {
     it('should delete multiple products successfully', async () => {
       const mockData = { data: { deleted_count: 3 } };
 
-      mockApiClient.DELETE.mockResolvedValueOnce({
+      mockApiClient.POST.mockResolvedValueOnce({
         data: mockData,
         error: null
       });
@@ -717,13 +727,13 @@ describe('useProducts hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.DELETE).toHaveBeenCalledWith('/api/products/batch', {
-        body: { ids: [1, 2, 3] }
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/products/batch-delete', {
+        body: { ids: ["1", "2", "3"] }
       });
     });
 
     it('should handle error during batch deletion', async () => {
-      mockApiClient.DELETE.mockResolvedValueOnce({
+      mockApiClient.POST.mockResolvedValueOnce({
         data: null,
         error: { message: 'Batch delete failed' }
       });
@@ -764,8 +774,32 @@ describe('useProducts hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/product-variants', {
+      // 由於數據精煉廠的處理，實際返回的是處理後的數組
+      expect(result.current.data).toEqual([
+        expect.objectContaining({
+          id: 1,
+          sku: 'PROD-001', 
+          price: 100,
+          product_id: 0,
+          created_at: '',
+          updated_at: '',
+          product: null,
+          attribute_values: [],
+          inventory: []
+        }),
+        expect.objectContaining({
+          id: 2,
+          sku: 'PROD-002',
+          price: 150,
+          product_id: 0,
+          created_at: '',
+          updated_at: '',
+          product: null,
+          attribute_values: [],
+          inventory: []
+        })
+      ]);
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/products/variants', {
         params: { query: { product_id: 1 } }
       });
     });
@@ -808,8 +842,8 @@ describe('useProducts hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/product-variants/{id}', {
-        params: { path: { id: 1 } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/products/variants/{variant}', {
+        params: { path: { variant: 1 } }
       });
     });
 
@@ -852,8 +886,8 @@ describe('useProducts hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/products/{id}/image', {
-        params: { path: { id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/products/{product}/upload-image', {
+        params: { path: { product: 1 } },
         body: expect.any(FormData)
       });
     });

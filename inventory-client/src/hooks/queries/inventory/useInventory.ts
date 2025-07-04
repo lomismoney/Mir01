@@ -68,8 +68,8 @@ export function useInventoryDetail(id: number) {
   return useQuery({
     queryKey: ['inventory', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/{id}' as any, {
-        params: { path: { id } },
+      const { data, error } = await apiClient.GET('/api/inventory/{inventory}' as any, {
+        params: { path: { inventory: id } },
       } as any);
       if (error) {
         throw new Error('獲取庫存詳情失敗');
@@ -141,9 +141,9 @@ export function useInventoryHistory(params: {
       if (params.per_page) queryParams.per_page = params.per_page;
       if (params.page) queryParams.page = params.page;
       
-      const { data, error } = await apiClient.GET('/api/inventory/{id}/history', {
+      const { data, error } = await apiClient.GET('/api/inventory/{inventory}/history', {
         params: { 
-          path: { id: params.id.toString() },
+          path: { inventory: params.id },
           query: queryParams
         }
       });
@@ -344,9 +344,9 @@ export function useInventoryTransferDetail(id: number) {
   return useQuery({
     queryKey: ['inventory', 'transfer', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/transfers/{id}' as any, {
-        params: { path: { id: id.toString() } },
-      } as any);
+      const { data, error } = await apiClient.GET('/api/inventory/transfers/{transfer}', {
+        params: { path: { transfer: id } },
+      });
       if (error) {
         throw new Error('獲取庫存轉移詳情失敗');
       }
@@ -401,8 +401,8 @@ export function useUpdateInventoryTransferStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status, notes }: { id: number; status: string; notes?: string }) => {
-      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{id}/status', {
-        params: { path: { id: id.toString() } },
+      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{transfer}/status', {
+        params: { path: { transfer: id } },
         body: { status, notes }
       });
       if (error) {
@@ -432,10 +432,15 @@ export function useCancelInventoryTransfer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, reason }: { id: number; reason?: string }) => {
-      const { data, error } = await apiClient.POST('/api/inventory/transfers/{id}/cancel' as any, {
-        params: { path: { id: id.toString() } },
-        body: { reason }
-      } as any);
+      const body: any = {};
+      if (reason) {
+        body.reason = reason;
+      }
+      
+      const { data, error } = await apiClient.PATCH('/api/inventory/transfers/{transfer}/cancel', {
+        params: { path: { transfer: id } },
+        body
+      });
       if (error) {
         throw new Error('取消轉移失敗');
       }

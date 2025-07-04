@@ -46,8 +46,8 @@ export function useCustomerDetail(customerId: number | null) {
     queryFn: async () => {
       if (!customerId) return null;
       
-      const { data, error } = await apiClient.GET('/api/customers/{id}', {
-        params: { path: { id: customerId } },
+      const { data, error } = await apiClient.GET('/api/customers/{customer}', {
+        params: { path: { customer: customerId } },
       });
 
       if (error) {
@@ -133,8 +133,8 @@ export function useDeleteCustomer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (customerId: number) => {
-      const { error } = await apiClient.DELETE('/api/customers/{id}', {
-        params: { path: { id: customerId } }
+      const { error } = await apiClient.DELETE('/api/customers/{customer}', {
+        params: { path: { customer: customerId } }
       });
       if (error) throw error;
     },
@@ -264,8 +264,8 @@ export function useUpdateCustomer() {
   
   return useMutation({
     mutationFn: async ({ id, data }: UpdateCustomerPayload) => {
-      const { data: responseData, error } = await apiClient.PUT('/api/customers/{id}', {
-        params: { path: { id } },
+      const { data: responseData, error } = await apiClient.PUT('/api/customers/{customer}', {
+        params: { path: { customer: id } },
         body: data,
       });
       if (error) throw error;

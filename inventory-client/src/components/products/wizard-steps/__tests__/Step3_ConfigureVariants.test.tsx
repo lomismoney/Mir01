@@ -812,7 +812,7 @@ describe('Step3_ConfigureVariants', () => {
       );
 
       // Single variant should not show variant combination column
-      expect(screen.queryByText('變體組合')).toBeInTheDocument(); // Header should still be there
+      expect(screen.queryByText('變體組合')).not.toBeInTheDocument();
       expect(screen.getByDisplayValue('SINGLE-001')).toBeInTheDocument();
       expect(screen.getByDisplayValue('100.00')).toBeInTheDocument();
     });

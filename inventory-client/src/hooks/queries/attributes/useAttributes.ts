@@ -114,7 +114,7 @@ export function useCreateAttribute() {
  * 
  * 功能說明：
  * 1. 接收屬性更新資料（路徑參數和請求體）
- * 2. 發送 PUT 請求到 /api/attributes/{id} 端點
+ * 2. 發送 PUT 請求到 /api/attributes/{attribute} 端點
  * 3. 支援更新屬性名稱
  * 4. 處理業務邏輯驗證錯誤（如重複名稱檢查）
  * 5. 成功後自動無效化屬性列表快取
@@ -123,8 +123,8 @@ export function useUpdateAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (variables: { id: number; body: { name: string } }) => {
-      const { data, error } = await apiClient.PUT('/api/attributes/{id}', {
-        params: { path: { id: variables.id } },
+      const { data, error } = await apiClient.PUT('/api/attributes/{attribute}', {
+        params: { path: { attribute: variables.id } },
         body: variables.body,
       });
       if (error) { 
@@ -146,7 +146,7 @@ export function useUpdateAttribute() {
  * 
  * 功能說明：
  * 1. 接收要刪除的屬性 ID 路徑參數
- * 2. 發送 DELETE 請求到 /api/attributes/{id} 端點
+ * 2. 發送 DELETE 請求到 /api/attributes/{attribute} 端點
  * 3. 執行刪除操作，會級聯刪除所有相關的屬性值
  * 4. 注意：如果有商品變體正在使用此屬性，刪除可能會失敗
  * 5. 成功後自動無效化屬性列表快取
@@ -155,8 +155,8 @@ export function useDeleteAttribute() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (pathParams: AttributePathParams) => {
-      const { error } = await apiClient.DELETE('/api/attributes/{id}', {
-        params: { path: pathParams },
+      const { error } = await apiClient.DELETE('/api/attributes/{attribute}', {
+        params: { path: { attribute: pathParams.id } },
       });
       if (error) { 
         throw new Error('刪除屬性失敗'); 
@@ -187,9 +187,9 @@ export function useDeleteAttribute() {
 }
 
 // 導入屬性值管理的精確類型定義
-type CreateAttributeValueRequestBody = import('@/types/api').paths["/api/attributes/{attribute_id}/values"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateAttributeValueRequestBody = import('@/types/api').paths["/api/values/{id}"]["put"]["requestBody"]["content"]["application/json"];
-type AttributeValuePathParams = import('@/types/api').paths["/api/values/{id}"]["get"]["parameters"]["path"];
+type CreateAttributeValueRequestBody = import('@/types/api').paths["/api/attributes/{attribute}/values"]["post"]["requestBody"]["content"]["application/json"];
+type UpdateAttributeValueRequestBody = import('@/types/api').paths["/api/values/{value}"]["put"]["requestBody"]["content"]["application/json"];
+type AttributeValuePathParams = import('@/types/api').paths["/api/values/{value}"]["get"]["parameters"]["path"];
 
 /**
  * 為指定屬性建立新屬性值的 Mutation
@@ -198,8 +198,8 @@ export function useCreateAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (variables: { attributeId: number; body: CreateAttributeValueRequestBody }) => {
-      const { data, error } = await apiClient.POST('/api/attributes/{attribute_id}/values', {
-        params: { path: { attribute_id: variables.attributeId } },
+      const { data, error } = await apiClient.POST('/api/attributes/{attribute}/values', {
+        params: { path: { attribute: variables.attributeId } },
         body: variables.body,
       });
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '新增選項失敗'); }
@@ -242,8 +242,8 @@ export function useUpdateAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (variables: { valueId: number; body: UpdateAttributeValueRequestBody }) => {
-      const { data, error } = await apiClient.PUT('/api/values/{id}', {
-        params: { path: { id: variables.valueId } },
+      const { data, error } = await apiClient.PUT('/api/values/{value}', {
+        params: { path: { value: variables.valueId } },
         body: variables.body,
       });
       if (error) { throw new Error(Object.values(error).flat().join('\n') || '更新選項失敗'); }
@@ -286,8 +286,8 @@ export function useDeleteAttributeValue() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (valueId: number) => {
-      const { error } = await apiClient.DELETE('/api/values/{id}', {
-        params: { path: { id: valueId } },
+      const { error } = await apiClient.DELETE('/api/values/{value}', {
+        params: { path: { value: valueId } },
       });
       if (error) { throw new Error('刪除選項失敗'); }
     },
@@ -342,8 +342,8 @@ export function useAttributeValues(attributeId: number | null) {
       // 只有在 attributeId 有效時才發起請求
       if (!attributeId) return null;
 
-      const { data, error } = await apiClient.GET('/api/attributes/{attribute_id}/values', {
-        params: { path: { attribute_id: attributeId } },
+      const { data, error } = await apiClient.GET('/api/attributes/{attribute}/values', {
+        params: { path: { attribute: attributeId } },
       });
 
       if (error) {

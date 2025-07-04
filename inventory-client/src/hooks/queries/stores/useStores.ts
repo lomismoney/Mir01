@@ -6,9 +6,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/apiClient';
-import { parseApiError } from '@/lib/errorHandler';
+import { parseApiError, handleApiError } from '@/lib/errorHandler';
 import { QUERY_KEYS } from '../shared/queryKeys';
-import { CreateStoreRequest, UpdateStoreRequest } from '@/types/api-helpers';
+import { CreateStoreRequest } from '@/types/api-helpers';
 
 /**
  * 獲取門市列表
@@ -24,6 +24,7 @@ export function useStores(params: {
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/stores');
       if (error) {
+        handleApiError(error);
         throw new Error('獲取門市列表失敗');
       }
       return data;
@@ -70,16 +71,16 @@ export function useStore(id: number) {
   return useQuery({
     queryKey: ['stores', id],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/stores/{id}' as any, {
-        params: { path: { id } },
-      } as any);
+      const { data, error } = await apiClient.GET('/api/stores/{store}', {
+        params: { path: { store: id } },
+      });
       if (error) {
         throw new Error('獲取門市詳情失敗');
       }
       return data;
     },
     // 🎯 新增的數據精煉廠，負責解包
-    select: (response: any) => response?.data,
+    select: (response: any) => response?.data || response,
     enabled: !!id,
   });
 }
@@ -147,18 +148,18 @@ export function useCreateStore() {
  * 
  * 功能說明：
  * 1. 接收門市更新資料（路徑參數和請求體）
- * 2. 發送 PUT 請求到 /api/stores/{id} 端點
+ * 2. 發送 PUT 請求到 /api/stores/{store} 端點
  * 3. 成功後自動無效化相關快取
  * 4. 提供成功或錯誤反饋
  */
 export function useUpdateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, body }: { id: number; body: UpdateStoreRequest }) => {
-      const { data, error } = await apiClient.PUT('/api/stores/{id}' as any, {
-        params: { path: { id } },
+    mutationFn: async ({ id, body }: { id: number; body: { name: string; address?: string | null } }) => {
+      const { data, error } = await apiClient.PUT('/api/stores/{store}', {
+        params: { path: { store: id } },
         body,
-      } as any);
+      });
       if (error) {
         throw new Error('更新門市失敗');
       }
@@ -192,7 +193,7 @@ export function useUpdateStore() {
  * 
  * 功能說明：
  * 1. 接收要刪除的門市 ID 路徑參數
- * 2. 發送 DELETE 請求到 /api/stores/{id} 端點
+ * 2. 發送 DELETE 請求到 /api/stores/{store} 端點
  * 3. 成功後自動無效化門市列表快取
  * 4. 提供成功或錯誤反饋
  * 
@@ -202,10 +203,11 @@ export function useDeleteStore() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: number) => {
-      const { error } = await apiClient.DELETE('/api/stores/{id}', {
-        params: { path: { id } },
+      const { error } = await apiClient.DELETE('/api/stores/{store}', {
+        params: { path: { store: id } },
       });
       if (error) {
+        handleApiError(error);
         throw new Error('刪除門市失敗');
       }
     },
