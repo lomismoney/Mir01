@@ -8,6 +8,7 @@ use App\Models\Inventory;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 
 /**
@@ -287,5 +288,206 @@ class PurchaseService
                 );
             }
         }
+    }
+
+    /**
+     * 統一的進貨單狀態更新方法
+     * 
+     * 確保所有狀態變更都經過相同的業務邏輯驗證和處理
+     * 
+     * @param Purchase $purchase 進貨單實例
+     * @param string $newStatus 新狀態
+     * @param int|null $userId 操作用戶ID，若未提供則使用當前認證用戶
+     * @param string|null $reason 狀態變更原因
+     * @return Purchase 更新後的進貨單
+     * @throws \InvalidArgumentException 當狀態轉換不合法時
+     * @throws \Exception 當庫存操作失敗時
+     */
+    public function updatePurchaseStatus(Purchase $purchase, string $newStatus, ?int $userId = null, ?string $reason = null): Purchase
+    {
+        return DB::transaction(function () use ($purchase, $newStatus, $userId, $reason) {
+            $oldStatus = $purchase->status;
+            $userId = $userId ?? Auth::id();
+            
+            if (!$userId) {
+                throw new \InvalidArgumentException('用戶必須經過認證才能更新進貨單狀態');
+            }
+            
+            // 1. 驗證狀態轉換合法性
+            if (!$this->isValidStatusTransition($oldStatus, $newStatus)) {
+                throw new \InvalidArgumentException(
+                    "無法從 " . (Purchase::getStatusOptions()[$oldStatus] ?? $oldStatus) . 
+                    " 轉換到 " . (Purchase::getStatusOptions()[$newStatus] ?? $newStatus)
+                );
+            }
+            
+            // 2. 更新狀態
+            $purchase->update([
+                'status' => $newStatus,
+                'updated_at' => now()
+            ]);
+            
+            // 3. 處理業務邏輯副作用
+            $this->handleStatusChangeEffects($purchase, $oldStatus, $newStatus, $userId);
+            
+            // 4. 記錄狀態變更日誌
+            $this->logStatusChange($purchase, $oldStatus, $newStatus, $userId, $reason);
+            
+            return $purchase->fresh(['store', 'items.productVariant.product']);
+        });
+    }
+
+    /**
+     * 處理狀態變更的業務邏輯副作用
+     * 
+     * @param Purchase $purchase 進貨單實例
+     * @param string $oldStatus 原狀態
+     * @param string $newStatus 新狀態
+     * @param int $userId 操作用戶ID
+     * @return void
+     * @throws \Exception 當庫存操作失敗時
+     */
+    private function handleStatusChangeEffects(Purchase $purchase, string $oldStatus, string $newStatus, int $userId): void
+    {
+        // 處理庫存相關邏輯
+        if ($oldStatus !== Purchase::STATUS_COMPLETED && $newStatus === Purchase::STATUS_COMPLETED) {
+            // 狀態變更為已完成：執行庫存入庫
+            try {
+                $this->processInventoryForCompletedPurchase($purchase);
+                
+                Log::info('進貨單庫存入庫成功', [
+                    'purchase_id' => $purchase->id,
+                    'order_number' => $purchase->order_number,
+                    'user_id' => $userId,
+                    'items_count' => $purchase->items->count()
+                ]);
+                
+            } catch (\Exception $e) {
+                Log::error('進貨單庫存入庫失敗', [
+                    'purchase_id' => $purchase->id,
+                    'order_number' => $purchase->order_number,
+                    'error' => $e->getMessage(),
+                    'user_id' => $userId
+                ]);
+                
+                throw new \Exception("庫存入庫失敗：{$e->getMessage()}");
+            }
+            
+        } elseif ($oldStatus === Purchase::STATUS_COMPLETED && $newStatus !== Purchase::STATUS_COMPLETED) {
+            // 狀態從已完成變更為其他：回退庫存
+            try {
+                $this->revertInventoryForPurchase($purchase);
+                
+                Log::info('進貨單庫存回退成功', [
+                    'purchase_id' => $purchase->id,
+                    'order_number' => $purchase->order_number,
+                    'user_id' => $userId
+                ]);
+                
+            } catch (\Exception $e) {
+                Log::error('進貨單庫存回退失敗', [
+                    'purchase_id' => $purchase->id,
+                    'order_number' => $purchase->order_number,
+                    'error' => $e->getMessage(),
+                    'user_id' => $userId
+                ]);
+                
+                throw new \Exception("庫存回退失敗：{$e->getMessage()}");
+            }
+        }
+        
+        // 未來可擴展其他業務邏輯：
+        // - 發送通知
+        // - 更新相關統計
+        // - 觸發工作流
+    }
+
+    /**
+     * 記錄狀態變更日誌
+     * 
+     * @param Purchase $purchase 進貨單實例
+     * @param string $oldStatus 原狀態
+     * @param string $newStatus 新狀態
+     * @param int $userId 操作用戶ID
+     * @param string|null $reason 變更原因
+     * @return void
+     */
+    private function logStatusChange(Purchase $purchase, string $oldStatus, string $newStatus, int $userId, ?string $reason = null): void
+    {
+        $logData = [
+            'purchase_id' => $purchase->id,
+            'order_number' => $purchase->order_number,
+            'old_status' => $oldStatus,
+            'old_status_display' => Purchase::getStatusOptions()[$oldStatus] ?? $oldStatus,
+            'new_status' => $newStatus,
+            'new_status_display' => Purchase::getStatusOptions()[$newStatus] ?? $newStatus,
+            'user_id' => $userId,
+            'reason' => $reason ?? '狀態更新',
+            'inventory_affected' => $this->isInventoryAffected($oldStatus, $newStatus),
+            'timestamp' => now()->toISOString()
+        ];
+        
+        Log::info('進貨單狀態變更', $logData);
+        
+        // 如果涉及庫存變更，發送額外的監控日誌
+        if ($this->isInventoryAffected($oldStatus, $newStatus)) {
+            Log::channel('inventory')->info('進貨單狀態變更影響庫存', $logData);
+        }
+    }
+
+    /**
+     * 檢查狀態變更是否影響庫存
+     * 
+     * @param string $oldStatus 原狀態
+     * @param string $newStatus 新狀態
+     * @return bool
+     */
+    private function isInventoryAffected(string $oldStatus, string $newStatus): bool
+    {
+        return ($oldStatus !== Purchase::STATUS_COMPLETED && $newStatus === Purchase::STATUS_COMPLETED) ||
+               ($oldStatus === Purchase::STATUS_COMPLETED && $newStatus !== Purchase::STATUS_COMPLETED);
+    }
+
+    /**
+     * 驗證狀態轉換是否合法
+     * 
+     * @param string $currentStatus 當前狀態
+     * @param string $newStatus 新狀態
+     * @return bool
+     */
+    private function isValidStatusTransition(string $currentStatus, string $newStatus): bool
+    {
+        if ($currentStatus === $newStatus) {
+            return true;
+        }
+        
+        $validTransitions = [
+            Purchase::STATUS_PENDING => [
+                Purchase::STATUS_CONFIRMED,
+                Purchase::STATUS_CANCELLED,
+            ],
+            Purchase::STATUS_CONFIRMED => [
+                Purchase::STATUS_IN_TRANSIT,
+                Purchase::STATUS_CANCELLED,
+            ],
+            Purchase::STATUS_IN_TRANSIT => [
+                Purchase::STATUS_RECEIVED,
+                Purchase::STATUS_PARTIALLY_RECEIVED,
+            ],
+            Purchase::STATUS_RECEIVED => [
+                Purchase::STATUS_COMPLETED,
+                Purchase::STATUS_PARTIALLY_RECEIVED,
+            ],
+            Purchase::STATUS_PARTIALLY_RECEIVED => [
+                Purchase::STATUS_COMPLETED,
+                Purchase::STATUS_RECEIVED,
+            ],
+            // 已完成的進貨單可以回退到已收貨狀態（用於修正錯誤）
+            Purchase::STATUS_COMPLETED => [
+                Purchase::STATUS_RECEIVED,
+            ],
+        ];
+
+        return in_array($newStatus, $validTransitions[$currentStatus] ?? []);
     }
 }
