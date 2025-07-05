@@ -10,7 +10,8 @@
       "Bash(grep:*)",
       "Bash(php artisan api:check-docs:*)",
       "Bash(rg:*)",
-      "Bash(php artisan tinker:*)"
+      "Bash(php artisan tinker:*)",
+      "WebFetch(domain:scribe.knuckles.wtf)"
     ],
     "deny": []
   }

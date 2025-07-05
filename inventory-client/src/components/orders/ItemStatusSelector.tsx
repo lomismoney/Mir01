@@ -106,7 +106,7 @@ export function ItemStatusSelector({
         onValueChange={handleStatusChange}
         disabled={isLoading}
       >
-        <SelectTrigger className="w-fit h-auto border-none shadow-none p-0 bg-transparent hover:bg-transparent focus:ring-0 focus:ring-offset-0">
+        <SelectTrigger className="w-fit h-auto border-none shadow-none p-0 bg-transparent hover:bg-transparent focus:ring-0 focus:ring-offset-0 dark:bg-transparent dark:hover:bg-transparent dark:border-none dark:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-none data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=open]:border-none">
           {isLoading ? (
             <Badge variant="outline" className="gap-1.5 pointer-events-none text-xs">
               <Loader2 className="h-3 w-3 animate-spin text-current" />
