@@ -28,17 +28,23 @@ class OrderController extends Controller
         $this->authorizeResource(Order::class, 'order');
     }
     /**
+     * Display a listing of orders
+     * 
      * @group 訂單管理
      * @authenticated
      * @summary 獲取訂單列表
-     * @queryParam search string 關鍵字搜尋，將匹配訂單號、客戶名稱。Example: PO-20250619-001
-     * @queryParam shipping_status string 按貨物進度篩選。Example: 待出貨
-     * @queryParam payment_status string 按付款進度篩選。Example: 待付款
-     * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d)。Example: 2025-01-01
-     * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d)。Example: 2025-06-19
+     * @description 顯示所有訂單列表，支援關鍵字搜尋、狀態篩選和日期範圍篩選。
      * 
-     * @apiResourceCollection \App\Http\Resources\Api\OrderResource
-     * @apiResourceModel \App\Models\Order
+     * @queryParam search string 關鍵字搜尋，將匹配訂單號、客戶名稱 Example: PO-20250619-001
+     * @queryParam shipping_status string 按貨物進度篩選 Example: 待出貨
+     * @queryParam payment_status string 按付款進度篩選 Example: 待付款
+     * @queryParam start_date string 按創建日期篩選的開始日期 (格式: Y-m-d) Example: 2025-01-01
+     * @queryParam end_date string 按創建日期篩選的結束日期 (格式: Y-m-d) Example: 2025-06-19
+     * @queryParam page integer 頁碼 Example: 1
+     * @queryParam per_page integer 每頁項目數 Example: 15
+     * 
+     * @apiResourceCollection App\Http\Resources\Api\OrderResource
+     * @apiResourceModel App\Models\Order with=customer,creator
      */
     public function index(Request $request)
     {
@@ -96,52 +102,39 @@ class OrderController extends Controller
     }
 
     /**
+     * Create a new order
+     * 
      * @group 訂單管理
      * @authenticated
      * @summary 創建新訂單
+     * @description 創建新的訂單，包含訂單頭資訊和訂單項目明細。支援庫存檢查和預訂模式。
      * 
-     * 此端點用於創建新的訂單，包含訂單頭資訊和訂單項目明細。
-     * 系統會自動生成訂單號、計算總金額，並記錄初始狀態歷史。
+     * @bodyParam customer_id integer required 客戶ID Example: 1
+     * @bodyParam shipping_status string required 貨物狀態 Example: 待出貨
+     * @bodyParam payment_status string required 付款狀態 Example: 待付款
+     * @bodyParam shipping_fee number 運費 Example: 100
+     * @bodyParam tax number 稅金 Example: 50
+     * @bodyParam discount_amount number 折扣金額 Example: 0
+     * @bodyParam payment_method string required 付款方式 Example: 轉帳
+     * @bodyParam order_source string required 訂單來源 Example: 現場客戶
+     * @bodyParam shipping_address string required 運送地址 Example: 台北市信義區信義路五段7號
+     * @bodyParam notes string 備註 Example: 請小心輕放
+     * @bodyParam force_create_despite_stock boolean 是否在庫存不足時強制建立訂單 Example: false
+     * @bodyParam items array required 訂單項目清單
+     * @bodyParam items.*.product_variant_id integer 商品變體ID Example: 1
+     * @bodyParam items.*.is_stocked_sale boolean required 是否為庫存銷售 Example: true
+     * @bodyParam items.*.status string required 項目狀態 Example: 待處理
+     * @bodyParam items.*.custom_specifications json 訂製規格 Example: {"寬度": "150cm"}
+     * @bodyParam items.*.product_name string required 商品名稱 Example: 標準辦公桌
+     * @bodyParam items.*.sku string required SKU Example: DESK-001
+     * @bodyParam items.*.price number required 單價 Example: 5000
+     * @bodyParam items.*.quantity integer required 數量 Example: 2
      * 
-     * 🎯 預訂系統支援：當庫存不足時，會返回結構化錯誤資訊，
-     * 前端可以基於此資訊引導用戶選擇預訂模式。
+     * @apiResource App\Http\Resources\Api\OrderResource
+     * @apiResourceModel App\Models\Order with=customer,creator,items.productVariant.product
      * 
-     * @bodyParam customer_id integer required 客戶ID。Example: 1
-     * @bodyParam shipping_status string required 貨物狀態。Example: 待出貨
-     * @bodyParam payment_status string required 付款狀態。Example: 待付款
-     * @bodyParam shipping_fee number 運費。Example: 100
-     * @bodyParam tax number 稅金。Example: 50
-     * @bodyParam discount_amount number 折扣金額。Example: 0
-     * @bodyParam payment_method string required 付款方式。Example: 轉帳
-     * @bodyParam order_source string required 訂單來源。Example: 現場客戶
-     * @bodyParam shipping_address string required 運送地址。Example: 台北市信義區信義路五段7號
-     * @bodyParam notes string 備註。Example: 請小心輕放
-     * @bodyParam force_create_despite_stock boolean 是否在庫存不足時強制建立訂單（預訂模式）。Example: false
-     * @bodyParam items array required 訂單項目清單。
-     * @bodyParam items.*.product_variant_id integer 商品變體ID（訂製商品可為空）。Example: 1
-     * @bodyParam items.*.is_stocked_sale boolean required 是否為庫存銷售。Example: true
-     * @bodyParam items.*.status string required 項目狀態。Example: 待處理
-     * @bodyParam items.*.custom_specifications json 訂製規格（僅訂製商品需要）。Example: {"寬度": "150cm"}
-     * @bodyParam items.*.product_name string required 商品名稱。Example: 標準辦公桌
-     * @bodyParam items.*.sku string required SKU。Example: DESK-001
-     * @bodyParam items.*.price number required 單價。Example: 5000
-     * @bodyParam items.*.quantity integer required 數量。Example: 2
-     * 
-     * @apiResource \App\Http\Resources\Api\OrderResource
-     * @apiResourceModel \App\Models\Order
-     * @response 422 scenario="庫存不足" {
-     *   "message": "庫存不足",
-     *   "stockCheckResults": [...],
-     *   "insufficientStockItems": [
-     *     {
-     *       "product_name": "標準辦公桌",
-     *       "sku": "DESK-001",
-     *       "requested_quantity": 5,
-     *       "available_quantity": 2,
-     *       "shortage": 3
-     *     }
-     *   ]
-     * }
+     * @response 201 scenario="訂單創建成功" {"data": {"id": 1, "order_number": "ORD-20250101-001", "total_amount": 10100}}
+     * @response 422 scenario="庫存不足" {"message": "庫存不足", "insufficientStockItems": [{"product_name": "標準辦公桌", "sku": "DESK-001", "requested_quantity": 5, "available_quantity": 2, "shortage": 3}]}
      */
     public function store(StoreOrderRequest $request)
     {
@@ -182,13 +175,15 @@ class OrderController extends Controller
     /**
      * @group 訂單管理
      * @authenticated
+     * Display specified order
+     * 
      * @summary 獲取訂單詳情
      * @description 顯示指定訂單的詳細資訊，包含訂單項目、客戶資料、狀態歷史和付款記錄。
      * 
-     * @urlParam order integer required 訂單ID。 Example: 1
+     * @urlParam order integer required 訂單ID Example: 1
      * 
-     * @apiResource \App\Http\Resources\Api\OrderResource
-     * @apiResourceModel \App\Models\Order
+     * @apiResource App\Http\Resources\Api\OrderResource
+     * @apiResourceModel App\Models\Order with=items.productVariant,customer.defaultAddress,creator,statusHistories.user,paymentRecords.creator
      */
     public function show(Order $order)
     {

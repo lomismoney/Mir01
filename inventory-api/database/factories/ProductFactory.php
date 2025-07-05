@@ -24,6 +24,37 @@ class ProductFactory extends Factory
     }
 
     /**
+     * Configure the model factory.
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (\App\Models\Product $product) {
+            // 創建分類
+            $category = \App\Models\Category::factory()->create();
+            $product->update(['category_id' => $category->id]);
+            
+            // 創建屬性
+            $attributes = \App\Models\Attribute::factory()->count(2)->create();
+            $product->attributes()->attach($attributes->pluck('id'));
+            
+            // 創建變體
+            $variants = \App\Models\ProductVariant::factory()->count(3)->create([
+                'product_id' => $product->id
+            ]);
+            
+            // 為每個變體分配屬性值
+            foreach ($variants as $variant) {
+                foreach ($attributes as $attribute) {
+                    $attributeValue = \App\Models\AttributeValue::factory()->create([
+                        'attribute_id' => $attribute->id
+                    ]);
+                    $variant->attributeValues()->attach($attributeValue->id);
+                }
+            }
+        });
+    }
+
+    /**
      * 生成有分類的商品狀態
      */
     public function withCategory($categoryId): static

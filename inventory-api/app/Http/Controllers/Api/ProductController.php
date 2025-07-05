@@ -129,20 +129,24 @@ class ProductController extends Controller
     }
 
     /**
+     * Create a new product (SPU/SKU)
+     * 
      * @group 商品管理
      * @authenticated
-     * @summary 建立新商品 (SPU/SKU)
-     * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
-     * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
-     * @bodyParam category_id integer 分類ID。 Example: 1
-     * @bodyParam attributes integer[] 該 SPU 擁有的屬性 ID 陣列（單規格商品可為空陣列）。 Example: [1, 2]
-     * @bodyParam variants object[] required SKU 變體陣列，至少需要一項。
-     * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
-     * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
-     * @bodyParam variants.*.attribute_value_ids integer[] 組成此 SKU 的屬性值 ID 陣列（單規格商品可為空陣列）。 Example: [10, 25]
+     * @summary 建立新商品
+     * @description 建立新的 SPU/SKU 結構商品，支援單規格和多規格商品。自動為所有門市建立初始庫存記錄。
      * 
-     * @apiResource \App\Http\Resources\Api\ProductResource
-     * @apiResourceModel \App\Models\Product
+     * @bodyParam name string required SPU 的名稱 Example: 經典棉質T-shirt
+     * @bodyParam description string SPU 的描述 Example: 100% 純棉
+     * @bodyParam category_id integer 分類ID Example: 1
+     * @bodyParam attributes integer[] 該 SPU 擁有的屬性 ID 陣列 Example: [1, 2]
+     * @bodyParam variants object[] required SKU 變體陣列，至少需要一項
+     * @bodyParam variants.*.sku string required SKU 的唯一編號 Example: TSHIRT-RED-S
+     * @bodyParam variants.*.price number required SKU 的價格 Example: 299.99
+     * @bodyParam variants.*.attribute_value_ids integer[] 組成此 SKU 的屬性值 ID 陣列 Example: [10, 25]
+     * 
+     * @apiResource App\Http\Resources\Api\ProductResource
+     * @apiResourceModel App\Models\Product with=category,attributes,variants.attributeValues.attribute,variants.inventory,media
      */
     public function store(StoreProductRequest $request)
     {
@@ -207,26 +211,17 @@ class ProductController extends Controller
     }
 
     /**
+     * Display specified product
+     * 
      * @group 商品管理
      * @authenticated
      * @summary 獲取商品詳情
      * @description 顯示指定商品的詳細資訊，包含變體、庫存和圖片等完整資料。
      * 
-     * @urlParam product integer required 商品ID。 Example: 1
+     * @urlParam product integer required 商品ID Example: 1
      * 
-     * @apiResource \App\Http\Resources\Api\ProductResource
-     * @apiResourceModel \App\Models\Product
-     * 
-     * @response 200 scenario="商品詳情" {
-     *   "data": {
-     *     "id": 1,
-     *     "name": "商品名稱",
-     *     "description": "商品描述",
-     *     "category_id": 1,
-     *     "created_at": "2025-01-01T10:00:00.000000Z",
-     *     "updated_at": "2025-01-01T10:00:00.000000Z"
-     *   }
-     * }
+     * @apiResource App\Http\Resources\Api\ProductResource
+     * @apiResourceModel App\Models\Product with=category,attributes,variants.attributeValues.attribute,variants.inventory.store,media
      */
     public function show(Product $product)
     {
@@ -240,24 +235,27 @@ class ProductController extends Controller
     }
 
     /**
+     * Update product information
+     * 
      * @group 商品管理
      * @authenticated
      * @summary 更新商品資訊
      * @description 更新指定商品的基本資訊和變體資料，支援複雜的 SPU/SKU 架構更新。
      * 
-     * @urlParam product integer required 商品ID。 Example: 1
-     * @bodyParam name string required SPU 的名稱。 Example: "經典棉質T-shirt"
-     * @bodyParam description string SPU 的描述。 Example: "100% 純棉"
-     * @bodyParam category_id integer 分類ID。 Example: 1
-     * @bodyParam attributes integer[] 該 SPU 擁有的屬性 ID 陣列。 Example: [1, 2]
-     * @bodyParam variants object[] SKU 變體陣列。
-     * @bodyParam variants.*.id integer 變體的 ID（用於更新現有變體）。 Example: 1
-     * @bodyParam variants.*.sku string required SKU 的唯一編號。 Example: "TSHIRT-RED-S"
-     * @bodyParam variants.*.price number required SKU 的價格。 Example: 299.99
-     * @bodyParam variants.*.attribute_value_ids integer[] 組成此 SKU 的屬性值 ID 陣列（單規格商品可為空陣列）。 Example: [10, 25]
+     * @urlParam product integer required 商品ID Example: 1
      * 
-     * @apiResource \App\Http\Resources\Api\ProductResource
-     * @apiResourceModel \App\Models\Product
+     * @bodyParam name string required SPU 的名稱 Example: 經典棉質T-shirt
+     * @bodyParam description string SPU 的描述 Example: 100% 純棉
+     * @bodyParam category_id integer 分類ID Example: 1
+     * @bodyParam attributes integer[] 該 SPU 擁有的屬性 ID 陣列 Example: [1, 2]
+     * @bodyParam variants object[] SKU 變體陣列
+     * @bodyParam variants.*.id integer 變體的 ID（用於更新現有變體） Example: 1
+     * @bodyParam variants.*.sku string required SKU 的唯一編號 Example: TSHIRT-RED-S
+     * @bodyParam variants.*.price number required SKU 的價格 Example: 299.99
+     * @bodyParam variants.*.attribute_value_ids integer[] 組成此 SKU 的屬性值 ID 陣列 Example: [10, 25]
+     * 
+     * @apiResource App\Http\Resources\Api\ProductResource
+     * @apiResourceModel App\Models\Product with=category,attributes,variants.attributeValues.attribute,variants.inventory.store,media
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
@@ -287,14 +285,16 @@ class ProductController extends Controller
     }
 
     /**
+     * Delete product
+     * 
      * @group 商品管理
      * @authenticated
      * @summary 刪除商品
-     * @description 刪除指定商品，會檢查是否有相關的進貨單或訂單記錄，有關聯記錄時無法刪除。
+     * @description 刪除指定商品。會檢查是否有相關的進貨單或訂單記錄，有關聯記錄時無法刪除。
      * 
-     * @urlParam product integer required 商品ID。 Example: 1
+     * @urlParam product integer required 商品ID Example: 1
      * 
-     * @response 204 scenario="商品刪除成功"
+     * @response 204 scenario="刪除成功" ""
      * @response 422 scenario="刪除失敗" {"message": "無法刪除商品，因為該商品已有相關的進貨單或訂單記錄。"}
      */
     public function destroy(Product $product): Response
@@ -331,13 +331,17 @@ class ProductController extends Controller
     }
 
     /**
+     * Batch delete products
+     * 
      * @group 商品管理
      * @authenticated
      * @summary 批量刪除商品
-     * @description 根據提供的商品 ID 陣列批量刪除商品。
-     * @bodyParam ids integer[] required 要刪除的商品 ID 陣列。 Example: [1, 2, 3]
+     * @description 根據提供的商品 ID 陣列批量刪除商品。會檢查是否有相關記錄。
      * 
-     * @response 204
+     * @bodyParam ids integer[] required 要刪除的商品 ID 陣列 Example: [1, 2, 3]
+     * 
+     * @response 204 scenario="批量刪除成功" ""
+     * @response 422 scenario="刪除失敗" {"message": "無法刪除部分商品，因為它們已有相關記錄。"}
      */
     public function destroyMultiple(DestroyMultipleProductsRequest $request): Response
     {
@@ -386,20 +390,24 @@ class ProductController extends Controller
     }
 
     /**
+     * Upload product image
+     * 
      * @group 商品管理
      * @authenticated
      * @summary 上傳商品圖片
-     * @description 遵循 Spatie Media Library v11 官方最佳實踐
+     * @description 上傳商品主圖，遵循 Spatie Media Library v11 最佳實踐。支援多種格式和自動轉換。
      * 
-     * @urlParam product integer required 商品ID。 Example: 1
+     * @urlParam product integer required 商品ID Example: 1
+     * 
      * @bodyParam image file required 圖片檔案 (支援 JPEG、PNG、GIF、WebP，最大 5MB)
      * 
-     * @apiResource \App\Http\Resources\Api\ProductResource
-     * @apiResourceModel \App\Models\Product
+     * @apiResource App\Http\Resources\Api\ProductResource
+     * @apiResourceModel App\Models\Product with=media
      * 
-     * @response 404
-     * @response 422
-     * @response 500
+     * @response 201 scenario="上傳成功" {"data": {"id": 1, "name": "商品名稱", "image_url": "http://localhost/storage/...jpg"}}
+     * @response 403 scenario="權限不足" {"message": "您沒有權限上傳此商品的圖片"}
+     * @response 422 scenario="檔案驗證失敗" {"message": "上傳的檔案不符合要求"}
+     * @response 500 scenario="上傳失敗" {"message": "圖片上傳失敗: ..."}
      */
     public function uploadImage(UploadProductImageRequest $request, Product $product)
     {

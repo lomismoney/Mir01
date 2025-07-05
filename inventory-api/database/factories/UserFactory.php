@@ -34,6 +34,21 @@ class UserFactory extends Factory
     }
 
     /**
+     * Configure the model factory.
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (User $user) {
+            // 預設分配員工角色
+            $user->assignRole(User::ROLE_STAFF);
+            
+            // 創建並分配門市關聯
+            $stores = \App\Models\Store::factory()->count(2)->create();
+            $user->stores()->attach($stores->pluck('id'));
+        });
+    }
+
+    /**
      * 因為我們使用 username 認證，不再需要 email 驗證功能
      * 此方法保留以維持相容性，但不執行任何操作
      */
