@@ -25,7 +25,7 @@ class PurchaseItemFactory extends Factory
         $allocatedShippingCost = $this->faker->numberBetween(0, 10000); // 0 ~ 100.00
 
         return [
-            'purchase_id' => Purchase::factory(),
+            'purchase_id' => null, // 由 PurchaseFactory 設定，避免無限遞歸
             'product_variant_id' => ProductVariant::factory(),
             'quantity' => $quantity,
             'unit_price' => $unitPrice,

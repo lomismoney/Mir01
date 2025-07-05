@@ -171,6 +171,38 @@ class OrderFactory extends Factory
     }
 
     /**
+     * Configure the model factory.
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (Order $order) {
+            // 自動創建 2-5 個訂單項目，確保 Scribe 能獲得完整的關聯數據
+            $itemsCount = $this->faker->numberBetween(2, 5);
+            
+            for ($i = 0; $i < $itemsCount; $i++) {
+                \App\Models\OrderItem::factory()->create([
+                    'order_id' => $order->id,
+                ]);
+            }
+            
+            // 重新計算訂單總額（基於項目）
+            $items = $order->items;
+            $subtotal = $items->sum(function ($item) {
+                return $item->price * $item->quantity;
+            });
+            
+            $tax = $subtotal * 0.05;
+            $grandTotal = $subtotal + $order->shipping_fee + $tax - $order->discount_amount;
+            
+            $order->update([
+                'subtotal' => $subtotal,
+                'tax' => $tax,
+                'grand_total' => $grandTotal,
+            ]);
+        });
+    }
+
+    /**
      * 設定特定的金額
      */
     public function withAmount(float $grandTotal): static

@@ -20,7 +20,7 @@ class OrderItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_id' => Order::factory(),
+            'order_id' => null, // 由 OrderFactory 設定，避免無限遞歸
             'product_variant_id' => ProductVariant::factory(),
             'is_stocked_sale' => true,
             'is_backorder' => false,
