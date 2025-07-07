@@ -35,8 +35,16 @@ echo "  DB_SOCKET: ${DB_SOCKET:-未設定}"
 echo "  DB_HOST: ${DB_HOST:-未設定}"
 echo "  DB_DATABASE: $DB_DATABASE"
 echo "  DB_USERNAME: $DB_USERNAME"
+echo "  DB_PASSWORD: $([ -n "$DB_PASSWORD" ] && echo "已設定" || echo "未設定")"
+echo "  LARAVEL_DB_PASSWORD: $([ -n "$LARAVEL_DB_PASSWORD" ] && echo "已設定" || echo "未設定")"
 echo "  專案 ID: $GOOGLE_CLOUD_PROJECT"
 echo "  連線方式: $([ -n "$DB_SOCKET" ] && echo "Unix Socket" || echo "TCP/IP")"
+
+# 確保密碼環境變數正確設定
+if [ -n "$LARAVEL_DB_PASSWORD" ] && [ -z "$DB_PASSWORD" ]; then
+    export DB_PASSWORD="$LARAVEL_DB_PASSWORD"
+    echo "設定 DB_PASSWORD 從 LARAVEL_DB_PASSWORD"
+fi
 
 # 等待資料庫連線（最多 30 秒）
 echo "檢查資料庫連線..."
