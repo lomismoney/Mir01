@@ -55,6 +55,22 @@ jobs:
           echo "🔍 驗證 Artifact Registry 存取權限..."
           gcloud artifacts repositories list --location=${{ env.REGION }} --format="value(name)" || exit 1
           echo "✅ Artifact Registry 存取權限正常"
+          
+          echo "🔍 驗證 Secret Manager 存取權限..."
+          gcloud secrets versions access latest --secret="LARAVEL_APP_KEY" >/dev/null || exit 1
+          gcloud secrets versions access latest --secret="LARAVEL_DB_PASSWORD" >/dev/null || exit 1
+          echo "✅ Secret Manager 存取權限正常"
+          
+          echo "🔍 驗證 Compute Engine 預設服務帳號 Secret Manager 權限..."
+          # 檢查 Compute Engine 預設服務帳號是否有 Secret Manager 權限
+          gcloud projects get-iam-policy ${{ env.PROJECT_ID }} \
+            --flatten="bindings[].members" \
+            --filter="bindings.members:672374290013-compute@developer.gserviceaccount.com AND bindings.role:roles/secretmanager.secretAccessor" \
+            --format="value(bindings.role)" | grep -q "roles/secretmanager.secretAccessor" || {
+              echo "❌ Compute Engine 預設服務帳號缺少 Secret Manager 權限"
+              exit 1
+            }
+          echo "✅ Compute Engine 預設服務帳號 Secret Manager 權限正常"
 
       - name: 'Build and Push API Docker Image'
         run: |-
