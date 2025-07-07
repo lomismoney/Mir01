@@ -49,8 +49,8 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # 創建日誌目錄
 RUN mkdir -p /var/log/supervisor
 
-# 暴露端口
-EXPOSE 80
+# 暴露端口 (Cloud Run 要求 8080)
+EXPOSE 8080
 
 # 啟動腳本
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh

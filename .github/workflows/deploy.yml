@@ -74,14 +74,59 @@ jobs:
             }
           echo "✅ Compute Engine 預設服務帳號 Secret Manager 權限正常"
 
-      - name: 'Build and Push API Docker Image'
+      - name: 'Get Client URL for CORS'
+        id: get_client_url
+        run: |-
+          # 優先使用自訂網域（如果有設定）
+          if [ ! -z "${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}" ]; then
+            echo "CLIENT_URL=${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}" >> $GITHUB_OUTPUT
+            echo "使用客戶端自訂網域: ${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}"
+          else
+            # 使用預設的 Cloud Run URL
+            echo "CLIENT_URL=https://${{ env.CLIENT_SERVICE_NAME }}-${{ secrets.GCP_SERVICE_ID }}-${{ env.REGION }}.a.run.app" >> $GITHUB_OUTPUT
+            echo "使用預設 Cloud Run URL"
+          fi
+
+      - name: 'Build and Test API Docker Image'
         run: |-
           gcloud artifacts repositories create ${{ env.API_SERVICE_NAME }}-repo \
             --repository-format=docker \
             --location=${{ env.REGION }} \
             --description="API Docker repository" || echo "Repo already exists"
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+          
+          echo "🔨 構建 Docker 映像..."
           docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest ./inventory-api
+          
+          echo "🧪 測試容器啟動..."
+          # 測試容器是否能在 8080 端口啟動（模擬 Cloud Run 環境）
+          docker run -d --name test-api-container \
+            -p 8080:8080 \
+            -e PORT=8080 \
+            -e APP_ENV=testing \
+            -e APP_KEY=base64:dGVzdGluZ0tleUZvckRvY2tlcg== \
+            -e DB_CONNECTION=sqlite \
+            -e DB_DATABASE=:memory: \
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest
+          
+          echo "⏳ 等待容器啟動..."
+          sleep 30
+          
+          echo "🔍 檢查容器健康狀態..."
+          if docker exec test-api-container curl -f http://localhost:8080/api/health; then
+            echo "✅ 容器啟動成功並響應健康檢查"
+          else
+            echo "❌ 容器啟動失敗或健康檢查失敗"
+            echo "📋 容器日誌："
+            docker logs test-api-container
+            docker rm -f test-api-container
+            exit 1
+          fi
+          
+          echo "🧹 清理測試容器..."
+          docker rm -f test-api-container
+          
+          echo "📤 推送 Docker 映像..."
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest
 
       - name: 'Deploy API to Cloud Run'
@@ -92,12 +137,37 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --add-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} \
-            --set-env-vars="FILESYSTEM_DISK=gcs,GCS_BUCKET=${{ env.GCS_BUCKET }},GOOGLE_CLOUD_PROJECT_ID=${{ env.PROJECT_ID }}" \
-            --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest"
+            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,DB_CONNECTION=mysql,DB_HOST=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,FRONTEND_URL=${{ steps.get_client_url.outputs.CLIENT_URL }},SESSION_DOMAIN=.lomis.com.tw,SANCTUM_STATEFUL_DOMAINS=www.lomis.com.tw,FILESYSTEM_DISK=gcs,GCS_BUCKET=${{ env.GCS_BUCKET }},GOOGLE_CLOUD_PROJECT_ID=${{ env.PROJECT_ID }},CACHE_STORE=file,SESSION_DRIVER=file,SESSION_LIFETIME=120,QUEUE_CONNECTION=sync,APP_LOCALE=zh_TW,LOG_CHANNEL=stack,LOG_LEVEL=error,SPATIE_PERMISSION_CACHE_EXPIRATION_TIME=3600" \
+            --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
+            --timeout=60 \
+            --memory=512Mi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=100
+            
+      - name: 'Update API URL Environment Variable'
+        run: |-
+          echo "更新 API URL 環境變數..."
+          API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
+          gcloud run services update ${{ env.API_SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --update-env-vars="APP_URL=${API_URL}"
 
       - name: 'Run Database Migrations'
         run: |-
-          gcloud run jobs create ${{ env.API_SERVICE_NAME }}-migrate --region=${{ env.REGION }} --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest --command=php --args=artisan,migrate,--force --add-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" --execute-now || \
+          gcloud run jobs create ${{ env.API_SERVICE_NAME }}-migrate \
+            --region=${{ env.REGION }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
+            --command=php \
+            --args=artisan,migrate,--force \
+            --add-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} \
+            --set-env-vars="APP_ENV=production,DB_CONNECTION=mysql,DB_HOST=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240" \
+            --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
+            --task-timeout=300 \
+            --parallelism=1 \
+            --max-retries=1 || echo "Migration job already exists"
+          
+          echo "執行資料庫遷移..."
           gcloud run jobs execute ${{ env.API_SERVICE_NAME }}-migrate --region=${{ env.REGION }} --wait
 
   deploy-client:
