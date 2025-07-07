@@ -47,6 +47,22 @@ return [
             'report' => false,
         ],
 
+        'gcs' => [
+            'driver' => 'gcs',
+            'project_id' => env('GOOGLE_CLOUD_PROJECT_ID'),
+            'key_file' => env('GOOGLE_CLOUD_KEY_FILE'), // 在 Cloud Run 中通常為 null，使用服務帳號
+            'bucket' => env('GCS_BUCKET'),
+            'path_prefix' => env('GCS_PATH_PREFIX', ''),
+            'storage_api_uri' => env('GCS_STORAGE_API_URI'),
+            'api_endpoint' => env('GCS_API_ENDPOINT'),
+            'visibility' => 'public',
+            'metadata' => [
+                'cacheControl' => 'public,max-age=86400',
+            ],
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

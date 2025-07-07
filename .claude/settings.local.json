@@ -11,7 +11,9 @@
       "Bash(php artisan api:check-docs:*)",
       "Bash(rg:*)",
       "Bash(php artisan tinker:*)",
-      "WebFetch(domain:scribe.knuckles.wtf)"
+      "WebFetch(domain:scribe.knuckles.wtf)",
+      "Bash(./prepare-gcp-deployment.sh:*)",
+      "Bash(./deploy-to-gcp.sh:*)"
     ],
     "deny": []
   }
