@@ -62,12 +62,14 @@ jobs:
           echo "✅ Secret Manager 存取權限正常"
           
           echo "🔍 驗證 Compute Engine 預設服務帳號 Secret Manager 權限..."
-          # 檢查 Compute Engine 預設服務帳號是否有 Secret Manager 權限
           gcloud projects get-iam-policy ${{ env.PROJECT_ID }} \
             --flatten="bindings[].members" \
             --filter="bindings.members:672374290013-compute@developer.gserviceaccount.com AND bindings.role:roles/secretmanager.secretAccessor" \
             --format="value(bindings.role)" | grep -q "roles/secretmanager.secretAccessor" || {
               echo "❌ Compute Engine 預設服務帳號缺少 Secret Manager 權限"
+              echo "請執行：gcloud projects add-iam-policy-binding ${{ env.PROJECT_ID }} \\"
+              echo "  --member='serviceAccount:672374290013-compute@developer.gserviceaccount.com' \\"
+              echo "  --role='roles/secretmanager.secretAccessor'"
               exit 1
             }
           echo "✅ Compute Engine 預設服務帳號 Secret Manager 權限正常"
