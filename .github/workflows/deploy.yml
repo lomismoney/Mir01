@@ -218,7 +218,9 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --add-cloudsql-instances=turnkey-pottery-461707-b5:asia-east1:lomis-db-instance \
-            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,APP_MAINTENANCE_DRIVER=file,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance,DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,FRONTEND_URL=${{ steps.get_client_url.outputs.CLIENT_URL }},SESSION_DOMAIN=.lomis.com.tw,SESSION_DRIVER=file,SESSION_LIFETIME=120,SESSION_ENCRYPT=false,SESSION_PATH=/,SANCTUM_STATEFUL_DOMAINS=www.lomis.com.tw,FILESYSTEM_DISK=gcs,GCS_BUCKET=${{ env.GCS_BUCKET }},GOOGLE_CLOUD_PROJECT_ID=${{ env.PROJECT_ID }},CACHE_STORE=file,QUEUE_CONNECTION=sync,BROADCAST_CONNECTION=log,LOG_CHANNEL=stack,LOG_LEVEL=error,SPATIE_PERMISSION_CACHE_EXPIRATION_TIME=3600" \
+            --add-volume=name=gcs-storage,type=cloud-storage,bucket=${{ env.GCS_BUCKET }} \
+            --add-volume-mount=volume=gcs-storage,mount-path=/mnt/gcs \
+            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,APP_MAINTENANCE_DRIVER=file,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance,DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,FRONTEND_URL=${{ steps.get_client_url.outputs.CLIENT_URL }},SESSION_DOMAIN=.lomis.com.tw,SESSION_DRIVER=file,SESSION_LIFETIME=120,SESSION_ENCRYPT=false,SESSION_PATH=/,SANCTUM_STATEFUL_DOMAINS=www.lomis.com.tw,FILESYSTEM_DISK=gcs,GCS_BUCKET=${{ env.GCS_BUCKET }},GOOGLE_CLOUD_PROJECT_ID=${{ env.PROJECT_ID }},CACHE_STORE=file,QUEUE_CONNECTION=sync,BROADCAST_CONNECTION=log,LOG_CHANNEL=stack,LOG_LEVEL=error,SPATIE_PERMISSION_CACHE_EXPIRATION_TIME=3600,GCS_MOUNT_PATH=/mnt/gcs" \
             --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
             --timeout=300 \
             --memory=1Gi \
@@ -269,8 +271,10 @@ jobs:
             --region=${{ env.REGION }} \
             --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
             --command=/usr/local/bin/openapi-entrypoint.sh \
+            --add-volume=name=gcs-storage,type=cloud-storage,bucket=${{ env.GCS_BUCKET }} \
+            --add-volume-mount=volume=gcs-storage,mount-path=/mnt/gcs \
             --set-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance \
-            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance,DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,CACHE_STORE=file,LOG_CHANNEL=stack,LOG_LEVEL=debug,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},INSTANCE_CONNECTION_NAME=${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance,GCS_BUCKET=${{ env.GCS_BUCKET }}" \
+            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance,DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,CACHE_STORE=file,LOG_CHANNEL=stack,LOG_LEVEL=debug,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},INSTANCE_CONNECTION_NAME=${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance,GCS_BUCKET=${{ env.GCS_BUCKET }},GCS_MOUNT_PATH=/mnt/gcs" \
             --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
             --task-timeout=300 \
             --cpu=1 \
@@ -283,31 +287,18 @@ jobs:
           echo "執行 OpenAPI 生成 Job..."
           gcloud run jobs execute ${{ env.API_SERVICE_NAME }}-openapi --region=${{ env.REGION }} --wait
           
-          # 從 GCS 下載生成的 OpenAPI
+          # 從 GCS 下載生成的 OpenAPI 給前端建置使用
           echo "從 GCS 下載 OpenAPI..."
-          gsutil cp gs://${{ env.GCS_BUCKET }}/openapi/openapi-latest.yaml ./openapi-generated.yaml
+          gsutil cp gs://${{ env.GCS_BUCKET }}/openapi/openapi-latest.yaml ./inventory-client/openapi.yaml
           
-          # 驗證生成的檔案
-          if [ -f ./openapi-generated.yaml ]; then
-            echo "✅ OpenAPI 檔案已生成"
-            echo "檔案大小：$(wc -l < ./openapi-generated.yaml) 行"
-            if [ $(wc -l < ./openapi-generated.yaml) -lt 100 ]; then
-              echo "❌ OpenAPI 檔案太小，可能不完整"
-              cat ./openapi-generated.yaml
-              exit 1
-            fi
+          # 驗證檔案
+          if [ -f ./inventory-client/openapi.yaml ] && [ $(wc -l < ./inventory-client/openapi.yaml) -gt 100 ]; then
+            echo "✅ OpenAPI 檔案已下載"
+            echo "檔案大小：$(wc -l < ./inventory-client/openapi.yaml) 行"
           else
-            echo "❌ 無法下載 OpenAPI 檔案"
+            echo "❌ OpenAPI 檔案無效或太小"
             exit 1
           fi
-
-      - name: 'Upload OpenAPI Specification'
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: openapi-spec
-          path: ./openapi-generated.yaml
-          if-no-files-found: error
 
   deploy-client:
     name: 'Deploy Client to Cloud Run'
@@ -352,27 +343,6 @@ jobs:
             echo "使用 Cloud Run URL: ${API_URL}"
           fi
 
-      - name: 'Download OpenAPI Specification'
-        uses: actions/download-artifact@v4
-        with:
-          name: openapi-spec
-          path: ./
-
-      - name: 'Prepare OpenAPI for Frontend'
-        run: |-
-          echo "📄 準備 OpenAPI 規格..."
-          if [ -f ./openapi-generated.yaml ]; then
-            echo "✅ 找到從 API 服務下載的 OpenAPI 規格"
-            cp ./openapi-generated.yaml ./inventory-client/openapi.yaml
-            ls -la ./inventory-client/openapi.yaml
-            echo "檔案大小：$(wc -l < ./inventory-client/openapi.yaml) 行"
-            # 顯示前幾行以確認內容
-            echo "檔案開頭內容："
-            head -20 ./inventory-client/openapi.yaml
-          else
-            echo "❌ 無法找到 OpenAPI 規格"
-            exit 1
-          fi
 
       - name: 'Build and Push Client Docker Image'
         run: |-

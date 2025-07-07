@@ -51,25 +51,44 @@ done
 echo "生成 OpenAPI 文檔..."
 php artisan scribe:generate --force
 
-# 將生成的文檔上傳到 GCS
-if [ -f "storage/app/scribe/openapi.yaml" ]; then
-    echo "✅ OpenAPI 文檔生成成功"
+# 找到生成的 OpenAPI 檔案（可能在不同位置）
+OPENAPI_FILE=""
+if [ -f "storage/app/private/scribe/openapi.yaml" ]; then
+    OPENAPI_FILE="storage/app/private/scribe/openapi.yaml"
+elif [ -f "storage/app/scribe/openapi.yaml" ]; then
+    OPENAPI_FILE="storage/app/scribe/openapi.yaml"
+elif [ -f ".scribe/openapi.yaml" ]; then
+    OPENAPI_FILE=".scribe/openapi.yaml"
+fi
+
+if [ -n "$OPENAPI_FILE" ]; then
+    echo "✅ OpenAPI 文檔生成成功：$OPENAPI_FILE"
     
-    # 如果有設定 GCS bucket，上傳檔案
-    if [ -n "$GCS_BUCKET" ]; then
-        echo "上傳 OpenAPI 到 GCS..."
-        gsutil cp storage/app/scribe/openapi.yaml gs://${GCS_BUCKET}/openapi/openapi-latest.yaml
-        gsutil cp storage/app/scribe/openapi.yaml gs://${GCS_BUCKET}/openapi/openapi-$(date +%Y%m%d-%H%M%S).yaml
+    # 使用掛載的 GCS 路徑
+    if [ -n "$GCS_MOUNT_PATH" ] && [ -d "$GCS_MOUNT_PATH" ]; then
+        echo "使用掛載的 GCS 路徑：$GCS_MOUNT_PATH"
+        mkdir -p "$GCS_MOUNT_PATH/openapi"
+        cp "$OPENAPI_FILE" "$GCS_MOUNT_PATH/openapi/openapi-latest.yaml"
+        cp "$OPENAPI_FILE" "$GCS_MOUNT_PATH/openapi/openapi-$(date +%Y%m%d-%H%M%S).yaml"
+        echo "✅ OpenAPI 已複製到掛載的 GCS"
+        ls -la "$GCS_MOUNT_PATH/openapi/"
+    elif [ -n "$GCS_BUCKET" ]; then
+        echo "使用 gsutil 上傳到 GCS..."
+        gsutil cp "$OPENAPI_FILE" gs://${GCS_BUCKET}/openapi/openapi-latest.yaml
+        gsutil cp "$OPENAPI_FILE" gs://${GCS_BUCKET}/openapi/openapi-$(date +%Y%m%d-%H%M%S).yaml
         echo "✅ OpenAPI 已上傳到 GCS"
     else
-        echo "⚠️ 未設定 GCS_BUCKET，跳過上傳"
+        echo "⚠️ 未設定 GCS_MOUNT_PATH 或 GCS_BUCKET，跳過上傳"
     fi
     
     # 顯示檔案資訊
-    echo "檔案大小：$(wc -l < storage/app/scribe/openapi.yaml) 行"
+    echo "檔案大小：$(wc -l < "$OPENAPI_FILE") 行"
+    echo "前 20 行內容："
+    head -20 "$OPENAPI_FILE"
 else
     echo "❌ 找不到生成的 OpenAPI 檔案"
-    find . -name "openapi.yaml" -o -name "openapi.yml" | head -10
+    echo "搜尋所有 YAML 檔案："
+    find . -name "*.yaml" -o -name "*.yml" | head -20
     exit 1
 fi
 

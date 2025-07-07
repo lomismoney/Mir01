@@ -32,9 +32,8 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
-# 檢查是否有從 CI/CD 流程提供的 openapi.yaml
-# 如果有，使用它來生成完整的 TypeScript 類型
-# 如果沒有，建立基本的類型檔案以確保建置成功
+# 生成 TypeScript API 類型
+# 注意：在 Cloud Run 環境中，OpenAPI 檔案會通過 GCS 掛載共享
 RUN if [ -f "openapi.yaml" ]; then \
       echo "✅ 找到 openapi.yaml，生成 TypeScript API 類型..." && \
       npm run api:types && \
