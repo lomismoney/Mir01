@@ -73,6 +73,76 @@ jobs:
               exit 1
             }
           echo "✅ Compute Engine 預設服務帳號 Secret Manager 權限正常"
+          
+          echo "🔍 驗證 Cloud SQL 連線名稱格式..."
+          if [[ "${{ env.CLOUD_SQL_CONNECTION_NAME }}" =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
+            echo "✅ Cloud SQL 連線名稱格式正確: ${{ env.CLOUD_SQL_CONNECTION_NAME }}"
+          else
+            echo "❌ Cloud SQL 連線名稱格式錯誤: ${{ env.CLOUD_SQL_CONNECTION_NAME }}"
+            echo "預期格式: PROJECT_ID:REGION:INSTANCE_NAME"
+            echo "例如: turnkey-pottery-461707-b5:asia-east1:lomis-db-instance"
+            exit 1
+          fi
+          
+          echo "🔍 驗證 Cloud SQL 實例存在..."
+          gcloud sql instances describe lomis-db-instance --project=${{ env.PROJECT_ID }} >/dev/null || {
+            echo "❌ Cloud SQL 實例 'lomis-db-instance' 不存在"
+            exit 1
+          }
+          echo "✅ Cloud SQL 實例存在"
+          
+          echo "🔍 驗證環境變數完整性..."
+          [ -z "${{ env.PROJECT_ID }}" ] && echo "❌ PROJECT_ID 未設定" && exit 1
+          [ -z "${{ env.GCS_BUCKET }}" ] && echo "❌ GCS_BUCKET 未設定" && exit 1
+          [ -z "${{ env.CLOUD_SQL_CONNECTION_NAME }}" ] && echo "❌ CLOUD_SQL_CONNECTION_NAME 未設定" && exit 1
+          [ -z "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ] && echo "❌ GCP_WORKLOAD_IDENTITY_PROVIDER 未設定" && exit 1
+          [ -z "${{ secrets.GCP_SERVICE_ACCOUNT }}" ] && echo "❌ GCP_SERVICE_ACCOUNT 未設定" && exit 1
+          echo "✅ 所有必要環境變數已設定"
+          
+          echo "🔍 驗證 GCS Bucket 存在且可存取..."
+          gsutil ls -b gs://${{ env.GCS_BUCKET }} >/dev/null || {
+            echo "❌ GCS Bucket '${{ env.GCS_BUCKET }}' 不存在或無法存取"
+            exit 1
+          }
+          echo "✅ GCS Bucket 存在且可存取"
+          
+          echo "🔍 驗證資料庫存在..."
+          gcloud sql databases describe lomis_internal --instance=lomis-db-instance --project=${{ env.PROJECT_ID }} >/dev/null || {
+            echo "❌ 資料庫 'lomis_internal' 不存在於實例 'lomis-db-instance'"
+            echo "請執行：gcloud sql databases create lomis_internal --instance=lomis-db-instance"
+            exit 1
+          }
+          echo "✅ 資料庫存在"
+          
+          echo "🔍 驗證 Artifact Registry 倉庫..."
+          gcloud artifacts repositories describe ${{ env.API_SERVICE_NAME }}-repo --location=${{ env.REGION }} >/dev/null 2>&1 || {
+            echo "⚠️ Artifact Registry 倉庫 '${{ env.API_SERVICE_NAME }}-repo' 不存在，將在構建時創建"
+          }
+          
+          echo "🔍 驗證 Cloud Run 服務名稱規範..."
+          if [[ ! "${{ env.API_SERVICE_NAME }}" =~ ^[a-z][a-z0-9-]{0,62}$ ]]; then
+            echo "❌ API 服務名稱 '${{ env.API_SERVICE_NAME }}' 不符合 Cloud Run 命名規範"
+            echo "服務名稱必須以小寫字母開頭，只能包含小寫字母、數字和連字符"
+            exit 1
+          fi
+          if [[ ! "${{ env.CLIENT_SERVICE_NAME }}" =~ ^[a-z][a-z0-9-]{0,62}$ ]]; then
+            echo "❌ Client 服務名稱 '${{ env.CLIENT_SERVICE_NAME }}' 不符合 Cloud Run 命名規範"
+            exit 1
+          fi
+          echo "✅ 服務名稱符合規範"
+          
+          echo "🔍 驗證 Workload Identity 配置..."
+          # 從 provider 中提取 pool 名稱
+          POOL_NAME=$(echo "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}" | sed -n 's|projects/.*/locations/.*/workloadIdentityPools/\([^/]*\)/.*|\1|p')
+          if [ -n "$POOL_NAME" ]; then
+            gcloud iam workload-identity-pools describe "$POOL_NAME" --location=global --project=${{ env.PROJECT_ID }} >/dev/null || {
+              echo "❌ Workload Identity Pool 不存在或無法存取"
+              exit 1
+            }
+            echo "✅ Workload Identity 配置正確"
+          else
+            echo "⚠️ 無法解析 Workload Identity Provider，跳過驗證"
+          fi
 
       - name: 'Get Client URL for CORS'
         id: get_client_url
