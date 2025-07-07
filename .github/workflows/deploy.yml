@@ -30,16 +30,31 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
 
       - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Verify Authentication'
+        run: |-
+          echo "🔍 驗證 GCP 認證..."
+          gcloud auth list --filter=status:ACTIVE --format="value(account)" || exit 1
+          echo "✅ 認證成功"
+          
+          echo "🔍 驗證專案存取權限..."
+          gcloud projects describe ${{ env.PROJECT_ID }} --format="value(name)" || exit 1
+          echo "✅ 專案存取權限正常"
+          
+          echo "🔍 驗證 Artifact Registry 存取權限..."
+          gcloud artifacts repositories list --location=${{ env.REGION }} --format="value(name)" || exit 1
+          echo "✅ Artifact Registry 存取權限正常"
 
       - name: 'Build and Push API Docker Image'
         run: |-
@@ -78,16 +93,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
 
       - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Verify Authentication'
+        run: |-
+          echo "🔍 驗證 GCP 認證（Client 部署）..."
+          gcloud auth list --filter=status:ACTIVE --format="value(account)" || exit 1
+          echo "✅ Client 部署認證正常"
         
       - name: 'Determine API URL'
         id: get_api_url
