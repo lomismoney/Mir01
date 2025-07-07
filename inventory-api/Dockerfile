@@ -40,22 +40,8 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # 安裝 PHP 依賴
 RUN composer install --no-dev --optimize-autoloader
 
-# 生成 API 文檔（包括 OpenAPI 規格）
-# 需要設定一些基本的環境變數讓 Laravel 可以執行
-ENV APP_KEY=base64:dGVtcG9yYXJ5X2tleV9mb3JfYnVpbGRfb25seQ==
-ENV APP_ENV=production
-ENV DB_CONNECTION=sqlite
-ENV DB_DATABASE=:memory:
-
-RUN php artisan scribe:generate --force || true
-
-# 複製 OpenAPI 檔案到容器根目錄，方便後續提取
-RUN if [ -f "storage/app/scribe/openapi.yaml" ]; then \
-      cp storage/app/scribe/openapi.yaml /openapi.yaml && \
-      echo "✅ OpenAPI 規格已生成並複製到 /openapi.yaml"; \
-    else \
-      echo "⚠️ 未找到 OpenAPI 規格檔案"; \
-    fi
+# 注意：OpenAPI 文檔會在容器啟動時由 entrypoint.sh 生成
+# 這裡不生成是因為建置時沒有完整的環境（資料庫連接等）
 
 # 複製 Nginx 配置
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
@@ -81,6 +67,10 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # 遷移腳本（用於 Cloud Run Jobs）
 COPY docker/migrate-entrypoint.sh /usr/local/bin/migrate-entrypoint.sh
 RUN chmod +x /usr/local/bin/migrate-entrypoint.sh
+
+# OpenAPI 生成腳本（用於 Cloud Run Jobs）
+COPY docker/openapi-entrypoint.sh /usr/local/bin/openapi-entrypoint.sh
+RUN chmod +x /usr/local/bin/openapi-entrypoint.sh
 
 # 使用 Supervisor 管理 Nginx 和 PHP-FPM
 CMD ["/usr/local/bin/entrypoint.sh"] 

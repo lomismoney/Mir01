@@ -179,19 +179,6 @@ jobs:
           echo "🔨 構建 Docker 映像..."
           docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest ./inventory-api
           
-          # 從建置的容器中提取 OpenAPI 檔案
-          echo "📄 提取 OpenAPI 規格..."
-          docker create --name temp-api-container ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest
-          docker cp temp-api-container:/openapi.yaml ./openapi-temp.yaml || echo "⚠️ 無法提取 OpenAPI 檔案"
-          docker rm temp-api-container
-          
-          if [ -f ./openapi-temp.yaml ]; then
-            echo "✅ 成功提取 OpenAPI 規格"
-            ls -la ./openapi-temp.yaml
-          else
-            echo "❌ OpenAPI 檔案不存在"
-          fi
-          
           echo "🧪 測試容器啟動..."
           # 測試容器是否能在 8080 端口啟動（模擬 Cloud Run 環境）
           docker run -d --name test-api-container \
@@ -272,13 +259,55 @@ jobs:
           echo "執行資料庫遷移..."
           gcloud run jobs execute ${{ env.API_SERVICE_NAME }}-migrate --region=${{ env.REGION }} --wait
 
+      - name: 'Generate OpenAPI using Cloud Run Jobs'
+        id: generate_openapi
+        run: |-
+          echo "📄 使用 Cloud Run Jobs 生成 OpenAPI..."
+          
+          # 建立或更新 OpenAPI 生成 Job
+          gcloud run jobs create ${{ env.API_SERVICE_NAME }}-openapi \
+            --region=${{ env.REGION }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
+            --command=/usr/local/bin/openapi-entrypoint.sh \
+            --set-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance \
+            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance,DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,CACHE_STORE=file,LOG_CHANNEL=stack,LOG_LEVEL=debug,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},INSTANCE_CONNECTION_NAME=${{ env.PROJECT_ID }}:${{ env.REGION }}:lomis-db-instance,GCS_BUCKET=${{ env.GCS_BUCKET }}" \
+            --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
+            --task-timeout=300 \
+            --cpu=1 \
+            --memory=1Gi \
+            --parallelism=1 \
+            --max-retries=1 \
+            --service-account=${{ secrets.GCP_SERVICE_ACCOUNT }} || echo "Job already exists"
+          
+          # 執行 Job
+          echo "執行 OpenAPI 生成 Job..."
+          gcloud run jobs execute ${{ env.API_SERVICE_NAME }}-openapi --region=${{ env.REGION }} --wait
+          
+          # 從 GCS 下載生成的 OpenAPI
+          echo "從 GCS 下載 OpenAPI..."
+          gsutil cp gs://${{ env.GCS_BUCKET }}/openapi/openapi-latest.yaml ./openapi-generated.yaml
+          
+          # 驗證生成的檔案
+          if [ -f ./openapi-generated.yaml ]; then
+            echo "✅ OpenAPI 檔案已生成"
+            echo "檔案大小：$(wc -l < ./openapi-generated.yaml) 行"
+            if [ $(wc -l < ./openapi-generated.yaml) -lt 100 ]; then
+              echo "❌ OpenAPI 檔案太小，可能不完整"
+              cat ./openapi-generated.yaml
+              exit 1
+            fi
+          else
+            echo "❌ 無法下載 OpenAPI 檔案"
+            exit 1
+          fi
+
       - name: 'Upload OpenAPI Specification'
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: openapi-spec
-          path: ./openapi-temp.yaml
-          if-no-files-found: warn
+          path: ./openapi-generated.yaml
+          if-no-files-found: error
 
   deploy-client:
     name: 'Deploy Client to Cloud Run'
@@ -332,12 +361,17 @@ jobs:
       - name: 'Prepare OpenAPI for Frontend'
         run: |-
           echo "📄 準備 OpenAPI 規格..."
-          if [ -f ./openapi-temp.yaml ]; then
-            echo "✅ 找到從後端建置提取的 OpenAPI 規格"
-            cp ./openapi-temp.yaml ./inventory-client/openapi.yaml
+          if [ -f ./openapi-generated.yaml ]; then
+            echo "✅ 找到從 API 服務下載的 OpenAPI 規格"
+            cp ./openapi-generated.yaml ./inventory-client/openapi.yaml
             ls -la ./inventory-client/openapi.yaml
+            echo "檔案大小：$(wc -l < ./inventory-client/openapi.yaml) 行"
+            # 顯示前幾行以確認內容
+            echo "檔案開頭內容："
+            head -20 ./inventory-client/openapi.yaml
           else
-            echo "⚠️ 無法找到 OpenAPI 規格，將使用基本類型檔案"
+            echo "❌ 無法找到 OpenAPI 規格"
+            exit 1
           fi
 
       - name: 'Build and Push Client Docker Image'
