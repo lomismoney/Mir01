@@ -61,5 +61,9 @@ EXPOSE 8080
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# 遷移腳本（用於 Cloud Run Jobs）
+COPY docker/migrate-entrypoint.sh /usr/local/bin/migrate-entrypoint.sh
+RUN chmod +x /usr/local/bin/migrate-entrypoint.sh
+
 # 使用 Supervisor 管理 Nginx 和 PHP-FPM
 CMD ["/usr/local/bin/entrypoint.sh"] 
