@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
+  CardAction,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,9 @@ import {
   ArrowUp,
   Plus,
   FileText,
+  TrendingUp,
+  Clock,
+  Activity,
 } from "lucide-react";
 import { CreatePurchaseDialog } from "@/components/purchases/CreatePurchaseDialog";
 import { formatDistanceToNow } from "date-fns";
@@ -236,113 +240,167 @@ export function IncomingManagement() {
 
       {/* 統計卡片區 */}
       <div
-        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+        className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 mb-6"
         data-oid="jxr69lp"
       >
-        <Card data-oid="-n7ik2r">
-          <CardContent className="p-4" data-oid="ogfk_b5">
-            <div
-              className="flex items-center justify-between"
-              data-oid="js3gos_"
+        <Card className="@container/card" data-oid="-n7ik2r">
+          <CardHeader data-oid="ogfk_b5">
+            <CardDescription data-oid="x9ev6l8">
+              今日入庫
+            </CardDescription>
+            <CardTitle
+              className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+              data-oid="o_rxagw"
             >
-              <div data-oid=":pyp2ye">
-                <p
-                  className="text-sm font-medium text-muted-foreground"
-                  data-oid="x9ev6l8"
-                >
-                  今日入庫
-                </p>
-                <p
-                  className="text-2xl font-bold text-green-600"
-                  data-oid="o_rxagw"
-                >
-                  {transactionsData?.data?.filter((t: any) => {
-                    const today = new Date().toDateString();
-                    const transactionDate = new Date(
-                      t.created_at || "",
-                    ).toDateString();
-                    return transactionDate === today;
-                  }).length || 0}
-                </p>
-              </div>
-              <ArrowUp className="h-8 w-8 text-green-600" data-oid="extopfo" />
+              {transactionsData?.data?.filter((t: any) => {
+                const today = new Date().toDateString();
+                const transactionDate = new Date(
+                  t.created_at || "",
+                ).toDateString();
+                return transactionDate === today;
+              }).length || 0}
+            </CardTitle>
+            <CardAction data-oid="extopfo">
+              <Badge variant="outline" className="text-green-600">
+                <ArrowUp className="size-4" />
+                新增
+              </Badge>
+            </CardAction>
+          </CardHeader>
+          <CardFooter
+            className="flex-col items-start gap-1.5 text-sm"
+            data-oid="js3gos_"
+          >
+            <div className="line-clamp-1 flex gap-2 font-medium" data-oid=":pyp2ye">
+              入庫作業進行中 <Activity className="size-4" />
             </div>
-          </CardContent>
+            <div className="text-muted-foreground">
+              今日商品入庫操作次數
+            </div>
+          </CardFooter>
         </Card>
 
-        <Card data-oid="wntktvh">
-          <CardContent className="p-4" data-oid="m.bkg91">
-            <div
-              className="flex items-center justify-between"
-              data-oid="jb14:s5"
+        <Card className="@container/card" data-oid="wntktvh">
+          <CardHeader data-oid="m.bkg91">
+            <CardDescription data-oid="a54-9.n">
+              本週入庫
+            </CardDescription>
+            <CardTitle
+              className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+              data-oid="sbikgnv"
             >
-              <div data-oid="n1mpaw8">
-                <p
-                  className="text-sm font-medium text-muted-foreground"
-                  data-oid="a54-9.n"
-                >
-                  本週入庫
-                </p>
-                <p
-                  className="text-2xl font-bold text-blue-600"
-                  data-oid="sbikgnv"
-                >
-                  {transactionsData?.data?.filter((t: any) => {
-                    const now = new Date();
-                    const weekAgo = new Date(
-                      now.getTime() - 7 * 24 * 60 * 60 * 1000,
-                    );
-                    const transactionDate = new Date(t.created_at || "");
-                    return transactionDate >= weekAgo;
-                  }).length || 0}
-                </p>
-              </div>
-              <Package className="h-8 w-8 text-blue-600" data-oid=".j5yn4k" />
+              {transactionsData?.data?.filter((t: any) => {
+                const now = new Date();
+                const weekAgo = new Date(
+                  now.getTime() - 7 * 24 * 60 * 60 * 1000,
+                );
+                const transactionDate = new Date(t.created_at || "");
+                return transactionDate >= weekAgo;
+              }).length || 0}
+            </CardTitle>
+            <CardAction data-oid=".j5yn4k">
+              <Badge variant="outline" className="text-blue-600">
+                <TrendingUp className="size-4" />
+                成長
+              </Badge>
+            </CardAction>
+          </CardHeader>
+          <CardFooter
+            className="flex-col items-start gap-1.5 text-sm"
+            data-oid="jb14:s5"
+          >
+            <div className="line-clamp-1 flex gap-2 font-medium" data-oid="n1mpaw8">
+              入庫效率良好 <Package className="size-4" />
             </div>
-          </CardContent>
+            <div className="text-muted-foreground">
+              本週商品入庫統計
+            </div>
+          </CardFooter>
         </Card>
 
-        <Card data-oid="jifz05j">
-          <CardContent className="p-4" data-oid="unwvf--">
-            <div
-              className="flex items-center justify-between"
-              data-oid="5jlrk3e"
+        <Card className="@container/card" data-oid="jifz05j">
+          <CardHeader data-oid="unwvf--">
+            <CardDescription data-oid="99_l3w7">
+              總入庫次數
+            </CardDescription>
+            <CardTitle
+              className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+              data-oid="45dxesw"
             >
-              <div data-oid="luffvxn">
-                <p
-                  className="text-sm font-medium text-muted-foreground"
-                  data-oid="99_l3w7"
-                >
-                  總入庫次數
-                </p>
-                <p
-                  className="text-2xl font-bold text-purple-600"
-                  data-oid="45dxesw"
-                >
-                  {transactionsData?.pagination?.total || 0}
-                </p>
-              </div>
-              <History className="h-8 w-8 text-purple-600" data-oid="-p0ecaa" />
+              {transactionsData?.pagination?.total || 0}
+            </CardTitle>
+            <CardAction data-oid="-p0ecaa">
+              <Badge variant="outline" className="text-purple-600">
+                <History className="size-4" />
+                總計
+              </Badge>
+            </CardAction>
+          </CardHeader>
+          <CardFooter
+            className="flex-col items-start gap-1.5 text-sm"
+            data-oid="5jlrk3e"
+          >
+            <div className="line-clamp-1 flex gap-2 font-medium" data-oid="luffvxn">
+              系統累計記錄 <History className="size-4" />
             </div>
-          </CardContent>
+            <div className="text-muted-foreground">
+              歷史入庫操作總計
+            </div>
+          </CardFooter>
+        </Card>
+
+        <Card className="@container/card" data-oid="new_card">
+          <CardHeader>
+            <CardDescription>
+              本月入庫
+            </CardDescription>
+            <CardTitle
+              className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+            >
+              {transactionsData?.data?.filter((t: any) => {
+                const now = new Date();
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                const transactionDate = new Date(t.created_at || "");
+                return transactionDate >= monthStart;
+              }).length || 0}
+            </CardTitle>
+            <CardAction>
+              <Badge variant="outline" className="text-orange-600">
+                <Clock className="size-4" />
+                本月
+              </Badge>
+            </CardAction>
+          </CardHeader>
+          <CardFooter
+            className="flex-col items-start gap-1.5 text-sm"
+          >
+            <div className="line-clamp-1 flex gap-2 font-medium">
+              月度入庫統計 <Calendar className="size-4" />
+            </div>
+            <div className="text-muted-foreground">
+              本月商品入庫次數
+            </div>
+          </CardFooter>
         </Card>
       </div>
 
       {/* 篩選器區域 */}
-      <Card data-oid="1_p34cq">
+      <Card className="@container/card" data-oid="1_p34cq">
         <CardHeader data-oid=".2w2b3u">
-          <CardTitle className="flex items-center gap-2" data-oid="exo5gcn">
-            <Search className="h-5 w-5" data-oid="wv-_pp6" />
-            篩選入庫記錄
-            {getActiveFiltersCount() > 0 && (
-              <Badge variant="secondary" className="ml-2" data-oid="d1ew63r">
-                {getActiveFiltersCount()} 項篩選
-              </Badge>
-            )}
-          </CardTitle>
           <CardDescription data-oid="24lniga">
             使用以下篩選器來精確查找入庫記錄和相關資訊
           </CardDescription>
+          <CardTitle className="flex items-center gap-2" data-oid="exo5gcn">
+            <Search className="h-5 w-5" data-oid="wv-_pp6" />
+            篩選入庫記錄
+          </CardTitle>
+          <CardAction data-oid="d1ew63r">
+            {getActiveFiltersCount() > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {getActiveFiltersCount()} 項篩選
+              </Badge>
+            )}
+          </CardAction>
         </CardHeader>
         <CardContent data-oid="g5oc1b-">
           <div

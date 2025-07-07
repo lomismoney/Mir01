@@ -14,6 +14,22 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * 
  * @apiResource App\Http\Resources\Api\ProductResource
  * @apiResourceModel App\Models\Product
+ * 
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property int|null $category_id
+ * @property \App\Http\Resources\Api\CategoryResource|null $category
+ * @property \App\Http\Resources\Api\AttributeResource[] $attributes
+ * @property \App\Http\Resources\Api\ProductVariantResource[] $variants
+ * @property int|null $variant_count
+ * @property bool $has_image
+ * @property array $image_urls
+ * @property array|null $image_info
+ * @property int|null $total_stock
+ * @property array|null $price_range
+ * @property string $created_at
+ * @property string $updated_at
  */
 class ProductResource extends JsonResource
 {

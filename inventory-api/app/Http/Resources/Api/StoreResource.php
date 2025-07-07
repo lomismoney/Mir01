@@ -9,6 +9,22 @@ use App\Http\Resources\Api\InventoryResource;
 use App\Http\Resources\Api\PurchaseResource;
 use App\Http\Resources\Api\InventoryTransferResource;
 
+/**
+ * StoreResource API 資源
+ * 
+ * 用於格式化門市資料的 API 回應
+ * 
+ * @property int $id
+ * @property string $name
+ * @property string $address
+ * @property string $created_at
+ * @property string $updated_at
+ * @property \App\Http\Resources\Api\UserResource[]|null $users
+ * @property \App\Http\Resources\Api\InventoryResource[]|null $inventories
+ * @property \App\Http\Resources\Api\PurchaseResource[]|null $purchases
+ * @property \App\Http\Resources\Api\InventoryTransferResource[]|null $transfers_out
+ * @property \App\Http\Resources\Api\InventoryTransferResource[]|null $transfers_in
+ */
 class StoreResource extends JsonResource
 {
     /**

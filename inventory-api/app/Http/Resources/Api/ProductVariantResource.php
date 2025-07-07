@@ -10,6 +10,24 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * 
  * 將商品變體模型轉換為標準化的 API 回應格式
  * 包含商品、屬性值、庫存等相關資訊
+ * 
+ * @property int $id
+ * @property string $sku
+ * @property string $price
+ * @property string $cost_price
+ * @property string $average_cost
+ * @property int $total_purchased_quantity
+ * @property string $profit_margin
+ * @property string $profit_amount
+ * @property int $product_id
+ * @property string $created_at
+ * @property string $updated_at
+ * @property int|null $stock
+ * @property string|null $specifications
+ * @property string|null $image_url
+ * @property array|null $product
+ * @property array|null $attribute_values
+ * @property array|null $inventory
  */
 class ProductVariantResource extends JsonResource
 {

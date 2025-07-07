@@ -10,6 +10,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * 
  * 用於格式化商品屬性的 API 回應資料
  * 包含屬性的基本資訊和關聯的屬性值
+ * 
+ * @property int $id
+ * @property string $name
+ * @property string $created_at
+ * @property string $updated_at
+ * @property \App\Http\Resources\Api\AttributeValueResource[]|null $values
+ * @property int $products_count
  */
 class AttributeResource extends JsonResource
 {
