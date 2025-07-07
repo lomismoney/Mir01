@@ -14,24 +14,29 @@ if [ -z "$GOOGLE_CLOUD_PROJECT" ] && [ -n "$CLOUDSQL_CONNECTION_NAME" ]; then
     GOOGLE_CLOUD_PROJECT=$(echo "$CLOUDSQL_CONNECTION_NAME" | cut -d: -f1)
 fi
 
-# 動態構建 DB_HOST（如果未設定）
-if [ -z "$DB_HOST" ] && [ -n "$GOOGLE_CLOUD_PROJECT" ]; then
-    # 從環境變數獲取區域（預設為 asia-east1）
-    REGION="${GOOGLE_CLOUD_REGION:-asia-east1}"
-    INSTANCE="${DB_INSTANCE_NAME:-lomis-db-instance}"
-    DB_HOST="/cloudsql/${GOOGLE_CLOUD_PROJECT}:${REGION}:${INSTANCE}"
-    echo "構建 Cloud SQL 連線: $DB_HOST"
+# 使用 Unix socket 連線 (Cloud SQL 推薦方式)
+if [ -n "$INSTANCE_CONNECTION_NAME" ]; then
+    DB_SOCKET="/cloudsql/${INSTANCE_CONNECTION_NAME}"
+    echo "使用 Unix socket 連線: $DB_SOCKET"
+    # 清空 DB_HOST，強制使用 socket
+    export DB_HOST=""
+    export DB_SOCKET
+elif [ -n "$DB_SOCKET" ]; then
+    echo "使用提供的 Unix socket: $DB_SOCKET"
+    export DB_HOST=""
+    export DB_SOCKET
 fi
 
 # 設定環境變數
-export DB_HOST
 export GOOGLE_CLOUD_PROJECT
 
 echo "資料庫連線資訊："
-echo "  DB_HOST: $DB_HOST"
+echo "  DB_SOCKET: ${DB_SOCKET:-未設定}"
+echo "  DB_HOST: ${DB_HOST:-未設定}"
 echo "  DB_DATABASE: $DB_DATABASE"
 echo "  DB_USERNAME: $DB_USERNAME"
 echo "  專案 ID: $GOOGLE_CLOUD_PROJECT"
+echo "  連線方式: $([ -n "$DB_SOCKET" ] && echo "Unix Socket" || echo "TCP/IP")"
 
 # 等待資料庫連線（最多 30 秒）
 echo "檢查資料庫連線..."
