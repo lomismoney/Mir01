@@ -1,11 +1,22 @@
 #!/bin/bash
 set -e
 
+echo "🚀 啟動容器..."
+echo "環境變數 PORT: $PORT"
+
 # Cloud Run 特殊處理
 if [ -n "$PORT" ]; then
     echo "檢測到 Cloud Run 環境，PORT=$PORT"
     # 動態設置 Nginx 監聽端口
+    echo "修改 Nginx 配置以監聽端口 $PORT..."
     sed -i "s/listen 8080;/listen $PORT;/g" /etc/nginx/sites-available/default
+    echo "✅ Nginx 配置已更新"
+    
+    # 顯示修改後的配置
+    echo "📋 Nginx 配置檢查："
+    grep "listen" /etc/nginx/sites-available/default
+else
+    echo "使用預設端口 8080"
 fi
 
 # 簡化版本：不等待資料庫，讓 Cloud Run 健康檢查處理
@@ -43,6 +54,14 @@ php artisan scribe:generate || true
 
 # 確保權限正確
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# 啟用 Nginx 站點
+echo "啟用 Nginx 站點..."
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+# 測試 Nginx 配置
+echo "測試 Nginx 配置..."
+nginx -t
 
 # 啟動 Supervisor
 echo "啟動應用程式..."
