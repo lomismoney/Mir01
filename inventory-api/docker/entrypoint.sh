@@ -26,11 +26,10 @@ echo "跳過資料庫連接檢查（Cloud Run 環境）"
 # 這樣可以避免啟動超時問題
 echo "跳過資料庫遷移（應通過 Cloud Run Jobs 執行）"
 
-# 生成應用程式密鑰（如果不存在）
-if [ -z "$APP_KEY" ]; then
-    echo "生成應用程式密鑰..."
-    php artisan key:generate --force
-fi
+# 在 Cloud Run 環境中，APP_KEY 通過 Secret Manager 提供
+# 跳過密鑰生成以避免 .env 檔案依賴問題
+echo "跳過 APP_KEY 生成（使用 Secret Manager 提供的密鑰）"
+echo "APP_KEY 狀態：$([ -n "$APP_KEY" ] && echo "已設定" || echo "未設定")"
 
 # 清除和優化快取
 echo "優化應用程式..."
@@ -44,9 +43,8 @@ php artisan route:cache
 # 視圖快取也是安全的
 php artisan view:cache
 
-# 建立儲存符號連結
-echo "建立儲存符號連結..."
-php artisan storage:link || true
+# 跳過建立儲存符號連結（使用 GCS，不需要本地符號連結）
+echo "跳過儲存符號連結（使用 Google Cloud Storage）"
 
 # 生成 API 文檔
 echo "生成 API 文檔..."
