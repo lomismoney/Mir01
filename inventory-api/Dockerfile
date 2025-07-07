@@ -43,6 +43,11 @@ RUN composer install --no-dev --optimize-autoloader
 # 複製 Nginx 配置
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 
+# 移除預設的 Nginx 配置並創建必要的目錄
+RUN rm -f /etc/nginx/sites-enabled/default \
+    && mkdir -p /etc/nginx/sites-enabled \
+    && mkdir -p /var/log/nginx
+
 # 複製 Supervisor 配置
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
