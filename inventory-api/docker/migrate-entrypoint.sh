@@ -61,4 +61,8 @@ done
 echo "執行資料庫遷移..."
 php artisan migrate --force
 
+# 執行初始管理員建立（只在沒有用戶時執行）
+echo "檢查初始管理員帳號..."
+php artisan db:seed --class=InitialAdminSeeder --force
+
 echo "✅ 資料庫遷移完成"
