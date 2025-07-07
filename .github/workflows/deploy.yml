@@ -3,7 +3,13 @@ name: Deploy to Google Cloud
 on:
   push:
     branches:
-      - master # 或者您的主要分支
+      - master
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deploy (ignore cache)'
+        required: false
+        default: 'false'
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -11,7 +17,7 @@ env:
   CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
   API_SERVICE_NAME: inventory-api
   CLIENT_SERVICE_NAME: inventory-client
-  REGION: asia-east1 # 已根據您的需求設定
+  REGION: asia-east1
 
 jobs:
   deploy-api:
@@ -83,10 +89,19 @@ jobs:
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
         
-      - name: Get API URL
+      - name: 'Determine API URL'
         id: get_api_url
-        run: echo "API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')" >> $GITHUB_OUTPUT
-        shell: bash
+        run: |-
+          # 優先使用自訂網域（如果有設定）
+          if [ ! -z "${{ secrets.API_CUSTOM_DOMAIN_URL }}" ]; then
+            echo "API_URL=${{ secrets.API_CUSTOM_DOMAIN_URL }}" >> $GITHUB_OUTPUT
+            echo "使用自訂網域: ${{ secrets.API_CUSTOM_DOMAIN_URL }}"
+          else
+            # 如果沒有自訂網域，則使用 Cloud Run 自動生成的 URL
+            API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
+            echo "API_URL=${API_URL}" >> $GITHUB_OUTPUT
+            echo "使用 Cloud Run URL: ${API_URL}"
+          fi
 
       - name: 'Build and Push Client Docker Image'
         run: |-
@@ -105,4 +120,12 @@ jobs:
             --region=${{ env.REGION }} \
             --platform=managed \
             --allow-unauthenticated \
-            --set-env-vars="NEXT_PUBLIC_API_BASE_URL=${{ steps.get_api_url.outputs.API_URL }}" 
+            --set-env-vars="NEXT_PUBLIC_API_BASE_URL=${{ steps.get_api_url.outputs.API_URL }}"
+
+      - name: 'Display Deployment URLs'
+        run: |-
+          echo "🎉 部署完成！"
+          echo "📋 服務網址："
+          echo "API 服務: ${{ steps.get_api_url.outputs.API_URL }}"
+          CLIENT_URL=$(gcloud run services describe ${{ env.CLIENT_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
+          echo "前端服務: ${CLIENT_URL}"
