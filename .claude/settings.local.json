@@ -13,7 +13,24 @@
       "Bash(php artisan tinker:*)",
       "WebFetch(domain:scribe.knuckles.wtf)",
       "Bash(./prepare-gcp-deployment.sh:*)",
-      "Bash(./deploy-to-gcp.sh:*)"
+      "Bash(./deploy-to-gcp.sh:*)",
+      "Bash(docker build:*)",
+      "Bash(composer install:*)",
+      "Bash(git add:*)",
+      "Bash(gcloud iam service-accounts list:*)",
+      "Bash(gh secret set:*)",
+      "Bash(gcloud iam workload-identity-pools describe:*)",
+      "Bash(gcloud iam workload-identity-pools providers describe:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gcloud projects add-iam-policy-binding:*)",
+      "Bash(--member=\"serviceAccount:672374290013-compute@developer.gserviceaccount.com\" )",
+      "Bash(--role=\"roles/secretmanager.secretAccessor\")",
+      "Bash(--member=\"serviceAccount:github-deploy-sa@turnkey-pottery-461707-b5.iam.gserviceaccount.com\" )",
+      "Bash(--role=\"roles/resourcemanager.projectIamAdmin\")",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }

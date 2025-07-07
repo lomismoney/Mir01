@@ -302,6 +302,34 @@ jobs:
             echo "使用 Cloud Run URL: ${API_URL}"
           fi
 
+      - name: 'Generate OpenAPI Specification'
+        run: |-
+          echo "📄 生成 OpenAPI 規格..."
+          # 等待 API 服務完全啟動
+          sleep 10
+          
+          # 嘗試下載 OpenAPI 規格
+          max_retries=5
+          retry_count=0
+          
+          while [ $retry_count -lt $max_retries ]; do
+            echo "嘗試從 ${{ steps.get_api_url.outputs.API_URL }}/docs.openapi 下載 OpenAPI 規格 (嘗試 $((retry_count + 1))/$max_retries)..."
+            
+            if curl -f -o ./inventory-client/openapi.yaml "${{ steps.get_api_url.outputs.API_URL }}/docs.openapi"; then
+              echo "✅ 成功下載 OpenAPI 規格"
+              ls -la ./inventory-client/openapi.yaml
+              break
+            else
+              echo "❌ 下載失敗，等待 10 秒後重試..."
+              sleep 10
+              retry_count=$((retry_count + 1))
+            fi
+          done
+          
+          if [ ! -f ./inventory-client/openapi.yaml ]; then
+            echo "⚠️ 無法下載 OpenAPI 規格，將使用基本類型檔案"
+          fi
+
       - name: 'Build and Push Client Docker Image'
         run: |-
           gcloud artifacts repositories create ${{ env.CLIENT_SERVICE_NAME }}-repo \

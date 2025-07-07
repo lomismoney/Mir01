@@ -16,6 +16,9 @@ RUN npm ci
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# 安裝 curl 來下載 OpenAPI 規格
+RUN apk add --no-cache curl
+
 # 複製依賴
 COPY --from=deps /app/node_modules ./node_modules
 
@@ -28,6 +31,27 @@ ENV NEXT_TELEMETRY_DISABLED 1
 # 設定建置時 API URL 參數（用於 GCP 部署）
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+
+# 檢查是否有從 CI/CD 流程提供的 openapi.yaml
+# 如果有，使用它來生成完整的 TypeScript 類型
+# 如果沒有，建立基本的類型檔案以確保建置成功
+RUN if [ -f "openapi.yaml" ]; then \
+      echo "✅ 找到 openapi.yaml，生成 TypeScript API 類型..." && \
+      npm run api:types && \
+      echo "✅ API 類型生成完成"; \
+    else \
+      echo "⚠️ 找不到 openapi.yaml，建立基本類型檔案..." && \
+      mkdir -p src/types && \
+      echo "// Auto-generated API types (fallback)" > src/types/api.ts && \
+      echo "export interface paths {" >> src/types/api.ts && \
+      echo "  '/api/auth/login': any;" >> src/types/api.ts && \
+      echo "  '/api/auth/logout': any;" >> src/types/api.ts && \
+      echo "  '/api/auth/user': any;" >> src/types/api.ts && \
+      echo "}" >> src/types/api.ts && \
+      echo "export interface components {" >> src/types/api.ts && \
+      echo "  schemas: {};" >> src/types/api.ts && \
+      echo "}" >> src/types/api.ts; \
+    fi
 
 # 構建應用程式
 RUN npm run build
