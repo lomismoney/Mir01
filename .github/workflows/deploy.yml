@@ -157,22 +157,24 @@ jobs:
         run: |-
           echo "創建或更新資料庫遷移 Job..."
           if gcloud run jobs describe ${{ env.API_SERVICE_NAME }}-migrate --region=${{ env.REGION }} >/dev/null 2>&1; then
-            echo "更新現有的遷移 Job..."
-            gcloud run jobs replace-job --region=${{ env.REGION }} --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest ${{ env.API_SERVICE_NAME }}-migrate
-          else
-            echo "創建新的遷移 Job..."
-            gcloud run jobs create ${{ env.API_SERVICE_NAME }}-migrate \
-              --region=${{ env.REGION }} \
-              --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
-              --command=php \
-              --args=artisan,migrate,--force \
-              --set-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} \
-              --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,DB_CONNECTION=mysql,DB_HOST=/cloudsql/turnkey-pottery-461707-b5:asia-east1:lomis-db-instance,DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,CACHE_STORE=file,LOG_CHANNEL=stack,LOG_LEVEL=debug" \
-              --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
-              --task-timeout=300 \
-              --parallelism=1 \
-              --max-retries=1
+            echo "刪除現有的遷移 Job（重新創建以更新配置）..."
+            gcloud run jobs delete ${{ env.API_SERVICE_NAME }}-migrate --region=${{ env.REGION }} --quiet
           fi
+          
+          echo "創建新的遷移 Job..."
+          gcloud run jobs create ${{ env.API_SERVICE_NAME }}-migrate \
+            --region=${{ env.REGION }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
+            --command=php \
+            --args=artisan,migrate,--force \
+            --set-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} \
+            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,DB_CONNECTION=mysql,DB_HOST=/cloudsql/turnkey-pottery-461707-b5:asia-east1:lomis-db-instance,DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,CACHE_STORE=file,LOG_CHANNEL=stack,LOG_LEVEL=debug" \
+            --set-secrets="LARAVEL_APP_KEY=LARAVEL_APP_KEY:latest,LARAVEL_DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
+            --task-timeout=600 \
+            --cpu=1 \
+            --memory=1Gi \
+            --parallelism=1 \
+            --max-retries=1
           
           echo "執行資料庫遷移..."
           gcloud run jobs execute ${{ env.API_SERVICE_NAME }}-migrate --region=${{ env.REGION }} --wait
