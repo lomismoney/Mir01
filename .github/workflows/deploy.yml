@@ -361,32 +361,47 @@ jobs:
       - name: 'Deployment Reason Analysis'
         run: |
           echo "🔍 前端部署原因分析："
-          API_CHANGED="${{ needs.detect-changes.outputs.api-changed }}"
-          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
-          DEPLOY_TARGET="${{ needs.detect-changes.outputs.deploy-target }}"
+          
+          # 安全地處理 GitHub Actions 輸出變數
+          API_CHANGED="${{ needs.detect-changes.outputs.api-changed || 'false' }}"
+          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed || 'false' }}"
+          DEPLOY_TARGET="${{ needs.detect-changes.outputs.deploy-target || 'auto' }}"
           
           echo "   變數狀態檢查："
-          echo "     API_CHANGED: $API_CHANGED"
-          echo "     CLIENT_CHANGED: $CLIENT_CHANGED" 
-          echo "     DEPLOY_TARGET: $DEPLOY_TARGET"
+          echo "     API_CHANGED: '${API_CHANGED}'"
+          echo "     CLIENT_CHANGED: '${CLIENT_CHANGED}'" 
+          echo "     DEPLOY_TARGET: '${DEPLOY_TARGET}'"
           echo ""
           
-          if [ "$DEPLOY_TARGET" = "both" ] || [ "$DEPLOY_TARGET" = "client" ]; then
-            echo "   📋 手動指定部署目標: $DEPLOY_TARGET"
-          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
+          # 標準化變數值，避免空值問題
+          [ -z "$API_CHANGED" ] && API_CHANGED="false"
+          [ -z "$CLIENT_CHANGED" ] && CLIENT_CHANGED="false" 
+          [ -z "$DEPLOY_TARGET" ] && DEPLOY_TARGET="auto"
+          
+          echo "   標準化後："
+          echo "     API_CHANGED: '${API_CHANGED}'"
+          echo "     CLIENT_CHANGED: '${CLIENT_CHANGED}'"
+          echo "     DEPLOY_TARGET: '${DEPLOY_TARGET}'"
+          echo ""
+          
+          if [ "${DEPLOY_TARGET}" = "both" ] || [ "${DEPLOY_TARGET}" = "client" ]; then
+            echo "   📋 手動指定部署目標: ${DEPLOY_TARGET}"
+          elif [ "${API_CHANGED}" = "true" ] && [ "${CLIENT_CHANGED}" = "false" ]; then
             echo "   🔗 API 變更依賴部署 - 同步最新 openapi.yaml"
             echo "   📦 API 有變更，前端需要更新類型定義"
-          elif [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+          elif [ "${API_CHANGED}" = "false" ] && [ "${CLIENT_CHANGED}" = "true" ]; then
             echo "   🎯 前端直接變更部署"
             echo "   📦 前端代碼有變更"
-          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+          elif [ "${API_CHANGED}" = "true" ] && [ "${CLIENT_CHANGED}" = "true" ]; then
             echo "   🔄 API 和前端都有變更"
             echo "   📦 全面同步部署"
           else
             echo "   ❓ 未預期的部署狀況"
             echo "   這可能是 auto 模式的智能檢測結果"
+            echo "   詳細: API=${API_CHANGED}, CLIENT=${CLIENT_CHANGED}, TARGET=${DEPLOY_TARGET}"
           fi
           echo ""
+        working-directory: . # 🔧 在根目錄執行，因為此時 inventory-client 目錄還不存在
 
       - name: 'Checkout'
         uses: actions/checkout@v4
@@ -410,9 +425,15 @@ jobs:
 
       - name: 'Verify or Generate Fallback OpenAPI'
         run: |
-          API_CHANGED="${{ needs.detect-changes.outputs.api-changed }}"
-          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
-          DEPLOY_API_RESULT="${{ needs.deploy-api.result }}"
+          # 安全地處理 GitHub Actions 輸出變數
+          API_CHANGED="${{ needs.detect-changes.outputs.api-changed || 'false' }}"
+          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed || 'false' }}"
+          DEPLOY_API_RESULT="${{ needs.deploy-api.result || 'skipped' }}"
+          
+          # 標準化變數值
+          [ -z "$API_CHANGED" ] && API_CHANGED="false"
+          [ -z "$CLIENT_CHANGED" ] && CLIENT_CHANGED="false"
+          [ -z "$DEPLOY_API_RESULT" ] && DEPLOY_API_RESULT="skipped"
           
           echo "🔍 OpenAPI 檔案狀態檢查："
           echo "   API 變更: $API_CHANGED"
@@ -582,16 +603,20 @@ jobs:
           echo "🎉 部署完成！"
           echo ""
           echo "📋 本次部署總結："
-          API_CHANGED="${{ needs.detect-changes.outputs.api-changed }}"
-          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
           
-          if [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
+          # 安全地處理變數
+          API_CHANGED="${{ needs.detect-changes.outputs.api-changed || 'false' }}"
+          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed || 'false' }}"
+          [ -z "$API_CHANGED" ] && API_CHANGED="false"
+          [ -z "$CLIENT_CHANGED" ] && CLIENT_CHANGED="false"
+          
+          if [ "${API_CHANGED}" = "true" ] && [ "${CLIENT_CHANGED}" = "false" ]; then
             echo "   🔗 API 變更觸發的依賴部署"
             echo "   📦 API 有更新 → 前端同步新的 API 類型定義"
-          elif [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+          elif [ "${API_CHANGED}" = "false" ] && [ "${CLIENT_CHANGED}" = "true" ]; then
             echo "   🎯 前端獨立部署"
             echo "   📦 只有前端代碼變更"
-          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+          elif [ "${API_CHANGED}" = "true" ] && [ "${CLIENT_CHANGED}" = "true" ]; then
             echo "   🔄 前後端全面更新"
             echo "   📦 API 和前端都有變更"
           fi
@@ -621,32 +646,42 @@ jobs:
           echo "======================"
           echo ""
           
-          # 取得所有相關變數
-          API_CHANGED="${{ needs.detect-changes.outputs.api-changed }}"
-          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
-          CLIENT_NEEDS_DEPLOY="${{ needs.detect-changes.outputs.client-needs-deploy }}"
-          FORCE_DEPLOY="${{ needs.detect-changes.outputs.force-deploy }}"
-          DEPLOY_TARGET="${{ needs.detect-changes.outputs.deploy-target }}"
+          # 安全地取得所有相關變數
+          API_CHANGED="${{ needs.detect-changes.outputs.api-changed || 'false' }}"
+          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed || 'false' }}"
+          CLIENT_NEEDS_DEPLOY="${{ needs.detect-changes.outputs.client-needs-deploy || 'false' }}"
+          FORCE_DEPLOY="${{ needs.detect-changes.outputs.force-deploy || 'false' }}"
+          DEPLOY_TARGET="${{ needs.detect-changes.outputs.deploy-target || 'auto' }}"
           
-          DETECT_RESULT="${{ needs.detect-changes.result }}"
-          API_RESULT="${{ needs.deploy-api.result }}"
-          CLIENT_RESULT="${{ needs.deploy-client.result }}"
+          DETECT_RESULT="${{ needs.detect-changes.result || 'skipped' }}"
+          API_RESULT="${{ needs.deploy-api.result || 'skipped' }}"
+          CLIENT_RESULT="${{ needs.deploy-client.result || 'skipped' }}"
+          
+          # 標準化變數值
+          [ -z "$API_CHANGED" ] && API_CHANGED="false"
+          [ -z "$CLIENT_CHANGED" ] && CLIENT_CHANGED="false"
+          [ -z "$CLIENT_NEEDS_DEPLOY" ] && CLIENT_NEEDS_DEPLOY="false"
+          [ -z "$FORCE_DEPLOY" ] && FORCE_DEPLOY="false"
+          [ -z "$DEPLOY_TARGET" ] && DEPLOY_TARGET="auto"
+          [ -z "$DETECT_RESULT" ] && DETECT_RESULT="skipped"
+          [ -z "$API_RESULT" ] && API_RESULT="skipped"
+          [ -z "$CLIENT_RESULT" ] && CLIENT_RESULT="skipped"
           
           echo "📊 變更檢測結果："
-          echo "   檢測狀態: $DETECT_RESULT"
-          echo "   API 變更: $API_CHANGED"
-          echo "   Client 變更: $CLIENT_CHANGED"
-          echo "   強制部署: $FORCE_DEPLOY"
-          echo "   部署目標: $DEPLOY_TARGET"
+          echo "   檢測狀態: ${DETECT_RESULT}"
+          echo "   API 變更: ${API_CHANGED}"
+          echo "   Client 變更: ${CLIENT_CHANGED}"
+          echo "   強制部署: ${FORCE_DEPLOY}"
+          echo "   部署目標: ${DEPLOY_TARGET}"
           echo ""
           
           echo "🚀 部署執行結果："
-          echo "   API 部署: $API_RESULT"
-          echo "   Client 部署: $CLIENT_RESULT"
+          echo "   API 部署: ${API_RESULT}"
+          echo "   Client 部署: ${CLIENT_RESULT}"
           echo ""
           
           # 分析部署狀況
-          if [ "$DETECT_RESULT" != "success" ]; then
+          if [ "${DETECT_RESULT}" != "success" ]; then
             echo "❌ 變更檢測失敗 - 部署流程異常終止"
             echo "   請檢查倉庫權限或變更檢測邏輯"
             exit 1
@@ -655,27 +690,27 @@ jobs:
           # 總結部署原因和結果
           echo "📋 本次部署分析："
           
-          if [ "$FORCE_DEPLOY" = "true" ]; then
+          if [ "${FORCE_DEPLOY}" = "true" ]; then
             echo "   🔄 強制部署模式"
             echo "   原因: 手動觸發強制部署"
-          elif [ "$DEPLOY_TARGET" = "api" ] || [ "$DEPLOY_TARGET" = "client" ] || [ "$DEPLOY_TARGET" = "both" ]; then
+          elif [ "${DEPLOY_TARGET}" = "api" ] || [ "${DEPLOY_TARGET}" = "client" ] || [ "${DEPLOY_TARGET}" = "both" ]; then
             echo "   🎯 手動指定部署"
-            echo "   目標: $DEPLOY_TARGET"
-          elif [ "$DEPLOY_TARGET" = "auto" ] && [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
+            echo "   目標: ${DEPLOY_TARGET}"
+          elif [ "${DEPLOY_TARGET}" = "auto" ] && [ "${API_CHANGED}" = "true" ] && [ "${CLIENT_CHANGED}" = "false" ]; then
             echo "   🔗 API 變更觸發連鎖部署"
             echo "   原因: API 變更 → Client 同步 openapi.yaml"
-          elif [ "$DEPLOY_TARGET" = "auto" ] && [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+          elif [ "${DEPLOY_TARGET}" = "auto" ] && [ "${API_CHANGED}" = "false" ] && [ "${CLIENT_CHANGED}" = "true" ]; then
             echo "   🎯 前端獨立部署"
             echo "   原因: 只有前端代碼變更"
-          elif [ "$DEPLOY_TARGET" = "auto" ] && [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+          elif [ "${DEPLOY_TARGET}" = "auto" ] && [ "${API_CHANGED}" = "true" ] && [ "${CLIENT_CHANGED}" = "true" ]; then
             echo "   🔄 全面更新部署"
             echo "   原因: API 和前端都有變更"
-          elif [ "$DEPLOY_TARGET" = "auto" ] && [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "false" ]; then
+          elif [ "${DEPLOY_TARGET}" = "auto" ] && [ "${API_CHANGED}" = "false" ] && [ "${CLIENT_CHANGED}" = "false" ]; then
             echo "   ✅ 無變更，跳過部署"
             echo "   原因: 沒有檢測到相關檔案變更"
           else
             echo "   ❓ 未知部署模式"
-            echo "   DEPLOY_TARGET: $DEPLOY_TARGET, API: $API_CHANGED, CLIENT: $CLIENT_CHANGED"
+            echo "   DEPLOY_TARGET: ${DEPLOY_TARGET}, API: ${API_CHANGED}, CLIENT: ${CLIENT_CHANGED}"
           fi
           
           echo ""
@@ -685,42 +720,42 @@ jobs:
           SKIP_COUNT=0
           FAIL_COUNT=0
           
-          if [ "$API_RESULT" = "success" ]; then
+          if [ "${API_RESULT}" = "success" ]; then
             SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
             echo "✅ API 部署成功"
-          elif [ "$API_RESULT" = "skipped" ]; then
+          elif [ "${API_RESULT}" = "skipped" ]; then
             SKIP_COUNT=$((SKIP_COUNT + 1))
             echo "⏭️ API 部署跳過（無需更新）"
-          elif [ "$API_RESULT" = "failure" ]; then
+          elif [ "${API_RESULT}" = "failure" ]; then
             FAIL_COUNT=$((FAIL_COUNT + 1))
             echo "❌ API 部署失敗"
           fi
           
-          if [ "$CLIENT_RESULT" = "success" ]; then
+          if [ "${CLIENT_RESULT}" = "success" ]; then
             SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
             echo "✅ 前端部署成功"
-          elif [ "$CLIENT_RESULT" = "skipped" ]; then
+          elif [ "${CLIENT_RESULT}" = "skipped" ]; then
             SKIP_COUNT=$((SKIP_COUNT + 1))
             echo "⏭️ 前端部署跳過（無需更新或依賴失敗）"
-          elif [ "$CLIENT_RESULT" = "failure" ]; then
+          elif [ "${CLIENT_RESULT}" = "failure" ]; then
             FAIL_COUNT=$((FAIL_COUNT + 1))
             echo "❌ 前端部署失敗"
           fi
           
           echo ""
           echo "📈 部署統計："
-          echo "   成功: $SUCCESS_COUNT 項"
-          echo "   跳過: $SKIP_COUNT 項"
-          echo "   失敗: $FAIL_COUNT 項"
+          echo "   成功: ${SUCCESS_COUNT} 項"
+          echo "   跳過: ${SKIP_COUNT} 項"
+          echo "   失敗: ${FAIL_COUNT} 項"
           
-          if [ $FAIL_COUNT -gt 0 ]; then
+          if [ ${FAIL_COUNT} -gt 0 ]; then
             echo ""
             echo "🚨 部署警告："
-            echo "   有 $FAIL_COUNT 項部署失敗，請檢查上述日誌"
-            if [ "$API_RESULT" = "failure" ] && [ "$CLIENT_RESULT" = "skipped" ]; then
+            echo "   有 ${FAIL_COUNT} 項部署失敗，請檢查上述日誌"
+            if [ "${API_RESULT}" = "failure" ] && [ "${CLIENT_RESULT}" = "skipped" ]; then
               echo "   💡 前端可能因為 API 部署失敗而被跳過"
             fi
-          elif [ $SUCCESS_COUNT -gt 0 ]; then
+          elif [ ${SUCCESS_COUNT} -gt 0 ]; then
             echo ""
             echo "🎉 部署成功完成！"
             echo ""
@@ -741,7 +776,7 @@ jobs:
           echo "   • 依賴邏輯 - API 變更自動觸發前端同步"
           
           # 設置最終退出碼
-          if [ $FAIL_COUNT -gt 0 ]; then
+          if [ ${FAIL_COUNT} -gt 0 ]; then
             echo ""
             echo "❌ 工作流程以失敗狀態結束（有部署失敗）"
             exit 1
