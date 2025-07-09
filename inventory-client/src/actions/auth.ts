@@ -52,12 +52,9 @@ export async function loginAction(
     const credentials = { username, password };
     
     // 呼叫 Auth.js 的 signIn 方法
-    // 🔧 關鍵修復：使用 redirectTo 參數，讓 Auth.js 處理重定向
-    // 移除手動 redirect 調用，避免重定向衝突
-    await signIn('credentials', { 
-      ...credentials,
-      redirectTo: '/dashboard'
-    });
+    // 🔧 關鍵修復：移除 redirectTo，讓 auth.ts 中的 authorized 回調統一處理重定向
+    // 避免雙重重定向造成的衝突和載入卡住問題
+    await signIn('credentials', credentials);
     
   } catch (error) {
     // 🔧 處理 Next.js Server Actions 的重定向機制
