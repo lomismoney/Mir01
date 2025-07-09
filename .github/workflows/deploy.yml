@@ -40,7 +40,7 @@ jobs:
       client-changed: ${{ steps.changes.outputs.client }}
       client-needs-deploy: ${{ steps.changes.outputs.client-needs-deploy }}
       force-deploy: ${{ github.event.inputs.force_deploy == 'true' }}
-      deploy-target: ${{ github.event.inputs.deploy_target || 'both' }}
+      deploy-target: ${{ github.event.inputs.deploy_target || 'auto' }}
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v4
@@ -66,7 +66,7 @@ jobs:
           fi
 
           # 🎯 處理手動部署目標
-          DEPLOY_TARGET="${{ github.event.inputs.deploy_target || 'both' }}"
+          DEPLOY_TARGET="${{ github.event.inputs.deploy_target || 'auto' }}"
           if [ "$DEPLOY_TARGET" == "api" ]; then
             echo "api=true" >> $GITHUB_OUTPUT
             echo "client=false" >> $GITHUB_OUTPUT
@@ -86,6 +86,9 @@ jobs:
             echo "🎯 手動指定部署 Both (API + Client)"
             exit 0
           fi
+          
+          # 🤖 auto 模式：根據檔案變更智能決定部署目標
+          echo "🤖 自動模式：根據檔案變更智能決定部署目標"
 
           # 🔍 檢測自動推送時的文件變更（處理邊界情況）
           echo "🔍 檢測檔案變更..."
@@ -362,6 +365,12 @@ jobs:
           CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
           DEPLOY_TARGET="${{ needs.detect-changes.outputs.deploy-target }}"
           
+          echo "   變數狀態檢查："
+          echo "     API_CHANGED: $API_CHANGED"
+          echo "     CLIENT_CHANGED: $CLIENT_CHANGED" 
+          echo "     DEPLOY_TARGET: $DEPLOY_TARGET"
+          echo ""
+          
           if [ "$DEPLOY_TARGET" = "both" ] || [ "$DEPLOY_TARGET" = "client" ]; then
             echo "   📋 手動指定部署目標: $DEPLOY_TARGET"
           elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
@@ -373,6 +382,9 @@ jobs:
           elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
             echo "   🔄 API 和前端都有變更"
             echo "   📦 全面同步部署"
+          else
+            echo "   ❓ 未預期的部署狀況"
+            echo "   這可能是 auto 模式的智能檢測結果"
           fi
           echo ""
 
@@ -646,21 +658,24 @@ jobs:
           if [ "$FORCE_DEPLOY" = "true" ]; then
             echo "   🔄 強制部署模式"
             echo "   原因: 手動觸發強制部署"
-          elif [ "$DEPLOY_TARGET" != "both" ] && [ "$DEPLOY_TARGET" != "" ]; then
+          elif [ "$DEPLOY_TARGET" = "api" ] || [ "$DEPLOY_TARGET" = "client" ] || [ "$DEPLOY_TARGET" = "both" ]; then
             echo "   🎯 手動指定部署"
             echo "   目標: $DEPLOY_TARGET"
-          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
+          elif [ "$DEPLOY_TARGET" = "auto" ] && [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
             echo "   🔗 API 變更觸發連鎖部署"
             echo "   原因: API 變更 → Client 同步 openapi.yaml"
-          elif [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+          elif [ "$DEPLOY_TARGET" = "auto" ] && [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "true" ]; then
             echo "   🎯 前端獨立部署"
             echo "   原因: 只有前端代碼變更"
-          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+          elif [ "$DEPLOY_TARGET" = "auto" ] && [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
             echo "   🔄 全面更新部署"
             echo "   原因: API 和前端都有變更"
-          else
+          elif [ "$DEPLOY_TARGET" = "auto" ] && [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "false" ]; then
             echo "   ✅ 無變更，跳過部署"
             echo "   原因: 沒有檢測到相關檔案變更"
+          else
+            echo "   ❓ 未知部署模式"
+            echo "   DEPLOY_TARGET: $DEPLOY_TARGET, API: $API_CHANGED, CLIENT: $CLIENT_CHANGED"
           fi
           
           echo ""
