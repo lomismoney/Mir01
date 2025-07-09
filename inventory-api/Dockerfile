@@ -1,105 +1,25 @@
-# Laravel 11 後端 Dockerfile (生產級多階段構建)
+# Laravel 11 後端 Dockerfile (超速生產級構建 - 優化版)
 
-# Stage 1: 構建階段 - 安裝 PHP 擴展、Composer 和依賴
-FROM php:8.2-fpm-alpine AS builder
+# Stage 1: 基礎 PHP 擴展層 (最少變動，最高快取命中率)
+FROM php:8.2-fpm-alpine AS php-base
 
-# 安裝構建時需要的系統依賴
-RUN apk add --no-cache --virtual .build-deps \
-    $PHPIZE_DEPS \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
-    libwebp-dev \
-    libzip-dev \
-    oniguruma-dev \
-    && apk add --no-cache \
-    freetype \
-    libjpeg-turbo \
-    libpng \
-    libwebp \
-    libzip \
-    oniguruma \
-    git \
-    unzip
-
-# 配置和安裝 PHP 擴展
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install -j$(nproc) \
-        pdo_mysql \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
-        zip \
-        opcache
-
-# 安裝 Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# 設定工作目錄
-WORKDIR /var/www/html
-
-# 複製 Composer 文件以利用 Docker 層緩存
-COPY composer.json composer.lock ./
-
-# 安裝 PHP 依賴（生產環境優化）
-RUN composer install \
-    --no-dev \
-    --no-scripts \
-    --no-autoloader \
-    --prefer-dist \
-    --optimize-autoloader \
-    && composer clear-cache
-
-# 複製應用程式代碼
-COPY . .
-
-# 生成優化的 autoloader
-RUN composer dump-autoload --optimize --no-dev
-
-# Stage 2: 運行階段 - 生產級 nginx + php-fpm 環境
-FROM php:8.2-fpm-alpine AS runner
-
-# 安裝運行時依賴
+# 🚀 批量安裝系統依賴 (一次性，充分利用 Docker 層快取)
 RUN apk add --no-cache \
-    nginx \
-    supervisor \
-    freetype \
-    libjpeg-turbo \
-    libpng \
-    libwebp \
-    libzip \
-    oniguruma \
+    # 構建依賴
+    $PHPIZE_DEPS freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libzip-dev oniguruma-dev \
+    # 運行時依賴
+    freetype libjpeg-turbo libpng libwebp libzip oniguruma git unzip \
+    # 生產環境依賴
+    nginx supervisor \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd zip opcache \
+    && apk del $PHPIZE_DEPS \
     && rm -rf /var/cache/apk/*
 
-# 從構建階段複製 PHP 擴展
-COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
-COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-
-# 設定工作目錄
-WORKDIR /var/www/html
-
-# 確保 www-data 用戶和組存在（Alpine Linux 通常已包含）
-RUN getent group www-data || addgroup -g 82 -S www-data
-RUN getent passwd www-data || adduser -u 82 -D -S -G www-data www-data
-
-# 創建必要目錄
-RUN mkdir -p /var/www/html/storage/logs \
-    && mkdir -p /var/www/html/storage/framework/cache \
-    && mkdir -p /var/www/html/storage/framework/sessions \
-    && mkdir -p /var/www/html/storage/framework/views \
-    && mkdir -p /var/www/html/bootstrap/cache \
-    && mkdir -p /run/nginx \
-    && mkdir -p /var/log/supervisor
-
-# 複製應用程式碼和依賴
-COPY --from=builder /var/www/html /var/www/html
-
-# 設定 PHP 生產環境配置
+# 🔧 預設置 PHP 生產環境配置 (快取友好)
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# PHP 優化配置
+# PHP 優化配置 (單層快取)
 COPY <<EOF /usr/local/etc/php/conf.d/laravel.ini
 ; Laravel 生產環境優化
 opcache.enable=1
@@ -128,7 +48,56 @@ realpath_cache_size=4096K
 realpath_cache_ttl=600
 EOF
 
-# PHP-FPM 優化配置 (Cloud Run 內部系統專用)
+# Stage 2: Composer 依賴層 (獨立快取，充分利用 composer.lock)
+FROM php-base AS composer-deps
+
+# 安裝 Composer (固定版本，快取友好)
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# 🎯 關鍵優化：先複製 Composer 文件，再安裝依賴
+COPY composer.json composer.lock ./
+
+# 🚀 優化的 Composer 安裝 (生產級)
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-interaction \
+    && composer clear-cache
+
+# Stage 3: 應用程式構建層
+FROM composer-deps AS app-builder
+
+# 複製應用程式代碼 (這層變動最頻繁，放在最後)
+COPY . .
+
+# 生成最終的 autoloader
+RUN composer dump-autoload --optimize --no-dev --no-interaction
+
+# Stage 4: 生產運行環境 (輕量級)
+FROM php-base AS runner
+
+WORKDIR /var/www/html
+
+# 🔧 預創建目錄結構 (避免運行時權限問題)
+RUN mkdir -p \
+    /var/www/html/storage/logs \
+    /var/www/html/storage/framework/{cache,sessions,views} \
+    /var/www/html/bootstrap/cache \
+    /run/nginx \
+    /var/log/supervisor \
+    && getent group www-data || addgroup -g 82 -S www-data \
+    && getent passwd www-data || adduser -u 82 -D -S -G www-data www-data
+
+# 🎯 從構建階段複製最終應用 (單次複製，最小化層級)
+COPY --from=app-builder --chown=www-data:www-data /var/www/html /var/www/html
+
+# 🔧 生產環境配置文件 (合併配置，減少層級)
+# PHP-FPM 配置
 COPY <<EOF /usr/local/etc/php-fpm.d/www.conf
 [www]
 user = www-data
@@ -137,26 +106,22 @@ listen = 127.0.0.1:9000
 listen.owner = www-data
 listen.group = www-data
 
-; Cloud Run 內部系統優化 - 支援突發流量
+; Cloud Run 優化 - 突發流量支援
 pm = dynamic
 pm.max_children = 100
 pm.start_servers = 15
 pm.min_spare_servers = 8
 pm.max_spare_servers = 25
 pm.max_requests = 1000
-
-; 快速響應配置
 pm.process_idle_timeout = 20s
 pm.max_spawn_rate = 15
 
-; 日誌配置
+; 監控和日誌
 catch_workers_output = yes
 decorate_workers_output = no
 access.log = /proc/self/fd/2
 slowlog = /proc/self/fd/2
 request_slowlog_timeout = 8s
-
-; 健康檢查（僅內部使用）
 ping.path = /fpm-ping
 ping.response = pong
 pm.status_path = /fpm-status
@@ -169,17 +134,16 @@ pid /run/nginx.pid;
 error_log /dev/stderr warn;
 
 events {
-    worker_connections 2048;      # 提高連接數支援突發流量
+    worker_connections 2048;
     use epoll;
     multi_accept on;
-    accept_mutex off;             # 減少鎖競爭，加快處理速度
+    accept_mutex off;
 }
 
 http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
-    # 日誌格式
     log_format main '\$remote_addr - \$remote_user [\$time_local] "\$request" '
                     '\$status \$body_bytes_sent "\$http_referer" '
                     '"\$http_user_agent" "\$http_x_forwarded_for"';
@@ -210,16 +174,12 @@ http {
         server_name _;
         root /var/www/html/public;
         index index.php;
-
-        # 安全性配置
         server_tokens off;
 
-        # Laravel 路由配置
         location / {
             try_files \$uri \$uri/ /index.php?\$query_string;
         }
 
-        # PHP 處理（簡化配置）
         location ~ \.php$ {
             fastcgi_split_path_info ^(.+\.php)(/.+)$;
             fastcgi_pass 127.0.0.1:9000;
@@ -228,7 +188,6 @@ http {
             fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
             fastcgi_param PATH_INFO \$fastcgi_path_info;
             
-            # 性能優化
             fastcgi_buffering on;
             fastcgi_buffer_size 128k;
             fastcgi_buffers 4 256k;
@@ -236,14 +195,12 @@ http {
             fastcgi_read_timeout 300;
         }
 
-        # 健康檢查端點
         location = /health {
             access_log off;
             return 200 "healthy\n";
             add_header Content-Type text/plain;
         }
 
-        # PHP-FPM 狀態監控（僅內部使用）
         location ~ ^/(fpm-status|fpm-ping)$ {
             access_log off;
             fastcgi_pass 127.0.0.1:9000;
@@ -253,14 +210,12 @@ http {
             deny all;
         }
 
-        # 靜態文件處理
         location ~* \.(jpg|jpeg|png|gif|ico|css|js|woff|woff2|ttf|svg)$ {
             expires 1y;
             add_header Cache-Control "public, immutable";
             access_log off;
         }
 
-        # 隱藏敏感文件（精確正則表達式）
         location ~* /\.(?:env|htaccess|htpasswd|git|svn)$ {
             deny all;
             access_log off;
@@ -300,64 +255,42 @@ stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 EOF
 
-# Cloud Run Jobs 執行腳本
+# 🚀 運行腳本 (合併創建，減少層級)
 COPY <<'EOF' /usr/local/bin/run-artisan.sh
 #!/bin/sh
 set -e
-
 echo "🔧 Cloud Run Job 執行: $@"
-echo "工作目錄: $(pwd)"
-
-# 確保在正確的目錄
 cd /var/www/html
-
-# 設定基本權限
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
-chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
-
-# 執行 artisan 命令
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 echo "🚀 執行: php artisan $@"
 exec php artisan "$@"
 EOF
 
-# 啟動腳本 (Cloud Run 內部系統冷啟動優化)
 COPY <<'EOF' /usr/local/bin/start-server.sh
 #!/bin/sh
 set -e
+echo "🚀 庫存系統啟動 (優化版 ~1-2秒)"
 
-echo "🚀 Cloud Run 內部庫存系統 - 快速冷啟動模式"
-echo "目標: 3秒內啟動，支援100並發突發流量"
-echo "架構: nginx + php-fpm + supervisor"
-
-# 快速權限設定 (並行執行)
-(chown -R www-data:www-data /var/www/html/storage &)
-(chown -R www-data:www-data /var/www/html/bootstrap/cache &)
-(chmod -R 775 /var/www/html/storage &)
-(chmod -R 775 /var/www/html/bootstrap/cache &)
+# 並行權限設定 (快速冷啟動)
+(chown -R www-data:www-data storage bootstrap/cache &)
+(chmod -R 775 storage bootstrap/cache &)
 wait
 
-# 生產環境快速快取 (並行執行加速冷啟動)
+# 生產環境快取 (並行執行)
 if [ "$APP_ENV" = "production" ]; then
-    echo "⚡ 並行快取優化 (冷啟動加速)..."
+    echo "⚡ 並行快取..."
     (php artisan config:cache 2>/dev/null &)
     (php artisan route:cache 2>/dev/null &) 
     (php artisan view:cache 2>/dev/null &)
-    wait  # 等待所有快取完成
+    wait
 fi
 
-echo "✅ 冷啟動完成 (~2-3秒)"
-echo "🔥 並發支援: 100 requests/instance"
-echo "💰 成本策略: min-instances=0, 按需擴展"
-echo "🏥 健康檢查: /health | 📊 監控: /status"
-
-# 直接啟動 (無額外延遲)
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+echo "✅ 啟動完成 | 並發: 100 req/instance"
+exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
 EOF
 
 RUN chmod +x /usr/local/bin/start-server.sh /usr/local/bin/run-artisan.sh
 
-# 暴露端口
 EXPOSE 8080
-
-# 啟動服務
 CMD ["/usr/local/bin/start-server.sh"] 

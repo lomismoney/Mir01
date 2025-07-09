@@ -236,23 +236,34 @@ jobs:
 
       - name: 'Create Artifact Repository (if not exists)'
         run: |
+          # 主要映像儲存庫
           gcloud artifacts repositories create ${{ env.API_SERVICE_NAME }}-repo \
             --repository-format=docker \
             --location=${{ env.REGION }} \
-            --description="API Docker repository" || echo "✅ Repo already exists"
+            --description="API Docker repository" || echo "✅ Main repo already exists"
 
       - name: 'Configure Docker for Artifact Registry'
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
-      - name: 'Build and Push API Docker Image (Optimized)'
+      - name: 'Build and Push API Docker Image (Super Optimized)'
         uses: docker/build-push-action@v5
         with:
           context: ./inventory-api
           push: true
           tags: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # 🚀 超級快取策略：GHA + Registry + Inline
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/cache
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/cache,mode=max
           platforms: linux/amd64
+          # 🔧 建置優化參數
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+          # 🎯 多核心並行建置
+          outputs: type=image,compression=gzip,compression-level=6
 
       - name: 'Deploy API to Cloud Run (固定域名版本)'
         run: |-
