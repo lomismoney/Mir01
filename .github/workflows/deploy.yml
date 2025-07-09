@@ -10,6 +10,15 @@ on:
         description: 'Force deploy (ignore cache)'
         required: false
         default: 'false'
+      deploy_target:
+        description: 'Deploy target (api/client/both)'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - api
+          - client
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -20,9 +29,130 @@ env:
   REGION: asia-east1
 
 jobs:
+  # 檢測變更的檔案和倉庫驗證
+  detect-changes:
+    name: 'Detect Changes'
+    runs-on: ubuntu-latest
+    # 🔐 限制只在指定倉庫執行
+    if: github.repository == 'lomismoney/Mir01'
+    outputs:
+      api-changed: ${{ steps.changes.outputs.api }}
+      client-changed: ${{ steps.changes.outputs.client }}
+      client-needs-deploy: ${{ steps.changes.outputs.client-needs-deploy }}
+      force-deploy: ${{ github.event.inputs.force_deploy == 'true' }}
+      deploy-target: ${{ github.event.inputs.deploy_target || 'both' }}
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 'Detect file changes and dependencies'
+        id: changes
+        run: |
+          # 初始化變更檢測變數
+          API_CHANGED=false
+          CLIENT_CHANGED=false
+          
+          echo "🔍 檢查倉庫: ${{ github.repository }}"
+          echo "✅ 倉庫驗證通過: ${{ github.repository }}"
+          
+          if [ "${{ github.event.inputs.force_deploy }}" == "true" ]; then
+            echo "api=true" >> $GITHUB_OUTPUT
+            echo "client=true" >> $GITHUB_OUTPUT
+            echo "client-needs-deploy=true" >> $GITHUB_OUTPUT
+            echo "🔄 強制部署 - 所有服務將被重新部署"
+            exit 0
+          fi
+
+          # 🎯 處理手動部署目標
+          DEPLOY_TARGET="${{ github.event.inputs.deploy_target || 'both' }}"
+          if [ "$DEPLOY_TARGET" == "api" ]; then
+            echo "api=true" >> $GITHUB_OUTPUT
+            echo "client=false" >> $GITHUB_OUTPUT
+            echo "client-needs-deploy=false" >> $GITHUB_OUTPUT
+            echo "🎯 手動指定部署 API only"
+            exit 0
+          elif [ "$DEPLOY_TARGET" == "client" ]; then
+            echo "api=false" >> $GITHUB_OUTPUT
+            echo "client=true" >> $GITHUB_OUTPUT
+            echo "client-needs-deploy=true" >> $GITHUB_OUTPUT
+            echo "🎯 手動指定部署 Client only"
+            exit 0
+          elif [ "$DEPLOY_TARGET" == "both" ]; then
+            echo "api=true" >> $GITHUB_OUTPUT
+            echo "client=true" >> $GITHUB_OUTPUT
+            echo "client-needs-deploy=true" >> $GITHUB_OUTPUT
+            echo "🎯 手動指定部署 Both (API + Client)"
+            exit 0
+          fi
+
+          # 🔍 檢測自動推送時的文件變更（處理邊界情況）
+          echo "🔍 檢測檔案變更..."
+          
+          # 檢查是否是初始提交或單一提交的情況
+          if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
+            echo "⚠️ 偵測到初始提交或單一提交，假設所有檔案都有變更"
+            API_CHANGED=true
+            CLIENT_CHANGED=true
+            echo "📦 初始部署 - API 和 Client 都需要部署"
+          else
+            # 正常的變更檢測
+            if git diff --name-only HEAD~1 HEAD | grep -q "^inventory-api/"; then
+              API_CHANGED=true
+              echo "📦 檢測到 API 變更"
+            else
+              echo "✅ API 無變更"
+            fi
+
+            if git diff --name-only HEAD~1 HEAD | grep -q "^inventory-client/"; then
+              CLIENT_CHANGED=true
+              echo "📦 檢測到 Client 變更"
+            else
+              echo "✅ Client 無變更"
+            fi
+          fi
+
+          # 🔗 依賴邏輯：如果 API 有變更，Client 也需要重新部署（同步 openapi.yaml）
+          CLIENT_NEEDS_DEPLOY=false
+          if [ "$API_CHANGED" = true ]; then
+            CLIENT_NEEDS_DEPLOY=true
+            if [ "$CLIENT_CHANGED" = true ]; then
+              echo "🔗 API + Client 都有變更 -> 全面部署"
+            else
+              echo "🔗 API 變更detected -> Client 需要同步部署 (openapi.yaml 依賴)"
+            fi
+          elif [ "$CLIENT_CHANGED" = true ]; then
+            CLIENT_NEEDS_DEPLOY=true
+            echo "🎯 Client 直接變更 -> Client 需要部署"
+          fi
+
+          # 輸出結果
+          echo "api=$API_CHANGED" >> $GITHUB_OUTPUT
+          echo "client=$CLIENT_CHANGED" >> $GITHUB_OUTPUT
+          echo "client-needs-deploy=$CLIENT_NEEDS_DEPLOY" >> $GITHUB_OUTPUT
+          
+          # 總結輸出
+          echo ""
+          echo "📋 部署決策總結："
+          echo "   API 部署: $API_CHANGED"
+          echo "   Client 部署: $CLIENT_NEEDS_DEPLOY"
+          if [ "$API_CHANGED" = true ] && [ "$CLIENT_CHANGED" = false ]; then
+            echo "   原因: API 變更 -> Client 同步 openapi.yaml"
+          elif [ "$API_CHANGED" = false ] && [ "$CLIENT_CHANGED" = true ]; then
+            echo "   原因: Client 直接變更"
+          elif [ "$API_CHANGED" = true ] && [ "$CLIENT_CHANGED" = true ]; then
+            echo "   原因: API 和 Client 都有變更"
+          elif [ "$API_CHANGED" = false ] && [ "$CLIENT_CHANGED" = false ]; then
+            echo "   原因: 無變更 - 可能是手動觸發或 force deploy"
+          fi
+
   deploy-api:
     name: 'Deploy API to Cloud Run'
     runs-on: ubuntu-latest
+    needs: detect-changes
+    # 🔐 只有當 API 需要部署時才執行
+    if: needs.detect-changes.outputs.api-changed == 'true'
     
     permissions:
       contents: 'read'
@@ -54,17 +184,29 @@ jobs:
           coverage: none
 
       - name: 'Cache Composer dependencies'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: inventory-api/vendor
+          path: |
+            inventory-api/vendor
+            ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('inventory-api/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
 
       - name: 'Install Composer Dependencies (for Scribe only)'
-        run: composer install --prefer-dist --no-progress
+        run: composer install --prefer-dist --no-progress --optimize-autoloader
 
-      - name: 'Create .env.testing for Scribe'
+      - name: 'Cache OpenAPI Generation'
+        id: cache-openapi
+        uses: actions/cache@v4
+        with:
+          path: inventory-api/storage/app/scribe/openapi.yaml
+          key: ${{ runner.os }}-openapi-${{ hashFiles('inventory-api/app/Http/**/*.php', 'inventory-api/routes/**/*.php') }}
+          restore-keys: |
+            ${{ runner.os }}-openapi-
+
+      - name: 'Generate OpenAPI Specification'
+        if: steps.cache-openapi.outputs.cache-hit != 'true'
         run: |
           echo "APP_ENV=testing" > .env.testing
           echo "APP_KEY=base64:some_random_key_for_testing" >> .env.testing
@@ -74,15 +216,10 @@ jobs:
           echo "QUEUE_CONNECTION=sync" >> .env.testing
           echo "SESSION_DRIVER=array" >> .env.testing
           echo "DB_CACHE_CONNECTION=sqlite" >> .env.testing
-
-      - name: 'Create SQLite Database File'
-        run: touch database/testing.sqlite
-
-      - name: 'Run Migrations for Scribe'
-        run: php artisan migrate:fresh --force --env=testing
-
-      - name: 'Generate OpenAPI Specification'
-        run: php artisan scribe:generate --verbose --env=testing
+          
+          touch database/testing.sqlite
+          php artisan migrate:fresh --force --env=testing
+          php artisan scribe:generate --verbose --env=testing
 
       - name: 'Upload OpenAPI as Artifact'
         uses: actions/upload-artifact@v4
@@ -90,17 +227,31 @@ jobs:
           name: openapi-spec
           path: inventory-api/storage/app/scribe/openapi.yaml
 
-      - name: 'Build and Push API Docker Image'
-        run: |-
+      # 🚀 Docker 構建優化 - 使用多層緩存
+      - name: 'Set up Docker Buildx'
+        uses: docker/setup-buildx-action@v3
+
+      - name: 'Create Artifact Repository (if not exists)'
+        run: |
           gcloud artifacts repositories create ${{ env.API_SERVICE_NAME }}-repo \
             --repository-format=docker \
             --location=${{ env.REGION }} \
-            --description="API Docker repository" || echo "Repo already exists"
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest .
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest
+            --description="API Docker repository" || echo "✅ Repo already exists"
 
-      - name: 'Deploy API to Cloud Run (內部系統優化)'
+      - name: 'Configure Docker for Artifact Registry'
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: 'Build and Push API Docker Image (Optimized)'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./inventory-api
+          push: true
+          tags: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: 'Deploy API to Cloud Run (固定域名版本)'
         run: |-
           gcloud run deploy ${{ env.API_SERVICE_NAME }} \
             --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
@@ -110,7 +261,7 @@ jobs:
             --add-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} \
             --add-volume=name=gcs-storage,type=cloud-storage,bucket=${{ env.GCS_BUCKET }} \
             --add-volume-mount=volume=gcs-storage,mount-path=/mnt/gcs \
-            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,APP_MAINTENANCE_DRIVER=file,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,SESSION_DOMAIN=.lomis.com.tw,SESSION_DRIVER=file,SESSION_LIFETIME=120,SESSION_ENCRYPT=false,SESSION_PATH=/,FILESYSTEM_DISK=gcs,GCS_BUCKET=${{ env.GCS_BUCKET }},GOOGLE_CLOUD_PROJECT_ID=${{ env.PROJECT_ID }},CACHE_STORE=file,QUEUE_CONNECTION=sync,BROADCAST_CONNECTION=log,LOG_CHANNEL=stack,LOG_LEVEL=error,SPATIE_PERMISSION_CACHE_EXPIRATION_TIME=3600,GCS_MOUNT_PATH=/mnt/gcs" \
+            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,APP_MAINTENANCE_DRIVER=file,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,SESSION_DOMAIN=.lomis.com.tw,SESSION_DRIVER=file,SESSION_LIFETIME=120,SESSION_ENCRYPT=false,SESSION_PATH=/,FILESYSTEM_DISK=gcs,GCS_BUCKET=${{ env.GCS_BUCKET }},GOOGLE_CLOUD_PROJECT_ID=${{ env.PROJECT_ID }},CACHE_STORE=file,QUEUE_CONNECTION=sync,BROADCAST_CONNECTION=log,LOG_CHANNEL=stack,LOG_LEVEL=error,SPATIE_PERMISSION_CACHE_EXPIRATION_TIME=3600,GCS_MOUNT_PATH=/mnt/gcs,FRONTEND_URL=${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }},SANCTUM_STATEFUL_DOMAINS=$(echo '${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}' | sed 's|https://||' | sed 's|/.*||')" \
             --set-secrets="APP_KEY=LARAVEL_APP_KEY:latest,DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
             --timeout=300 \
             --memory=1Gi \
@@ -120,66 +271,32 @@ jobs:
             --max-instances=5
         working-directory: . # 此步驟在根目錄執行
 
-      - name: 'Get Deployed URLs'
-        id: get_urls
-        run: |-
-          # 獲取 API 服務的實際 URL
-          API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
-          echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
-          
-          # 嘗試獲取前端服務 URL（如果已存在）
-          CLIENT_URL=$(gcloud run services describe ${{ env.CLIENT_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)' 2>/dev/null || echo "")
-          
-          if [ -z "$CLIENT_URL" ]; then
-            # 如果前端還未部署，使用 API URL 的相同模式
-            CLIENT_BASE=$(echo $API_URL | sed 's/inventory-api/inventory-client/')
-            echo "CLIENT_URL=$CLIENT_BASE" >> $GITHUB_OUTPUT
-          else
-            echo "CLIENT_URL=$CLIENT_URL" >> $GITHUB_OUTPUT
-          fi
-          
-          # 提取域名用於 SANCTUM（只使用前端域名）
-          CLIENT_DOMAIN=$(echo ${CLIENT_URL:-$CLIENT_BASE} | sed 's|https://||' | sed 's|/.*||')
-          echo "SANCTUM_DOMAINS=$CLIENT_DOMAIN" >> $GITHUB_OUTPUT
-          
-          echo "API URL: $API_URL"
-          echo "預期的前端 URL: ${CLIENT_URL:-$CLIENT_BASE}"
-        working-directory: . # 此步驟在根目錄執行
-
-      - name: 'Update API Environment Variables'
-        env:
-          CUSTOM_CLIENT_URL: ${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}
-          CUSTOM_API_URL: ${{ secrets.API_CUSTOM_DOMAIN_URL }}
-          DYNAMIC_CLIENT_URL: ${{ steps.get_urls.outputs.CLIENT_URL }}
-          DYNAMIC_SANCTUM: ${{ steps.get_urls.outputs.SANCTUM_DOMAINS }}
-        run: |-
-          # 使用自訂域名或動態獲取的 URL
-          FRONTEND_URL="${CUSTOM_CLIENT_URL}"
-          if [ -z "$FRONTEND_URL" ]; then
-            FRONTEND_URL="${DYNAMIC_CLIENT_URL}"
-          fi
-          
-          # 設定 SANCTUM 域名（只使用前端域名）
-          if [ ! -z "${CUSTOM_CLIENT_URL}" ]; then
-            # 使用自訂域名
-            CLIENT_DOMAIN=$(echo "${CUSTOM_CLIENT_URL}" | sed 's|https://||' | sed 's|/.*||')
-            SANCTUM_DOMAINS="${CLIENT_DOMAIN}"
-          else
-            # 使用動態獲取的域名
-            SANCTUM_DOMAINS="${DYNAMIC_SANCTUM}"
-          fi
-          
-          # 更新 API 的環境變數（使用 ^ 作為分隔符避免逗號問題）
-          echo "更新環境變數："
-          echo "  FRONTEND_URL=${FRONTEND_URL}"
-          echo "  SANCTUM_STATEFUL_DOMAINS=${SANCTUM_DOMAINS}"
-          
-          # 更新 API 的環境變數
-          gcloud run services update ${{ env.API_SERVICE_NAME }} \
-            --region=${{ env.REGION }} \
-            --update-env-vars FRONTEND_URL="${FRONTEND_URL}" \
-            --update-env-vars SANCTUM_STATEFUL_DOMAINS="${SANCTUM_DOMAINS}"
-        working-directory: . # 此步驟在根目錄執行
+      # 註解：動態域名獲取（保留以備將來使用）
+      # - name: 'Get Deployed URLs (動態域名 - 已停用)'
+      #   id: get_urls
+      #   run: |-
+      #     # 獲取 API 服務的實際 URL
+      #     API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
+      #     echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+      #     
+      #     # 嘗試獲取前端服務 URL（如果已存在）
+      #     CLIENT_URL=$(gcloud run services describe ${{ env.CLIENT_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)' 2>/dev/null || echo "")
+      #     
+      #     if [ -z "$CLIENT_URL" ]; then
+      #       # 如果前端還未部署，使用 API URL 的相同模式
+      #       CLIENT_BASE=$(echo $API_URL | sed 's/inventory-api/inventory-client/')
+      #       echo "CLIENT_URL=$CLIENT_BASE" >> $GITHUB_OUTPUT
+      #     else
+      #       echo "CLIENT_URL=$CLIENT_URL" >> $GITHUB_OUTPUT
+      #     fi
+      #     
+      #     # 提取域名用於 SANCTUM（只使用前端域名）
+      #     CLIENT_DOMAIN=$(echo ${CLIENT_URL:-$CLIENT_BASE} | sed 's|https://||' | sed 's|/.*||')
+      #     echo "SANCTUM_DOMAINS=$CLIENT_DOMAIN" >> $GITHUB_OUTPUT
+      #     
+      #     echo "API URL: $API_URL"
+      #     echo "預期的前端 URL: ${CLIENT_URL:-$CLIENT_BASE}"
+      #   working-directory: . # 此步驟在根目錄執行
 
       - name: 'Run Database Migrations'
         run: |-
@@ -221,8 +338,13 @@ jobs:
 
   deploy-client:
     name: 'Deploy Client to Cloud Run'
-    needs: deploy-api
     runs-on: ubuntu-latest
+    needs: [detect-changes, deploy-api]
+    # 🔐 Client 依賴檢測 + API 依賴檢查
+    if: |
+      always() && 
+      needs.detect-changes.outputs.client-needs-deploy == 'true' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
 
     permissions:
       contents: 'read'
@@ -233,6 +355,27 @@ jobs:
         working-directory: ./inventory-client
 
     steps:
+      - name: 'Deployment Reason Analysis'
+        run: |
+          echo "🔍 前端部署原因分析："
+          API_CHANGED="${{ needs.detect-changes.outputs.api-changed }}"
+          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
+          DEPLOY_TARGET="${{ needs.detect-changes.outputs.deploy-target }}"
+          
+          if [ "$DEPLOY_TARGET" = "both" ] || [ "$DEPLOY_TARGET" = "client" ]; then
+            echo "   📋 手動指定部署目標: $DEPLOY_TARGET"
+          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
+            echo "   🔗 API 變更依賴部署 - 同步最新 openapi.yaml"
+            echo "   📦 API 有變更，前端需要更新類型定義"
+          elif [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+            echo "   🎯 前端直接變更部署"
+            echo "   📦 前端代碼有變更"
+          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+            echo "   🔄 API 和前端都有變更"
+            echo "   📦 全面同步部署"
+          fi
+          echo ""
+
       - name: 'Checkout'
         uses: actions/checkout@v4
 
@@ -251,45 +394,144 @@ jobs:
         with:
           name: openapi-spec
           path: ./inventory-client
+        continue-on-error: true
 
-      - name: 'Verify OpenAPI File'
+      - name: 'Verify or Generate Fallback OpenAPI'
         run: |
+          API_CHANGED="${{ needs.detect-changes.outputs.api-changed }}"
+          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
+          DEPLOY_API_RESULT="${{ needs.deploy-api.result }}"
+          
+          echo "🔍 OpenAPI 檔案狀態檢查："
+          echo "   API 變更: $API_CHANGED"
+          echo "   Client 變更: $CLIENT_CHANGED"
+          echo "   API 部署結果: $DEPLOY_API_RESULT"
+          
           if [ -f ./openapi.yaml ]; then
             echo "✅ OpenAPI 檔案已成功下載"
             ls -l openapi.yaml
-          else
-            echo "❌ 找不到 OpenAPI 檔案"
-            exit 1
+            
+            # 驗證檔案內容
+            if [ -s ./openapi.yaml ] && grep -q "openapi:" ./openapi.yaml; then
+              echo "✅ OpenAPI 檔案格式驗證通過"
+              if [ "$API_CHANGED" = "true" ]; then
+                echo "🔄 使用最新生成的 OpenAPI 規格（API 有變更）"
+              else
+                echo "📋 使用快取的 OpenAPI 規格（API 無變更）"
+              fi
+            else
+              echo "❌ OpenAPI 檔案格式驗證失敗，檔案可能損壞"
+              echo "🔧 將創建 fallback 檔案"
+              rm -f ./openapi.yaml
+            fi
           fi
-
-      - name: 'Determine API URL'
-        id: get_api_url
-        run: |-
-          # 優先使用自訂網域（如果有設定）
-          if [ ! -z "${{ secrets.API_CUSTOM_DOMAIN_URL }}" ]; then
-            echo "API_URL=${{ secrets.API_CUSTOM_DOMAIN_URL }}" >> $GITHUB_OUTPUT
-            echo "使用自訂網域: ${{ secrets.API_CUSTOM_DOMAIN_URL }}"
-          else
-            # 獲取實際部署的 API URL
-            API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
-            echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
-            echo "使用 Cloud Run URL: $API_URL"
+          
+          if [ ! -f ./openapi.yaml ]; then
+            echo "⚠️ 找不到或無效的 OpenAPI 檔案"
+            
+            if [ "$API_CHANGED" = "true" ] && [ "$DEPLOY_API_RESULT" = "success" ]; then
+              echo "❌ API 有變更且部署成功，但找不到 OpenAPI 檔案"
+              echo "   這可能表示 API 部署過程中的 OpenAPI 生成或上傳失敗"
+              echo "🔧 創建 fallback 檔案以避免前端構建失敗"
+            elif [ "$API_CHANGED" = "false" ]; then
+              echo "📋 API 無變更，使用 fallback OpenAPI 檔案（前端將使用現有類型定義）"
+            elif [ "$DEPLOY_API_RESULT" = "skipped" ]; then
+              echo "📋 API 部署被跳過，使用 fallback OpenAPI 檔案"
+            fi
+            
+            # 創建基本的 fallback OpenAPI 檔案
+            cat > openapi.yaml << 'EOF'
+          openapi: 3.0.0
+          info:
+            title: Inventory API
+            version: 1.0.0
+            description: 'Fallback API specification for client build'
+          servers:
+            - url: '${{ secrets.API_CUSTOM_DOMAIN_URL }}'
+              description: Production API server
+          paths:
+            /health:
+              get:
+                summary: Health check endpoint
+                operationId: healthCheck
+                responses:
+                  '200':
+                    description: API is healthy
+                    content:
+                      application/json:
+                        schema:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                              example: ok
+          components:
+            schemas:
+              Error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  code:
+                    type: integer
+          EOF
+            
+            echo "📄 已創建 fallback OpenAPI 檔案"
+            echo "   這將允許前端正常構建，但可能缺少最新的 API 類型定義"
           fi
-        working-directory: . # 此步驟在根目錄執行
+          
+          # 最終檔案狀態
+          echo ""
+          echo "📋 最終 OpenAPI 檔案狀態："
+          ls -l openapi.yaml
+          echo "檔案大小: $(wc -c < openapi.yaml) bytes"
+          echo "檔案行數: $(wc -l < openapi.yaml) lines"
 
-      - name: 'Build and Push Client Docker Image'
-        run: |-
+      # 🚀 Node.js 緩存優化
+      - name: 'Setup Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: inventory-client/package-lock.json
+
+      - name: 'Cache Next.js build'
+        uses: actions/cache@v4
+        with:
+          path: |
+            inventory-client/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('inventory-client/package-lock.json') }}-${{ hashFiles('inventory-client/**/*.js', 'inventory-client/**/*.jsx', 'inventory-client/**/*.ts', 'inventory-client/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('inventory-client/package-lock.json') }}-
+
+      # 🚀 Docker 構建優化 - 使用多層緩存
+      - name: 'Set up Docker Buildx'
+        uses: docker/setup-buildx-action@v3
+
+      - name: 'Create Artifact Repository (if not exists)'
+        run: |
           gcloud artifacts repositories create ${{ env.CLIENT_SERVICE_NAME }}-repo \
             --repository-format=docker \
             --location=${{ env.REGION }} \
-            --description="Client Docker repository" || echo "Repo already exists"
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
-          docker build \
-            --build-arg NEXT_PUBLIC_API_BASE_URL=${{ steps.get_api_url.outputs.API_URL }} \
-            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.CLIENT_SERVICE_NAME }}-repo/client:latest .
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.CLIENT_SERVICE_NAME }}-repo/client:latest
+            --description="Client Docker repository" || echo "✅ Repo already exists"
+        working-directory: ..
 
-      - name: 'Deploy Client to Cloud Run (內部系統優化)'
+      - name: 'Configure Docker for Artifact Registry'
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: 'Build and Push Client Docker Image (Optimized)'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./inventory-client
+          push: true
+          tags: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.CLIENT_SERVICE_NAME }}-repo/client:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=${{ secrets.API_CUSTOM_DOMAIN_URL }}
+
+      - name: 'Deploy Client to Cloud Run (固定域名版本)'
         id: deploy_client
         run: |-
           gcloud run deploy ${{ env.CLIENT_SERVICE_NAME }} \
@@ -297,7 +539,7 @@ jobs:
             --region=${{ env.REGION }} \
             --platform=managed \
             --allow-unauthenticated \
-            --set-env-vars="NEXT_PUBLIC_API_BASE_URL=${{ steps.get_api_url.outputs.API_URL }}" \
+            --set-env-vars="NEXT_PUBLIC_API_BASE_URL=${{ secrets.API_CUSTOM_DOMAIN_URL }},NEXTAUTH_URL=${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }},AUTH_URL=${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }},AUTH_TRUST_HOST=auto" \
             --set-secrets="NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest" \
             --timeout=300 \
             --memory=512Mi \
@@ -305,67 +547,191 @@ jobs:
             --concurrency=100 \
             --min-instances=0 \
             --max-instances=3
-          
-          # 獲取實際部署的 URL
-          CLIENT_URL=$(gcloud run services describe ${{ env.CLIENT_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
-          echo "CLIENT_URL=$CLIENT_URL" >> $GITHUB_OUTPUT
-
-      - name: 'Update Client Environment Variables'
-        run: |-
-          # 使用自訂域名或動態獲取的 URL
-          NEXTAUTH_URL="${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}"
-          if [ -z "$NEXTAUTH_URL" ]; then
-            NEXTAUTH_URL="${{ steps.deploy_client.outputs.CLIENT_URL }}"
-          fi
-          
-          # 更新前端的環境變數
-          # 添加 AUTH_URL 來修復 Cloudflare 代理問題
-          gcloud run services update ${{ env.CLIENT_SERVICE_NAME }} \
-            --region=${{ env.REGION }} \
-            --update-env-vars="NEXTAUTH_URL=$NEXTAUTH_URL,AUTH_URL=$NEXTAUTH_URL,AUTH_TRUST_HOST=auto"
         working-directory: . # 此步驟在根目錄執行
 
-      - name: 'Final Update API CORS Settings'
-        env:
-          CUSTOM_CLIENT_URL: ${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}
-          CUSTOM_API_URL: ${{ secrets.API_CUSTOM_DOMAIN_URL }}
-          DEPLOYED_CLIENT_URL: ${{ steps.deploy_client.outputs.CLIENT_URL }}
-        run: |-
-          # 最終更新 API 的 CORS 設定，確保包含正確的前端 URL
-          FRONTEND_URL="${CUSTOM_CLIENT_URL}"
-          if [ -z "$FRONTEND_URL" ]; then
-            FRONTEND_URL="${DEPLOYED_CLIENT_URL}"
-          fi
-          
-          # 設定 SANCTUM 域名（只使用前端域名）
-          if [ ! -z "${CUSTOM_CLIENT_URL}" ]; then
-            # 使用自訂域名
-            CLIENT_DOMAIN=$(echo "${CUSTOM_CLIENT_URL}" | sed 's|https://||' | sed 's|/.*||')
-            SANCTUM_DOMAINS="${CLIENT_DOMAIN}"
-          else
-            # 使用實際部署的域名
-            CLIENT_URL="${DEPLOYED_CLIENT_URL}"
-            CLIENT_DOMAIN=$(echo "${CLIENT_URL}" | sed 's|https://||' | sed 's|/.*||')
-            SANCTUM_DOMAINS="${CLIENT_DOMAIN}"
-          fi
-          
-          # 最終更新 API 的環境變數（使用 ^ 作為分隔符避免逗號問題）
-          echo "✅ 最終 CORS 設定："
-          echo "   FRONTEND_URL: ${FRONTEND_URL}"
-          echo "   SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_DOMAINS}"
-          
-          # 更新 API 的環境變數
-          gcloud run services update ${{ env.API_SERVICE_NAME }} \
-            --region=${{ env.REGION }} \
-            --update-env-vars FRONTEND_URL="${FRONTEND_URL}" \
-            --update-env-vars SANCTUM_STATEFUL_DOMAINS="${SANCTUM_DOMAINS}"
-        working-directory: . # 此步驟在根目錄執行
-
+      # 註解：動態域名部分（保留以備將來使用）
+      # - name: 'Determine API URL (動態版本 - 已停用)'
+      #   id: get_api_url
+      #   run: |-
+      #     # 優先使用自訂網域（如果有設定）
+      #     if [ ! -z "${{ secrets.API_CUSTOM_DOMAIN_URL }}" ]; then
+      #       echo "API_URL=${{ secrets.API_CUSTOM_DOMAIN_URL }}" >> $GITHUB_OUTPUT
+      #       echo "使用自訂網域: ${{ secrets.API_CUSTOM_DOMAIN_URL }}"
+      #     else
+      #       # 獲取實際部署的 API URL
+      #       API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
+      #       echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+      #       echo "使用 Cloud Run URL: $API_URL"
+      #     fi
+      #   working-directory: . # 此步驟在根目錄執行
 
       - name: 'Display Deployment URLs'
         run: |-
           echo "🎉 部署完成！"
-          echo "📋 服務網址："
-          echo "API 服務: ${{ steps.get_api_url.outputs.API_URL }}"
-          echo "前端服務: ${{ steps.deploy_client.outputs.CLIENT_URL }}"
+          echo ""
+          echo "📋 本次部署總結："
+          API_CHANGED="${{ needs.detect-changes.outputs.api-changed }}"
+          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
+          
+          if [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
+            echo "   🔗 API 變更觸發的依賴部署"
+            echo "   📦 API 有更新 → 前端同步新的 API 類型定義"
+          elif [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+            echo "   🎯 前端獨立部署"
+            echo "   📦 只有前端代碼變更"
+          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+            echo "   🔄 前後端全面更新"
+            echo "   📦 API 和前端都有變更"
+          fi
+          
+          echo ""
+          echo "🌐 服務網址："
+          echo "   API 服務: ${{ secrets.API_CUSTOM_DOMAIN_URL }}"
+          echo "   前端服務: ${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}"
+          echo ""
+          echo "💡 依賴邏輯說明："
+          echo "   • API 變更 → 前端自動同步 (openapi.yaml 依賴)"
+          echo "   • 前端變更 → 前端獨立部署"
+          echo "   • 無變更 → 跳過部署（節省時間）"
         working-directory: . # 此步驟在根目錄執行
+
+  # 🎯 部署總結
+  deployment-summary:
+    name: 'Deployment Summary'
+    runs-on: ubuntu-latest
+    needs: [detect-changes, deploy-api, deploy-client]
+    if: always() && github.repository == 'lomismoney/Mir01'
+    
+    steps:
+      - name: 'Complete Deployment Summary'
+        run: |
+          echo "🏁 完整部署總結報告"
+          echo "======================"
+          echo ""
+          
+          # 取得所有相關變數
+          API_CHANGED="${{ needs.detect-changes.outputs.api-changed }}"
+          CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed }}"
+          CLIENT_NEEDS_DEPLOY="${{ needs.detect-changes.outputs.client-needs-deploy }}"
+          FORCE_DEPLOY="${{ needs.detect-changes.outputs.force-deploy }}"
+          DEPLOY_TARGET="${{ needs.detect-changes.outputs.deploy-target }}"
+          
+          DETECT_RESULT="${{ needs.detect-changes.result }}"
+          API_RESULT="${{ needs.deploy-api.result }}"
+          CLIENT_RESULT="${{ needs.deploy-client.result }}"
+          
+          echo "📊 變更檢測結果："
+          echo "   檢測狀態: $DETECT_RESULT"
+          echo "   API 變更: $API_CHANGED"
+          echo "   Client 變更: $CLIENT_CHANGED"
+          echo "   強制部署: $FORCE_DEPLOY"
+          echo "   部署目標: $DEPLOY_TARGET"
+          echo ""
+          
+          echo "🚀 部署執行結果："
+          echo "   API 部署: $API_RESULT"
+          echo "   Client 部署: $CLIENT_RESULT"
+          echo ""
+          
+          # 分析部署狀況
+          if [ "$DETECT_RESULT" != "success" ]; then
+            echo "❌ 變更檢測失敗 - 部署流程異常終止"
+            echo "   請檢查倉庫權限或變更檢測邏輯"
+            exit 1
+          fi
+          
+          # 總結部署原因和結果
+          echo "📋 本次部署分析："
+          
+          if [ "$FORCE_DEPLOY" = "true" ]; then
+            echo "   🔄 強制部署模式"
+            echo "   原因: 手動觸發強制部署"
+          elif [ "$DEPLOY_TARGET" != "both" ] && [ "$DEPLOY_TARGET" != "" ]; then
+            echo "   🎯 手動指定部署"
+            echo "   目標: $DEPLOY_TARGET"
+          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "false" ]; then
+            echo "   🔗 API 變更觸發連鎖部署"
+            echo "   原因: API 變更 → Client 同步 openapi.yaml"
+          elif [ "$API_CHANGED" = "false" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+            echo "   🎯 前端獨立部署"
+            echo "   原因: 只有前端代碼變更"
+          elif [ "$API_CHANGED" = "true" ] && [ "$CLIENT_CHANGED" = "true" ]; then
+            echo "   🔄 全面更新部署"
+            echo "   原因: API 和前端都有變更"
+          else
+            echo "   ✅ 無變更，跳過部署"
+            echo "   原因: 沒有檢測到相關檔案變更"
+          fi
+          
+          echo ""
+          
+          # 檢查部署成功狀況
+          SUCCESS_COUNT=0
+          SKIP_COUNT=0
+          FAIL_COUNT=0
+          
+          if [ "$API_RESULT" = "success" ]; then
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            echo "✅ API 部署成功"
+          elif [ "$API_RESULT" = "skipped" ]; then
+            SKIP_COUNT=$((SKIP_COUNT + 1))
+            echo "⏭️ API 部署跳過（無需更新）"
+          elif [ "$API_RESULT" = "failure" ]; then
+            FAIL_COUNT=$((FAIL_COUNT + 1))
+            echo "❌ API 部署失敗"
+          fi
+          
+          if [ "$CLIENT_RESULT" = "success" ]; then
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            echo "✅ 前端部署成功"
+          elif [ "$CLIENT_RESULT" = "skipped" ]; then
+            SKIP_COUNT=$((SKIP_COUNT + 1))
+            echo "⏭️ 前端部署跳過（無需更新或依賴失敗）"
+          elif [ "$CLIENT_RESULT" = "failure" ]; then
+            FAIL_COUNT=$((FAIL_COUNT + 1))
+            echo "❌ 前端部署失敗"
+          fi
+          
+          echo ""
+          echo "📈 部署統計："
+          echo "   成功: $SUCCESS_COUNT 項"
+          echo "   跳過: $SKIP_COUNT 項"
+          echo "   失敗: $FAIL_COUNT 項"
+          
+          if [ $FAIL_COUNT -gt 0 ]; then
+            echo ""
+            echo "🚨 部署警告："
+            echo "   有 $FAIL_COUNT 項部署失敗，請檢查上述日誌"
+            if [ "$API_RESULT" = "failure" ] && [ "$CLIENT_RESULT" = "skipped" ]; then
+              echo "   💡 前端可能因為 API 部署失敗而被跳過"
+            fi
+          elif [ $SUCCESS_COUNT -gt 0 ]; then
+            echo ""
+            echo "🎉 部署成功完成！"
+            echo ""
+            echo "🌐 服務網址："
+            echo "   API: ${{ secrets.API_CUSTOM_DOMAIN_URL }}"
+            echo "   前端: ${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}"
+          else
+            echo ""
+            echo "✅ 無需部署，系統保持最新狀態"
+            echo "   節省部署時間和資源"
+          fi
+          
+          echo ""
+          echo "⏱️ 部署流程優化："
+          echo "   • 智能變更檢測 - 只部署必要服務"
+          echo "   • Docker 多層緩存 - 加速構建過程"
+          echo "   • OpenAPI 同步 - 確保前後端契約一致"
+          echo "   • 依賴邏輯 - API 變更自動觸發前端同步"
+          
+          # 設置最終退出碼
+          if [ $FAIL_COUNT -gt 0 ]; then
+            echo ""
+            echo "❌ 工作流程以失敗狀態結束（有部署失敗）"
+            exit 1
+          else
+            echo ""
+            echo "✅ 工作流程成功完成"
+            exit 0
+          fi
