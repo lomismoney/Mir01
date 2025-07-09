@@ -24,7 +24,7 @@ class CreateRefundRequest extends FormRequest
     {
         // 假設所有已驗證的使用者都可以創建退款
         // 實際權限檢查可以在控制器或政策中進行
-        return auth()->check();
+        return $this->user() !== null;
     }
 
     /**
@@ -257,6 +257,14 @@ class CreateRefundRequest extends FormRequest
                         'quantity' => 1,
                     ],
                 ],
+            ],
+            'items.*.order_item_id' => [
+                'description' => '要退款的訂單項目 ID',
+                'example' => 1,
+            ],
+            'items.*.quantity' => [
+                'description' => '退款數量',
+                'example' => 2,
             ],
         ];
     }

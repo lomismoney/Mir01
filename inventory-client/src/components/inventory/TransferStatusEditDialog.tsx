@@ -102,7 +102,7 @@ export function TransferStatusEditDialog({
 
     updateStatusMutation.mutate(
       {
-        id: transfer.id!,
+        id: Number(transfer.id!),
         status: data.status,
         notes: data.notes,
       },

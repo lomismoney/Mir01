@@ -1,108 +1,114 @@
-import { auth } from "../auth";
-import { NextResponse } from "next/server";
+import { auth } from '../auth'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 /**
- * 高性能認證中間件（第五階段：中間件優化版本）
+ * 安全的 Host 驗證函數
  * 
- * 🚀 核心性能優化：
- * 1. 精確路由匹配 - 減少不必要的認證檢查
- * 2. 智能重定向策略 - 避免多次重定向循環
- * 3. 靜態資源快速通道 - 零延遲處理靜態檔案
- * 4. 邊緣運算最佳化 - 充分利用 Edge Runtime 性能
- * 5. 網絡請求最小化 - 減少認證相關的網絡開銷
+ * 檢查請求的 host 是否為可信任的域名
+ */
+function isValidHost(host: string): boolean {
+  // 🔧 增強的本地開發環境檢測
+  const isLocalDevelopment = 
+    process.env.NODE_ENV === 'development' ||           // 明確設定為開發環境
+    host.includes('localhost') ||                        // localhost 域名
+    host.includes('127.0.0.1') ||                       // 本地 IP
+    host.startsWith('localhost:') ||                     // 帶端口的 localhost
+    host.startsWith('127.0.0.1:') ||                    // 帶端口的本地 IP
+    /^localhost:\d+$/.test(host) ||                      // localhost:端口格式
+    /^127\.0\.0\.1:\d+$/.test(host);                     // IP:端口格式
+
+  // 如果是本地開發環境，直接允許
+  if (isLocalDevelopment) {
+    return true;
+  }
+
+  // 生產環境的驗證邏輯
+  // 從 NEXTAUTH_URL 取得允許的域名
+  const nextAuthUrl = process.env.NEXTAUTH_URL;
+  if (nextAuthUrl) {
+    try {
+      const allowedHost = new URL(nextAuthUrl).hostname;
+      if (host === allowedHost) {
+        return true;
+      }
+    } catch (error) {
+      console.warn('無法解析 NEXTAUTH_URL:', nextAuthUrl);
+    }
+  }
+
+  // 允許的自訂域名
+  const allowedCustomDomains = [
+    'internal.lomis.com.tw',
+    'api.lomis.com.tw',
+  ];
+
+  if (allowedCustomDomains.includes(host)) {
+    return true;
+  }
+
+  // Google Cloud Run 域名模式匹配
+  const cloudRunPatterns = [
+    /^inventory-client-[a-z0-9]+-[a-z0-9-]+\.a\.run\.app$/,  // 標準 Cloud Run URL
+    /^inventory-client--[a-z0-9-]+\.a\.run\.app$/,           // 內部路由 URL
+    /^.*\.run\.app$/,                                        // 通用 Cloud Run 域名
+  ];
+
+  const isValidCloudRunHost = cloudRunPatterns.some(pattern => pattern.test(host));
+  
+  // 記錄允許的 Cloud Run hosts（用於監控）
+  if (isValidCloudRunHost) {
+    console.log(`✅ 允許 Cloud Run host: ${host}`);
+  }
+
+  return isValidCloudRunHost;
+}
+
+/**
+ * 結合 Host 驗證和認證的中間件
  * 
- * 🎯 專為解決「中間件開銷」問題設計：
- * - 消除冗餘的認證檢查
- * - 優化公開路由處理
- * - 智能快取友好設計
- * - 錯誤處理性能優化
- * 
- * 技術亮點：
- * - 使用 NextResponse.next() 最小化處理開銷
- * - 路徑匹配算法優化
- * - 重定向邏輯簡化
+ * 1. 首先檢查 host 是否可信任
+ * 2. 然後讓 Auth.js 處理認證邏輯
  */
 export default auth((req) => {
-  const { nextUrl } = req;
-  const pathname = nextUrl.pathname;
-  const isLoggedIn = !!req.auth;
+  const host = req.headers.get('host') || '';
+  const forwardedProto = req.headers.get('x-forwarded-proto');
   
-  // 🚀 第一層優化：靜態資源和 API 路由快速通道
-  // 這些路由完全跳過認證檢查，實現零延遲
-  if (
-    pathname.startsWith('/_next') ||      // Next.js 內部資源
-    pathname.startsWith('/api') ||        // API 路由（有自己的認證）
-    pathname.includes('.') ||             // 所有帶副檔名的靜態檔案
-    pathname === '/favicon.ico' ||        // 網站圖標
-    pathname === '/robots.txt' ||         // 搜尋引擎爬蟲檔案
-    pathname === '/manifest.json'         // PWA 清單檔案
-  ) {
-    return NextResponse.next();
+  // 第一層：Host 安全驗證
+  if (!isValidHost(host)) {
+    console.warn(`🚫 拒絕不信任的 host: ${host}`);
+    console.warn(`   環境: NODE_ENV=${process.env.NODE_ENV}`);
+    console.warn(`   NEXTAUTH_URL: ${process.env.NEXTAUTH_URL}`);
+    return new NextResponse('Forbidden: Invalid host', { status: 403 });
   }
 
-  // 🎯 第二層優化：精確的公開路由處理
-  // 定義明確的公開路由清單，避免模糊匹配
-  const publicRoutes = ['/login'];
-  const isPublicRoute = publicRoutes.includes(pathname);
-
-  // 🔥 第三層優化：智能登入頁面邏輯（與 Auth.js 修復相容）
-  if (pathname === '/login') {
-    if (isLoggedIn) {
-      // 🔧 修復：已登入用戶訪問登入頁 → 重定向到儀表板
-      // 由於 Auth.js 的 authorized 回調已簡化，這裡需要處理重定向
-      return NextResponse.redirect(new URL('/dashboard', nextUrl));
-    }
-    // 未登入用戶訪問登入頁 → 允許
-    return NextResponse.next();
+  // 🔧 處理 Cloudflare 的 HTTP/HTTPS 問題
+  // 如果通過 Cloudflare 代理，檢查 x-forwarded-proto
+  if (forwardedProto === 'http' && process.env.NODE_ENV === 'production') {
+    // 在生產環境中，如果請求是 HTTP，重定向到 HTTPS
+    const httpsUrl = new URL(req.url);
+    httpsUrl.protocol = 'https:';
+    return NextResponse.redirect(httpsUrl);
   }
 
-  // ⚡ 第四層優化：根路徑智能處理
-  if (pathname === '/') {
-    if (isLoggedIn) {
-      // 已登入用戶訪問根路徑 → 重定向到儀表板
-      return NextResponse.redirect(new URL('/dashboard', nextUrl));
-    } else {
-      // 未登入用戶訪問根路徑 → 重定向到登入頁
-      return NextResponse.redirect(new URL('/login', nextUrl));
-    }
-  }
-
-  // 🛡️ 第五層優化：受保護路由的精簡檢查
-  if (!isLoggedIn && !isPublicRoute) {
-    // 未登入用戶訪問受保護路由 → 重定向到登入頁
-    return NextResponse.redirect(new URL('/login', nextUrl));
-  }
-
-  // 🎊 最終層：允許通過，最小化處理開銷
+  // 第二層：Auth.js 認證邏輯
+  // 這裡的認證邏輯由 auth.ts 中的 authorized 回調處理：
+  // - 公開路由（如 /login）允許訪問
+  // - 受保護路由需要登入，未登入會自動重定向到 /login
+  
+  // 如果到達這裡，表示 host 有效且認證已通過
   return NextResponse.next();
-});
+})
 
-/**
- * 中間件匹配器配置（高性能版本）
- * 
- * 🚀 優化策略：
- * 1. 更精確的排除模式 - 減少中間件調用次數
- * 2. 性能友好的正則表達式 - 降低匹配開銷
- * 3. 靜態資源完全跳過 - 零中間件開銷
- * 
- * 排除項目（完全不經過中間件）：
- * - /_next/* - Next.js 所有內部資源和靜態檔案
- * - /api/* - API 路由（Laravel 後端處理認證）
- * - 所有帶副檔名的檔案 (*.js, *.css, *.png, *.ico 等)
- * 
- * 包含項目（需要認證檢查）：
- * - 所有頁面路由 (/dashboard, /users, /products 等)
- * - 根路徑 (/)
- * - 登入頁面 (/login) - 需要重定向邏輯
- */
 export const config = {
   matcher: [
     /*
-     * 匹配所有路徑，除了：
-     * - /_next (Next.js 內部檔案)
-     * - /api (API 路由)
-     * - 所有帶副檔名的檔案
+     * 匹配所有請求路徑，除了：
+     * - api/auth (NextAuth.js 路由)
+     * - _next/static (靜態檔案)
+     * - _next/image (圖片優化)
+     * - favicon.ico (網站圖示)
      */
-    '/((?!_next|api|.*\\.).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
   ],
-}; 
+} 

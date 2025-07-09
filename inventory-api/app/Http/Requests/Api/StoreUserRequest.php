@@ -133,6 +133,14 @@ class StoreUserRequest extends FormRequest
                 'example' => 'password123',
                 'required' => true,
             ],
+            'roles' => [
+                'description' => '用戶角色陣列',
+                'example' => ['admin', 'staff'],
+            ],
+            'roles.*' => [
+                'description' => '用戶角色，必須是有效的系統角色',
+                'example' => 'admin',
+            ],
             'role' => [
                 'description' => '用戶角色，必須是 admin 或 viewer',
                 'example' => 'admin',

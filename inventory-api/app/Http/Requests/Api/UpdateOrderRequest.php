@@ -88,28 +88,28 @@ class UpdateOrderRequest extends FormRequest
     {
         return [
             'customer_id' => [
-                'description' => '客戶 ID',
+                'description' => '客戶ID',
                 'example' => 1,
             ],
             'shipping_status' => [
-                'description' => '運送狀態（pending: 待處理, processing: 處理中, shipped: 已出貨, delivered: 已送達）',
+                'description' => '運送狀態',
                 'example' => 'pending',
             ],
             'payment_status' => [
-                'description' => '付款狀態（pending: 待付款, paid: 已付款, failed: 付款失敗, refunded: 已退款）',
+                'description' => '付款狀態',
                 'example' => 'pending',
             ],
             'shipping_fee' => [
                 'description' => '運費',
-                'example' => 100,
+                'example' => 100.0,
             ],
             'tax' => [
-                'description' => '稅額',
-                'example' => 500,
+                'description' => '稅金',
+                'example' => 50.0,
             ],
             'discount_amount' => [
                 'description' => '折扣金額',
-                'example' => 200,
+                'example' => 0.0,
             ],
             'payment_method' => [
                 'description' => '付款方式',
@@ -124,20 +124,28 @@ class UpdateOrderRequest extends FormRequest
                 'example' => '台北市信義區信義路五段7號',
             ],
             'customer_address_id' => [
-                'description' => '客戶地址 ID',
+                'description' => '客戶地址ID',
                 'example' => 1,
             ],
             'notes' => [
-                'description' => '訂單備註',
-                'example' => '請小心處理',
+                'description' => '備註',
+                'example' => '請小心輕放',
             ],
             'po_number' => [
-                'description' => '採購單號',
+                'description' => '採購訂單號',
                 'example' => 'PO-2025-001',
             ],
             'reference_number' => [
-                'description' => '參考編號',
-                'example' => 'REF-2025-001',
+                'description' => '參考號碼',
+                'example' => 'REF-123',
+            ],
+            'subtotal' => [
+                'description' => '小計金額',
+                'example' => 5000.0,
+            ],
+            'grand_total' => [
+                'description' => '總金額',
+                'example' => 5250.0,
             ],
             'items' => [
                 'description' => '訂單項目陣列',
@@ -152,8 +160,69 @@ class UpdateOrderRequest extends FormRequest
                         'cost' => 800,
                         'tax_rate' => 5,
                         'discount_amount' => 100,
+                        'custom_product_name' => '訂製辦公桌',
+                        'custom_specifications' => '{"寬度": "180cm", "高度": "75cm"}',
+                        'custom_product_image' => 'https://example.com/image.jpg',
+                        'custom_product_category' => '辦公家具',
+                        'custom_product_brand' => '自訂品牌',
                     ],
                 ],
+            ],
+            'items.*.id' => [
+                'description' => '訂單項目ID（用於更新現有項目）',
+                'example' => 1,
+            ],
+            'items.*.product_variant_id' => [
+                'description' => '商品變體ID（訂製商品可為空）',
+                'example' => 1,
+            ],
+            'items.*.is_stocked_sale' => [
+                'description' => '是否為庫存銷售',
+                'example' => true,
+            ],
+            'items.*.status' => [
+                'description' => '項目狀態',
+                'example' => 'pending',
+            ],
+            'items.*.quantity' => [
+                'description' => '數量',
+                'example' => 2,
+            ],
+            'items.*.price' => [
+                'description' => '單價',
+                'example' => 1000.0,
+            ],
+            'items.*.cost' => [
+                'description' => '成本價',
+                'example' => 800.0,
+            ],
+            'items.*.tax_rate' => [
+                'description' => '稅率（百分比）',
+                'example' => 5.0,
+            ],
+            'items.*.discount_amount' => [
+                'description' => '折扣金額',
+                'example' => 100.0,
+            ],
+            'items.*.custom_product_name' => [
+                'description' => '訂製商品名稱',
+                'example' => '訂製辦公桌',
+            ],
+            'items.*.custom_specifications' => [
+                'description' => '訂製規格（JSON 格式）',
+                'example' => '{"寬度": "180cm", "高度": "75cm"}',
+            ],
+            'items.*.custom_product_image' => [
+                'description' => '訂製商品圖片URL',
+                'example' => 'https://example.com/image.jpg',
+            ],
+            'items.*.custom_product_category' => [
+                'description' => '訂製商品分類',
+                'example' => '辦公家具',
+            ],
+            'items.*.custom_product_brand' => [
+                'description' => '訂製商品品牌',
+                'example' => '自訂品牌',
             ],
         ];
     }

@@ -96,24 +96,51 @@ class UpdateProductRequest extends FormRequest
                 'description' => '商品的完整名稱。',
                 'example' => '高階人體工學辦公椅',
             ],
-            'sku' => [
-                'description' => '商品的唯一庫存單位編號 (SKU)。',
-                'example' => 'CHAIR-ERG-001',
-            ],
             'description' => [
                 'description' => '商品的詳細描述。',
                 'example' => '具備可調節腰靠和 4D 扶手。',
             ],
-            'selling_price' => [
-                'description' => '商品的銷售價格。',
-                'example' => 399.99,
-            ],
-            'cost_price' => [
-                'description' => '商品的成本價格。',
-                'example' => 150.00,
-            ],
             'category_id' => [
                 'description' => '商品所屬分類的 ID。可為空值表示不屬於任何分類。',
+                'example' => 1,
+            ],
+            'attributes' => [
+                'description' => '商品使用的屬性 ID 陣列（如顏色、尺寸等）。',
+                'example' => [1, 2],
+            ],
+            'attributes.*' => [
+                'description' => '屬性 ID，必須存在於系統中。',
+                'example' => 1,
+            ],
+            'variants' => [
+                'description' => '商品變體陣列，每個變體代表一種屬性組合。',
+                'example' => [
+                    [
+                        'id' => 1,
+                        'sku' => 'CHAIR-ERG-RED-L',
+                        'price' => 399.99,
+                        'attribute_value_ids' => [1, 3]
+                    ]
+                ],
+            ],
+            'variants.*.id' => [
+                'description' => '變體 ID（更新現有變體時提供）。',
+                'example' => 1,
+            ],
+            'variants.*.sku' => [
+                'description' => '變體的唯一庫存單位編號。',
+                'example' => 'CHAIR-ERG-RED-L',
+            ],
+            'variants.*.price' => [
+                'description' => '變體的價格。',
+                'example' => 399.99,
+            ],
+            'variants.*.attribute_value_ids' => [
+                'description' => '變體對應的屬性值 ID 陣列。',
+                'example' => [1, 3],
+            ],
+            'variants.*.attribute_value_ids.*' => [
+                'description' => '屬性值 ID，必須存在於系統中。',
                 'example' => 1,
             ],
         ];

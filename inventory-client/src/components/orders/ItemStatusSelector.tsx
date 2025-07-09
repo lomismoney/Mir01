@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Loader2, ChevronDown } from 'lucide-react';
+import { Loader2, Clock, Package, Truck, CheckCircle } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -30,9 +30,8 @@ interface ItemStatusSelectorProps {
  * 訂單項目狀態選擇器組件
  * 
  * 提供訂單項目狀態的選擇和更新功能，支援：
- * - 下拉選單狀態選擇
+ * - 一體化徽章設計
  * - 載入狀態視覺反饋
- * - 當前狀態 Badge 顯示
  * - 樂觀更新支援
  * 
  * @component
@@ -46,15 +45,45 @@ export function ItemStatusSelector({
 }: ItemStatusSelectorProps): React.ReactElement {
   
   /**
-   * 可用的訂單項目狀態選項
+   * 可用的訂單項目狀態選項配置
    * 對應後端 UpdateOrderItemStatusRequest 驗證規則
    */
   const statusOptions = [
-    { value: '待處理', label: '待處理', variant: 'outline' as const },
-    { value: '已叫貨', label: '已叫貨', variant: 'secondary' as const },
-    { value: '已出貨', label: '已出貨', variant: 'default' as const },
-    { value: '完成', label: '完成', variant: 'success' as const },
+    { 
+      value: '待處理', 
+      label: '待處理', 
+      variant: 'outline' as const,
+      icon: Clock
+    },
+    { 
+      value: '已叫貨', 
+      label: '已叫貨', 
+      variant: 'secondary' as const,
+      icon: Package
+    },
+    { 
+      value: '已出貨', 
+      label: '已出貨', 
+      variant: 'default' as const,
+      icon: Truck
+    },
+    { 
+      value: '完成', 
+      label: '完成', 
+      variant: 'success' as const,
+      icon: CheckCircle
+    },
   ];
+
+  /**
+   * 獲取當前狀態的徽章配置
+   * 
+   * @param {string} status - 狀態值
+   * @returns {object} 狀態配置對象
+   */
+  const getCurrentStatusConfig = (status: string) => {
+    return statusOptions.find(option => option.value === status) || statusOptions[0];
+  };
 
   /**
    * 處理狀態變更事件
@@ -67,73 +96,59 @@ export function ItemStatusSelector({
     }
   };
 
-  /**
-   * 根據狀態值獲取對應的 Badge variant
-   * 
-   * @param {string} status - 狀態值
-   * @returns {string} Badge variant
-   */
-  const getStatusVariant = (status: string) => {
-    const option = statusOptions.find(opt => opt.value === status);
-    return option?.variant || 'outline';
-  };
-
-  // 如果正在載入，顯示載入狀態的 Badge
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-2">
-        <Badge 
-          variant="secondary" 
-          className="whitespace-nowrap animate-pulse"
-        >
-          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-          更新中...
-        </Badge>
-      </div>
-    );
-  }
+  const currentConfig = getCurrentStatusConfig(item.status);
 
   return (
-    <div className="flex items-center gap-2">
-      {/* 當前狀態 Badge */}
-      <Badge 
-        variant={getStatusVariant(item.status)}
-        className="whitespace-nowrap text-xs"
-      >
-        {item.status}
-      </Badge>
-      
-      {/* 狀態選擇下拉選單 */}
+    <div className="flex items-center justify-center">
+      {/* 一體化狀態選擇器 */}
       <Select
         value={item.status}
         onValueChange={handleStatusChange}
         disabled={isLoading}
       >
-        <SelectTrigger 
-          size="sm" 
-          className="w-[100px] h-7 text-xs border-dashed border-muted-foreground/40 hover:border-muted-foreground/80 transition-colors"
-        >
-          <SelectValue placeholder="選擇狀態" />
-          <ChevronDown className="h-3 w-3 opacity-50" />
+        <SelectTrigger className="w-fit h-auto border-none shadow-none p-0 bg-transparent hover:bg-transparent focus:ring-0 focus:ring-offset-0 dark:bg-transparent dark:hover:bg-transparent dark:border-none dark:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-none data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=open]:border-none">
+          {isLoading ? (
+            <Badge variant="outline" className="gap-1.5 pointer-events-none text-xs">
+              <Loader2 className="h-3 w-3 animate-spin text-current" />
+              更新中
+            </Badge>
+          ) : (
+            <Badge 
+              variant={currentConfig.variant}
+              className="cursor-pointer hover:opacity-80 transition-opacity gap-1.5 text-xs"
+            >
+              <currentConfig.icon className="h-3 w-3 shrink-0 text-current" />
+              {currentConfig.label}
+            </Badge>
+          )}
         </SelectTrigger>
         
-        <SelectContent align="center" className="min-w-[120px]">
-          {statusOptions.map((option) => (
-            <SelectItem 
-              key={option.value} 
-              value={option.value}
-              className="text-xs cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Badge 
-                  variant={option.variant}
-                  className="text-xs scale-90"
-                >
-                  {option.label}
-                </Badge>
-              </div>
-            </SelectItem>
-          ))}
+        <SelectContent 
+          align="center" 
+          className="min-w-fit"
+        >
+          {statusOptions.map((option) => {
+            const Icon = option.icon;
+            const isSelected = option.value === item.status;
+            
+            return (
+              <SelectItem 
+                key={option.value} 
+                value={option.value}
+                className="cursor-pointer py-1.5 pl-2 pr-12 focus:bg-accent/50"
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <Badge 
+                    variant={option.variant}
+                    className="pointer-events-none text-xs"
+                  >
+                    {option.label}
+                  </Badge>
+                </div>
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </Select>
     </div>

@@ -61,6 +61,10 @@ class StoreProductRequest extends FormRequest
                 'description' => 'SPU 商品使用的屬性 ID 陣列（如顏色、尺寸等）。',
                 'example' => [1, 2],
             ],
+            'attributes.*' => [
+                'description' => '屬性 ID，必須存在於系統中。',
+                'example' => 1,
+            ],
             'variants' => [
                 'description' => 'SKU 變體陣列，每個變體代表一種屬性組合。',
                 'example' => [
@@ -87,6 +91,10 @@ class StoreProductRequest extends FormRequest
             'variants.*.attribute_value_ids' => [
                 'description' => '單一 SKU 變體對應的屬性值 ID 陣列。',
                 'example' => [1, 3],
+            ],
+            'variants.*.attribute_value_ids.*' => [
+                'description' => '屬性值 ID，必須存在於系統中。',
+                'example' => 1,
             ],
         ];
     }

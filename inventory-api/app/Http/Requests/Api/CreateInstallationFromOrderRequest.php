@@ -120,12 +120,20 @@ class CreateInstallationFromOrderRequest extends FormRequest
                 'description' => '需要安裝的訂單項目 ID 列表',
                 'example' => [1, 2],
             ],
+            'order_item_ids.*' => [
+                'description' => '訂單項目 ID，必須存在於指定的訂單中',
+                'example' => 1,
+            ],
             'specifications' => [
                 'description' => '每個訂單項目的特定安裝規格 (可選)',
                 'example' => [
                     '1' => '安裝在主臥門',
                     '2' => '安裝在後門，需要加裝防水盒',
                 ]
+            ],
+            'specifications.*' => [
+                'description' => '特定訂單項目的安裝規格說明',
+                'example' => '安裝在主臥門',
             ],
         ];
     }

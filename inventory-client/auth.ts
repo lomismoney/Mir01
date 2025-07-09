@@ -1,10 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import createClient from "openapi-fetch";
-import type { paths } from "@/types/api";
 
 /**
- * Auth.js 核心配置
+ * Auth.js v5 核心配置 (Edge Runtime 兼容版本)
  * 
  * 整合 Laravel Sanctum 後端認證系統
  * 提供 Credentials Provider 進行用戶名密碼登入
@@ -15,24 +13,56 @@ import type { paths } from "@/types/api";
  * 3. 自訂用戶資料結構
  * 4. API Token 儲存與傳遞
  * 5. 角色權限管理
+ * 
+ * 注意：使用原生 fetch 以兼容 Edge Runtime
  */
 
-// 建立專用於認證的 API 客戶端（無攔截器版本）
-const authApiClient = createClient<paths>({
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost",
-  credentials: "include",
-});
-
-// 為認證客戶端添加基本標頭
-authApiClient.use({
-  onRequest({ request }) {
-    request.headers.set("Accept", "application/json");
-    request.headers.set("Content-Type", "application/json");
-    return request;
-  },
-});
+/**
+ * 安全的 Host 配置策略
+ * 
+ * 使用 AUTH_TRUST_HOST 環境變數來控制：
+ * - 'auto': 自動從 NEXTAUTH_URL 提取允許的 host (推薦)
+ * - 'true': 信任所有 hosts (僅開發環境)
+ * - 未設定: 使用預設的嚴格驗證
+ * 
+ * 生產環境建議設定 AUTH_TRUST_HOST=auto 並確保 NEXTAUTH_URL 正確
+ */
+const getTrustHostConfig = (): boolean => {
+  const authTrustHost = process.env.AUTH_TRUST_HOST;
+  
+  // 🔧 本地開發環境自動檢測
+  // 如果是本地環境（localhost 或開發模式），預設為信任
+  const isLocalhost = process.env.NEXTAUTH_URL?.includes('localhost') || 
+                     process.env.NEXTAUTH_URL?.includes('127.0.0.1');
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (isLocalhost || isDevelopment) {
+    return true;
+  }
+  
+  // 如果設定為 'auto'，從 NEXTAUTH_URL 自動決定
+  if (authTrustHost === 'auto') {
+    return !!process.env.NEXTAUTH_URL;
+  }
+  
+  // 如果明確設定為 'true'
+  if (authTrustHost === 'true') {
+    // 在生產環境中警告不安全的設定
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('⚠️  AUTH_TRUST_HOST=true 在生產環境中不安全，建議改用 AUTH_TRUST_HOST=auto');
+    }
+    return true;
+  }
+  
+  // 預設為 false（最安全）
+  return false;
+};
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // 使用環境變數控制的安全 host 驗證
+  trustHost: getTrustHostConfig(),
+  // 添加基本 URL 配置以處理 Cloudflare 代理
+  basePath: '/api/auth',
   providers: [
     Credentials({
       name: "Credentials",
@@ -46,37 +76,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         try {
-          // openapi-typescript 對 /api/login 的 response 未定義，導致 data 類型為 never
-          // 這裡手動定義回應結構以恢復型別安全
-          type LoginSuccess = {
-            user: {
-              id: number;
-              name: string;
-              username: string;
-              roles: string[];              // 🔧 修復：角色陣列
-              roles_display: string[];      // 🔧 修復：角色顯示名稱陣列
-              is_admin: boolean;
-            };
-            token: string;
-          };
-
-          const { data, error } = await authApiClient.POST(
-            "/api/login",
-            {
-            body: {
+          // 使用原生 fetch 進行 API 調用，兼容 Edge Runtime
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            },
+            body: JSON.stringify({
               username: String(credentials.username),
               password: String(credentials.password),
-            },
-            },
-          );
+            }),
+          });
 
-          if (error || !data || !("user" in data)) {
-            // 登入失敗，回傳 null
-            console.error("登入失敗:", error);
+          if (!response.ok) {
+            console.error("登入失敗:", response.status, response.statusText);
             return null;
           }
 
-          const loginData = data as LoginSuccess;
+          const loginData = await response.json();
+
+          if (!loginData.user || !loginData.token) {
+            console.error("登入回應格式錯誤:", loginData);
+            return null;
+          }
 
           // 登入成功，回傳包含後端 token 和用戶資訊的物件
           // Auth.js 會將此物件加密儲存在 session cookie 中
@@ -84,9 +107,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: String(loginData.user.id),
             name: loginData.user.name,
             username: loginData.user.username,
-            role: loginData.user.roles[0] || 'user',                    // 🔧 修復：使用角色陣列的第一個
-            roleDisplay: loginData.user.roles_display[0] || 'unknown',  // 🔧 修復：使用角色顯示陣列的第一個
-            isAdmin: loginData.user.is_admin,
+            role: (loginData.user.roles && loginData.user.roles[0]) || 'user',
+            roleDisplay: (loginData.user.roles_display && loginData.user.roles_display[0]) || 'unknown',
+            isAdmin: loginData.user.is_admin || false,
             apiToken: loginData.token, // 儲存後端 API Token
           };
         } catch (error) {
@@ -98,15 +121,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     /**
-     * 授權回呼函式 - 中間件核心邏輯（修正版）
+     * 授權回呼函式 - 中間件核心邏輯（重定向修復版）
      * 
      * 採用「預設保護」策略：除了明確定義的公開路由外，所有路由都需要登入
      * 此策略能確保系統安全性，並根除登入循環問題
      * 
      * 🔧 重定向修復：
-     * 1. 簡化重定向邏輯，避免與 Server Actions 衝突
-     * 2. 確保登入成功後能正確跳轉
-     * 3. 移除可能導致衝突的自動重定向
+     * 1. 讓 Auth.js 完全處理重定向邏輯
+     * 2. 已登入用戶訪問登入頁時重定向到儀表板
+     * 3. 確保認證流程的完整性
      * 
      * 在 Edge Runtime 中執行，效能極佳
      * 
@@ -120,11 +143,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // 定義不需要登入即可訪問的公開路由
       const publicRoutes = ['/login'];
       const isPublicRoute = publicRoutes.some(route => nextUrl.pathname.startsWith(route));
+      
+      // 特殊處理根路徑
+      if (nextUrl.pathname === '/') {
+        if (isLoggedIn) {
+          // 已登入用戶訪問根路徑，重定向到儀表板
+          return Response.redirect(new URL('/dashboard', nextUrl.origin));
+        } else {
+          // 未登入用戶訪問根路徑，重定向到登入頁
+          return Response.redirect(new URL('/login', nextUrl.origin));
+        }
+      }
 
-      // 🔧 關鍵修復：簡化公開路由處理
+      // 🔧 關鍵修復：已登入用戶不應該訪問登入頁
+      if (isPublicRoute && isLoggedIn) {
+        // 已登入用戶訪問登入頁時，重定向到儀表板
+        // 使用絕對 URL 避免 Cloudflare 代理問題
+        const dashboardUrl = new URL('/dashboard', nextUrl.origin);
+        return Response.redirect(dashboardUrl);
+      }
+      
+      // 公開路由且未登入，允許訪問
       if (isPublicRoute) {
-        // 如果是公開路由，直接允許訪問
-        // 登入後的重定向由 Server Action 手動處理
         return true;
       }
 

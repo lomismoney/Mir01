@@ -1,7 +1,7 @@
 import { handlers } from "../../../../../auth";
 
 /**
- * Auth.js API 路由處理器
+ * Auth.js v5 API 路由處理器
  * 
  * 此檔案為 Next.js App Router 的動態路由處理器
  * 負責處理所有 Auth.js 相關的 API 請求

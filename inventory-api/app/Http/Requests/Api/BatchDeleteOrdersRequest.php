@@ -64,6 +64,10 @@ class BatchDeleteOrdersRequest extends FormRequest
                 'description' => '要刪除的訂單 ID 陣列',
                 'example' => [1, 2, 3],
             ],
+            'ids.*' => [
+                'description' => '訂單 ID，必須是有效的整數且存在於系統中',
+                'example' => 1,
+            ],
         ];
     }
 }

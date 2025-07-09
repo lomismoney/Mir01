@@ -4,9 +4,14 @@ import { ColumnDef } from "@tanstack/react-table";
 import {
   MoreHorizontal,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   Store as StoreIcon,
   Edit,
   Trash2,
+  MapPin,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -21,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Store 類型定義
 type Store = {
@@ -48,12 +54,11 @@ export interface StoreActions {
  * 包含完整的分店資訊展示和操作功能
  *
  * 欄位說明：
- * 1. ID - 分店編號
- * 2. 名稱 - 可排序的分店名稱
- * 3. 地址 - 分店地址
- * 4. 建立時間 - 格式化的建立日期
- * 5. 更新時間 - 格式化的更新日期
- * 6. 操作 - 下拉選單包含編輯、刪除
+ * 1. 名稱 - 可排序的分店名稱
+ * 2. 地址 - 分店地址
+ * 3. 建立時間 - 格式化的建立日期
+ * 4. 更新時間 - 格式化的更新日期
+ * 5. 操作 - 下拉選單包含編輯、刪除
  *
  * @param actions - 操作處理器
  * @param showActions - 是否顯示操作欄位（根據權限控制）
@@ -65,62 +70,52 @@ export const createStoresColumns = (
 ): ColumnDef<Store>[] => {
   const columns: ColumnDef<Store>[] = [
     {
-      accessorKey: "id",
-      header: ({ column }) => {
-        return (
-          <div className="text-center" data-oid="qf:-_zf">
-            <Button
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-              className="h-auto p-0 font-medium"
-              data-oid="fimz6sv"
-            >
-              ID
-              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="_:pn9a4" />
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        return (
-          <div className="font-mono text-sm text-center" data-oid="mdbrg.9">
-            #{row.getValue("id")}
-          </div>
-        );
-      },
-    },
-    {
       accessorKey: "name",
       header: ({ column }) => {
+        const sortDirection = column.getIsSorted();
+        
         return (
-          <div className="text-center" data-oid="2xt2j1.">
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10">
+              <StoreIcon className="h-3 w-3 text-primary" />
+            </div>
             <Button
               variant="ghost"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
-              className="h-auto p-0 font-medium"
-              data-oid="4u5anaf"
+              className="h-auto p-0 font-semibold text-foreground hover:text-primary transition-colors"
             >
-              <StoreIcon className="mr-2 h-4 w-4" data-oid="jjcps94" />
-              名稱
-              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="js0s.7c" />
+              分店名稱
+              <div className="ml-2 flex items-center">
+                {sortDirection === "asc" ? (
+                  <ArrowUp className="h-3.5 w-3.5 text-primary" />
+                ) : sortDirection === "desc" ? (
+                  <ArrowDown className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground opacity-50" />
+                )}
+              </div>
             </Button>
           </div>
         );
       },
       cell: ({ row }) => {
+        const storeName = row.getValue("name") as string;
+        const storeInitial = storeName ? storeName.charAt(0) : "?";
+        const store = row.original;
+        
         return (
-          <div className="flex items-center justify-center" data-oid="4ib:-:7">
-            <Badge
-              variant="secondary"
-              className="font-medium"
-              data-oid="0cqm-mm"
-            >
-              {row.getValue("name") || "未知分店"}
-            </Badge>
+          <div className="flex items-center space-x-3" data-oid="4ib:-:7">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                {storeInitial}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="font-medium text-foreground">{storeName || "未知分店"}</span>
+              <span className="text-xs text-muted-foreground">ID: #{store.id}</span>
+            </div>
           </div>
         );
       },
@@ -128,22 +123,30 @@ export const createStoresColumns = (
     {
       accessorKey: "address",
       header: () => (
-        <div className="text-center" data-oid="km::4-c">
-          地址
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted">
+            <MapPin className="h-3 w-3 text-muted-foreground" />
+          </div>
+          <span className="font-semibold text-foreground">分店地址</span>
         </div>
       ),
-
       cell: ({ row }) => {
         const address = row.getValue("address") as string | null;
         return (
-          <div
-            className="max-w-[300px] truncate text-center"
-            data-oid=":_dojrc"
-          >
-            {address || (
-              <span className="text-muted-foreground" data-oid="fupioew">
-                未設定地址
-              </span>
+          <div className="max-w-[300px] space-y-1" data-oid=":_dojrc">
+            {address ? (
+              <>
+                <div className="text-sm text-foreground truncate">{address}</div>
+                <div className="flex items-center space-x-1">
+                  <div className="h-2 w-2 rounded-full bg-success"></div>
+                  <span className="text-xs text-muted-foreground">已設定地址</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 rounded-full bg-muted"></div>
+                <span className="text-sm text-muted-foreground">未設定地址</span>
+              </div>
             )}
           </div>
         );
@@ -152,18 +155,30 @@ export const createStoresColumns = (
     {
       accessorKey: "created_at",
       header: ({ column }) => {
+        const sortDirection = column.getIsSorted();
+        
         return (
-          <div className="text-center" data-oid=":vmstxw">
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted">
+              <Calendar className="h-3 w-3 text-muted-foreground" />
+            </div>
             <Button
               variant="ghost"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
-              className="h-auto p-0 font-medium"
-              data-oid="_s7veh5"
+              className="h-auto p-0 font-semibold text-foreground hover:text-primary transition-colors"
             >
               建立時間
-              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="--xrfo5" />
+              <div className="ml-2 flex items-center">
+                {sortDirection === "asc" ? (
+                  <ArrowUp className="h-3.5 w-3.5 text-primary" />
+                ) : sortDirection === "desc" ? (
+                  <ArrowDown className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground opacity-50" />
+                )}
+              </div>
             </Button>
           </div>
         );
@@ -172,26 +187,25 @@ export const createStoresColumns = (
         const dateString = row.getValue("created_at") as string;
         if (!dateString)
           return (
-            <div
-              className="text-muted-foreground text-center"
-              data-oid="d9b0z:b"
-            >
+            <div className="text-muted-foreground text-left" data-oid="d9b0z:b">
               -
             </div>
           );
 
         try {
+          const date = new Date(dateString);
+          const formattedDate = format(date, "yyyy-MM-dd", { locale: zhTW });
+          const timeAgo = format(date, "MM月dd日", { locale: zhTW });
+          
           return (
-            <div className="text-sm text-center" data-oid="men871i">
-              {format(new Date(dateString), "yyyy-MM-dd", { locale: zhTW })}
+            <div className="space-y-1" data-oid="men871i">
+              <div className="text-sm font-medium">{formattedDate}</div>
+              <div className="text-xs text-muted-foreground">{timeAgo}</div>
             </div>
           );
         } catch {
           return (
-            <div
-              className="text-muted-foreground text-center"
-              data-oid="g_89hpu"
-            >
+            <div className="text-muted-foreground text-left" data-oid="g_89hpu">
               格式錯誤
             </div>
           );
@@ -201,18 +215,30 @@ export const createStoresColumns = (
     {
       accessorKey: "updated_at",
       header: ({ column }) => {
+        const sortDirection = column.getIsSorted();
+        
         return (
-          <div className="text-center" data-oid="b.l.dty">
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted">
+              <Clock className="h-3 w-3 text-muted-foreground" />
+            </div>
             <Button
               variant="ghost"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
-              className="h-auto p-0 font-medium"
-              data-oid="9ckc.6h"
+              className="h-auto p-0 font-semibold text-foreground hover:text-primary transition-colors"
             >
               更新時間
-              <ArrowUpDown className="ml-2 h-4 w-4" data-oid="saxpdiq" />
+              <div className="ml-2 flex items-center">
+                {sortDirection === "asc" ? (
+                  <ArrowUp className="h-3.5 w-3.5 text-primary" />
+                ) : sortDirection === "desc" ? (
+                  <ArrowDown className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground opacity-50" />
+                )}
+              </div>
             </Button>
           </div>
         );
@@ -221,26 +247,36 @@ export const createStoresColumns = (
         const dateString = row.getValue("updated_at") as string;
         if (!dateString)
           return (
-            <div
-              className="text-muted-foreground text-center"
-              data-oid="lbgl0vz"
-            >
+            <div className="text-muted-foreground text-left" data-oid="lbgl0vz">
               -
             </div>
           );
 
         try {
+          const date = new Date(dateString);
+          const now = new Date();
+          const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+          
+          let timeDisplay = "";
+          if (diffInDays === 0) {
+            timeDisplay = "今天";
+          } else if (diffInDays === 1) {
+            timeDisplay = "昨天";
+          } else if (diffInDays < 7) {
+            timeDisplay = `${diffInDays}天前`;
+          } else {
+            timeDisplay = format(date, "MM月dd日", { locale: zhTW });
+          }
+          
           return (
-            <div className="text-sm text-center" data-oid="11lczc3">
-              {format(new Date(dateString), "yyyy-MM-dd", { locale: zhTW })}
+            <div className="space-y-1" data-oid="11lczc3">
+              <div className="text-sm font-medium">{format(date, "yyyy-MM-dd", { locale: zhTW })}</div>
+              <div className="text-xs text-muted-foreground">{timeDisplay}</div>
             </div>
           );
         } catch {
           return (
-            <div
-              className="text-muted-foreground text-center"
-              data-oid="vbkae:-"
-            >
+            <div className="text-muted-foreground text-left" data-oid="vbkae:-">
               格式錯誤
             </div>
           );
@@ -254,11 +290,10 @@ export const createStoresColumns = (
     columns.push({
       id: "actions",
       header: () => (
-        <div className="text-center" data-oid="7o.-f-e">
-          操作
+        <div className="flex items-center justify-center">
+          <span className="font-semibold text-foreground">操作</span>
         </div>
       ),
-
       cell: ({ row }) => {
         const store = row.original;
 
@@ -268,7 +303,7 @@ export const createStoresColumns = (
               <DropdownMenuTrigger asChild data-oid="t05io9b">
                 <Button
                   variant="ghost"
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 hover:bg-muted"
                   data-oid="amapnxg"
                 >
                   <span className="sr-only" data-oid="e5oa5ek">

@@ -134,6 +134,10 @@ class UpdateUserRequest extends FormRequest
                 'example' => ['admin', 'staff'],
                 'type' => 'array',
             ],
+            'roles.*' => [
+                'description' => '用戶角色，必須是有效的系統角色',
+                'example' => 'admin',
+            ],
         ];
     }
 }

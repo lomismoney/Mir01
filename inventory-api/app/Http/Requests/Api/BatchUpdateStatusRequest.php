@@ -75,17 +75,21 @@ class BatchUpdateStatusRequest extends FormRequest
                 'description' => '要更新狀態的訂單 ID 陣列',
                 'example' => [1, 2, 3],
             ],
+            'ids.*' => [
+                'description' => '訂單 ID，必須是有效的整數且存在於系統中',
+                'example' => 1,
+            ],
             'status_type' => [
-                'description' => '要更新的狀態類型（payment_status: 付款狀態, shipping_status: 貨物狀態）',
+                'description' => '要更新的狀態類型（payment_status 或 shipping_status）',
                 'example' => 'payment_status',
             ],
             'status_value' => [
-                'description' => '新的狀態值',
+                'description' => '要更新的狀態值',
                 'example' => 'paid',
             ],
             'notes' => [
-                'description' => '狀態更新備註（可選）',
-                'example' => '已收到付款',
+                'description' => '備註（可選）',
+                'example' => '批量標記為已付款',
             ],
         ];
     }

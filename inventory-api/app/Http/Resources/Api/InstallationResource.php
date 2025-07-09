@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class InstallationResource extends JsonResource
 {
@@ -27,15 +28,15 @@ class InstallationResource extends JsonResource
             // 狀態和時間
             'status' => $this->status,
             'scheduled_date' => $this->scheduled_date?->format('Y-m-d'),
-            'actual_start_time' => $this->actual_start_time?->format('Y-m-d H:i:s'),
-            'actual_end_time' => $this->actual_end_time?->format('Y-m-d H:i:s'),
+            'actual_start_time' => $this->formatDateTime($this->actual_start_time),
+            'actual_end_time' => $this->formatDateTime($this->actual_end_time),
             
             // 備註
             'notes' => $this->notes,
             
             // 時間戳記
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->formatDateTime($this->created_at),
+            'updated_at' => $this->formatDateTime($this->updated_at),
             
             // 關聯資源（按需加載）
             'items' => InstallationItemResource::collection($this->whenLoaded('items')),
@@ -56,5 +57,34 @@ class InstallationResource extends JsonResource
             'can_be_cancelled' => $this->canBeCancelled(),
             'has_started' => $this->hasStarted(),
         ];
+    }
+
+    /**
+     * 安全格式化日期時間字段
+     * 
+     * @param mixed $dateTime
+     * @return string|null
+     */
+    private function formatDateTime($dateTime): ?string
+    {
+        if ($dateTime === null) {
+            return null;
+        }
+
+        // 如果是字符串，嘗試轉換為 Carbon 實例
+        if (is_string($dateTime)) {
+            try {
+                $dateTime = Carbon::parse($dateTime);
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+
+        // 確保是 Carbon 實例或實現了 DateTimeInterface 的對象
+        if ($dateTime instanceof \DateTimeInterface) {
+            return $dateTime->format('Y-m-d H:i:s');
+        }
+
+        return null;
     }
 } 

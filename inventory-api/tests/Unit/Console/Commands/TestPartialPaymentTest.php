@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Commands;
+namespace Tests\Unit\Console\Commands;
 
 use App\Console\Commands\TestPartialPayment;
 use App\Models\Customer;

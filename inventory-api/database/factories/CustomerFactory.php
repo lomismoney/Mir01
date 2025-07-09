@@ -28,7 +28,7 @@ class CustomerFactory extends Factory
 
         return [
             'name' => $isCompany ? $this->faker->company() : $this->faker->name(),
-            'phone' => $this->faker->optional(0.8)->phoneNumber(), // 80% 機率有電話
+            'phone' => $this->faker->boolean(80) ? $this->faker->unique()->numerify('09########') : null, // 80% 機率有電話，避免 optional + unique 鏈式調用問題
             'is_company' => $isCompany,
             'tax_id' => $isCompany ? $this->faker->numerify('########') : null,
             'industry_type' => $this->faker->randomElement([
@@ -107,7 +107,7 @@ class CustomerFactory extends Factory
     public function withPhone(): static
     {
         return $this->state(fn (array $attributes) => [
-            'phone' => $this->faker->phoneNumber(),
+            'phone' => $this->faker->unique()->numerify('09########'),
         ]);
     }
 

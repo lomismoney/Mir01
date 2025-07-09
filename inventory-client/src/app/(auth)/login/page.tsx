@@ -11,8 +11,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { loginAction } from "@/actions/auth";
 import { toast } from "sonner";
+import { AlertCircle } from "lucide-react";
 
 /**
  * 登入頁面元件 (Auth.js + React 19 現代化版本)
@@ -24,7 +26,7 @@ import { toast } from "sonner";
  * 2. useActionState - React 19 現代化表單狀態管理
  * 3. Auth.js 整合 - 統一認證流程
  * 4. 自動重導向 - 登入成功後自動跳轉
- * 5. 錯誤處理 - 友善的錯誤訊息顯示
+ * 5. 雙重錯誤顯示 - 表單內持久顯示 + Toast 提醒
  * 6. 內建 Pending 狀態 - 自動載入中狀態管理
  *
  * 技術優勢：
@@ -63,6 +65,14 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent data-oid="l5o1zsb">
+          {/* 錯誤訊息顯示區域 - 直觀且持久的錯誤提示 */}
+          {state?.error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
+          )}
+
           {/* 
                                使用 Server Action 的表單
                                - action={formAction}: 將 Server Action 直接綁定到表單
@@ -82,6 +92,7 @@ export default function LoginPage() {
                   name="username"
                   placeholder="superadmin"
                   required
+                  className={state?.error ? "border-destructive" : ""}
                   data-oid="n3q5p8t"
                 />
               </div>
@@ -96,6 +107,7 @@ export default function LoginPage() {
                   type="password"
                   name="password"
                   required
+                  className={state?.error ? "border-destructive" : ""}
                   data-oid="ftopt9f"
                 />
               </div>
@@ -111,6 +123,11 @@ export default function LoginPage() {
               </Button>
             </div>
           </form>
+
+          {/* 友善提示 */}
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            預設帳號：superadmin
+          </div>
         </CardContent>
       </Card>
     </div>

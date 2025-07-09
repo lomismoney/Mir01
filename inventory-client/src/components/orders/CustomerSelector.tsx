@@ -139,38 +139,24 @@ export function CustomerSelector({
               >
                 載入中...
               </div>
-            ) : filteredCustomers.length === 0 && searchQuery ? (
-              <div
-                className="py-6 text-center text-sm text-muted-foreground"
-                data-oid="6oyvjtz"
-              >
-                找不到符合的客戶
-              </div>
-            ) : customers.length === 0 ? (
-              <div
-                className="py-6 text-center text-sm text-muted-foreground"
-                data-oid="3me.6ru"
-              >
-                尚無客戶資料
-              </div>
             ) : (
               <>
-                {/* 新增客戶按鈕 */}
+                {/* 新增客戶按鈕 - 始終顯示在最上方 */}
                 {onAddNewCustomer && (
                   <button
                     onClick={() => {
                       onAddNewCustomer();
                       setOpen(false);
                     }}
-                    className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-accent text-left transition-colors w-full"
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-accent text-left transition-colors w-full"
                     data-oid="cwk8pmi"
                   >
                     <div
-                      className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"
+                      className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center"
                       data-oid="3aq4s6r"
                     >
                       <PlusCircle
-                        className="h-4 w-4 text-primary"
+                        className="h-3.5 w-3.5 text-primary"
                         data-oid="s9lki8_"
                       />
                     </div>
@@ -183,62 +169,79 @@ export function CustomerSelector({
                   </button>
                 )}
 
-                {/* 分隔線 */}
-                {onAddNewCustomer && filteredCustomers.length > 0 && (
+                {/* 分隔線 - 新增客戶按鈕下方始終顯示 */}
+                {onAddNewCustomer && (
                   <div className="my-1 mx-3 border-t" data-oid="f06w-dv" />
                 )}
 
-                {/* 客戶項目 */}
-                {filteredCustomers.map((customer) => (
-                  <button
-                    key={customer.id}
-                    onClick={() => {
-                      onSelectCustomer(customer);
-                      setOpen(false);
-                    }}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-accent text-left transition-colors relative w-full",
-                      selectedCustomerId === customer.id && "bg-accent",
-                    )}
-                    data-oid=".fkpxgq"
+                {/* 客戶列表內容 */}
+                {filteredCustomers.length === 0 && searchQuery ? (
+                  <div
+                    className="py-6 text-center text-sm text-muted-foreground"
+                    data-oid="6oyvjtz"
                   >
-                    {selectedCustomerId === customer.id && (
+                    找不到符合的客戶
+                  </div>
+                ) : customers.length === 0 ? (
+                  <div
+                    className="py-6 text-center text-sm text-muted-foreground"
+                    data-oid="3me.6ru"
+                  >
+                    尚無客戶資料
+                  </div>
+                ) : (
+                  /* 客戶項目 */
+                  filteredCustomers.map((customer) => (
+                    <button
+                      key={customer.id}
+                      onClick={() => {
+                        onSelectCustomer(customer);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-accent text-left transition-colors relative w-full",
+                        selectedCustomerId === customer.id && "bg-accent",
+                      )}
+                      data-oid=".fkpxgq"
+                    >
+                      {selectedCustomerId === customer.id && (
+                        <div
+                          className="absolute left-1 top-1/2 -translate-y-1/2"
+                          data-oid="kw1o74q"
+                        >
+                          <Check
+                            className="h-3 w-3 text-primary"
+                            data-oid="rv40_s6"
+                          />
+                        </div>
+                      )}
+
                       <div
-                        className="absolute left-1 top-1/2 -translate-y-1/2"
-                        data-oid="kw1o74q"
+                        className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0"
+                        data-oid="mth65dq"
                       >
-                        <Check
-                          className="h-3 w-3 text-primary"
-                          data-oid="rv40_s6"
+                        <UserCircle2
+                          className="h-5 w-5 text-muted-foreground"
+                          data-oid="q8nv13d"
                         />
                       </div>
-                    )}
 
-                    <div
-                      className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0"
-                      data-oid="mth65dq"
-                    >
-                      <UserCircle2
-                        className="h-5 w-5 text-muted-foreground"
-                        data-oid="q8nv13d"
-                      />
-                    </div>
-
-                    <div className="flex flex-col min-w-0" data-oid="2hjl7bh">
-                      <span className="font-medium truncate" data-oid="gkqtyo1">
-                        {customer.name}
-                      </span>
-                      {customer.phone && (
-                        <span
-                          className="text-xs text-muted-foreground"
-                          data-oid="0iz9mtu"
-                        >
-                          {customer.phone}
+                      <div className="flex flex-col min-w-0" data-oid="2hjl7bh">
+                        <span className="font-medium truncate" data-oid="gkqtyo1">
+                          {customer.name}
                         </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
+                        {customer.phone && (
+                          <span
+                            className="text-xs text-muted-foreground"
+                            data-oid="0iz9mtu"
+                          >
+                            {customer.phone}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  ))
+                )}
               </>
             )}
           </div>

@@ -127,6 +127,10 @@ class StoreInstallationRequest extends FormRequest
                 'description' => '關聯的訂單項目 ID (如果從訂單轉入)',
                 'example' => null,
             ],
+            'items.*.product_variant_id' => [
+                'description' => '商品變體 ID (如果指定具體商品變體)',
+                'example' => 1,
+            ],
             'items.*.product_name' => [
                 'description' => '商品名稱',
                 'example' => 'A500 智能電子鎖',

@@ -8,9 +8,12 @@
     "require": {
         "php": "^8.2",
         "doctrine/dbal": "^4.2",
+        "google/cloud-storage": "^1.48",
+        "knuckleswtf/scribe": "^5.2",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.1",
         "laravel/tinker": "^2.10.1",
+        "league/flysystem-google-cloud-storage": "^3.0",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-data": "^4.15",
         "spatie/laravel-medialibrary": "^11.13",
@@ -19,7 +22,6 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "knuckleswtf/scribe": "^5.2",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
         "laravel/sail": "*",

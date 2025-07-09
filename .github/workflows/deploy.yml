@@ -1,0 +1,371 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deploy (ignore cache)'
+        required: false
+        default: 'false'
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
+  CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
+  API_SERVICE_NAME: inventory-api
+  CLIENT_SERVICE_NAME: inventory-client
+  REGION: asia-east1
+
+jobs:
+  deploy-api:
+    name: 'Deploy API to Cloud Run'
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    defaults:
+      run:
+        working-directory: ./inventory-api
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Setup PHP with Composer'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: gd, zip, pcntl, bcmath, xml, pdo_sqlite
+          coverage: none
+
+      - name: 'Cache Composer dependencies'
+        uses: actions/cache@v3
+        with:
+          path: inventory-api/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('inventory-api/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: 'Install Composer Dependencies (for Scribe only)'
+        run: composer install --prefer-dist --no-progress
+
+      - name: 'Create .env.testing for Scribe'
+        run: |
+          echo "APP_ENV=testing" > .env.testing
+          echo "APP_KEY=base64:some_random_key_for_testing" >> .env.testing
+          echo "DB_CONNECTION=sqlite" >> .env.testing
+          echo "DB_DATABASE=database/testing.sqlite" >> .env.testing
+          echo "CACHE_STORE=array" >> .env.testing
+          echo "QUEUE_CONNECTION=sync" >> .env.testing
+          echo "SESSION_DRIVER=array" >> .env.testing
+          echo "DB_CACHE_CONNECTION=sqlite" >> .env.testing
+
+      - name: 'Create SQLite Database File'
+        run: touch database/testing.sqlite
+
+      - name: 'Run Migrations for Scribe'
+        run: php artisan migrate:fresh --force --env=testing
+
+      - name: 'Generate OpenAPI Specification'
+        run: php artisan scribe:generate --verbose --env=testing
+
+      - name: 'Upload OpenAPI as Artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: inventory-api/storage/app/scribe/openapi.yaml
+
+      - name: 'Build and Push API Docker Image'
+        run: |-
+          gcloud artifacts repositories create ${{ env.API_SERVICE_NAME }}-repo \
+            --repository-format=docker \
+            --location=${{ env.REGION }} \
+            --description="API Docker repository" || echo "Repo already exists"
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest .
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest
+
+      - name: 'Deploy API to Cloud Run (內部系統優化)'
+        run: |-
+          gcloud run deploy ${{ env.API_SERVICE_NAME }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --add-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} \
+            --add-volume=name=gcs-storage,type=cloud-storage,bucket=${{ env.GCS_BUCKET }} \
+            --add-volume-mount=volume=gcs-storage,mount-path=/mnt/gcs \
+            --set-env-vars="APP_ENV=production,APP_NAME=庫存管理系統,APP_DEBUG=false,APP_TIMEZONE=Asia/Taipei,APP_LOCALE=zh_TW,APP_FALLBACK_LOCALE=zh_TW,BCRYPT_ROUNDS=12,APP_MAINTENANCE_DRIVER=file,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240,SESSION_DOMAIN=.lomis.com.tw,SESSION_DRIVER=file,SESSION_LIFETIME=120,SESSION_ENCRYPT=false,SESSION_PATH=/,FILESYSTEM_DISK=gcs,GCS_BUCKET=${{ env.GCS_BUCKET }},GOOGLE_CLOUD_PROJECT_ID=${{ env.PROJECT_ID }},CACHE_STORE=file,QUEUE_CONNECTION=sync,BROADCAST_CONNECTION=log,LOG_CHANNEL=stack,LOG_LEVEL=error,SPATIE_PERMISSION_CACHE_EXPIRATION_TIME=3600,GCS_MOUNT_PATH=/mnt/gcs" \
+            --set-secrets="APP_KEY=LARAVEL_APP_KEY:latest,DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
+            --timeout=300 \
+            --memory=1Gi \
+            --cpu=2 \
+            --concurrency=80 \
+            --min-instances=0 \
+            --max-instances=5
+        working-directory: . # 此步驟在根目錄執行
+
+      - name: 'Get Deployed URLs'
+        id: get_urls
+        run: |-
+          # 獲取 API 服務的實際 URL
+          API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
+          echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+          
+          # 嘗試獲取前端服務 URL（如果已存在）
+          CLIENT_URL=$(gcloud run services describe ${{ env.CLIENT_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)' 2>/dev/null || echo "")
+          
+          if [ -z "$CLIENT_URL" ]; then
+            # 如果前端還未部署，使用 API URL 的相同模式
+            CLIENT_BASE=$(echo $API_URL | sed 's/inventory-api/inventory-client/')
+            echo "CLIENT_URL=$CLIENT_BASE" >> $GITHUB_OUTPUT
+          else
+            echo "CLIENT_URL=$CLIENT_URL" >> $GITHUB_OUTPUT
+          fi
+          
+          # 提取域名用於 SANCTUM（只使用前端域名）
+          CLIENT_DOMAIN=$(echo ${CLIENT_URL:-$CLIENT_BASE} | sed 's|https://||' | sed 's|/.*||')
+          echo "SANCTUM_DOMAINS=$CLIENT_DOMAIN" >> $GITHUB_OUTPUT
+          
+          echo "API URL: $API_URL"
+          echo "預期的前端 URL: ${CLIENT_URL:-$CLIENT_BASE}"
+        working-directory: . # 此步驟在根目錄執行
+
+      - name: 'Update API Environment Variables'
+        env:
+          CUSTOM_CLIENT_URL: ${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}
+          CUSTOM_API_URL: ${{ secrets.API_CUSTOM_DOMAIN_URL }}
+          DYNAMIC_CLIENT_URL: ${{ steps.get_urls.outputs.CLIENT_URL }}
+          DYNAMIC_SANCTUM: ${{ steps.get_urls.outputs.SANCTUM_DOMAINS }}
+        run: |-
+          # 使用自訂域名或動態獲取的 URL
+          FRONTEND_URL="${CUSTOM_CLIENT_URL}"
+          if [ -z "$FRONTEND_URL" ]; then
+            FRONTEND_URL="${DYNAMIC_CLIENT_URL}"
+          fi
+          
+          # 設定 SANCTUM 域名（只使用前端域名）
+          if [ ! -z "${CUSTOM_CLIENT_URL}" ]; then
+            # 使用自訂域名
+            CLIENT_DOMAIN=$(echo "${CUSTOM_CLIENT_URL}" | sed 's|https://||' | sed 's|/.*||')
+            SANCTUM_DOMAINS="${CLIENT_DOMAIN}"
+          else
+            # 使用動態獲取的域名
+            SANCTUM_DOMAINS="${DYNAMIC_SANCTUM}"
+          fi
+          
+          # 更新 API 的環境變數（使用 ^ 作為分隔符避免逗號問題）
+          echo "更新環境變數："
+          echo "  FRONTEND_URL=${FRONTEND_URL}"
+          echo "  SANCTUM_STATEFUL_DOMAINS=${SANCTUM_DOMAINS}"
+          
+          # 更新 API 的環境變數
+          gcloud run services update ${{ env.API_SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --update-env-vars FRONTEND_URL="${FRONTEND_URL}" \
+            --update-env-vars SANCTUM_STATEFUL_DOMAINS="${SANCTUM_DOMAINS}"
+        working-directory: . # 此步驟在根目錄執行
+
+      - name: 'Run Database Migrations'
+        run: |-
+          gcloud run jobs create ${{ env.API_SERVICE_NAME }}-migrate \
+            --region=${{ env.REGION }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
+            --task-timeout=300 \
+            --memory=512Mi \
+            --cpu=1 \
+            --command=/usr/local/bin/run-artisan.sh \
+            --args=migrate,--force \
+            --set-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} \
+            --set-env-vars="APP_ENV=production,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240" \
+            --set-secrets="APP_KEY=LARAVEL_APP_KEY:latest,DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
+            --execute-now || \
+          gcloud run jobs execute ${{ env.API_SERVICE_NAME }}-migrate \
+            --region=${{ env.REGION }} \
+            --wait
+        working-directory: . # 此步驟在根目錄執行
+
+      - name: 'Run Initial Admin Seeder'
+        run: |-
+          gcloud run jobs create ${{ env.API_SERVICE_NAME }}-seed-admin \
+            --region=${{ env.REGION }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.API_SERVICE_NAME }}-repo/api:latest \
+            --task-timeout=300 \
+            --memory=512Mi \
+            --cpu=1 \
+            --command=/usr/local/bin/run-artisan.sh \
+            --args=db:seed,--class=InitialAdminSeeder,--force \
+            --set-cloudsql-instances=${{ env.CLOUD_SQL_CONNECTION_NAME }} \
+            --set-env-vars="APP_ENV=production,DB_CONNECTION=mysql,DB_SOCKET=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_PORT=3306,DB_DATABASE=lomis_internal,DB_USERNAME=h1431532403240" \
+            --set-secrets="APP_KEY=LARAVEL_APP_KEY:latest,DB_PASSWORD=LARAVEL_DB_PASSWORD:latest" \
+            --execute-now || \
+          gcloud run jobs execute ${{ env.API_SERVICE_NAME }}-seed-admin \
+            --region=${{ env.REGION }} \
+            --wait
+        working-directory: . # 此步驟在根目錄執行
+
+  deploy-client:
+    name: 'Deploy Client to Cloud Run'
+    needs: deploy-api
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    defaults:
+      run:
+        working-directory: ./inventory-client
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Download OpenAPI Artifact'
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-spec
+          path: ./inventory-client
+
+      - name: 'Verify OpenAPI File'
+        run: |
+          if [ -f ./openapi.yaml ]; then
+            echo "✅ OpenAPI 檔案已成功下載"
+            ls -l openapi.yaml
+          else
+            echo "❌ 找不到 OpenAPI 檔案"
+            exit 1
+          fi
+
+      - name: 'Determine API URL'
+        id: get_api_url
+        run: |-
+          # 優先使用自訂網域（如果有設定）
+          if [ ! -z "${{ secrets.API_CUSTOM_DOMAIN_URL }}" ]; then
+            echo "API_URL=${{ secrets.API_CUSTOM_DOMAIN_URL }}" >> $GITHUB_OUTPUT
+            echo "使用自訂網域: ${{ secrets.API_CUSTOM_DOMAIN_URL }}"
+          else
+            # 獲取實際部署的 API URL
+            API_URL=$(gcloud run services describe ${{ env.API_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
+            echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+            echo "使用 Cloud Run URL: $API_URL"
+          fi
+        working-directory: . # 此步驟在根目錄執行
+
+      - name: 'Build and Push Client Docker Image'
+        run: |-
+          gcloud artifacts repositories create ${{ env.CLIENT_SERVICE_NAME }}-repo \
+            --repository-format=docker \
+            --location=${{ env.REGION }} \
+            --description="Client Docker repository" || echo "Repo already exists"
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+          docker build \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=${{ steps.get_api_url.outputs.API_URL }} \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.CLIENT_SERVICE_NAME }}-repo/client:latest .
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.CLIENT_SERVICE_NAME }}-repo/client:latest
+
+      - name: 'Deploy Client to Cloud Run (內部系統優化)'
+        id: deploy_client
+        run: |-
+          gcloud run deploy ${{ env.CLIENT_SERVICE_NAME }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.CLIENT_SERVICE_NAME }}-repo/client:latest \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --set-env-vars="NEXT_PUBLIC_API_BASE_URL=${{ steps.get_api_url.outputs.API_URL }}" \
+            --set-secrets="NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest" \
+            --timeout=300 \
+            --memory=512Mi \
+            --cpu=1 \
+            --concurrency=100 \
+            --min-instances=0 \
+            --max-instances=3
+          
+          # 獲取實際部署的 URL
+          CLIENT_URL=$(gcloud run services describe ${{ env.CLIENT_SERVICE_NAME }} --platform=managed --region=${{ env.REGION }} --format='value(status.url)')
+          echo "CLIENT_URL=$CLIENT_URL" >> $GITHUB_OUTPUT
+
+      - name: 'Update Client Environment Variables'
+        run: |-
+          # 使用自訂域名或動態獲取的 URL
+          NEXTAUTH_URL="${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}"
+          if [ -z "$NEXTAUTH_URL" ]; then
+            NEXTAUTH_URL="${{ steps.deploy_client.outputs.CLIENT_URL }}"
+          fi
+          
+          # 更新前端的環境變數
+          # 添加 AUTH_URL 來修復 Cloudflare 代理問題
+          gcloud run services update ${{ env.CLIENT_SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --update-env-vars="NEXTAUTH_URL=$NEXTAUTH_URL,AUTH_URL=$NEXTAUTH_URL,AUTH_TRUST_HOST=auto"
+        working-directory: . # 此步驟在根目錄執行
+
+      - name: 'Final Update API CORS Settings'
+        env:
+          CUSTOM_CLIENT_URL: ${{ secrets.CLIENT_CUSTOM_DOMAIN_URL }}
+          CUSTOM_API_URL: ${{ secrets.API_CUSTOM_DOMAIN_URL }}
+          DEPLOYED_CLIENT_URL: ${{ steps.deploy_client.outputs.CLIENT_URL }}
+        run: |-
+          # 最終更新 API 的 CORS 設定，確保包含正確的前端 URL
+          FRONTEND_URL="${CUSTOM_CLIENT_URL}"
+          if [ -z "$FRONTEND_URL" ]; then
+            FRONTEND_URL="${DEPLOYED_CLIENT_URL}"
+          fi
+          
+          # 設定 SANCTUM 域名（只使用前端域名）
+          if [ ! -z "${CUSTOM_CLIENT_URL}" ]; then
+            # 使用自訂域名
+            CLIENT_DOMAIN=$(echo "${CUSTOM_CLIENT_URL}" | sed 's|https://||' | sed 's|/.*||')
+            SANCTUM_DOMAINS="${CLIENT_DOMAIN}"
+          else
+            # 使用實際部署的域名
+            CLIENT_URL="${DEPLOYED_CLIENT_URL}"
+            CLIENT_DOMAIN=$(echo "${CLIENT_URL}" | sed 's|https://||' | sed 's|/.*||')
+            SANCTUM_DOMAINS="${CLIENT_DOMAIN}"
+          fi
+          
+          # 最終更新 API 的環境變數（使用 ^ 作為分隔符避免逗號問題）
+          echo "✅ 最終 CORS 設定："
+          echo "   FRONTEND_URL: ${FRONTEND_URL}"
+          echo "   SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_DOMAINS}"
+          
+          # 更新 API 的環境變數
+          gcloud run services update ${{ env.API_SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --update-env-vars FRONTEND_URL="${FRONTEND_URL}" \
+            --update-env-vars SANCTUM_STATEFUL_DOMAINS="${SANCTUM_DOMAINS}"
+        working-directory: . # 此步驟在根目錄執行
+
+
+      - name: 'Display Deployment URLs'
+        run: |-
+          echo "🎉 部署完成！"
+          echo "📋 服務網址："
+          echo "API 服務: ${{ steps.get_api_url.outputs.API_URL }}"
+          echo "前端服務: ${{ steps.deploy_client.outputs.CLIENT_URL }}"
+        working-directory: . # 此步驟在根目錄執行

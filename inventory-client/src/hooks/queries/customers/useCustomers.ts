@@ -198,14 +198,15 @@ export function useCustomers(filters?: CustomerFilters) {
       const [, queryFilters] = queryKey;
       const queryParams: Record<string, any> = {};
       
+      // 🔧 修復 API 契約：客戶管理後端期望直接參數，不是 Spatie QueryBuilder 格式
       if ((queryFilters as CustomerFilters)?.search) {
-        queryParams['filter[search]'] = (queryFilters as CustomerFilters).search;
+        queryParams.search = (queryFilters as CustomerFilters).search;
       }
       if ((queryFilters as CustomerFilters)?.start_date) {
-        queryParams['filter[start_date]'] = (queryFilters as CustomerFilters).start_date;
+        queryParams.start_date = (queryFilters as CustomerFilters).start_date;
       }
       if ((queryFilters as CustomerFilters)?.end_date) {
-        queryParams['filter[end_date]'] = (queryFilters as CustomerFilters).end_date;
+        queryParams.end_date = (queryFilters as CustomerFilters).end_date;
       }
       if ((queryFilters as CustomerFilters)?.page) {
         queryParams.page = (queryFilters as CustomerFilters).page;

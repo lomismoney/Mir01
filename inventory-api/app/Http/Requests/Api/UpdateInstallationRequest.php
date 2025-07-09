@@ -211,6 +211,10 @@ class UpdateInstallationRequest extends FormRequest
                 'description' => '要更新的安裝項目 ID (新項目則不提供)',
                 'example' => 1,
             ],
+            'items.*.product_variant_id' => [
+                'description' => '商品變體 ID (如果指定具體商品變體)',
+                'example' => 1,
+            ],
             'items.*.product_name' => [
                 'description' => '商品名稱',
                 'example' => 'A500 智能電子鎖 (維修品)',
