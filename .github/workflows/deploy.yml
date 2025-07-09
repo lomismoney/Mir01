@@ -219,7 +219,7 @@ jobs:
           echo "QUEUE_CONNECTION=sync" >> .env.testing
           echo "SESSION_DRIVER=array" >> .env.testing
           echo "DB_CACHE_CONNECTION=sqlite" >> .env.testing
-          
+
           touch database/testing.sqlite
           php artisan migrate:fresh --force --env=testing
           php artisan scribe:generate --verbose --env=testing
@@ -423,70 +423,100 @@ jobs:
           path: ./inventory-client
         continue-on-error: true
 
-      - name: 'Verify or Generate Fallback OpenAPI'
+      - name: 'Smart OpenAPI Acquisition Strategy'
         run: |
           # 安全地處理 GitHub Actions 輸出變數
           API_CHANGED="${{ needs.detect-changes.outputs.api-changed || 'false' }}"
           CLIENT_CHANGED="${{ needs.detect-changes.outputs.client-changed || 'false' }}"
           DEPLOY_API_RESULT="${{ needs.deploy-api.result || 'skipped' }}"
+          DEPLOY_TARGET="${{ needs.detect-changes.outputs.deploy-target || 'auto' }}"
           
           # 標準化變數值
           [ -z "$API_CHANGED" ] && API_CHANGED="false"
           [ -z "$CLIENT_CHANGED" ] && CLIENT_CHANGED="false"
           [ -z "$DEPLOY_API_RESULT" ] && DEPLOY_API_RESULT="skipped"
+          [ -z "$DEPLOY_TARGET" ] && DEPLOY_TARGET="auto"
           
-          echo "🔍 OpenAPI 檔案狀態檢查："
+          echo "🔍 智能 OpenAPI 獲取策略："
           echo "   API 變更: $API_CHANGED"
           echo "   Client 變更: $CLIENT_CHANGED"
           echo "   API 部署結果: $DEPLOY_API_RESULT"
+          echo "   部署目標: $DEPLOY_TARGET"
+          echo ""
           
-          if [ -f ./openapi.yaml ]; then
-            echo "✅ OpenAPI 檔案已成功下載"
-            ls -l openapi.yaml
+          # 🎯 策略 1: 檢查 artifact 下載結果
+          if [ -f ./openapi.yaml ] && [ -s ./openapi.yaml ] && grep -q "openapi:" ./openapi.yaml; then
+            echo "✅ 策略 1 成功：使用 artifact 中的 OpenAPI 規格"
+            OPENAPI_SIZE=$(wc -c < openapi.yaml)
+            OPENAPI_LINES=$(wc -l < openapi.yaml)
+            echo "   檔案大小: $OPENAPI_SIZE bytes, 行數: $OPENAPI_LINES"
             
-            # 驗證檔案內容
-            if [ -s ./openapi.yaml ] && grep -q "openapi:" ./openapi.yaml; then
-              echo "✅ OpenAPI 檔案格式驗證通過"
-              if [ "$API_CHANGED" = "true" ]; then
-                echo "🔄 使用最新生成的 OpenAPI 規格（API 有變更）"
+            if [ "$API_CHANGED" = "true" ]; then
+              echo "🔄 來源：最新生成的 API 規格（API 有變更）"
+            else
+              echo "📋 來源：快取的 API 規格（API 無變更）"
+            fi
+          else
+            echo "❌ 策略 1 失敗：artifact 不可用或內容無效"
+            rm -f ./openapi.yaml
+            
+            # 🌐 策略 2: 從生產環境 API 直接獲取
+            echo ""
+            echo "🌐 策略 2：從生產環境 API 獲取最新 OpenAPI 規格"
+            echo "   API 端點: ${{ secrets.API_CUSTOM_DOMAIN_URL }}/docs/openapi.yaml"
+            
+            if curl -f -s -o openapi.yaml "${{ secrets.API_CUSTOM_DOMAIN_URL }}/docs/openapi.yaml"; then
+              # 驗證從生產環境獲取的檔案
+              if [ -s ./openapi.yaml ] && grep -q "openapi:" ./openapi.yaml; then
+                echo "✅ 策略 2 成功：從生產環境獲取 OpenAPI 規格"
+                OPENAPI_SIZE=$(wc -c < openapi.yaml)
+                OPENAPI_LINES=$(wc -l < openapi.yaml)
+                echo "   檔案大小: $OPENAPI_SIZE bytes, 行數: $OPENAPI_LINES"
+                echo "🌐 來源：生產環境 API 當前規格"
+                
+                # 檢查檔案品質
+                ENDPOINT_COUNT=$(grep -c "operationId:" openapi.yaml || echo "0")
+                SCHEMA_COUNT=$(grep -c "schemas:" openapi.yaml || echo "0")
+                echo "   品質檢查：$ENDPOINT_COUNT 個端點, $SCHEMA_COUNT 個 schemas 區塊"
+                
+                if [ "$ENDPOINT_COUNT" -gt 5 ]; then
+                  echo "✅ OpenAPI 規格品質良好，包含充足的端點定義"
+                else
+                  echo "⚠️ OpenAPI 規格端點較少，可能影響前端類型生成"
+                fi
               else
-                echo "📋 使用快取的 OpenAPI 規格（API 無變更）"
+                echo "❌ 策略 2 失敗：從生產環境獲取的檔案格式無效"
+                rm -f ./openapi.yaml
               fi
             else
-              echo "❌ OpenAPI 檔案格式驗證失敗，檔案可能損壞"
-              echo "🔧 將創建 fallback 檔案"
-              rm -f ./openapi.yaml
+              echo "❌ 策略 2 失敗：無法從生產環境獲取 OpenAPI 規格"
+              echo "   可能原因：網路問題、API 服務未運行、或端點不存在"
             fi
           fi
           
-          if [ ! -f ./openapi.yaml ]; then
-            echo "⚠️ 找不到或無效的 OpenAPI 檔案"
+          # 🔧 策略 3: 創建增強版 fallback （最後手段）
+          if [ ! -f ./openapi.yaml ] || [ ! -s ./openapi.yaml ]; then
+            echo ""
+            echo "🔧 策略 3：創建增強版 fallback OpenAPI 規格"
+            echo "   ⚠️ 這是最後手段，可能導致前端類型定義不完整"
             
-            if [ "$API_CHANGED" = "true" ] && [ "$DEPLOY_API_RESULT" = "success" ]; then
-              echo "❌ API 有變更且部署成功，但找不到 OpenAPI 檔案"
-              echo "   這可能表示 API 部署過程中的 OpenAPI 生成或上傳失敗"
-              echo "🔧 創建 fallback 檔案以避免前端構建失敗"
-            elif [ "$API_CHANGED" = "false" ]; then
-              echo "📋 API 無變更，使用 fallback OpenAPI 檔案（前端將使用現有類型定義）"
-            elif [ "$DEPLOY_API_RESULT" = "skipped" ]; then
-              echo "📋 API 部署被跳過，使用 fallback OpenAPI 檔案"
-            fi
-            
-            # 創建基本的 fallback OpenAPI 檔案
             cat > openapi.yaml << 'EOF'
           openapi: 3.0.0
           info:
-            title: Inventory API
+            title: Inventory Management API
             version: 1.0.0
-            description: 'Fallback API specification for client build'
+            description: 'Enhanced fallback API specification for client build'
+            contact:
+              name: Inventory System
           servers:
             - url: '${{ secrets.API_CUSTOM_DOMAIN_URL }}'
               description: Production API server
           paths:
-            /health:
+            /api/health:
               get:
                 summary: Health check endpoint
                 operationId: healthCheck
+                tags: [System]
                 responses:
                   '200':
                     description: API is healthy
@@ -498,8 +528,83 @@ jobs:
                             status:
                               type: string
                               example: ok
+            /api/login:
+              post:
+                summary: User login
+                operationId: login
+                tags: [Authentication]
+                requestBody:
+                  required: true
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                          password:
+                            type: string
+                responses:
+                  '200':
+                    description: Login successful
+                    content:
+                      application/json:
+                        schema:
+                          type: object
+                          properties:
+                            user:
+                              $ref: '#/components/schemas/User'
+                            token:
+                              type: string
+                  '401':
+                    description: Invalid credentials
+                    content:
+                      application/json:
+                        schema:
+                          $ref: '#/components/schemas/Error'
+            /api/user:
+              get:
+                summary: Get current user
+                operationId: getCurrentUser
+                tags: [User]
+                security:
+                  - bearerAuth: []
+                responses:
+                  '200':
+                    description: Current user information
+                    content:
+                      application/json:
+                        schema:
+                          $ref: '#/components/schemas/User'
           components:
+            securitySchemes:
+              bearerAuth:
+                type: http
+                scheme: bearer
+                bearerFormat: JWT
             schemas:
+              User:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                    format: email
+                  is_admin:
+                    type: boolean
+                  roles:
+                    type: array
+                    items:
+                      type: string
+                  roles_display:
+                    type: array
+                    items:
+                      type: string
               Error:
                 type: object
                 properties:
@@ -507,18 +612,57 @@ jobs:
                     type: string
                   code:
                     type: integer
+                  errors:
+                    type: object
+              PaginatedResponse:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: {}
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      last_page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
           EOF
             
-            echo "📄 已創建 fallback OpenAPI 檔案"
-            echo "   這將允許前端正常構建，但可能缺少最新的 API 類型定義"
+            echo "📄 已創建增強版 fallback OpenAPI 規格"
+            echo "   包含：認證端點、用戶管理、基本資料結構"
+            echo "   ⚠️ 仍建議在下次部署時同時更新 API 以獲取完整規格"
           fi
           
-          # 最終檔案狀態
+          # 最終檔案狀態報告
           echo ""
           echo "📋 最終 OpenAPI 檔案狀態："
-          ls -l openapi.yaml
-          echo "檔案大小: $(wc -c < openapi.yaml) bytes"
-          echo "檔案行數: $(wc -l < openapi.yaml) lines"
+          ls -la openapi.yaml
+          FINAL_SIZE=$(wc -c < openapi.yaml)
+          FINAL_LINES=$(wc -l < openapi.yaml)
+          echo "檔案大小: $FINAL_SIZE bytes"
+          echo "檔案行數: $FINAL_LINES lines"
+          
+          # 品質檢查
+          ENDPOINTS=$(grep -c "operationId:" openapi.yaml || echo "0")
+          SCHEMAS=$(grep -c "schemas:" openapi.yaml || echo "0")
+          echo "API 端點數量: $ENDPOINTS"
+          echo "Schema 定義: $SCHEMAS 個區塊"
+          
+          if [ "$ENDPOINTS" -gt 10 ]; then
+            echo "✅ OpenAPI 規格完整度：優秀 ($ENDPOINTS 個端點)"
+          elif [ "$ENDPOINTS" -gt 5 ]; then
+            echo "✅ OpenAPI 規格完整度：良好 ($ENDPOINTS 個端點)"
+          elif [ "$ENDPOINTS" -gt 0 ]; then
+            echo "⚠️ OpenAPI 規格完整度：基本 ($ENDPOINTS 個端點，可能影響類型生成)"
+          else
+            echo "❌ OpenAPI 規格完整度：不足，前端編譯可能失敗"
+            exit 1
+          fi
 
       # 🚀 Node.js 緩存優化
       - name: 'Setup Node.js'
