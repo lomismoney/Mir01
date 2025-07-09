@@ -339,6 +339,55 @@ jobs:
             --wait
         working-directory: . # 此步驟在根目錄執行
 
+      # 🔥 關鍵：只有當所有 API 部署步驟都成功後，才 cache OpenAPI
+      - name: 'Final OpenAPI Validation Before Cache'
+        run: |
+          echo "🔍 API 部署完全成功，準備緩存 OpenAPI 規格"
+          
+          if [ ! -f openapi.yaml ] || [ ! -s openapi.yaml ]; then
+            echo "❌ OpenAPI 檔案不存在或為空，跳過 cache"
+            exit 1
+          fi
+          
+          if ! grep -q "openapi:" openapi.yaml; then
+            echo "❌ OpenAPI 檔案格式無效，跳過 cache"
+            exit 1
+          fi
+          
+          ENDPOINTS=$(grep -c "operationId:" openapi.yaml || echo "0")
+          FINAL_SIZE=$(wc -c < openapi.yaml)
+          FINAL_LINES=$(wc -l < openapi.yaml)
+          
+          echo "📊 OpenAPI 檔案驗證："
+          echo "   檔案大小: $FINAL_SIZE bytes"
+          echo "   檔案行數: $FINAL_LINES lines"
+          echo "   API 端點數量: $ENDPOINTS"
+          
+          if [ "$ENDPOINTS" -lt 5 ]; then
+            echo "⚠️ OpenAPI 端點數量過少 ($ENDPOINTS)，可能有問題"
+            echo "🔍 檔案內容預覽："
+            head -20 openapi.yaml
+          fi
+          
+          echo "✅ OpenAPI 檔案驗證通過，準備 cache"
+        working-directory: ./inventory-api
+        if: success()
+
+      - name: 'Cache OpenAPI for Frontend (Final Step)'
+        uses: actions/cache@v4
+        with:
+          path: inventory-api/openapi.yaml
+          key: openapi-latest
+        if: success()
+
+      - name: 'Confirm OpenAPI Cache Success'
+        run: |
+          echo "✅ 後端部署完全成功"
+          echo "📦 OpenAPI 規格已緩存，對應成功部署的後端版本"
+          echo "🎯 前端部署時將使用此規格"
+          echo "🔑 Cache Key: openapi-latest"
+        if: success()
+
   deploy-client:
     name: 'Deploy Client to Cloud Run'
     runs-on: ubuntu-latest
@@ -416,6 +465,13 @@ jobs:
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
 
+      - name: 'Restore Latest OpenAPI from Cache'
+        uses: actions/cache@v4
+        with:
+          path: inventory-api/openapi.yaml
+          key: openapi-latest
+        continue-on-error: true
+
       - name: 'Download OpenAPI Artifact'
         uses: actions/download-artifact@v4
         with:
@@ -437,70 +493,48 @@ jobs:
           [ -z "$DEPLOY_API_RESULT" ] && DEPLOY_API_RESULT="skipped"
           [ -z "$DEPLOY_TARGET" ] && DEPLOY_TARGET="auto"
           
-          echo "🔍 智能 OpenAPI 獲取策略："
+          echo "🔍 智能 OpenAPI 獲取策略（Cache 優先）："
           echo "   API 變更: $API_CHANGED"
           echo "   Client 變更: $CLIENT_CHANGED"
           echo "   API 部署結果: $DEPLOY_API_RESULT"
           echo "   部署目標: $DEPLOY_TARGET"
           echo ""
           
-          # 🎯 策略 1: 檢查 artifact 下載結果
-          if [ -f ./openapi.yaml ] && [ -s ./openapi.yaml ] && grep -q "openapi:" ./openapi.yaml; then
-            echo "✅ 策略 1 成功：使用 artifact 中的 OpenAPI 規格"
-            OPENAPI_SIZE=$(wc -c < openapi.yaml)
-            OPENAPI_LINES=$(wc -l < openapi.yaml)
+          # 🎯 策略 1: 檢查 cache 結果（最高優先級）
+          if [ -f ../inventory-api/openapi.yaml ] && [ -s ../inventory-api/openapi.yaml ] && grep -q "openapi:" ../inventory-api/openapi.yaml; then
+            echo "✅ 策略 1 成功：使用 Cache 中的 OpenAPI 規格"
+            OPENAPI_SIZE=$(wc -c < ../inventory-api/openapi.yaml)
+            OPENAPI_LINES=$(wc -l < ../inventory-api/openapi.yaml)
             echo "   檔案大小: $OPENAPI_SIZE bytes, 行數: $OPENAPI_LINES"
+            echo "📦 來源：最後一次成功 API 部署的規格（Cache）"
             
-            if [ "$API_CHANGED" = "true" ]; then
-              echo "🔄 來源：最新生成的 API 規格（API 有變更）"
-            else
-              echo "📋 來源：快取的 API 規格（API 無變更）"
-            fi
+            # 複製到當前工作目錄
+            cp ../inventory-api/openapi.yaml ./openapi.yaml
           else
-            echo "❌ 策略 1 失敗：artifact 不可用或內容無效"
-            rm -f ./openapi.yaml
+            echo "❌ 策略 1 失敗：Cache 中無可用 OpenAPI 規格"
             
-            # 🌐 策略 2: 從生產環境 API 直接獲取
-            echo ""
-            echo "🌐 策略 2：從生產環境 API 獲取最新 OpenAPI 規格"
-            echo "   API 端點: ${{ secrets.API_CUSTOM_DOMAIN_URL }}/docs/openapi.yaml"
-            
-            if curl -f -s -o openapi.yaml "${{ secrets.API_CUSTOM_DOMAIN_URL }}/docs/openapi.yaml"; then
-              # 驗證從生產環境獲取的檔案
-              if [ -s ./openapi.yaml ] && grep -q "openapi:" ./openapi.yaml; then
-                echo "✅ 策略 2 成功：從生產環境獲取 OpenAPI 規格"
-                OPENAPI_SIZE=$(wc -c < openapi.yaml)
-                OPENAPI_LINES=$(wc -l < openapi.yaml)
-                echo "   檔案大小: $OPENAPI_SIZE bytes, 行數: $OPENAPI_LINES"
-                echo "🌐 來源：生產環境 API 當前規格"
-                
-                # 檢查檔案品質
-                ENDPOINT_COUNT=$(grep -c "operationId:" openapi.yaml || echo "0")
-                SCHEMA_COUNT=$(grep -c "schemas:" openapi.yaml || echo "0")
-                echo "   品質檢查：$ENDPOINT_COUNT 個端點, $SCHEMA_COUNT 個 schemas 區塊"
-                
-                if [ "$ENDPOINT_COUNT" -gt 5 ]; then
-                  echo "✅ OpenAPI 規格品質良好，包含充足的端點定義"
-                else
-                  echo "⚠️ OpenAPI 規格端點較少，可能影響前端類型生成"
-                fi
+            # 🎯 策略 2: 檢查 artifact 下載結果
+            if [ -f ./openapi.yaml ] && [ -s ./openapi.yaml ] && grep -q "openapi:" ./openapi.yaml; then
+              echo "✅ 策略 2 成功：使用 Artifact 中的 OpenAPI 規格"
+              OPENAPI_SIZE=$(wc -c < ./openapi.yaml)
+              OPENAPI_LINES=$(wc -l < ./openapi.yaml)
+              echo "   檔案大小: $OPENAPI_SIZE bytes, 行數: $OPENAPI_LINES"
+              
+              if [ "$API_CHANGED" = "true" ]; then
+                echo "🔄 來源：最新生成的 API 規格（API 有變更）"
               else
-                echo "❌ 策略 2 失敗：從生產環境獲取的檔案格式無效"
-                rm -f ./openapi.yaml
+                echo "📋 來源：當次部署生成的 API 規格"
               fi
             else
-              echo "❌ 策略 2 失敗：無法從生產環境獲取 OpenAPI 規格"
-              echo "   可能原因：網路問題、API 服務未運行、或端點不存在"
-            fi
-          fi
-          
-          # 🔧 策略 3: 創建增強版 fallback （最後手段）
-          if [ ! -f ./openapi.yaml ] || [ ! -s ./openapi.yaml ]; then
-            echo ""
-            echo "🔧 策略 3：創建增強版 fallback OpenAPI 規格"
-            echo "   ⚠️ 這是最後手段，可能導致前端類型定義不完整"
-            
-            cat > openapi.yaml << 'EOF'
+              echo "❌ 策略 2 失敗：artifact 不可用或內容無效"
+              rm -f ./openapi.yaml
+              
+              # 🔧 策略 3: 創建增強版 fallback （最後手段）
+              echo ""
+              echo "🔧 策略 3：創建增強版 fallback OpenAPI 規格"
+              echo "   ⚠️ 這是最後手段，可能導致前端類型定義不完整"
+              
+              cat > ./openapi.yaml << 'EOF'
           openapi: 3.0.0
           info:
             title: Inventory Management API
@@ -633,23 +667,30 @@ jobs:
                         type: integer
           EOF
             
-            echo "📄 已創建增強版 fallback OpenAPI 規格"
-            echo "   包含：認證端點、用戶管理、基本資料結構"
-            echo "   ⚠️ 仍建議在下次部署時同時更新 API 以獲取完整規格"
+              echo "📄 已創建增強版 fallback OpenAPI 規格"
+              echo "   包含：認證端點、用戶管理、基本資料結構"
+              echo "   ⚠️ 仍建議在下次部署時同時更新 API 以獲取完整規格"
+            fi
           fi
           
           # 最終檔案狀態報告
           echo ""
           echo "📋 最終 OpenAPI 檔案狀態："
-          ls -la openapi.yaml
-          FINAL_SIZE=$(wc -c < openapi.yaml)
-          FINAL_LINES=$(wc -l < openapi.yaml)
+          if [ -f ./openapi.yaml ]; then
+            ls -la ./openapi.yaml
+            FINAL_SIZE=$(wc -c < ./openapi.yaml)
+            FINAL_LINES=$(wc -l < ./openapi.yaml)
+          else
+            echo "❌ 找不到 OpenAPI 檔案"
+            exit 1
+          fi
+          
           echo "檔案大小: $FINAL_SIZE bytes"
           echo "檔案行數: $FINAL_LINES lines"
           
           # 品質檢查
-          ENDPOINTS=$(grep -c "operationId:" openapi.yaml || echo "0")
-          SCHEMAS=$(grep -c "schemas:" openapi.yaml || echo "0")
+          ENDPOINTS=$(grep -c "operationId:" ./openapi.yaml || echo "0")
+          SCHEMAS=$(grep -c "schemas:" ./openapi.yaml || echo "0")
           echo "API 端點數量: $ENDPOINTS"
           echo "Schema 定義: $SCHEMAS 個區塊"
           
