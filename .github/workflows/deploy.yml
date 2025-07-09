@@ -224,12 +224,6 @@ jobs:
           php artisan migrate:fresh --force --env=testing
           php artisan scribe:generate --verbose --env=testing
 
-      - name: 'Upload OpenAPI as Artifact'
-        uses: actions/upload-artifact@v4
-        with:
-          name: openapi-spec
-          path: inventory-api/storage/app/scribe/openapi.yaml
-
       # 🚀 Docker 構建優化 - 使用多層緩存
       - name: 'Set up Docker Buildx'
         uses: docker/setup-buildx-action@v3
@@ -350,24 +344,36 @@ jobs:
             --wait
         working-directory: . # 此步驟在根目錄執行
 
-      # 🔥 關鍵：只有當所有 API 部署步驟都成功後，才 cache OpenAPI
+      # 🔥 關鍵：只有當所有 API 部署步驟都成功後，才處理 OpenAPI
       - name: 'Final OpenAPI Validation Before Cache'
         run: |
           echo "🔍 API 部署完全成功，準備緩存 OpenAPI 規格"
           
-          if [ ! -f openapi.yaml ] || [ ! -s openapi.yaml ]; then
-            echo "❌ OpenAPI 檔案不存在或為空，跳過 cache"
+          # 🎯 修復路徑問題：檢查正確的 OpenAPI 檔案位置
+          OPENAPI_SOURCE="storage/app/scribe/openapi.yaml"
+          OPENAPI_TARGET="openapi.yaml"
+          
+          if [ ! -f "$OPENAPI_SOURCE" ] || [ ! -s "$OPENAPI_SOURCE" ]; then
+            echo "❌ OpenAPI 源檔案不存在或為空: $OPENAPI_SOURCE"
+            echo "🔍 檢查 storage/app/scribe/ 目錄內容："
+            ls -la storage/app/scribe/ || echo "目錄不存在"
             exit 1
           fi
           
-          if ! grep -q "openapi:" openapi.yaml; then
+          # 複製到根目錄以便 cache（保持 artifact 和 cache 的一致性）
+          cp "$OPENAPI_SOURCE" "$OPENAPI_TARGET"
+          echo "✅ 已複製 OpenAPI 檔案：$OPENAPI_SOURCE → $OPENAPI_TARGET"
+          
+          if ! grep -q "openapi:" "$OPENAPI_TARGET"; then
             echo "❌ OpenAPI 檔案格式無效，跳過 cache"
+            echo "🔍 檔案內容預覽："
+            head -10 "$OPENAPI_TARGET"
             exit 1
           fi
           
-          ENDPOINTS=$(grep -c "operationId:" openapi.yaml || echo "0")
-          FINAL_SIZE=$(wc -c < openapi.yaml)
-          FINAL_LINES=$(wc -l < openapi.yaml)
+          ENDPOINTS=$(grep -c "operationId:" "$OPENAPI_TARGET" || echo "0")
+          FINAL_SIZE=$(wc -c < "$OPENAPI_TARGET")
+          FINAL_LINES=$(wc -l < "$OPENAPI_TARGET")
           
           echo "📊 OpenAPI 檔案驗證："
           echo "   檔案大小: $FINAL_SIZE bytes"
@@ -377,11 +383,18 @@ jobs:
           if [ "$ENDPOINTS" -lt 5 ]; then
             echo "⚠️ OpenAPI 端點數量過少 ($ENDPOINTS)，可能有問題"
             echo "🔍 檔案內容預覽："
-            head -20 openapi.yaml
+            head -20 "$OPENAPI_TARGET"
           fi
           
-          echo "✅ OpenAPI 檔案驗證通過，準備 cache"
+          echo "✅ OpenAPI 檔案驗證通過，準備上傳和緩存"
         working-directory: ./inventory-api
+        if: success()
+
+      - name: 'Upload OpenAPI as Artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: inventory-api/openapi.yaml
         if: success()
 
       - name: 'Cache OpenAPI for Frontend (Final Step)'
@@ -487,7 +500,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: openapi-spec
-          path: ./inventory-client
+          path: ./artifact-temp
         continue-on-error: true
 
       - name: 'Smart OpenAPI Acquisition Strategy'
@@ -525,11 +538,14 @@ jobs:
             echo "❌ 策略 1 失敗：Cache 中無可用 OpenAPI 規格"
             
             # 🎯 策略 2: 檢查 artifact 下載結果
-            if [ -f ./openapi.yaml ] && [ -s ./openapi.yaml ] && grep -q "openapi:" ./openapi.yaml; then
+            if [ -f ../artifact-temp/openapi.yaml ] && [ -s ../artifact-temp/openapi.yaml ] && grep -q "openapi:" ../artifact-temp/openapi.yaml; then
               echo "✅ 策略 2 成功：使用 Artifact 中的 OpenAPI 規格"
-              OPENAPI_SIZE=$(wc -c < ./openapi.yaml)
-              OPENAPI_LINES=$(wc -l < ./openapi.yaml)
+              OPENAPI_SIZE=$(wc -c < ../artifact-temp/openapi.yaml)
+              OPENAPI_LINES=$(wc -l < ../artifact-temp/openapi.yaml)
               echo "   檔案大小: $OPENAPI_SIZE bytes, 行數: $OPENAPI_LINES"
+              
+              # 複製到當前工作目錄
+              cp ../artifact-temp/openapi.yaml ./openapi.yaml
               
               if [ "$API_CHANGED" = "true" ]; then
                 echo "🔄 來源：最新生成的 API 規格（API 有變更）"
@@ -538,6 +554,11 @@ jobs:
               fi
             else
               echo "❌ 策略 2 失敗：artifact 不可用或內容無效"
+              
+              # 檢查 artifact 目錄內容以便調試
+              echo "🔍 檢查 artifact 目錄內容："
+              ls -la ../artifact-temp/ || echo "artifact-temp 目錄不存在"
+              
               rm -f ./openapi.yaml
               
               # 🔧 策略 3: 創建增強版 fallback （最後手段）
