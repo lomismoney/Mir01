@@ -8,6 +8,7 @@ import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/toaster";
 import { StagewiseToolbar } from "@stagewise/toolbar-next";
 import { ReactPlugin } from "@stagewise-plugins/react";
+import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -20,13 +21,20 @@ export const metadata: Metadata = {
 };
 
 /**
- * 根佈局組件（Auth.js 完整版本）
+ * 根佈局組件（Auth.js + 錯誤邊界完整版本）
  *
  * 提供全局的應用程式架構，包含：
  * 1. 主題管理 (ThemeProvider)
  * 2. Auth.js Session 管理 (SessionProvider)
  * 3. React Query 狀態管理 (QueryProvider)
  * 4. Toast 通知系統 (Toaster)
+ * 5. 🔐 身份驗證錯誤邊界保護 (AuthErrorBoundary) - NEW
+ *
+ * 🛡️ 安全特性升級：
+ * - 雙重身份驗證保護 (中介軟體 + 客戶端)
+ * - 錯誤邊界捕獲身份驗證異常
+ * - 優雅的錯誤處理和用戶引導
+ * - 防止未登入用戶觸發客戶端錯誤
  *
  * @param children - 子頁面內容
  */
@@ -49,15 +57,18 @@ export default function RootLayout({
           data-oid="tonwzxq"
         >
           <SessionProvider data-oid="_g6ifp_">
-            <QueryProvider data-oid="ok99bhf">
-              {children}
-              <Toaster data-oid="tm249ru" />
-              <StagewiseToolbar
-                config={{
-                  plugins: [ReactPlugin],
-                }}
-              />
-            </QueryProvider>
+            {/* 🔐 錯誤邊界保護：捕獲身份驗證相關的客戶端錯誤 */}
+            <AuthErrorBoundary>
+              <QueryProvider data-oid="ok99bhf">
+                {children}
+                <Toaster data-oid="tm249ru" />
+                <StagewiseToolbar
+                  config={{
+                    plugins: [ReactPlugin],
+                  }}
+                />
+              </QueryProvider>
+            </AuthErrorBoundary>
           </SessionProvider>
         </ThemeProvider>
       </body>

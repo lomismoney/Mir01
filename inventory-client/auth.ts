@@ -121,15 +121,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     /**
-     * 授權回呼函式 - 中間件核心邏輯（重定向修復版）
+     * 授權回呼函式 - 全路徑身份驗證保護（強化版本）
      * 
-     * 採用「預設保護」策略：除了明確定義的公開路由外，所有路由都需要登入
-     * 此策略能確保系統安全性，並根除登入循環問題
+     * 🔐 採用「全域保護」策略：除了明確定義的公開路由外，所有路由都需要登入
+     * 🎯 確保 internal.lomis.com.tw/* 所有路徑都受到保護
      * 
-     * 🔧 重定向修復：
-     * 1. 讓 Auth.js 完全處理重定向邏輯
-     * 2. 已登入用戶訪問登入頁時重定向到儀表板
-     * 3. 確保認證流程的完整性
+     * 核心邏輯：
+     * 1. 定義公開路由白名單（僅限登入相關頁面）
+     * 2. 已登入用戶訪問登入頁 → 重定向到儀表板
+     * 3. 未登入用戶訪問任何受保護路由 → 重定向到登入頁
+     * 4. 根路徑特殊處理，確保正確導向
      * 
      * 在 Edge Runtime 中執行，效能極佳
      * 
@@ -139,43 +140,68 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      */
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
+      const pathname = nextUrl.pathname;
       
-      // 定義不需要登入即可訪問的公開路由
-      const publicRoutes = ['/login'];
-      const isPublicRoute = publicRoutes.some(route => nextUrl.pathname.startsWith(route));
+      console.log(`🔍 Auth.js authorized: ${pathname}, 登入狀態: ${isLoggedIn ? '已登入' : '未登入'}`);
       
-      // 特殊處理根路徑
-      if (nextUrl.pathname === '/') {
+      // 🔐 定義公開路由白名單 - 只有這些路徑不需要登入
+      const publicRoutes = [
+        '/login',
+        '/api/auth', // NextAuth.js API 路由
+      ];
+      
+      // 檢查是否為公開路由
+      const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+      
+      // 🔐 特殊處理根路徑 - 確保立即重定向
+      if (pathname === '/') {
         if (isLoggedIn) {
           // 已登入用戶訪問根路徑，重定向到儀表板
-          return Response.redirect(new URL('/dashboard', nextUrl.origin));
+          const dashboardUrl = new URL('/dashboard', nextUrl.origin);
+          console.log(`🏠 根路徑重定向 (已登入): ${dashboardUrl.toString()}`);
+          return Response.redirect(dashboardUrl);
         } else {
           // 未登入用戶訪問根路徑，重定向到登入頁
-          return Response.redirect(new URL('/login', nextUrl.origin));
+          const loginUrl = new URL('/login', nextUrl.origin);
+          console.log(`🏠 根路徑重定向 (未登入): ${loginUrl.toString()}`);
+          return Response.redirect(loginUrl);
         }
       }
 
-      // 🔧 關鍵修復：已登入用戶不應該訪問登入頁
-      if (isPublicRoute && isLoggedIn) {
-        // 已登入用戶訪問登入頁時，重定向到儀表板
-        // 使用絕對 URL 避免 Cloudflare 代理問題
+      // 🔐 已登入用戶訪問登入頁 → 重定向到儀表板
+      if (isPublicRoute && isLoggedIn && pathname.startsWith('/login')) {
         const dashboardUrl = new URL('/dashboard', nextUrl.origin);
+        console.log(`🔄 登入頁重定向 (已登入): ${dashboardUrl.toString()}`);
         return Response.redirect(dashboardUrl);
       }
       
-      // 公開路由且未登入，允許訪問
-      if (isPublicRoute) {
+      // 🔐 公開路由且未登入 → 允許訪問
+      if (isPublicRoute && !isLoggedIn) {
+        console.log(`✅ 允許訪問公開路由: ${pathname}`);
         return true;
       }
 
-      // 對於所有其他的非公開路由：
-      if (isLoggedIn) {
-        // 如果用戶已登入，允許訪問
+      // 🔐 已登入用戶訪問受保護路由 → 允許訪問
+      if (isLoggedIn && !isPublicRoute) {
+        console.log(`✅ 已登入用戶訪問受保護路由: ${pathname}`);
         return true;
       }
+
+      // 🔐 未登入用戶訪問任何受保護路由 → 強制重定向到登入頁
+      if (!isLoggedIn && !isPublicRoute) {
+        // 保存原始 URL 以便登入後返回
+        const loginUrl = new URL('/login', nextUrl.origin);
+        if (pathname !== '/login') {
+          loginUrl.searchParams.set('callbackUrl', pathname + nextUrl.search);
+        }
+        
+        console.log(`🔐 未登入重定向: ${pathname} -> ${loginUrl.toString()}`);
+        return Response.redirect(loginUrl);
+      }
       
-      // 如果用戶未登入，則拒絕訪問，Auth.js 會自動將他們重定向到登入頁
-      return false; 
+      // 🔐 預設行為：拒絕訪問
+      console.log(`❌ 拒絕訪問 (預設): ${pathname}, 登入狀態: ${isLoggedIn}`);
+      return false;
     },
     /**
      * JWT 回呼函式 - 密鑰統一作戰核心

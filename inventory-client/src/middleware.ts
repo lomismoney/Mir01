@@ -65,14 +65,25 @@ function isValidHost(host: string): boolean {
 }
 
 /**
- * 結合 Host 驗證和認證的中間件
+ * 簡化中間件（專注於 Host 驗證和 HTTPS 重定向）
  * 
- * 1. 首先檢查 host 是否可信任
- * 2. 然後讓 Auth.js 處理認證邏輯
+ * 🔐 身份驗證邏輯完全交由 Auth.js 的 authorized 回調處理
+ * 
+ * 職責分離：
+ * 1. Host 安全驗證 - 確保請求來自可信任的域名
+ * 2. HTTPS 重定向 - 處理 Cloudflare 代理的 HTTP/HTTPS 問題  
+ * 3. 🔥 身份驗證邏輯 → 由 auth.ts 中的 authorized 回調完全處理
+ * 
+ * 優勢：
+ * - 避免重複的身份驗證邏輯
+ * - 確保邏輯一致性和可維護性
+ * - 讓 Auth.js 完全控制身份驗證流程
  */
 export default auth((req) => {
   const host = req.headers.get('host') || '';
   const forwardedProto = req.headers.get('x-forwarded-proto');
+  
+  console.log(`🔍 中介軟體 Host 檢查: ${host}, 協議: ${forwardedProto || 'unknown'}`);
   
   // 第一層：Host 安全驗證
   if (!isValidHost(host)) {
@@ -82,21 +93,20 @@ export default auth((req) => {
     return new NextResponse('Forbidden: Invalid host', { status: 403 });
   }
 
-  // 🔧 處理 Cloudflare 的 HTTP/HTTPS 問題
-  // 如果通過 Cloudflare 代理，檢查 x-forwarded-proto
+  // 第二層：🔧 處理 Cloudflare 的 HTTP/HTTPS 問題
   if (forwardedProto === 'http' && process.env.NODE_ENV === 'production') {
     // 在生產環境中，如果請求是 HTTP，重定向到 HTTPS
     const httpsUrl = new URL(req.url);
     httpsUrl.protocol = 'https:';
+    console.log(`🔒 HTTP 重定向到 HTTPS: ${httpsUrl.toString()}`);
     return NextResponse.redirect(httpsUrl);
   }
 
-  // 第二層：Auth.js 認證邏輯
-  // 這裡的認證邏輯由 auth.ts 中的 authorized 回調處理：
-  // - 公開路由（如 /login）允許訪問
-  // - 受保護路由需要登入，未登入會自動重定向到 /login
+  // 第三層：🔐 身份驗證由 Auth.js 的 authorized 回調處理
+  // 這裡不需要額外的身份驗證邏輯，完全交由 auth.ts 處理
+  console.log(`✅ Host 驗證通過，身份驗證交由 Auth.js 處理`);
   
-  // 如果到達這裡，表示 host 有效且認證已通過
+  // 如果到達這裡，表示 host 有效，繼續執行 Auth.js 的身份驗證邏輯
   return NextResponse.next();
 })
 
@@ -108,7 +118,8 @@ export const config = {
      * - _next/static (靜態檔案)
      * - _next/image (圖片優化)
      * - favicon.ico (網站圖示)
+     * - 其他靜態資源
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*|sitemap\\.xml|robots\\.txt).*)',
   ],
 } 
