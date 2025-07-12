@@ -7,11 +7,11 @@ import { AlertCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export function BackorderAlert() {
-  const { data: stats, isLoading } = useBackorderStats();
+  const { data: stats, isLoading, error } = useBackorderStats();
 
-  // 如果沒有待處理的預訂商品，不顯示警示
+  // 如果正在載入、有錯誤或沒有待處理的預訂商品，不顯示警示
   // useBackorderStats 現在已經透過 select 解包了 data，所以直接存取欄位
-  if (isLoading || !stats || (stats.total_items || 0) === 0) {
+  if (isLoading || error || !stats || (stats.total_items || 0) === 0) {
     return null;
   }
 

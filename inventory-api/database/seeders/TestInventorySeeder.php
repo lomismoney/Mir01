@@ -759,6 +759,7 @@ class TestInventorySeeder extends Seeder
                     'shipping_cost' => $shippingCost,
                     'status' => $status,
                     'notes' => $this->getPurchaseNotes($status),
+                    'total_amount' => $shippingCost, // 先設定為運費，後面會更新為總金額
                     'created_at' => $createdAt,
                     'updated_at' => $createdAt,
                 ]);
@@ -784,7 +785,9 @@ class TestInventorySeeder extends Seeder
                         'purchase_id' => $purchase->id,
                         'product_variant_id' => $variant->id,
                         'quantity' => $quantity,
-                        'cost_price' => $costPrice,
+                        'unit_price' => $costPrice, // 進貨單價
+                        'cost_price' => $costPrice, // 成本價
+                        'allocated_shipping_cost' => 0, // 攤銷的運費成本，先設為0
                         'created_at' => $createdAt,
                         'updated_at' => $createdAt,
                     ]);

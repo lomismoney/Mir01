@@ -16,11 +16,14 @@ class CustomerSeeder extends Seeder
         $customers = [
             [
                 'name' => '王小明',
-                'email' => 'xiaoming.wang@example.com',
                 'phone' => '0912-345-678',
-                'birthday' => '1985-05-15',
-                'gender' => 'male',
-                'notes' => 'VIP客戶，經常購買3C產品',
+                'is_company' => false,
+                'tax_id' => null,
+                'industry_type' => '個人客戶',
+                'payment_type' => '現金',
+                'contact_address' => '台北市信義區信義路五段7號',
+                'total_unpaid_amount' => 0,
+                'total_completed_amount' => 0,
                 'addresses' => [
                     [
                         'type' => 'home',

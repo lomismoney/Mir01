@@ -975,7 +975,7 @@ class OrderService extends BaseService
      */
     public function getPendingBackordersStats(): array
     {
-        $stats = OrderItem::where(function ($q) {
+        $stats = \App\Models\OrderItem::where(function ($q) {
                 // 包含預訂商品和需要進貨的訂製商品
                 $q->where('is_backorder', true)
                   ->orWhere(function ($subQ) {

@@ -25,16 +25,16 @@ class DatabaseSeeder extends Seeder
             TestInventorySeeder::class, // 包含商品、變體、庫存和進貨單
             
             // 客戶資料
-            CustomerSeeder::class,
+            // CustomerSeeder::class, // 暫時跳過，需要修復欄位問題
             
             // 訂單資料
-            OrderSeeder::class,
+            // OrderSeeder::class, // 暫時跳過，等客戶資料修復後再啟用
             
             // 進貨單與訂單關聯
-            PurchaseOrderLinkSeeder::class,
+            // PurchaseOrderLinkSeeder::class, // 暫時跳過，等訂單資料修復後再啟用
             
             // 低庫存預警場景
-            LowStockScenarioSeeder::class,
+            // LowStockScenarioSeeder::class, // 暫時跳過，等基礎資料修復後再啟用
         ]);
         
         $this->command->info('✅ 所有測試資料建立完成！');

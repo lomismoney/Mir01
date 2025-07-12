@@ -29,15 +29,53 @@ export function useBackorderStats() {
   return useQuery({
     queryKey: ['backorder-stats'],
     queryFn: async () => {
-      const response = await apiClient.GET('/api/backorders/stats', {});
-      return response.data;
+      try {
+        const response = await apiClient.GET('/api/backorders/stats', {});
+        // 確保有錯誤處理
+        if (response.error) {
+          console.error('API 錯誤回應:', response.error);
+          throw new Error('獲取待進貨統計失敗');
+        }
+        // 檢查回應數據
+        if (!response.data) {
+          console.warn('API 回應沒有 data 欄位');
+          return {
+            data: {
+              total_items: 0,
+              unique_products: 0,
+              days_pending: 0,
+            }
+          };
+        }
+        return response.data;
+      } catch (error) {
+        console.error('useBackorderStats 請求失敗:', error);
+        throw error;
+      }
     },
     // 🎯 數據精煉廠：解包 API 回應的 data 欄位
     select: (response: any) => {
+      // 如果 response 是 undefined，返回預設值
+      if (!response) {
+        console.warn('select: response 是 undefined');
+        return {
+          total_items: 0,
+          unique_products: 0,
+          days_pending: 0,
+        };
+      }
       // 如果 API 回應有 data 欄位，直接回傳 data 內容
       // 否則回傳整個回應（向後兼容）
-      return response?.data || response;
+      const result = response?.data || response;
+      return result || {
+        total_items: 0,
+        unique_products: 0,
+        days_pending: 0,
+      };
     },
+    // 添加重試和錯誤處理配置
+    retry: 1,
+    retryDelay: 1000,
   });
 }
 

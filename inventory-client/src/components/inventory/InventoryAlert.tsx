@@ -57,11 +57,11 @@ export function InventoryAlert() {
               發現 <span className="font-semibold text-red-600">{critical_stock_count || 0}</span> 個商品缺貨，
               <span className="font-semibold text-orange-600">{low_stock_count || 0}</span> 個商品庫存偏低。
             </p>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               庫存健康度：<Badge variant={healthStatus.variant} className="text-xs">
                 {healthStatus.label} {alerts?.health_score || 0}%
               </Badge>
-            </p>
+            </div>
           </div>
           
           <div className="flex items-center gap-2">
