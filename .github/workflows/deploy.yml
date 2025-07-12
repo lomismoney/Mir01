@@ -741,18 +741,58 @@ jobs:
       - name: 'Setup Node.js'
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'  # 更新到更穩定的版本
           cache: 'npm'
           cache-dependency-path: inventory-client/package-lock.json
 
-      - name: 'Cache Next.js build'
-        uses: actions/cache@v4
-        with:
-          path: |
-            inventory-client/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('inventory-client/package-lock.json') }}-${{ hashFiles('inventory-client/**/*.js', 'inventory-client/**/*.jsx', 'inventory-client/**/*.ts', 'inventory-client/**/*.tsx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('inventory-client/package-lock.json') }}-
+      - name: 'Install Dependencies'
+        run: |
+          echo "🔍 安裝依賴前的環境檢查："
+          echo "Node.js 版本: $(node --version)"
+          echo "npm 版本: $(npm --version)"
+          echo "當前目錄: $(pwd)"
+          echo "package.json 檢查："
+          ls -la package.json
+          
+          npm ci --verbose
+          
+          echo "✅ 依賴安裝完成"
+          echo "node_modules 大小: $(du -sh node_modules)"
+        working-directory: ./inventory-client
+
+      - name: 'Generate API Types'
+        run: |
+          echo "🔍 生成 API 類型定義："
+          echo "OpenAPI 檔案檢查："
+          ls -la openapi.yaml
+          
+          # 確保 openapi.yaml 檔案存在並有效
+          if ! grep -q "openapi:" openapi.yaml; then
+            echo "❌ OpenAPI 檔案格式無效"
+            head -10 openapi.yaml
+            exit 1
+          fi
+          
+          npm run api:types
+          
+          echo "✅ API 類型定義生成完成"
+          echo "生成的類型檔案檢查："
+          ls -la src/types/api.ts
+        working-directory: ./inventory-client
+        
+      - name: 'Build Application with Enhanced Logging'
+        run: |
+          echo "🚀 開始構建應用："
+          echo "構建前環境檢查："
+          echo "記憶體使用: $(free -h || echo 'N/A')"
+          echo "磁碟空間: $(df -h . || echo 'N/A')"
+          
+          # 設置更詳細的 Next.js 構建日誌
+          export DEBUG=1
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          
+          npm run build
+        working-directory: ./inventory-client
 
       # 🚀 Docker 構建優化 - 使用多層緩存
       - name: 'Set up Docker Buildx'

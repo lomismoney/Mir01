@@ -1,32 +1,52 @@
-# Next.js 14 前端 Dockerfile (多階段構建生產環境)
+# Next.js 15 前端 Dockerfile (多階段構建生產環境) - 修復版
 
 # Stage 1: 依賴安裝階段
 FROM node:20-alpine AS deps
 WORKDIR /app
 
+# 安裝構建工具（某些 npm 包可能需要）
+RUN apk add --no-cache libc6-compat
+
 # 僅複製 package 文件以利用 Docker 層緩存
 COPY package.json package-lock.json* ./
-# 安裝依賴
-RUN npm ci --only=production && npm cache clean --force
+
+# 清理安裝（確保一致性）
+RUN npm ci --only=production --frozen-lockfile && npm cache clean --force
 
 # Stage 2: 構建階段
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# 安裝構建工具
+RUN apk add --no-cache libc6-compat
+
 # 接受構建時參數
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
-# 複製依賴
-COPY --from=deps /app/node_modules ./node_modules
+# 複製 package 文件
+COPY package.json package-lock.json* ./
+
+# 安裝所有依賴（包括 devDependencies）用於構建
+RUN npm ci --frozen-lockfile
+
 # 複製源代碼
 COPY . .
 
-# 安裝所有依賴（包括 devDependencies）用於構建
-RUN npm ci
+# 確保 OpenAPI 檔案存在並生成 API 類型
+RUN if [ ! -f "openapi.yaml" ]; then \
+      echo "⚠️ Warning: openapi.yaml not found, creating minimal version" && \
+      echo "openapi: 3.0.0" > openapi.yaml && \
+      echo "info:" >> openapi.yaml && \
+      echo "  title: Inventory API" >> openapi.yaml && \
+      echo "  version: 1.0.0" >> openapi.yaml && \
+      echo "paths: {}" >> openapi.yaml; \
+    fi && \
+    npm run api:types
 
-# 生成 API 類型
-RUN npm run api:types
+# 設置構建環境變數
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 # 構建應用
 RUN npm run build
