@@ -94,49 +94,55 @@ export function useImageSelection(initialPreviewUrl?: string | null) {
     const validation = validateImageFile(file);
     
     if (validation.isValid) {
-      // 清理舊的 blob URL（不清理外部 URL）
-      if (imageData.preview && imageData.preview.startsWith('blob:')) {
-        URL.revokeObjectURL(imageData.preview);
-      }
-      
       // 創建新的預覽 URL
       const previewUrl = URL.createObjectURL(file);
       
-      setImageData({
-        file,
-        preview: previewUrl,
-        isValid: true,
+      setImageData((prev) => {
+        // 清理舊的 blob URL（不清理外部 URL）
+        if (prev.preview && prev.preview.startsWith('blob:')) {
+          URL.revokeObjectURL(prev.preview);
+        }
+        
+        return {
+          file,
+          preview: previewUrl,
+          isValid: true,
+        };
       });
     } else {
-      // 驗證失敗，清理狀態
-      if (imageData.preview && imageData.preview.startsWith('blob:')) {
-        URL.revokeObjectURL(imageData.preview);
-      }
-      
-      setImageData({
-        file: null,
-        preview: null,
-        isValid: false,
-        validationError: validation.error,
+      setImageData((prev) => {
+        // 驗證失敗，清理狀態
+        if (prev.preview && prev.preview.startsWith('blob:')) {
+          URL.revokeObjectURL(prev.preview);
+        }
+        
+        return {
+          file: null,
+          preview: null,
+          isValid: false,
+          validationError: validation.error,
+        };
       });
     }
-  }, [imageData.preview]);
+  }, []);
 
   /**
    * 清除圖片選擇
    */
   const clearImage = useCallback(() => {
-    // 清理預覽 URL（只清理 blob URL，不清理外部 URL）
-    if (imageData.preview && imageData.preview.startsWith('blob:')) {
-      URL.revokeObjectURL(imageData.preview);
-    }
-    
-    setImageData({
-      file: null,
-      preview: null,
-      isValid: true,
+    setImageData((prev) => {
+      // 清理預覽 URL（只清理 blob URL，不清理外部 URL）
+      if (prev.preview && prev.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(prev.preview);
+      }
+      
+      return {
+        file: null,
+        preview: null,
+        isValid: true,
+      };
     });
-  }, [imageData.preview]);
+  }, []);
 
   /**
    * 設置外部圖片 URL（用於編輯模式）
@@ -144,18 +150,20 @@ export function useImageSelection(initialPreviewUrl?: string | null) {
    * @param url - 外部圖片 URL
    */
   const setExternalPreview = useCallback((url: string | null) => {
-    // 清理舊的 blob URL
-    if (imageData.preview && imageData.preview.startsWith('blob:')) {
-      URL.revokeObjectURL(imageData.preview);
-    }
-    
-    setImageData(prev => ({
-      ...prev,
-      preview: url,
-      file: null, // 外部 URL 時清空文件
-      isValid: true,
-    }));
-  }, [imageData.preview]);
+    setImageData(prev => {
+      // 清理舊的 blob URL
+      if (prev.preview && prev.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(prev.preview);
+      }
+      
+      return {
+        ...prev,
+        preview: url,
+        file: null, // 外部 URL 時清空文件
+        isValid: true,
+      };
+    });
+  }, []);
 
   /**
    * 獲取圖片元數據

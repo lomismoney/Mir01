@@ -56,7 +56,7 @@ import { useSession } from "next-auth/react";
 import { AdaptiveTable } from "@/components/ui/AdaptiveTable";
 import { PRODUCT_MODAL_TYPES } from "@/hooks/useModalManager";
 import { flexRender } from "@tanstack/react-table";
-import { useReactTable, getCoreRowModel, getExpandedRowModel, getSortedRowModel, getFilteredRowModel } from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, getExpandedRowModel, getSortedRowModel, getFilteredRowModel, getPaginationRowModel } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
 
@@ -158,6 +158,7 @@ const ProductClientComponent = () => {
     getExpandedRowModel: getExpandedRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getSubRows,
     enableExpanding: true,
     state: {
@@ -173,6 +174,11 @@ const ProductClientComponent = () => {
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     enableRowSelection: enableRowSelection,
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
   });
 
   /**
@@ -504,24 +510,63 @@ const ProductClientComponent = () => {
                   個商品
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                   
-                  >
-                    上一頁
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                   
-                  >
-                    下一頁
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm font-medium">每頁顯示</p>
+                    <select
+                      value={table.getState().pagination.pageSize}
+                      onChange={e => {
+                        table.setPageSize(Number(e.target.value))
+                      }}
+                      className="h-8 w-[70px] rounded-md border border-input bg-transparent px-2 py-1 text-sm"
+                    >
+                      {[10, 20, 30, 40, 50].map(pageSize => (
+                        <option key={pageSize} value={pageSize}>
+                          {pageSize}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => table.setPageIndex(0)}
+                      disabled={!table.getCanPreviousPage()}
+                    >
+                      首頁
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                    >
+                      上一頁
+                    </Button>
+                    <span className="flex items-center gap-1">
+                      <div className="text-sm">第</div>
+                      <strong className="text-sm">
+                        {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+                      </strong>
+                      <div className="text-sm">頁</div>
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                    >
+                      下一頁
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                      disabled={!table.getCanNextPage()}
+                    >
+                      末頁
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -193,7 +193,7 @@ export function Step1_BasicInfoWithImage({
     if (isEditMode && formData.imageData.previewUrl && !imageSelection.imageData.preview) {
       imageSelection.setExternalPreview(formData.imageData.previewUrl);
     }
-  }, [isEditMode, formData.imageData.previewUrl, imageSelection.imageData.preview, imageSelection]);
+  }, [isEditMode, formData.imageData.previewUrl, imageSelection.imageData.preview, imageSelection.setExternalPreview]);
 
   /**
    * 同步圖片選擇到父組件
@@ -201,15 +201,23 @@ export function Step1_BasicInfoWithImage({
    */
   useEffect(() => {
     // 只有在選擇了新文件時才更新
-    if (imageSelection.imageData.file) {
-      updateFormData("imageData", {
-        selectedFile: imageSelection.imageData.file,
-        previewUrl: imageSelection.imageData.preview,
-      });
+    // 使用時間戳來確保只在真正的新文件時才更新
+    if (imageSelection.imageData.file && imageSelection.imageData.preview) {
+      const currentFile = imageSelection.imageData.file;
+      const currentPreview = imageSelection.imageData.preview;
+      
+      // 檢查是否是真正的新文件（避免重複更新）
+      if (formData.imageData.selectedFile !== currentFile) {
+        updateFormData("imageData", {
+          selectedFile: currentFile,
+          previewUrl: currentPreview,
+        });
+      }
     }
   }, [
     imageSelection.imageData.file,
     imageSelection.imageData.preview,
+    formData.imageData.selectedFile,
     updateFormData,
   ]);
 

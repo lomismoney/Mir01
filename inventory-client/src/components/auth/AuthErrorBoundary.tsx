@@ -95,19 +95,7 @@ export class AuthErrorBoundary extends Component<
       error.message.includes("unauthorized") ||
       error.message.includes("unauthenticated");
 
-    if (isAuthError) {
-      console.error("🔐 身份驗證錯誤邊界捕獲錯誤:", errorData);
-    } else {
-      console.error("🚨 錯誤邊界捕獲一般錯誤:", errorData);
-    }
-
-    // 在開發環境中，也記錄到控制台以便調試
-    if (process.env.NODE_ENV === "development") {
-      console.group("🔍 錯誤邊界詳細信息");
-      console.error("錯誤:", error);
-      console.error("錯誤信息:", errorInfo);
-      console.groupEnd();
-    }
+    // 錯誤已經被記錄，不需要額外的 console.error
   };
 
   /**

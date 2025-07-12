@@ -270,12 +270,24 @@ export function useProductWizard(productId?: string | number): UseProductWizardR
         productResponse = await createProduct.mutateAsync(apiData);
       }
 
-      // 處理圖片上傳
+      // 處理圖片上傳（只在有新選擇的檔案時才上傳）
       if (formData.imageData.selectedFile && (productResponse?.data as any)?.id) {
-        await uploadImage.mutateAsync({
-          productId: (productResponse.data as any).id,
-          image: formData.imageData.selectedFile,
-        });
+        try {
+          await uploadImage.mutateAsync({
+            productId: (productResponse.data as any).id,
+            image: formData.imageData.selectedFile,
+          });
+        } catch (imageError) {
+          // 圖片上傳失敗
+          // 圖片上傳失敗不應該阻止商品創建成功
+          // 只顯示警告訊息
+          if (typeof window !== 'undefined') {
+            const { toast } = require('sonner');
+            toast.warning('商品已創建，但圖片上傳失敗', {
+              description: '您可以稍後在編輯頁面重新上傳圖片。'
+            });
+          }
+        }
       }
 
       handleSuccess(
@@ -285,7 +297,7 @@ export function useProductWizard(productId?: string | number): UseProductWizardR
       // 導航回商品列表
       router.push("/products");
     } catch (error) {
-      console.error("提交失敗:", error);
+      // 提交失敗
       handleError(new Error(
         isEditMode ? "更新商品失敗" : "創建商品失敗"
       ));
