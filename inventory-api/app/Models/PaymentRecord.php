@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HandlesCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PaymentRecord extends Model
 {
-    use HasFactory;
+    use HasFactory, HandlesCurrency;
 
     /**
      * 可批量賦值的屬性
@@ -26,14 +27,17 @@ class PaymentRecord extends Model
         'payment_method',
         'payment_date',
         'notes',
+        // 金額欄位（分為單位）
+        'amount_cents',
     ];
 
     /**
      * 屬性類型轉換
      */
     protected $casts = [
-        'amount' => 'decimal:2',
         'payment_date' => 'datetime',
+        // 金額欄位使用分為單位
+        'amount_cents' => 'integer',
     ];
 
     /**
@@ -62,5 +66,31 @@ class PaymentRecord extends Model
             'transfer' => '轉帳',
             'credit_card' => '信用卡',
         ];
+    }
+
+    // ===== 金額處理方法 =====
+
+    /**
+     * 定義金額欄位
+     */
+    protected function getCurrencyFields(): array
+    {
+        return ['amount'];
+    }
+
+    /**
+     * 金額 Accessor
+     */
+    public function getAmountAttribute(): float
+    {
+        return self::centsToYuan($this->getCentsValue('amount'));
+    }
+
+    /**
+     * 金額 Mutator
+     */
+    public function setAmountAttribute($value): void
+    {
+        $this->setCurrencyValue('amount', $value);
     }
 }

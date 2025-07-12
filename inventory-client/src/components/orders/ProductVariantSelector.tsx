@@ -103,24 +103,24 @@ export function ProductVariantSelector({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="1.uzhmd">
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="w-[90vw] max-w-[1400px] max-h-[80vh] flex flex-col"
-        data-oid="1:8zfs9"
+       
       >
-        <DialogHeader data-oid="lud12wk">
-          <DialogTitle className="flex items-center gap-2" data-oid="lkr8b3m">
-            <Package className="h-5 w-5" data-oid="t_6hvif" />
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
             選擇商品項目
           </DialogTitle>
         </DialogHeader>
 
         {/* 搜尋欄 */}
-        <div className="flex items-center space-x-2" data-oid="xqdwq4j">
-          <div className="relative flex-1" data-oid="b4uv3ll">
+        <div className="flex items-center space-x-2">
+          <div className="relative flex-1">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"
-              data-oid="7ac:o:y"
+             
             />
 
             <Input
@@ -128,10 +128,10 @@ export function ProductVariantSelector({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
-              data-oid="evd55g6"
+             
             />
           </div>
-          <Badge variant="outline" data-oid="70bd5hb">
+          <Badge variant="outline">
             已選擇 {selectedVariants.length} 項
           </Badge>
         </div>
@@ -139,81 +139,81 @@ export function ProductVariantSelector({
         {/* 商品變體表格 */}
         <div
           className="flex-1 overflow-auto border rounded-md"
-          data-oid="8pn_1.q"
+         
         >
-          <Table data-oid="xl5c5cm">
-            <TableHeader data-oid="3.uybz_">
+          <Table>
+            <TableHeader>
               <TableRow
                 className="border-b hover:bg-transparent"
-                data-oid="lab6bdf"
+               
               >
                 <TableHead
                   className="w-12 h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="_u3rmjn"
+                 
                 >
                   選擇
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="6-z82vy"
+                 
                 >
                   商品名稱
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="w69elp3"
+                 
                 >
                   SKU
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="xe5ttg4"
+                 
                 >
                   規格
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="3cf7ov5"
+                 
                 >
                   分類
                 </TableHead>
                 <TableHead
                   className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-                  data-oid="pq3yge2"
+                 
                 >
                   單價
                 </TableHead>
                 <TableHead
                   className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-                  data-oid="h65rp2_"
+                 
                 >
                   庫存
                 </TableHead>
                 <TableHead
                   className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-                  data-oid="t4anc.1"
+                 
                 >
                   狀態
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody data-oid="efbch:q">
+            <TableBody>
               {isLoading ? (
-                <TableRow data-oid=".xpk_9m">
+                <TableRow>
                   <TableCell
                     colSpan={8}
                     className="text-center py-8"
-                    data-oid="8gjy-uz"
+                   
                   >
                     載入中...
                   </TableCell>
                 </TableRow>
               ) : allVariants.length === 0 ? (
-                <TableRow data-oid="zi1ireu">
+                <TableRow>
                   <TableCell
                     colSpan={8}
                     className="text-center py-8 text-muted-foreground"
-                    data-oid="um9ee46"
+                   
                   >
                     {searchQuery ? "找不到符合條件的商品" : "暫無商品資料"}
                   </TableCell>
@@ -230,45 +230,45 @@ export function ProductVariantSelector({
                       key={variant.id}
                       className={`cursor-pointer hover:bg-muted/50 ${isSelected ? "bg-muted" : ""}`}
                       onClick={() => handleVariantToggle(variant)}
-                      data-oid="u6f5hl5"
+                     
                     >
-                      <TableCell data-oid="0_:u8x2">
+                      <TableCell>
                         <Checkbox
                           checked={isSelected}
                           onChange={() => handleVariantToggle(variant)}
-                          data-oid="_mmoc6q"
+                         
                         />
                       </TableCell>
-                      <TableCell className="font-medium" data-oid="q2m0zag">
+                      <TableCell className="font-medium">
                         {variant.product_name}
                       </TableCell>
                       <TableCell
                         className="font-mono text-sm"
-                        data-oid="dyge0mq"
+                       
                       >
                         {variant.sku}
                       </TableCell>
-                      <TableCell data-oid="jcj.jzy">
+                      <TableCell>
                         {variant.attribute_values
                           ?.map((av) => av.value)
                           .join(", ") || "-"}
                       </TableCell>
-                      <TableCell data-oid="ze8f7qz">
-                        <Badge variant="outline" data-oid="060ay.g">
+                      <TableCell>
+                        <Badge variant="outline">
                           {variant.product_category || "未分類"}
                         </Badge>
                       </TableCell>
                       <TableCell
                         className="text-right font-medium"
-                        data-oid="fyuiboh"
+                       
                       >
                         ${Math.round(parseFloat(variant.price || "0")).toLocaleString()}
                       </TableCell>
-                      <TableCell className="text-center" data-oid="yqxzns:">
+                      <TableCell className="text-center">
                         {variant.total_inventory}
                       </TableCell>
-                      <TableCell className="text-center" data-oid="pf771e7">
-                        <Badge variant={stockStatus.variant} data-oid="-g6rmgk">
+                      <TableCell className="text-center">
+                        <Badge variant={stockStatus.variant}>
                           {stockStatus.label}
                         </Badge>
                       </TableCell>
@@ -280,14 +280,14 @@ export function ProductVariantSelector({
           </Table>
         </div>
 
-        <DialogFooter data-oid="pgron84">
-          <Button variant="outline" onClick={handleCancel} data-oid="5soj2tt">
+        <DialogFooter>
+          <Button variant="outline" onClick={handleCancel}>
             取消
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={selectedVariants.length === 0}
-            data-oid="l4prm-a"
+           
           >
             確認添加 ({selectedVariants.length})
           </Button>

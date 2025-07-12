@@ -34,7 +34,7 @@ describe('Button 組件測試', () => {
       
       const button = screen.getByRole('button');
       expect(button).toHaveAttribute('data-slot', 'button');
-      expect(button).toHaveAttribute('data-oid', 'x676yg7');
+      expect(button).toHaveAttribute('data-testid', 'x676yg7');
     });
 
     it('應該正確處理點擊事件', () => {

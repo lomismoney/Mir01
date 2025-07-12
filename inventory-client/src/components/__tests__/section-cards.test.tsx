@@ -15,14 +15,14 @@ describe('SectionCards 組件測試', () => {
     render(<SectionCards />);
     
     // 檢查是否渲染了容器
-    const container = document.querySelector('[data-oid]');
+    const container = document.querySelector('[data-testid]');
     expect(container).toBeInTheDocument();
   });
 
   it('應該有正確的網格佈局類別', () => {
     render(<SectionCards />);
     
-    const container = document.querySelector('[data-oid]');
+    const container = document.querySelector('[data-testid]');
     expect(container).toHaveClass('grid');
   });
 
@@ -80,7 +80,7 @@ describe('SectionCards 組件測試', () => {
   it('應該有正確的響應式類別', () => {
     render(<SectionCards />);
     
-    const container = document.querySelector('[data-oid]');
+    const container = document.querySelector('[data-testid]');
     expect(container).toHaveClass('grid-cols-1');
   });
 

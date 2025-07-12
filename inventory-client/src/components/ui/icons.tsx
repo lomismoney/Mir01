@@ -1,6 +1,22 @@
-// 從 lucide-react 導出所需的圖標
-// 這個文件將所有需要的圖標統一導出，避免在各個組件中重複導入
+// 圖標管理系統 - 使用動態導入優化性能
+// 這個文件提供向後兼容性，同時引導使用新的 DynamicIcon 系統
 
+import { DynamicIcon, type IconName } from './DynamicIcon';
+
+// 導出新的動態圖標系統
+export { DynamicIcon, type IconName };
+export {
+  Icon,
+  LoadingIcon,
+  CheckIcon,
+  CloseIcon,
+  AddIcon,
+  SearchIcon,
+  AlertIcon,
+} from './DynamicIcon';
+
+// 為了向後兼容，提供常用圖標的直接導出
+// 注意：建議逐步遷移到 DynamicIcon 系統
 import {
   ArrowLeft,
   ArrowRight,
@@ -44,6 +60,7 @@ import {
   Filter,
 } from "lucide-react";
 
+// 保持向後兼容的導出
 export {
   ArrowLeft,
   ArrowRight,
@@ -86,3 +103,17 @@ export {
   ArrowUpDown,
   Filter,
 };
+
+// 便捷的包裝器函數，用於快速遷移
+export const createIconComponent = (name: IconName) => (props: any) => (
+  <DynamicIcon name={name} {...props} />
+);
+
+// 常用圖標的便捷組件
+export const EditIcon = createIconComponent('Edit');
+export const TrashIcon = createIconComponent('Trash2');
+export const SaveIcon = createIconComponent('Save');
+export const EyeIcon = createIconComponent('Eye');
+export const PackageIcon = createIconComponent('Package');
+export const UserIcon = createIconComponent('User');
+export const SettingsIcon = createIconComponent('Settings');

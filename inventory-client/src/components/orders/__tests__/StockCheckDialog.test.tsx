@@ -21,16 +21,20 @@ const mockInsufficientStockItems = [
   },
 ];
 
+// 測試工具函數
+const createMockProps = (overrides = {}) => ({
+  open: true,
+  onOpenChange: jest.fn(),
+  insufficientStockItems: mockInsufficientStockItems,
+  onConfirmBackorder: jest.fn(),
+  onCancel: jest.fn(),
+  isProcessing: false,
+  ...overrides,
+});
+
 describe('StockCheckDialog', () => {
   // 預設 props
-  const defaultProps = {
-    open: true,
-    onOpenChange: jest.fn(),
-    insufficientStockItems: mockInsufficientStockItems,
-    onConfirmBackorder: jest.fn(),
-    onCancel: jest.fn(),
-    isProcessing: false,
-  };
+  const defaultProps = createMockProps();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -158,6 +162,15 @@ describe('StockCheckDialog', () => {
       expect(screen.getByText('取消建單')).not.toBeDisabled();
       expect(screen.getByText('確認建立預訂訂單')).not.toBeDisabled();
     });
+
+    test('當 isProcessing 為 undefined 時應該使用默認值 false', () => {
+      const { isProcessing, ...propsWithoutIsProcessing } = defaultProps;
+      render(<StockCheckDialog {...propsWithoutIsProcessing} />);
+
+      expect(screen.getByText('確認建立預訂訂單')).toBeInTheDocument();
+      expect(screen.getByText('取消建單')).not.toBeDisabled();
+      expect(screen.getByText('確認建立預訂訂單')).not.toBeDisabled();
+    });
   });
 
   describe('說明區域測試', () => {
@@ -235,6 +248,136 @@ describe('StockCheckDialog', () => {
 
       expect(screen.getByText('3 項')).toBeInTheDocument();  // 影響商品數量
       expect(screen.getByText('18 件')).toBeInTheDocument(); // 總缺貨量 (7+5+6=18)
+    });
+  });
+
+  describe('組件穩定性測試', () => {
+    test('應該正確處理空字串的商品名稱和 SKU', () => {
+      const itemsWithEmptyStrings = [
+        {
+          product_name: '',
+          sku: '',
+          requested_quantity: 5,
+          available_quantity: 0,
+          shortage: 5,
+        },
+      ];
+
+      render(<StockCheckDialog {...defaultProps} insufficientStockItems={itemsWithEmptyStrings} />);
+
+      // 檢查組件不會崩潰並且能正常渲染
+      expect(screen.getByText('1 項')).toBeInTheDocument();
+      expect(screen.getByText('5 件')).toBeInTheDocument();
+    });
+
+    test('應該正確處理負數值', () => {
+      const itemsWithNegativeValues = [
+        {
+          product_name: '異常商品',
+          sku: 'ABNORMAL001',
+          requested_quantity: -1,
+          available_quantity: -2,
+          shortage: 1,
+        },
+      ];
+
+      render(<StockCheckDialog {...defaultProps} insufficientStockItems={itemsWithNegativeValues} />);
+
+      // 檢查組件不會崩潰並且能正常渲染
+      expect(screen.getByText('1 項')).toBeInTheDocument();
+      expect(screen.getByText('1 件')).toBeInTheDocument();
+    });
+
+    test('應該正確處理大量數據', () => {
+      const largeDataset = Array.from({ length: 100 }, (_, index) => ({
+        product_name: `商品${index + 1}`,
+        sku: `SKU${String(index + 1).padStart(3, '0')}`,
+        requested_quantity: 10,
+        available_quantity: 0,
+        shortage: 10,
+      }));
+
+      render(<StockCheckDialog {...defaultProps} insufficientStockItems={largeDataset} />);
+
+      expect(screen.getByText('100 項')).toBeInTheDocument();
+      expect(screen.getByText('1000 件')).toBeInTheDocument();
+    });
+  });
+
+  describe('組件重新渲染測試', () => {
+    test('當 props 改變時應該正確更新', () => {
+      const { rerender } = render(<StockCheckDialog {...defaultProps} />);
+
+      expect(screen.getByText('2 項')).toBeInTheDocument();
+      expect(screen.getByText('12 件')).toBeInTheDocument();
+
+      const newItems = [
+        {
+          product_name: '新商品',
+          sku: 'NEW001',
+          requested_quantity: 3,
+          available_quantity: 1,
+          shortage: 2,
+        },
+      ];
+
+      rerender(<StockCheckDialog {...defaultProps} insufficientStockItems={newItems} />);
+
+      expect(screen.getByText('1 項')).toBeInTheDocument();
+      expect(screen.getByText('2 件')).toBeInTheDocument();
+    });
+
+    test('當 open 狀態改變時應該正確顯示/隱藏', () => {
+      const { rerender } = render(<StockCheckDialog {...defaultProps} open={true} />);
+
+      expect(screen.getByText('庫存不足警告')).toBeInTheDocument();
+
+      rerender(<StockCheckDialog {...defaultProps} open={false} />);
+
+      expect(screen.queryByText('庫存不足警告')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('鍵盤導航測試', () => {
+    test('應該支持鍵盤導航', async () => {
+      const user = userEvent.setup();
+      const onCancel = jest.fn();
+      const onConfirmBackorder = jest.fn();
+
+      render(
+        <StockCheckDialog
+          {...defaultProps}
+          onCancel={onCancel}
+          onConfirmBackorder={onConfirmBackorder}
+        />
+      );
+
+      // 測試 Tab 鍵的導航 - 修正預期的焦點順序
+      await user.tab();
+      // 在 AlertDialog 中，確認按鈕通常是第一個焦點
+      expect(screen.getByText('確認建立預訂訂單')).toHaveFocus();
+
+      await user.tab();
+      expect(screen.getByText('取消建單')).toHaveFocus();
+
+      // 測試 Enter 鍵的觸發
+      await user.keyboard('{Enter}');
+      expect(onCancel).toHaveBeenCalled();
+    });
+
+    test('應該支持 Escape 鍵關閉對話框', async () => {
+      const user = userEvent.setup();
+      const onOpenChange = jest.fn();
+
+      render(
+        <StockCheckDialog
+          {...defaultProps}
+          onOpenChange={onOpenChange}
+        />
+      );
+
+      await user.keyboard('{Escape}');
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
 });

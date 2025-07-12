@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { SectionCards } from "@/components/section-cards";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { BackorderAlert } from "@/components/backorders/BackorderAlert";
+import { InventoryAlert } from "@/components/inventory/InventoryAlert";
 import { useProductVariants } from "@/hooks";
 import {
   Select,
@@ -70,28 +72,38 @@ export default function DashboardPage() {
   const variants: DashboardProductVariant[] = productVariants || [];
 
   return (
-    <div className="flex flex-1 flex-col" data-oid="durq1z4">
+    <div className="flex flex-1 flex-col">
       <div
         className="@container/main flex flex-1 flex-col gap-2"
-        data-oid="t5een4g"
+       
       >
         <div
           className="flex flex-col gap-4 py-4 md:gap-6 md:py-6"
-          data-oid="z754o0l"
+         
         >
-          <SectionCards data-oid="e_fwggf" />
+          {/* 預訂商品警示 */}
+          <div className="px-4 lg:px-6">
+            <BackorderAlert />
+          </div>
+          
+          {/* 庫存預警 */}
+          <div className="px-4 lg:px-6">
+            <InventoryAlert />
+          </div>
+          
+          <SectionCards />
 
           {/* 商品選擇器 */}
-          <div className="px-4 lg:px-6" data-oid="a1:4kl9">
-            <Card data-oid="53eg68w">
-              <CardHeader data-oid="3_vkt21">
-                <CardTitle className="text-lg" data-oid="4g11-6p">
+          <div className="px-4 lg:px-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
                   庫存趨勢分析
                 </CardTitle>
               </CardHeader>
-              <CardContent data-oid="7wsqteg">
-                <div className="space-y-2" data-oid="3gee0mm">
-                  <label className="text-sm font-medium" data-oid="vz-2kn6">
+              <CardContent>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
                     選擇商品查看庫存趨勢
                   </label>
                   <Select
@@ -101,29 +113,29 @@ export default function DashboardPage() {
                         value ? parseInt(value) : null,
                       )
                     }
-                    data-oid="blfvvmk"
+                   
                   >
-                    <SelectTrigger className="w-full" data-oid="pn7sd7n">
+                    <SelectTrigger className="w-full">
                       <SelectValue
                         placeholder={
                           isLoadingVariants ? "載入商品中..." : "請選擇商品"
                         }
-                        data-oid="sc_5ddw"
+                       
                       />
                     </SelectTrigger>
-                    <SelectContent data-oid="bfoo:8_">
+                    <SelectContent>
                       {variants?.map((variant: DashboardProductVariant) => (
                         <SelectItem
                           key={variant.id}
                           value={variant.id?.toString() || ""}
-                          data-oid="6y:ztz0"
+                         
                         >
                           {variant.product?.name} - {variant.sku}
                           {variant.attribute_values &&
                             variant.attribute_values.length > 0 && (
                               <span
                                 className="text-muted-foreground ml-1"
-                                data-oid="t6vodk3"
+                               
                               >
                                 (
                                 {variant.attribute_values
@@ -142,10 +154,10 @@ export default function DashboardPage() {
           </div>
 
           {/* 庫存趨勢圖表 */}
-          <div className="px-4 lg:px-6" data-oid="3.4_-ms">
+          <div className="px-4 lg:px-6">
             <ChartAreaInteractive
               productVariantId={selectedProductVariantId}
-              data-oid="03pufnu"
+             
             />
           </div>
         </div>

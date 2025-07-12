@@ -68,6 +68,17 @@ const config = {
       statements: 70,
     },
   },
+  
+  // 性能優化配置
+  maxWorkers: '50%', // 使用CPU核心數的50%，避免過度佔用資源
+  testTimeout: 10000, // 設置全局測試超時為10秒
+  
+  // 更快的全局設置
+  globals: {
+    'ts-jest': {
+      isolatedModules: true, // 加速TypeScript編譯
+    },
+  },
 }
 
 // 匯出使用 Next.js 優化的 Jest 配置

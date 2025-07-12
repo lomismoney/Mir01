@@ -10,10 +10,11 @@ import {
 import {
   useCategories,
   useUpdateCategory,
+  useErrorHandler,
   type CategoryNode,
 } from "@/hooks";
-import { CategoryForm, type FormValues } from "./CategoryForm";
-import { toast } from "sonner";
+import { CategoryForm } from "./CategoryForm";
+import { UpdateCategoryData } from "@/lib/validations/category";
 
 /**
  * 編輯分類 Modal 組件屬性
@@ -41,29 +42,30 @@ export function UpdateCategoryModal({
 }: UpdateCategoryModalProps) {
   const { data: categories = [] } = useCategories();
   const updateCategory = useUpdateCategory();
+  const { handleError, handleSuccess } = useErrorHandler();
 
   /**
    * 處理表單提交
    */
-  const handleSubmit = (data: FormValues) => {
+  const handleSubmit = (data: UpdateCategoryData | { name: string; sort_order: number; description?: string; parent_id?: number | null }) => {
+    // 確保 data 有正確的類型
+    const updateData = 'id' in data ? data : { ...data, id: category.id };
     updateCategory.mutate(
       {
         id: category.id,
         data: {
-          name: data.name,
+          name: data.name || category.name,
           description: data.description || "",
-          parent_id: data.parent_id ? Number(data.parent_id) : null,
+          parent_id: data.parent_id !== undefined ? data.parent_id : category.parent_id,
         },
       },
       {
         onSuccess: () => {
-          toast.success("分類已成功更新");
+          handleSuccess("分類已成功更新");
           onSuccess?.();
           onOpenChange(false);
         },
-        onError: (error) => {
-          toast.error(`更新失敗: ${error.message}`);
-        },
+        onError: (error) => handleError(error),
       },
     );
   };
@@ -83,21 +85,22 @@ export function UpdateCategoryModal({
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="ji6-5v_">
-      <DialogContent className="sm:max-w-[425px]" data-oid="mg:u715">
-        <DialogHeader data-oid="q3-qh1o">
-          <DialogTitle data-oid="u1ev6f9">編輯分類</DialogTitle>
-          <DialogDescription data-oid="oo7sqj7">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>編輯分類</DialogTitle>
+          <DialogDescription>
             修改「{category.name}」的資訊
           </DialogDescription>
         </DialogHeader>
 
         <CategoryForm
-          onSubmit={handleSubmit}
-          isLoading={updateCategory.isPending}
+          mode="edit"
+          categoryId={category.id}
           initialData={category}
           categories={flatCategories}
-          data-oid=":vx:twg"
+          onSuccess={handleSubmit}
+          onCancel={() => onOpenChange(false)}
         />
       </DialogContent>
     </Dialog>

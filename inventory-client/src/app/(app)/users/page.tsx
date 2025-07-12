@@ -29,9 +29,10 @@ import {
   useCreateUser,
   useUpdateUser,
   useDeleteUser,
+  useModalManager,
+  useErrorHandler,
 } from "@/hooks";
 import { useSession } from "next-auth/react";
-import { toast } from "sonner";
 import { UsersDataTable } from "@/components/users/users-data-table";
 import { createUsersColumns } from "@/components/users/users-columns";
 import { UserItem } from "@/types/api-helpers";
@@ -74,9 +75,9 @@ export default function UsersPage() {
   const createUserMutation = useCreateUser();
   const deleteUserMutation = useDeleteUser();
 
-  // 對話框狀態管理
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  // 🎯 統一的 Modal 管理器和錯誤處理
+  const modalManager = useModalManager<UserItem>();
+  const { handleError, handleSuccess } = useErrorHandler();
 
   // 新用戶表單狀態
   const [newUserName, setNewUserName] = useState("");
@@ -86,38 +87,22 @@ export default function UsersPage() {
   const [newRoles, setNewRoles] = useState<string[]>([]); // 多角色支持
 
   // 編輯用戶狀態
-  const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [editUserName, setEditUserName] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [editUserEmail, setEditUserEmail] = useState("");
   const [editPassword, setEditPassword] = useState("");
   const [editRoles, setEditRoles] = useState<string[]>([]); // 多角色支持
 
-  // 刪除確認對話框狀態
-  const [userToDelete, setUserToDelete] = useState<UserItem | null>(null);
-
   // 使用 useUpdateUser hook（重構版，不需要預先提供 userId）
   const updateUserMutation = useUpdateUser();
 
-  // 用戶分店管理狀態
-  const [isStoresDialogOpen, setIsStoresDialogOpen] = useState(false);
-  const [selectedUserForStores, setSelectedUserForStores] =
-    useState<UserItem | null>(null);
+  // 用戶分店管理狀態（整合到 modalManager）
 
   const queryClient = useQueryClient();
 
   // 處理分店管理按鈕點擊
   const handleManageUserStores = (user: UserItem) => {
-    setSelectedUserForStores(user);
-    setIsStoresDialogOpen(true);
-  };
-
-  // helper: clear selected user when dialog closes
-  const handleStoresDialogOpenChange = (open: boolean) => {
-    setIsStoresDialogOpen(open);
-    if (!open) {
-      setSelectedUserForStores(null);
-    }
+    modalManager.openModal('stores', user);
   };
 
   /**
@@ -132,19 +117,19 @@ export default function UsersPage() {
   const handleCreateUser = () => {
     // 基本驗證
     if (!newUserName.trim() || !newUsername.trim() || !newPassword.trim() || !newUserEmail.trim()) {
-      toast.error("請填寫所有必填欄位");
+      handleError(new Error("請填寫所有必填欄位"));
       return;
     }
 
     // 密碼長度驗證
     if (newPassword.length < 8) {
-      toast.error("密碼至少需要 8 個字元");
+      handleError(new Error("密碼至少需要 8 個字元"));
       return;
     }
 
     // 角色驗證
     if (newRoles.length === 0) {
-      toast.error("請至少選擇一個角色");
+      handleError(new Error("請至少選擇一個角色"));
       return;
     }
 
@@ -159,30 +144,11 @@ export default function UsersPage() {
       },
       {
         onSuccess: () => {
-          toast.success("用戶建立成功！");
-          setIsDialogOpen(false); // 關閉對話框
-          // 重置表單狀態
+          handleSuccess("用戶建立成功！");
+          modalManager.closeModal();
           resetForm();
         },
-        onError: (error) => {
-          // 改進錯誤顯示：提供更詳細的錯誤信息
-          const errorMessage = error.message;
-
-          if (
-            errorMessage.includes("用戶名已被使用") ||
-            errorMessage.includes("username")
-          ) {
-            toast.error(
-              `用戶名重複：${newUsername} 已被使用，請選擇其他用戶名`,
-            );
-          } else if (errorMessage.includes("密碼")) {
-            toast.error(`密碼錯誤：${errorMessage}`);
-          } else if (errorMessage.includes("角色")) {
-            toast.error(`角色錯誤：${errorMessage}`);
-          } else {
-            toast.error(`建立失敗：${errorMessage}`);
-          }
-        },
+        onError: (error) => handleError(error),
       },
     );
   };
@@ -191,40 +157,40 @@ export default function UsersPage() {
    * 處理新增用戶按鈕點擊
    */
   const handleAddUser = () => {
-    setIsDialogOpen(true);
+    modalManager.openModal('create');
   };
 
   /**
    * 處理編輯用戶
    */
   const handleEditUser = (userToEdit: UserItem) => {
-    setEditingUser(userToEdit);
     setEditUserName(userToEdit.name || "");
     setEditUsername(userToEdit.username || "");
     setEditUserEmail(userToEdit.email || "");
     setEditPassword(""); // 密碼留空，表示不更改
     setEditRoles((userToEdit.roles || []) as ("admin" | "staff" | "viewer" | "installer")[]);
-    setIsEditDialogOpen(true);
+    modalManager.openModal('edit', userToEdit);
   };
 
   /**
    * 處理更新用戶的函式
    */
   const handleUpdateUser = () => {
+    const editingUser = modalManager.currentData;
     if (!editingUser?.id) {
-      toast.error("無效的用戶 ID");
+      handleError(new Error("無效的用戶 ID"));
       return;
     }
 
     // 基本驗證
     if (!editUserName.trim() || !editUsername.trim()) {
-      toast.error("請填寫所有必填欄位");
+      handleError(new Error("請填寫所有必填欄位"));
       return;
     }
 
     // 角色驗證
     if (editRoles.length === 0) {
-      toast.error("請至少選擇一個角色");
+      handleError(new Error("請至少選擇一個角色"));
       return;
     }
 
@@ -249,23 +215,29 @@ export default function UsersPage() {
       },
       {
         onSuccess: () => {
-          toast.success("用戶更新成功！");
-          setIsEditDialogOpen(false);
+          handleSuccess("用戶更新成功！");
+          modalManager.closeModal();
           resetEditForm();
         },
-        onError: (error) => {
-          toast.error(`更新失敗：${error.message}`);
-        },
+        onError: (error) => handleError(error),
       },
     );
   };
 
   /**
-   * 處理刪除用戶
+   * 處理刪除用戶按鈕點擊
    */
   const handleDeleteUser = (userToDelete: UserItem) => {
-    if (!userToDelete.id) {
-      toast.error("無效的用戶 ID");
+    modalManager.openModal('delete', userToDelete);
+  };
+
+  /**
+   * 確認刪除用戶
+   */
+  const handleConfirmDelete = () => {
+    const userToDelete = modalManager.currentData;
+    if (!userToDelete?.id) {
+      handleError(new Error("無效的用戶 ID"));
       return;
     }
 
@@ -273,13 +245,10 @@ export default function UsersPage() {
       userToDelete.id,
       {
         onSuccess: () => {
-          toast.success("用戶刪除成功！");
-          setUserToDelete(null); // 清除狀態
+          handleSuccess("用戶刪除成功！");
+          modalManager.closeModal();
         },
-        onError: (error) => {
-          toast.error(`刪除失敗：${error.message}`);
-          setUserToDelete(null); // 清除狀態
-        },
+        onError: (error) => handleError(error),
       },
     );
   };
@@ -299,7 +268,6 @@ export default function UsersPage() {
    * 重置編輯表單狀態
    */
   const resetEditForm = () => {
-    setEditingUser(null);
     setEditUserName("");
     setEditUsername("");
     setEditUserEmail("");
@@ -311,8 +279,8 @@ export default function UsersPage() {
    * 處理對話框關閉事件
    */
   const handleDialogClose = (open: boolean) => {
-    setIsDialogOpen(open);
     if (!open) {
+      modalManager.closeModal();
       resetForm(); // 關閉時重置表單
     }
   };
@@ -321,8 +289,8 @@ export default function UsersPage() {
    * 處理編輯對話框關閉事件
    */
   const handleEditDialogClose = (open: boolean) => {
-    setIsEditDialogOpen(open);
     if (!open) {
+      modalManager.closeModal();
       resetEditForm(); // 關閉時重置編輯表單
     }
   };
@@ -330,7 +298,7 @@ export default function UsersPage() {
   // 用戶動作定義（符合新的 UserActions 介面）
   const userActions: UserActions = {
     onView: (user: UserItem) => {
-      toast.info(`查看用戶：${user.name}`);
+      handleSuccess(`查看用戶：${user.name}`);
     },
     onEdit: handleEditUser,
     onDelete: handleDeleteUser,
@@ -343,24 +311,24 @@ export default function UsersPage() {
   // 檢查管理員權限 - 使用 useAuth hook 來檢查權限
   if (!user?.isAdmin) {
     return (
-      <div className="container mx-auto py-8" data-oid="t-0ly8x">
-        <Card data-oid="ndg_yph">
-          <CardContent className="pt-6" data-oid="trh-dbl">
-            <div className="text-center" data-oid="uk7mba8">
+      <div className="container mx-auto py-8">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
               <Shield
                 className="mx-auto h-12 w-12 text-gray-400"
-                data-oid="rivxq1u"
+               
               />
 
               <h3
                 className="mt-2 text-sm font-medium text-gray-900 dark:text-white"
-                data-oid="mhkwen6"
+               
               >
                 權限不足
               </h3>
               <p
                 className="mt-1 text-sm text-gray-500 dark:text-gray-400"
-                data-oid="6:2l5il"
+               
               >
                 您沒有權限訪問用戶管理功能
               </p>
@@ -373,19 +341,19 @@ export default function UsersPage() {
 
   // 只有已登入且為管理員的用戶才會執行到這裡
   return (
-    <div className="container mx-auto py-8 space-y-6" data-oid="r7udv0r">
+    <div className="container mx-auto py-8 space-y-6">
       {/* 頁面標題 */}
-      <div className="flex items-center justify-between" data-oid="nuq9_-i">
-        <div data-oid="tu2xz8x">
+      <div className="flex items-center justify-between">
+        <div>
           <h1
             className="text-3xl font-bold text-gray-900 dark:text-white"
-            data-oid="5nzglce"
+           
           >
             用戶管理
           </h1>
           <p
             className="text-gray-600 dark:text-gray-300 mt-2"
-            data-oid="d:6f:tk"
+           
           >
             管理系統中的所有用戶帳號
           </p>
@@ -393,7 +361,7 @@ export default function UsersPage() {
       </div>
 
       {/* 用戶資料表格 */}
-      <div className="space-y-4" data-oid="ql8wyy0">
+      <div className="space-y-4">
         <UsersDataTable
           columns={columns}
           data={usersData}
@@ -402,40 +370,40 @@ export default function UsersPage() {
           onAddUser={handleAddUser}
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
-          data-oid="xzuzf:q"
+         
         />
       </div>
 
       {/* 新增用戶對話框 */}
       <Dialog
-        open={isDialogOpen}
+        open={modalManager.isModalOpen('create')}
         onOpenChange={handleDialogClose}
-        data-oid="k:_qcqq"
+       
       >
-        <DialogContent className="sm:max-w-[425px]" data-oid="g.u-jqd">
-          <DialogHeader data-oid="wfwvpko">
-            <DialogTitle className="flex items-center gap-2" data-oid="wx0:8wq">
-              <UserCheck className="w-5 h-5" data-oid="nomy5gx" />
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="w-5 h-5" />
               建立新用戶
             </DialogTitle>
-            <DialogDescription data-oid="0fsh8fb">
+            <DialogDescription>
               填寫以下資訊以建立一個新的使用者帳號。
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4" data-oid="2f2bxdy">
+          <div className="grid gap-4 py-4">
             {/* 姓名欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
-              data-oid="-n7w.o0"
+             
             >
               <Label
                 htmlFor="name"
                 className="text-right font-medium"
-                data-oid="u2l_11l"
+               
               >
                 姓名{" "}
-                <span className="text-red-500" data-oid="_:9v8se">
+                <span className="text-red-500">
                   *
                 </span>
               </Label>
@@ -446,22 +414,22 @@ export default function UsersPage() {
                 onChange={(e) => setNewUserName(e.target.value)}
                 className="col-span-3"
                 disabled={createUserMutation.isPending}
-                data-oid="fbe9ci1"
+               
               />
             </div>
 
             {/* 帳號欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
-              data-oid=".:u7sq4"
+             
             >
               <Label
                 htmlFor="username"
                 className="text-right font-medium"
-                data-oid="54r71u3"
+               
               >
                 用戶名{" "}
-                <span className="text-red-500" data-oid="i9ff4t5">
+                <span className="text-red-500">
                   *
                 </span>
               </Label>
@@ -472,14 +440,14 @@ export default function UsersPage() {
                 onChange={(e) => setNewUsername(e.target.value)}
                 className="col-span-3"
                 disabled={createUserMutation.isPending}
-                data-oid="6gq16i7"
+               
               />
             </div>
 
             {/* Email 欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
-              data-oid="email-field"
+             
             >
               <Label
                 htmlFor="email"
@@ -502,19 +470,19 @@ export default function UsersPage() {
             {/* 密碼欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
-              data-oid="vh1h3gt"
+             
             >
               <Label
                 htmlFor="password"
                 className="text-right font-medium"
-                data-oid="5cq.19t"
+               
               >
                 密碼{" "}
-                <span className="text-red-500" data-oid="225cazk">
+                <span className="text-red-500">
                   *
                 </span>
               </Label>
-              <div className="col-span-3 space-y-1" data-oid="5mg:sbv">
+              <div className="col-span-3 space-y-1">
                 <Input
                   id="password"
                   type="password"
@@ -522,10 +490,10 @@ export default function UsersPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={createUserMutation.isPending}
-                  data-oid="8nxs091"
+                 
                 />
 
-                <p className="text-xs text-gray-500" data-oid="q-8yk.p">
+                <p className="text-xs text-gray-500">
                   密碼至少需要 8 個字元
                 </p>
               </div>
@@ -546,12 +514,12 @@ export default function UsersPage() {
             </div>
           </div>
 
-          <DialogFooter data-oid="27wcl53">
+          <DialogFooter>
             <Button
               variant="outline"
               onClick={() => handleDialogClose(false)}
               disabled={createUserMutation.isPending}
-              data-oid="iod7ast"
+             
             >
               取消
             </Button>
@@ -559,19 +527,19 @@ export default function UsersPage() {
               onClick={handleCreateUser}
               disabled={createUserMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700"
-              data-oid="63uya0f"
+             
             >
               {createUserMutation.isPending ? (
                 <>
                   <Loader2
                     className="w-4 h-4 mr-2 animate-spin"
-                    data-oid="d-0n9ch"
+                   
                   />
                   建立中...
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4 mr-2" data-oid="puv8pcg" />
+                  <Plus className="w-4 h-4 mr-2" />
                   建立用戶
                 </>
               )}
@@ -582,34 +550,34 @@ export default function UsersPage() {
 
       {/* 編輯用戶對話框 */}
       <Dialog
-        open={isEditDialogOpen}
+        open={modalManager.isModalOpen('edit')}
         onOpenChange={handleEditDialogClose}
-        data-oid="u21j:jr"
+       
       >
-        <DialogContent className="sm:max-w-[425px]" data-oid=".eflfyy">
-          <DialogHeader data-oid="znbwg:v">
-            <DialogTitle className="flex items-center gap-2" data-oid="y3fb98d">
-              <UserCheck className="w-5 h-5" data-oid="kpg2xhy" />
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="w-5 h-5" />
               編輯用戶
             </DialogTitle>
-            <DialogDescription data-oid="pxxxk:d">
+            <DialogDescription>
               修改用戶資訊。密碼欄位留空表示不更改密碼。
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4" data-oid="2533gp5">
+          <div className="grid gap-4 py-4">
             {/* 姓名欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
-              data-oid="6ugu9mm"
+             
             >
               <Label
                 htmlFor="edit-name"
                 className="text-right font-medium"
-                data-oid="43xahi0"
+               
               >
                 姓名{" "}
-                <span className="text-red-500" data-oid="sb5lm19">
+                <span className="text-red-500">
                   *
                 </span>
               </Label>
@@ -620,22 +588,22 @@ export default function UsersPage() {
                 onChange={(e) => setEditUserName(e.target.value)}
                 className="col-span-3"
                 disabled={updateUserMutation.isPending}
-                data-oid="9j3jjz1"
+               
               />
             </div>
 
             {/* 帳號欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
-              data-oid="h61mwg8"
+             
             >
               <Label
                 htmlFor="edit-username"
                 className="text-right font-medium"
-                data-oid="j_62pjb"
+               
               >
                 用戶名{" "}
-                <span className="text-red-500" data-oid="6m_0d3.">
+                <span className="text-red-500">
                   *
                 </span>
               </Label>
@@ -646,7 +614,7 @@ export default function UsersPage() {
                 onChange={(e) => setEditUsername(e.target.value)}
                 className="col-span-3"
                 disabled={updateUserMutation.isPending}
-                data-oid="z.z5hw5"
+               
               />
             </div>
 
@@ -668,15 +636,15 @@ export default function UsersPage() {
             {/* 密碼欄位 */}
             <div
               className="grid grid-cols-4 items-center gap-4"
-              data-oid="yx7b9iy"
+             
             >
               <Label
                 htmlFor="edit-password"
                 className="text-right font-medium"
-                data-oid="86r5mq0"
+               
               >
                 密碼{" "}
-                <span className="text-gray-500" data-oid="cca.95y">
+                <span className="text-gray-500">
                   (留空不更改)
                 </span>
               </Label>
@@ -688,7 +656,7 @@ export default function UsersPage() {
                 onChange={(e) => setEditPassword(e.target.value)}
                 className="col-span-3"
                 disabled={updateUserMutation.isPending}
-                data-oid="8:jddk2"
+               
               />
             </div>
 
@@ -707,12 +675,12 @@ export default function UsersPage() {
             </div>
           </div>
 
-          <DialogFooter data-oid="lhrnvg3">
+          <DialogFooter>
             <Button
               variant="outline"
               onClick={() => handleEditDialogClose(false)}
               disabled={updateUserMutation.isPending}
-              data-oid="6gvpbc-"
+             
             >
               取消
             </Button>
@@ -720,19 +688,19 @@ export default function UsersPage() {
               onClick={handleUpdateUser}
               disabled={updateUserMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700"
-              data-oid=":5q8486"
+             
             >
               {updateUserMutation.isPending ? (
                 <>
                   <Loader2
                     className="w-4 h-4 mr-2 animate-spin"
-                    data-oid="qdpltlf"
+                   
                   />
                   更新中...
                 </>
               ) : (
                 <>
-                  <UserCheck className="w-4 h-4 mr-2" data-oid="k4n3cuv" />
+                  <UserCheck className="w-4 h-4 mr-2" />
                   更新用戶
                 </>
               )}
@@ -743,35 +711,31 @@ export default function UsersPage() {
 
       {/* 刪除確認對話框 */}
       <AlertDialog
-        open={!!userToDelete}
-        onOpenChange={(isOpen) => !isOpen && setUserToDelete(null)}
-        data-oid="jxha:dc"
+        open={modalManager.isModalOpen('delete')}
+        onOpenChange={(isOpen) => !isOpen && modalManager.closeModal()}
+       
       >
-        <AlertDialogContent data-oid="qhxmhin">
-          <AlertDialogHeader data-oid="touccdr">
-            <AlertDialogTitle data-oid="s4a0jgw">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
               確定要執行刪除嗎？
             </AlertDialogTitle>
-            <AlertDialogDescription data-oid="62ghj-u">
-              你正準備刪除用戶「{userToDelete?.name}」。此操作無法復原。
+            <AlertDialogDescription>
+              你正準備刪除用戶「{modalManager.currentData?.name}」。此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="or59qg6">
+          <AlertDialogFooter>
             <AlertDialogCancel
-              onClick={() => setUserToDelete(null)}
-              data-oid="gizwydy"
+              onClick={() => modalManager.closeModal()}
+             
             >
               取消
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/90"
-              onClick={() => {
-                if (userToDelete) {
-                  handleDeleteUser(userToDelete);
-                }
-              }}
+              onClick={handleConfirmDelete}
               disabled={deleteUserMutation.isPending}
-              data-oid="-yivkk7"
+             
             >
               {deleteUserMutation.isPending ? "刪除中..." : "確定刪除"}
             </AlertDialogAction>
@@ -780,13 +744,13 @@ export default function UsersPage() {
       </AlertDialog>
 
       {/* 用戶分店管理對話框 */}
-      {selectedUserForStores && (
+      {modalManager.currentData && modalManager.isModalOpen('stores') && (
         <UserStoresDialog
-          userId={selectedUserForStores.id as number}
-          userName={selectedUserForStores.name as string}
-          open={isStoresDialogOpen}
-          onOpenChange={setIsStoresDialogOpen}
-          data-oid="_ou37qk"
+          userId={modalManager.currentData.id as number}
+          userName={modalManager.currentData.name as string}
+          open={modalManager.isModalOpen('stores')}
+          onOpenChange={(open) => !open && modalManager.closeModal()}
+         
         />
       )}
     </div>

@@ -91,10 +91,10 @@ describe('ThemeProvider', () => {
   });
 
   /**
-   * 測試 data-oid 屬性
+   * 測試 data-testid 屬性
    * 驗證組件是否包含正確的追蹤屬性
    */
-  it('應該包含正確的 data-oid 屬性', () => {
+  it('應該包含正確的 data-testid 屬性', () => {
     const { getByTestId } = render(
       <ThemeProvider>
         <div>測試內容</div>
@@ -102,7 +102,7 @@ describe('ThemeProvider', () => {
     );
     
     const provider = getByTestId('theme-provider');
-    expect(provider).toHaveAttribute('data-oid', '5.h8q40');
+    expect(provider).toHaveAttribute('data-testid', '5.h8q40');
   });
 
   /**

@@ -439,5 +439,83 @@ describe('QueryProvider 組件測試', () => {
       // 在客戶端應該重用同一個 QueryClient 實例
       expect(firstQueryClient).toBe(secondQueryClient);
     });
+
+    it.skip('應該在服務端為每個請求創建新的 QueryClient 實例', () => {
+      // 模擬服務端環境
+      const originalWindow = global.window;
+      const originalLocation = global.location;
+      delete (global as any).window;
+      delete (global as any).location;
+      
+      let firstQueryClient: any = null;
+      let secondQueryClient: any = null;
+
+      const FirstClientTester = () => {
+        const queryClient = useQueryClient();
+        firstQueryClient = queryClient;
+        return <div data-testid="first-client">First Client</div>;
+      };
+
+      const SecondClientTester = () => {
+        const queryClient = useQueryClient();
+        secondQueryClient = queryClient;
+        return <div data-testid="second-client">Second Client</div>;
+      };
+
+      // 在服務端環境中，每次渲染都會創建新的 QueryClient
+      render(
+        <QueryProvider>
+          <FirstClientTester />
+        </QueryProvider>
+      );
+
+      render(
+        <QueryProvider>
+          <SecondClientTester />
+        </QueryProvider>
+      );
+
+      expect(screen.getByTestId('second-client')).toBeInTheDocument();
+      // 在服務端應該創建不同的 QueryClient 實例
+      expect(firstQueryClient).not.toBe(secondQueryClient);
+      
+      // 恢復 window 和 location 對象
+      global.window = originalWindow;
+      global.location = originalLocation;
+    });
+
+    it('應該處理單例模式的邊界情況', () => {
+      // 確保多次調用 getQueryClient() 返回相同實例
+      let clients: any[] = [];
+      
+      const ClientTester = () => {
+        const queryClient = useQueryClient();
+        clients.push(queryClient);
+        return <div data-testid="client-tester">Client Tester</div>;
+      };
+
+      // 渲染多次來測試單例行為
+      render(
+        <QueryProvider>
+          <ClientTester />
+        </QueryProvider>
+      );
+
+      render(
+        <QueryProvider>
+          <ClientTester />
+        </QueryProvider>
+      );
+
+      render(
+        <QueryProvider>
+          <ClientTester />
+        </QueryProvider>
+      );
+
+      expect(clients.length).toBe(3);
+      expect(clients[0]).toBe(clients[1]);
+      expect(clients[1]).toBe(clients[2]);
+    });
   });
 });

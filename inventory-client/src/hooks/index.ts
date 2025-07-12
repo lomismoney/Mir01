@@ -8,6 +8,10 @@
 // 主要實體查詢鉤子（來自新的統一檔案）
 export * from './queries/useEntityQueries';
 
+// 性能優化相關 Hooks
+export { useRouteIconPreloader } from './useRouteIconPreloader';
+export { useIconPreloader } from '../lib/iconPreloader';
+
 // 分類管理相關 hooks（已拆分到獨立檔案）
 export {
   useCategories,
@@ -89,8 +93,16 @@ export {
   useCreateInventoryTransfer,
   useUpdateInventoryTransferStatus,
   useCancelInventoryTransfer,
-  useInventoryTimeSeries
+  useInventoryTimeSeries,
+  useInventoryBatchCheck
 } from './queries/inventory/useInventory';
+
+// 庫存預警相關 hooks
+export {
+  useLowStockItems,
+  useInventoryAlertSummary,
+  updateInventoryThresholds
+} from './queries/inventory/useInventoryAlerts';
 
 // 進貨管理相關 hooks（已拆分到獨立檔案）
 export {
@@ -133,9 +145,43 @@ export {
   useBatchUpdateStatus
 } from './queries/orders/useOrders';
 
+// 業務邏輯 hooks
+export { useInventoryManagement } from './useInventoryManagement';
+export { useInstallationItems } from './useInstallationItems';
+export { useProductWizard, type WizardFormData } from './useProductWizard';
+
 // 其他專門的鉤子
 export * from './use-admin-auth';
 export { useDebounce } from './use-debounce';
 // useUserStores 已移除 - 包含 URL 參數相關的 as any 臨時補丁，且未被使用
 export * from './use-mobile';
-export * from './useAppFieldArray'; 
+export * from './useAppFieldArray';
+
+// 性能監控相關 hooks
+export { 
+  usePerformanceTracking,
+  useComponentPerformanceTracking,
+  useApiPerformanceTracking
+} from './usePerformanceTracking';
+
+// 新增的架構優化 hooks
+export * from './useModalManager';
+export * from './useErrorHandler';
+export * from './useOptimisticUpdate';
+export * from './useQueryInvalidation';
+export * from './useOptimisticCRUD';
+export * from './useStandardTable';
+export * from './useLoadingState';
+export * from './useDataTransformation';
+export * from './useVirtualizedTable';
+
+// 全局狀態管理 hooks
+export {
+  useGlobalState,
+  useUserPreferences,
+  useTableConfig,
+  useNotificationSettings,
+  useFeatureToggle,
+  useTemporaryState,
+  useSettingsManager,
+} from '@/contexts/GlobalStateContext'; 

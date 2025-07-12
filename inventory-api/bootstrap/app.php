@@ -5,6 +5,10 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Auth\AuthenticationException;
+use App\Exceptions\Business\InsufficientStockException;
+use App\Exceptions\Business\InvalidStatusTransitionException;
+use App\Exceptions\Business\OrderNotFoundException;
+use App\Exceptions\Business\RefundException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,6 +28,34 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+        });
+        
+        // 處理庫存不足異常
+        $exceptions->render(function (InsufficientStockException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json($e->toArray(), $e->getCode());
+            }
+        });
+        
+        // 處理無效狀態轉換異常
+        $exceptions->render(function (InvalidStatusTransitionException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json($e->toArray(), $e->getCode());
+            }
+        });
+        
+        // 處理訂單不存在異常
+        $exceptions->render(function (OrderNotFoundException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json($e->toArray(), $e->getCode());
+            }
+        });
+        
+        // 處理退款異常
+        $exceptions->render(function (RefundException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json($e->toArray(), $e->getCode());
             }
         });
     })->create();

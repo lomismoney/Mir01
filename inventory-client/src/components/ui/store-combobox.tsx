@@ -59,34 +59,34 @@ export function StoreCombobox({
     : null;
 
   return (
-    <Popover open={open} onOpenChange={setOpen} data-oid="oc4accy">
-      <PopoverTrigger asChild data-oid="hsabdjy">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
           disabled={isLoading}
-          data-oid=".7mumki"
+         
         >
           {selectedStore ? selectedStore.name : placeholder}
           <ChevronsUpDown
             className="ml-2 h-4 w-4 shrink-0 opacity-50"
-            data-oid="z6wxje4"
+           
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start" data-oid="uu_mqpd">
-        <Command data-oid="nz18uqz">
+      <PopoverContent className="w-full p-0" align="start">
+        <Command>
           <CommandInput
             placeholder="搜尋分店名稱..."
             className="h-9"
-            data-oid="8nzxibw"
+           
           />
 
-          <CommandList data-oid="ql4:-qr">
-            <CommandEmpty data-oid="kvyergf">{emptyText}</CommandEmpty>
-            <CommandGroup data-oid="g736..y">
+          <CommandList>
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandGroup>
               {/* 全部選項 */}
               <CommandItem
                 value=""
@@ -94,14 +94,14 @@ export function StoreCombobox({
                   onValueChange("");
                   setOpen(false);
                 }}
-                data-oid="i2qp355"
+               
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
                     value === "" ? "opacity-100" : "opacity-0",
                   )}
-                  data-oid="37hzc6_"
+                 
                 />
                 全部分店
               </CommandItem>
@@ -115,7 +115,7 @@ export function StoreCombobox({
                     onValueChange(store.id?.toString() || "");
                     setOpen(false);
                   }}
-                  data-oid="k5nhod_"
+                 
                 >
                   <Check
                     className={cn(
@@ -124,14 +124,14 @@ export function StoreCombobox({
                         ? "opacity-100"
                         : "opacity-0",
                     )}
-                    data-oid="gfrgqax"
+                   
                   />
 
                   {store.name}
                   {store.address && (
                     <span
                       className="ml-2 text-xs text-muted-foreground"
-                      data-oid="zssx:p-"
+                     
                     >
                       {store.address}
                     </span>

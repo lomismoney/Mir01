@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { formatDate, safeFormatDate } from "@/lib/dateHelpers";
 import { 
   INSTALLATION_STATUS_VARIANTS, 
   INSTALLATION_STATUS_LABELS,
@@ -193,12 +194,12 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              建立時間：{format(new Date(installation.created_at), "yyyy/MM/dd HH:mm", { locale: zhTW })}
+              建立時間：{formatDate.fullDateTime(installation.created_at)}
             </div>
             {installation.scheduled_date && (
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                預計安裝：{format(new Date(installation.scheduled_date), "yyyy/MM/dd", { locale: zhTW })}
+                預計安裝：{formatDate.dateOnly(installation.scheduled_date)}
               </div>
             )}
           </div>
@@ -322,10 +323,10 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
                   預計安裝日期
                 </label>
                 <p className="mt-1 text-lg font-semibold">
-                  {format(new Date(installation.scheduled_date), "yyyy 年 MM 月 dd 日", { locale: zhTW })}
+                  {formatDate.chineseDate(installation.scheduled_date, "尚未安排")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(installation.scheduled_date), "EEEE", { locale: zhTW })}
+                  {formatDate.weekday(installation.scheduled_date, "")}
                 </p>
               </div>
               
@@ -364,7 +365,7 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
                   <p className="mt-1">
                     {installation.actual_start_time ? (
                       <span className="text-green-600 font-medium">
-                        {format(new Date(installation.actual_start_time), "yyyy/MM/dd HH:mm", { locale: zhTW })}
+                        {formatDate.fullDateTime(installation.actual_start_time)}
                       </span>
                     ) : (
                       <span className="text-muted-foreground italic">尚未開始</span>
@@ -377,7 +378,7 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
                   <p className="mt-1">
                     {installation.actual_end_time ? (
                       <span className="text-green-600 font-medium">
-                        {format(new Date(installation.actual_end_time), "yyyy/MM/dd HH:mm", { locale: zhTW })}
+                        {formatDate.fullDateTime(installation.actual_end_time)}
                       </span>
                     ) : (
                       <span className="text-muted-foreground italic">尚未完成</span>
@@ -398,7 +399,7 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
                     {installation.creator.name || installation.creator.username || '未知用戶'}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    於 {format(new Date(installation.created_at), "MM/dd HH:mm", { locale: zhTW })} 建立
+                    於 {formatDate.shortDateTime(installation.created_at)} 建立
                   </span>
                 </div>
               </div>
@@ -552,8 +553,8 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
         </CardContent>
       </Card>
 
-              {/* 狀態操作 */}
-        {installation.status !== 'completed' && installation.status !== 'cancelled' && (
+      {/* 狀態操作 */}
+      {installation.status !== 'completed' && installation.status !== 'cancelled' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -650,7 +651,7 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
                       <p className="text-lg font-semibold text-green-600">安裝已完成</p>
                       <p className="text-sm text-muted-foreground">
                         {installation.actual_end_time && (
-                          <>完成時間：{format(new Date(installation.actual_end_time), "yyyy/MM/dd HH:mm", { locale: zhTW })}</>
+                          <>完成時間：{formatDate.fullDateTime(installation.actual_end_time)}</>
                         )}
                       </p>
                     </div>
@@ -670,4 +671,4 @@ export function InstallationDetailComponent({ installationId }: InstallationDeta
         )}
       </div>
     );
-  }
+}

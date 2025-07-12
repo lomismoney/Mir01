@@ -11,6 +11,7 @@ import {
 } from "@/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatPrice } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -384,11 +385,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                 <div className="flex items-center justify-between font-medium text-base pt-2 border-t">
                   <span className="text-muted-foreground">訂單總額</span>
                   <span className="text-right w-[120px]">
-                    {new Intl.NumberFormat("zh-TW", {
-                      style: "currency",
-                      currency: "TWD",
-                      minimumFractionDigits: 0,
-                    }).format(order.grand_total)}
+                    {formatPrice(order.grand_total)}
                   </span>
                 </div>
               </div>

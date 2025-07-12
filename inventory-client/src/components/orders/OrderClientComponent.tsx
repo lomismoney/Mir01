@@ -1,16 +1,21 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link"; // <-- 新增導入
-import { Button } from "@/components/ui/button"; // <-- 新增導入
-import { PlusCircle } from "lucide-react"; // <-- 新增導入
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
 import {
   useOrders,
   useCancelOrder,
   useBatchDeleteOrders,
   useBatchUpdateStatus,
-} from "@/hooks"; // 🎯 新增 useCancelOrder & useBatchDeleteOrders & useBatchUpdateStatus
-import { toast } from "sonner"; // 🎯 新增 toast 導入
+  useVirtualizedTable,
+} from "@/hooks";
+import { useOrderModalManager, ORDER_MODAL_TYPES } from "@/hooks/useModalManager";
+import { useApiErrorHandler } from "@/hooks/useErrorHandler";
+import { useOptimisticListOperations } from "@/hooks/useOptimisticUpdate";
+import { extractResponseData, extractPaginationMeta } from "@/types/api-responses";
+import type { OrdersResponse } from "@/types/api-responses";
 import { OrderPreviewModal } from "@/components/orders/OrderPreviewModal";
 import { ShipmentFormModal } from "@/components/orders/ShipmentFormModal";
 import RecordPaymentModal from "@/components/orders/RecordPaymentModal";
@@ -18,6 +23,7 @@ import RefundModal from "@/components/orders/RefundModal"; // 🎯 新增 Refund
 import { useDebounce } from "@/hooks/use-debounce";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import { Input } from "@/components/ui/input";
+import { AdaptiveTable } from "@/components/ui/AdaptiveTable";
 import {
   Select,
   SelectContent,
@@ -48,24 +54,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { DataTablePagination } from "@/components/ui/data-table-pagination"; // 🎯 新增分頁組件導入
 import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-  getSortedRowModel,
   SortingState,
   PaginationState, // 🎯 新增分頁狀態類型
   type RowSelectionState, // 🎯 新增
-  getFilteredRowModel, // 🎯 新增 (用於獲取已選項目)
 } from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 
 export function OrderClientComponent() {
@@ -86,26 +78,11 @@ export function OrderClientComponent() {
   });
   const debouncedSearch = useDebounce(filters.search, 500); // 500ms 防抖
 
-  // 🎯 訂單預覽狀態管理
-  const [previewingOrderId, setPreviewingOrderId] = useState<number | null>(
-    null,
-  );
-
-  // 🎯 出貨Modal狀態管理
-  const [shippingOrderId, setShippingOrderId] = useState<number | null>(null);
-
-  // 🎯 部分收款Modal狀態管理
-  const [payingOrder, setPayingOrder] = useState<ProcessedOrder | null>(null);
-
-  // 🎯 退款Modal狀態管理
-  const [refundingOrder, setRefundingOrder] = useState<ProcessedOrder | null>(
-    null,
-  );
-
-  // 🎯 新增：取消訂單狀態管理
-  const [cancellingOrder, setCancellingOrder] = useState<ProcessedOrder | null>(
-    null,
-  );
+  // 🎯 統一的 Modal 管理器
+  const modalManager = useOrderModalManager();
+  const { handleError, handleSuccess } = useApiErrorHandler();
+  
+  // 🎯 取消訂單相關狀態
   const [cancelReason, setCancelReason] = useState<string>("");
   const cancelOrderMutation = useCancelOrder();
 
@@ -145,20 +122,24 @@ export function OrderClientComponent() {
   // 表格狀態管理
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  // 從響應中解析數據
-  const pageData = ((response as any)?.data || []) as Order[];
-  const meta = (response as any)?.meta;
+  // 🎯 類型安全的響應數據解析
+  const pageData = extractResponseData(response || []);
+  const meta = extractPaginationMeta(response || []);
 
   // 🎯 建立確認取消的處理函式
   const handleConfirmCancel = () => {
+    const cancellingOrder = modalManager.currentData;
     if (!cancellingOrder) return;
+    
     cancelOrderMutation.mutate(
       { orderId: cancellingOrder.id, reason: cancelReason },
       {
         onSuccess: () => {
-          setCancellingOrder(null); // 成功後關閉對話框
-          setCancelReason(""); // 清空原因
+          modalManager.handleSuccess();
+          setCancelReason("");
+          handleSuccess('訂單已取消');
         },
+        onError: (error) => handleError(error),
       },
     );
   };
@@ -166,10 +147,10 @@ export function OrderClientComponent() {
   // 🎯 建立批量刪除確認處理函式 - 裁決核心
   const handleConfirmBatchDelete = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
-    const selectedOrderIds = selectedRows.map((row) => row.original.id);
+    const selectedOrderIds = selectedRows.map((row: any) => row.original.id);
 
     if (selectedOrderIds.length === 0) {
-      toast.warning("沒有選擇任何訂單");
+      handleError(new Error("沒有選擇任何訂單"));
       return;
     }
 
@@ -187,10 +168,10 @@ export function OrderClientComponent() {
   // 🎯 建立批量更新狀態確認處理函式 - 授旗儀式核心
   const handleConfirmBatchAction = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
-    const selectedOrderIds = selectedRows.map((row) => row.original.id);
+    const selectedOrderIds = selectedRows.map((row: any) => row.original.id);
 
     if (selectedOrderIds.length === 0) {
-      toast.warning("沒有選擇任何訂單");
+      handleError(new Error("沒有選擇任何訂單"));
       return;
     }
 
@@ -216,34 +197,33 @@ export function OrderClientComponent() {
   const columns = useMemo(
     () =>
       createColumns({
-        onPreview: setPreviewingOrderId,
-        onShip: setShippingOrderId,
-        onRecordPayment: setPayingOrder,
-        onRefund: setRefundingOrder, // 🎯 新增
-        onCancel: setCancellingOrder, // 🎯 新增
+        onPreview: (orderId: number) => modalManager.openModal(ORDER_MODAL_TYPES.PREVIEW, orderId),
+        onShip: (orderId: number) => modalManager.openModal(ORDER_MODAL_TYPES.SHIPMENT, orderId),
+        onRecordPayment: (order: ProcessedOrder) => modalManager.openModal(ORDER_MODAL_TYPES.PAYMENT, order),
+        onRefund: (order: ProcessedOrder) => modalManager.openModal(ORDER_MODAL_TYPES.REFUND, order),
+        onCancel: (order: ProcessedOrder) => modalManager.openModal(ORDER_MODAL_TYPES.CANCEL, order),
         onDelete: (id: number) => {
           // 目前使用 deleteOrder hook 在 columns 內部處理
           // 未來可以在這裡添加確認對話框或其他邏輯
         },
       }),
-    [],
+    [modalManager],
   );
   // 🎯 配置表格以啟用手動分頁和行選擇 - 軍團作戰升級
-  const table = useReactTable({
+  // 🎯 使用虛擬化表格 Hook - 訂單列表優化
+  const virtualizedTableResult = useVirtualizedTable({
     data: pageData,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(), // 🎯 新增
+    enableVirtualization: pageData.length > 20, // 超過20筆訂單時啟用虛擬化
+    rowHeight: 70, // 訂單行較高，包含更多信息
 
-    onSortingChange: setSorting,
+    enableRowSelection: true, // 支持批量操作
+    manualPagination: true, // 啟用後端分頁
+    pageCount: meta?.last_page ?? -1,
     onPaginationChange: setPagination,
-    onRowSelectionChange: setRowSelection, // 🎯 新增
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
 
-    manualPagination: true, // 🎯 啟用手動分頁（後端分頁）
-    enableRowSelection: true, // 🎯 新增
-    pageCount: meta?.last_page ?? -1, // 🎯 從後端獲取總頁數
 
     state: {
       sorting,
@@ -252,30 +232,33 @@ export function OrderClientComponent() {
     },
   });
 
+  // 從虛擬化配置中獲取 table 實例用於批量操作
+  const { table } = virtualizedTableResult;
+
   const router = useRouter();
 
   if (isLoading) {
     // 預計會有 8 列，顯示 10 行骨架屏
-    return <DataTableSkeleton columns={8} data-oid="wuki03e" />;
+    return <DataTableSkeleton columns={8} />;
   }
 
   if (isError) {
     return (
-      <div className="text-red-500" data-oid="_hm0dxj">
+      <div className="text-red-500">
         無法加載訂單資料: {error?.message}
       </div>
     );
   }
 
   return (
-    <div className="space-y-4" data-oid=":qun7ld">
+    <div className="space-y-4">
       {/* 篩選與操作按鈕區域 */}
       <div
         className="flex items-center justify-between py-4"
-        data-oid="bwpiqj0"
+       
       >
         {/* 左側的篩選/搜尋區域 */}
-        <div className="flex items-center gap-2" data-oid="43afb-m">
+        <div className="flex items-center gap-2">
           <Input
             placeholder="搜尋訂單號、客戶名稱..."
             value={filters.search}
@@ -283,7 +266,7 @@ export function OrderClientComponent() {
               setFilters((prev) => ({ ...prev, search: e.target.value }))
             }
             className="max-w-sm"
-            data-oid="g5xnvo_"
+           
           />
 
           <Select
@@ -293,25 +276,25 @@ export function OrderClientComponent() {
               const newValue = value === "all" ? "" : value;
               setFilters((prev) => ({ ...prev, shipping_status: newValue }));
             }}
-            data-oid="c-o5aj7"
+           
           >
-            <SelectTrigger className="w-40" data-oid=":9o:mjq">
-              <SelectValue placeholder="貨物狀態" data-oid="98wn.rm" />
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="貨物狀態" />
             </SelectTrigger>
-            <SelectContent data-oid="v0xpciu">
-              <SelectItem value="all" data-oid="nlm_l3i">
+            <SelectContent>
+              <SelectItem value="all">
                 全部狀態
               </SelectItem>
-              <SelectItem value="pending" data-oid=":pa8v3k">
+              <SelectItem value="pending">
                 待處理
               </SelectItem>
-              <SelectItem value="processing" data-oid="4s4s8cm">
+              <SelectItem value="processing">
                 處理中
               </SelectItem>
-              <SelectItem value="shipped" data-oid="nmjp9fd">
+              <SelectItem value="shipped">
                 已出貨
               </SelectItem>
-              <SelectItem value="delivered" data-oid="hmvl9rb">
+              <SelectItem value="delivered">
                 已完成
               </SelectItem>
             </SelectContent>
@@ -323,25 +306,25 @@ export function OrderClientComponent() {
               const newValue = value === "all" ? "" : value;
               setFilters((prev) => ({ ...prev, payment_status: newValue }));
             }}
-            data-oid="gqw9tm_"
+           
           >
-            <SelectTrigger className="w-40" data-oid="r0ruvhx">
-              <SelectValue placeholder="付款狀態" data-oid="olymn1." />
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="付款狀態" />
             </SelectTrigger>
-            <SelectContent data-oid=".4by:r3">
-              <SelectItem value="all" data-oid=".yyd60h">
+            <SelectContent>
+              <SelectItem value="all">
                 全部狀態
               </SelectItem>
-              <SelectItem value="pending" data-oid="lzyhr.e">
+              <SelectItem value="pending">
                 待付款
               </SelectItem>
-              <SelectItem value="partial" data-oid="dfkickn">
+              <SelectItem value="partial">
                 部分付款
               </SelectItem>
-              <SelectItem value="paid" data-oid="-1pn:pg">
+              <SelectItem value="paid">
                 已付款
               </SelectItem>
-              <SelectItem value="refunded" data-oid="g0-9imk">
+              <SelectItem value="refunded">
                 已退款
               </SelectItem>
             </SelectContent>
@@ -349,49 +332,49 @@ export function OrderClientComponent() {
         </div>
 
         {/* 右側的操作按鈕區域 */}
-        <Link href="/orders/new" passHref data-oid="f-m1d7-">
-          <Button data-oid="mnyiaw6">
-            <PlusCircle className="mr-2 h-4 w-4" data-oid="fn.9pu1" />
+        <Link href="/orders/new" passHref>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
             新增訂單
           </Button>
         </Link>
       </div>
 
       {/* --- 🎯 新增的批量操作欄 --- */}
-      <div className="flex items-center justify-between" data-oid="333f1ip">
+      <div className="flex items-center justify-between">
         <div
           className="flex-1 text-sm text-muted-foreground"
-          data-oid="0rbt7ai"
+         
         >
           已選擇 {table.getFilteredSelectedRowModel().rows.length} 筆 / 總計{" "}
           {meta?.total ?? 0} 筆
         </div>
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <div className="flex items-center space-x-2" data-oid="8xcx9tw">
+          <div className="flex items-center space-x-2">
             <Button
               variant="destructive"
               size="sm"
               onClick={() => setIsBatchDeleteConfirmOpen(true)} // 🎯 解開主炮保險
               disabled={table.getFilteredSelectedRowModel().rows.length === 0}
-              data-oid="tr52.m9"
+             
             >
               批量刪除
             </Button>
-            <DropdownMenu data-oid="ge_z3b_">
-              <DropdownMenuTrigger asChild data-oid="eb5pt7:">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={
                     table.getFilteredSelectedRowModel().rows.length === 0
                   }
-                  data-oid="zu6dcw2"
+                 
                 >
                   批量更新狀態
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" data-oid="f82dmwr">
-                <DropdownMenuLabel data-oid="vuvi2yu">
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>
                   標記付款狀態為
                 </DropdownMenuLabel>
                 <DropdownMenuItem
@@ -401,7 +384,7 @@ export function OrderClientComponent() {
                       status_value: "paid",
                     })
                   }
-                  data-oid="hgc8s7j"
+                 
                 >
                   已付款
                 </DropdownMenuItem>
@@ -412,12 +395,12 @@ export function OrderClientComponent() {
                       status_value: "pending",
                     })
                   }
-                  data-oid="33aha8e"
+                 
                 >
                   待付款
                 </DropdownMenuItem>
-                <DropdownMenuSeparator data-oid="4-q-wl." />
-                <DropdownMenuLabel data-oid="8r3m:v3">
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>
                   標記貨物狀態為
                 </DropdownMenuLabel>
                 <DropdownMenuItem
@@ -427,7 +410,7 @@ export function OrderClientComponent() {
                       status_value: "shipped",
                     })
                   }
-                  data-oid="sn5vdtr"
+                 
                 >
                   已出貨
                 </DropdownMenuItem>
@@ -438,7 +421,7 @@ export function OrderClientComponent() {
                       status_value: "delivered",
                     })
                   }
-                  data-oid="c8rxf9q"
+                 
                 >
                   已送達
                 </DropdownMenuItem>
@@ -449,180 +432,111 @@ export function OrderClientComponent() {
       </div>
       {/* --- 批量操作欄結束 --- */}
 
-      {/* 表格容器 */}
-      <div 
-        className="rounded-lg border bg-card shadow-sm overflow-hidden" 
-        data-oid="c-gfz:5"
-      >
-        <Table data-oid="bp0-wlx">
-          <TableHeader data-oid="hg64_rh">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="border-b bg-muted/30 hover:bg-muted/30"
-                data-oid="wxsp1e4"
-              >
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="3-c76.y"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody data-oid="lctsid7">
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="border-b transition-colors hover:bg-muted/50"
-                  data-oid="8i08hjh"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className="h-12 px-4 py-2 align-middle"
-                      data-oid="b3tvodv"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow data-oid="diu:iva">
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                  data-oid="reoxymv"
-                >
-                  暫無訂單資料
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {/* 🎯 使用 AdaptiveTable 組件 - 訂單列表虛擬化 */}
+      <AdaptiveTable
+        table={table}
+        className="rounded-lg border bg-card shadow-sm"
+        virtualizationOptions={{
+          containerHeight: virtualizedTableResult.virtualizationConfig.containerHeight,
+          estimateSize: virtualizedTableResult.virtualizationConfig.estimateSize,
+          overscan: virtualizedTableResult.virtualizationConfig.overscan,
+        }}
+        showVirtualizationToggle={true}
+        dataType="訂單"
+      />
 
       {/* 🎯 分頁控制器 - 分段進軍終章完成 */}
       <DataTablePagination
         table={table}
         totalCount={meta?.total} // 傳入後端返回的總數據量
-        data-oid="8_tc:k_"
+       
       />
 
       {/* 🎯 訂單預覽模態 */}
       <OrderPreviewModal
-        orderId={previewingOrderId}
-        open={!!previewingOrderId} // 當 ID 存在時，open 為 true
+        orderId={modalManager.currentData}
+        open={modalManager.isModalOpen(ORDER_MODAL_TYPES.PREVIEW)}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
-            setPreviewingOrderId(null); // 當面板關閉時，重置 ID
+            modalManager.closeModal();
           }
         }}
         onEdit={(order) => {
-          // 跳轉到編輯頁面
           router.push(`/orders/${order.id}/edit`);
-          setPreviewingOrderId(null);
+          modalManager.closeModal();
         }}
         onPrint={(order) => {
-          // TODO: 實現列印功能
-          toast.info("列印功能開發中");
+          handleSuccess("列印功能開發中");
         }}
         onCancel={(order) => {
-          setCancellingOrder(order);
-          setPreviewingOrderId(null);
+          modalManager.openModal(ORDER_MODAL_TYPES.CANCEL, order);
         }}
         onShipOrder={(order) => {
-          setShippingOrderId(order.id);
-          setPreviewingOrderId(null);
+          modalManager.openModal(ORDER_MODAL_TYPES.SHIPMENT, order.id);
         }}
         onRecordPayment={(order) => {
-          setPayingOrder(order);
-          setPreviewingOrderId(null);
+          modalManager.openModal(ORDER_MODAL_TYPES.PAYMENT, order);
         }}
         onRefund={(order) => {
-          setRefundingOrder(order);
-          setPreviewingOrderId(null);
+          modalManager.openModal(ORDER_MODAL_TYPES.REFUND, order);
         }}
-        data-oid="k8vq1n_"
       />
 
       {/* 🎯 出貨表單模態 */}
       <ShipmentFormModal
-        orderId={shippingOrderId!}
-        open={!!shippingOrderId}
+        orderId={modalManager.currentData}
+        open={modalManager.isModalOpen(ORDER_MODAL_TYPES.SHIPMENT)}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
-            setShippingOrderId(null);
+            modalManager.closeModal();
           }
         }}
-        data-oid="8ew8uoj"
       />
 
       {/* 🎯 部分收款模態 */}
       <RecordPaymentModal
-        order={payingOrder}
-        open={!!payingOrder}
+        order={modalManager.currentData}
+        open={modalManager.isModalOpen(ORDER_MODAL_TYPES.PAYMENT)}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
-            setPayingOrder(null);
+            modalManager.closeModal();
           }
         }}
-        data-oid="a8kp833"
       />
 
       {/* 🎯 退款模態 */}
       <RefundModal
-        order={refundingOrder}
-        open={!!refundingOrder}
+        order={modalManager.currentData}
+        open={modalManager.isModalOpen(ORDER_MODAL_TYPES.REFUND)}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
-            setRefundingOrder(null);
+            modalManager.closeModal();
           }
         }}
-        data-oid="2eiux96"
       />
 
       {/* 🎯 取消訂單確認對話框 */}
       <AlertDialog
-        open={!!cancellingOrder}
-        onOpenChange={(isOpen) => !isOpen && setCancellingOrder(null)}
-        data-oid="obvhra6"
+        open={modalManager.isModalOpen(ORDER_MODAL_TYPES.CANCEL)}
+        onOpenChange={(isOpen) => !isOpen && modalManager.closeModal()}
       >
-        <AlertDialogContent data-oid="zn7pdi.">
-          <AlertDialogHeader data-oid="v2t-dr3">
-            <AlertDialogTitle data-oid="l6pbfja">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
               確認取消訂單？
             </AlertDialogTitle>
-            <AlertDialogDescription data-oid=":4_4d2:">
+            <AlertDialogDescription>
               您確定要取消訂單{" "}
-              <strong data-oid="8iltayg">
-                {cancellingOrder?.order_number}
+              <strong>
+                {modalManager.currentData?.order_number}
               </strong>{" "}
               嗎？此操作不可撤銷。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="py-4" data-oid="8-ct91a">
+          <div className="py-4">
             <label
               htmlFor="cancel-reason"
               className="text-sm font-medium"
-              data-oid="3ugsge8"
             >
               取消原因 (可選)
             </label>
@@ -632,15 +546,13 @@ export function OrderClientComponent() {
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               className="mt-2"
-              data-oid="r739war"
             />
           </div>
-          <AlertDialogFooter data-oid="33mqnd-">
-            <AlertDialogCancel data-oid="882loki">再想想</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>再想想</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmCancel}
               disabled={cancelOrderMutation.isPending}
-              data-oid="3mxxf8p"
             >
               {cancelOrderMutation.isPending ? "處理中..." : "確認取消"}
             </AlertDialogAction>
@@ -657,24 +569,24 @@ export function OrderClientComponent() {
             setBatchUpdateConfig(null);
           }
         }}
-        data-oid="r_qpaqo"
+       
       >
-        <AlertDialogContent data-oid="r144zzg">
-          <AlertDialogHeader data-oid="2vhudat">
-            <AlertDialogTitle data-oid="yhffa4b">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
               確認批量操作？
             </AlertDialogTitle>
-            <AlertDialogDescription data-oid="t_xl6qt">
+            <AlertDialogDescription>
               您確定要對所選的
-              <strong data-oid="l4gvak8">
+              <strong>
                 {table.getFilteredSelectedRowModel().rows.length}
               </strong>
               筆訂單執行此操作嗎？
               {isBatchDeleteConfirmOpen && " 此操作不可撤銷。"}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="i85xdpq">
-            <AlertDialogCancel data-oid="l7fz_px">取消</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={
                 isBatchDeleteConfirmOpen
@@ -689,7 +601,7 @@ export function OrderClientComponent() {
                   ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   : ""
               }
-              data-oid="ka16dd:"
+             
             >
               {batchDeleteMutation.isPending || batchUpdateMutation.isPending
                 ? "處理中..."

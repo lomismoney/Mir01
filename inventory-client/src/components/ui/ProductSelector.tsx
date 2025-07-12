@@ -13,6 +13,7 @@ import { ArrowLeft, Plus } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useProducts } from "@/hooks";
 import { toast } from "sonner";
+import { useErrorHandler } from "@/hooks";
 import { cn } from "@/lib/utils";
 
 /**
@@ -156,6 +157,9 @@ export function ProductSelector({
   multiple = true,
   selectedIds = [],
 }: ProductSelectorProps) {
+  // 統一錯誤處理
+  const { handleError } = useErrorHandler();
+  
   // 搜尋關鍵字狀態
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -328,7 +332,7 @@ export function ProductSelector({
         }
         onOpenChange(newOpen);
       }}
-      data-oid="6i4d48c"
+     
     >
       <DialogContent
         className={cn(
@@ -341,11 +345,11 @@ export function ProductSelector({
             ? "max-w-[800px] w-[90vw]" // 選擇商品或訂製規格時的寬度（較窄）
             : "!max-w-[1400px] w-[90vw] [&>div]:max-w-full", // 選擇 SKU 規格時的寬度（較寬）
         )}
-        data-oid="6f_9c8n"
+       
       >
-        <DialogHeader data-oid="n4qeotx">
-          <DialogTitle data-oid="gwd4ysj">選擇商品</DialogTitle>
-          <DialogDescription data-oid="e1d5hk5">
+        <DialogHeader>
+          <DialogTitle>選擇商品</DialogTitle>
+          <DialogDescription>
             {multiple
               ? "請選擇一個或多個商品。您可以使用搜尋功能快速找到所需商品。"
               : "請選擇一個商品。"}
@@ -355,33 +359,33 @@ export function ProductSelector({
         {/* 條件渲染：主產品列表 or 詳細視圖 */}
         {selectedProduct === null ? (
           // 主產品列表 (Master View)
-          <div className="space-y-4" data-oid="ah8x3w1">
+          <div className="space-y-4">
             {/* 搜尋框 */}
             <Input
               placeholder="搜尋商品名稱..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
-              data-oid="t2gx-p9"
+             
             />
 
             {/* 過濾和排序控制項 */}
-            <div className="flex flex-col sm:flex-row gap-2" data-oid="-wyy6uh">
+            <div className="flex flex-col sm:flex-row gap-2">
               {/* 分類過濾選單 */}
               <Select
                 value={categoryFilter}
                 onValueChange={setCategoryFilter}
-                data-oid=".ckjge7"
+               
               >
                 <SelectTrigger
                   className="w-full sm:w-[180px]"
-                  data-oid="juh64lb"
+                 
                 >
-                  <SelectValue placeholder="所有分類" data-oid="g0c4w0u" />
+                  <SelectValue placeholder="所有分類" />
                 </SelectTrigger>
-                <SelectContent data-oid="ekpsgk4">
+                <SelectContent>
                   {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat} data-oid="gn6ut5_">
+                    <SelectItem key={cat} value={cat}>
                       {cat === "all" ? "所有分類" : cat}
                     </SelectItem>
                   ))}
@@ -392,22 +396,22 @@ export function ProductSelector({
               <Select
                 value={sortOrder}
                 onValueChange={setSortOrder}
-                data-oid="mkp09ri"
+               
               >
                 <SelectTrigger
                   className="w-full sm:w-[180px]"
-                  data-oid="k3ovkh6"
+                 
                 >
-                  <SelectValue placeholder="預設排序" data-oid="_27_n4j" />
+                  <SelectValue placeholder="預設排序" />
                 </SelectTrigger>
-                <SelectContent data-oid="358ocdx">
-                  <SelectItem value="default" data-oid="5.tdpxr">
+                <SelectContent>
+                  <SelectItem value="default">
                     預設排序
                   </SelectItem>
-                  <SelectItem value="price-asc" data-oid="-:wc3vn">
+                  <SelectItem value="price-asc">
                     價格：由低到高
                   </SelectItem>
-                  <SelectItem value="price-desc" data-oid="i1p9zqb">
+                  <SelectItem value="price-desc">
                     價格：由高到低
                   </SelectItem>
                 </SelectContent>
@@ -418,14 +422,14 @@ export function ProductSelector({
             {isLoading ? (
               <div
                 className="flex items-center justify-center h-[40vh]"
-                data-oid="oumf8xx"
+               
               >
-                <div className="text-center space-y-2" data-oid="j7o_bf4">
+                <div className="text-center space-y-2">
                   <div
                     className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"
-                    data-oid="nm0yi7o"
+                   
                   ></div>
-                  <p className="text-muted-foreground" data-oid="qr2rn6f">
+                  <p className="text-muted-foreground">
                     載入中...
                   </p>
                 </div>
@@ -433,17 +437,17 @@ export function ProductSelector({
             ) : error ? (
               <div
                 className="flex items-center justify-center h-[40vh]"
-                data-oid="_uq_5gk"
+               
               >
-                <div className="text-center space-y-2" data-oid="7a2aibk">
-                  <p className="text-destructive" data-oid="pdyxb.q">
+                <div className="text-center space-y-2">
+                  <p className="text-destructive">
                     {error?.message || "載入失敗"}
                   </p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
-                    data-oid="vsk3dvk"
+                   
                   >
                     重試
                   </Button>
@@ -452,10 +456,10 @@ export function ProductSelector({
             ) : displayedProducts.length === 0 ? (
               <div
                 className="flex items-center justify-center h-[40vh]"
-                data-oid="koorna0"
+               
               >
-                <div className="text-center space-y-2" data-oid="fs80jf0">
-                  <p className="text-muted-foreground" data-oid="5pp.42p">
+                <div className="text-center space-y-2">
+                  <p className="text-muted-foreground">
                     {searchQuery || categoryFilter !== "all"
                       ? "找不到符合條件的商品"
                       : "暫無商品資料"}
@@ -465,20 +469,20 @@ export function ProductSelector({
             ) : (
               <div
                 className="grid grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[50vh]"
-                data-oid="v76:21r"
+               
               >
                 {displayedProducts.map((product) => (
                   <Card
                     key={product.id}
                     className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
                     onClick={() => setSelectedProduct(product)}
-                    data-oid="6uxznhp"
+                   
                   >
-                    <CardContent className="p-4" data-oid="bx49n5y">
+                    <CardContent className="p-4">
                       {/* 產品圖片 */}
                       <div
                         className="relative aspect-square mb-3"
-                        data-oid="anxxmca"
+                       
                       >
                         <Image
                           src={product.mainImageUrl}
@@ -486,14 +490,14 @@ export function ProductSelector({
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           className="object-cover rounded-md"
-                          data-oid="-72iy9r"
+                         
                         />
                       </div>
 
                       {/* 產品名稱 */}
                       <h3
                         className="font-semibold text-sm mb-2 line-clamp-2"
-                        data-oid="mws7fo."
+                       
                       >
                         {product.name}
                       </h3>
@@ -502,7 +506,7 @@ export function ProductSelector({
                       <Badge
                         variant="secondary"
                         className="text-xs"
-                        data-oid="nbh2vq7"
+                       
                       >
                         {product.categoryName}
                       </Badge>
@@ -510,7 +514,7 @@ export function ProductSelector({
                       {/* 規格數量提示 */}
                       <p
                         className="text-xs text-muted-foreground mt-2"
-                        data-oid="7yf3uzo"
+                       
                       >
                         {product.variants.length} 種規格
                       </p>
@@ -522,16 +526,16 @@ export function ProductSelector({
           </div>
         ) : (
           // 詳細視圖 - 規格選擇列表
-          <div className="flex flex-col h-full" data-oid="36l3895">
+          <div className="flex flex-col h-full">
             {/* 視圖標頭 - 只在非訂製模式下顯示 */}
             {!isAddingCustom && (
               <div
                 className="flex items-center justify-between px-6 py-4 border-b"
-                data-oid="v8b7kdz"
+               
               >
                 <div
                   className="flex items-center gap-4 flex-1 min-w-0"
-                  data-oid="rdekw.y"
+                 
                 >
                   <Button
                     variant="outline"
@@ -540,20 +544,20 @@ export function ProductSelector({
                       setSelectedProduct(null);
                       setIsAddingCustom(false);
                     }}
-                    data-oid="dd5tomn"
+                   
                   >
-                    <ArrowLeft className="h-4 w-4" data-oid="1h:_7.k" />
+                    <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <div className="flex-1 min-w-0" data-oid="2y1a:x9">
+                  <div className="flex-1 min-w-0">
                     <h2
                       className="text-xl font-semibold truncate"
-                      data-oid="rylbogo"
+                     
                     >
                       {selectedProduct.name}
                     </h2>
                     <p
                       className="text-sm text-muted-foreground"
-                      data-oid="iwnox48"
+                     
                     >
                       選擇規格
                     </p>
@@ -563,9 +567,9 @@ export function ProductSelector({
                   variant="outline"
                   size="sm"
                   onClick={() => setIsAddingCustom(true)}
-                  data-oid="u7xb50-"
+                 
                 >
-                  <Plus className="h-4 w-4 mr-1" data-oid=".bs3:ss" />
+                  <Plus className="h-4 w-4 mr-1" />
                   新增訂製規格
                 </Button>
               </div>
@@ -574,40 +578,40 @@ export function ProductSelector({
             {/* 條件渲染：訂製表單 or 標準規格選擇 */}
             {isAddingCustom ? (
               /* --- 這裡是新的訂製表單 --- */
-              <div className="flex flex-col h-full" data-oid="6xnt.og">
+              <div className="flex flex-col h-full">
                 {/* 訂製表單標題區 */}
-                <div className="border-b" data-oid="qgdnr1o">
-                  <div className="px-6 py-4" data-oid="uqwcl-_">
-                    <div className="flex items-center gap-4" data-oid="8esx..h">
+                <div className="border-b">
+                  <div className="px-6 py-4">
+                    <div className="flex items-center gap-4">
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => setIsAddingCustom(false)}
-                        data-oid="8k466jh"
+                       
                       >
-                        <ArrowLeft className="h-4 w-4" data-oid="6t_ittu" />
+                        <ArrowLeft className="h-4 w-4" />
                       </Button>
-                      <div className="flex-1 min-w-0" data-oid="cxnwa32">
-                        <div className="space-y-1" data-oid="u:7p7b0">
+                      <div className="flex-1 min-w-0">
+                        <div className="space-y-1">
                           <h3
                             className="text-base font-medium text-muted-foreground"
-                            data-oid="bgkj66z"
+                           
                           >
                             為{" "}
                             <span
                               className="font-semibold text-foreground"
-                              data-oid="wept92b"
+                             
                             >
                               {selectedProduct.name}
                             </span>
                           </h3>
-                          <h2 className="text-xl font-bold" data-oid="_4igsam">
+                          <h2 className="text-xl font-bold">
                             新增訂製規格
                           </h2>
                         </div>
                         <p
                           className="text-sm text-muted-foreground mt-2"
-                          data-oid="lzjdy6j"
+                         
                         >
                           請填寫訂製商品的詳細規格資訊
                         </p>
@@ -620,21 +624,21 @@ export function ProductSelector({
                 <div
                   className="overflow-y-auto px-6 py-8 flex-shrink"
                   style={{ maxHeight: "calc(90vh - 200px)" }}
-                  data-oid="2vx.2mn"
+                 
                 >
                   <div
                     className="max-w-xl mx-auto space-y-6"
-                    data-oid="kljl42w"
+                   
                   >
                     {/* 訂製規格描述 */}
-                    <div className="space-y-3" data-oid="_x2o7zg">
+                    <div className="space-y-3">
                       <Label
                         htmlFor="custom-spec"
                         className="text-base font-medium"
-                        data-oid="vzxmu.g"
+                       
                       >
                         訂製規格描述{" "}
-                        <span className="text-destructive" data-oid="0tw6.0k">
+                        <span className="text-destructive">
                           *
                         </span>
                       </Label>
@@ -644,12 +648,12 @@ export function ProductSelector({
                         value={customSpec}
                         onChange={(e) => setCustomSpec(e.target.value)}
                         className="min-h-[120px] resize-none"
-                        data-oid="mcieuu0"
+                       
                       />
 
                       <p
                         className="text-xs text-muted-foreground"
-                        data-oid="0dw2sio"
+                       
                       >
                         請詳細描述商品的訂製規格，包含尺寸、顏色、材質等資訊
                       </p>
@@ -658,16 +662,16 @@ export function ProductSelector({
                     {/* 數量和單價 */}
                     <div
                       className="grid grid-cols-1 sm:grid-cols-2 gap-6"
-                      data-oid="kkxvgf-"
+                     
                     >
-                      <div className="space-y-3" data-oid="kzg5f:g">
+                      <div className="space-y-3">
                         <Label
                           htmlFor="custom-quantity"
                           className="text-base font-medium"
-                          data-oid="gt_371b"
+                         
                         >
                           數量{" "}
-                          <span className="text-destructive" data-oid="ubuvqk9">
+                          <span className="text-destructive">
                             *
                           </span>
                         </Label>
@@ -681,17 +685,17 @@ export function ProductSelector({
                           }
                           placeholder="請輸入數量"
                           className="h-11"
-                          data-oid="fcytvp1"
+                         
                         />
                       </div>
-                      <div className="space-y-3" data-oid="1brp6hp">
+                      <div className="space-y-3">
                         <Label
                           htmlFor="custom-price"
                           className="text-base font-medium"
-                          data-oid="si72ye."
+                         
                         >
                           單價 (NT$){" "}
-                          <span className="text-destructive" data-oid="1.2dbq4">
+                          <span className="text-destructive">
                             *
                           </span>
                         </Label>
@@ -706,7 +710,7 @@ export function ProductSelector({
                           }
                           placeholder="請輸入單價"
                           className="h-11"
-                          data-oid="wi_5g9m"
+                         
                         />
                       </div>
                     </div>
@@ -714,46 +718,46 @@ export function ProductSelector({
                 </div>
 
                 {/* 🎯 合併的底部區域：小計顯示 + 確認按鈕 */}
-                <div className="border-t p-6 bg-background" data-oid="73gbu72">
-                  <div className="max-w-xl mx-auto space-y-4" data-oid="8p1giq4">
+                <div className="border-t p-6 bg-background">
+                  <div className="max-w-xl mx-auto space-y-4">
                     {/* 小計顯示卡片 */}
                     {customPrice && customQuantity && (
                       <div
                         className="p-4 bg-muted/50 rounded-lg space-y-2 border"
-                        data-oid="ibv8cls"
+                       
                       >
                         <div
                           className="flex justify-between text-sm"
-                          data-oid="e7w:i0g"
+                         
                         >
                           <span
                             className="text-muted-foreground"
-                            data-oid="l-w0nv-"
+                           
                           >
                             單價
                           </span>
-                          <span data-oid="bop:j84">
+                          <span>
                             NT$ {Number(customPrice).toLocaleString()}
                           </span>
                         </div>
                         <div
                           className="flex justify-between text-sm"
-                          data-oid="qsvl8q1"
+                         
                         >
                           <span
                             className="text-muted-foreground"
-                            data-oid="s-o7k3t"
+                           
                           >
                             數量
                           </span>
-                          <span data-oid="u6sal97">{customQuantity}</span>
+                          <span>{customQuantity}</span>
                         </div>
                         <div
                           className="flex justify-between font-semibold text-base pt-2 border-t"
-                          data-oid="jsqw_d3"
+                         
                         >
-                          <span data-oid=":61oizc">小計</span>
-                          <span className="text-primary" data-oid="xd1jm-u">
+                          <span>小計</span>
+                          <span className="text-primary">
                             NT${" "}
                             {(
                               Number(customPrice) * Number(customQuantity)
@@ -782,7 +786,7 @@ export function ProductSelector({
                             !customPrice ||
                             !customQuantity
                           ) {
-                            toast.error("請填寫所有必填欄位");
+                            handleError("請填寫所有必填欄位");
                             return;
                           }
                           const customItem = {
@@ -800,7 +804,7 @@ export function ProductSelector({
                           setCustomPrice("");
                           setCustomQuantity(1);
                         }}
-                        data-oid="zbw_v8x"
+                       
                       >
                         確認添加訂製商品
                       </Button>
@@ -814,53 +818,53 @@ export function ProductSelector({
                 {/* 表格區域 */}
                 <div
                   className="flex-grow overflow-y-auto overflow-x-auto"
-                  data-oid="8be:19t"
+                 
                 >
-                  <Table data-oid="7re4ki0">
-                    <TableHeader data-oid="zme_0we">
+                  <Table>
+                    <TableHeader>
                       <TableRow
                         className="border-b hover:bg-transparent"
-                        data-oid="zhjiyrt"
+                       
                       >
                         <TableHead
                           className="w-[50px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                          data-oid="b0w:loo"
+                         
                         >
                           選擇
                         </TableHead>
                         <TableHead
                           className="w-[80px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                          data-oid="4mm6bx:"
+                         
                         >
                           圖片
                         </TableHead>
                         <TableHead
                           className="w-[150px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                          data-oid="mcl2ig4"
+                         
                         >
                           SKU
                         </TableHead>
                         <TableHead
                           className="min-w-[300px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                          data-oid="0gcs:vp"
+                         
                         >
                           規格
                         </TableHead>
                         <TableHead
                           className="w-[100px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                          data-oid="7w2e99w"
+                         
                         >
                           庫存
                         </TableHead>
                         <TableHead
                           className="w-[120px] text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-                          data-oid="3mpg:lh"
+                         
                         >
                           單價
                         </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody data-oid="da67jge">
+                    <TableBody>
                       {selectedProduct.variants.map((variant) => {
                         const isSelected = selectedVariants.has(variant.id);
                         const stockLevel =
@@ -886,11 +890,11 @@ export function ProductSelector({
                                 handleVariantToggle(variant.id);
                               }
                             }}
-                            data-oid="pcj2teq"
+                           
                           >
                             <TableCell
                               onClick={(e) => e.stopPropagation()}
-                              data-oid="os3usa6"
+                             
                             >
                               <Checkbox
                                 checked={isSelected}
@@ -902,14 +906,14 @@ export function ProductSelector({
                                   selectedVariants.size > 0 &&
                                   !isSelected
                                 }
-                                data-oid="__t19_l"
+                               
                               />
                             </TableCell>
-                            <TableCell data-oid="mgxer9e">
+                            <TableCell>
                               {variant.imageUrl ? (
                                 <div
                                   className="relative w-12 h-12"
-                                  data-oid="e_pt:ci"
+                                 
                                 >
                                   <Image
                                     src={variant.imageUrl}
@@ -917,32 +921,32 @@ export function ProductSelector({
                                     fill
                                     sizes="48px"
                                     className="object-cover rounded"
-                                    data-oid="239prl8"
+                                   
                                   />
                                 </div>
                               ) : (
                                 <div
                                   className="w-12 h-12 bg-muted rounded flex items-center justify-center text-muted-foreground text-xs"
-                                  data-oid="9l9jbk-"
+                                 
                                 >
                                   無圖
                                 </div>
                               )}
                             </TableCell>
-                            <TableCell className="font-mono" data-oid="iw46cl3">
+                            <TableCell className="font-mono">
                               {variant.sku}
                             </TableCell>
-                            <TableCell data-oid="wydgn1_">
+                            <TableCell>
                               {variant.specifications}
                             </TableCell>
-                            <TableCell data-oid="tmkew0e">
-                              <Badge variant={stockLevel} data-oid="iuoyz9d">
+                            <TableCell>
+                              <Badge variant={stockLevel}>
                                 {variant.stock} 件
                               </Badge>
                             </TableCell>
                             <TableCell
                               className="text-right font-semibold"
-                              data-oid="5k2appa"
+                             
                             >
                               NT$ {variant.price.toLocaleString()}
                             </TableCell>
@@ -959,21 +963,21 @@ export function ProductSelector({
 
         {/* 🎯 條件性渲染 DialogFooter - 訂製模式下完全不顯示 */}
         {!(selectedProduct && isAddingCustom) && (
-          <DialogFooter data-oid="deabc5q">
+          <DialogFooter>
             {selectedProduct === null ? (
               // 主列表的按鈕
               <>
                 <Button
                   variant="outline"
                   onClick={handleCancel}
-                  data-oid="ghnuhyk"
+                 
                 >
                   取消
                 </Button>
                 <Button
                   onClick={handleConfirmSelection}
                   disabled={selectedVariants.size === 0}
-                  data-oid="2lwmhz9"
+                 
                 >
                   確認選擇{" "}
                   {selectedVariants.size > 0 && `(${selectedVariants.size})`}
@@ -988,14 +992,14 @@ export function ProductSelector({
                     setSelectedProduct(null);
                     setIsAddingCustom(false);
                   }}
-                  data-oid="pu1tizp"
+                 
                 >
                   返回列表
                 </Button>
                 <Button
                   onClick={handleConfirmSelection}
                   disabled={selectedVariants.size === 0}
-                  data-oid="k3asifx"
+                 
                 >
                   確認選擇{" "}
                   {selectedVariants.size > 0 && `(${selectedVariants.size})`}

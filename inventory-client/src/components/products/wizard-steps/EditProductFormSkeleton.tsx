@@ -13,36 +13,36 @@ import { Badge } from "@/components/ui/badge";
  */
 export function EditProductFormSkeleton() {
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8" data-oid="l3kn7h7">
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       {/* --- 頁面標題骨架 --- */}
-      <div className="mb-8" data-oid="wbdull5">
-        <Skeleton className="h-9 w-32 mb-2" data-oid="il8dyxx" /> {/* 標題 */}
-        <Skeleton className="h-5 w-64" data-oid="3:3y87-" /> {/* 副標題 */}
+      <div className="mb-8">
+        <Skeleton className="h-9 w-32 mb-2" /> {/* 標題 */}
+        <Skeleton className="h-5 w-64" /> {/* 副標題 */}
       </div>
 
       {/* --- 統一的內容容器 --- */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8" data-oid="4:0lrgs">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* --- 左欄：步驟指示器骨架 --- */}
-        <aside className="md:col-span-1" data-oid="ohlvp_4">
+        <aside className="md:col-span-1">
           {/* 進度概覽骨架 */}
-          <div className="mb-6" data-oid="p.nkh_q">
+          <div className="mb-6">
             <div
               className="flex items-center justify-between mb-2"
-              data-oid="xenk:fv"
+             
             >
-              <Skeleton className="h-4 w-20" data-oid="u76:h8v" />{" "}
+              <Skeleton className="h-4 w-20" />{" "}
               {/* "創建進度" 文字 */}
               <Skeleton
                 className="h-5 w-16 rounded-full"
-                data-oid="he44a46"
+               
               />{" "}
               {/* Badge */}
             </div>
-            <Progress value={25} className="w-full h-2" data-oid="ku:zz_u" />
+            <Progress value={25} className="w-full h-2" />
           </div>
 
           {/* 步驟列表骨架 */}
-          <div className="space-y-2" data-oid="i3p7j60">
+          <div className="space-y-2">
             {[1, 2, 3, 4].map((step) => (
               <div
                 key={step}
@@ -51,28 +51,28 @@ export function EditProductFormSkeleton() {
                     ? "bg-primary/10 border border-primary/20"
                     : "bg-transparent"
                 }`}
-                data-oid="jo7krkm"
+               
               >
                 {/* 步驟圖標骨架 */}
-                <div className="flex-shrink-0 mt-0.5" data-oid="imgt7ct">
+                <div className="flex-shrink-0 mt-0.5">
                   <Skeleton
                     className="h-5 w-5 rounded-full"
-                    data-oid="zhntqkq"
+                   
                   />
                 </div>
 
                 {/* 步驟資訊骨架 */}
-                <div className="flex-1 min-w-0 space-y-1" data-oid="whkq2n6">
-                  <Skeleton className="h-4 w-24" data-oid="3gw-nfo" />{" "}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <Skeleton className="h-4 w-24" />{" "}
                   {/* 步驟標題 */}
-                  <Skeleton className="h-3 w-32" data-oid="2z4eclv" />{" "}
+                  <Skeleton className="h-3 w-32" />{" "}
                   {/* 步驟描述 */}
                   {step === 1 && (
                     <div
                       className="flex items-center mt-1.5"
-                      data-oid="el605hj"
+                     
                     >
-                      <Skeleton className="h-3 w-12" data-oid="kief2cv" />{" "}
+                      <Skeleton className="h-3 w-12" />{" "}
                       {/* "進行中" */}
                     </div>
                   )}
@@ -83,41 +83,41 @@ export function EditProductFormSkeleton() {
         </aside>
 
         {/* --- 右欄：表單內容區骨架 --- */}
-        <main className="md:col-span-3" data-oid="qyh.r:8">
+        <main className="md:col-span-3">
           {/* 基本資訊表單骨架 */}
           <Card
             className="bg-card text-card-foreground border border-border/40 shadow-sm"
-            data-oid="td5-l.s"
+           
           >
-            <CardHeader data-oid="1cqqkwl">
-              <div className="flex items-center gap-2" data-oid="ypcuxzk">
-                <Skeleton className="h-5 w-5" data-oid="mty56f0" /> {/* 圖標 */}
-                <Skeleton className="h-6 w-32" data-oid="jtjfv19" />{" "}
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-5" /> {/* 圖標 */}
+                <Skeleton className="h-6 w-32" />{" "}
                 {/* 標題 */}
               </div>
             </CardHeader>
-            <CardContent className="space-y-6" data-oid="yrv0eib">
+            <CardContent className="space-y-6">
               {/* 商品名稱輸入框骨架 */}
-              <div className="space-y-2" data-oid="8g_ko8o">
-                <Skeleton className="h-4 w-20" data-oid="kvbwlct" />{" "}
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />{" "}
                 {/* Label */}
-                <Skeleton className="h-10 w-full" data-oid="5ky1hpc" />{" "}
+                <Skeleton className="h-10 w-full" />{" "}
                 {/* Input */}
               </div>
 
               {/* 商品描述文本域骨架 */}
-              <div className="space-y-2" data-oid="dn:y-ce">
-                <Skeleton className="h-4 w-20" data-oid="8-1.6e-" />{" "}
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />{" "}
                 {/* Label */}
-                <Skeleton className="h-24 w-full" data-oid="l.z:wmb" />{" "}
+                <Skeleton className="h-24 w-full" />{" "}
                 {/* Textarea */}
               </div>
 
               {/* 商品分類選擇器骨架 */}
-              <div className="space-y-2" data-oid="l57cm6q">
-                <Skeleton className="h-4 w-20" data-oid="y96jv2e" />{" "}
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />{" "}
                 {/* Label */}
-                <Skeleton className="h-10 w-full" data-oid="sa7b987" />{" "}
+                <Skeleton className="h-10 w-full" />{" "}
                 {/* Select */}
               </div>
             </CardContent>
@@ -126,17 +126,17 @@ export function EditProductFormSkeleton() {
           {/* 圖片上傳區域骨架 */}
           <Card
             className="mt-6 bg-card text-card-foreground border border-border/40 shadow-sm"
-            data-oid="psk0x.b"
+           
           >
-            <CardHeader data-oid="mzxoobu">
-              <div className="flex items-center gap-2" data-oid="e_r2kok">
-                <Skeleton className="h-5 w-5" data-oid="hnuuyw:" /> {/* 圖標 */}
-                <Skeleton className="h-6 w-32" data-oid="3l.ruq1" />{" "}
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-5" /> {/* 圖標 */}
+                <Skeleton className="h-6 w-32" />{" "}
                 {/* 標題 */}
               </div>
             </CardHeader>
-            <CardContent data-oid="x-j.hue">
-              <Skeleton className="h-48 w-full rounded-lg" data-oid="bmz2hyx" />{" "}
+            <CardContent>
+              <Skeleton className="h-48 w-full rounded-lg" />{" "}
               {/* 上傳區域 */}
             </CardContent>
           </Card>
@@ -144,13 +144,13 @@ export function EditProductFormSkeleton() {
           {/* 底部導航控制骨架 */}
           <div
             className="mt-6 flex items-center justify-between"
-            data-oid="5d3o7uq"
+           
           >
-            <Skeleton className="h-10 w-24" data-oid=":boow4t" />{" "}
+            <Skeleton className="h-10 w-24" />{" "}
             {/* 上一步按鈕 */}
-            <Skeleton className="h-4 w-20" data-oid="qpqvo2d" />{" "}
+            <Skeleton className="h-4 w-20" />{" "}
             {/* 步驟指示 */}
-            <Skeleton className="h-10 w-24" data-oid="r-8xbdd" />{" "}
+            <Skeleton className="h-10 w-24" />{" "}
             {/* 下一步按鈕 */}
           </div>
         </main>

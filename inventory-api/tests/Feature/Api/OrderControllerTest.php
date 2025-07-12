@@ -58,6 +58,13 @@ class OrderControllerTest extends TestCase
         $category = Category::factory()->create();
         $this->product = Product::factory()->create(['category_id' => $category->id]);
         $this->productVariant = ProductVariant::factory()->create(['product_id' => $this->product->id]);
+        
+        // 創建足夠的庫存
+        $this->productVariant->inventory()->create([
+            'store_id' => $this->store->id,
+            'quantity' => 100,
+            'low_stock_threshold' => 5
+        ]);
     }
 
     /**
@@ -81,8 +88,18 @@ class OrderControllerTest extends TestCase
                              'customer_id',
                              'shipping_status',
                              'payment_status',
-                             'created_at'
+                             'created_at',
+                             'grand_total',
+                             'paid_amount'
                          ]
+                     ],
+                     'meta' => [
+                         'current_page',
+                         'from',
+                         'last_page',
+                         'per_page',
+                         'to',
+                         'total'
                      ]
                  ]);
     }
@@ -218,10 +235,11 @@ class OrderControllerTest extends TestCase
         
         $orderData = [
             'customer_id' => $this->customer->id,
+            'store_id' => $this->store->id,
             'shipping_status' => 'pending',
             'payment_status' => 'pending',
-            'shipping_fee' => 100,
-            'tax' => 50,
+            'shipping_fee' => 100.00,
+            'tax' => 50.00,
             'discount_amount' => 0,
             'payment_method' => '轉帳',
             'order_source' => '現場客戶',
@@ -235,7 +253,7 @@ class OrderControllerTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-001',
-                    'price' => 1000,
+                    'price' => 1000.00,
                     'quantity' => 2,
                 ]
             ]
@@ -257,7 +275,9 @@ class OrderControllerTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'customer_id' => $this->customer->id,
             'shipping_status' => 'pending',
-            'payment_status' => 'pending'
+            'payment_status' => 'pending',
+            'shipping_fee' => 100.00,  // API 接受並儲存為小數
+            'tax' => 50.00             // API 接受並儲存為小數
         ]);
     }
 
@@ -286,6 +306,7 @@ class OrderControllerTest extends TestCase
         
         $orderData = [
             'customer_id' => $this->customer->id,
+            'store_id' => $this->store->id,
             'shipping_status' => 'pending',
             'payment_status' => 'pending',
             'payment_method' => '轉帳',
@@ -298,7 +319,7 @@ class OrderControllerTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-001',
-                    'price' => 1000,
+                    'price' => 1000.00,
                     'quantity' => 5,
                 ]
             ]
@@ -344,7 +365,7 @@ class OrderControllerTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-001',
-                    'price' => 1000,
+                    'price' => 1000.00,
                     'quantity' => 1,
                 ]
             ]
@@ -521,11 +542,11 @@ class OrderControllerTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'payment_status' => 'pending',
-            'grand_total' => 10000  // 使用正確的欄位名稱
+            'grand_total' => 1000000  // 10000.00 * 100 = 1000000 分
         ]);
         
         $paymentData = [
-            'amount' => 5000,
+            'amount' => 5000.00,  // API 接受元為單位
             'payment_method' => 'cash',
             'notes' => '收到現金付款'
         ];
@@ -536,7 +557,7 @@ class OrderControllerTest extends TestCase
         
         $this->assertDatabaseHas('payment_records', [
             'order_id' => $order->id,
-            'amount' => 5000,
+            'amount' => 5000.00,  // API 接受並儲存為小數
             'payment_method' => 'cash'
         ]);
     }
@@ -551,12 +572,12 @@ class OrderControllerTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'payment_status' => 'paid',
-            'grand_total' => 5000,
-            'paid_amount' => 5000  // 設置已付金額等於總額，確保訂單已付清
+            'grand_total' => 500000,   // 5000.00 * 100
+            'paid_amount' => 500000     // 5000.00 * 100，確保訂單已付清
         ]);
         
         $response = $this->postJson("/api/orders/{$order->id}/add-payment", [
-            'amount' => 1000,
+            'amount' => 1000.00,  // API 接受元為單位
             'payment_method' => 'cash'
         ]);
         
@@ -642,13 +663,13 @@ class OrderControllerTest extends TestCase
             'customer_id' => $this->customer->id,
             'payment_status' => 'paid',
             'shipping_status' => 'delivered',  // 設置為已交付狀態，允許退款
-            'grand_total' => 5000,  // 設置訂單總額
-            'paid_amount' => 5000   // 設置已付金額
+            'grand_total' => 500000,  // 5000.00 * 100
+            'paid_amount' => 500000   // 5000.00 * 100
         ]);
         
         $orderItem = OrderItem::factory()->create([
             'order_id' => $order->id,
-            'price' => 5000,
+            'price' => 500000,  // 5000.00 * 100
             'quantity' => 1
         ]);
         
@@ -859,6 +880,7 @@ class OrderControllerTest extends TestCase
         
         $orderData = [
             'customer_id' => $this->customer->id,
+            'store_id' => $this->store->id,
             'shipping_status' => 'pending',
             'payment_status' => 'pending',
             'payment_method' => '轉帳',
@@ -871,7 +893,7 @@ class OrderControllerTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-001',
-                    'price' => 1000,
+                    'price' => 1000.00,
                     'quantity' => 1,
                 ]
             ]

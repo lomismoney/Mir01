@@ -94,7 +94,7 @@ describe('Tooltip 組件測試', () => {
         const state = content.getAttribute('data-state');
         expect(state).toBeDefined();
       }
-    }, { timeout: 2000 });
+    });
   });
 
   it('應該支援設置延遲時間', () => {

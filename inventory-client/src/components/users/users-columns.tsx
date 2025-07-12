@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { formatDate } from "@/lib/dateHelpers";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -189,15 +190,14 @@ export const createUsersColumns = (
       const user = row.original;
       const stores = user.stores || [];
       return (
-        <div className="flex flex-wrap gap-1" data-oid="j9583cl">
+        <div className="flex flex-wrap gap-1">
           {stores.map((store: StoreItem) => (
             <Badge
               key={store.id}
               variant="outline"
               className="text-xs"
-              data-oid="_aojafr"
             >
-              <Store className="mr-1 h-3 w-3" data-oid="5uw:hbt" />
+              <Store className="mr-1 h-3 w-3" />
               {store.name}
             </Badge>
           ))}
@@ -224,15 +224,11 @@ export const createUsersColumns = (
       const dateString = row.getValue("created_at") as string;
       if (!dateString) return <div className="text-muted-foreground">-</div>;
 
-      try {
-        return (
-          <div className="text-sm">
-            {format(new Date(dateString), "yyyy-MM-dd HH:mm", { locale: zhTW })}
-          </div>
-        );
-      } catch {
-        return <div className="text-muted-foreground">格式錯誤</div>;
-      }
+      return (
+        <div className="text-sm">
+          {formatDate.fullDateTime(dateString, "格式錯誤")}
+        </div>
+      );
     },
   },
   {
@@ -253,15 +249,11 @@ export const createUsersColumns = (
       const dateString = row.getValue("updated_at") as string;
       if (!dateString) return <div className="text-muted-foreground">-</div>;
 
-      try {
-        return (
-          <div className="text-sm">
-            {format(new Date(dateString), "yyyy-MM-dd HH:mm", { locale: zhTW })}
-          </div>
-        );
-      } catch {
-        return <div className="text-muted-foreground">格式錯誤</div>;
-      }
+      return (
+        <div className="text-sm">
+          {formatDate.fullDateTime(dateString, "格式錯誤")}
+        </div>
+      );
     },
   },
   {

@@ -21,13 +21,13 @@ import { CreateProductWizard } from "@/components/products/CreateProductWizard";
 export default function NewProductPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
-    <div data-oid="5hfmpt.">
+    <div>
       {/* 商品創建嚮導 */}
       <Suspense
-        fallback={<DataTableSkeleton data-oid="q2cg839" />}
-        data-oid="ai7p39l"
+        fallback={<DataTableSkeleton />}
+       
       >
-        <CreateProductWizard data-oid="83fr0hk" />
+        <CreateProductWizard />
       </Suspense>
     </div>
   );

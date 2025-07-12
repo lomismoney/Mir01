@@ -22,11 +22,11 @@ export default function AuthLoading() {
   return (
     <div
       className="flex items-center justify-center h-screen"
-      data-oid=".:9r_i9"
+     
     >
       <Loader2
         className="h-8 w-8 animate-spin text-primary"
-        data-oid="d66h:w0"
+       
       />
     </div>
   );

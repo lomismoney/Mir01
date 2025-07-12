@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Inventory;
 use App\Models\ProductVariant;
 use App\Models\Store;
+use App\Services\BaseService;
+use App\Services\Traits\HandlesInventoryOperations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,8 +19,9 @@ use Illuminate\Support\Facades\Auth;
  * - 庫存轉移
  * - 庫存調整
  */
-class InventoryService
+class InventoryService extends BaseService
 {
+    use HandlesInventoryOperations;
     /**
      * 獲取預設門市ID
      * 
@@ -77,7 +80,7 @@ class InventoryService
      */
     public function deductStock(int $productVariantId, int $quantity, ?int $storeId = null, ?string $notes = null, array $metadata = []): bool
     {
-        return DB::transaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
+        return $this->executeInTransaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
             // 🎯 使用預設門市邏輯，確保門市ID有效
             $effectiveStoreId = $this->ensureValidStoreId($storeId);
 
@@ -101,10 +104,7 @@ class InventoryService
             }
 
             // 扣減庫存
-            $userId = Auth::id();
-            if (!$userId) {
-                throw new \InvalidArgumentException('用戶必須經過認證才能執行庫存操作');
-            }
+            $userId = $this->requireAuthentication('庫存操作');
             
             $notes = $notes ?? '訂單扣減庫存';
             
@@ -131,7 +131,7 @@ class InventoryService
      */
     public function returnStock(int $productVariantId, int $quantity, ?int $storeId = null, ?string $notes = null, array $metadata = []): bool
     {
-        return DB::transaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
+        return $this->executeInTransaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
             // 🎯 使用預設門市邏輯，確保門市ID有效
             $effectiveStoreId = $this->ensureValidStoreId($storeId);
 
@@ -149,10 +149,7 @@ class InventoryService
                 );
 
             // 返還庫存
-            $userId = Auth::id();
-            if (!$userId) {
-                throw new \InvalidArgumentException('用戶必須經過認證才能執行庫存操作');
-            }
+            $userId = $this->requireAuthentication('庫存操作');
             
             $notes = $notes ?? '訂單取消/退款返還庫存';
             
@@ -177,20 +174,78 @@ class InventoryService
      */
     public function batchDeductStock(array $items, ?int $storeId = null, array $metadata = []): bool
     {
-        return DB::transaction(function () use ($items, $storeId, $metadata) {
-            foreach ($items as $item) {
-                if (isset($item['product_variant_id']) && $item['is_stocked_sale']) {
-                                    $this->deductStock(
-                    $item['product_variant_id'],
-                    $item['quantity'],
-                    $storeId, // 保持原有邏輯，讓 deductStock 內部處理預設門市
-                    "訂單商品：{$item['product_name']}",
-                    $metadata
-                );
-                }
-            }
-            return true;
+        return $this->executeInTransaction(function () use ($items, $storeId, $metadata) {
+            return $this->processBatchDeduct($items, $storeId, $metadata);
         });
+    }
+    
+    /**
+     * 處理批量扣減的實際邏輯
+     */
+    private function processBatchDeduct(array $items, ?int $storeId, array $metadata): bool
+    {
+        $effectiveStoreId = $this->ensureValidStoreId($storeId);
+        $userId = auth()->id();
+        
+        if (!$userId) {
+            throw new \InvalidArgumentException('用戶必須經過認證才能扣減庫存');
+        }
+        
+        // 收集需要處理的商品變體ID
+        $variantIds = collect($items)
+            ->filter(fn($item) => isset($item['product_variant_id']) && $item['is_stocked_sale'])
+            ->pluck('product_variant_id')
+            ->unique()
+            ->sort() // 統一排序避免死鎖
+            ->values();
+        
+        if ($variantIds->isEmpty()) {
+            return true;
+        }
+        
+        // 批量獲取並鎖定庫存記錄
+        $inventories = Inventory::whereIn('product_variant_id', $variantIds)
+            ->where('store_id', $effectiveStoreId)
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('product_variant_id');
+        
+        // 處理每個項目
+        foreach ($items as $item) {
+            if (!isset($item['product_variant_id']) || !$item['is_stocked_sale']) {
+                continue;
+            }
+            
+            $inventory = $inventories->get($item['product_variant_id']);
+            
+            if (!$inventory) {
+                throw new \Exception("商品變體 {$item['product_variant_id']} 在門市 {$effectiveStoreId} 沒有庫存記錄");
+            }
+            
+            if ($inventory->quantity < $item['quantity']) {
+                $productVariant = ProductVariant::find($item['product_variant_id']);
+                throw new \Exception(
+                    "庫存不足：商品 {$productVariant->sku} 需求 {$item['quantity']}，可用 {$inventory->quantity}"
+                );
+            }
+            
+            // 扣減庫存
+            $inventory->quantity -= $item['quantity'];
+            $inventory->save();
+            
+            // 記錄交易
+            $inventory->transactions()->create([
+                'quantity' => -$item['quantity'],
+                'before_quantity' => $inventory->quantity + $item['quantity'],
+                'after_quantity' => $inventory->quantity,
+                'user_id' => $userId,
+                'type' => 'deduct',
+                'notes' => "訂單商品：{$item['product_name']}",
+                'metadata' => json_encode($metadata),
+            ]);
+        }
+        
+        return true;
     }
 
     /**
@@ -204,20 +259,89 @@ class InventoryService
      */
     public function batchReturnStock($items, ?int $storeId = null, array $metadata = []): bool
     {
-        return DB::transaction(function () use ($items, $storeId, $metadata) {
-            foreach ($items as $item) {
-                if ($item->product_variant_id && $item->is_stocked_sale) {
-                    $this->returnStock(
-                        $item->product_variant_id,
-                        $item->quantity,
-                        $storeId, // 保持原有邏輯，讓 returnStock 內部處理預設門市
-                        "訂單取消返還：{$item->product_name}",
-                        $metadata
-                    );
-                }
-            }
-            return true;
+        return $this->executeInTransaction(function () use ($items, $storeId, $metadata) {
+            return $this->processBatchReturn($items, $storeId, $metadata);
         });
+    }
+    
+    /**
+     * 處理批量返還的實際邏輯
+     */
+    private function processBatchReturn($items, ?int $storeId, array $metadata): bool
+    {
+        $effectiveStoreId = $this->ensureValidStoreId($storeId);
+        $userId = auth()->id();
+        
+        if (!$userId) {
+            throw new \InvalidArgumentException('用戶必須經過認證才能返還庫存');
+        }
+        
+        // 統一轉換為陣列格式並收集需要處理的商品變體ID
+        $processItems = [];
+        foreach ($items as $item) {
+            $productVariantId = is_array($item) ? ($item['product_variant_id'] ?? null) : $item->product_variant_id;
+            $isStockedSale = is_array($item) ? ($item['is_stocked_sale'] ?? false) : $item->is_stocked_sale;
+            $quantity = is_array($item) ? ($item['quantity'] ?? 0) : $item->quantity;
+            $productName = is_array($item) ? ($item['product_name'] ?? '') : $item->product_name;
+            
+            if ($productVariantId && $isStockedSale) {
+                $processItems[] = [
+                    'product_variant_id' => $productVariantId,
+                    'quantity' => $quantity,
+                    'product_name' => $productName
+                ];
+            }
+        }
+        
+        if (empty($processItems)) {
+            return true;
+        }
+        
+        // 收集並排序商品變體ID（避免死鎖）
+        $variantIds = collect($processItems)
+            ->pluck('product_variant_id')
+            ->unique()
+            ->sort()
+            ->values();
+        
+        // 批量獲取並鎖定庫存記錄
+        $inventories = Inventory::whereIn('product_variant_id', $variantIds)
+            ->where('store_id', $effectiveStoreId)
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('product_variant_id');
+        
+        // 處理每個項目
+        foreach ($processItems as $item) {
+            $inventory = $inventories->get($item['product_variant_id']);
+            
+            if (!$inventory) {
+                // 如果庫存記錄不存在，創建新的
+                $inventory = Inventory::create([
+                    'product_variant_id' => $item['product_variant_id'],
+                    'store_id' => $effectiveStoreId,
+                    'quantity' => 0,
+                    'low_stock_threshold' => 5
+                ]);
+            }
+            
+            // 返還庫存
+            $inventory->quantity += $item['quantity'];
+            $inventory->save();
+            
+            // 記錄交易
+            $inventory->transactions()->create([
+                'quantity' => $item['quantity'],
+                'before_quantity' => $inventory->quantity - $item['quantity'],
+                'after_quantity' => $inventory->quantity,
+                'user_id' => $userId,
+                'type' => 'return',
+                'notes' => "訂單取消返還：{$item['product_name']}",
+                'metadata' => json_encode($metadata),
+            ]);
+        }
+        
+        return true;
     }
 
     /**
@@ -254,34 +378,50 @@ class InventoryService
     public function batchCheckStock(array $items, ?int $storeId = null): array
     {
         $results = [];
-        
-        // 🎯 提前確保門市ID有效，避免在迴圈中重複檢查
         $effectiveStoreId = $this->ensureValidStoreId($storeId);
         
+        // 收集需要檢查的商品變體ID
+        $variantIds = collect($items)
+            ->filter(fn($item) => isset($item['product_variant_id']) && $item['is_stocked_sale'])
+            ->pluck('product_variant_id')
+            ->unique()
+            ->values();
+        
+        if ($variantIds->isEmpty()) {
+            return $results;
+        }
+        
+        // 批量獲取庫存記錄
+        $inventories = Inventory::whereIn('product_variant_id', $variantIds)
+            ->where('store_id', $effectiveStoreId)
+            ->get()
+            ->keyBy('product_variant_id');
+        
+        // 批量獲取商品變體信息
+        $variants = ProductVariant::whereIn('id', $variantIds)
+            ->get()
+            ->keyBy('id');
+        
+        // 檢查每個項目
         foreach ($items as $item) {
-            if (isset($item['product_variant_id']) && $item['is_stocked_sale']) {
-                $isAvailable = $this->checkStock(
-                    $item['product_variant_id'],
-                    $item['quantity'],
-                    $effectiveStoreId // 使用已確保有效的門市ID
-                );
-                
-                if (!$isAvailable) {
-                    $variant = ProductVariant::find($item['product_variant_id']);
-                    
-                    $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])
-                        ->where('store_id', $effectiveStoreId)
-                        ->first();
-                    
-                    $results[] = [
-                        'product_variant_id' => $item['product_variant_id'],
-                        'sku' => $variant->sku ?? 'Unknown',
-                        'product_name' => $item['product_name'] ?? 'Unknown',
-                        'requested_quantity' => $item['quantity'],
-                        'available_quantity' => $inventory->quantity ?? 0,
-                        'is_available' => false
-                    ];
-                }
+            if (!isset($item['product_variant_id']) || !$item['is_stocked_sale']) {
+                continue;
+            }
+            
+            $inventory = $inventories->get($item['product_variant_id']);
+            $variant = $variants->get($item['product_variant_id']);
+            $availableQuantity = $inventory ? $inventory->quantity : 0;
+            
+            // 如果庫存不足，加入結果列表
+            if ($availableQuantity < $item['quantity']) {
+                $results[] = [
+                    'product_variant_id' => $item['product_variant_id'],
+                    'sku' => $variant ? $variant->sku : 'Unknown',
+                    'product_name' => $item['product_name'] ?? 'Unknown',
+                    'requested_quantity' => $item['quantity'],
+                    'available_quantity' => $availableQuantity,
+                    'is_available' => false
+                ];
             }
         }
         

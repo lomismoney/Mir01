@@ -1,6 +1,7 @@
 import createClient from "openapi-fetch";
 import type { paths } from "@/types/api";
 import { getSession } from 'next-auth/react';
+import type { CreateStoreRequest, UpdateStoreRequest } from "@/types/api-helpers";
 
 /**
  * 統一認證 API 客戶端 - 密鑰統一作戰版本
@@ -123,18 +124,18 @@ export const safeApiClient = {
     });
   },
 
-  // ✅ 門市創建端點 - 移除 as any 強制轉換
-  createStore: async (data: any) => {
+  // ✅ 門市創建端點 - 使用類型安全的請求類型
+  createStore: async (data: CreateStoreRequest) => {
     return apiClient.POST('/api/stores', {
       body: data
     });
   },
 
-  // ✅ 修復門市更新端點 - 語義化參數升級
-  updateStore: async (id: number, data: any) => {
+  // ✅ 修復門市更新端點 - 語義化參數升級，使用類型安全的請求類型
+  updateStore: async (id: number, data: UpdateStoreRequest) => {
     return apiClient.PUT('/api/stores/{store}', {
       params: { path: { store: id } },
-      body: data
+      body: data as any
     });
   },
 

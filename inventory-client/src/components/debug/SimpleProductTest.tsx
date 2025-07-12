@@ -23,32 +23,32 @@ export function SimpleProductTest() {
   });
 
   return (
-    <Card className="w-full max-w-2xl mx-auto" data-oid="tu5wnjx">
-      <CardHeader data-oid="u5:zlq1">
-        <CardTitle data-oid="0-f2ngi">簡化商品測試</CardTitle>
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>簡化商品測試</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4" data-oid="._wmsnw">
+      <CardContent className="space-y-4">
         {/* 登入狀態 */}
-        <div className="p-4 border rounded" data-oid="f:-42dd">
-          <h3 className="font-semibold mb-2" data-oid="j5rfue3">
+        <div className="p-4 border rounded">
+          <h3 className="font-semibold mb-2">
             登入狀態
           </h3>
           <Badge
             variant={status === "authenticated" ? "default" : "destructive"}
-            data-oid="xplt5pf"
+           
           >
             {status}
           </Badge>
           {session?.user?.email && (
-            <p className="text-sm mt-1" data-oid="subwo18">
+            <p className="text-sm mt-1">
               用戶: {session.user.email}
             </p>
           )}
         </div>
 
         {/* 搜尋框 */}
-        <div className="p-4 border rounded" data-oid="61z0dcp">
-          <h3 className="font-semibold mb-2" data-oid="c35g7qb">
+        <div className="p-4 border rounded">
+          <h3 className="font-semibold mb-2">
             商品搜尋
           </h3>
           <input
@@ -57,50 +57,50 @@ export function SimpleProductTest() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full p-2 border rounded"
-            data-oid="g25og3k"
+           
           />
         </div>
 
         {/* API 狀態 */}
-        <div className="p-4 border rounded" data-oid="lka-ted">
-          <h3 className="font-semibold mb-2" data-oid="3:gyq3z">
+        <div className="p-4 border rounded">
+          <h3 className="font-semibold mb-2">
             API 狀態
           </h3>
-          <div className="space-y-2" data-oid="qcxtn03">
-            <div data-oid="dr:6zlx">
-              <strong data-oid="7r37tt7">載入中:</strong>{" "}
+          <div className="space-y-2">
+            <div>
+              <strong>載入中:</strong>{" "}
               {isLoading ? "是" : "否"}
             </div>
-            <div data-oid="t9qplxq">
-              <strong data-oid="xeqscy-">有錯誤:</strong> {error ? "是" : "否"}
+            <div>
+              <strong>有錯誤:</strong> {error ? "是" : "否"}
             </div>
             {error && (
-              <div className="text-red-600" data-oid="7:akh_j">
-                <strong data-oid="zucruyb">錯誤訊息:</strong> {error.message}
+              <div className="text-red-600">
+                <strong>錯誤訊息:</strong> {error.message}
               </div>
             )}
-            <div data-oid="eosqulu">
-              <strong data-oid="01wc8f6">數據類型:</strong> {typeof products}
+            <div>
+              <strong>數據類型:</strong> {typeof products}
             </div>
-            <div data-oid="77n:rng">
-              <strong data-oid="8019l-r">是陣列:</strong>{" "}
+            <div>
+              <strong>是陣列:</strong>{" "}
               {Array.isArray(products) ? "是" : "否"}
             </div>
-            <div data-oid="wr_z.w1">
-              <strong data-oid="dj74:fc">商品數量:</strong>{" "}
+            <div>
+              <strong>商品數量:</strong>{" "}
               {Array.isArray(products) ? products.length : "N/A"}
             </div>
           </div>
         </div>
 
         {/* 原始數據 */}
-        <div className="p-4 border rounded" data-oid="uni5k.n">
-          <h3 className="font-semibold mb-2" data-oid="7zsgal3">
+        <div className="p-4 border rounded">
+          <h3 className="font-semibold mb-2">
             原始數據
           </h3>
           <pre
             className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-40"
-            data-oid="f70v:8x"
+           
           >
             {JSON.stringify(products, null, 2)}
           </pre>
@@ -108,27 +108,27 @@ export function SimpleProductTest() {
 
         {/* 商品列表 */}
         {Array.isArray(products) && products.length > 0 && (
-          <div className="p-4 border rounded" data-oid="nagsg.x">
-            <h3 className="font-semibold mb-2" data-oid="f49ifv_">
+          <div className="p-4 border rounded">
+            <h3 className="font-semibold mb-2">
               商品列表
             </h3>
-            <div className="space-y-2" data-oid="k6lorf_">
+            <div className="space-y-2">
               {products.slice(0, 3).map((product: any) => (
                 <div
                   key={product.id}
                   className="p-2 bg-gray-50 rounded"
-                  data-oid="6wm1bv6"
+                 
                 >
-                  <div className="font-medium" data-oid="hskhfv7">
+                  <div className="font-medium">
                     {product.name}
                   </div>
-                  <div className="text-sm text-gray-600" data-oid="ksjwcvv">
+                  <div className="text-sm text-gray-600">
                     ID: {product.id} | 變體: {product.variants?.length || 0}
                   </div>
                 </div>
               ))}
               {products.length > 3 && (
-                <div className="text-sm text-gray-600" data-oid="wij78nh">
+                <div className="text-sm text-gray-600">
                   還有 {products.length - 3} 個商品...
                 </div>
               )}
@@ -140,14 +140,14 @@ export function SimpleProductTest() {
         {!isLoading &&
           !error &&
           (!products || (Array.isArray(products) && products.length === 0)) && (
-            <div className="p-4 border rounded bg-yellow-50" data-oid="x243e8w">
+            <div className="p-4 border rounded bg-yellow-50">
               <h3
                 className="font-semibold mb-2 text-yellow-800"
-                data-oid="ximji2f"
+               
               >
                 暫無商品資料
               </h3>
-              <p className="text-sm text-yellow-700" data-oid="x64mj-i">
+              <p className="text-sm text-yellow-700">
                 {searchTerm
                   ? `找不到包含「${searchTerm}」的商品`
                   : "系統中沒有商品資料"}

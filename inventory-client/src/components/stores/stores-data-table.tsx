@@ -5,14 +5,9 @@ import {
   ColumnDef,
   SortingState,
   VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
 } from "@tanstack/react-table";
+import { useVirtualizedTable, useErrorHandler } from "@/hooks";
 import { ChevronDown, Plus, Store as StoreIcon, Search } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,15 +15,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { AdaptiveTable, TablePresets } from "@/components/ui/AdaptiveTable";
 
 /**
  * 分店資料表格組件的屬性介面
@@ -80,21 +68,23 @@ export function StoresDataTable<TData, TValue>({
   searchValue = "",
   onSearchChange,
 }: StoresDataTableProps<TData, TValue>) {
+  // 🎯 增強的錯誤處理
+  const { handleError, handleSuccess } = useErrorHandler();
+  
   // 表格狀態管理
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
 
-  // 初始化表格實例
-  const table = useReactTable({
+  // 🎯 使用虛擬化表格 Hook - 分店列表優化
+  const virtualizedTableConfig = useVirtualizedTable({
     data,
     columns,
+    enableVirtualization: data.length > 50, // 超過50筆分店時啟用虛擬化
+    rowHeight: 60, // 分店行高度
     onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    autoResetPageIndex: false, // 🎯 斬斷循環：禁用分頁自動重設
+    autoResetPageIndex: false,
     state: {
       sorting,
       columnVisibility,
@@ -102,10 +92,10 @@ export function StoresDataTable<TData, TValue>({
   });
 
   return (
-    <div className="w-full space-y-4" data-oid="hf-a-3w">
+    <div className="w-full space-y-4">
       {/* 工具列 */}
-      <div className="flex items-center justify-between gap-4" data-oid="nj8n4jj">
-        <div className="flex-1 max-w-sm" data-oid="u2u_.kg">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 max-w-sm">
           {/* 搜索框 */}
           {onSearchChange && (
             <div className="relative">
@@ -121,16 +111,16 @@ export function StoresDataTable<TData, TValue>({
           )}
         </div>
 
-        <div className="flex items-center space-x-2" data-oid="g47pgd-">
+        <div className="flex items-center space-x-2">
           {/* 欄位顯示控制 */}
-          <DropdownMenu data-oid="foiy_8s">
-            <DropdownMenuTrigger asChild data-oid="0xhmlac">
-              <Button variant="outline" data-oid="34yemnm">
-                欄位 <ChevronDown className="ml-2 h-4 w-4" data-oid="o3gp5b5" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                欄位 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" data-oid="vmhbn8c">
-              {table
+            <DropdownMenuContent align="end">
+              {virtualizedTableConfig.table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
                 .map((column) => {
@@ -142,7 +132,7 @@ export function StoresDataTable<TData, TValue>({
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
                       }
-                      data-oid="jjkzmrw"
+                     
                     >
                       {column.id === "name" && "名稱"}
                       {column.id === "address" && "地址"}
@@ -164,137 +154,44 @@ export function StoresDataTable<TData, TValue>({
 
           {/* 新增分店按鈕 */}
           {showAddButton && onAddStore && (
-            <Button onClick={onAddStore} data-oid="mpmkcy3">
-              <Plus className="mr-2 h-4 w-4" data-oid="ynl30_p" />
+            <Button onClick={onAddStore}>
+              <Plus className="mr-2 h-4 w-4" />
               新增分店
             </Button>
           )}
         </div>
       </div>
 
-      {/* 資料表格 */}
-      <div className="rounded-md border" data-oid="35fel4h">
-        <Table data-oid="-x28t9x">
-          <TableHeader data-oid="mxj8lfl">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="border-b hover:bg-transparent"
-                data-oid="j-7qe7-"
-              >
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className="h-12 px-6 py-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="_l60.t-"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody data-oid="kaebga2">
-            {isLoading ? (
-              // 載入狀態
-              <TableRow data-oid="refd4ic">
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                  data-oid="tm.unyk"
-                >
-                  <div
-                    className="flex items-center justify-center space-x-2"
-                    data-oid="jl412ti"
-                  >
-                    <div
-                      className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
-                      data-oid="me68sv4"
-                    ></div>
-                    <span data-oid="_ma4w81">載入中...</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              // 有資料時顯示表格行
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="border-b hover:bg-muted/50 transition-colors"
-                  data-oid="7:e2rfa"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className="px-6 py-4 align-top"
-                      data-oid="5fai-:c"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              // 無資料狀態
-              <TableRow data-oid="h6yh9am">
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-32 text-center"
-                  data-oid="rwk2f_l"
-                >
-                  <div
-                    className="flex flex-col items-center justify-center space-y-3"
-                    data-oid=".7cboyg"
-                  >
-                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                      <StoreIcon className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="text-sm font-medium text-muted-foreground" data-oid="-s7bonp">
-                        尚無分店資料
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        建立您的第一個分店開始管理
-                      </div>
-                    </div>
-                    {showAddButton && onAddStore && (
-                      <Button
-                        variant="outline"
-                        onClick={onAddStore}
-                        className="mt-2"
-                        data-oid="ajljnf1"
-                      >
-                        <Plus className="mr-2 h-4 w-4" data-oid="nivkl:d" />
-                        建立第一個分店
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {/* 🎯 使用 AdaptiveTable 組件 - 分店列表虛擬化 */}
+      {isLoading ? (
+        <div className="rounded-md border">
+          <div className="flex items-center justify-center h-32 space-x-2">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+            <span>載入中...</span>
+          </div>
+        </div>
+      ) : (
+        <AdaptiveTable
+          table={virtualizedTableConfig.table}
+          className="rounded-md border"
+          virtualizationOptions={{
+            containerHeight: virtualizedTableConfig.virtualizationConfig.containerHeight,
+            estimateSize: virtualizedTableConfig.virtualizationConfig.estimateSize,
+            overscan: virtualizedTableConfig.virtualizationConfig.overscan,
+          }}
+          showVirtualizationToggle={true}
+          dataType="分店"
+        />
+      )}
 
       {/* 分頁控制和統計資訊 */}
       <div
         className="flex items-center justify-between space-x-2 py-4"
-        data-oid="a266zqv"
+       
       >
         <div
           className="flex-1 text-sm text-muted-foreground"
-          data-oid="gv2j2hj"
+         
         >
           {searchValue ? (
             <span>
@@ -307,28 +204,26 @@ export function StoresDataTable<TData, TValue>({
             `共 ${data.length} 個分店`
           )}
         </div>
-        <div className="flex items-center space-x-2" data-oid=":d_ubcp">
+        <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage() || isLoading}
-            data-oid="dc521t1"
+            onClick={() => virtualizedTableConfig.table.previousPage()}
+            disabled={!virtualizedTableConfig.table.getCanPreviousPage() || isLoading}
           >
             上一頁
           </Button>
-          <div className="flex items-center space-x-1" data-oid="fnfwnu7">
-            <span className="text-sm text-muted-foreground" data-oid="zrjjg-z">
-              第 {table.getState().pagination.pageIndex + 1} 頁， 共{" "}
-              {table.getPageCount()} 頁
+          <div className="flex items-center space-x-1">
+            <span className="text-sm text-muted-foreground">
+              第 {virtualizedTableConfig.table.getState().pagination.pageIndex + 1} 頁， 共{" "}
+              {virtualizedTableConfig.table.getPageCount()} 頁
             </span>
           </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage() || isLoading}
-            data-oid="1o37cy5"
+            onClick={() => virtualizedTableConfig.table.nextPage()}
+            disabled={!virtualizedTableConfig.table.getCanNextPage() || isLoading}
           >
             下一頁
           </Button>

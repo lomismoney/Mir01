@@ -24,7 +24,7 @@ describe('Checkbox 組件', () => {
       render(<Checkbox />);
       
       const checkbox = screen.getByRole('checkbox');
-      expect(checkbox).toHaveAttribute('data-oid', '5z3vdta');
+      expect(checkbox).toHaveAttribute('data-testid', '5z3vdta');
     });
 
     it('應該應用預設的 CSS 類', () => {

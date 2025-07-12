@@ -3,12 +3,17 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Enums\OrderItemType;
+use App\Services\BaseService;
+use App\Services\Traits\HandlesInventoryOperations;
+use App\Services\Traits\HandlesStatusHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 
-class OrderService
+class OrderService extends BaseService
 {
+    use HandlesInventoryOperations, HandlesStatusHistory;
     /**
      * 注入庫存服務和訂單編號生成器
      * 
@@ -36,7 +41,16 @@ class OrderService
      */
     public function createOrder(array $validatedData): Order
     {
-        return DB::transaction(function () use ($validatedData) {
+        return $this->executeInTransaction(function () use ($validatedData) {
+            return $this->processCreateOrder($validatedData);
+        });
+    }
+    
+    /**
+     * 處理創建訂單的實際邏輯
+     */
+    private function processCreateOrder(array $validatedData): Order
+    {
             // 1. 生成新的訂單編號
             $orderNumber = $this->orderNumberGenerator->generateNextNumber();
 
@@ -46,41 +60,35 @@ class OrderService
                 FILTER_VALIDATE_BOOLEAN
             );
             
-            // 過濾出需要檢查庫存的標準商品（排除訂製商品）
-            $standardItems = collect($validatedData['items'])->filter(function ($item) {
-                return !empty($item['product_variant_id']) && ($item['is_stocked_sale'] ?? true);
+            // 2. 庫存驗證：只針對現貨商品進行庫存檢查
+            $stockedItems = collect($validatedData['items'])->filter(function ($item) {
+                $itemType = OrderItemType::determineType($item);
+                return $itemType === OrderItemType::STOCK && !empty($item['product_variant_id']);
             })->values()->all();
             
-            // 🎯 Operation: Precise Tagging - 智能預訂模式：庫存檢查與精確標記
-            $stockCheckResults = [];
-            $insufficientVariantIds = [];
-            $hasInsufficientStock = false;
-            
-            if (!empty($standardItems)) {
-                // 🎯 無論是否強制建單，都需要檢查庫存以進行精確標記
-                $stockCheckResults = $this->inventoryService->batchCheckStock($standardItems);
+            // 檢查現貨商品是否有足夠庫存
+            if (!empty($stockedItems)) {
+                $stockCheckResults = $this->inventoryService->batchCheckStock(
+                    $stockedItems,
+                    $validatedData['store_id'] ?? null // 使用請求中指定的門市
+                );
                 
                 if (!empty($stockCheckResults)) {
-                    // 🎯 提取庫存不足的 variant_id 列表（用於後續精確標記）
-                    $insufficientVariantIds = array_column($stockCheckResults, 'product_variant_id');
-                    $hasInsufficientStock = true;
+                    // 現貨商品庫存不足，直接拋出異常
+                    $insufficientItems = collect($stockCheckResults)->map(function ($result) {
+                        return [
+                            'product_name' => $result['product_name'],
+                            'sku' => $result['sku'],
+                            'requested_quantity' => $result['requested_quantity'],
+                            'available_quantity' => $result['available_quantity'],
+                            'shortage' => $result['requested_quantity'] - $result['available_quantity']
+                        ];
+                    })->all();
                     
-                    // 🎯 智能預訂邏輯：只有在明確禁止預訂時才拋出異常
-                    if (!$forceCreate && !($validatedData['allow_backorder'] ?? true)) {
-                        // 只有在明確設定不允許預訂時才拋出異常
-                        $exception = new \Exception('庫存不足且不允許預訂');
-                        $exception->stockCheckResults = $stockCheckResults;
-                        $exception->insufficientStockItems = collect($stockCheckResults)->map(function ($result) {
-                            return [
-                                'product_name' => $result['product_name'],
-                                'sku' => $result['sku'],
-                                'requested_quantity' => $result['requested_quantity'],
-                                'available_quantity' => $result['available_quantity'],
-                                'shortage' => $result['requested_quantity'] - $result['available_quantity']
-                            ];
-                        })->all();
-                        throw $exception;
-                    }
+                    $exception = new \Exception('現貨商品庫存不足');
+                    $exception->stockCheckResults = $stockCheckResults;
+                    $exception->insufficientStockItems = $insufficientItems;
+                    throw $exception;
                 }
             }
 
@@ -95,11 +103,12 @@ class OrderService
                         + ($validatedData['tax'] ?? 0) 
                         - ($validatedData['discount_amount'] ?? 0);
 
-            // 5. 創建訂單主記錄（使用新的訂單編號）
+            // 5. 創建訂單主記錄
             $order = Order::create([
                 'order_number'      => $orderNumber, // 🎯 使用新的訂單編號生成器
                 'customer_id'       => $validatedData['customer_id'],
-                'creator_user_id'   => auth()->id(), // 直接獲取當前登入用戶ID
+                'store_id'          => $validatedData['store_id'], // 🎯 確保設置門市ID
+                'creator_user_id'   => $this->requireAuthentication('創建訂單'),
                 'shipping_status'   => $validatedData['shipping_status'],
                 'payment_status'    => $validatedData['payment_status'],
                 'subtotal'          => $subtotal,
@@ -113,80 +122,58 @@ class OrderService
                 'notes'             => $validatedData['notes'] ?? null,
             ]);
 
-            // 6. 🎯 Operation: Precise Tagging - 創建訂單項目並精確標記預訂狀態
+            // 6. 創建訂單項目
             foreach ($validatedData['items'] as $itemData) {
-                // 檢查是否為訂製商品
-                if (empty($itemData['product_variant_id']) || $itemData['product_variant_id'] === null) {
-                    // 訂製商品：確保必要的訂製資訊存在
-                    $orderItemData = [
-                        'order_id' => $order->id,
-                        'product_variant_id' => null,
-                        'is_stocked_sale' => false, // 訂製商品通常不是庫存銷售
-                        'is_backorder' => false, // 訂製商品不是預訂商品
-                        'status' => $itemData['status'] ?? '待處理',
-                        'product_name' => $itemData['product_name'],
-                        'sku' => $itemData['sku'],
-                        'price' => $itemData['price'],
-                        'quantity' => $itemData['quantity'],
-                        'custom_product_name' => $itemData['custom_product_name'] ?? $itemData['product_name'],
-                        'custom_specifications' => $itemData['custom_specifications'] ?? null,
-                        'tax_rate' => $itemData['tax_rate'] ?? 0,
-                        'discount_amount' => $itemData['discount_amount'] ?? 0,
-                        'cost' => $itemData['cost'] ?? 0,
-                    ];
-                } else {
-                    // 🎯 標準商品：精確判斷是否為預訂商品
-                    $isBackorder = in_array($itemData['product_variant_id'], $insufficientVariantIds);
-                    
-                    $orderItemData = array_merge($itemData, [
-                        'order_id' => $order->id,
-                        'is_backorder' => $isBackorder, // 🎯 精確標記：只有庫存不足的商品才標記為預訂
-                    ]);
+                // 判斷商品類型
+                $itemType = OrderItemType::determineType($itemData);
+                
+                // 根據商品類型設定屬性
+                $orderItemData = array_merge($itemData, [
+                    'order_id' => $order->id,
+                    'is_stocked_sale' => $itemType === OrderItemType::STOCK,
+                    'is_backorder' => $itemType === OrderItemType::BACKORDER,
+                    // 現貨商品在創建時立即標記為已履行
+                    'is_fulfilled' => OrderItemType::shouldMarkFulfilledOnCreate($itemType),
+                    'fulfilled_at' => OrderItemType::shouldMarkFulfilledOnCreate($itemType) ? now() : null,
+                    // 現貨商品創建時履行數量等於訂購數量
+                    'fulfilled_quantity' => OrderItemType::shouldMarkFulfilledOnCreate($itemType) ? $itemData['quantity'] : 0,
+                ]);
+                
+                // 訂製商品的特殊處理
+                if ($itemType === OrderItemType::CUSTOM && empty($itemData['product_variant_id'])) {
+                    $orderItemData['custom_product_name'] = $itemData['custom_product_name'] ?? $itemData['product_name'];
+                    $orderItemData['custom_specifications'] = $itemData['custom_specifications'] ?? null;
                 }
                 
                 $order->items()->create($orderItemData);
             }
             
-            // 7. 🎯 智能庫存扣減：根據庫存情況決定處理方式
-            if (!empty($standardItems)) {
-                if ($hasInsufficientStock) {
-                    // 🎯 智能預訂模式：部分扣減庫存，無庫存商品等待補貨
-                    $this->processPartialStockDeduction($order, $standardItems, $stockCheckResults);
-                    
-                    // 在訂單備註中標記包含預訂商品
-                    $backorderCount = count($insufficientVariantIds);
-                    $order->update([
-                        'notes' => ($order->notes ? $order->notes . ' | ' : '') . 
-                                  "【智能預訂】{$backorderCount} 項商品庫存不足，已標記為預訂"
-                    ]);
-                } else {
-                    // 正常模式：批量扣減庫存（整個交易內執行，確保原子性）
-                    $this->inventoryService->batchDeductStock(
-                        $standardItems,
-                        null, // 使用預設門市
-                        ['order_number' => $order->order_number, 'order_id' => $order->id]
-                    );
-                }
-            }
+            // 7. 分類處理庫存扣減：根據商品類型決定處理方式
+            $this->processInventoryByItemType($order, $validatedData['items'] ?? []);
 
             // 8. 記錄初始狀態歷史
-            $initialNotes = $hasInsufficientStock ? '智能預訂訂單已創建（部分商品庫存不足）' : '訂單已創建';
             
             $order->statusHistories()->create([
                 'to_status' => $order->shipping_status,
                 'status_type' => 'shipping',
-                'user_id' => auth()->id(),
-                'notes' => $initialNotes,
+                'user_id' => $this->requireAuthentication('狀態記錄'),
+                'notes' => '訂單已創建',
             ]);
             
             $order->statusHistories()->create([
                 'to_status' => $order->payment_status,
                 'status_type' => 'payment',
-                'user_id' => auth()->id(),
+                'user_id' => $this->requireAuthentication('狀態記錄'),
             ]);
 
-            return $order->load(['items', 'customer', 'creator']);
-        });
+            $this->logOperation('訂單創建成功', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_id' => $order->customer_id,
+                'grand_total' => $order->grand_total
+            ]);
+
+            return $order->load(['items.productVariant', 'customer', 'creator']);
     }
 
     /**
@@ -198,7 +185,16 @@ class OrderService
      */
     public function updateOrder(Order $order, array $validatedData): Order
     {
-        return DB::transaction(function () use ($order, $validatedData) {
+        return $this->executeInTransaction(function () use ($order, $validatedData) {
+            return $this->processUpdateOrder($order, $validatedData);
+        });
+    }
+    
+    /**
+     * 處理更新訂單的實際邏輯
+     */
+    private function processUpdateOrder(Order $order, array $validatedData): Order
+    {
             // 1. 更新訂單主體信息（排除 items）
             $order->update(Arr::except($validatedData, ['items']));
 
@@ -217,7 +213,7 @@ class OrderService
                     'from_status' => $order->getOriginal('shipping_status'),
                     'to_status' => $order->shipping_status,
                     'status_type' => 'shipping',
-                    'user_id' => auth()->id(),
+                    'user_id' => $this->requireAuthentication('狀態記錄'),
                     'notes' => '運送狀態已更新',
                 ]);
             }
@@ -228,13 +224,12 @@ class OrderService
                     'from_status' => $order->getOriginal('payment_status'),
                     'to_status' => $order->payment_status,
                     'status_type' => 'payment',
-                    'user_id' => auth()->id(),
+                    'user_id' => $this->requireAuthentication('狀態記錄'),
                     'notes' => '付款狀態已更新',
                 ]);
             }
 
             return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories']);
-        });
     }
 
     /**
@@ -268,7 +263,7 @@ class OrderService
                     $this->inventoryService->returnStock(
                         $item->product_variant_id, 
                         $item->quantity,
-                        null, // 使用預設門市
+                        $order->store_id, // 使用訂單的門市
                         "訂單編輯：移除商品 {$item->product_name}",
                         ['order_number' => $order->order_number, 'order_id' => $order->id]
                     );
@@ -284,15 +279,41 @@ class OrderService
                 ? $order->items()->find($itemData['id']) 
                 : null;
             
-            // 記錄原始數量（用於計算庫存差異）
+            // 記錄原始數量和類型（用於計算庫存差異）
             $originalQty = $originalItem ? $originalItem->quantity : 0;
             $originalIsStocked = $originalItem ? $originalItem->is_stocked_sale : false;
             $originalVariantId = $originalItem ? $originalItem->product_variant_id : null;
+            $originalType = null;
+            if ($originalItem) {
+                if ($originalItem->is_stocked_sale) {
+                    $originalType = OrderItemType::STOCK;
+                } elseif ($originalItem->is_backorder) {
+                    $originalType = OrderItemType::BACKORDER;
+                } else {
+                    $originalType = OrderItemType::CUSTOM;
+                }
+            }
+            
+            // 判斷新的商品類型
+            $newType = OrderItemType::determineType($itemData);
+            
+            // 準備更新數據，包含類型相關的欄位
+            $updateData = array_merge($itemData, [
+                'is_stocked_sale' => $newType === OrderItemType::STOCK,
+                'is_backorder' => $newType === OrderItemType::BACKORDER,
+            ]);
+            
+            // 處理履行狀態變更
+            if (!$originalItem || $originalType !== $newType) {
+                // 新項目或類型變更時，根據新類型設定履行狀態
+                $updateData['is_fulfilled'] = OrderItemType::shouldMarkFulfilledOnCreate($newType);
+                $updateData['fulfilled_at'] = OrderItemType::shouldMarkFulfilledOnCreate($newType) ? now() : null;
+            }
             
             // 更新或創建項目
             $item = $order->items()->updateOrCreate(
                 ['id' => $itemData['id'] ?? null],
-                Arr::except($itemData, ['id'])
+                Arr::except($updateData, ['id'])
             );
 
             // 處理庫存變更邏輯
@@ -303,7 +324,7 @@ class OrderService
                     $this->inventoryService->returnStock(
                         $originalVariantId, 
                         $originalQty,
-                        null,
+                        $order->store_id,
                         "訂單編輯：更換商品",
                         ['order_number' => $order->order_number, 'order_id' => $order->id]
                     );
@@ -311,7 +332,7 @@ class OrderService
                     $this->inventoryService->deductStock(
                         $item->product_variant_id, 
                         $item->quantity,
-                        null,
+                        $order->store_id,
                         "訂單編輯：新增商品",
                         ['order_number' => $order->order_number, 'order_id' => $order->id]
                     );
@@ -324,7 +345,7 @@ class OrderService
                         $this->inventoryService->deductStock(
                             $item->product_variant_id, 
                             $qtyDifference,
-                            null,
+                            $order->store_id,
                             "訂單編輯：增加數量",
                             ['order_number' => $order->order_number, 'order_id' => $order->id]
                         );
@@ -333,7 +354,7 @@ class OrderService
                         $this->inventoryService->returnStock(
                             $item->product_variant_id, 
                             abs($qtyDifference),
-                            null,
+                            $order->store_id,
                             "訂單編輯：減少數量",
                             ['order_number' => $order->order_number, 'order_id' => $order->id]
                         );
@@ -344,7 +365,7 @@ class OrderService
                 $this->inventoryService->returnStock(
                     $originalVariantId, 
                     $originalQty,
-                    null,
+                    $order->store_id,
                     "訂單編輯：改為非庫存銷售",
                     ['order_number' => $order->order_number, 'order_id' => $order->id]
                 );
@@ -389,28 +410,36 @@ class OrderService
      */
     public function confirmPayment(Order $order): Order
     {
-        return DB::transaction(function () use ($order) {
-            // 1. 記錄原始狀態（用於歷史記錄）
-            $originalStatus = $order->payment_status;
-            
-            // 2. 更新付款狀態和相關時間戳
-            $order->update([
-                'payment_status' => 'paid',
-                'paid_at' => now(),
-            ]);
-            
-            // 3. 記錄狀態變更歷史
-            $order->statusHistories()->create([
-                'from_status' => $originalStatus,
-                'to_status' => 'paid',
-                'status_type' => 'payment',
-                'user_id' => auth()->id(),
-                'notes' => '付款已確認',
-            ]);
-            
-            // 4. 預載入關聯並返回
-            return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);
+        return $this->executeInTransaction(function () use ($order) {
+            return $this->processConfirmPayment($order);
         });
+    }
+    
+    /**
+     * 處理確認付款的實際邏輯
+     */
+    private function processConfirmPayment(Order $order): Order
+    {
+        // 1. 記錄原始狀態（用於歷史記錄）
+        $originalStatus = $order->payment_status;
+        
+        // 2. 更新付款狀態和相關時間戳
+        $order->update([
+            'payment_status' => 'paid',
+            'paid_at' => now(),
+        ]);
+        
+        // 3. 記錄狀態變更歷史
+        $order->statusHistories()->create([
+            'from_status' => $originalStatus,
+            'to_status' => 'paid',
+            'status_type' => 'payment',
+            'user_id' => $this->requireAuthentication('狀態記錄'),
+            'notes' => '付款已確認',
+        ]);
+        
+        // 4. 預載入關聯並返回
+        return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);
     }
 
     /**
@@ -428,81 +457,89 @@ class OrderService
      */
     public function addPartialPayment(Order $order, array $paymentData): Order
     {
-        return DB::transaction(function () use ($order, $paymentData) {
-            // 1. 驗證金額：確認傳入的 amount 不大於剩餘未付金額
-            $remainingAmount = $order->grand_total - $order->paid_amount;
-            if ($paymentData['amount'] > $remainingAmount) {
-                throw new \Exception("收款金額不能超過剩餘未付金額：{$remainingAmount}");
-            }
-            
-            // 2. 建立收款記錄：在 payment_records 資料表中創建新紀錄
-            $paymentRecord = $order->paymentRecords()->create([
-                'amount' => $paymentData['amount'],
-                'payment_method' => $paymentData['payment_method'],
-                'payment_date' => $paymentData['payment_date'] ?? now(),
-                'notes' => $paymentData['notes'] ?? null,
-                'creator_id' => auth()->id(),
-            ]);
-            
-            // 3. 更新訂單主體：重新計算並更新已付金額和付款狀態
-            $newPaidAmount = $order->paid_amount + $paymentData['amount'];
-            
-            // 記錄原始付款狀態（用於歷史記錄）
-            $originalPaymentStatus = $order->payment_status;
-            
-            // 根據新的已付金額更新付款狀態
-            $newPaymentStatus = 'partial'; // 預設為部分付款
-            if ($newPaidAmount >= $order->grand_total) {
-                $newPaymentStatus = 'paid';
-                $paidAt = now(); // 全額付清時設定付清時間
-            } else {
-                $paidAt = null; // 部分付款時不設定付清時間
-            }
-            
-            // 更新訂單
-            $updateData = [
-                'paid_amount' => $newPaidAmount,
-                'payment_status' => $newPaymentStatus,
-            ];
-            
-            if ($paidAt) {
-                $updateData['paid_at'] = $paidAt;
-            }
-            
-            $order->update($updateData);
-            
-            // 4. 寫入歷史記錄：描述此次收款事件
-            $paymentMethodText = [
-                'cash' => '現金',
-                'transfer' => '轉帳',
-                'credit_card' => '信用卡',
-            ][$paymentData['payment_method']] ?? $paymentData['payment_method'];
-            
-            $historyNotes = "記錄一筆 {$paymentData['amount']} 元的{$paymentMethodText}付款";
-            if (!empty($paymentData['notes'])) {
-                $historyNotes .= "，備註：{$paymentData['notes']}";
-            }
-            
-            // 如果付款狀態有變更，則記錄狀態歷史
-            if ($originalPaymentStatus !== $newPaymentStatus) {
-                $order->statusHistories()->create([
-                    'from_status' => $originalPaymentStatus,
-                    'to_status' => $newPaymentStatus,
-                    'status_type' => 'payment',
-                    'user_id' => auth()->id(),
-                    'notes' => $historyNotes,
-                ]);
-            }
-            
-            // 5. 返回結果：返回更新後的 Order 物件
-            return $order->load([
-                'items.productVariant', 
-                'customer', 
-                'creator', 
-                'statusHistories.user',
-                'paymentRecords.creator' // 載入付款記錄
-            ]);
+        return $this->executeInTransaction(function () use ($order, $paymentData) {
+            return $this->processAddPartialPayment($order, $paymentData);
         });
+    }
+    
+    /**
+     * 處理新增部分付款的實際邏輯
+     */
+    private function processAddPartialPayment(Order $order, array $paymentData): Order
+    {
+        // 1. 驗證金額：確認傳入的 amount 不大於剩餘未付金額
+        $remainingAmount = $order->grand_total - $order->paid_amount;
+        if ($paymentData['amount'] > $remainingAmount) {
+            throw new \Exception("收款金額不能超過剩餘未付金額：{$remainingAmount}");
+        }
+        
+        // 2. 建立收款記錄：在 payment_records 資料表中創建新紀錄
+        $paymentRecord = $order->paymentRecords()->create([
+            'amount' => $paymentData['amount'],
+            'payment_method' => $paymentData['payment_method'],
+            'payment_date' => $paymentData['payment_date'] ?? now(),
+            'notes' => $paymentData['notes'] ?? null,
+            'creator_id' => $this->requireAuthentication('創建付款記錄'),
+        ]);
+        
+        // 3. 更新訂單主體：重新計算並更新已付金額和付款狀態
+        $newPaidAmount = $order->paid_amount + $paymentData['amount'];
+        
+        // 記錄原始付款狀態（用於歷史記錄）
+        $originalPaymentStatus = $order->payment_status;
+        
+        // 根據新的已付金額更新付款狀態
+        $newPaymentStatus = 'partial'; // 預設為部分付款
+        if ($newPaidAmount >= $order->grand_total) {
+            $newPaymentStatus = 'paid';
+            $paidAt = now(); // 全額付清時設定付清時間
+        } else {
+            $paidAt = null; // 部分付款時不設定付清時間
+        }
+        
+        // 更新訂單
+        $updateData = [
+            'paid_amount' => $newPaidAmount,
+            'payment_status' => $newPaymentStatus,
+        ];
+        
+        if ($paidAt) {
+            $updateData['paid_at'] = $paidAt;
+        }
+        
+        $order->update($updateData);
+        
+        // 4. 寫入歷史記錄：描述此次收款事件
+        $paymentMethodText = [
+            'cash' => '現金',
+            'transfer' => '轉帳',
+            'credit_card' => '信用卡',
+        ][$paymentData['payment_method']] ?? $paymentData['payment_method'];
+        
+        $historyNotes = "記錄一筆 {$paymentData['amount']} 元的{$paymentMethodText}付款";
+        if (!empty($paymentData['notes'])) {
+            $historyNotes .= "，備註：{$paymentData['notes']}";
+        }
+        
+        // 如果付款狀態有變更，則記錄狀態歷史
+        if ($originalPaymentStatus !== $newPaymentStatus) {
+            $order->statusHistories()->create([
+                'from_status' => $originalPaymentStatus,
+                'to_status' => $newPaymentStatus,
+                'status_type' => 'payment',
+                'user_id' => $this->requireAuthentication('狀態記錄'),
+                'notes' => $historyNotes,
+            ]);
+        }
+        
+        // 5. 返回結果：返回更新後的 Order 物件
+        return $order->load([
+            'items.productVariant', 
+            'customer', 
+            'creator', 
+            'statusHistories.user',
+            'paymentRecords.creator' // 載入付款記錄
+        ]);
     }
 
     /**
@@ -517,41 +554,49 @@ class OrderService
      */
     public function createShipment(Order $order, array $shipmentData): Order
     {
-        return DB::transaction(function () use ($order, $shipmentData) {
-            // 1. 記錄原始狀態（用於歷史記錄）
-            $originalStatus = $order->shipping_status;
-            
-            // 2. 準備更新資料
-            $updateData = [
-                'shipping_status' => 'shipped',
-                'tracking_number' => $shipmentData['tracking_number'],
-                'shipped_at' => $shipmentData['shipped_at'] ?? now(),
-            ];
-            
-            // 3. 添加可選欄位
-            if (isset($shipmentData['carrier'])) {
-                $updateData['carrier'] = $shipmentData['carrier'];
-            }
-            
-            if (isset($shipmentData['estimated_delivery_date'])) {
-                $updateData['estimated_delivery_date'] = $shipmentData['estimated_delivery_date'];
-            }
-            
-            // 4. 更新訂單
-            $order->update($updateData);
-            
-            // 5. 記錄狀態變更歷史
-            $order->statusHistories()->create([
-                'from_status' => $originalStatus,
-                'to_status' => 'shipped',
-                'status_type' => 'shipping',
-                'user_id' => auth()->id(),
-                'notes' => $shipmentData['notes'] ?? '商品已出貨，追蹤號碼：' . $shipmentData['tracking_number'],
-            ]);
-            
-            // 6. 預載入關聯並返回
-            return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);
+        return $this->executeInTransaction(function () use ($order, $shipmentData) {
+            return $this->processCreateShipment($order, $shipmentData);
         });
+    }
+    
+    /**
+     * 處理創建出貨記錄的實際邏輯
+     */
+    private function processCreateShipment(Order $order, array $shipmentData): Order
+    {
+        // 1. 記錄原始狀態（用於歷史記錄）
+        $originalStatus = $order->shipping_status;
+        
+        // 2. 準備更新資料
+        $updateData = [
+            'shipping_status' => 'shipped',
+            'tracking_number' => $shipmentData['tracking_number'],
+            'shipped_at' => $shipmentData['shipped_at'] ?? now(),
+        ];
+        
+        // 3. 添加可選欄位
+        if (isset($shipmentData['carrier'])) {
+            $updateData['carrier'] = $shipmentData['carrier'];
+        }
+        
+        if (isset($shipmentData['estimated_delivery_date'])) {
+            $updateData['estimated_delivery_date'] = $shipmentData['estimated_delivery_date'];
+        }
+        
+        // 4. 更新訂單
+        $order->update($updateData);
+        
+        // 5. 記錄狀態變更歷史
+        $order->statusHistories()->create([
+            'from_status' => $originalStatus,
+            'to_status' => 'shipped',
+            'status_type' => 'shipping',
+            'user_id' => $this->requireAuthentication('狀態記錄'),
+            'notes' => $shipmentData['notes'] ?? '商品已出貨，追蹤號碼：' . $shipmentData['tracking_number'],
+        ]);
+        
+        // 6. 預載入關聯並返回
+        return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);
     }
 
     /**
@@ -564,22 +609,27 @@ class OrderService
      */
     public function deleteOrder(Order $order): bool
     {
-        return DB::transaction(function () use ($order) {
-            // 1. 獲取所有訂單項目
-            $items = $order->items;
-            
-            // 2. 返還庫存（在刪除前執行，確保數據完整性）
-            $this->inventoryService->batchReturnStock(
-                $items,
-                null, // 使用預設門市
-                ['order_number' => $order->order_number, 'order_id' => $order->id, 'reason' => '訂單刪除']
-            );
-            
-            // 3. 刪除訂單（會級聯刪除訂單項目和狀態歷史）
-            $order->delete();
-            
-            return true;
+        return $this->executeInTransaction(function () use ($order) {
+            return $this->processDeleteOrder($order);
         });
+    }
+    
+    /**
+     * 處理刪除訂單的實際邏輯
+     */
+    private function processDeleteOrder(Order $order): bool
+    {
+        // 1. 獲取所有訂單項目
+        $items = $order->items;
+        
+        // 2. 返還庫存（在刪除前執行，確保數據完整性）
+        // 使用統一的庫存返還邏輯
+        $this->returnInventoryOnCancel($order, '訂單刪除');
+        
+        // 3. 刪除訂單（會級聯刪除訂單項目和狀態歷史）
+        $order->delete();
+        
+        return true;
     }
 
     /**
@@ -593,57 +643,76 @@ class OrderService
      */
     public function cancelOrder(Order $order, ?string $reason = null): Order
     {
-        return DB::transaction(function () use ($order, $reason) {
-            // 1. 檢查訂單是否可以取消
-            if (in_array($order->shipping_status, ['shipped', 'delivered'])) {
-                throw new \Exception('已出貨或已交付的訂單無法取消');
-            }
-            
-            // 2. 記錄原始狀態
-            $originalShippingStatus = $order->shipping_status;
-            $originalPaymentStatus = $order->payment_status;
-            
-            // 3. 更新訂單狀態
-            $order->update([
-                'shipping_status' => 'cancelled',
-                'payment_status' => $order->payment_status === 'paid' ? 'refunded' : 'cancelled',
-            ]);
-            
-            // 4. 返還庫存
-            $this->inventoryService->batchReturnStock(
-                $order->items,
-                null, // 使用預設門市
-                [
-                    'order_number' => $order->order_number, 
-                    'order_id' => $order->id, 
-                    'reason' => $reason ?? '訂單取消'
-                ]
-            );
-            
-            // 5. 記錄狀態變更歷史
-            if ($originalShippingStatus !== 'cancelled') {
-                $order->statusHistories()->create([
-                    'from_status' => $originalShippingStatus,
-                    'to_status' => 'cancelled',
-                    'status_type' => 'shipping',
-                    'user_id' => auth()->id(),
-                    'notes' => $reason ?? '訂單已取消',
-                ]);
-            }
-            
-            if ($originalPaymentStatus !== $order->payment_status) {
-                $order->statusHistories()->create([
-                    'from_status' => $originalPaymentStatus,
-                    'to_status' => $order->payment_status,
-                    'status_type' => 'payment',
-                    'user_id' => auth()->id(),
-                    'notes' => '付款狀態已更新',
-                ]);
-            }
-            
-            // 6. 預載入關聯並返回
-            return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);
+        return $this->executeInTransaction(function () use ($order, $reason) {
+            return $this->processCancelOrder($order, $reason);
         });
+    }
+    
+    /**
+     * 處理取消訂單的實際邏輯
+     */
+    private function processCancelOrder(Order $order, ?string $reason = null): Order
+    {
+        // 1. 檢查訂單是否可以取消
+        if (in_array($order->shipping_status, ['shipped', 'delivered'])) {
+            throw new \Exception('已出貨或已交付的訂單無法取消');
+        }
+        
+        // 2. 記錄原始狀態
+        $originalShippingStatus = $order->shipping_status;
+        $originalPaymentStatus = $order->payment_status;
+        
+        // 3. 更新訂單狀態
+        $order->update([
+            'shipping_status' => 'cancelled',
+            'payment_status' => $order->payment_status === 'paid' ? 'refunded' : 'cancelled',
+        ]);
+        
+        // 4. 智能返還庫存：只返還現貨商品的庫存
+        $this->returnInventoryOnCancel($order, $reason);
+        
+        // 5. 更新訂單項目的履行狀態
+        // 取消訂單時，將所有未完成的訂單項目標記為未履行
+        $order->items()
+            ->where('is_fulfilled', true)
+            ->where(function($q) {
+                // 只更新預訂商品和訂製商品的履行狀態
+                // 現貨商品的履行狀態保持不變（它們在創建時就已履行）
+                $q->where('is_backorder', true)
+                  ->orWhere(function($subQ) {
+                      $subQ->where('is_stocked_sale', false)
+                           ->where('is_backorder', false)
+                           ->whereNotNull('product_variant_id');
+                  });
+            })
+            ->update([
+                'is_fulfilled' => false,
+                'fulfilled_at' => null,
+            ]);
+        
+        // 5. 記錄狀態變更歷史
+        if ($originalShippingStatus !== 'cancelled') {
+            $order->statusHistories()->create([
+                'from_status' => $originalShippingStatus,
+                'to_status' => 'cancelled',
+                'status_type' => 'shipping',
+                'user_id' => $this->requireAuthentication('狀態記錄'),
+                'notes' => $reason ?? '訂單已取消',
+            ]);
+        }
+        
+        if ($originalPaymentStatus !== $order->payment_status) {
+            $order->statusHistories()->create([
+                'from_status' => $originalPaymentStatus,
+                'to_status' => $order->payment_status,
+                'status_type' => 'payment',
+                'user_id' => $this->requireAuthentication('狀態記錄'),
+                'notes' => '付款狀態已更新',
+            ]);
+        }
+        
+        // 6. 預載入關聯並返回
+        return $order->load(['items.productVariant', 'customer', 'creator', 'statusHistories.user']);
     }
 
     /**
@@ -661,40 +730,48 @@ class OrderService
      */
     public function batchUpdateStatus(array $ids, string $statusType, string $statusValue, ?string $notes): void
     {
-        DB::transaction(function () use ($ids, $statusType, $statusValue, $notes) {
-            // 1. 獲取所有要更新的訂單
-            $orders = Order::whereIn('id', $ids)->get();
-            
-            // 2. 檢查是否找到所有訂單
-            if ($orders->count() !== count($ids)) {
-                $foundIds = $orders->pluck('id')->toArray();
-                $missingIds = array_diff($ids, $foundIds);
-                throw new \Exception("找不到以下訂單 ID：" . implode(', ', $missingIds));
-            }
-            
-            // 3. 逐一更新每個訂單
-            foreach ($orders as $order) {
-                // 記錄原始狀態
-                $originalStatus = $order->{$statusType};
-                
-                // 只有在狀態確實發生變更時才進行更新
-                if ($originalStatus !== $statusValue) {
-                    // 更新訂單狀態
-                    $order->update([
-                        $statusType => $statusValue,
-                    ]);
-                    
-                    // 記錄狀態變更歷史
-                    $this->addStatusHistory(
-                        $order,
-                        $originalStatus,
-                        $statusValue,
-                        $statusType,
-                        "批量操作：狀態更新為 {$statusValue}。" . ($notes ? " 備註：{$notes}" : "")
-                    );
-                }
-            }
+        $this->executeInTransaction(function () use ($ids, $statusType, $statusValue, $notes) {
+            $this->processBatchUpdateStatus($ids, $statusType, $statusValue, $notes);
         });
+    }
+    
+    /**
+     * 處理批量更新狀態的實際邏輯
+     */
+    private function processBatchUpdateStatus(array $ids, string $statusType, string $statusValue, ?string $notes): void
+    {
+        // 1. 獲取所有要更新的訂單
+        $orders = Order::whereIn('id', $ids)->get();
+        
+        // 2. 檢查是否找到所有訂單
+        if ($orders->count() !== count($ids)) {
+            $foundIds = $orders->pluck('id')->toArray();
+            $missingIds = array_diff($ids, $foundIds);
+            throw new \Exception("找不到以下訂單 ID：" . implode(', ', $missingIds));
+        }
+        
+        // 3. 逐一更新每個訂單
+        foreach ($orders as $order) {
+            // 記錄原始狀態
+            $originalStatus = $order->{$statusType};
+            
+            // 只有在狀態確實發生變更時才進行更新
+            if ($originalStatus !== $statusValue) {
+                // 更新訂單狀態
+                $order->update([
+                    $statusType => $statusValue,
+                ]);
+                
+                // 記錄狀態變更歷史
+                $this->addStatusHistory(
+                    $order,
+                    $originalStatus,
+                    $statusValue,
+                    $statusType,
+                    "批量操作：狀態更新為 {$statusValue}。" . ($notes ? " 備註：{$notes}" : "")
+                );
+            }
+        }
     }
 
     /**
@@ -724,7 +801,7 @@ class OrderService
             'from_status' => $fromStatus,
             'to_status' => $toStatus,
             'status_type' => $historyStatusType,
-            'user_id' => auth()->id(),
+            'user_id' => $this->requireAuthentication('狀態記錄'),
             'notes' => $notes,
         ]);
     }
@@ -740,46 +817,271 @@ class OrderService
      * @param array $stockCheckResults 庫存檢查結果
      * @return void
      */
-    protected function processPartialStockDeduction(Order $order, array $standardItems, array $stockCheckResults): void
+    /**
+     * 根據商品類型處理庫存扣減
+     * 
+     * 商品類型分類：
+     * 1. 現貨商品：立即扣減庫存（已在創建時標記為已履行）
+     * 2. 預訂商品：不扣減庫存，等待進貨
+     * 3. 訂製商品：不涉及庫存，等待製作
+     */
+    protected function processInventoryByItemType(Order $order, array $itemsData): void
     {
-        // 🎯 建立庫存不足商品的對應表
-        $insufficientStockMap = collect($stockCheckResults)->keyBy('product_variant_id');
+        $stockedItems = [];      // 需要立即扣減庫存的現貨商品
+        $backorderItems = [];    // 預訂商品，不扣減庫存
+        $customItems = [];       // 訂製商品，不涉及庫存
         
-        // 🎯 分離有庫存和無庫存的商品
-        $stockedItems = [];
-        $backorderItems = [];
-        
-        foreach ($standardItems as $item) {
-            $variantId = $item['product_variant_id'];
-            
-            if ($insufficientStockMap->has($variantId)) {
-                // 無庫存商品：記錄為預訂項目
-                $backorderItems[] = $item;
+        // 分類處理每個訂單項目
+        foreach ($order->items as $orderItem) {
+            // 根據商品屬性判斷類型
+            $itemType = null;
+            if ($orderItem->is_stocked_sale) {
+                $itemType = OrderItemType::STOCK;
+            } elseif ($orderItem->is_backorder) {
+                $itemType = OrderItemType::BACKORDER;
             } else {
-                // 有庫存商品：可以正常扣減
-                $stockedItems[] = $item;
+                $itemType = OrderItemType::CUSTOM;
+            }
+            
+            $itemData = [
+                'product_variant_id' => $orderItem->product_variant_id,
+                'quantity' => $orderItem->quantity,
+                'product_name' => $orderItem->product_name,
+                'sku' => $orderItem->sku,
+                'is_stocked_sale' => $orderItem->is_stocked_sale,
+                'is_backorder' => $orderItem->is_backorder,
+            ];
+            
+            if ($itemType === OrderItemType::STOCK) {
+                // 現貨商品：需要立即扣減庫存
+                $stockedItems[] = $itemData;
+            } elseif ($itemType === OrderItemType::BACKORDER) {
+                // 預訂商品：不扣減庫存，記錄用於後續處理
+                $backorderItems[] = $itemData;
+            } elseif ($itemType === OrderItemType::CUSTOM) {
+                // 訂製商品：不涉及庫存管理
+                $customItems[] = $itemData;
             }
         }
         
-        // 🎯 扣減有庫存的商品
+        // 處理現貨商品：立即扣減庫存
         if (!empty($stockedItems)) {
+            // 注意：庫存檢查已經在 createOrder 方法中完成，這裡直接扣減
+            // 執行庫存扣減
             $this->inventoryService->batchDeductStock(
                 $stockedItems,
-                null, // 使用預設門市
+                $order->store_id, // 使用訂單指定的門市
                 [
                     'order_number' => $order->order_number, 
                     'order_id' => $order->id,
-                    'reason' => '智能預訂：扣減有庫存商品'
+                    'reason' => '現貨商品庫存扣減'
                 ]
             );
         }
         
-        // 🎯 記錄預訂商品信息（用於日誌和統計）
-        if (!empty($backorderItems)) {
-            \Log::info("智能預訂模式：訂單 {$order->order_number} 包含 " . count($backorderItems) . " 項預訂商品", [
-                'order_id' => $order->id,
-                'backorder_items' => collect($backorderItems)->pluck('product_variant_id')->toArray()
-            ]);
+        // 記錄各類商品統計
+        if (!empty($backorderItems) || !empty($customItems)) {
+            $notes = [];
+            if (!empty($backorderItems)) {
+                $notes[] = "包含 " . count($backorderItems) . " 項預訂商品";
+            }
+            if (!empty($customItems)) {
+                $notes[] = "包含 " . count($customItems) . " 項訂製商品";
+            }
+            
+            if (!empty($notes)) {
+                $order->update([
+                    'notes' => ($order->notes ? $order->notes . ' | ' : '') . implode('，', $notes)
+                ]);
+            }
         }
+        
+        // 記錄詳細日誌
+        \Log::info("訂單庫存處理完成", [
+            'order_number' => $order->order_number,
+            'stocked_items' => count($stockedItems),
+            'backorder_items' => count($backorderItems),
+            'custom_items' => count($customItems)
+        ]);
+    }
+
+    /**
+     * 取得待處理的預訂商品（尚未建立進貨單的）
+     * 
+     * @param array $filters 篩選條件
+     * @return \Illuminate\Support\Collection
+     */
+    public function getPendingBackorders(array $filters = [])
+    {
+        $query = OrderItem::where(function ($q) {
+                // 包含預訂商品和需要進貨的訂製商品
+                $q->where('is_backorder', true)
+                  ->orWhere(function ($subQ) {
+                      // 訂製商品：非現貨、非預訂、但有 product_variant_id（表示需要向供應商訂購）
+                      $subQ->where('is_stocked_sale', false)
+                           ->where('is_backorder', false)
+                           ->whereNotNull('product_variant_id');
+                  });
+            })
+            ->whereNull('purchase_item_id')  // 尚未關聯進貨單
+            ->where('is_fulfilled', false)    // 尚未履行
+            ->whereHas('order', function ($q) {
+                // 只包含未取消的訂單
+                $q->where('shipping_status', '!=', 'cancelled');
+            })
+            ->with(['order.customer', 'productVariant.product']);
+
+        // 可選：按日期範圍篩選
+        if (!empty($filters['date_from'])) {
+            $query->where('created_at', '>=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $query->where('created_at', '<=', $filters['date_to']);
+        }
+
+        // 可選：按商品變體篩選
+        if (!empty($filters['product_variant_id'])) {
+            $query->where('product_variant_id', $filters['product_variant_id']);
+        }
+
+        // 按商品變體分組統計
+        if (!empty($filters['group_by_variant']) && $filters['group_by_variant']) {
+            return $query->select(
+                'product_variant_id',
+                DB::raw('SUM(quantity) as total_quantity'),
+                DB::raw('COUNT(DISTINCT order_id) as order_count'),
+                DB::raw('MIN(created_at) as earliest_order_date'),
+                DB::raw('MAX(created_at) as latest_order_date'),
+                DB::raw('GROUP_CONCAT(DISTINCT order_id) as order_ids')
+            )
+            ->groupBy('product_variant_id')
+            ->get()
+            ->map(function ($item) {
+                // 載入商品變體資訊
+                $item->productVariant = ProductVariant::with('product')->find($item->product_variant_id);
+                $item->order_ids = explode(',', $item->order_ids);
+                return $item;
+            });
+        }
+
+        // 返回詳細清單
+        return $query->orderBy('created_at', 'asc')->get();
+    }
+
+    /**
+     * 取得待處理預訂商品的統計資訊
+     * 
+     * @return array
+     */
+    public function getPendingBackordersStats(): array
+    {
+        $stats = OrderItem::where(function ($q) {
+                // 包含預訂商品和需要進貨的訂製商品
+                $q->where('is_backorder', true)
+                  ->orWhere(function ($subQ) {
+                      $subQ->where('is_stocked_sale', false)
+                           ->where('is_backorder', false)
+                           ->whereNotNull('product_variant_id');
+                  });
+            })
+            ->whereNull('purchase_item_id')
+            ->where('is_fulfilled', false)
+            ->whereHas('order', function ($q) {
+                $q->where('shipping_status', '!=', 'cancelled');
+            })
+            ->selectRaw('
+                COUNT(*) as total_items,
+                COUNT(DISTINCT product_variant_id) as unique_products,
+                COUNT(DISTINCT order_id) as affected_orders,
+                SUM(quantity) as total_quantity,
+                MIN(created_at) as oldest_backorder_date
+            ')
+            ->first();
+
+        return [
+            'total_items' => $stats->total_items ?? 0,
+            'unique_products' => $stats->unique_products ?? 0,
+            'affected_orders' => $stats->affected_orders ?? 0,
+            'total_quantity' => $stats->total_quantity ?? 0,
+            'oldest_backorder_date' => $stats->oldest_backorder_date,
+            'days_pending' => $stats->oldest_backorder_date 
+                ? now()->diffInDays($stats->oldest_backorder_date) 
+                : 0
+        ];
+    }
+
+    /**
+     * 取消訂單時智能返還庫存
+     * 
+     * 只返還現貨商品的庫存，預訂商品和訂製商品不涉及庫存返還
+     */
+    protected function returnInventoryOnCancel(Order $order, ?string $reason = null): void
+    {
+        $stockedItems = [];
+        $skippedItems = [];
+        
+        // 分類處理訂單項目
+        foreach ($order->items as $orderItem) {
+            if ($orderItem->is_stocked_sale && !$orderItem->is_backorder) {
+                // 只有現貨商品才需要返還庫存
+                $stockedItems[] = [
+                    'product_variant_id' => $orderItem->product_variant_id,
+                    'quantity' => $orderItem->quantity,
+                    'product_name' => $orderItem->product_name,
+                    'sku' => $orderItem->sku,
+                    'is_stocked_sale' => true,
+                    'is_backorder' => false,
+                ];
+            } else {
+                // 預訂商品和訂製商品不返還庫存
+                $skippedItems[] = $orderItem->product_name;
+            }
+        }
+        
+        // 返還現貨商品庫存
+        if (!empty($stockedItems)) {
+            $this->inventoryService->batchReturnStock(
+                $stockedItems,
+                $order->store_id, // 使用訂單的門市
+                [
+                    'order_number' => $order->order_number, 
+                    'order_id' => $order->id, 
+                    'reason' => $reason ?? '訂單取消'
+                ]
+            );
+        }
+        
+        // 記錄返還庫存的詳細資訊
+        \Log::info("訂單取消庫存返還", [
+            'order_number' => $order->order_number,
+            'returned_items' => count($stockedItems),
+            'skipped_items' => count($skippedItems),
+            'skipped_item_names' => $skippedItems,
+            'reason' => $reason ?? '訂單取消'
+        ]);
+    }
+
+    // ===== 測試輔助方法 =====
+
+    /**
+     * 檢查用戶是否有效認證（測試用）
+     */
+    public function hasValidAuth(): bool
+    {
+        return \Illuminate\Support\Facades\Auth::user() !== null;
+    }
+
+    /**
+     * 獲取多個訂單及其關聯（測試用）
+     */
+    public function getOrdersWithRelations(array $orderIds): \Illuminate\Database\Eloquent\Collection
+    {
+        return Order::whereIn('id', $orderIds)
+            ->with([
+                'customer',
+                'items.productVariant',
+                'statusHistories.user'
+            ])
+            ->get();
     }
 } 

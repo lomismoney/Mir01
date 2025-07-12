@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
 import {
   Store as StoreIcon,
   Check,
@@ -12,7 +11,7 @@ import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import * as React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { useStores } from "@/hooks";
+import { useStores, useErrorHandler } from "@/hooks";
 import { apiClient } from "@/lib/apiClient";
 import { handleApiError } from "@/lib/errorHandler";
 
@@ -173,6 +172,9 @@ export function UserStoresDialog({
   // 獲取 React Query 客戶端實例，用於手動使緩存失效
   const queryClient = useQueryClient();
 
+  // 統一錯誤處理
+  const { handleError, handleSuccess } = useErrorHandler();
+
   // 選擇的分店 ID 列表
   const [selectedStoreIds, setSelectedStoreIds] = useState<number[]>([]);
 
@@ -210,17 +212,15 @@ export function UserStoresDialog({
         storeIds: selectedStoreIds,
       });
 
-      toast.success("分店分配成功");
+      handleSuccess("分店分配成功");
 
       // 使用戶列表查詢緩存失效，強制重新獲取最新數據
       queryClient.invalidateQueries({ queryKey: ["users"] });
 
       onOpenChange(false);
     } catch (error: unknown) {
-      // handleApiError 只做 logging；仍應讓使用者看到失敗訊息
-      const errorMessage =
-        error instanceof Error ? error.message : "操作失敗，請稍後再試";
-      toast.error(errorMessage);
+      // 使用統一錯誤處理
+      handleError(error);
     }
   };
 

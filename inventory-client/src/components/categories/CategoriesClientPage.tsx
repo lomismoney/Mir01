@@ -6,6 +6,8 @@ import { VisibilityState, ExpandedState } from "@tanstack/react-table";
 import {
   useCategories,
   useDeleteCategory,
+  useModalManager,
+  useErrorHandler,
   type CategoryNode,
 } from "@/hooks";
 import { DraggableCategoriesTable } from "./DraggableCategoriesTable";
@@ -26,7 +28,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -45,13 +46,11 @@ import {
 export function CategoriesClientPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryNode | null>(
-    null,
-  );
-  const [categoryToDelete, setCategoryToDelete] = useState<CategoryNode | null>(
-    null,
-  );
+  
+  // 🎯 統一的 Modal 管理器
+  const modalManager = useModalManager<CategoryNode>();
+  const { handleError, handleSuccess } = useErrorHandler();
+  
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     name: true,
     description: true,
@@ -114,29 +113,27 @@ export function CategoriesClientPage() {
   // 操作處理函數
   const handleAddSubCategory = (parentId: number) => {
     const parentCategory = findCategoryById(categories, parentId);
-    setSelectedCategory(parentCategory);
-    setIsCreateModalOpen(true);
+    modalManager.openModal('createWithParent', parentCategory ?? undefined);
   };
 
   const handleEdit = (category: CategoryNode) => {
-    setSelectedCategory(category);
+    modalManager.openModal('edit', category);
   };
 
   const handleDelete = (category: CategoryNode) => {
-    setCategoryToDelete(category);
+    modalManager.openModal('delete', category);
   };
 
   const confirmDelete = () => {
+    const categoryToDelete = modalManager.currentData;
     if (!categoryToDelete) return;
 
     deleteCategory.mutate(categoryToDelete.id, {
       onSuccess: () => {
-        toast.success("分類已成功刪除");
-        setCategoryToDelete(null);
+        modalManager.handleSuccess();
+        handleSuccess("分類已成功刪除");
       },
-      onError: (error) => {
-        toast.error(`刪除失敗: ${error.message}`);
-      },
+      onError: (error) => handleError(error),
     });
   };
 
@@ -149,39 +146,39 @@ export function CategoriesClientPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96" data-oid="gulh-la">
+      <div className="flex items-center justify-center h-96">
         <Loader2
           className="h-8 w-8 animate-spin text-muted-foreground"
-          data-oid="9_s:2ek"
+         
         />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6" data-oid="tb_.s33">
+    <div className="space-y-6">
       {/* 頁面標題與操作 */}
-      <div className="flex items-center justify-between" data-oid="ctt3cqa">
-        <h1 className="text-3xl font-bold tracking-tight" data-oid="gfpa66n">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">
           分類管理
         </h1>
-        <Button onClick={() => setIsCreateModalOpen(true)} data-oid="7ca:me3">
-          <PlusCircle className="mr-2 h-4 w-4" data-oid="ku5cf2g" />
+        <Button onClick={() => modalManager.openModal('create')}>
+          <PlusCircle className="mr-2 h-4 w-4" />
           新增分類
         </Button>
       </div>
 
       {/* 主要內容區 */}
-      <Card data-oid="osh-yhb">
-        <CardHeader data-oid="yt6h.s4">
-          <div className="flex items-center gap-4" data-oid="m:q4ft1">
-            <CardTitle data-oid="oo5m7n7">分類列表</CardTitle>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <CardTitle>分類列表</CardTitle>
 
             {/* 搜尋欄 */}
-            <div className="relative w-96" data-oid="6va3nwd">
+            <div className="relative w-96">
               <Search
                 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                data-oid="e-hianp"
+               
               />
 
               <Input
@@ -189,23 +186,23 @@ export function CategoriesClientPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
-                data-oid="w0kd8s-"
+               
               />
             </div>
 
             {/* 欄位顯示控制 - 真正實作 */}
-            <DropdownMenu data-oid="hsod.jj">
-              <DropdownMenuTrigger asChild data-oid="_46fm24">
-                <Button variant="outline" data-oid="t4llcdl">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
                   欄位{" "}
-                  <ChevronDown className="ml-2 h-4 w-4" data-oid="7625821" />
+                  <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" data-oid="-ffhw8k">
+              <DropdownMenuContent align="end">
                 <DropdownMenuCheckboxItem
                   checked={columnVisibility.name}
                   disabled
-                  data-oid="1aogg0b"
+                 
                 >
                   分類名稱
                 </DropdownMenuCheckboxItem>
@@ -217,7 +214,7 @@ export function CategoriesClientPage() {
                       description: checked,
                     }))
                   }
-                  data-oid="4p0vf_c"
+                 
                 >
                   描述
                 </DropdownMenuCheckboxItem>
@@ -229,14 +226,14 @@ export function CategoriesClientPage() {
                       statistics: checked,
                     }))
                   }
-                  data-oid="f550_3_"
+                 
                 >
                   統計
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   checked={columnVisibility.actions}
                   disabled
-                  data-oid="5eb5nlf"
+                 
                 >
                   操作
                 </DropdownMenuCheckboxItem>
@@ -244,7 +241,7 @@ export function CategoriesClientPage() {
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent data-oid="mwqe-ua">
+        <CardContent>
           {/* 使用支援拖曳的資料表格 */}
           <DraggableCategoriesTable
             columns={columns}
@@ -254,64 +251,64 @@ export function CategoriesClientPage() {
             onColumnVisibilityChange={setColumnVisibility}
             expanded={expanded}
             onExpandedChange={setExpanded}
-            data-oid="amg0c92"
+           
           />
         </CardContent>
       </Card>
 
-      {/* 新增分類 Modal */}
+      {/* 🎯 新增分類 Modal */}
       <CreateCategoryModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        parentCategory={selectedCategory}
+        open={modalManager.isModalOpen('create') || modalManager.isModalOpen('createWithParent')}
+        onOpenChange={(open) => !open && modalManager.closeModal()}
+        parentCategory={modalManager.isModalOpen('createWithParent') ? modalManager.currentData : undefined}
         onSuccess={() => {
-          setIsCreateModalOpen(false);
-          setSelectedCategory(null);
+          modalManager.handleSuccess();
+          handleSuccess("分類已成功新增");
         }}
-        data-oid="oweuu.k"
       />
 
-      {/* 編輯分類 Modal */}
-      {selectedCategory && !isCreateModalOpen && (
+      {/* 🎯 編輯分類 Modal */}
+      {modalManager.currentData && (
         <UpdateCategoryModal
-          open={!!selectedCategory}
-          onOpenChange={(open) => !open && setSelectedCategory(null)}
-          category={selectedCategory}
-          onSuccess={() => setSelectedCategory(null)}
-          data-oid="tg3rsee"
+          open={modalManager.isModalOpen('edit')}
+          onOpenChange={(open) => !open && modalManager.closeModal()}
+          category={modalManager.currentData}
+          onSuccess={() => {
+            modalManager.handleSuccess();
+            handleSuccess("分類已成功更新");
+          }}
         />
       )}
 
-      {/* 刪除確認對話框 */}
+      {/* 🎯 刪除確認對話框 */}
       <AlertDialog
-        open={!!categoryToDelete}
-        onOpenChange={(open) => !open && setCategoryToDelete(null)}
-        data-oid="bidnmvf"
+        open={modalManager.isModalOpen('delete')}
+        onOpenChange={(open) => !open && modalManager.closeModal()}
       >
-        <AlertDialogContent data-oid="8m:vbo3">
-          <AlertDialogHeader data-oid="vuwuz80">
-            <AlertDialogTitle data-oid="euxs_3q">確認刪除</AlertDialogTitle>
-            <AlertDialogDescription data-oid="4x8r0q0">
-              您確定要刪除分類「{categoryToDelete?.name}」嗎？
-              {categoryToDelete?.children &&
-                categoryToDelete.children.length > 0 && (
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認刪除</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要刪除分類「{modalManager.currentData?.name}」嗎？
+              {modalManager.currentData?.children &&
+                modalManager.currentData.children.length > 0 && (
                   <span
                     className="block mt-2 text-destructive"
-                    data-oid="s_peunw"
+                   
                   >
-                    注意：此分類包含 {categoryToDelete.children.length}{" "}
+                    注意：此分類包含 {modalManager.currentData?.children.length}{" "}
                     個子分類，將一併刪除。
                   </span>
                 )}
               此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="xhguon7">
-            <AlertDialogCancel data-oid="pjui:e5">取消</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              data-oid="t6thwjj"
+             
             >
               刪除
             </AlertDialogAction>

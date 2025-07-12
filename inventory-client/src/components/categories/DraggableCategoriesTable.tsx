@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { GripVertical, Check, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useErrorHandler } from "@/hooks";
 
 interface DraggableRowProps {
   row: any;
@@ -90,10 +90,10 @@ function DraggableRow({ row, children }: DraggableRowProps) {
         ${isDragging ? "cursor-grabbing shadow-lg border-2 border-primary/20 bg-primary/5" : ""} 
         transition-colors duration-200
       `}
-      data-oid="tkqrsz4"
+     
     >
       {/* 拖曳手柄 - 增強版 */}
-      <TableCell className="w-10" data-oid="dckyxeq">
+      <TableCell className="w-10">
         <Button
           variant="ghost"
           size="sm"
@@ -103,9 +103,9 @@ function DraggableRow({ row, children }: DraggableRowProps) {
           `}
           {...attributes}
           {...listeners}
-          data-oid="_c3:csf"
+         
         >
-          <GripVertical className="h-4 w-4" data-oid="t:g0rol" />
+          <GripVertical className="h-4 w-4" />
         </Button>
       </TableCell>
       {children}
@@ -158,6 +158,9 @@ export function DraggableCategoriesTable<TData, TValue>({
   expanded,
   onExpandedChange,
 }: DraggableCategoriesTableProps<TData, TValue>) {
+  // 🎯 增強的錯誤處理
+  const { handleError, handleSuccess } = useErrorHandler();
+  
   // 拖曳狀態管理
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [draggedCategory, setDraggedCategory] = useState<CategoryNode | null>(null);
@@ -165,6 +168,7 @@ export function DraggableCategoriesTable<TData, TValue>({
   // 本地數據狀態管理
   const [localData, setLocalData] = useState<CategoryNode[]>(data);
   const [isReordering, setIsReordering] = useState(false);
+  const [loadingToastId, setLoadingToastId] = useState<string | number | null>(null);
   // 移除 dragOverId 狀態以提升性能
 
   // 當外部數據變化時，更新本地狀態（但不覆蓋正在重新排序的數據）
@@ -253,20 +257,10 @@ export function DraggableCategoriesTable<TData, TValue>({
       const oldIndex = localData.findIndex((item) => item.id === active.id);
       const newIndex = localData.findIndex((item) => item.id === over.id);
 
-      console.log("🎯 [DraggableCategoriesTable] handleDragEnd:", {
-        activeId: active.id,
-        overId: over.id,
-        oldIndex,
-        newIndex,
-        dataLength: localData.length,
-      });
 
       // 只處理頂層分類的排序
       if (oldIndex === -1 || newIndex === -1) {
-        toast.warning("僅支援頂層分類排序", {
-          position: 'bottom-right',
-          duration: 1500,
-        });
+        handleError(new Error("僅支援頂層分類排序"));
         return;
       }
 
@@ -278,33 +272,17 @@ export function DraggableCategoriesTable<TData, TValue>({
       setLocalData(reorderedCategories);
       setIsReordering(true);
 
-              // 輕量化的處理中提示
-        const loadingToast = toast.loading(`更新排序中...`, {
-          duration: 0, // 不自動消失
-          position: 'bottom-right',
-        });
-
       // 準備更新數據
       const itemsToUpdate = reorderedCategories.map((category, index) => ({
         id: category.id,
         sort_order: index,
       }));
 
-      console.log("📊 [DraggableCategoriesTable] 准備更新:", itemsToUpdate);
-
       // 觸發後端同步
       reorderMutation.mutate(itemsToUpdate, {
         onSuccess: () => {
-          console.log("✅ [DraggableCategoriesTable] 排序成功");
           setIsReordering(false);
-          
-          // 關閉載入提示，顯示簡潔的成功提示
-          toast.dismiss(loadingToast);
-          toast.success(`排序已更新`, {
-            duration: 2000,
-            position: 'bottom-right',
-            icon: <Check className="h-4 w-4" />,
-          });
+          handleSuccess("排序已更新");
         },
         onError: (error) => {
           console.error("❌ [DraggableCategoriesTable] 排序失敗:", error);
@@ -313,26 +291,20 @@ export function DraggableCategoriesTable<TData, TValue>({
           setLocalData(data);
           setIsReordering(false);
           
-          // 關閉載入提示，顯示錯誤提示
-          toast.dismiss(loadingToast);
-          toast.error(`排序更新失敗`, {
-            description: error.message || "請稍後重試",
-            position: 'bottom-right',
-            duration: 4000,
-          });
+          handleError(error);
         },
       });
     } else {
       // 沒有有效的拖曳操作 - 不顯示提示，保持操作流暢
       // toast.info("未進行排序變更");
     }
-  }, [localData, data, reorderMutation]);
+  }, [localData, data, reorderMutation, handleError, handleSuccess]);
 
   // 移除 handleDragOver 以提升性能
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96" data-oid="d6regf8">
+      <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
           <p className="text-sm text-muted-foreground">載入分類數據中...</p>
@@ -342,20 +314,20 @@ export function DraggableCategoriesTable<TData, TValue>({
   }
 
   return (
-    <div className="rounded-md border" data-oid="qjxg8a8">
+    <div className="rounded-md border">
               <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          data-oid="mcxusms"
+         
         >
-        <Table data-oid="dbqlyzn">
-          <TableHeader data-oid="l36g4rm">
+        <Table>
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} data-oid="vsmal2r">
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} data-oid="od6g9m9">
+                  <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -367,11 +339,11 @@ export function DraggableCategoriesTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody data-oid="mvqvkw6">
+          <TableBody>
             <SortableContext
               items={categoryIds}
               strategy={verticalListSortingStrategy}
-              data-oid="4x9cnsu"
+             
             >
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => {
@@ -384,13 +356,13 @@ export function DraggableCategoriesTable<TData, TValue>({
                         <DraggableRow 
                           key={row.id} 
                           row={row} 
-                          data-oid="fnhv-5c"
+                         
                         >
                         {row
                           .getVisibleCells()
                           .slice(1)
                           .map((cell) => (
-                            <TableCell key={cell.id} data-oid="2iww5:.">
+                            <TableCell key={cell.id}>
                               {flexRender(
                                 cell.column.columnDef.cell,
                                 cell.getContext(),
@@ -402,13 +374,13 @@ export function DraggableCategoriesTable<TData, TValue>({
                   } else {
                     // 子分類不可拖曳
                     return (
-                      <TableRow key={row.id} data-oid="cgnxe:l">
-                        <TableCell className="w-10" data-oid="6kw__4:" />
+                      <TableRow key={row.id}>
+                        <TableCell className="w-10" />
                         {row
                           .getVisibleCells()
                           .slice(1)
                           .map((cell) => (
-                            <TableCell key={cell.id} data-oid="2cb9a47">
+                            <TableCell key={cell.id}>
                               {flexRender(
                                 cell.column.columnDef.cell,
                                 cell.getContext(),
@@ -420,11 +392,11 @@ export function DraggableCategoriesTable<TData, TValue>({
                   }
                 })
               ) : (
-                <TableRow data-oid=".qwlvln">
+                <TableRow>
                   <TableCell
                     colSpan={columns.length + 1}
                     className="h-24 text-center"
-                    data-oid=".:d25do"
+                   
                   >
                     尚無分類資料
                   </TableCell>

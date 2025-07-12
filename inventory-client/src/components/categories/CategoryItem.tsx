@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, MoreHorizontal, Edit, Trash, Plus } from "lucide-react";
+import { DynamicIcon } from "@/components/ui/DynamicIcon";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -68,11 +68,11 @@ export function CategoryItem({
   const children = allCategories[category.id.toString()] || [];
 
   return (
-    <div className="my-1" data-oid="q359zik">
+    <div className="my-1">
       {/* 分類項目主要內容區 */}
       <div
         className="flex items-center p-2 rounded-md hover:bg-muted group"
-        data-oid="tkvpp_p"
+       
       >
         {/* 展開/收合按鈕 */}
         <Button
@@ -81,16 +81,16 @@ export function CategoryItem({
           onClick={() => setIsExpanded(!isExpanded)}
           disabled={children.length === 0}
           className="mr-2 h-6 w-6 p-0"
-          data-oid="dp7xzlz"
+         
         >
-          <ChevronRight
+          <DynamicIcon
+            name="ChevronRight"
             className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-90" : ""} ${children.length === 0 ? "opacity-0" : ""}`}
-            data-oid="3m62z_d"
           />
         </Button>
 
         {/* 分類名稱顯示區 */}
-        <span className="flex-1 font-medium" data-oid="p7orw93">
+        <span className="flex-1 font-medium">
           {category.name}
         </span>
 
@@ -98,7 +98,7 @@ export function CategoryItem({
         {category.description && (
           <span
             className="text-xs text-muted-foreground mr-2 max-w-40 truncate"
-            data-oid="z6dt_fz"
+           
           >
             {category.description}
           </span>
@@ -108,43 +108,43 @@ export function CategoryItem({
         {children.length > 0 && (
           <span
             className="text-xs text-muted-foreground mr-2 bg-muted rounded-full px-2 py-0.5"
-            data-oid=".f96.3:"
+           
           >
             {children.length}
           </span>
         )}
 
         {/* 操作選單 */}
-        <DropdownMenu data-oid="1.vmz04">
-          <DropdownMenuTrigger asChild data-oid="me8q-_v">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              data-oid="sjmo-6d"
+             
             >
-              <MoreHorizontal className="h-3 w-3" data-oid="zmibe0l" />
+              <DynamicIcon name="MoreHorizontal" className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" data-oid="0:dtyae">
+          <DropdownMenuContent align="end">
             {onAddSubCategory && (
               <>
                 <DropdownMenuItem
                   onClick={() => onAddSubCategory(category.id)}
-                  data-oid="x154-fq"
+                 
                 >
-                  <Plus className="mr-2 h-4 w-4" data-oid="3ky6so1" />
+                  <DynamicIcon name="Plus" className="mr-2 h-4 w-4" />
                   新增子分類
                 </DropdownMenuItem>
-                <DropdownMenuSeparator data-oid="4sqyfd." />
+                <DropdownMenuSeparator />
               </>
             )}
             {onEdit && (
               <DropdownMenuItem
                 onClick={() => onEdit(category)}
-                data-oid="tt.j.7w"
+               
               >
-                <Edit className="mr-2 h-4 w-4" data-oid="gzw3me0" />
+                <DynamicIcon name="Edit" className="mr-2 h-4 w-4" />
                 編輯分類
               </DropdownMenuItem>
             )}
@@ -152,9 +152,9 @@ export function CategoryItem({
               <DropdownMenuItem
                 onClick={() => onDelete(category)}
                 className="text-destructive focus:text-destructive"
-                data-oid="vu72p_0"
+               
               >
-                <Trash className="mr-2 h-4 w-4" data-oid="9mrbkqs" />
+                <DynamicIcon name="Trash2" className="mr-2 h-4 w-4" />
                 刪除分類
               </DropdownMenuItem>
             )}
@@ -170,7 +170,7 @@ export function CategoryItem({
           onEdit={onEdit}
           onDelete={onDelete}
           onAddSubCategory={onAddSubCategory}
-          data-oid="kdpqkvu"
+         
         />
       )}
     </div>

@@ -326,32 +326,32 @@ export function Step1_BasicInfo({
   };
 
   return (
-    <TooltipProvider data-oid="ilo9h60">
-      <div className="space-y-3" data-oid="1:ftnob">
+    <TooltipProvider>
+      <div className="space-y-3">
         {/* 表單區域 - 緊湊設計 */}
-        <div className="space-y-3" data-oid="ihdk8vh">
+        <div className="space-y-3">
           {/* 商品名稱 */}
-          <div className="space-y-2" data-oid="pug_kvr">
-            <div className="flex items-center gap-2" data-oid="4s4pms4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <Label
                 htmlFor="productName"
                 className="text-sm font-medium"
-                data-oid="5h.mrx9"
+               
               >
                 商品名稱
               </Label>
-              <span className="text-red-500 text-sm" data-oid="ycgjnmh">
+              <span className="text-red-500 text-sm">
                 *
               </span>
-              <Tooltip data-oid="jr1u6cw">
-                <TooltipTrigger asChild data-oid="8.7zex:">
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <HelpCircle
                     className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help"
-                    data-oid="hsfcq8o"
+                   
                   />
                 </TooltipTrigger>
-                <TooltipContent data-oid=":kq9o9b">
-                  <p data-oid="0m:r98s">
+                <TooltipContent>
+                  <p>
                     為您的商品取一個吸引人的名稱，這將是顧客看到的第一印象
                   </p>
                 </TooltipContent>
@@ -366,47 +366,47 @@ export function Step1_BasicInfo({
               onBlur={handleNameBlur}
               className={validationErrors.name ? "border-red-500" : ""}
               maxLength={100}
-              data-oid="p:htxk8"
+             
             />
 
             {validationErrors.name && (
-              <Alert variant="destructive" data-oid="t_noag8">
-                <AlertCircle className="h-4 w-4" data-oid="v-bxry:" />
-                <AlertDescription data-oid="uk7.9q3">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
                   {validationErrors.name}
                 </AlertDescription>
               </Alert>
             )}
             <div
               className="flex justify-between text-xs text-gray-500"
-              data-oid="96uuz1o"
+             
             >
-              <span data-oid="e:.tja6">建議長度：2-50個字符</span>
-              <span data-oid="8yp7x_g">
+              <span>建議長度：2-50個字符</span>
+              <span>
                 {formData.basicInfo.name.length}/100
               </span>
             </div>
           </div>
 
           {/* 商品描述 */}
-          <div className="space-y-2" data-oid="eoupk5y">
-            <div className="flex items-center gap-2" data-oid="4ewz.gb">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <Label
                 htmlFor="productDescription"
                 className="text-sm font-medium"
-                data-oid="soklovy"
+               
               >
                 商品描述
               </Label>
-              <Tooltip data-oid="gq9m_r_">
-                <TooltipTrigger asChild data-oid="_u6mmi5">
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <HelpCircle
                     className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help"
-                    data-oid="_wn-k93"
+                   
                   />
                 </TooltipTrigger>
-                <TooltipContent data-oid=".1y4rl_">
-                  <p data-oid="vgaq0nb">
+                <TooltipContent>
+                  <p>
                     詳細描述您的商品特色、功能和優勢，幫助顧客更好地了解商品
                   </p>
                 </TooltipContent>
@@ -420,47 +420,47 @@ export function Step1_BasicInfo({
               onBlur={handleDescriptionBlur}
               className={`min-h-[100px] ${validationErrors.description ? "border-red-500" : ""}`}
               maxLength={1000}
-              data-oid="97c4wkn"
+             
             />
 
             {validationErrors.description && (
-              <Alert variant="destructive" data-oid="7vcfmhj">
-                <AlertCircle className="h-4 w-4" data-oid="2qfm5vn" />
-                <AlertDescription data-oid="xe3580_">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
                   {validationErrors.description}
                 </AlertDescription>
               </Alert>
             )}
             <div
               className="flex justify-between text-xs text-gray-500"
-              data-oid="c7x7qj8"
+             
             >
-              <span data-oid="tk3ev:4">選填，建議填寫以提升商品吸引力</span>
-              <span data-oid="l69rt5e">
+              <span>選填，建議填寫以提升商品吸引力</span>
+              <span>
                 {formData.basicInfo.description.length}/1000
               </span>
             </div>
           </div>
 
           {/* 商品分類 */}
-          <div className="space-y-2" data-oid="sjqymej">
-            <div className="flex items-center gap-2" data-oid="cv2quoh">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <Label
                 htmlFor="productCategory"
                 className="text-sm font-medium"
-                data-oid="7j.m6hx"
+               
               >
                 商品分類
               </Label>
-              <Tooltip data-oid="9x-_l:f">
-                <TooltipTrigger asChild data-oid=":rtm-20">
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <HelpCircle
                     className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help"
-                    data-oid="mucq24b"
+                   
                   />
                 </TooltipTrigger>
-                <TooltipContent data-oid="td:7yra">
-                  <p data-oid="40cg06:">
+                <TooltipContent>
+                  <p>
                     選擇最符合您商品特性的分類，有助於顧客搜尋和瀏覽
                   </p>
                 </TooltipContent>
@@ -505,21 +505,21 @@ export function Step1_BasicInfo({
                         handleFieldChange("category_id", categoryId);
                       }
                     }}
-                    data-oid="kd5r3p."
+                   
                   >
-                    <SelectTrigger id={`category-stage-${stage.level}`} data-oid="o3j2qk2">
+                    <SelectTrigger id={`category-stage-${stage.level}`}>
                       <SelectValue
                         placeholder={
                           stage.level === 0 
                             ? "請選擇主分類（可選）" 
                             : `選擇 ${stage.parentCategory?.name} 的子分類（可選）`
                         }
-                        data-oid="vrp.yre"
+                       
                       />
                     </SelectTrigger>
-                    <SelectContent data-oid="1gt63l_">
+                    <SelectContent>
                       {stage.level === 0 ? (
-                        <SelectItem value="none" data-oid="f:t.w6u">
+                        <SelectItem value="none">
                           未分類
                         </SelectItem>
                       ) : (
@@ -528,7 +528,7 @@ export function Step1_BasicInfo({
                         </SelectItem>
                       )}
                       {categoriesLoading && stage.level === 0 ? (
-                        <SelectItem value="loading" disabled data-oid="emki.u-">
+                        <SelectItem value="loading" disabled>
                           載入分類中...
                         </SelectItem>
                       ) : (
@@ -537,7 +537,7 @@ export function Step1_BasicInfo({
                             <SelectItem
                               key={category.id}
                               value={category.id.toString()}
-                              data-oid="5g5.v3-"
+                             
                             >
                               {category.name}
                               {category.description && (
@@ -559,13 +559,13 @@ export function Step1_BasicInfo({
                 </div>
               ))}
             </div>
-            <div className="text-xs text-gray-500" data-oid="q_beutj">
+            <div className="text-xs text-gray-500">
               選填，稍後您也可以在商品管理中修改分類
             </div>
           </div>
 
           {/* 商品圖片上傳 */}
-          <div className="space-y-2" data-oid="symna6t">
+          <div className="space-y-2">
             <ImageUploader
               onUpload={handleImageUpload}
               onUploadSuccess={handleImageUploadSuccess}
@@ -576,14 +576,14 @@ export function Step1_BasicInfo({
                   ? "請先創建商品後再上傳圖片"
                   : "支援 JPEG、PNG、GIF、WebP 格式，最大 10MB"
               }
-              data-oid="mg9khqu"
+             
             />
 
             {!isEditMode && (
-              <Alert data-oid="hkq_s6i">
-                <AlertCircle className="h-4 w-4" data-oid="n7wmyop" />
-                <AlertDescription data-oid="2zv-cwb">
-                  <strong data-oid="lt8u.m4">提示：</strong>
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>提示：</strong>
                   圖片上傳功能將在商品創建完成後開啟。您可以在創建商品後返回編輯頁面上傳圖片。
                 </AlertDescription>
               </Alert>
@@ -592,10 +592,10 @@ export function Step1_BasicInfo({
         </div>
 
         {/* 進度提示 */}
-        <Alert className="mt-4" data-oid="508lx01">
-          <AlertCircle className="h-4 w-4" data-oid="249w6yl" />
-          <AlertDescription data-oid="lio15q-">
-            <strong data-oid="z0i7p_e">進度提示：</strong>
+        <Alert className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>進度提示：</strong>
             商品名稱為必填欄位，填寫完成後即可進入下一步進行規格定義。
           </AlertDescription>
         </Alert>

@@ -165,7 +165,7 @@ class CreateRefundRequest extends FormRequest
         }
         
         // 獲取訂單的所有品項 ID
-        $orderItemIds = $order->orderItems->pluck('id')->toArray();
+        $orderItemIds = $order->items->pluck('id')->toArray();
         
         foreach ($items as $index => $item) {
             $orderItemId = $item['order_item_id'] ?? null;

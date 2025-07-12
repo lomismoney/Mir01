@@ -3,12 +3,12 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Suspense, memo } from "react";
+import { Suspense, memo, useEffect } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import PerformanceMonitor from "@/components/performance/PerformanceMonitor";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouteIconPreloader } from "@/hooks/useRouteIconPreloader";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -46,6 +46,9 @@ interface AppLayoutProps {
 const AppLayout = memo(function AppLayout({ children }: AppLayoutProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  
+  // 🎨 圖標預加載系統 - 根據路由自動預加載相關圖標
+  useRouteIconPreloader();
 
   // 🔐 客戶端身份驗證保護 - 防止未登入用戶觸發錯誤
   useEffect(() => {
@@ -101,46 +104,46 @@ const AppLayout = memo(function AppLayout({ children }: AppLayoutProps) {
             "--header-height": "3rem", // 48px = 3rem，固定標題高度
           } as React.CSSProperties
         }
-        data-oid="o:23pqb"
+       
       >
         {/* 🔧 側邊欄組件 - 獨立緩存和優化 */}
-        <AppSidebar variant="inset" data-oid="fw.pe:i" />
+        <AppSidebar variant="inset" />
 
-        <SidebarInset data-oid="5r1_z.l">
+        <SidebarInset>
           {/* 🔧 標題組件 - 輕量級，最小重渲染 */}
-          <SiteHeader data-oid="e6q6bd8" />
+          <SiteHeader />
 
           {/* 🚀 主內容區域 - 核心性能優化區域 */}
           <main
             className="flex-1 overflow-auto p-6 bg-background"
-            data-oid="_a-0cwf"
+           
           >
-            <div className="container mx-auto max-w-7xl" data-oid="ou:o_lv">
+            <div className="container mx-auto max-w-7xl">
               {/* 🎯 Suspense 邊界 - 路由性能革命的核心 */}
               <Suspense
                 fallback={
                   <div
                     className="flex flex-col items-center justify-center h-64 space-y-4"
-                    data-oid="furuu9m"
+                   
                   >
-                    <LoadingSpinner size="lg" data-oid="cdwi6_k" />
-                    <div className="text-center space-y-2" data-oid="l.qc7ro">
+                    <LoadingSpinner size="lg" />
+                    <div className="text-center space-y-2">
                       <h3
                         className="text-lg font-semibold text-foreground"
-                        data-oid="hepf.:_"
+                       
                       >
                         載入頁面中
                       </h3>
                       <p
                         className="text-sm text-muted-foreground"
-                        data-oid="qmht-si"
+                       
                       >
                         正在為您準備最新內容...
                       </p>
                     </div>
                   </div>
                 }
-                data-oid="9xdzj50"
+               
               >
                 {/* 🔥 子頁面內容 - 在 Suspense 保護下懶加載 */}
                 {children}
@@ -150,7 +153,7 @@ const AppLayout = memo(function AppLayout({ children }: AppLayoutProps) {
         </SidebarInset>
 
         {/* 🚀 性能監控儀表板 - 實時監控系統性能 */}
-        <PerformanceMonitor data-oid="tkl0b8p" />
+        <PerformanceMonitor />
       </SidebarProvider>
     );
   }

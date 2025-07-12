@@ -48,7 +48,6 @@ export const createCategoryColumns = (
             style={{ paddingLeft: `${row.depth * 2}rem` }} // 🎯 根據層級深度，動態計算縮排
             className={`flex items-center gap-2 ${canExpand ? "cursor-pointer" : ""}`}
             onClick={canExpand ? toggleExpanded : undefined} // 整個區域都可以點擊展開
-            data-oid="1cbt_b8"
           >
             {/* 展開/收合按鈕或等寬空白 */}
             {canExpand ? (
@@ -60,33 +59,29 @@ export const createCategoryColumns = (
                   toggleExpanded();
                 }}
                 className="h-6 w-6"
-                data-oid="yz9rs5n"
               >
                 <ChevronRight
                   className={`h-4 w-4 transition-transform ${row.getIsExpanded() ? "rotate-90" : ""}`} // 🎯 展開時旋轉圖標
-                  data-oid="6jv4obc"
                 />
               </Button>
             ) : (
               // 沒有子分類時，添加等寬的空白區域
-              <div className="h-6 w-6" data-oid="v2twb2x" />
+              <div className="h-6 w-6" />
             )}
 
             {/* 資料夾圖標 */}
-            {row.original.children && row.original.children.length > 0 ? (
+            {row.getIsExpanded() ? (
               <FolderOpen
                 className="h-4 w-4 text-muted-foreground flex-shrink-0"
-                data-oid="77tj8hb"
               />
             ) : (
               <Folder
                 className="h-4 w-4 text-muted-foreground flex-shrink-0"
-                data-oid="mpd3spx"
               />
             )}
 
             {/* 分類名稱 */}
-            <span className="font-medium" data-oid="pes--r0">
+            <span className="font-medium">
               {row.original.name}
             </span>
           </div>
@@ -97,7 +92,7 @@ export const createCategoryColumns = (
       accessorKey: "description",
       header: "描述",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground" data-oid="6beyisx">
+        <span className="text-sm text-muted-foreground">
           {row.original.description || "暫無描述"}
         </span>
       ),
@@ -111,13 +106,13 @@ export const createCategoryColumns = (
         const childCount = row.original.children?.length || 0;
 
         return (
-          <div className="flex items-center gap-2" data-oid="r1rsi8s">
+          <div className="flex items-center gap-2">
             {hasChildren && (
-              <Badge variant="outline" data-oid="66fuoh_">
+              <Badge variant="outline">
                 {childCount} 個子分類
               </Badge>
             )}
-            <Badge variant="outline" data-oid="4_.z.7v">
+            <Badge variant="outline">
               {row.original.total_products_count || 0} 個商品
             </Badge>
           </div>
@@ -131,32 +126,30 @@ export const createCategoryColumns = (
         const category = row.original;
 
         return (
-          <DropdownMenu data-oid="6oi8r--">
-            <DropdownMenuTrigger asChild data-oid="cc.:w1q">
-              <Button variant="ghost" size="icon" data-oid="jliwrl9">
-                <MoreHorizontal className="h-4 w-4" data-oid="ei8cd6i" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" data-oid="05i9hsq">
+            <DropdownMenuContent align="end">
               {actions.onAddSubCategory && (
                 <>
                   <DropdownMenuItem
                     onClick={() => actions.onAddSubCategory?.(category.id)}
-                    data-oid="snt5_t5"
                   >
-                    <Plus className="mr-2 h-3.5 w-3.5" data-oid="315n.pp" />
+                    <Plus className="mr-2 h-3.5 w-3.5" />
                     新增子分類
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator data-oid="3haui:g" />
+                  <DropdownMenuSeparator />
                 </>
               )}
 
               {actions.onEdit && (
                 <DropdownMenuItem
                   onClick={() => actions.onEdit?.(category)}
-                  data-oid="9-889hc"
                 >
-                  <Edit className="mr-2 h-3.5 w-3.5" data-oid="ott26b_" />
+                  <Edit className="mr-2 h-3.5 w-3.5" />
                   編輯分類
                 </DropdownMenuItem>
               )}
@@ -165,9 +158,8 @@ export const createCategoryColumns = (
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive"
                   onClick={() => actions.onDelete?.(category)}
-                  data-oid="tcqcqrs"
                 >
-                  <Trash2 className="mr-2 h-3.5 w-3.5" data-oid=":dumoxx" />
+                  <Trash2 className="mr-2 h-3.5 w-3.5" />
                   刪除分類
                 </DropdownMenuItem>
               )}

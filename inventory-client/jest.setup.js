@@ -15,6 +15,9 @@ import '@testing-library/jest-dom'
 // 設置全局 fetch（如果需要）
 global.fetch = jest.fn()
 
+// Polyfill for structuredClone (not available in Jest environment)
+global.structuredClone = global.structuredClone || ((obj) => JSON.parse(JSON.stringify(obj)))
+
 // 模擬 Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {

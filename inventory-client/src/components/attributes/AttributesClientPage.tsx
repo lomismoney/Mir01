@@ -10,6 +10,8 @@ import {
   useUpdateAttributeValue,
   useDeleteAttributeValue,
   useAttributeValues,
+  useModalManager,
+  useErrorHandler,
 } from "@/hooks";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -54,7 +56,6 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Attribute } from "@/types/attribute";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AttributeValuesManager } from "./AttributeValuesManager";
@@ -86,6 +87,12 @@ const AttributesClientPage = () => {
     error,
   } = useAttributes();
 
+  // 🎯 統一的 Modal 管理器
+  const modalManager = useModalManager();
+  
+  // 🎯 增強的錯誤處理
+  const { handleError, handleSuccess } = useErrorHandler();
+
   // API Mutation Hooks
   const createAttributeMutation = useCreateAttribute();
   const updateAttributeMutation = useUpdateAttribute();
@@ -93,12 +100,6 @@ const AttributesClientPage = () => {
   const createValueMutation = useCreateAttributeValue();
   const updateValueMutation = useUpdateAttributeValue();
   const deleteValueMutation = useDeleteAttributeValue();
-
-  // 對話框狀態管理
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isValueDeleteDialogOpen, setIsValueDeleteDialogOpen] = useState(false);
 
   // 表單資料狀態
   const [attributeName, setAttributeName] = useState("");
@@ -132,13 +133,11 @@ const AttributesClientPage = () => {
 
     try {
       await createAttributeMutation.mutateAsync({ name: attributeName.trim() });
-      toast.success("規格新增成功！");
+      handleSuccess("規格新增成功！");
       setAttributeName("");
-      setIsCreateDialogOpen(false);
+      modalManager.closeModal();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "新增規格失敗";
-      toast.error(errorMessage);
+      handleError(error);
     }
   };
 
@@ -154,11 +153,11 @@ const AttributesClientPage = () => {
         id: selectedAttribute.id,
         body: { name: attributeName.trim() },
       });
-      toast.success("規格更新成功！");
+      handleSuccess("規格更新成功！");
       setAttributeName("");
-      setIsEditDialogOpen(false);
+      modalManager.closeModal();
     } catch (error) {
-      toast.error("更新規格失敗");
+      handleError(error);
     }
   };
 
@@ -172,11 +171,11 @@ const AttributesClientPage = () => {
       await deleteAttributeMutation.mutateAsync({
         id: selectedAttribute.id,
       });
-      toast.success("規格刪除成功！");
+      handleSuccess("規格刪除成功！");
       setSelectedAttribute(null);
-      setIsDeleteDialogOpen(false);
+      modalManager.closeModal();
     } catch (error) {
-      toast.error("刪除規格失敗");
+      handleError(error);
     }
   };
 
@@ -184,15 +183,17 @@ const AttributesClientPage = () => {
    * 開始編輯規格
    */
   const startEditAttribute = (attribute: Attribute) => {
+    setSelectedAttribute(attribute);
     setAttributeName(attribute.name);
-    setIsEditDialogOpen(true);
+    modalManager.openModal('edit', attribute);
   };
 
   /**
    * 開始刪除規格
    */
   const startDeleteAttribute = (attribute: Attribute) => {
-    setIsDeleteDialogOpen(true);
+    setSelectedAttribute(attribute);
+    modalManager.openModal('delete', attribute);
   };
 
   /**
@@ -206,11 +207,11 @@ const AttributesClientPage = () => {
         attributeId: selectedAttribute.id,
         body: { value: newValueInput.trim() },
       });
-      toast.success("規格值新增成功！");
+      handleSuccess("規格值新增成功！");
       setNewValueInput("");
       setShowValueInput(false);
     } catch (error) {
-      toast.error("新增規格值失敗");
+      handleError(error);
     }
   };
 
@@ -222,12 +223,12 @@ const AttributesClientPage = () => {
 
     try {
       await deleteValueMutation.mutateAsync(selectedValueId);
-      toast.success("規格值刪除成功！");
+      handleSuccess("規格值刪除成功！");
       setSelectedValueId(null);
       setSelectedValueName("");
-      setIsValueDeleteDialogOpen(false);
+      modalManager.closeModal();
     } catch (error) {
-      toast.error("刪除規格值失敗");
+      handleError(error);
     }
   };
 
@@ -237,7 +238,7 @@ const AttributesClientPage = () => {
   const startDeleteValue = (valueId: number, valueName: string) => {
     setSelectedValueId(valueId);
     setSelectedValueName(valueName);
-    setIsValueDeleteDialogOpen(true);
+    modalManager.openModal('deleteValue', { id: valueId, name: valueName });
   };
 
   // 權限檢查
@@ -247,30 +248,30 @@ const AttributesClientPage = () => {
         className="flex justify-center items-center min-h-[400px]"
         role="status"
         aria-label="loading"
-        data-oid="0n.m-lj"
+       
       >
-        <Loader2 className="h-8 w-8 animate-spin" data-oid="xakl14v" />
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   if (!isAuthorized) {
     return (
-      <Card className="border-destructive/50" data-oid="_dgdzk7">
-        <CardContent className="pt-6" data-oid="x-n9tzu">
-          <div className="text-center" data-oid="zupj.i3">
+      <Card className="border-destructive/50">
+        <CardContent className="pt-6">
+          <div className="text-center">
             <X
               className="h-12 w-12 mx-auto text-destructive mb-4"
-              data-oid=".o:kuz9"
+             
             />
 
             <p
               className="text-lg font-medium text-destructive"
-              data-oid="osetzci"
+             
             >
               權限不足
             </p>
-            <p className="text-muted-foreground mt-2" data-oid="hjv09jf">
+            <p className="text-muted-foreground mt-2">
               您沒有權限訪問此頁面
             </p>
           </div>
@@ -280,40 +281,40 @@ const AttributesClientPage = () => {
   }
 
   return (
-    <div className="space-y-4" data-oid="3xarzgp">
+    <div className="space-y-4">
       {/* 頁面標題和操作區 */}
-      <div className="flex items-center justify-between" data-oid="t-yjqaf">
-        <div data-oid="pj8ncg5">
-          <h1 className="text-2xl font-bold" data-oid="__vx.h2">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">
             規格管理
           </h1>
-          <p className="text-sm text-muted-foreground" data-oid="gukmh8d">
+          <p className="text-sm text-muted-foreground">
             管理商品規格屬性和規格值
           </p>
         </div>
 
         <Dialog
-          open={isCreateDialogOpen}
-          onOpenChange={setIsCreateDialogOpen}
-          data-oid="jt6e9:."
+          open={modalManager.isModalOpen('create')}
+          onOpenChange={(open) => !open && modalManager.closeModal()}
+         
         >
-          <DialogTrigger asChild data-oid="-y5k8sf">
-            <Button size="sm" data-oid="yxp1rh9">
-              <Plus className="mr-1.5 h-4 w-4" data-oid="risyqz9" />
+          <DialogTrigger asChild>
+            <Button size="sm" onClick={() => modalManager.openModal('create')}>
+              <Plus className="mr-1.5 h-4 w-4" />
               新增規格
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]" data-oid="el03rk1">
-            <DialogHeader data-oid="3ee:h4j">
-              <DialogTitle data-oid=".4rn5s6">新增規格</DialogTitle>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>新增規格</DialogTitle>
             </DialogHeader>
             <form
               onSubmit={handleCreateAttribute}
               className="space-y-4"
-              data-oid="5drvrus"
+             
             >
-              <div className="space-y-2" data-oid="0no7yjz">
-                <Label htmlFor="name" data-oid="a7:-vb:">
+              <div className="space-y-2">
+                <Label htmlFor="name">
                   規格名稱
                 </Label>
                 <Input
@@ -323,19 +324,19 @@ const AttributesClientPage = () => {
                   onChange={(e) => setAttributeName(e.target.value)}
                   required
                   autoFocus
-                  data-oid="q.zoclv"
+                 
                 />
               </div>
-              <div className="flex justify-end gap-2" data-oid="-kyulh9">
+              <div className="flex justify-end gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setIsCreateDialogOpen(false);
+                    modalManager.closeModal();
                     setAttributeName("");
                   }}
-                  data-oid=":20a1s."
+                 
                 >
                   取消
                 </Button>
@@ -345,12 +346,12 @@ const AttributesClientPage = () => {
                   disabled={
                     createAttributeMutation.isPending || !attributeName.trim()
                   }
-                  data-oid="1i1y1ry"
+                 
                 >
                   {createAttributeMutation.isPending && (
                     <Loader2
                       className="mr-1.5 h-4 w-4 animate-spin"
-                      data-oid="ktw133e"
+                     
                     />
                   )}
                   新增
@@ -364,27 +365,27 @@ const AttributesClientPage = () => {
       {/* 雙面板佈局 */}
       <div
         className="h-[calc(100vh-10rem)] rounded-lg border flex"
-        data-oid="o5ndkwg"
+       
       >
         {/* --- 左側面板：屬性導航欄 --- */}
         <aside
           className="w-1/4 min-w-[240px] max-w-[360px] border-r bg-muted/10"
-          data-oid="fjmoefz"
+         
         >
-          <div className="flex h-full flex-col" data-oid="3cx-xt8">
+          <div className="flex h-full flex-col">
             {/* 側邊欄標頭 */}
-            <div className="p-4 pb-2" data-oid="aubwlal">
-              <h2 className="text-lg font-semibold" data-oid="f17_7vr">
+            <div className="p-4 pb-2">
+              <h2 className="text-lg font-semibold">
                 規格類型
               </h2>
             </div>
 
             {/* 搜索區 */}
-            <div className="px-4 pb-2" data-oid="h4hffgj">
-              <div className="relative" data-oid="h8-_gxv">
+            <div className="px-4 pb-2">
+              <div className="relative">
                 <Search
                   className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                  data-oid="cf7vj_3"
+                 
                 />
 
                 <Input
@@ -392,35 +393,35 @@ const AttributesClientPage = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 h-9 bg-background"
-                  data-oid="12zl0rx"
+                 
                 />
               </div>
             </div>
 
             {/* 內容區 */}
-            <ScrollArea className="flex-1 px-2" data-oid="zof2l70">
-              <div className="p-2" data-oid="lwypxg_">
+            <ScrollArea className="flex-1 px-2">
+              <div className="p-2">
                 {/* 規格列表 - 符合 shadcn 規範 */}
                 {isAttributesLoading ? (
                   <div
                     className="flex justify-center items-center min-h-[200px]"
-                    data-oid="-fpia-g"
+                   
                   >
                     <Loader2
                       className="h-6 w-6 animate-spin"
-                      data-oid="xcrbv:h"
+                     
                     />
                   </div>
                 ) : filteredAttributes.length === 0 ? (
-                  <div className="text-center py-8" data-oid="-ztss8e">
+                  <div className="text-center py-8">
                     <Package
                       className="h-8 w-8 mx-auto text-muted-foreground mb-2"
-                      data-oid="gofzwoh"
+                     
                     />
 
                     <p
                       className="text-sm text-muted-foreground"
-                      data-oid="rqjv-fo"
+                     
                     >
                       {searchQuery ? "找不到符合的規格" : "尚未建立任何規格"}
                     </p>
@@ -430,7 +431,7 @@ const AttributesClientPage = () => {
                     className="space-y-1"
                     role="navigation"
                     aria-label="規格類型列表"
-                    data-oid="-ocmbvo"
+                   
                   >
                     {filteredAttributes.map((attribute) => (
                       <Button
@@ -447,14 +448,14 @@ const AttributesClientPage = () => {
                             ? "page"
                             : undefined
                         }
-                        data-oid=".dk7sgm"
+                       
                       >
                         <Tag
                           className="mr-2 h-4 w-4 text-muted-foreground"
-                          data-oid="wl2kgee"
+                         
                         />
 
-                        <span className="flex-1 text-left" data-oid=":ibs:z8">
+                        <span className="flex-1 text-left">
                           {attribute.name}
                         </span>
                         <Badge
@@ -464,7 +465,7 @@ const AttributesClientPage = () => {
                               : "secondary"
                           }
                           className="ml-auto text-xs"
-                          data-oid="zxn0yqe"
+                         
                         >
                           {attribute.values?.length || 0}
                         </Badge>
@@ -478,9 +479,9 @@ const AttributesClientPage = () => {
         </aside>
 
         {/* --- 右側面板：規格值工作區 --- */}
-        <main className="flex-1 bg-background" data-oid="2ccuoe7">
-          <ScrollArea className="h-full" data-oid="tg-es:3">
-            <div className="p-6" data-oid="62pdzl9">
+        <main className="flex-1 bg-background">
+          <ScrollArea className="h-full">
+            <div className="p-6">
               {selectedAttribute ? (
                 <AttributeValuesManager
                   attribute={selectedAttribute}
@@ -493,20 +494,20 @@ const AttributesClientPage = () => {
                   showValueInput={showValueInput}
                   setShowValueInput={setShowValueInput}
                   createValuePending={createValueMutation.isPending}
-                  data-oid="fi991u8"
+                 
                 />
               ) : (
                 <div
                   className="flex h-full items-center justify-center"
-                  data-oid="4449a9p"
+                 
                 >
-                  <div className="text-center" data-oid="vd-7sq-">
+                  <div className="text-center">
                     <Tag
                       className="h-12 w-12 mx-auto text-muted-foreground mb-4"
-                      data-oid="277z5_5"
+                     
                     />
 
-                    <p className="text-muted-foreground" data-oid="fxq8e-f">
+                    <p className="text-muted-foreground">
                       請從左側選擇一個規格類型進行管理
                     </p>
                   </div>
@@ -519,21 +520,21 @@ const AttributesClientPage = () => {
 
       {/* 編輯規格對話框 */}
       <Dialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        data-oid="r1dnbw6"
+        open={modalManager.isModalOpen('edit')}
+        onOpenChange={(open) => !open && modalManager.closeModal()}
+       
       >
-        <DialogContent className="sm:max-w-[425px]" data-oid="9_woj2n">
-          <DialogHeader data-oid="8xa_snb">
-            <DialogTitle data-oid="ah:62ni">編輯規格</DialogTitle>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>編輯規格</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={handleEditAttribute}
             className="space-y-4"
-            data-oid="6l2uxkx"
+           
           >
-            <div className="space-y-2" data-oid="8bhpv1u">
-              <Label htmlFor="edit-name" data-oid="t0rpicf">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">
                 規格名稱
               </Label>
               <Input
@@ -543,19 +544,19 @@ const AttributesClientPage = () => {
                 onChange={(e) => setAttributeName(e.target.value)}
                 required
                 autoFocus
-                data-oid="55bjo._"
+               
               />
             </div>
-            <div className="flex justify-end gap-2" data-oid="tqov4g0">
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setIsEditDialogOpen(false);
+                  modalManager.closeModal();
                   setAttributeName("");
                 }}
-                data-oid="a-gsy3a"
+               
               >
                 取消
               </Button>
@@ -565,12 +566,12 @@ const AttributesClientPage = () => {
                 disabled={
                   updateAttributeMutation.isPending || !attributeName.trim()
                 }
-                data-oid="zely0nu"
+               
               >
                 {updateAttributeMutation.isPending && (
                   <Loader2
                     className="mr-1.5 h-4 w-4 animate-spin"
-                    data-oid="awn0ek2"
+                   
                   />
                 )}
                 保存
@@ -582,30 +583,30 @@ const AttributesClientPage = () => {
 
       {/* 刪除規格確認對話框 */}
       <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        data-oid="s.avqzc"
+        open={modalManager.isModalOpen('delete')}
+        onOpenChange={(open) => !open && modalManager.closeModal()}
+       
       >
-        <AlertDialogContent data-oid="slzzgsa">
-          <AlertDialogHeader data-oid="r3xud:0">
-            <AlertDialogTitle data-oid="nvbd:l9">確認刪除規格</AlertDialogTitle>
-            <AlertDialogDescription data-oid="uw:l3-b">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認刪除規格</AlertDialogTitle>
+            <AlertDialogDescription>
               您確定要刪除規格「{selectedAttribute?.name}」嗎？
               此操作將同時刪除該規格下的所有規格值，且無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="f632oui">
-            <AlertDialogCancel data-oid="..98ac5">取消</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAttribute}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteAttributeMutation.isPending}
-              data-oid="lle6:ix"
+             
             >
               {deleteAttributeMutation.isPending && (
                 <Loader2
                   className="mr-1.5 h-4 w-4 animate-spin"
-                  data-oid="hctm67-"
+                 
                 />
               )}
               確認刪除
@@ -616,31 +617,31 @@ const AttributesClientPage = () => {
 
       {/* 刪除規格值確認對話框 */}
       <AlertDialog
-        open={isValueDeleteDialogOpen}
-        onOpenChange={setIsValueDeleteDialogOpen}
-        data-oid="81agk0j"
+        open={modalManager.isModalOpen('deleteValue')}
+        onOpenChange={(open) => !open && modalManager.closeModal()}
+       
       >
-        <AlertDialogContent data-oid="r8.k_6m">
-          <AlertDialogHeader data-oid="rcqj:ew">
-            <AlertDialogTitle data-oid="w977eo2">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
               確認刪除規格值
             </AlertDialogTitle>
-            <AlertDialogDescription data-oid="lhjzuq8">
+            <AlertDialogDescription>
               您確定要刪除規格值「{selectedValueName}」嗎？ 此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="3xb6jkp">
-            <AlertDialogCancel data-oid="l.1tddj">取消</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteValue}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteValueMutation.isPending}
-              data-oid="brns678"
+             
             >
               {deleteValueMutation.isPending && (
                 <Loader2
                   className="mr-1.5 h-4 w-4 animate-spin"
-                  data-oid="j:g:hrv"
+                 
                 />
               )}
               確認刪除

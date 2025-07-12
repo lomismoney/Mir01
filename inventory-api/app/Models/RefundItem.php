@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HandlesCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class RefundItem extends Model
 {
-    use HasFactory;
+    use HasFactory, HandlesCurrency;
 
     /**
      * 資料表名稱
@@ -47,6 +48,8 @@ class RefundItem extends Model
         'order_item_id',
         'quantity',
         'refund_subtotal',
+        // 金額欄位（分為單位）
+        'refund_subtotal_cents',
     ];
 
     /**
@@ -56,9 +59,10 @@ class RefundItem extends Model
      */
     protected $casts = [
         'quantity' => 'integer',
-        'refund_subtotal' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        // 金額欄位使用分為單位
+        'refund_subtotal_cents' => 'integer',
     ];
 
     /**
@@ -286,5 +290,31 @@ class RefundItem extends Model
                 $refundItem->refund_subtotal = $refundItem->orderItem->price * $refundItem->quantity;
             }
         });
+    }
+
+    // ===== 金額處理方法 =====
+
+    /**
+     * 定義金額欄位
+     */
+    protected function getCurrencyFields(): array
+    {
+        return ['refund_subtotal'];
+    }
+
+    /**
+     * 退款小計 Accessor
+     */
+    public function getRefundSubtotalAttribute(): float
+    {
+        return self::centsToYuan($this->getCentsValue('refund_subtotal'));
+    }
+
+    /**
+     * 退款小計 Mutator
+     */
+    public function setRefundSubtotalAttribute($value): void
+    {
+        $this->setCurrencyValue('refund_subtotal', $value);
     }
 }

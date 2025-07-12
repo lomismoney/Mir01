@@ -23,6 +23,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { format } from "date-fns";
+import { formatDate as safeDateFormat } from "@/lib/dateHelpers";
 
 interface TransferHistoryDialogProps {
   transfer: InventoryTransferItem;
@@ -79,12 +80,12 @@ export function TransferHistoryDialog({
 
   const getTransactionIcon = (type: string, quantity: number) => {
     if (type.includes("transfer")) {
-      return <Package className="h-4 w-4 text-blue-600" data-oid="eo7y7_x" />;
+      return <Package className="h-4 w-4 text-blue-600" />;
     }
     return quantity > 0 ? (
-      <TrendingUp className="h-4 w-4 text-green-600" data-oid=".vyhu8d" />
+      <TrendingUp className="h-4 w-4 text-green-600" />
     ) : (
-      <TrendingDown className="h-4 w-4 text-red-600" data-oid="hko2nwn" />
+      <TrendingDown className="h-4 w-4 text-red-600" />
     );
   };
 
@@ -105,7 +106,7 @@ export function TransferHistoryDialog({
 
     const config = typeMap[type] || { label: type, variant: "secondary" };
     return (
-      <Badge variant={config.variant} data-oid="j8pk_.5">
+      <Badge variant={config.variant}>
         {config.label}
       </Badge>
     );
@@ -113,7 +114,7 @@ export function TransferHistoryDialog({
 
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), "MM/dd HH:mm");
+              return safeDateFormat.shortDateTime(dateString, "無效日期");
     } catch {
       return dateString;
     }
@@ -127,44 +128,44 @@ export function TransferHistoryDialog({
   });
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="d4a63xy">
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-3xl max-h-[80vh] overflow-y-auto"
-        data-oid="i-lix50"
+       
       >
-        <DialogHeader data-oid="ky:j:0c">
-          <DialogTitle data-oid="2ey.pr6">轉移歷史記錄</DialogTitle>
-          <DialogDescription data-oid="w.c8kl-">
+        <DialogHeader>
+          <DialogTitle>轉移歷史記錄</DialogTitle>
+          <DialogDescription>
             轉移單號 #{transfer.id} - 產品 #{transfer.product_variant_id}
           </DialogDescription>
         </DialogHeader>
 
         {/* 轉移基本資訊 */}
-        <Card data-oid="4:n-pl6">
-          <CardHeader data-oid="moelwa-">
-            <CardTitle className="text-sm" data-oid="dp:fbzv">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">
               轉移資訊
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2" data-oid="2mn37d4">
-            <div className="flex items-center gap-2 text-sm" data-oid="uqh:yb7">
-              <Badge variant="outline" data-oid="rti0l_-">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <Badge variant="outline">
                 門市 #{transfer.from_store_id}
               </Badge>
               <ArrowRight
                 className="h-4 w-4 text-muted-foreground"
-                data-oid="81j11cz"
+               
               />
 
-              <Badge variant="outline" data-oid=":xwhycn">
+              <Badge variant="outline">
                 門市 #{transfer.to_store_id}
               </Badge>
-              <span className="ml-2" data-oid="8tw29:0">
+              <span className="ml-2">
                 數量: {transfer.quantity}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-sm" data-oid="it3z3of">
-              <span data-oid="tar53-0">狀態:</span>
+            <div className="flex items-center gap-2 text-sm">
+              <span>狀態:</span>
               <Badge
                 variant={
                   transfer.status === "completed"
@@ -175,7 +176,7 @@ export function TransferHistoryDialog({
                         ? "secondary"
                         : "outline"
                 }
-                data-oid="vcvgeua"
+               
               >
                 {transfer.status === "pending"
                   ? "待處理"
@@ -187,12 +188,12 @@ export function TransferHistoryDialog({
                         ? "已取消"
                         : transfer.status}
               </Badge>
-              <span className="ml-4" data-oid="4jazox3">
+              <span className="ml-4">
                 創建時間: {formatDate(transfer.created_at || "")}
               </span>
             </div>
             {transfer.notes && (
-              <div className="text-sm text-muted-foreground" data-oid="ed9w9m0">
+              <div className="text-sm text-muted-foreground">
                 備註: {transfer.notes}
               </div>
             )}
@@ -200,72 +201,72 @@ export function TransferHistoryDialog({
         </Card>
 
         {/* 相關交易記錄 */}
-        <Card data-oid="376h:n6">
-          <CardHeader data-oid="rltxd:i">
-            <CardTitle className="text-sm" data-oid="kg.ot0s">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">
               相關庫存變動記錄
             </CardTitle>
           </CardHeader>
-          <CardContent data-oid="mjekw_f">
+          <CardContent>
             {isLoading ? (
-              <div className="space-y-4" data-oid="g2l6dki">
+              <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <Skeleton
                     key={index}
                     className="h-16 w-full"
-                    data-oid="mi-05bl"
+                   
                   />
                 ))}
               </div>
             ) : error ? (
-              <Alert variant="destructive" data-oid="21v2bn_">
-                <AlertDescription data-oid="xd:6xyn">
+              <Alert variant="destructive">
+                <AlertDescription>
                   載入庫存變動記錄失敗
                 </AlertDescription>
               </Alert>
             ) : processedTransactions.length === 0 ? (
               <div
                 className="text-center py-8 text-muted-foreground"
-                data-oid="-9ik55v"
+               
               >
                 <Package
                   className="h-12 w-12 mx-auto mb-4 opacity-20"
-                  data-oid="h4gpepx"
+                 
                 />
 
-                <p data-oid="dt.3.ww">暫無相關的庫存變動記錄</p>
-                <p className="text-sm" data-oid="qpqoxul">
+                <p>暫無相關的庫存變動記錄</p>
+                <p className="text-sm">
                   可能是因為轉移尚未執行或記錄格式不同
                 </p>
               </div>
             ) : (
-              <div className="space-y-3" data-oid="68xck.e">
+              <div className="space-y-3">
                 {processedTransactions.map((transaction: any, index: any) => (
                   <div
                     key={transaction.id}
                     className="flex items-start space-x-4 p-3 border rounded-lg"
-                    data-oid="ucru5js"
+                   
                   >
-                    <div className="p-2 bg-muted rounded-lg" data-oid="bf.y2qn">
+                    <div className="p-2 bg-muted rounded-lg">
                       {getTransactionIcon(
                         transaction.type || "",
                         transaction.quantity || 0,
                       )}
                     </div>
 
-                    <div className="flex-1 space-y-2" data-oid="-__cl_h">
+                    <div className="flex-1 space-y-2">
                       <div
                         className="flex items-center justify-between"
-                        data-oid="w2bc0r4"
+                       
                       >
                         <div
                           className="flex items-center gap-2"
-                          data-oid=":w9bl2."
+                         
                         >
                           {getTypeBadge(transaction.type || "")}
                           <span
                             className="text-sm font-medium"
-                            data-oid="gqs821k"
+                           
                           >
                             數量: {(transaction.quantity || 0) > 0 ? "+" : ""}
                             {transaction.quantity || 0}
@@ -273,35 +274,35 @@ export function TransferHistoryDialog({
                         </div>
                         <div
                           className="flex items-center gap-1 text-sm text-muted-foreground"
-                          data-oid="ucew.gz"
+                         
                         >
-                          <Calendar className="h-3 w-3" data-oid="ehm7k3q" />
+                          <Calendar className="h-3 w-3" />
                           {formatDate(transaction.created_at || "")}
                         </div>
                       </div>
 
                       <div
                         className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm"
-                        data-oid="b1v5xlb"
+                       
                       >
-                        <div data-oid="n9c73..">
-                          <span className="font-medium" data-oid=".tk-xme">
+                        <div>
+                          <span className="font-medium">
                             變動前:
                           </span>{" "}
                           {transaction.before_quantity ?? "未知"}
                         </div>
-                        <div data-oid=".zhu6_u">
-                          <span className="font-medium" data-oid="otvn-lp">
+                        <div>
+                          <span className="font-medium">
                             變動後:
                           </span>{" "}
                           {transaction.after_quantity ?? "未知"}
                         </div>
                         <div
                           className="flex items-center gap-1"
-                          data-oid="ysbyzw1"
+                         
                         >
-                          <User className="h-3 w-3" data-oid="1d0hlmg" />
-                          <span data-oid="9cqa0ii">
+                          <User className="h-3 w-3" />
+                          <span>
                             {transaction.user?.name || "未知用戶"}
                           </span>
                         </div>
@@ -310,9 +311,9 @@ export function TransferHistoryDialog({
                       {transaction.notes && (
                         <div
                           className="text-sm text-muted-foreground"
-                          data-oid="mo31mje"
+                         
                         >
-                          <span className="font-medium" data-oid="qhro_es">
+                          <span className="font-medium">
                             備註:
                           </span>{" "}
                           {transaction.notes}

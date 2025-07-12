@@ -112,10 +112,10 @@ class InstallationServiceTest extends TestCase
         $this->assertEquals($this->customer->name, $installation->customer_name);
         $this->assertEquals('測試安裝地址', $installation->installation_address);
         $this->assertEquals('pending', $installation->status);
-        $this->assertStringStartsWith('I-', $installation->installation_number);
+        $this->assertStringStartsWith('IN-', $installation->installation_number);
         
         // 驗證安裝工程項目也被創建
-        $this->assertTrue($installation->installationItems()->exists());
+        $this->assertTrue($installation->items()->exists());
     }
 
     /**
@@ -152,7 +152,7 @@ class InstallationServiceTest extends TestCase
         $this->assertEquals('0912345678', $installation->customer_phone);
         $this->assertEquals('測試安裝地址', $installation->installation_address);
         $this->assertEquals('pending', $installation->status);
-        $this->assertStringStartsWith('I-', $installation->installation_number);
+        $this->assertStringStartsWith('IN-', $installation->installation_number);
         
         // 驗證安裝項目被創建
         $this->assertCount(1, $installation->items);

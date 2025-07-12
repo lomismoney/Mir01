@@ -6,6 +6,12 @@ use App\Data\PurchaseData;
 use App\Models\Purchase;
 use App\Models\Inventory;
 use App\Models\ProductVariant;
+use App\Models\OrderItem;
+use App\Models\PurchaseItem;
+use App\Services\BaseService;
+use App\Services\Traits\HandlesInventoryOperations;
+use App\Services\Traits\HandlesStatusHistory;
+use App\Services\BackorderAllocationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -16,8 +22,9 @@ use Illuminate\Support\Carbon;
  * 
  * 處理進貨相關的業務邏輯
  */
-class PurchaseService
+class PurchaseService extends BaseService
 {
+    use HandlesInventoryOperations, HandlesStatusHistory;
     /**
      * 自動生成進貨單號（黃金標準實現）
      * 
@@ -30,7 +37,7 @@ class PurchaseService
      */
     private function generateOrderNumber(\DateTime $date = null): string
     {
-        return DB::transaction(function () use ($date) {
+        return $this->executeInTransaction(function () use ($date) {
             // 獲取日期
             $date = $date ?? new \DateTime();
             $dateStr = $date->format('Y-m-d');
@@ -80,7 +87,7 @@ class PurchaseService
     public function createPurchase(PurchaseData $purchaseData): Purchase
     {
         // 使用資料庫交易，確保資料一致性
-        return DB::transaction(function () use ($purchaseData) {
+        return $this->executeInTransaction(function () use ($purchaseData) {
             // 1. 計算總金額和總數量
             $itemSubtotal = 0;
             $totalQuantity = 0;
@@ -97,10 +104,7 @@ class PurchaseService
             $orderNumber = $this->generateOrderNumber(new \DateTime($purchasedAt));
             
             // 確保用戶已認證
-            $userId = Auth::id();
-            if (!$userId) {
-                throw new \InvalidArgumentException('用戶必須經過認證才能建立進貨單');
-            }
+            $userId = $this->requireAuthentication('建立進貨單');
             
             $purchase = Purchase::create([
                 'store_id' => $purchaseData->store_id,
@@ -124,6 +128,7 @@ class PurchaseService
                     // 最後一項用總運費減去已分配的，避免因四捨五入產生誤差
                     $allocatedShippingCost = $purchaseData->shipping_cost - $accumulatedShippingCost;
                 } else {
+                    // 保持原有邏輯，已經是整數計算（以分為單位）
                     $allocatedShippingCost = $totalQuantity > 0
                         ? (int) round(($purchaseData->shipping_cost * $itemData->quantity) / $totalQuantity)
                         : 0;
@@ -159,7 +164,7 @@ class PurchaseService
      */
     public function updatePurchase(Purchase $purchase, PurchaseData $purchaseData): Purchase
     {
-        return DB::transaction(function () use ($purchase, $purchaseData) {
+        return $this->executeInTransaction(function () use ($purchase, $purchaseData) {
             $oldStatus = $purchase->status;
             $newStatus = $purchaseData->status ?? $purchase->status;
 
@@ -234,10 +239,8 @@ class PurchaseService
 
             // 7. 如果狀態有變更，記錄日誌
             if ($oldStatus !== $newStatus) {
-                $userId = Auth::id();
-                if ($userId) {
-                    $this->logStatusChange($purchase, $oldStatus, $newStatus, $userId, '進貨單更新時狀態變更');
-                }
+                $userId = $this->requireAuthentication('狀態變更');
+                $this->logStatusChange($purchase, $oldStatus, $newStatus, $userId, '進貨單更新時狀態變更');
             }
 
             return $purchase->load(['store', 'items.productVariant.product']);
@@ -260,10 +263,7 @@ class PurchaseService
             );
 
             // 使用庫存模型的方法來增加庫存
-            $userId = Auth::id();
-            if (!$userId) {
-                throw new \InvalidArgumentException('用戶必須經過認證才能處理庫存操作');
-            }
+            $userId = $this->requireAuthentication('庫存操作');
             
             $inventory->addStock(
                 $item->quantity, 
@@ -282,6 +282,179 @@ class PurchaseService
                 );
             }
         }
+        
+        // 🎯 新增：更新關聯的訂單項目為已履行
+        $this->markRelatedOrderItemsAsFulfilled($purchase);
+    }
+    
+    /**
+     * 標記關聯的訂單項目為已履行（智能分配版）
+     * 
+     * 當進貨單完成時，使用智能分配系統將商品分配給預訂訂單
+     * 支援優先級排序、客戶等級、緊急程度等多維度考量
+     * 
+     * @param Purchase|PurchaseItem $purchaseOrItem
+     * @param array $allocationOptions 分配選項
+     */
+    public function markRelatedOrderItemsAsFulfilled($purchaseOrItem, array $allocationOptions = []): void
+    {
+        // 處理兩種調用方式：Purchase 或 PurchaseItem
+        if ($purchaseOrItem instanceof Purchase) {
+            $purchase = $purchaseOrItem;
+            $purchaseItems = $purchase->items;
+        } elseif ($purchaseOrItem instanceof PurchaseItem) {
+            $purchaseItems = collect([$purchaseOrItem]);
+            $purchase = $purchaseOrItem->purchase;
+        } else {
+            throw new \InvalidArgumentException('參數必須是 Purchase 或 PurchaseItem 實例');
+        }
+
+        // 獲取分配服務實例
+        $allocationService = app(BackorderAllocationService::class);
+        
+        // 設定預設分配選項
+        $defaultOptions = [
+            'allocation_strategy' => 'smart_priority', // 智能優先級分配
+            'store_id' => $purchase->store_id,
+            'enable_logging' => true,
+        ];
+        $options = array_merge($defaultOptions, $allocationOptions);
+        
+        // 處理每個進貨項目
+        foreach ($purchaseItems as $purchaseItem) {
+            try {
+                // 檢查是否有已關聯的訂單項目（直接關聯的情況）
+                $directLinkedItems = OrderItem::where('purchase_item_id', $purchaseItem->id)
+                    ->whereRaw('fulfilled_quantity < quantity')
+                    ->get();
+
+                if ($directLinkedItems->isNotEmpty()) {
+                    // 直接關聯的項目：使用傳統FIFO分配
+                    $this->allocateToDirectLinkedItems($purchaseItem, $directLinkedItems, $purchase);
+                } else {
+                    // 無直接關聯：使用智能分配系統
+                    $allocationResult = $allocationService->allocateToBackorders($purchaseItem, $options);
+                    
+                    Log::info('智能分配完成', [
+                        'purchase_item_id' => $purchaseItem->id,
+                        'purchase_order_number' => $purchase->order_number ?? 'N/A',
+                        'product_variant_id' => $purchaseItem->product_variant_id,
+                        'total_allocated' => $allocationResult['total_allocated'],
+                        'remaining_quantity' => $allocationResult['remaining_quantity'],
+                        'allocated_orders_count' => count($allocationResult['allocated_items']),
+                        'allocation_efficiency' => $allocationResult['allocation_summary']['allocation_efficiency'] ?? 0,
+                    ]);
+                    
+                    // 如果還有剩餘數量，記錄警告
+                    if ($allocationResult['remaining_quantity'] > 0) {
+                        Log::warning('智能分配後仍有剩餘進貨數量', [
+                            'purchase_item_id' => $purchaseItem->id,
+                            'purchase_order_number' => $purchase->order_number ?? 'N/A',
+                            'product_variant_id' => $purchaseItem->product_variant_id,
+                            'remaining_quantity' => $allocationResult['remaining_quantity'],
+                            'total_candidates' => $allocationResult['allocation_summary']['total_candidates'] ?? 0,
+                        ]);
+                    }
+                }
+                
+            } catch (\Exception $e) {
+                Log::error('進貨項目分配失敗', [
+                    'purchase_item_id' => $purchaseItem->id,
+                    'purchase_order_number' => $purchase->order_number ?? 'N/A',
+                    'product_variant_id' => $purchaseItem->product_variant_id,
+                    'error' => $e->getMessage(),
+                ]);
+                
+                
+                // 分配失敗時回退到簡單的FIFO分配
+                $this->fallbackToSimpleAllocation($purchaseItem, $purchase);
+            }
+        }
+    }
+
+    /**
+     * 分配給直接關聯的訂單項目
+     * 
+     * @param PurchaseItem $purchaseItem
+     * @param Collection $directLinkedItems
+     * @param Purchase $purchase
+     */
+    protected function allocateToDirectLinkedItems(PurchaseItem $purchaseItem, $directLinkedItems, Purchase $purchase): void
+    {
+        $remainingQuantity = $purchaseItem->quantity;
+        
+        // 對直接關聯的項目按創建時間排序（FIFO）
+        $sortedItems = $directLinkedItems->sortBy('created_at');
+        
+        foreach ($sortedItems as $orderItem) {
+            if ($remainingQuantity <= 0) {
+                break;
+            }
+            
+            $toFulfill = min($remainingQuantity, $orderItem->remaining_fulfillment_quantity);
+            
+            if ($toFulfill > 0) {
+                $orderItem->addFulfilledQuantity($toFulfill);
+                $remainingQuantity -= $toFulfill;
+                
+                Log::info('直接關聯項目履行更新', [
+                    'order_item_id' => $orderItem->id,
+                    'order_number' => $orderItem->order->order_number ?? 'N/A',
+                    'purchase_order_number' => $purchase->order_number ?? 'N/A',
+                    'product_name' => $orderItem->product_name,
+                    'sku' => $orderItem->sku,
+                    'fulfilled_quantity' => $toFulfill,
+                    'total_fulfilled' => $orderItem->fulfilled_quantity,
+                    'is_fully_fulfilled' => $orderItem->is_fully_fulfilled,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * 回退到簡單分配（當智能分配失敗時）
+     * 
+     * @param PurchaseItem $purchaseItem
+     * @param Purchase $purchase
+     */
+    protected function fallbackToSimpleAllocation(PurchaseItem $purchaseItem, Purchase $purchase): void
+    {
+        Log::info('回退到簡單FIFO分配', [
+            'purchase_item_id' => $purchaseItem->id,
+            'product_variant_id' => $purchaseItem->product_variant_id,
+        ]);
+        
+        // 找出所有相同商品變體的待履行訂單項目
+        $orderItems = OrderItem::where('product_variant_id', $purchaseItem->product_variant_id)
+            ->whereRaw('fulfilled_quantity < quantity')
+            ->whereHas('order', function ($q) {
+                $q->whereNotIn('shipping_status', ['cancelled', 'delivered']);
+            })
+            ->orderBy('created_at') // 簡單的先進先出
+            ->get();
+        
+        $remainingQuantity = $purchaseItem->quantity;
+        
+        foreach ($orderItems as $orderItem) {
+            if ($remainingQuantity <= 0) {
+                break;
+            }
+            
+            $toFulfill = min($remainingQuantity, $orderItem->remaining_fulfillment_quantity);
+            
+            if ($toFulfill > 0) {
+                $orderItem->addFulfilledQuantity($toFulfill);
+                $remainingQuantity -= $toFulfill;
+                
+                Log::info('回退分配履行更新', [
+                    'order_item_id' => $orderItem->id,
+                    'order_number' => $orderItem->order->order_number ?? 'N/A',
+                    'purchase_order_number' => $purchase->order_number ?? 'N/A',
+                    'fulfilled_quantity' => $toFulfill,
+                    'allocation_method' => 'fallback_fifo'
+                ]);
+            }
+        }
     }
 
     /**
@@ -295,9 +468,14 @@ class PurchaseService
                 ->first();
 
             if ($inventory) {
-                $userId = Auth::id();
-                if (!$userId) {
-                    throw new \InvalidArgumentException('用戶必須經過認證才能處理庫存操作');
+                $userId = $this->requireAuthentication('庫存操作');
+                
+                // 檢查庫存是否足夠回退
+                if ($inventory->quantity < $item->quantity) {
+                    throw new \Exception(
+                        "庫存不足以回退進貨項目。當前庫存：{$inventory->quantity}，" .
+                        "嘗試回退數量：{$item->quantity}，商品SKU：{$item->sku}"
+                    );
                 }
                 
                 $inventory->reduceStock(
@@ -306,6 +484,41 @@ class PurchaseService
                     "進貨單 #{$purchase->order_number} 狀態變更回退",
                     ['purchase_id' => $purchase->id, 'action' => 'revert']
                 );
+            }
+        }
+        
+        // 🎯 新增：回退關聯的訂單項目履行狀態
+        $this->revertRelatedOrderItemsFulfillment($purchase);
+    }
+    
+    /**
+     * 回退關聯的訂單項目履行狀態
+     * 
+     * 當進貨單從已完成狀態回退時，相關的訂單項目也要回退履行狀態
+     * 
+     * @param Purchase $purchase
+     */
+    private function revertRelatedOrderItemsFulfillment(Purchase $purchase): void
+    {
+        foreach ($purchase->items as $purchaseItem) {
+            // 找出所有關聯到此進貨項目的訂單項目
+            $orderItems = OrderItem::where('purchase_item_id', $purchaseItem->id)
+                ->where('is_fulfilled', true)
+                ->get();
+            
+            foreach ($orderItems as $orderItem) {
+                $orderItem->update([
+                    'is_fulfilled' => false,
+                    'fulfilled_at' => null,
+                ]);
+                
+                Log::info('訂單項目履行狀態已回退', [
+                    'order_item_id' => $orderItem->id,
+                    'order_number' => $orderItem->order->order_number ?? 'N/A',
+                    'purchase_order_number' => $purchase->order_number,
+                    'product_name' => $orderItem->product_name,
+                    'sku' => $orderItem->sku,
+                ]);
             }
         }
     }
@@ -325,23 +538,17 @@ class PurchaseService
      */
     public function updatePurchaseStatus(Purchase $purchase, string $newStatus, ?int $userId = null, ?string $reason = null): Purchase
     {
-        return DB::transaction(function () use ($purchase, $newStatus, $userId, $reason) {
+        return $this->executeInTransaction(function () use ($purchase, $newStatus, $userId, $reason) {
             $oldStatus = $purchase->status;
-            $userId = $userId ?? Auth::id();
-            
-            if (!$userId) {
-                throw new \InvalidArgumentException('用戶必須經過認證才能更新進貨單狀態');
-            }
+            $userId = $userId ?? $this->requireAuthentication('更新進貨單狀態');
             
             // 1. 驗證狀態轉換合法性
-            if (!$this->isValidStatusTransition($oldStatus, $newStatus)) {
-                throw new \InvalidArgumentException(
-                    "無法從 " . (Purchase::getStatusOptions()[$oldStatus] ?? $oldStatus) . 
-                    " 轉換到 " . (Purchase::getStatusOptions()[$newStatus] ?? $newStatus)
-                );
-            }
+            $purchase->validateStatusTransition($newStatus);
             
-            // 2. 更新狀態
+            // 2. 驗證業務邏輯條件
+            $this->validateBusinessLogicForStatusTransition($purchase, $oldStatus, $newStatus);
+            
+            // 3. 更新狀態
             $purchase->update([
                 'status' => $newStatus,
                 'updated_at' => now()
@@ -509,5 +716,341 @@ class PurchaseService
         ];
 
         return in_array($newStatus, $validTransitions[$currentStatus] ?? []);
+    }
+
+    /**
+     * 從預訂商品批量創建進貨單
+     * 
+     * @param array $backorderItemIds 預訂商品的 OrderItem ID 陣列
+     * @param array $options 選項配置
+     * @return array 返回創建的進貨單陣列
+     * @throws \Exception
+     */
+    public function createFromBackorders(array $backorderItemIds, array $options = []): array
+    {
+        return $this->executeInTransaction(function () use ($backorderItemIds, $options) {
+            // 1. 獲取有效的預訂商品（包含需要進貨的訂製商品）
+            $backorderItems = OrderItem::whereIn('id', $backorderItemIds)
+                ->where(function ($q) {
+                    // 包含預訂商品和需要進貨的訂製商品
+                    $q->where('is_backorder', true)
+                      ->orWhere(function ($subQ) {
+                          $subQ->where('is_stocked_sale', false)
+                               ->where('is_backorder', false)
+                               ->whereNotNull('product_variant_id');
+                      });
+                })
+                ->whereNull('purchase_item_id')  // 尚未關聯進貨單
+                ->where('is_fulfilled', false)    // 尚未履行
+                ->whereHas('order', function ($q) {
+                    // 只包含未取消的訂單
+                    $q->where('shipping_status', '!=', 'cancelled');
+                })
+                ->with(['productVariant.product', 'order'])
+                ->get();
+
+            if ($backorderItems->isEmpty()) {
+                throw new \Exception('沒有找到有效的預訂商品');
+            }
+
+            // 2. 按照供應商（或門市）分組
+            // 這裡假設我們按門市分組，您可以根據實際需求調整
+            $groupedByStore = [];
+            
+            foreach ($backorderItems as $item) {
+                // 使用選項中指定的門市，或使用訂單的門市，或使用預設門市
+                $storeId = $options['store_id'] ?? 
+                          $item->order->store_id ?? 
+                          Auth::user()->stores->first()?->id ?? 
+                          1; // 預設門市 ID
+                
+                if (!isset($groupedByStore[$storeId])) {
+                    $groupedByStore[$storeId] = [];
+                }
+                
+                $groupedByStore[$storeId][] = $item;
+            }
+
+            // 3. 為每個門市創建進貨單
+            $createdPurchases = [];
+            
+            foreach ($groupedByStore as $storeId => $items) {
+                // 生成進貨單號
+                $orderNumber = $this->generateOrderNumber();
+                
+                // 計算總金額（暫時使用商品變體的成本價）
+                $totalAmount = 0;
+                $purchaseItems = [];
+                
+                foreach ($items as $orderItem) {
+                    $cost = $orderItem->productVariant->cost ?? 0;
+                    $totalAmount += $cost * $orderItem->quantity;
+                    
+                    $purchaseItems[] = [
+                        'product_variant_id' => $orderItem->product_variant_id,
+                        'quantity' => $orderItem->quantity,
+                        'unit_price' => $cost,
+                        'cost_price' => $cost,
+                        'allocated_shipping_cost' => 0, // 可以之後再調整
+                    ];
+                }
+                
+                // 創建進貨單
+                $purchase = Purchase::create([
+                    'store_id' => $storeId,
+                    'user_id' => $this->requireAuthentication('創建進貨單'),
+                    'order_number' => $orderNumber,
+                    'purchased_at' => now(),
+                    'total_amount' => $totalAmount,
+                    'shipping_cost' => 0, // 可以之後再調整
+                    'status' => Purchase::STATUS_PENDING,
+                    'notes' => '從客戶預訂單自動生成 - 包含 ' . count($items) . ' 個預訂項目',
+                ]);
+                
+                // 創建進貨項目並關聯訂單項目
+                foreach ($items as $index => $orderItem) {
+                    $purchaseItem = $purchase->items()->create($purchaseItems[$index]);
+                    
+                    // 更新訂單項目，建立與進貨項目的關聯
+                    $orderItem->update(['purchase_item_id' => $purchaseItem->id]);
+                    
+                    // 記錄關聯日誌
+                    Log::info('預訂商品關聯進貨單', [
+                        'order_item_id' => $orderItem->id,
+                        'order_number' => $orderItem->order->order_number,
+                        'purchase_item_id' => $purchaseItem->id,
+                        'purchase_order_number' => $purchase->order_number,
+                        'product_name' => $orderItem->product_name,
+                        'quantity' => $orderItem->quantity,
+                    ]);
+                }
+                
+                $createdPurchases[] = $purchase->load(['store', 'items.productVariant.product']);
+            }
+            
+            // 4. 記錄整體操作日誌
+            Log::info('批量創建進貨單完成', [
+                'backorder_item_count' => count($backorderItemIds),
+                'processed_item_count' => $backorderItems->count(),
+                'purchase_count' => count($createdPurchases),
+                'user_id' => $this->requireAuthentication('創建進貨單'),
+            ]);
+            
+            return $createdPurchases;
+        });
+    }
+
+    /**
+     * 取得可以批量轉換為進貨單的預訂商品彙總
+     * 
+     * @param array $filters 篩選條件
+     * @return \Illuminate\Support\Collection
+     */
+    public function getBackordersSummaryForPurchase(array $filters = [])
+    {
+        $query = OrderItem::where(function ($q) {
+                // 包含預訂商品和需要進貨的訂製商品
+                $q->where('is_backorder', true)
+                  ->orWhere(function ($subQ) {
+                      $subQ->where('is_stocked_sale', false)
+                           ->where('is_backorder', false)
+                           ->whereNotNull('product_variant_id');
+                  });
+            })
+            ->whereNull('purchase_item_id')
+            ->where('is_fulfilled', false)
+            ->whereHas('order', function ($q) {
+                $q->where('shipping_status', '!=', 'cancelled');
+            });
+
+        // 應用篩選條件
+        if (!empty($filters['store_id'])) {
+            $query->whereHas('order', function ($q) use ($filters) {
+                $q->where('store_id', $filters['store_id']);
+            });
+        }
+
+        if (!empty($filters['date_from'])) {
+            $query->where('created_at', '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->where('created_at', '<=', $filters['date_to']);
+        }
+
+        // 按商品變體分組統計
+        return $query->with(['productVariant.product'])
+            ->get()
+            ->groupBy('product_variant_id')
+            ->map(function ($items, $variantId) {
+                $firstItem = $items->first();
+                $variant = $firstItem->productVariant;
+                
+                return [
+                    'product_variant_id' => $variantId,
+                    'product_name' => $variant->product->name ?? '未知商品',
+                    'sku' => $variant->sku,
+                    'total_quantity' => $items->sum('quantity'),
+                    'order_count' => $items->pluck('order_id')->unique()->count(),
+                    'earliest_date' => $items->min('created_at'),
+                    'latest_date' => $items->max('created_at'),
+                    'estimated_cost' => $variant->cost * $items->sum('quantity'),
+                    'item_ids' => $items->pluck('id')->toArray(),
+                ];
+            })
+            ->values();
+    }
+
+    /**
+     * 驗證狀態轉換的業務邏輯條件
+     * 
+     * @param Purchase $purchase 進貨單
+     * @param string $oldStatus 原始狀態
+     * @param string $newStatus 新狀態
+     * @throws \InvalidArgumentException 當業務邏輯條件不滿足時
+     */
+    protected function validateBusinessLogicForStatusTransition(Purchase $purchase, string $oldStatus, string $newStatus): void
+    {
+        switch ($newStatus) {
+            case Purchase::STATUS_COMPLETED:
+                // 轉換到完成狀態時，需要確保已經收貨
+                if ($oldStatus !== Purchase::STATUS_RECEIVED) {
+                    throw new \InvalidArgumentException('只有已收貨的進貨單才能標記為完成');
+                }
+                
+                // 檢查是否所有預訂商品都已處理
+                $pendingBackorders = $purchase->items()
+                    ->whereHas('orderItems', function ($query) {
+                        $query->where('is_fulfilled', false);
+                    })
+                    ->exists();
+                
+                if ($pendingBackorders) {
+                    throw new \InvalidArgumentException('存在未履行的預訂商品，無法完成進貨單');
+                }
+                break;
+                
+            case Purchase::STATUS_CANCELLED:
+                // 已完成的進貨單不能取消
+                if ($oldStatus === Purchase::STATUS_COMPLETED) {
+                    throw new \InvalidArgumentException('已完成的進貨單無法取消');
+                }
+                
+                // 檢查是否有已履行的預訂商品
+                $fulfilledBackorders = $purchase->items()
+                    ->whereHas('orderItems', function ($query) {
+                        $query->where('is_fulfilled', true);
+                    })
+                    ->exists();
+                
+                if ($fulfilledBackorders) {
+                    throw new \InvalidArgumentException('存在已履行的預訂商品，無法取消進貨單');
+                }
+                break;
+                
+            case Purchase::STATUS_RECEIVED:
+                // 轉換到收貨狀態時，檢查是否處於運輸中
+                if (!in_array($oldStatus, [Purchase::STATUS_IN_TRANSIT, Purchase::STATUS_PARTIALLY_RECEIVED])) {
+                    throw new \InvalidArgumentException('只有運輸中或部分收貨的進貨單才能標記為已收貨');
+                }
+                break;
+                
+            case Purchase::STATUS_PARTIALLY_RECEIVED:
+                // 部分收貨狀態的業務邏輯檢查
+                if ($oldStatus !== Purchase::STATUS_IN_TRANSIT) {
+                    throw new \InvalidArgumentException('只有運輸中的進貨單才能標記為部分收貨');
+                }
+                break;
+        }
+    }
+
+    /**
+     * 加強的狀態轉換驗證（包含額外的業務檢查）
+     * 
+     * @param Purchase $purchase 進貨單
+     * @param string $newStatus 新狀態
+     * @param array $context 額外的上下文信息
+     * @throws \InvalidArgumentException 當轉換條件不滿足時
+     */
+    public function validateStatusTransitionWithContext(Purchase $purchase, string $newStatus, array $context = []): void
+    {
+        // 基本的狀態轉換檢查
+        $purchase->validateStatusTransition($newStatus);
+        
+        // 業務邏輯檢查
+        $this->validateBusinessLogicForStatusTransition($purchase, $purchase->status, $newStatus);
+        
+        // 根據上下文進行額外檢查
+        if (isset($context['check_stock']) && $context['check_stock']) {
+            $this->validateStockAvailabilityForTransition($purchase, $newStatus);
+        }
+        
+        if (isset($context['check_dependencies']) && $context['check_dependencies']) {
+            $this->validateDependenciesForTransition($purchase, $newStatus);
+        }
+    }
+
+    /**
+     * 檢查庫存可用性（用於狀態轉換）
+     * 
+     * @param Purchase $purchase 進貨單
+     * @param string $newStatus 新狀態
+     */
+    protected function validateStockAvailabilityForTransition(Purchase $purchase, string $newStatus): void
+    {
+        // 如果是要完成進貨單，檢查庫存空間是否足夠
+        if ($newStatus === Purchase::STATUS_COMPLETED) {
+            // 這裡可以添加庫存容量檢查邏輯
+            // 例如：檢查倉庫是否有足夠空間存放商品
+        }
+    }
+
+    /**
+     * 檢查依賴關係（用於狀態轉換）
+     * 
+     * @param Purchase $purchase 進貨單
+     * @param string $newStatus 新狀態
+     */
+    protected function validateDependenciesForTransition(Purchase $purchase, string $newStatus): void
+    {
+        // 檢查相關的訂單狀態
+        if ($newStatus === Purchase::STATUS_CANCELLED) {
+            // 檢查是否有相關訂單依賴這個進貨單
+            $dependentOrders = \App\Models\OrderItem::where('purchase_item_id', 
+                $purchase->items()->pluck('id'))
+                ->whereHas('order', function ($query) {
+                    $query->whereNotIn('shipping_status', ['cancelled', 'delivered']);
+                })
+                ->exists();
+                
+            if ($dependentOrders) {
+                throw new \InvalidArgumentException('存在依賴此進貨單的活躍訂單，無法取消');
+            }
+        }
+    }
+
+    // ===== 測試輔助方法 =====
+
+    /**
+     * 檢查用戶是否有效認證（測試用）
+     */
+    public function hasValidAuth(): bool
+    {
+        return Auth::user() !== null;
+    }
+
+    /**
+     * 獲取多個進貨單及其關聯（測試用）
+     */
+    public function getPurchasesWithRelations(array $purchaseIds): \Illuminate\Database\Eloquent\Collection
+    {
+        return Purchase::whereIn('id', $purchaseIds)
+            ->with([
+                'store',
+                'items.productVariant'
+                // TODO: 實現 Purchase 狀態歷史功能
+                // 'statusHistories.user'
+            ])
+            ->get();
     }
 }

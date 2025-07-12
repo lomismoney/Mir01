@@ -8,6 +8,16 @@ jest.mock('sonner', () => ({
   },
 }));
 
+// Mock console.error 以避免測試輸出
+const originalConsoleError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+});
+
 describe('errorHandler', () => {
   // 清理所有 mock
   beforeEach(() => {
@@ -247,6 +257,62 @@ describe('errorHandler', () => {
       handleApiError(error);
       
       expect(consoleSpy).not.toHaveBeenCalled();
+      
+      consoleSpy.mockRestore();
+    });
+
+    it('應該過濾掉 HTML 字串但保留其他屬性', () => {
+      const error = {
+        message: '測試錯誤',
+        status: 400,
+        code: 'VALIDATION_ERROR',
+        details: '有用的詳細信息',
+        htmlContent: '<html><body>This is HTML</body></html>',
+        data: { userId: 123 },
+      };
+      
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      handleApiError(error);
+      
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'API Error:',
+        expect.objectContaining({
+          message: '測試錯誤',
+          status: 400,
+          code: 'VALIDATION_ERROR',
+          details: '有用的詳細信息',
+          data: { userId: 123 },
+        })
+      );
+      
+      // 驗證 HTML 內容被過濾掉
+      const loggedError = consoleSpy.mock.calls[0][1];
+      expect(loggedError).not.toHaveProperty('htmlContent');
+      
+      consoleSpy.mockRestore();
+    });
+
+    it('應該保留非字串類型的屬性', () => {
+      const error = {
+        message: '測試錯誤',
+        status: 400,
+        code: 'VALIDATION_ERROR',
+        timestamp: new Date(),
+        count: 5,
+        isRetryable: true,
+        metadata: { key: 'value' },
+      };
+      
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      handleApiError(error);
+      
+      const loggedError = consoleSpy.mock.calls[0][1];
+      expect(loggedError).toHaveProperty('timestamp');
+      expect(loggedError).toHaveProperty('count', 5);
+      expect(loggedError).toHaveProperty('isRetryable', true);
+      expect(loggedError).toHaveProperty('metadata', { key: 'value' });
       
       consoleSpy.mockRestore();
     });

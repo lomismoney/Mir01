@@ -105,10 +105,10 @@ export function InventoryHistory({
 
   if (error) {
     return (
-      <Card data-oid="pef721:">
-        <CardContent className="p-6" data-oid="wdl_f6y">
-          <Alert data-oid="jy.tu10">
-            <AlertDescription data-oid="y3q6ypc">
+      <Card>
+        <CardContent className="p-6">
+          <Alert>
+            <AlertDescription>
               載入庫存歷史記錄失敗，請稍後再試。
             </AlertDescription>
           </Alert>
@@ -118,19 +118,19 @@ export function InventoryHistory({
   }
 
   return (
-    <div className="space-y-6" data-oid="w2j6qvo">
+    <div className="space-y-6">
       {/* 標題區塊 */}
-      <div className="flex items-center justify-between" data-oid="jrmll8h">
-        <div data-oid="-x6wexv">
-          <h2 className="text-2xl font-bold" data-oid="g_80tu.">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">
             庫存變動歷史
           </h2>
           {productName && (
-            <p className="text-muted-foreground" data-oid="5bl:3:9">
+            <p className="text-muted-foreground">
               {productName} {sku && `(${sku})`}
             </p>
           )}
-          <p className="text-sm text-muted-foreground mt-1" data-oid="xz_muts">
+          <p className="text-sm text-muted-foreground mt-1">
             此為特定庫存記錄（ID: {inventoryId}）的歷史
           </p>
         </div>
@@ -138,63 +138,63 @@ export function InventoryHistory({
           onClick={() => refetch()}
           variant="outline"
           size="sm"
-          data-oid="_0o_lnp"
+         
         >
-          <RefreshCw className="h-4 w-4 mr-2" data-oid="2r5fl2-" />
+          <RefreshCw className="h-4 w-4 mr-2" />
           重新整理
         </Button>
       </div>
 
       {/* 篩選器 */}
-      <Card data-oid="kwbyyej">
-        <CardHeader data-oid="pbt7:8v">
-          <CardTitle className="flex items-center gap-2" data-oid="bin7eu_">
-            <Search className="h-5 w-5" data-oid="rvdvu3-" />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
             篩選條件
           </CardTitle>
         </CardHeader>
-        <CardContent data-oid="dbm.0i7">
+        <CardContent>
           <div
             className="grid grid-cols-1 md:grid-cols-4 gap-4"
-            data-oid="n_5:hf5"
+           
           >
-            <div className="space-y-2" data-oid="5l82w9k">
-              <Label data-oid="adne.p9">交易類型</Label>
+            <div className="space-y-2">
+              <Label>交易類型</Label>
               <Select
                 value={filters.type}
                 onValueChange={(value) =>
                   setFilters((prev) => ({ ...prev, type: value, page: 1 }))
                 }
-                data-oid="4jogzv0"
+               
               >
-                <SelectTrigger data-oid="2j.hnso">
-                  <SelectValue placeholder="全部類型" data-oid="9clqu66" />
+                <SelectTrigger>
+                  <SelectValue placeholder="全部類型" />
                 </SelectTrigger>
-                <SelectContent data-oid="0rqklh:">
-                  <SelectItem value="all" data-oid="f0fgb7w">
+                <SelectContent>
+                  <SelectItem value="all">
                     全部類型
                   </SelectItem>
-                  <SelectItem value="addition" data-oid="f67vy2u">
+                  <SelectItem value="addition">
                     入庫
                   </SelectItem>
-                  <SelectItem value="reduction" data-oid="f7ba482">
+                  <SelectItem value="reduction">
                     出庫
                   </SelectItem>
-                  <SelectItem value="adjustment" data-oid="9luc0sf">
+                  <SelectItem value="adjustment">
                     調整
                   </SelectItem>
-                  <SelectItem value="transfer_in" data-oid="x0ky7ze">
+                  <SelectItem value="transfer_in">
                     轉入
                   </SelectItem>
-                  <SelectItem value="transfer_out" data-oid="weu93:a">
+                  <SelectItem value="transfer_out">
                     轉出
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2" data-oid="dk1u7f-">
-              <Label data-oid="9ynjmcg">開始日期</Label>
+            <div className="space-y-2">
+              <Label>開始日期</Label>
               <Input
                 type="date"
                 value={filters.start_date}
@@ -205,12 +205,12 @@ export function InventoryHistory({
                     page: 1,
                   }))
                 }
-                data-oid="c6.zcxa"
+               
               />
             </div>
 
-            <div className="space-y-2" data-oid="wvtpw6_">
-              <Label data-oid="g1.gbbz">結束日期</Label>
+            <div className="space-y-2">
+              <Label>結束日期</Label>
               <Input
                 type="date"
                 value={filters.end_date}
@@ -221,12 +221,12 @@ export function InventoryHistory({
                     page: 1,
                   }))
                 }
-                data-oid="013_gh0"
+               
               />
             </div>
 
-            <div className="space-y-2" data-oid="miavtyx">
-              <Label data-oid="yri_utu">每頁筆數</Label>
+            <div className="space-y-2">
+              <Label>每頁筆數</Label>
               <Select
                 value={filters.per_page.toString()}
                 onValueChange={(value) =>
@@ -236,22 +236,22 @@ export function InventoryHistory({
                     page: 1,
                   }))
                 }
-                data-oid="4sx.ke1"
+               
               >
-                <SelectTrigger data-oid="v4u.8z.">
-                  <SelectValue data-oid="_.b.deb" />
+                <SelectTrigger>
+                  <SelectValue />
                 </SelectTrigger>
-                <SelectContent data-oid="uf:89e9">
-                  <SelectItem value="10" data-oid="lnzj.nl">
+                <SelectContent>
+                  <SelectItem value="10">
                     10 筆
                   </SelectItem>
-                  <SelectItem value="20" data-oid="qsqiik_">
+                  <SelectItem value="20">
                     20 筆
                   </SelectItem>
-                  <SelectItem value="50" data-oid="cem-wr7">
+                  <SelectItem value="50">
                     50 筆
                   </SelectItem>
-                  <SelectItem value="100" data-oid="idslr2v">
+                  <SelectItem value="100">
                     100 筆
                   </SelectItem>
                 </SelectContent>
@@ -262,13 +262,13 @@ export function InventoryHistory({
       </Card>
 
       {/* 歷史記錄列表 */}
-      <Card data-oid="t.0yf2t">
-        <CardHeader data-oid="_eoihsq">
-          <CardTitle className="flex items-center gap-2" data-oid="u6b.1cl">
-            <Clock className="h-5 w-5" data-oid="a7vmz7:" />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
             變動記錄
           </CardTitle>
-          <CardDescription data-oid="qjw083:">
+          <CardDescription>
             {/* 修正：顯示總記錄數而不是當前頁面的記錄數 */}
             {historyData?.total !== undefined && `共 ${historyData.total} 筆記錄`}
             {historyData?.current_page && historyData?.last_page && 
@@ -276,36 +276,36 @@ export function InventoryHistory({
             }
           </CardDescription>
         </CardHeader>
-        <CardContent data-oid="-5.mh5h">
+        <CardContent>
           {isLoading ? (
-            <div className="space-y-4" data-oid="2zs.5ac">
+            <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, index) => (
                 <div
                   key={index}
                   className="flex items-center space-x-4 p-4 border rounded-lg"
-                  data-oid="xd63q.l"
+                 
                 >
                   <Skeleton
                     className="h-10 w-10 rounded-full"
-                    data-oid="-8s:72c"
+                   
                   />
 
-                  <div className="space-y-2" data-oid="8wrzjmi">
-                    <Skeleton className="h-4 w-[250px]" data-oid="yw:bq_9" />
-                    <Skeleton className="h-4 w-[200px]" data-oid="qykij8r" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[250px]" />
+                    <Skeleton className="h-4 w-[200px]" />
                   </div>
                 </div>
               ))}
             </div>
           ) : historyData?.data && historyData.data.length > 0 ? (
-            <div className="space-y-4" data-oid="jwe8hn-">
+            <div className="space-y-4">
               {historyData.data.map((transaction: InventoryTransaction) => (
                 <div
                   key={transaction.id}
                   className="flex items-start space-x-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                  data-oid=":zss6mj"
+                 
                 >
-                  <div className="mt-1" data-oid="p6hkpft">
+                  <div className="mt-1">
                     {(() => {
                       const IconComponent = getTransactionIcon(
                         transaction.type,
@@ -313,30 +313,30 @@ export function InventoryHistory({
                       return (
                         <IconComponent
                           className={`h-4 w-4 ${getTransactionIconColor(transaction.type)}`}
-                          data-oid="o762igb"
+                         
                         />
                       );
                     })()}
                   </div>
 
-                  <div className="flex-1 space-y-2" data-oid="ja4ehz_">
+                  <div className="flex-1 space-y-2">
                     <div
                       className="flex items-center justify-between"
-                      data-oid="6scojhb"
+                     
                     >
                       <div
                         className="flex items-center gap-2"
-                        data-oid="970k-m:"
+                       
                       >
                         <Badge
                           variant={getTransactionTypeVariant(transaction.type)}
-                          data-oid="ow9l8d7"
+                         
                         >
                           {getTransactionTypeName(transaction.type)}
                         </Badge>
                         <span
                           className="text-sm text-muted-foreground"
-                          data-oid="aut2mk3"
+                         
                         >
                           數量變動: {(transaction.quantity || 0) > 0 ? "+" : ""}
                           {transaction.quantity || 0}
@@ -344,9 +344,9 @@ export function InventoryHistory({
                       </div>
                       <div
                         className="flex items-center gap-2 text-sm text-muted-foreground"
-                        data-oid="g.j39w3"
+                       
                       >
-                        <Calendar className="h-4 w-4" data-oid="yk0udkf" />
+                        <Calendar className="h-4 w-4" />
                         {transaction.created_at &&
                           formatDistanceToNow(
                             new Date(transaction.created_at),
@@ -360,16 +360,16 @@ export function InventoryHistory({
 
                     <div
                       className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm"
-                      data-oid="z1dtk-k"
+                     
                     >
-                      <div data-oid="nbdimjm">
-                        <span className="font-medium" data-oid="i3zc4a_">
+                      <div>
+                        <span className="font-medium">
                           變動前:
                         </span>{" "}
                         {transaction.before_quantity ?? "未知"}
                       </div>
-                      <div data-oid="kadarn0">
-                        <span className="font-medium" data-oid="b3w7xm:">
+                      <div>
+                        <span className="font-medium">
                           變動後:
                         </span>{" "}
                         {transaction.after_quantity ?? "未知"}
@@ -381,9 +381,9 @@ export function InventoryHistory({
                     {transaction.notes && (
                       <div
                         className="text-sm text-muted-foreground"
-                        data-oid=":md:kv-"
+                       
                       >
-                        <span className="font-medium" data-oid="jvbcj28">
+                        <span className="font-medium">
                           備註:
                         </span>{" "}
                         {transaction.notes}
@@ -392,12 +392,12 @@ export function InventoryHistory({
 
                     <div
                       className="text-xs text-muted-foreground"
-                      data-oid="3_j25d-"
+                     
                     >
-                      <span className="font-medium" data-oid="bzjm19r">
+                      <span className="font-medium">
                         額外資訊:
                       </span>
-                      <span data-oid="jq5s0er">
+                      <span>
                         {(() => {
                           if (!transaction.metadata) return "無";
 
@@ -451,13 +451,13 @@ export function InventoryHistory({
           ) : (
             <div
               className="text-center py-8 text-muted-foreground"
-              data-oid="4fv:q_y"
+             
             >
               <Package
                 className="h-12 w-12 mx-auto mb-4 opacity-50"
-                data-oid="zqaugxo"
+               
               />
-              <p data-oid="pdjsrjt">尚無庫存變動記錄</p>
+              <p>尚無庫存變動記錄</p>
             </div>
           )}
         </CardContent>

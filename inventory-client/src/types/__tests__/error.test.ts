@@ -264,6 +264,27 @@ describe('error.ts', () => {
     });
 
     /**
+     * 測試解析不同類型的 Error 物件
+     */
+    it('應該正確解析不同類型的 Error 物件', () => {
+      // 測試 TypeError
+      const typeError = new TypeError('類型錯誤');
+      expect(parseApiErrorMessage(typeError)).toBe('類型錯誤');
+      
+      // 測試 ReferenceError
+      const referenceError = new ReferenceError('引用錯誤');
+      expect(parseApiErrorMessage(referenceError)).toBe('引用錯誤');
+      
+      // 測試 RangeError
+      const rangeError = new RangeError('範圍錯誤');
+      expect(parseApiErrorMessage(rangeError)).toBe('範圍錯誤');
+      
+      // 測試空訊息的 Error
+      const emptyError = new Error('');
+      expect(parseApiErrorMessage(emptyError)).toBe('');
+    });
+
+    /**
      * 測試解析自定義 Error 子類
      */
     it('應該正確解析自定義 Error 子類', () => {

@@ -175,7 +175,7 @@ describe('ProductForm', () => {
         () => {
           expect(mockMutateAsync).not.toHaveBeenCalled();
         },
-        { timeout: 1000 }
+{}
       );
 
       if ((toast.error as jest.MockedFunction<typeof toast.error>).mock.calls.length > 0) {

@@ -10,6 +10,7 @@ use App\Models\InventoryTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -34,10 +35,16 @@ class InventoryServiceTest extends TestCase
     {
         parent::setUp();
         
+        // 安全地創建角色，避免重複創建
+        if (!Role::where('name', 'admin')->exists()) {
+            Role::create(['name' => 'admin']);
+        }
+        
         $this->inventoryService = new InventoryService();
         
         // 創建測試用戶
         $this->testUser = User::factory()->create();
+        $this->testUser->assignRole('admin');
         Auth::login($this->testUser);
         
         // 創建測試門市

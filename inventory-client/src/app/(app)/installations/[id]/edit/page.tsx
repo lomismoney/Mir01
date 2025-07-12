@@ -2,10 +2,9 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useInstallation, useUpdateInstallation } from "@/hooks";
+import { useInstallation, useUpdateInstallation, useErrorHandler } from "@/hooks";
 import { InstallationForm, InstallationFormValues } from "@/components/installations";
 import { UpdateInstallationRequest } from "@/types/installation";
-import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -21,6 +20,7 @@ export default function EditInstallationPage() {
   const params = useParams();
   const router = useRouter();
   const installationId = parseInt(params.id as string, 10);
+  const { handleError, handleSuccess } = useErrorHandler();
   
   const { data: installation, isLoading, isError, error } = useInstallation(installationId);
   const { mutate: updateInstallation, isPending } = useUpdateInstallation();
@@ -71,28 +71,30 @@ export default function EditInstallationPage() {
   }
 
   const handleSubmit = (values: InstallationFormValues) => {
-    console.log("準備提交的表單資料:", JSON.stringify(values, null, 2));
+    // 確保必填欄位有值
+    if (!values.customer_name || !values.installation_address) {
+      handleError(new Error('客戶姓名和安裝地址為必填欄位'));
+      return;
+    }
     
     // 轉換表單資料為 API 期望的格式（包含項目更新）
     const installationData: UpdateInstallationRequest = {
       customer_name: values.customer_name,
-      customer_phone: values.customer_phone || null,
+      customer_phone: values.customer_phone || undefined,
       installation_address: values.installation_address,
-      installer_user_id: values.installer_user_id || null,
-      scheduled_date: values.scheduled_date || null,
-      notes: values.notes || null,
+      installer_user_id: values.installer_user_id || undefined,
+      scheduled_date: values.scheduled_date || undefined,
+      notes: values.notes || undefined,
       // 加入項目更新
-      items: values.items.map((item) => ({
-        product_variant_id: item.product_variant_id && item.product_variant_id > 0 ? item.product_variant_id : null,
+      items: (values.items || []).map((item) => ({
+        product_variant_id: item.product_variant_id && item.product_variant_id > 0 ? item.product_variant_id : undefined,
         product_name: item.product_name || "",
         sku: item.sku || "",
         quantity: item.quantity,
-        specifications: item.specifications || null,
-        notes: item.notes || null,
+        specifications: item.specifications || undefined,
+        notes: item.notes || undefined,
       })),
     };
-
-    console.log("轉換後的 API 資料:", JSON.stringify(installationData, null, 2));
 
     updateInstallation(
       {
@@ -101,16 +103,13 @@ export default function EditInstallationPage() {
       },
       {
         onSuccess: (data) => {
-          console.log("更新成功回應:", data);
-          toast.success("安裝單更新成功");
+          handleSuccess("安裝單更新成功");
           // 返回安裝單詳情頁
           router.push(`/installations/${installationId}`);
         },
         onError: (error) => {
           console.error("更新失敗錯誤:", error);
-          toast.error("安裝單更新失敗", {
-            description: error.message || "請檢查輸入資料並重試。"
-          });
+          handleError(error);
         },
       }
     );
@@ -124,7 +123,7 @@ export default function EditInstallationPage() {
     installer_user_id: installation?.installer_user_id || undefined,
     scheduled_date: installation?.scheduled_date || undefined,
     notes: installation?.notes || "",
-    items: installation?.items?.length > 0 
+    items: installation?.items && installation.items.length > 0 
       ? installation.items.map((item: any) => {
           return {
             product_variant_id: item.product_variant_id ? Number(item.product_variant_id) : 0,

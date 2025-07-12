@@ -356,14 +356,14 @@ describe('AppSidebar', () => {
   });
 
   /**
-   * 測試 data-oid 屬性
+   * 測試 data-testid 屬性
    * 驗證追蹤屬性正確設置
    */
-  it('應該包含正確的 data-oid 屬性', () => {
+  it('應該包含正確的 data-testid 屬性', () => {
     const { container } = render(<AppSidebar />);
     
-    // 檢查主要元素的 data-oid 屬性
-    const elementsWithOid = container.querySelectorAll('[data-oid]');
+    // 檢查主要元素的 data-testid 屬性
+    const elementsWithOid = container.querySelectorAll('[data-testid]');
     expect(elementsWithOid.length).toBeGreaterThan(0);
   });
 }); 

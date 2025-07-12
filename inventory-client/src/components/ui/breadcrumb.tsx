@@ -10,7 +10,7 @@ const Breadcrumb = React.forwardRef<
     separator?: React.ReactNode;
   }
 >(({ ...props }, ref) => (
-  <nav ref={ref} aria-label="breadcrumb" {...props} data-oid="5-42:3s" />
+  <nav ref={ref} aria-label="breadcrumb" {...props} />
 ));
 Breadcrumb.displayName = "Breadcrumb";
 
@@ -25,7 +25,7 @@ const BreadcrumbList = React.forwardRef<
       className,
     )}
     {...props}
-    data-oid="nnvnk56"
+   
   />
 ));
 BreadcrumbList.displayName = "BreadcrumbList";
@@ -38,7 +38,7 @@ const BreadcrumbItem = React.forwardRef<
     ref={ref}
     className={cn("inline-flex items-center gap-1.5", className)}
     {...props}
-    data-oid="1x:j62:"
+   
   />
 ));
 BreadcrumbItem.displayName = "BreadcrumbItem";
@@ -56,7 +56,7 @@ const BreadcrumbLink = React.forwardRef<
       ref={ref}
       className={cn("transition-colors hover:text-foreground", className)}
       {...props}
-      data-oid="6b1kgs."
+     
     />
   );
 });
@@ -73,7 +73,7 @@ const BreadcrumbPage = React.forwardRef<
     aria-current="page"
     className={cn("font-normal text-foreground", className)}
     {...props}
-    data-oid="hgt0_l-"
+   
   />
 ));
 BreadcrumbPage.displayName = "BreadcrumbPage";
@@ -88,9 +88,9 @@ const BreadcrumbSeparator = ({
     aria-hidden="true"
     className={cn("[&>svg]:size-3.5", className)}
     {...props}
-    data-oid="y5zk6bi"
+   
   >
-    {children ?? <ChevronRight data-oid="9kuo:1m" />}
+    {children ?? <ChevronRight />}
   </li>
 );
 
@@ -105,10 +105,10 @@ const BreadcrumbEllipsis = ({
     aria-hidden="true"
     className={cn("flex h-9 w-9 items-center justify-center", className)}
     {...props}
-    data-oid="jf4viu9"
+   
   >
-    <MoreHorizontal className="h-4 w-4" data-oid="it.kuwj" />
-    <span className="sr-only" data-oid="ypsotam">
+    <MoreHorizontal className="h-4 w-4" />
+    <span className="sr-only">
       More
     </span>
   </span>

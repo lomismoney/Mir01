@@ -133,22 +133,22 @@ export function InventoryTransferForm({
   };
 
   return (
-    <Form {...form} data-oid="989oi-w">
+    <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
-        data-oid=":clbden"
+       
       >
         <div
           className="grid grid-cols-1 md:grid-cols-3 gap-4"
-          data-oid="kqb6ftv"
+         
         >
           <FormField
             control={form.control}
             name="from_store_id"
             render={({ field }) => (
-              <FormItem data-oid="d01zahc">
-                <FormLabel data-oid="96nbntn">來源門市</FormLabel>
+              <FormItem>
+                <FormLabel>來源門市</FormLabel>
                 <Select
                   disabled={isLoadingStores || isSubmitting}
                   onValueChange={(value) => {
@@ -163,38 +163,38 @@ export function InventoryTransferForm({
                     setCurrentStock(0);
                   }}
                   value={field.value}
-                  data-oid=":_fz.o_"
+                 
                 >
-                  <FormControl data-oid="prp7751">
-                    <SelectTrigger data-oid="m_w0ba1">
+                  <FormControl>
+                    <SelectTrigger>
                       <SelectValue
                         placeholder="選擇來源門市"
-                        data-oid="qzen41r"
+                       
                       />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent data-oid="a8p.-is">
+                  <SelectContent>
                     {storesData?.data?.map((store) => (
                       <SelectItem
                         key={store.id}
                         value={store.id?.toString() || ""}
-                        data-oid="9xywn69"
+                       
                       >
                         {store.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage data-oid="yne5vzp" />
+                <FormMessage />
               </FormItem>
             )}
-            data-oid="o_qud6y"
+           
           />
 
-          <div className="flex items-center justify-center" data-oid="qtqkv2f">
+          <div className="flex items-center justify-center">
             <ArrowRight
               className="h-6 w-6 text-muted-foreground"
-              data-oid="mnsqlx2"
+             
             />
           </div>
 
@@ -202,23 +202,23 @@ export function InventoryTransferForm({
             control={form.control}
             name="to_store_id"
             render={({ field }) => (
-              <FormItem data-oid="p5f9i.q">
-                <FormLabel data-oid="u.phqa6">目標門市</FormLabel>
+              <FormItem>
+                <FormLabel>目標門市</FormLabel>
                 <Select
                   disabled={isLoadingStores || isSubmitting}
                   onValueChange={field.onChange}
                   value={field.value}
-                  data-oid="zm04cim"
+                 
                 >
-                  <FormControl data-oid="7i0aa_l">
-                    <SelectTrigger data-oid="p2pwdbq">
+                  <FormControl>
+                    <SelectTrigger>
                       <SelectValue
                         placeholder="選擇目標門市"
-                        data-oid=":k_mqff"
+                       
                       />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent data-oid="k0:-kdi">
+                  <SelectContent>
                     {storesData?.data
                       ?.filter(
                         (store) =>
@@ -228,17 +228,17 @@ export function InventoryTransferForm({
                         <SelectItem
                           key={store.id}
                           value={store.id?.toString() || ""}
-                          data-oid="txhhjjh"
+                         
                         >
                           {store.name}
                         </SelectItem>
                       ))}
                   </SelectContent>
                 </Select>
-                <FormMessage data-oid="-zwwl2c" />
+                <FormMessage />
               </FormItem>
             )}
-            data-oid="la.eubk"
+           
           />
         </div>
 
@@ -246,9 +246,9 @@ export function InventoryTransferForm({
           control={form.control}
           name="product_variant_id"
           render={({ field }) => (
-            <FormItem data-oid="qek_7y-">
-              <FormLabel data-oid="jvbnev8">產品</FormLabel>
-              <FormControl data-oid="rm:ekkg">
+            <FormItem>
+              <FormLabel>產品</FormLabel>
+              <FormControl>
                 <ProductSelector
                   value={field.value}
                   onValueChange={(productVariantId, variant) => {
@@ -286,10 +286,10 @@ export function InventoryTransferForm({
                   disabled={isSubmitting || !form.watch("from_store_id")}
                   placeholder="先選擇來源門市，再選擇產品"
                   showCurrentStock={true}
-                  data-oid=":f2e4s_"
+                 
                 />
               </FormControl>
-              <FormDescription data-oid="ln9fc0y">
+              <FormDescription>
                 {!form.watch("from_store_id")
                   ? "請先選擇來源門市"
                   : selectedVariant && currentStock === 0
@@ -298,19 +298,19 @@ export function InventoryTransferForm({
                       ? `可轉移數量：${currentStock} 件`
                       : "請選擇要轉移的商品"}
               </FormDescription>
-              <FormMessage data-oid="7ljtd7z" />
+              <FormMessage />
             </FormItem>
           )}
-          data-oid="89-b_se"
+         
         />
 
         <FormField
           control={form.control}
           name="quantity"
           render={({ field }) => (
-            <FormItem data-oid="1j26050">
-              <FormLabel data-oid="mp1a6rk">轉移數量</FormLabel>
-              <FormControl data-oid="lb82tnr">
+            <FormItem>
+              <FormLabel>轉移數量</FormLabel>
+              <FormControl>
                 <Input
                   {...field}
                   type="number"
@@ -322,84 +322,84 @@ export function InventoryTransferForm({
                       ? `最多可轉移 ${currentStock} 件`
                       : "請先選擇商品"
                   }
-                  data-oid="cyol4ne"
+                 
                 />
               </FormControl>
-              <FormDescription data-oid="j0tv-yz">
+              <FormDescription>
                 {selectedVariant && currentStock > 0
                   ? `來源門市現有庫存：${currentStock} 件`
                   : selectedVariant && currentStock === 0
                     ? "來源門市庫存不足，無法轉移"
                     : "請先選擇商品與來源門市"}
               </FormDescription>
-              <FormMessage data-oid=".upyesl" />
+              <FormMessage />
             </FormItem>
           )}
-          data-oid="gdv-0ga"
+         
         />
 
         <FormField
           control={form.control}
           name="status"
           render={({ field }) => (
-            <FormItem data-oid="40s4d77">
-              <FormLabel data-oid="q:otvv2">初始狀態</FormLabel>
+            <FormItem>
+              <FormLabel>初始狀態</FormLabel>
               <Select
                 disabled={isSubmitting}
                 onValueChange={field.onChange}
                 value={field.value}
-                data-oid="fax85d0"
+               
               >
-                <FormControl data-oid="r:g_bw7">
-                  <SelectTrigger data-oid="7bcrbt_">
+                <FormControl>
+                  <SelectTrigger>
                     <SelectValue
                       placeholder="選擇初始狀態"
-                      data-oid="r.ql0ii"
+                     
                     />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent data-oid="e5866:g">
-                  <SelectItem value="pending" data-oid="8wgur7k">
+                <SelectContent>
+                  <SelectItem value="pending">
                     待處理
                   </SelectItem>
-                  <SelectItem value="in_transit" data-oid="yobd51d">
+                  <SelectItem value="in_transit">
                     運送中
                   </SelectItem>
-                  <SelectItem value="completed" data-oid="0jqw_ao">
+                  <SelectItem value="completed">
                     已完成
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription data-oid=".qke13k">
+              <FormDescription>
                 設定為「已完成」會立即執行庫存轉移操作
               </FormDescription>
-              <FormMessage data-oid="w01p0ky" />
+              <FormMessage />
             </FormItem>
           )}
-          data-oid="omic__0"
+         
         />
 
         <FormField
           control={form.control}
           name="notes"
           render={({ field }) => (
-            <FormItem data-oid="0o7buqj">
-              <FormLabel data-oid="z4i5ri4">備註</FormLabel>
-              <FormControl data-oid=":f26z4r">
+            <FormItem>
+              <FormLabel>備註</FormLabel>
+              <FormControl>
                 <Textarea
                   {...field}
                   placeholder="輸入此次轉移的備註資訊（選填）"
                   disabled={isSubmitting}
-                  data-oid="-qqk:t-"
+                 
                 />
               </FormControl>
-              <FormMessage data-oid="-fxa.hk" />
+              <FormMessage />
             </FormItem>
           )}
-          data-oid="efra5vg"
+         
         />
 
-        <div className="flex justify-end" data-oid="zqb03zl">
+        <div className="flex justify-end">
           <Button
             type="submit"
             disabled={
@@ -408,12 +408,12 @@ export function InventoryTransferForm({
               currentStock === 0 ||
               form.watch("from_store_id") === form.watch("to_store_id")
             }
-            data-oid="bt_.iop"
+           
           >
             {isSubmitting && (
               <Loader2
                 className="mr-2 h-4 w-4 animate-spin"
-                data-oid="neweg.7"
+               
               />
             )}
             創建轉移

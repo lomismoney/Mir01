@@ -62,35 +62,35 @@ export const InventoryTransferList = () => {
     switch (status) {
       case "pending":
         return (
-          <Badge variant="outline" data-oid="cu88:we">
+          <Badge variant="outline">
             待處理
           </Badge>
         );
 
       case "in_transit":
         return (
-          <Badge variant="secondary" data-oid="8prsa.u">
+          <Badge variant="secondary">
             運送中
           </Badge>
         );
 
       case "completed":
         return (
-          <Badge variant="default" data-oid="lbumnmc">
+          <Badge variant="default">
             已完成
           </Badge>
         );
 
       case "cancelled":
         return (
-          <Badge variant="destructive" data-oid="u2xutri">
+          <Badge variant="destructive">
             已取消
           </Badge>
         );
 
       default:
         return (
-          <Badge variant="secondary" data-oid="12fts1v">
+          <Badge variant="secondary">
             {status}
           </Badge>
         );
@@ -108,98 +108,98 @@ export const InventoryTransferList = () => {
   };
 
   return (
-    <div data-oid="wo233u6">
+    <div>
       {isLoading ? (
-        <div className="space-y-2" data-oid="0xwlbcb">
+        <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" data-oid="whp6_47" />
+            <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
       ) : (
         <>
-          <Table data-oid="qzkvvp1">
-            <TableHeader data-oid="d6:yfii">
+          <Table>
+            <TableHeader>
               <TableRow
                 className="border-b hover:bg-transparent"
-                data-oid="hc6:da5"
+               
               >
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="k:imuvn"
+                 
                 >
                   單號
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="ku8._ws"
+                 
                 >
                   日期
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="zvs0sw1"
+                 
                 >
                   來源門市
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="2834kj1"
+                 
                 >
                   目標門市
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="dbxtq5-"
+                 
                 >
                   產品
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="8njy7p_"
+                 
                 >
                   數量
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="oe1:0.8"
+                 
                 >
                   狀態
                 </TableHead>
                 <TableHead
                   className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="qp:no6m"
+                 
                 >
                   備註
                 </TableHead>
                 <TableHead
                   className="w-[80px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                  data-oid="mmlzspw"
+                 
                 >
                   操作
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody data-oid="8fmq-sd">
+            <TableBody>
               {data && data.length === 0 ? (
-                <TableRow data-oid=".j4jd._">
+                <TableRow>
                   <TableCell
                     colSpan={9}
                     className="h-24 text-center"
-                    data-oid="m1rm0u-"
+                   
                   >
                     <div
                       className="flex flex-col items-center justify-center space-y-3 py-6"
-                      data-oid="rjurk.b"
+                     
                     >
                       <p
                         className="text-lg font-medium text-muted-foreground"
-                        data-oid=":0zrq.k"
+                       
                       >
                         沒有庫存轉移記錄
                       </p>
                       <p
                         className="text-sm text-muted-foreground"
-                        data-oid=".b27a4n"
+                       
                       >
                         點擊"新增轉移"標籤來創建庫存轉移
                       </p>
@@ -208,71 +208,71 @@ export const InventoryTransferList = () => {
                 </TableRow>
               ) : (
                 data?.map((transfer: any) => (
-                  <TableRow key={transfer.id} data-oid="o7ut.1o">
-                    <TableCell data-oid="lbf.rj1">{transfer.id}</TableCell>
-                    <TableCell data-oid="ioczgs5">
+                  <TableRow key={transfer.id}>
+                    <TableCell>{transfer.id}</TableCell>
+                    <TableCell>
                       {formatDate(transfer.created_at)}
                     </TableCell>
-                    <TableCell data-oid="1o-.0.z">
+                    <TableCell>
                       {transfer.from_store?.name ||
                         `門市 #${transfer.from_store_id}`}
                     </TableCell>
-                    <TableCell data-oid="4c40:a1">
+                    <TableCell>
                       {transfer.to_store?.name ||
                         `門市 #${transfer.to_store_id}`}
                     </TableCell>
-                    <TableCell data-oid="4i:6w5b">
+                    <TableCell>
                       {transfer.product_variant?.product?.name ||
                         `產品 #${transfer.product_variant_id}`}
                     </TableCell>
-                    <TableCell data-oid="i06e22k">
+                    <TableCell>
                       {transfer.quantity}
                     </TableCell>
-                    <TableCell data-oid="4fei7ea">
+                    <TableCell>
                       {getStatusBadge(transfer.status || "unknown")}
                     </TableCell>
-                    <TableCell data-oid="isc4-hj">
+                    <TableCell>
                       <div
                         className="max-w-[200px] truncate"
                         title={transfer.notes || ""}
-                        data-oid="_.9pz22"
+                       
                       >
                         {transfer.notes || "-"}
                       </div>
                     </TableCell>
-                    <TableCell data-oid="c06cvhe">
-                      <DropdownMenu data-oid="w47o8t0">
-                        <DropdownMenuTrigger asChild data-oid="i20ga3v">
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             className="h-8 w-8 p-0"
-                            data-oid="k2xt7kg"
+                           
                           >
                             <MoreHorizontal
                               className="h-4 w-4"
-                              data-oid="ceymzno"
+                             
                             />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" data-oid="eikz:hs">
+                        <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={() => setViewingHistoryTransfer(transfer)}
-                            data-oid="7kibyuq"
+                           
                           >
                             <History
                               className="mr-2 h-4 w-4"
-                              data-oid="_xjhcfc"
+                             
                             />
                             查看歷史
                           </DropdownMenuItem>
                           {canEditStatus(transfer.status || "") && (
                             <DropdownMenuItem
                               onClick={() => setEditingTransfer(transfer)}
-                              data-oid="qrs7n:g"
+                             
                             >
                               <Edit
                                 className="mr-2 h-4 w-4"
-                                data-oid="a:i.bsr"
+                               
                               />
                               編輯狀態
                             </DropdownMenuItem>
@@ -287,14 +287,14 @@ export const InventoryTransferList = () => {
           </Table>
           <div
             className="flex justify-center mt-4 space-x-2"
-            data-oid="xbhouio"
+           
           >
             <Button
               variant="outline"
               size="sm"
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
               disabled={page === 1}
-              data-oid="a3dcz-d"
+             
             >
               上一頁
             </Button>
@@ -303,7 +303,7 @@ export const InventoryTransferList = () => {
               size="sm"
               onClick={() => setPage((prev) => prev + 1)}
               disabled={!data || data.length < perPage}
-              data-oid="fdqbtao"
+             
             >
               下一頁
             </Button>
@@ -318,7 +318,7 @@ export const InventoryTransferList = () => {
                 !open && setEditingTransfer(null)
               }
               onSuccess={handleEditSuccess}
-              data-oid="hv13zyq"
+             
             />
           )}
 
@@ -330,7 +330,7 @@ export const InventoryTransferList = () => {
               onOpenChange={(open: boolean) =>
                 !open && setViewingHistoryTransfer(null)
               }
-              data-oid="5pspt01"
+             
             />
           )}
         </>

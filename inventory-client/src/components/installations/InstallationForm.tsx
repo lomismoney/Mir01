@@ -1,32 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import React from "react";
+import { useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { useUsers } from "@/hooks";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormControl,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useInstallationItems } from "@/hooks/useInstallationItems";
+import { Form } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle, Trash2, Calendar as CalendarIcon } from "lucide-react";
-import { useAppFieldArray } from "@/hooks/useAppFieldArray";
 import { format } from "date-fns";
+import { formatDate } from "@/lib/dateHelpers";
 import {
   Popover,
   PopoverContent,
@@ -34,149 +16,176 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import {
-  CreateInstallationRequest,
-  CreateInstallationItemRequest
-} from '@/types/installation';
-import { toast } from "sonner";
 import { ProductSelector } from "@/components/inventory/ProductSelector";
+import { useStandardForm } from "@/hooks/useStandardForm";
+import { 
+  createInstallationSchema, 
+  updateInstallationSchema, 
+  type CreateInstallationData, 
+  type UpdateInstallationData,
+  type InstallationItem
+} from "@/lib/validations/installation";
+import { StandardForm } from "@/components/forms/StandardForm";
+import { 
+  StandardInputField, 
+  StandardTextareaField, 
+  StandardSelectField 
+} from "@/components/forms/StandardFormField";
 
-// 使用 Zod 定義表單驗證規則
-const installationFormSchema = z.object({
-  // 客戶資訊
-  customer_name: z.string().min(1, "客戶姓名為必填"),
-  customer_phone: z.string().optional(),
-  installation_address: z.string().min(1, "安裝地址為必填"),
-  
-  // 安裝資訊
-  installer_user_id: z.number().optional(),
-  scheduled_date: z.string().optional(),
-  notes: z.string().optional(),
-  
-  // 安裝項目
-  items: z
-    .array(
-      z.object({
-        product_variant_id: z.number().min(0, "請選擇商品規格").optional(),
-        product_name: z.string().optional(), // 自動填入，但保留以便顯示
-        sku: z.string().optional(), // 自動填入，但保留以便顯示
-        quantity: z.number().min(1, "數量至少為 1"),
-        specifications: z.string().optional(),
-        notes: z.string().optional(),
-      }),
-    )
-    .min(1, "安裝單至少需要一個項目")
-    .refine(
-      (items) => items.some((item) => {
-        // 如果商品名稱存在，視為有效項目（支援編輯模式的歷史資料）
-        return (item.product_variant_id && item.product_variant_id > 0) || 
-               (item.product_name && item.product_name.trim() !== '');
-      }),
-      {
-        message: "至少需要選擇一個商品規格",
-      }
-    ),
-});
+/**
+ * 安裝表單值類型（向下相容）
+ */
+export type InstallationFormValues = CreateInstallationData | UpdateInstallationData;
 
-export type InstallationFormValues = z.infer<typeof installationFormSchema>;
+/**
+ * 安裝表單內部值類型（包含可選的 id 屬性）
+ */
+type InstallationFormInternalValues = CreateInstallationData & {
+  id?: number;
+};
 
+/**
+ * 安裝表單元件屬性介面
+ */
 interface InstallationFormProps {
+  /** 表單模式：創建或編輯 */
+  mode?: 'create' | 'edit';
+  /** 初始資料（編輯模式時使用） */
   initialData?: Partial<InstallationFormValues>;
-  onSubmit: (data: InstallationFormValues) => void;
-  isSubmitting: boolean;
+  /** 安裝 ID（編輯模式時必須） */
+  installationId?: number;
+  /** 表單標題 */
+  title?: string;
+  /** 表單描述 */
+  description?: string;
+  /** 取消回調 */
   onCancel?: () => void;
+  /** 成功回調 */
+  onSuccess?: (data: CreateInstallationData | UpdateInstallationData) => void;
+  /** 是否正在提交（向下相容） */
+  isSubmitting?: boolean;
+  /** 提交回調（向下相容） */
+  onSubmit?: (data: InstallationFormValues) => void;
 }
 
+/**
+ * 安裝表單元件（統一架構版）
+ * 
+ * 支援新增和編輯兩種模式，使用統一的驗證和表單處理邏輯。
+ * 
+ * 功能特色：
+ * 1. 統一的 Zod 驗證和錯誤處理
+ * 2. 標準化表單組件
+ * 3. 動態安裝項目管理
+ * 4. 完整的類型安全
+ * 5. 智能產品選擇器
+ */
 export function InstallationForm({
+  mode = 'create',
   initialData,
-  onSubmit,
-  isSubmitting,
-  onCancel
+  installationId,
+  title,
+  description,
+  onCancel,
+  onSuccess,
+  // 向下相容的屬性
+  isSubmitting: legacyIsSubmitting,
+  onSubmit: legacyOnSubmit,
 }: InstallationFormProps) {
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  // 確定使用的驗證schema和默認值
+  const isEditMode = mode === 'edit';
+  const validationSchema = isEditMode ? updateInstallationSchema : createInstallationSchema;
+  const defaultTitle = title || (isEditMode ? "編輯安裝單" : "新增安裝單");
+  const defaultDescription = description || (isEditMode ? "編輯安裝單的詳細資訊" : "請填寫安裝單的詳細資訊");
   
-  // 載入所有用戶，然後在前端篩選有 installer 角色的用戶
-  const { data: allUsersData, isLoading: isLoadingUsers } = useUsers();
-  
-  // 篩選有 installer 角色的用戶
-  const usersData = allUsersData?.data?.filter((user: any) => 
-    user.roles && user.roles.includes('installer')
-  ) || [];
-
-  const form = useForm<InstallationFormValues>({
-    resolver: zodResolver(installationFormSchema),
-    defaultValues: initialData || {
-      customer_name: "",
-      customer_phone: "",
-      installation_address: "",
-      installer_user_id: undefined,
-      scheduled_date: "",
-      notes: "",
-      items: [
-        {
-          product_variant_id: 0,
-          product_name: "",
-          sku: "",
-          quantity: 1,
-          specifications: "",
-          notes: "",
-        }
-      ],
-    },
-  });
-
-  // 初始化 useFieldArray 來管理 items 字段
-  const { fields, append, remove } = useAppFieldArray({
-    control: form.control,
-    name: "items",
-  });
-
-  // 🎯 移除所有 useEffect 邏輯，完全依賴 defaultValues
-  // useFieldArray 會自動使用 form 的 defaultValues.items 初始化
-
-  // 處理新增安裝項目
-  const handleAddItem = () => {
-    append({
-      product_variant_id: 0,
-      product_name: "",
-      sku: "",
-      quantity: 1,
-      specifications: "",
-      notes: "",
-    });
+  // 準備表單默認值
+  const formDefaults: InstallationFormInternalValues = {
+    customer_name: initialData?.customer_name || '',
+    customer_phone: initialData?.customer_phone || '',
+    installation_address: initialData?.installation_address || '',
+    installer_user_id: initialData?.installer_user_id || undefined,
+    scheduled_date: initialData?.scheduled_date || '',
+    notes: initialData?.notes || '',
+    items: initialData?.items || [
+      {
+        product_variant_id: undefined,
+        product_name: '',
+        sku: '',
+        quantity: 1,
+        specifications: '',
+        notes: '',
+      }
+    ],
+    ...(isEditMode && { id: installationId || (initialData as UpdateInstallationData)?.id }),
   };
+
+  // 使用標準表單Hook（優先使用新架構，降級到舊版 API）
+  const {
+    form,
+    isSubmitting,
+    handleSubmit: submitForm,
+    reset,
+  } = useStandardForm({
+    schema: validationSchema,
+    defaultValues: formDefaults,
+    onSubmit: async (data) => {
+      // 優先使用新的 onSuccess，降級到舊的 onSubmit
+      if (onSuccess) {
+        onSuccess(data);
+      } else if (legacyOnSubmit) {
+        legacyOnSubmit(data);
+      } else {
+        console.log('提交安裝單数據:', data);
+      }
+    },
+    onSuccess: (data) => {
+      console.log('安裝單表單提交成功:', data);
+    },
+    successMessage: isEditMode ? "安裝單更新成功" : "安裝單創建成功",
+    errorMessage: isEditMode ? "安裝單更新失敗" : "安裝單創建失敗",
+  });
+  
+  // 向下相容：如果傳入了舊的 isSubmitting，優先使用它
+  const finalIsSubmitting = legacyIsSubmitting ?? isSubmitting;
+
+  // 使用自定義 hook 獲取安裝項目管理邏輯
+  const {
+    datePickerOpen,
+    setDatePickerOpen,
+    scheduledDateValue,
+    usersData,
+    isLoadingUsers,
+    fields,
+    remove,
+    handleAddItem,
+    handleDateSelect,
+    handleFormError,
+    handleProductSelect,
+    handleClearProduct,
+  } = useInstallationItems(form);
+  
+  // 載入狀態
+  const isLoading = finalIsSubmitting;
 
   // 處理表單提交
-  const handleSubmit = (data: InstallationFormValues) => {
-    console.log("表單提交資料:", data);
-    onSubmit(data);
-  };
+  const handleFormSubmit = legacyOnSubmit ? form.handleSubmit(legacyOnSubmit, handleFormError) : submitForm;
 
-  // 處理表單錯誤
-  const handleFormError = (errors: any) => {
-    console.log("表單驗證錯誤:", errors);
-    toast.error("表單驗證失敗", {
-      description: "請檢查必填欄位是否已正確填寫"
-    });
-  };
-
-  // 處理日期選擇
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      form.setValue("scheduled_date", format(date, "yyyy-MM-dd"));
-      setDatePickerOpen(false);
-    }
-  };
-
-  const scheduledDateValue = form.watch("scheduled_date");
+  // 準備安裝師傅選項
+  const installerOptions = [
+    { value: '', label: '暫不分配' },
+    ...(usersData?.map((user: any) => ({
+      value: user.id.toString(),
+      label: `${user.name || user.username}${user.email ? ` (${user.email})` : ''}`,
+    })) || [])
+  ];
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit, handleFormError)} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         {/* 頂層標題區 */}
         <div className="flex items-center gap-4">
           <h1 className="flex-1 text-2xl font-semibold">
-            {initialData ? "編輯安裝單" : "新增安裝單"}
+            {defaultTitle}
           </h1>
         </div>
 
@@ -193,6 +202,7 @@ export function InstallationForm({
                   variant="outline"
                   size="sm"
                   onClick={handleAddItem}
+                  disabled={isLoading}
                 >
                   <PlusCircle className="h-4 w-4 mr-2" />
                   新增項目
@@ -217,6 +227,7 @@ export function InstallationForm({
                             size="sm"
                             onClick={() => remove(index)}
                             className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                            disabled={isLoading}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -224,145 +235,89 @@ export function InstallationForm({
 
                         {/* 商品選擇器 - 佔整行 */}
                         <div className="mb-4">
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.product_variant_id`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-medium">
-                                  商品規格 <span className="text-destructive">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                  {/* 🎯 簡化：只要有商品名稱，就顯示商品信息 */}
-                                  {form.watch(`items.${index}.product_name`) && form.watch(`items.${index}.product_name`)?.trim() !== '' ? (
-                                    <div className="space-y-2">
-                                      {/* 當前選中的商品顯示 */}
-                                      <div className="p-3 bg-muted/50 rounded-lg border">
-                                        <div className="flex items-center justify-between">
-                                          <div>
-                                            <div className="font-medium text-sm">
-                                              {form.watch(`items.${index}.product_name`) || '商品名稱'}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                              SKU: {form.watch(`items.${index}.sku`) || '未知SKU'}
-                                              {field.value && field.value > 0 && <span className="text-green-600"> • ID: {field.value}</span>}
-                                            </div>
-                                          </div>
-                                          <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                              // 清除選擇，切換回選擇模式
-                                              field.onChange(0);
-                                              form.setValue(`items.${index}.product_name`, "");
-                                              form.setValue(`items.${index}.sku`, "");
-                                            }}
-                                          >
-                                            更換商品
-                                          </Button>
-                                        </div>
-                                      </div>
+                          {/* 🎯 簡化：只要有商品名稱，就顯示商品信息 */}
+                          {form.watch(`items.${index}.product_name`) && form.watch(`items.${index}.product_name`)?.trim() !== '' ? (
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">
+                                商品規格 <span className="text-destructive">*</span>
+                              </label>
+                              {/* 當前選中的商品顯示 */}
+                              <div className="p-3 bg-muted/50 rounded-lg border">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <div className="font-medium text-sm">
+                                      {form.watch(`items.${index}.product_name`) || '商品名稱'}
                                     </div>
-                                  ) : (
-                                    /* 沒有選擇時顯示ProductSelector */
-                                  <ProductSelector
-                                      key={`product-selector-${index}`}
-                                      value={0}
-                                    onValueChange={(variantId, variant) => {
-                                      field.onChange(variantId);
-                                      // 自動填入商品名稱和 SKU
-                                      if (variant) {
-                                        form.setValue(
-                                          `items.${index}.product_name`,
-                                          variant.product?.name || "",
-                                        );
-                                        form.setValue(
-                                          `items.${index}.sku`,
-                                          variant.sku || "",
-                                        );
-                                      }
-                                    }}
-                                    placeholder="搜尋並選擇商品規格"
-                                    disabled={isSubmitting}
-                                    showCurrentStock={true}
-                                  />
-                                  )}
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                                    <div className="text-xs text-muted-foreground">
+                                      SKU: {form.watch(`items.${index}.sku`) || '未知SKU'}
+                                      {form.watch(`items.${index}.product_variant_id`) && (form.watch(`items.${index}.product_variant_id`) ?? 0) > 0 && (
+                                        <span className="text-green-600"> • ID: {form.watch(`items.${index}.product_variant_id`)}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleClearProduct(index)}
+                                    disabled={isLoading}
+                                  >
+                                    更換商品
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            /* 沒有選擇時顯示ProductSelector */
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">
+                                商品規格 <span className="text-destructive">*</span>
+                              </label>
+                              <ProductSelector
+                                key={`product-selector-${index}`}
+                                value={0}
+                                onValueChange={(variantId, variant) => {
+                                  form.setValue(`items.${index}.product_variant_id`, variantId);
+                                  handleProductSelect(index, variantId, variant);
+                                }}
+                                placeholder="搜尋並選擇商品規格"
+                                disabled={isLoading}
+                                showCurrentStock={true}
+                              />
+                            </div>
+                          )}
                         </div>
 
                         {/* 數量與安裝規格 - 並排 */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <FormField
+                          <StandardInputField
                             control={form.control}
-                            name={`items.${index}.quantity`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-medium">
-                                  數量 <span className="text-destructive">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    min="1"
-                                    className="w-full"
-                                    placeholder="請輸入數量"
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(
-                                        parseInt(e.target.value) || 1,
-                                      )
-                                    }
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                            name={`items.${index}.quantity` as any}
+                            label="數量"
+                            type="number"
+                            min={1}
+                            placeholder="請輸入數量"
+                            required
+                            disabled={isLoading}
                           />
                           
-                          <FormField
+                          <StandardInputField
                             control={form.control}
-                            name={`items.${index}.specifications`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-medium">
-                                  安裝規格
-                                </FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="安裝規格說明"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                            name={`items.${index}.specifications` as any}
+                            label="安裝規格"
+                            placeholder="安裝規格說明"
+                            disabled={isLoading}
                           />
                         </div>
 
                         {/* 備註 - 佔整行，使用 Textarea */}
-                        <FormField
+                        <StandardTextareaField
                           control={form.control}
-                          name={`items.${index}.notes`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm font-medium">
-                                項目備註
-                              </FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  placeholder="輸入此項目的詳細備註資訊，如特殊安裝要求、注意事項等..."
-                                  className="resize-none min-h-[80px] w-full"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                          name={`items.${index}.notes` as any}
+                          label="項目備註"
+                          placeholder="輸入此項目的詳細備註資訊，如特殊安裝要求、注意事項等..."
+                          rows={3}
+                          disabled={isLoading}
                         />
                       </div>
                     ))}
@@ -397,52 +352,33 @@ export function InstallationForm({
                   </div>
                   
                   {/* 客戶姓名 */}
-                  <FormField
+                  <StandardInputField
                     control={form.control}
                     name="customer_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>客戶姓名 *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="請輸入客戶姓名" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="客戶姓名"
+                    placeholder="請輸入客戶姓名"
+                    required
+                    disabled={isLoading}
                   />
 
                   {/* 客戶電話 */}
-                  <FormField
+                  <StandardInputField
                     control={form.control}
                     name="customer_phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>客戶電話</FormLabel>
-                        <FormControl>
-                          <Input placeholder="請輸入客戶電話" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="客戶電話"
+                    placeholder="請輸入客戶電話"
+                    disabled={isLoading}
                   />
 
                   {/* 安裝地址 */}
-                  <FormField
+                  <StandardTextareaField
                     control={form.control}
                     name="installation_address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>安裝地址 *</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="請輸入詳細的安裝地址"
-                            className="resize-none min-h-[80px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="安裝地址"
+                    placeholder="請輸入詳細的安裝地址"
+                    rows={3}
+                    required
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -456,89 +392,48 @@ export function InstallationForm({
                   </div>
 
                   {/* 預計安裝日期 */}
-                  <FormField
-                    control={form.control}
-                    name="scheduled_date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>預計安裝日期</FormLabel>
-                        <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !scheduledDateValue && "text-muted-foreground"
-                                )}
-                              >
-                                {scheduledDateValue ? (
-                                  format(new Date(scheduledDateValue), "yyyy年MM月dd日")
-                                ) : (
-                                  <span>選擇安裝日期</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={scheduledDateValue ? new Date(scheduledDateValue) : undefined}
-                              onSelect={handleDateSelect}
-                              disabled={(date) =>
-                                date < new Date(new Date().setHours(0, 0, 0, 0))
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">預計安裝日期</label>
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !scheduledDateValue && "text-muted-foreground"
+                          )}
+                          disabled={isLoading}
+                        >
+                          {scheduledDateValue ? (
+                            formatDate.chineseDate(scheduledDateValue).replace(' 年 ', '年').replace(' 月 ', '月').replace(' 日', '日')
+                          ) : (
+                            <span>選擇安裝日期</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={scheduledDateValue ? new Date(scheduledDateValue) : undefined}
+                          onSelect={handleDateSelect}
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
                   {/* 安裝師傅選擇 */}
-                  <FormField
+                  <StandardSelectField
                     control={form.control}
                     name="installer_user_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>安裝師傅</FormLabel>
-                        <Select
-                          onValueChange={(value) => 
-                            field.onChange(value === "0" ? undefined : parseInt(value, 10))
-                          }
-                          value={field.value?.toString() || "0"}
-                          disabled={isLoadingUsers}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={
-                                isLoadingUsers ? "載入中..." : "選擇安裝師傅"
-                              } />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="0">暫不分配</SelectItem>
-                            {usersData?.map((user: any) => (
-                              <SelectItem 
-                                key={user.id} 
-                                value={user.id.toString()}
-                              >
-                                {user.name || user.username} 
-                                {user.email && (
-                                  <span className="text-muted-foreground text-xs ml-2">
-                                    ({user.email})
-                                  </span>
-                                )}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="安裝師傅"
+                    options={installerOptions}
+                    disabled={isLoading || isLoadingUsers}
+                    placeholder={isLoadingUsers ? "載入中..." : "選擇安裝師傅"}
                   />
                 </div>
               </CardContent>
@@ -552,21 +447,13 @@ export function InstallationForm({
             <CardTitle>安裝備註</CardTitle>
           </CardHeader>
           <CardContent>
-            <FormField
+            <StandardTextareaField
               control={form.control}
               name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      placeholder="輸入此安裝單的備註資訊..."
-                      className="resize-none min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label=""
+              placeholder="輸入此安裝單的備註資訊..."
+              rows={4}
+              disabled={isLoading}
             />
           </CardContent>
         </Card>
@@ -578,22 +465,22 @@ export function InstallationForm({
               type="button" 
               variant="outline" 
               onClick={onCancel}
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
               取消
             </Button>
           )}
           <Button 
             type="submit" 
-            disabled={isSubmitting}
+            disabled={isLoading}
           >
-            {isSubmitting 
-              ? (initialData ? '更新中...' : '創建中...') 
-              : (initialData ? '更新安裝單' : '創建安裝單')
+            {isLoading 
+              ? (isEditMode ? '更新中...' : '創建中...') 
+              : (isEditMode ? '更新安裝單' : '創建安裝單')
             }
           </Button>
         </div>
       </form>
     </Form>
   );
-} 
+}

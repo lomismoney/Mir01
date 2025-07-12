@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Models\User;
+use App\Models\Store;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -40,6 +41,7 @@ class OrderFactory extends Factory
             'order_number' => 'PO-' . date('Ymd') . '-' . $this->faker->unique()->numberBetween(1000, 9999),
             'customer_id' => Customer::factory(),
             'creator_user_id' => User::factory(),
+            'store_id' => Store::factory(),
             'shipping_status' => $this->faker->randomElement(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
             'payment_status' => $paymentStatus,
             'subtotal' => $subtotal,

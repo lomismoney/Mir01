@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Purchase;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,6 +21,7 @@ class PurchaseFactory extends Factory
     {
         return [
             'store_id' => Store::factory(),
+            'user_id' => User::factory(),
             'order_number' => 'PO-' . $this->faker->unique()->numerify('########'),
             'total_amount' => $this->faker->numberBetween(100000, 1000000), // 1000.00 ~ 10000.00
             'shipping_cost' => $this->faker->numberBetween(0, 50000), // 0 ~ 500.00

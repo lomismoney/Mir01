@@ -737,4 +737,151 @@ describe('useUsers hooks', () => {
       });
     });
   });
+
+  describe('useUsers data processing', () => {
+    it('should handle users with missing optional fields', async () => {
+      const mockUsers = [
+        {
+          id: 1,
+          name: 'User 1',
+          username: 'user1'
+          // 缺少 stores, roles
+        },
+        {
+          id: 2,
+          // 缺少 name, username
+          stores: ['store1'],
+          roles: ['admin', 'manager']
+        }
+      ];
+
+      mockApiClient.GET.mockResolvedValueOnce({
+        data: mockUsers,
+        error: null
+      });
+
+      const { result } = renderHook(() => useUsers(), {
+        wrapper: createWrapper()
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data?.data).toEqual([
+        {
+          id: 1,
+          name: 'User 1',
+          username: 'user1',
+          stores: [],
+          roles: []
+        },
+        {
+          id: 2,
+          name: '未知用戶',
+          username: 'n/a',
+          stores: ['store1'],
+          roles: ['admin', 'manager']
+        }
+      ]);
+    });
+
+    it('should handle non-array stores and roles', async () => {
+      const mockUsers = [
+        {
+          id: 1,
+          name: 'User 1',
+          username: 'user1',
+          stores: 'not-an-array',
+          roles: 'not-an-array'
+        }
+      ];
+
+      mockApiClient.GET.mockResolvedValueOnce({
+        data: mockUsers,
+        error: null
+      });
+
+      const { result } = renderHook(() => useUsers(), {
+        wrapper: createWrapper()
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data?.data).toEqual([
+        {
+          id: 1,
+          name: 'User 1',
+          username: 'user1',
+          stores: [],
+          roles: []
+        }
+      ]);
+    });
+
+    it('should handle nested data structure', async () => {
+      const mockResponse = {
+        data: {
+          data: [
+            {
+              id: 1,
+              name: 'User 1',
+              username: 'user1',
+              stores: [{ id: 1, name: 'Store 1' }],
+              roles: [1, 2, 3] // 數字類型的 roles
+            }
+          ]
+        }
+      };
+
+      mockApiClient.GET.mockResolvedValueOnce({
+        data: mockResponse,
+        error: null
+      });
+
+      const { result } = renderHook(() => useUsers(), {
+        wrapper: createWrapper()
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data?.data).toEqual([
+        {
+          id: 1,
+          name: 'User 1',
+          username: 'user1',
+          stores: [{ id: 1, name: 'Store 1' }],
+          roles: ['1', '2', '3'] // 轉換為字串陣列
+        }
+      ]);
+    });
+
+    it('should handle non-array response data', async () => {
+      const mockResponse = {
+        users: [{ id: 1, name: 'User 1' }]
+      };
+
+      mockApiClient.GET.mockResolvedValueOnce({
+        data: mockResponse,
+        error: null
+      });
+
+      const { result } = renderHook(() => useUsers(), {
+        wrapper: createWrapper()
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data).toEqual({
+        data: [],
+        meta: {}
+      });
+    });
+  });
 });

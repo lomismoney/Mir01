@@ -44,6 +44,7 @@ import {
 import { useDeleteInstallation } from "@/hooks";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { formatDate } from "@/lib/dateHelpers";
 import { InstallationProgressTracker } from "./InstallationProgressTracker";
 
 /**
@@ -124,7 +125,7 @@ export const createInstallationColumns = ({
             )}
           </div>
           <div className="text-xs text-muted-foreground/70 mt-1">
-            建立於 {format(new Date(installation.created_at), "MM/dd HH:mm", { locale: zhTW })}
+            建立於 {formatDate.shortDateTime(installation.created_at)}
           </div>
         </div>
       );
@@ -144,10 +145,10 @@ export const createInstallationColumns = ({
           {scheduledDate ? (
             <div className="space-y-1">
               <div className="text-sm font-medium text-foreground">
-                {format(new Date(scheduledDate), "MM/dd", { locale: zhTW })}
+                {formatDate.monthDay(scheduledDate)}
               </div>
               <div className="text-xs text-muted-foreground">
-                {format(new Date(scheduledDate), "EEEE", { locale: zhTW })}
+                {formatDate.weekday(scheduledDate)}
               </div>
             </div>
           ) : (

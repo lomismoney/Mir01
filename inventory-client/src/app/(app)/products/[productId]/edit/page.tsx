@@ -1,7 +1,10 @@
 "use client";
 
-import { use } from "react";
-import { CreateProductWizard } from "@/components/products/CreateProductWizard";
+import { use, lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+// 動態導入產品嚮導組件
+const CreateProductWizard = lazy(() => import("@/components/products/CreateProductWizard").then(module => ({ default: module.CreateProductWizard })));
 
 /**
  * 商品編輯頁面
@@ -17,5 +20,18 @@ export default function ProductEditPage({
   // Next.js 15: params 現在是 Promise，需要使用 React.use() 解包
   const { productId } = use(params);
 
-  return <CreateProductWizard productId={productId} data-oid="hp6bn4r" />;
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">載入商品編輯器...</p>
+          </div>
+        </div>
+      }
+    >
+      <CreateProductWizard productId={productId} />
+    </Suspense>
+  );
 }

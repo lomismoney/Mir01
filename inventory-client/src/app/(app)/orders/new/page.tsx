@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateOrder } from "@/hooks";
-import { OrderForm, OrderFormValues } from "@/components/orders/OrderForm";
+import { OrderFormValues } from "@/components/orders/OrderForm";
 // StockCheckDialog 已移除，預訂系統現在為自動模式
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+// 動態導入訂單表單組件
+const OrderForm = lazy(() => import("@/components/orders/OrderForm").then(module => ({ default: module.OrderForm })));
 
 /**
  * 擴展的錯誤介面，支援庫存檢查結構化異常
@@ -67,7 +71,6 @@ export default function NewOrderPage() {
       })),
     };
 
-    console.log('📤 發送到後端的訂單數據:', JSON.stringify(orderData, null, 2));
 
     createOrder(orderData, {
       onSuccess: (data) => {
@@ -107,7 +110,6 @@ export default function NewOrderPage() {
         const alreadyForced = forceCreate;
 
         if (isStockError && !alreadyForced) {
-          console.log('⚠️ 庫存不足，立即轉為預訂模式重新提交');
 
           // 直接重新提交，啟用強制建單模式
           const forceOrder = {
@@ -166,21 +168,31 @@ export default function NewOrderPage() {
   // 🎯 預訂系統現在為自動模式，不需要用戶交互函數
 
   return (
-    <div className="space-y-6" data-oid="dx7m__r">
-      <div data-oid="dfcxmsl">
-        <h2 className="text-2xl font-bold" data-oid="gwvvljp">
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">
           新增訂單
         </h2>
-        <p className="text-muted-foreground" data-oid="90rzrrg">
+        <p className="text-muted-foreground">
           填寫以下資訊以創建一筆新的銷售訂單。
         </p>
       </div>
       
-      <OrderForm
-        isSubmitting={isPending}
-        onSubmit={(values) => handleSubmit(values, false)} // 初始提交，不強制建單
-        data-oid="r4y513s"
-      />
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
+            <div className="flex flex-col items-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">載入訂單表單...</p>
+            </div>
+          </div>
+        }
+      >
+        <OrderForm
+          isSubmitting={isPending}
+          onSubmit={(values) => handleSubmit(values, false)} // 初始提交，不強制建單
+        />
+      </Suspense>
 
       {/* 🎯 預訂系統：自動模式，不需要對話框 */}
     </div>

@@ -6,13 +6,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { ProductFilters, InventoryTransactionFilters } from '@/types/api-helpers';
+import { INVENTORY_KEYS } from '../shared/queryKeys';
+import { createCacheInvalidation, createErrorHandler, createSuccessHandler } from '../shared/utils';
+import { processPaginatedResponse, processInventoryData } from '../shared/processors';
+import { BUSINESS_QUERY_CONFIG } from '../shared/config';
 
 /**
  * 庫存列表查詢 Hook
  */
 export const useInventoryList = (filters: ProductFilters = {}) => {
   return useQuery({
-    queryKey: ['inventory', 'list', filters],
+    ...BUSINESS_QUERY_CONFIG.INVENTORY.LIST,
+    queryKey: INVENTORY_KEYS.LIST(filters),
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/inventory', {
         params: {
@@ -25,39 +30,8 @@ export const useInventoryList = (filters: ProductFilters = {}) => {
       }
       return data;
     },
-    select: (response: any) => {
-      if (response?.meta || response?.links) {
-        return {
-          data: response.data || [],
-          meta: response.meta,
-          links: response.links
-        };
-      }
-      
-      const inventory = response?.data || response || [];
-      if (Array.isArray(inventory)) {
-        return {
-          data: inventory,
-          meta: {
-            current_page: 1,
-            last_page: 1,
-            per_page: inventory.length,
-            total: inventory.length
-          }
-        };
-      }
-      
-      return {
-        data: [],
-        meta: {
-          current_page: 1,
-          last_page: 1,
-          per_page: 0,
-          total: 0
-        }
-      };
-    },
-    staleTime: 5 * 60 * 1000,
+    select: (response: any) => 
+      processPaginatedResponse(response, processInventoryData),
   });
 };
 
@@ -66,7 +40,8 @@ export const useInventoryList = (filters: ProductFilters = {}) => {
  */
 export function useInventoryDetail(id: number) {
   return useQuery({
-    queryKey: ['inventory', id],
+    ...BUSINESS_QUERY_CONFIG.INVENTORY.DETAIL,
+    queryKey: INVENTORY_KEYS.DETAIL(id),
     queryFn: async () => {
       const { data, error } = await apiClient.GET('/api/inventory/{inventory}' as any, {
         params: { path: { inventory: id } },
@@ -104,17 +79,8 @@ export function useInventoryAdjustment() {
       return data;
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ 
-          queryKey: ['inventory'],
-          exact: false,
-          refetchType: 'active'
-        }),
-        queryClient.refetchQueries({ 
-          queryKey: ['inventory'],
-          exact: false
-        })
-      ]);
+      const cacheInvalidation = createCacheInvalidation(queryClient);
+      await cacheInvalidation.invalidateAndRefetch(INVENTORY_KEYS.ALL);
     },
   });
 }
@@ -494,5 +460,31 @@ export function useInventoryTimeSeries(filters: {
     },
     enabled: !!filters.product_variant_id && !!filters.start_date && !!filters.end_date,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * 庫存批量檢查 Hook
+ */
+export function useInventoryBatchCheck() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (data: { 
+      product_variant_ids: string[]; 
+      store_id?: number; 
+      items?: Array<{ sku: string; quantity: number }> 
+    }) => {
+      const { data: response, error } = await apiClient.POST('/api/inventory/batch-check', {
+        body: data
+      });
+      if (error) {
+        throw new Error('批量庫存檢查失敗');
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+    },
   });
 }

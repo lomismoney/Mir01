@@ -3,6 +3,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { formatDate } from "@/lib/dateHelpers";
 import { InstallationWithRelations, InstallationStatus } from "@/types/installation";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +62,7 @@ export function InstallationProgressTracker({
         <div className="flex-1">
           <div className="font-medium text-destructive text-sm">已取消</div>
           <div className="text-xs text-muted-foreground">
-            {installation.created_at && format(new Date(installation.created_at), "MM/dd HH:mm", { locale: zhTW })}
+            {formatDate.shortDateTime(installation.created_at)}
           </div>
         </div>
       </div>
@@ -144,7 +145,7 @@ export function InstallationProgressTracker({
                   {/* 顯示對應階段的時間 */}
                   <div className="text-xs text-muted-foreground/70 min-h-[14px] text-center">
                     {stage.time && isActive ? (
-                      format(new Date(stage.time), "MM/dd", { locale: zhTW })
+                      formatDate.monthDay(stage.time)
                     ) : (
                       "--/--"
                     )}
@@ -209,7 +210,7 @@ export function InstallationProgressTracker({
                   
                   {stage.time && (
                     <time className="text-xs text-muted-foreground">
-                      {format(new Date(stage.time), "yyyy/MM/dd HH:mm", { locale: zhTW })}
+                      {formatDate.fullDateTime(stage.time)}
                     </time>
                   )}
                 </div>

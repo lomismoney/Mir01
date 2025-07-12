@@ -83,4 +83,31 @@ class PurchaseItem extends Model
     {
         return (int) round($value / 100);
     }
+
+    /**
+     * 獲取關聯的訂單項目（通過 purchase_item_id）
+     * 這些是與此進貨項目相關聯的預訂商品
+     */
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'purchase_item_id', 'id');
+    }
+
+    /**
+     * 獲取此進貨項目已分配給預訂商品的數量
+     */
+    public function getAllocatedQuantityAttribute(): int
+    {
+        return $this->orderItems()
+                    ->where('is_backorder', true)
+                    ->sum('fulfilled_quantity');
+    }
+
+    /**
+     * 獲取此進貨項目的可用數量（未分配給預訂的數量）
+     */
+    public function getAvailableQuantityAttribute(): int
+    {
+        return $this->quantity - $this->allocated_quantity;
+    }
 }

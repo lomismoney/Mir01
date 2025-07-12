@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StoreController;
 use App\Http\Controllers\Api\UserStoreController;
+use App\Http\Controllers\Api\InventoryAlertController;
 use App\Http\Resources\Api\UserResource;
 
 /**
@@ -211,6 +212,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/inventory/{inventory}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'history']);
     Route::get('/inventory/sku/{sku}/history', [App\Http\Controllers\Api\InventoryManagementController::class, 'getSkuHistory']);
     Route::post('/inventory/batch-check', [App\Http\Controllers\Api\InventoryManagementController::class, 'batchCheck']);
+    
+    // 庫存預警
+    Route::prefix('inventory/alerts')->name('api.inventory.alerts.')->group(function () {
+        Route::get('/low-stock', [InventoryAlertController::class, 'lowStock'])->name('low-stock');
+        Route::get('/summary', [InventoryAlertController::class, 'summary'])->name('summary');
+        Route::post('/update-thresholds', [InventoryAlertController::class, 'updateThresholds'])->name('update-thresholds');
+    });
 
     /**
      * 客戶管理資源路由
@@ -294,6 +302,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('reports')->name('api.reports.')->group(function () {
         Route::get('/inventory-time-series', [App\Http\Controllers\Api\ReportController::class, 'inventoryTimeSeries'])
              ->name('inventory-time-series');
+    });
+
+    /**
+     * 預訂商品管理路由
+     * 提供預訂商品的追蹤、統計和批量轉換為進貨單的功能
+     * 協助避免遺忘向供應商下單的情況
+     * 
+     * 路由列表：
+     * GET    /api/backorders                 - 獲取待處理預訂商品清單（支援分組、篩選）
+     * GET    /api/backorders/stats           - 獲取預訂商品統計資訊
+     * GET    /api/backorders/summary         - 獲取預訂商品彙總（準備轉換為進貨單）
+     * POST   /api/backorders/convert         - 批量轉換預訂商品為進貨單
+     */
+    Route::prefix('backorders')->name('api.backorders.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\BackorderController::class, 'index'])->name('index');
+        Route::get('/stats', [App\Http\Controllers\Api\BackorderController::class, 'stats'])->name('stats');
+        Route::get('/summary', [App\Http\Controllers\Api\BackorderController::class, 'summary'])->name('summary');
+        Route::post('/convert', [App\Http\Controllers\Api\BackorderController::class, 'convertToPurchase'])->name('convert');
     });
 
     /**

@@ -44,7 +44,7 @@ export function CategoryOptionRenderer({
         value={category.name} // value 用於搜尋功能
         onSelect={() => onSelect(category.id)}
         style={{ paddingLeft: `${1 + level * 1.5}rem` }} // 根據層級計算縮排距離
-        data-oid="qp04wpd"
+       
       >
         {/* 選中狀態的勾選圖標 */}
         <Check
@@ -52,7 +52,7 @@ export function CategoryOptionRenderer({
             "mr-2 h-4 w-4",
             currentValue === category.id ? "opacity-100" : "opacity-0",
           )}
-          data-oid="f7u:3pq"
+         
         />
 
         {category.name}
@@ -67,7 +67,7 @@ export function CategoryOptionRenderer({
           currentValue={currentValue}
           onSelect={onSelect}
           level={level + 1} // 遞迴時層級加一，增加縮排
-          data-oid="k47pys-"
+         
         />
       ))}
     </>

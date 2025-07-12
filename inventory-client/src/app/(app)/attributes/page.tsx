@@ -20,10 +20,10 @@ export default function AttributesPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
     <Suspense
-      fallback={<DataTableSkeleton data-oid="ntg.k:1" />}
-      data-oid=".qannux"
+      fallback={<DataTableSkeleton />}
+     
     >
-      <AttributesClientPage data-oid="8ndvy0h" />
+      <AttributesClientPage />
     </Suspense>
   );
 }

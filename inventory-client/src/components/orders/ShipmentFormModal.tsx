@@ -21,8 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useCreateOrderShipment } from "@/hooks";
-import { toast } from "sonner";
+import { useCreateOrderShipment, useErrorHandler } from "@/hooks";
 
 /**
  * 出貨表單 Zod 驗證 Schema
@@ -72,6 +71,7 @@ export function ShipmentFormModal({
 }: ShipmentFormModalProps) {
   // 🎯 調用出貨建立的 mutation hook
   const createShipment = useCreateOrderShipment();
+  const { handleError, handleSuccess } = useErrorHandler();
 
   // 🎯 初始化 react-hook-form，整合 Zod 驗證
   const form = useForm<ShipmentFormValues>({
@@ -100,9 +100,7 @@ export function ShipmentFormModal({
       {
         onSuccess: () => {
           // 🎉 成功時的處理邏輯
-          toast.success("出貨資訊已建立", {
-            description: `追蹤單號：${values.tracking_number}`,
-          });
+          handleSuccess(`出貨資訊已建立 - 追蹤單號：${values.tracking_number}`);
 
           // 🔄 重置表單狀態
           form.reset();
@@ -110,12 +108,7 @@ export function ShipmentFormModal({
           // 🚪 關閉 Modal
           onOpenChange(false);
         },
-        onError: (error) => {
-          // 🚨 錯誤時的處理邏輯
-          toast.error("建立出貨資訊失敗", {
-            description: error.message || "請檢查網路連接後重試",
-          });
-        },
+        onError: (error) => handleError(error),
       },
     );
   };
@@ -130,36 +123,36 @@ export function ShipmentFormModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose} data-oid="mpbjo-4">
-      <DialogContent className="sm:max-w-md" data-oid="qc--ll4">
-        <DialogHeader data-oid="e77lkqq">
-          <DialogTitle data-oid="sr0y4m0">建立出貨資訊</DialogTitle>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>建立出貨資訊</DialogTitle>
         </DialogHeader>
 
-        <Form {...form} data-oid="nc1.fkf">
+        <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-6"
-            data-oid="lzdr25d"
+           
           >
             {/* 物流公司欄位 */}
             <FormField
               control={form.control}
               name="carrier"
               render={({ field }) => (
-                <FormItem data-oid="j2:7:5r">
-                  <FormLabel data-oid="99enhuq">物流公司</FormLabel>
-                  <FormControl data-oid="uvnhrv-">
+                <FormItem>
+                  <FormLabel>物流公司</FormLabel>
+                  <FormControl>
                     <Input
                       placeholder="請輸入物流公司名稱（如：黑貓宅急便、新竹貨運）"
                       {...field}
-                      data-oid="ha5akqv"
+                     
                     />
                   </FormControl>
-                  <FormMessage data-oid="7qjawuz" />
+                  <FormMessage />
                 </FormItem>
               )}
-              data-oid="aa23_g-"
+             
             />
 
             {/* 追蹤單號欄位 */}
@@ -167,36 +160,36 @@ export function ShipmentFormModal({
               control={form.control}
               name="tracking_number"
               render={({ field }) => (
-                <FormItem data-oid="03ct5t2">
-                  <FormLabel data-oid="y-oxyta">追蹤單號</FormLabel>
-                  <FormControl data-oid="-7rz.n3">
+                <FormItem>
+                  <FormLabel>追蹤單號</FormLabel>
+                  <FormControl>
                     <Input
                       placeholder="請輸入追蹤單號"
                       {...field}
-                      data-oid="t8yvjdx"
+                     
                     />
                   </FormControl>
-                  <FormMessage data-oid="b0:gcg0" />
+                  <FormMessage />
                 </FormItem>
               )}
-              data-oid="hb5afsq"
+             
             />
 
             {/* 表單操作按鈕 */}
-            <DialogFooter className="gap-2" data-oid="ocldaol">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={createShipment.isPending}
-                data-oid="ge_u1ez"
+               
               >
                 取消
               </Button>
               <Button
                 type="submit"
                 disabled={createShipment.isPending}
-                data-oid="j0dakvo"
+               
               >
                 {createShipment.isPending ? "建立中..." : "建立出貨"}
               </Button>

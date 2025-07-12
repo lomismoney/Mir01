@@ -99,19 +99,19 @@ export function InventoryListTable({
 
     if (quantity <= 0) {
       return (
-        <Badge variant="destructive" data-oid="k9isybl">
+        <Badge variant="destructive">
           缺貨
         </Badge>
       );
     } else if (quantity <= lowStockThreshold) {
       return (
-        <Badge variant="outline" data-oid="ivmasp5">
+        <Badge variant="outline">
           低庫存
         </Badge>
       );
     } else {
       return (
-        <Badge variant="default" data-oid="sj620nc">
+        <Badge variant="default">
           正常
         </Badge>
       );
@@ -121,100 +121,100 @@ export function InventoryListTable({
   const flatInventoryItems = flattenInventoryData(data);
 
   return (
-    <div className="rounded-md border" data-oid="kv-uht3">
-      <Table data-oid="c0tobc0">
-        <TableHeader data-oid="oolkh13">
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
           <TableRow
             className="border-b hover:bg-transparent"
-            data-oid="cvqkomq"
+           
           >
             <TableHead
               className="w-[100px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-              data-oid="w87krfw"
+             
             >
               SKU
             </TableHead>
             <TableHead
               className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-              data-oid="z66.sm."
+             
             >
               產品名稱
             </TableHead>
             <TableHead
               className="w-[120px] h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-              data-oid="wl_l16_"
+             
             >
               所在分店
             </TableHead>
             <TableHead
               className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="8ekcm7r"
+             
             >
               數量
             </TableHead>
             <TableHead
               className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="4d2c-se"
+             
             >
               售價
             </TableHead>
             <TableHead
               className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="nyfwqd9"
+             
             >
               平均成本
             </TableHead>
             <TableHead
               className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="1jsbdo8"
+             
             >
               利潤率
             </TableHead>
             <TableHead
               className="text-center h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="er-4q53"
+             
             >
               狀態
             </TableHead>
             <TableHead
               className="text-right h-12 px-4 align-middle font-medium text-muted-foreground"
-              data-oid="4ryquqk"
+             
             >
               操作
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody data-oid="q7sbuja">
+        <TableBody>
           {isLoading ? (
             // 載入中顯示骨架屏
             Array.from({ length: 5 }).map((_, index) => (
-              <TableRow key={`skeleton-${index}`} data-oid="urio_pp">
-                <TableCell colSpan={9} data-oid="yyaj_i3">
-                  <Skeleton className="h-12 w-full" data-oid="pulct47" />
+              <TableRow key={`skeleton-${index}`}>
+                <TableCell colSpan={9}>
+                  <Skeleton className="h-12 w-full" />
                 </TableCell>
               </TableRow>
             ))
           ) : flatInventoryItems.length === 0 ? (
             // 無資料顯示
-            <TableRow data-oid="7mw77db">
+            <TableRow>
               <TableCell
                 colSpan={9}
                 className="h-24 text-center"
-                data-oid="vyf1_l1"
+               
               >
                 <div
                   className="flex flex-col items-center justify-center space-y-3 py-6"
-                  data-oid="ug-2hh2"
+                 
                 >
                   <p
                     className="text-lg font-medium text-muted-foreground"
-                    data-oid="p93w2:9"
+                   
                   >
                     沒有庫存資料
                   </p>
                   <p
                     className="text-sm text-muted-foreground"
-                    data-oid="g:5.9a9"
+                   
                   >
                     選擇一個門市並添加庫存
                   </p>
@@ -224,40 +224,40 @@ export function InventoryListTable({
           ) : (
             // 庫存資料
             flatInventoryItems.map((item, index) => (
-              <TableRow key={`${item.inventoryId}-${index}`} data-oid="eku5bg0">
+              <TableRow key={`${item.inventoryId}-${index}`}>
                 <TableCell
                   className="font-medium font-mono text-sm"
-                  data-oid="qwq9--2"
+                 
                 >
                   {item.sku}
                 </TableCell>
-                <TableCell data-oid="gn584h_">{item.productName}</TableCell>
-                <TableCell className="font-medium" data-oid="v:q0zig">
+                <TableCell>{item.productName}</TableCell>
+                <TableCell className="font-medium">
                   {item.storeName}
                 </TableCell>
-                <TableCell className="text-center font-mono" data-oid="6qqxj8t">
+                <TableCell className="text-center font-mono">
                   {item.quantity.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-right font-mono" data-oid="lby7t8t">
+                <TableCell className="text-right font-mono">
                   {item.price > 0 ? `NT$ ${item.price.toLocaleString()}` : "—"}
                 </TableCell>
-                <TableCell className="text-right font-mono" data-oid="2-yrosu">
+                <TableCell className="text-right font-mono">
                   {item.averageCost && item.averageCost > 0
                     ? `NT$ ${item.averageCost.toLocaleString()}`
                     : "—"}
                 </TableCell>
-                <TableCell className="text-right font-mono" data-oid="5bmrdw8">
+                <TableCell className="text-right font-mono">
                   {item.profitMargin && item.profitMargin > 0
                     ? `${item.profitMargin.toFixed(1)}%`
                     : "—"}
                 </TableCell>
-                <TableCell className="text-center" data-oid="nmk67pp">
+                <TableCell className="text-center">
                   {getStockStatusBadge(item)}
                 </TableCell>
-                <TableCell className="text-right" data-oid=".b30llb">
+                <TableCell className="text-right">
                   <div
                     className="flex justify-end space-x-2"
-                    data-oid="8mw69-s"
+                   
                   >
                     <Button
                       variant="outline"
@@ -269,10 +269,10 @@ export function InventoryListTable({
                           item.quantity,
                         )
                       }
-                      data-oid="z68.e27"
+                     
                     >
-                      <ArrowUpDown className="h-4 w-4" data-oid="cazidwh" />
-                      <span className="sr-only" data-oid="__ialje">
+                      <ArrowUpDown className="h-4 w-4" />
+                      <span className="sr-only">
                         調整庫存
                       </span>
                     </Button>

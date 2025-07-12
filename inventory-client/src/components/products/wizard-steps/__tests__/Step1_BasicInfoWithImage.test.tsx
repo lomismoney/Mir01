@@ -250,7 +250,7 @@ describe('Step1_BasicInfoWithImage', () => {
 
       await waitFor(() => {
         expect(screen.getByText('商品名稱至少需要2個字符')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      });
     });
 
     test('應該驗證商品描述長度限制', async () => {
@@ -279,7 +279,7 @@ describe('Step1_BasicInfoWithImage', () => {
 
       await waitFor(() => {
         expect(screen.getByText('商品描述不能超過1000個字符')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      });
     });
 
     test('當輸入有效內容時應該清除驗證錯誤', async () => {
@@ -557,7 +557,7 @@ describe('Step1_BasicInfoWithImage', () => {
                 category_id: null,
               });
             }
-          }, { timeout: 1000 });
+          });
         }
       } catch (error) {
         // 如果選擇操作失敗，至少確保基本渲染正常

@@ -39,8 +39,10 @@ class SyncApiContract extends Command
 
     /**
      * Execute the console command.
+     *
+     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $frontendPath = $this->option('frontend-path');
         $checkOnly = $this->option('check');

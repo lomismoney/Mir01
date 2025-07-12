@@ -224,7 +224,14 @@ export function useCreateCategory() {
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
   
-  type UpdateCategoryRequestBody = any;
+  interface UpdateCategoryRequestBody {
+    name?: string;
+    description?: string;
+    parent_id?: number | null;
+    sort_order?: number;
+    is_active?: boolean;
+    image_url?: string;
+  }
   type UpdateCategoryPayload = {
     id: number;
     data: UpdateCategoryRequestBody;

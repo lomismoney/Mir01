@@ -257,7 +257,28 @@ export function useCustomers(filters?: CustomerFilters) {
 export function useUpdateCustomer() {
   const queryClient = useQueryClient();
   
-  type UpdateCustomerRequestBody = any;
+  interface UpdateCustomerRequestBody {
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    tax_number?: string;
+    note?: string;
+    is_active?: boolean;
+    addresses?: Array<{
+      id?: number;
+      type: 'billing' | 'shipping';
+      contact_name: string;
+      phone: string;
+      address_line_1: string;
+      address_line_2?: string;
+      city: string;
+      state: string;
+      postal_code: string;
+      country: string;
+      is_default: boolean;
+    }>;
+  }
   type UpdateCustomerPayload = {
     id: number;
     data: UpdateCustomerRequestBody;
@@ -267,7 +288,17 @@ export function useUpdateCustomer() {
     mutationFn: async ({ id, data }: UpdateCustomerPayload) => {
       const { data: responseData, error } = await apiClient.PUT('/api/customers/{customer}', {
         params: { path: { customer: id } },
-        body: data,
+        body: {
+          name: data.name || '',
+          phone: data.phone || null,
+          email: data.email || null,
+          is_company: !!data.company || false,
+          tax_id: data.tax_number || null,
+          industry_type: '',
+          payment_type: 'cash',
+          contact_address: data.note || null,
+          addresses: [],
+        },
       });
       if (error) throw error;
       return responseData;

@@ -56,11 +56,11 @@ export function DataTablePagination<TData>({
   return (
     <div
       className="flex items-center justify-between px-2 py-4"
-      data-oid="ntwr:v8"
+     
     >
       {/* 左側：頁面大小選擇器 */}
-      <div className="flex items-center space-x-2" data-oid="o77mgv9">
-        <p className="text-sm font-medium" data-oid="pzqbdj2">
+      <div className="flex items-center space-x-2">
+        <p className="text-sm font-medium">
           每頁顯示
         </p>
         <Select
@@ -68,24 +68,24 @@ export function DataTablePagination<TData>({
           onValueChange={(value) => {
             table.setPageSize(Number(value));
           }}
-          data-oid="1kez7_t"
+         
         >
-          <SelectTrigger className="h-8 w-[70px]" data-oid="zgr68l.">
-            <SelectValue placeholder={pageSize} data-oid="g5ryotc" />
+          <SelectTrigger className="h-8 w-[70px]">
+            <SelectValue placeholder={pageSize} />
           </SelectTrigger>
-          <SelectContent side="top" data-oid="q5r:1.2">
+          <SelectContent side="top">
             {pageSizeOptions.map((pageSize) => (
               <SelectItem
                 key={pageSize}
                 value={`${pageSize}`}
-                data-oid="e7ej7_o"
+               
               >
                 {pageSize}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <p className="text-sm font-medium" data-oid="lrtuvv:">
+        <p className="text-sm font-medium">
           筆
         </p>
       </div>
@@ -93,22 +93,22 @@ export function DataTablePagination<TData>({
       {/* 中間：數據範圍顯示 */}
       <div
         className="flex items-center justify-center text-sm font-medium"
-        data-oid="c_da-mc"
+       
       >
         顯示第 {startRow} - {endRow} 筆，共 {totalRows} 筆
       </div>
 
       {/* 右側：分頁導航 */}
-      <div className="flex items-center space-x-2" data-oid="m5hqns2">
+      <div className="flex items-center space-x-2">
         {/* 頁面信息 */}
-        <div className="flex items-center space-x-2" data-oid="v4do7dx">
-          <p className="text-sm font-medium" data-oid="k27tjqu">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm font-medium">
             第 {currentPage} 頁，共 {totalPages} 頁
           </p>
         </div>
 
         {/* 分頁按鈕 */}
-        <div className="flex items-center space-x-1" data-oid="ji288iy">
+        <div className="flex items-center space-x-1">
           {/* 第一頁 */}
           <Button
             variant="outline"
@@ -116,9 +116,9 @@ export function DataTablePagination<TData>({
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
             aria-label="跳到第一頁"
-            data-oid="4p9070g"
+           
           >
-            <ChevronsLeftIcon className="h-4 w-4" data-oid="j07zgdd" />
+            <ChevronsLeftIcon className="h-4 w-4" />
           </Button>
 
           {/* 上一頁 */}
@@ -128,9 +128,9 @@ export function DataTablePagination<TData>({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
             aria-label="上一頁"
-            data-oid="ebrmomn"
+           
           >
-            <ChevronLeftIcon className="h-4 w-4" data-oid="vr_xj9i" />
+            <ChevronLeftIcon className="h-4 w-4" />
           </Button>
 
           {/* 下一頁 */}
@@ -140,9 +140,9 @@ export function DataTablePagination<TData>({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
             aria-label="下一頁"
-            data-oid="lnesmsu"
+           
           >
-            <ChevronRightIcon className="h-4 w-4" data-oid="ze8ps2c" />
+            <ChevronRightIcon className="h-4 w-4" />
           </Button>
 
           {/* 最後一頁 */}
@@ -152,9 +152,9 @@ export function DataTablePagination<TData>({
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
             aria-label="跳到最後一頁"
-            data-oid="jls7u65"
+           
           >
-            <ChevronsRightIcon className="h-4 w-4" data-oid=".dktx3t" />
+            <ChevronsRightIcon className="h-4 w-4" />
           </Button>
         </div>
       </div>

@@ -605,4 +605,139 @@ describe('useStores hooks', () => {
       });
     });
   });
+
+  describe('useStores data processing', () => {
+    it('should handle stores with missing optional fields', async () => {
+      const mockStores = [
+        {
+          id: 1,
+          name: 'Store 1',
+          status: 'active',
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-01T00:00:00Z'
+          // 缺少 address, phone, inventory_count
+        },
+        {
+          id: 2,
+          // 缺少 name
+          address: '123 Main St',
+          phone: '555-1234',
+          status: 'inactive',
+          created_at: '2023-01-02T00:00:00Z',
+          updated_at: '2023-01-02T00:00:00Z',
+          inventory_count: 50
+        }
+      ];
+
+      mockApiClient.GET.mockResolvedValueOnce({
+        data: mockStores,
+        error: null
+      });
+
+      const { result } = renderHook(() => useStores(), {
+        wrapper: createWrapper()
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data?.data).toEqual([
+        {
+          id: 1,
+          name: 'Store 1',
+          address: null,
+          phone: null,
+          status: 'active',
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-01T00:00:00Z',
+          inventory_count: 0,
+          users_count: 0
+        },
+        {
+          id: 2,
+          name: '未命名門市',
+          address: '123 Main St',
+          phone: '555-1234',
+          status: 'inactive',
+          created_at: '2023-01-02T00:00:00Z',
+          updated_at: '2023-01-02T00:00:00Z',
+          inventory_count: 50,
+          users_count: 0
+        }
+      ]);
+    });
+
+    it('should handle completely invalid store data', async () => {
+      const mockStores = [
+        {
+          // 缺少 id
+          name: 'Store 1'
+        },
+        {
+          id: 2
+          // 缺少其他所有字段
+        }
+      ];
+
+      mockApiClient.GET.mockResolvedValueOnce({
+        data: mockStores,
+        error: null
+      });
+
+      const { result } = renderHook(() => useStores(), {
+        wrapper: createWrapper()
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data?.data).toEqual([
+        {
+          id: 0,
+          name: 'Store 1',
+          address: null,
+          phone: null,
+          status: 'active',
+          created_at: '',
+          updated_at: '',
+          inventory_count: 0,
+          users_count: 0
+        },
+        {
+          id: 2,
+          name: '未命名門市',
+          address: null,
+          phone: null,
+          status: 'active',
+          created_at: '',
+          updated_at: '',
+          inventory_count: 0,
+          users_count: 0
+        }
+      ]);
+    });
+
+    it('should handle non-array data', async () => {
+      const mockData = {
+        stores: [{ id: 1, name: 'Store 1' }]
+      };
+
+      mockApiClient.GET.mockResolvedValueOnce({
+        data: mockData,
+        error: null
+      });
+
+      const { result } = renderHook(() => useStores(), {
+        wrapper: createWrapper()
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data?.data).toEqual([]);
+    });
+  });
 });

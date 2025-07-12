@@ -36,7 +36,9 @@
 - **React** 19.x
 - **shadcn/ui** - UI 元件庫
 - **Tailwind CSS** 4.x - 樣式框架
-- **@tanstack/react-query** - 狀態管理
+- **@tanstack/react-query** - 伺服器狀態管理
+- **zustand** - 客戶端狀態管理
+- **immer** - 不可變狀態更新
 - **openapi-fetch** - API 客戶端
 - **react-hook-form** - 表單管理
 - **Sonner** - Toast 通知

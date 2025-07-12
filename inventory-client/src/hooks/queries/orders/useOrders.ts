@@ -106,6 +106,7 @@ export function useOrders(filters: {
         links: links
       };
     },
+    placeholderData: (previousData) => previousData,
     staleTime: 1 * 60 * 1000, // 設置 1 分鐘的數據保鮮期
   });
 }

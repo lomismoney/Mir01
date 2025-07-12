@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { formatDate, safeFormatDate } from "@/lib/dateHelpers";
 import { 
   INSTALLATION_STATUS_VARIANTS, 
   INSTALLATION_STATUS_LABELS,
@@ -97,7 +98,7 @@ export function InstallationPreviewContent({ installationId }: InstallationPrevi
               {INSTALLATION_STATUS_LABELS[installation.status as InstallationStatus]}
             </Badge>
             <span className="text-sm text-muted-foreground">
-              建立於 {format(new Date(installation.created_at), "yyyy/MM/dd HH:mm", { locale: zhTW })}
+              建立於 {formatDate.fullDateTime(installation.created_at)}
             </span>
           </div>
         </div>
@@ -167,10 +168,7 @@ export function InstallationPreviewContent({ installationId }: InstallationPrevi
                 預計安裝日期
               </label>
               <p className="font-semibold">
-                {installation.scheduled_date ? 
-                  format(new Date(installation.scheduled_date), "yyyy 年 MM 月 dd 日 (EEEE)", { locale: zhTW }) :
-                  <span className="text-muted-foreground italic">尚未安排</span>
-                }
+                {formatDate.chineseDateWithWeekday(installation.scheduled_date, "尚未安排")}
               </p>
             </div>
             
@@ -194,19 +192,13 @@ export function InstallationPreviewContent({ installationId }: InstallationPrevi
               <div>
                 <label className="text-xs font-medium text-muted-foreground">開始時間</label>
                 <p className="text-sm">
-                  {installation.actual_start_time ? 
-                    format(new Date(installation.actual_start_time), "MM/dd HH:mm") :
-                    <span className="text-muted-foreground italic">未開始</span>
-                  }
+                  {formatDate.shortDateTime(installation.actual_start_time, "未開始")}
                 </p>
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground">完成時間</label>
                 <p className="text-sm">
-                  {installation.actual_end_time ? 
-                    format(new Date(installation.actual_end_time), "MM/dd HH:mm") :
-                    <span className="text-muted-foreground italic">未完成</span>
-                  }
+                  {formatDate.shortDateTime(installation.actual_end_time, "未完成")}
                 </p>
               </div>
             </div>
@@ -361,7 +353,7 @@ export function InstallationPreviewContent({ installationId }: InstallationPrevi
       {installation.creator && (
         <div className="text-center text-sm text-muted-foreground pt-4 border-t">
           由 <span className="font-medium">{installation.creator.name}</span> 於{" "}
-          {format(new Date(installation.created_at), "yyyy/MM/dd HH:mm", { locale: zhTW })} 建立
+          {formatDate.fullDateTime(installation.created_at)} 建立
         </div>
       )}
     </div>

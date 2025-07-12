@@ -42,6 +42,16 @@ const mockUseAttributes = useAttributes as jest.MockedFunction<typeof useAttribu
 const mockUseCreateAttributeValue = useCreateAttributeValue as jest.MockedFunction<typeof useCreateAttributeValue>;
 const mockUseSession = useSession as jest.MockedFunction<typeof useSession>;
 
+// Mock console.error 以避免測試中的錯誤輸出
+const originalConsoleError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+});
+
 describe('Step2_DefineSpecs', () => {
   let mockUpdateFormData: jest.Mock;
   let currentFormData: WizardFormData;
@@ -171,7 +181,7 @@ describe('Step2_DefineSpecs', () => {
       );
 
       // 查找幫助圖標
-      const helpIcon = document.querySelector('svg[data-oid="yyipdwf"]');
+      const helpIcon = document.querySelector('svg[]');
       expect(helpIcon).toBeInTheDocument();
     });
   });
@@ -723,7 +733,7 @@ describe('Step2_DefineSpecs', () => {
       const removeButtons = screen.getAllByRole('button');
       const removeRedButton = removeButtons.find(button => 
         button.querySelector('svg') && 
-        button.closest('[data-oid="fn4d3bj"]')?.textContent?.includes('紅色')
+        button.closest('[]')?.textContent?.includes('紅色')
       );
 
       if (removeRedButton) {
@@ -987,7 +997,7 @@ describe('Step2_DefineSpecs', () => {
       );
 
       // 點擊屬性卡片本身（不是複選框）
-      const colorCard = screen.getByText('顏色').closest('[data-oid="7f6.z0r"]');
+      const colorCard = screen.getByText('顏色').closest('[]');
       if (colorCard) {
         await user.click(colorCard);
 

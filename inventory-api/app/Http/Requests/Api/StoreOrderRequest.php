@@ -23,6 +23,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'customer_id'          => 'required|exists:customers,id',
+            'store_id'             => 'required|exists:stores,id',
             'shipping_status'      => 'required|string',
             'payment_status'       => 'required|string',
             'shipping_fee'         => 'nullable|numeric|min:0',

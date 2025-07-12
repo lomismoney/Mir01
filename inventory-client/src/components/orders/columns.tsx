@@ -44,6 +44,7 @@ import {
 import Link from "next/link";
 import { Order, ProcessedOrder } from "@/types/api-helpers";
 import { useDeleteOrder } from "@/hooks";
+import { formatPrice } from "@/lib/utils";
 
 // 創建 columns 函數，接受預覽、出貨、收款、退款、取消和刪除回調
 export const createColumns = ({
@@ -73,7 +74,7 @@ export const createColumns = ({
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
         className="mx-auto block"
-        data-oid="dtoft90"
+       
       />
     ),
 
@@ -83,7 +84,7 @@ export const createColumns = ({
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
         className="mx-auto block"
-        data-oid="_2_w_d."
+       
       />
     ),
 
@@ -104,11 +105,11 @@ export const createColumns = ({
       const isBackorder = order.notes?.includes('【智能預訂】') || false;
       
       return (
-        <div className="flex items-center gap-2" data-oid="vx3ki2n">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => onPreview(order.id)}
             className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-            data-oid="b1yasza"
+           
           >
             {order.order_number}
           </button>
@@ -121,7 +122,7 @@ export const createColumns = ({
                   <Badge 
                     variant="warning" 
                     className="text-xs cursor-help"
-                    data-oid="backorder-badge"
+                   
                   >
                     預訂
                   </Badge>
@@ -133,11 +134,35 @@ export const createColumns = ({
             </TooltipProvider>
           )}
           
-          {/* 🎯 如果訂單包含訂製商品，顯示標籤 */}
-          {order.has_custom_items && (
-            <Badge variant="secondary" className="text-xs" data-oid="qfgr0ki">
-              含訂製品
-            </Badge>
+          {/* 🎯 顯示訂單包含的商品類型標籤 */}
+          {order.items && order.items.length > 0 && (
+            <div className="flex gap-1 flex-wrap">
+              {(() => {
+                const hasStock = order.items.some((item: any) => 
+                  item.item_type === 'stock' || item.is_stocked_sale
+                );
+                const hasBackorder = order.items.some((item: any) => 
+                  item.item_type === 'backorder' || item.is_backorder
+                );
+                const hasCustom = order.items.some((item: any) => 
+                  item.item_type === 'custom' || (!item.product_variant_id && !item.is_stocked_sale && !item.is_backorder)
+                );
+
+                return (
+                  <>
+                    {hasStock && (
+                      <Badge variant="default" className="text-xs">現貨</Badge>
+                    )}
+                    {hasBackorder && (
+                      <Badge variant="secondary" className="text-xs">預訂</Badge>
+                    )}
+                    {hasCustom && (
+                      <Badge variant="outline" className="text-xs">訂製</Badge>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
           )}
         </div>
       );
@@ -151,7 +176,7 @@ export const createColumns = ({
       <div className="text-center">
         <span
           className="whitespace-nowrap text-muted-foreground text-sm"
-          data-oid="j-3iaoj"
+         
         >
           {row.original.formatted_created_date}
         </span>
@@ -167,7 +192,7 @@ export const createColumns = ({
         <div
           className="max-w-[150px] truncate text-sm"
           title={customerName}
-          data-oid="79txkxp"
+         
         >
           {customerName}
         </div>
@@ -178,30 +203,57 @@ export const createColumns = ({
     accessorKey: "grand_total",
     size: 120,
     header: () => (
-      <div className="text-center" data-oid="_k7mj.p">
+      <div className="text-center">
         訂單總額
       </div>
     ),
 
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("grand_total"));
-      const formatted = new Intl.NumberFormat("zh-TW", {
-        style: "currency",
-        currency: "TWD",
-        minimumFractionDigits: 0,
-      }).format(amount);
-              return (
-          <div className="text-center">
-            <span
-              className="font-medium tabular-nums text-sm"
-              data-oid="weqxenh"
-            >
-              {formatted}
-            </span>
-          </div>
-        );
-      },
+      return (
+        <div className="text-center">
+          <span
+            className="font-medium tabular-nums text-sm"
+           
+          >
+            {formatPrice(amount)}
+          </span>
+        </div>
+      );
     },
+    },
+
+  {
+    accessorKey: "fulfillment_priority",
+    header: () => <div className="text-center">優先級</div>,
+    size: 90,
+    cell: ({ row }) => {
+      const priority = row.getValue("fulfillment_priority") as string || "normal";
+      const variant: "default" | "secondary" | "destructive" | "outline" =
+        priority === "urgent"
+          ? "destructive"
+          : priority === "high"
+            ? "default"
+            : priority === "low"
+              ? "outline"
+              : "secondary";
+
+      const priorityText = {
+        urgent: "緊急",
+        high: "高",
+        normal: "一般",
+        low: "低",
+      }[priority] || priority;
+
+      return (
+        <div className="text-center">
+          <Badge variant={variant} className="text-xs">
+            {priorityText}
+          </Badge>
+        </div>
+      );
+    },
+  },
 
   {
     accessorKey: "payment_status",
@@ -228,7 +280,7 @@ export const createColumns = ({
 
       return (
         <div className="text-center">
-          <Badge variant={variant} className="text-xs" data-oid="asnc4c9">
+          <Badge variant={variant} className="text-xs">
             {statusText}
           </Badge>
         </div>
@@ -263,7 +315,49 @@ export const createColumns = ({
 
       return (
         <div className="text-center">
-          <Badge variant={variant} className="text-xs" data-oid="lo24k4c">
+          <Badge variant={variant} className="text-xs">
+            {statusText}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
+    id: "fulfillment_status",
+    header: () => <div className="text-center">履行狀態</div>,
+    size: 120,
+    cell: ({ row }) => {
+      const order = row.original;
+      
+      // 計算履行狀態（基於訂單項目的履行狀況）
+      if (!order.items || order.items.length === 0) {
+        return (
+          <div className="text-center">
+            <Badge variant="outline" className="text-xs">無項目</Badge>
+          </div>
+        );
+      }
+
+      const totalItems = order.items.length;
+      const fulfilledItems = order.items.filter((item: any) => item.is_fulfilled).length;
+      const partiallyFulfilledItems = order.items.filter(
+        (item: any) => !item.is_fulfilled && (item.fulfilled_quantity || 0) > 0
+      ).length;
+
+      let variant: "default" | "secondary" | "destructive" | "outline" = "outline";
+      let statusText = "未履行";
+
+      if (fulfilledItems === totalItems) {
+        variant = "default";
+        statusText = "已履行";
+      } else if (fulfilledItems > 0 || partiallyFulfilledItems > 0) {
+        variant = "secondary";
+        statusText = `部分履行 (${fulfilledItems + partiallyFulfilledItems}/${totalItems})`;
+      }
+
+      return (
+        <div className="text-center">
+          <Badge variant={variant} className="text-xs">
             {statusText}
           </Badge>
         </div>
@@ -275,7 +369,7 @@ export const createColumns = ({
     id: "actions",
     size: 80,
     header: () => (
-      <div className="text-right" data-oid="s-wb7qj">
+      <div className="text-right">
         操作
       </div>
     ),
@@ -290,53 +384,53 @@ export const createColumns = ({
       );
 
       return (
-        <div className="flex justify-end" data-oid="nppn:fh">
-          <DropdownMenu data-oid="sy5q_4b">
-            <DropdownMenuTrigger asChild data-oid="r-id9zg">
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 className="h-8 w-8 p-0"
-                data-oid="hz3jisl"
+               
               >
-                <span className="sr-only" data-oid="7uc2pk:">
+                <span className="sr-only">
                   Open menu
                 </span>
-                <MoreHorizontal className="h-4 w-4" data-oid="yjrr0xu" />
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" data-oid="4bydpf_">
-              <DropdownMenuLabel data-oid="b63_.zi">操作</DropdownMenuLabel>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>操作</DropdownMenuLabel>
 
               {/* --- 檢視分組 --- */}
-              <DropdownMenuGroup data-oid="5cgyicm">
+              <DropdownMenuGroup>
                 <DropdownMenuItem
                   onSelect={() => onPreview(order.id)}
-                  data-oid="xu6jjxj"
+                 
                 >
-                  <Eye className="mr-2 h-4 w-4" data-oid="mu2dma8" />
-                  <span data-oid="t34jupw">快速預覽</span>
+                  <Eye className="mr-2 h-4 w-4" />
+                  <span>快速預覽</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild data-oid="_btjumm">
-                  <Link href={`/orders/${order.id}`} data-oid="b06_25e">
-                    <FileText className="mr-2 h-4 w-4" data-oid="7hw7z_q" />
-                    <span data-oid="gwjjl6z">查看完整詳情</span>
+                <DropdownMenuItem asChild>
+                  <Link href={`/orders/${order.id}`}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>查看完整詳情</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator data-oid="_.rszkt" />
+              <DropdownMenuSeparator />
 
               {/* --- 核心流程分組 --- */}
-              <DropdownMenuGroup data-oid="n_0tipg">
+              <DropdownMenuGroup>
                 <DropdownMenuItem
                   onSelect={() =>
                     onRecordPayment(order as unknown as ProcessedOrder)
                   }
                   disabled={order.payment_status === "paid"}
-                  data-oid="ncarrq9"
+                 
                 >
-                  <DollarSign className="mr-2 h-4 w-4" data-oid="o9:yaq5" />
-                  <span data-oid="eshz.zi">記錄收款</span>
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  <span>記錄收款</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => onShip(order.id)}
@@ -344,90 +438,90 @@ export const createColumns = ({
                     order.payment_status !== "paid" ||
                     order.shipping_status !== "pending"
                   }
-                  data-oid="_y3gvqh"
+                 
                 >
-                  <Truck className="mr-2 h-4 w-4" data-oid="rvrcmts" />
-                  <span data-oid="5lf1shj">執行出貨</span>
+                  <Truck className="mr-2 h-4 w-4" />
+                  <span>執行出貨</span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator data-oid=":p1krvg" />
+              <DropdownMenuSeparator />
 
               {/* --- 逆向流程分組 --- */}
-              <DropdownMenuGroup data-oid="5puqtc5">
+              <DropdownMenuGroup>
                 <DropdownMenuItem
                   onSelect={() => onRefund(order as unknown as ProcessedOrder)}
                   disabled={
                     order.payment_status !== "paid" &&
                     order.payment_status !== "partial"
                   }
-                  data-oid="xvbf0.7"
+                 
                 >
                   <Undo2
                     className="mr-2 h-4 w-4 text-destructive"
-                    data-oid="4.au5bd"
+                   
                   />
 
-                  <span className="text-destructive" data-oid="iaqbdwe">
+                  <span className="text-destructive">
                     處理退款
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => onCancel(order as unknown as ProcessedOrder)}
                   disabled={!canCancel}
-                  data-oid="e9zrz8-"
+                 
                 >
                   <Ban
                     className="mr-2 h-4 w-4 text-destructive"
-                    data-oid="fnf0:xm"
+                   
                   />
 
-                  <span className="text-destructive" data-oid="i6elikl">
+                  <span className="text-destructive">
                     取消訂單
                   </span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator data-oid="_wno6sq" />
+              <DropdownMenuSeparator />
 
               {/* --- 編輯與刪除分組 --- */}
-              <DropdownMenuGroup data-oid="lf3z-7_">
-                <DropdownMenuItem asChild data-oid="kj-wnef">
-                  <Link href={`/orders/${order.id}/edit`} data-oid="28ihkuv">
-                    <Pencil className="mr-2 h-4 w-4" data-oid="r9ik56z" />
-                    <span data-oid="wiib862">編輯</span>
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link href={`/orders/${order.id}/edit`}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    <span>編輯</span>
                   </Link>
                 </DropdownMenuItem>
-                <AlertDialog data-oid="hk99khr">
-                  <AlertDialogTrigger asChild data-oid="fj212jr">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
                     <DropdownMenuItem
                       className="text-destructive"
                       onSelect={(e) => e.preventDefault()} // 防止 DropdownMenu 立即關閉
-                      data-oid="dp8m7.g"
+                     
                     >
-                      <Trash2 className="mr-2 h-4 w-4" data-oid="r844g07" />
-                      <span data-oid="04stqyu">刪除</span>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>刪除</span>
                     </DropdownMenuItem>
                   </AlertDialogTrigger>
-                  <AlertDialogContent data-oid="otto0ze">
-                    <AlertDialogHeader data-oid="a:8cpau">
-                      <AlertDialogTitle data-oid=":-.pn3e">
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
                         確定要刪除此訂單嗎？
                       </AlertDialogTitle>
-                      <AlertDialogDescription data-oid="wcqouma">
+                      <AlertDialogDescription>
                         此操作無法撤銷。這將永久刪除訂單「{order.order_number}
                         」。
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter data-oid="j6r_5h0">
-                      <AlertDialogCancel data-oid="k6bef1t">
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>
                         取消
                       </AlertDialogCancel>
                       <AlertDialogAction
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         onClick={() => deleteOrder(order.id)}
                         disabled={isPending}
-                        data-oid="8vlg8y6"
+                       
                       >
                         {isPending ? "刪除中..." : "確定刪除"}
                       </AlertDialogAction>

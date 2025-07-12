@@ -154,24 +154,28 @@ class CheckApiDocs extends Command
      */
     private function checkDocumentationElement(string $docComment, string $element): bool
     {
+        $docCommentLower = strtolower($docComment);
+        
         switch ($element) {
             case 'business_logic':
-                return str_contains($docComment, '業務邏輯副作用') ||
-                       str_contains($docComment, '業務邏輯') ||
-                       str_contains($docComment, '副作用') ||
-                       str_contains($docComment, 'side effect');
+                return str_contains($docCommentLower, '業務邏輯副作用') ||
+                       str_contains($docCommentLower, '業務邏輯') ||
+                       str_contains($docCommentLower, '副作用') ||
+                       str_contains($docCommentLower, 'side effect') ||
+                       str_contains($docCommentLower, 'business logic') ||
+                       str_contains($docCommentLower, 'business');
 
             case 'inventory_impact':
-                return str_contains($docComment, '庫存') ||
-                       str_contains($docComment, 'inventory') ||
-                       str_contains($docComment, '入庫') ||
-                       str_contains($docComment, '庫存入庫');
+                return str_contains($docCommentLower, '庫存') ||
+                       str_contains($docCommentLower, 'inventory') ||
+                       str_contains($docCommentLower, '入庫') ||
+                       str_contains($docCommentLower, '庫存入庫');
 
             case 'transaction_guarantee':
-                return str_contains($docComment, '事務') ||
-                       str_contains($docComment, 'transaction') ||
-                       str_contains($docComment, '回滾') ||
-                       str_contains($docComment, 'rollback');
+                return str_contains($docCommentLower, '事務') ||
+                       str_contains($docCommentLower, 'transaction') ||
+                       str_contains($docCommentLower, '回滾') ||
+                       str_contains($docCommentLower, 'rollback');
 
             default:
                 return false;

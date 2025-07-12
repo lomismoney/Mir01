@@ -40,6 +40,11 @@ class RefundModelTest extends TestCase
         
         // 創建測試用戶
         $this->user = User::factory()->create();
+        
+        // 安全地分配角色，避免重複創建
+        if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+            \Spatie\Permission\Models\Role::create(['name' => 'admin']);
+        }
         $this->user->assignRole('admin');
         
         // 創建測試客戶
@@ -473,4 +478,41 @@ class RefundModelTest extends TestCase
         $this->assertTrue($results->contains($refund1));
         $this->assertFalse($results->contains($refund2));
     }
+
+    /**
+     * 測試 HandlesCurrency trait 功能
+     */
+    public function test_currency_handling(): void
+    {
+        $refund = Refund::factory()->create([
+            'order_id' => $this->order->id,
+            'creator_id' => $this->user->id,
+            'total_refund_amount' => 125.75,
+            'reason' => '測試金額處理'
+        ]);
+        
+        // 驗證金額正確轉換為分並儲存
+        $this->assertEquals(12575, $refund->total_refund_amount_cents);
+        
+        // 驗證金額正確從分轉換為元顯示
+        $this->assertEquals(125.75, $refund->total_refund_amount);
+    }
+
+    /**
+     * 測試 HandlesCurrency trait 的轉換方法
+     */
+    public function test_currency_conversion_methods(): void
+    {
+        // 測試 yuanToCents
+        $this->assertEquals(0, Refund::yuanToCents(null));
+        $this->assertEquals(0, Refund::yuanToCents(0));
+        $this->assertEquals(100, Refund::yuanToCents(1));
+        $this->assertEquals(12575, Refund::yuanToCents(125.75));
+        
+        // 測試 centsToYuan
+        $this->assertEquals(0.00, Refund::centsToYuan(0));
+        $this->assertEquals(1.00, Refund::centsToYuan(100));
+        $this->assertEquals(125.75, Refund::centsToYuan(12575));
+    }
+
 } 

@@ -50,7 +50,7 @@ function Button({
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-      data-oid="x676yg7"
+     
     />
   );
 }

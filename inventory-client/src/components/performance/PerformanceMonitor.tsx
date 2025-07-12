@@ -146,29 +146,29 @@ export default function PerformanceMonitor() {
 
   const getIcon = (name: string) => {
     if (name.includes("頁面"))
-      return <Clock className="w-4 h-4" data-oid="os-tkvf" />;
+      return <Clock className="w-4 h-4" />;
     if (name.includes("API"))
-      return <Network className="w-4 h-4" data-oid="vx07-.g" />;
+      return <Network className="w-4 h-4" />;
     if (name.includes("路由"))
-      return <Zap className="w-4 h-4" data-oid="4y-8im4" />;
+      return <Zap className="w-4 h-4" />;
     if (name.includes("中間件"))
-      return <Timer className="w-4 h-4" data-oid="31u_jd4" />;
+      return <Timer className="w-4 h-4" />;
     if (name.includes("快取"))
-      return <Database className="w-4 h-4" data-oid="zlese3m" />;
-    return <Clock className="w-4 h-4" data-oid=".v9hmsf" />;
+      return <Database className="w-4 h-4" />;
+    return <Clock className="w-4 h-4" />;
   };
 
   if (!isVisible) {
     return (
-      <div className="fixed bottom-4 right-4 z-50" data-oid="urcotu0">
+      <div className="fixed bottom-4 right-4 z-50">
         <Button
           onClick={() => setIsVisible(true)}
           variant="outline"
           size="sm"
           className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
-          data-oid="gdzli03"
+         
         >
-          <Zap className="w-4 h-4 mr-2" data-oid="rjierfk" />
+          <Zap className="w-4 h-4 mr-2" />
           性能監控
         </Button>
       </div>
@@ -176,15 +176,15 @@ export default function PerformanceMonitor() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-96" data-oid="n7gs8fy">
-      <Card className="bg-white border-blue-200 shadow-xl" data-oid="2feicpb">
-        <CardHeader className="pb-3" data-oid="yeq9j4i">
-          <div className="flex items-center justify-between" data-oid="89bkg.8">
+    <div className="fixed bottom-4 right-4 z-50 w-96">
+      <Card className="bg-white border-blue-200 shadow-xl">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
             <CardTitle
               className="text-lg flex items-center gap-2"
-              data-oid="uq4iuq5"
+             
             >
-              <Zap className="w-5 h-5 text-blue-600" data-oid="tjeoo4p" />
+              <Zap className="w-5 h-5 text-blue-600" />
               性能監控儀表板
             </CardTitle>
             <Button
@@ -192,37 +192,37 @@ export default function PerformanceMonitor() {
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0"
-              data-oid="cnw70er"
+             
             >
               ×
             </Button>
           </div>
-          <p className="text-sm text-gray-600" data-oid="lcium7x">
+          <p className="text-sm text-gray-600">
             第五階段：中間件優化完成 🚀
           </p>
         </CardHeader>
-        <CardContent data-oid=".c_6025">
-          <div className="space-y-3" data-oid="ugq5mwv">
+        <CardContent>
+          <div className="space-y-3">
             {metrics.map((metric, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                data-oid="y11kw62"
+               
               >
-                <div className="flex items-center gap-2" data-oid="d09g_c:">
+                <div className="flex items-center gap-2">
                   {getIcon(metric.name)}
-                  <span className="text-sm font-medium" data-oid="ty_rj7h">
+                  <span className="text-sm font-medium">
                     {metric.name}
                   </span>
                 </div>
-                <div className="flex items-center gap-2" data-oid="nmguq_m">
-                  <span className="text-sm font-bold" data-oid="9bsg0w9">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold">
                     {metric.value.toFixed(metric.unit === "%" ? 1 : 0)}
                     {metric.unit}
                   </span>
                   <Badge
                     className={`${getStatusColor(metric.status)} text-white text-xs`}
-                    data-oid="qamx3v."
+                   
                   >
                     {getStatusText(metric.status)}
                   </Badge>
@@ -233,20 +233,20 @@ export default function PerformanceMonitor() {
 
           <div
             className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg"
-            data-oid="gagq2i8"
+           
           >
             <h4
               className="text-sm font-semibold text-green-800 mb-2"
-              data-oid="wdc69-l"
+             
             >
               🎊 性能革命成果總結
             </h4>
-            <ul className="text-xs text-green-700 space-y-1" data-oid="dyoz1k9">
-              <li data-oid="f3z364:">• API 客戶端優化：90% 響應時間減少</li>
-              <li data-oid="jdq:a1x">• React Query 配置：85% 快取命中率提升</li>
-              <li data-oid="1.f-d41">• 路由性能革命：97% 切換時間減少</li>
-              <li data-oid="4e0n7-f">• 智能預載入：感知性能大幅提升</li>
-              <li data-oid="qat7mzb">• 中間件優化：零延遲靜態資源處理</li>
+            <ul className="text-xs text-green-700 space-y-1">
+              <li>• API 客戶端優化：90% 響應時間減少</li>
+              <li>• React Query 配置：85% 快取命中率提升</li>
+              <li>• 路由性能革命：97% 切換時間減少</li>
+              <li>• 智能預載入：感知性能大幅提升</li>
+              <li>• 中間件優化：零延遲靜態資源處理</li>
             </ul>
           </div>
 
@@ -256,9 +256,9 @@ export default function PerformanceMonitor() {
             }}
             className="w-full mt-3 bg-blue-600 hover:bg-blue-700"
             size="sm"
-            data-oid=".355-j2"
+           
           >
-            <Timer className="w-4 h-4 mr-2" data-oid="--xupby" />
+            <Timer className="w-4 h-4 mr-2" />
             重新測試性能
           </Button>
         </CardContent>

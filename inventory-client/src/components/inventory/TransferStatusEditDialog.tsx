@@ -145,44 +145,44 @@ export function TransferStatusEditDialog({
   const availableStatuses = getAvailableStatuses(transfer.status || "");
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="d6c8dxf">
-      <DialogContent className="max-w-md" data-oid="hueskhr">
-        <DialogHeader data-oid="a1pw1h0">
-          <DialogTitle data-oid=".o2ru03">編輯轉移狀態</DialogTitle>
-          <DialogDescription data-oid="3a-x0ox">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>編輯轉移狀態</DialogTitle>
+          <DialogDescription>
             轉移單號 #{transfer.id} - 產品 #{transfer.product_variant_id}
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form} data-oid=":2hq8wh">
+        <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4"
-            data-oid="o_bb6_2"
+           
           >
             <FormField
               control={form.control}
               name="status"
               render={({ field }) => (
-                <FormItem data-oid="29n_z.v">
-                  <FormLabel data-oid=":cg.unx">狀態</FormLabel>
+                <FormItem>
+                  <FormLabel>狀態</FormLabel>
                   <Select
                     disabled={isSubmitting}
                     onValueChange={field.onChange}
                     value={field.value}
-                    data-oid="bwqz61d"
+                   
                   >
-                    <FormControl data-oid="x2zf_ar">
-                      <SelectTrigger data-oid="-nbiv88">
-                        <SelectValue data-oid="tfqanih" />
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent data-oid="_n6eilm">
+                    <SelectContent>
                       {availableStatuses.map((status) => (
                         <SelectItem
                           key={status.value}
                           value={status.value}
-                          data-oid="n.wj_gy"
+                         
                         >
                           {status.label}
                         </SelectItem>
@@ -192,7 +192,7 @@ export function TransferStatusEditDialog({
                   {form.watch("status") !== transfer.status && (
                     <p
                       className="text-sm text-muted-foreground"
-                      data-oid="1szlmf8"
+                     
                     >
                       {getStatusChangeDescription(
                         transfer.status || "",
@@ -200,48 +200,48 @@ export function TransferStatusEditDialog({
                       )}
                     </p>
                   )}
-                  <FormMessage data-oid="1h3:zr4" />
+                  <FormMessage />
                 </FormItem>
               )}
-              data-oid="m.owfwd"
+             
             />
 
             <FormField
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem data-oid="mgta0:l">
-                  <FormLabel data-oid="g6w5gvg">備註</FormLabel>
-                  <FormControl data-oid="y:t9y:3">
+                <FormItem>
+                  <FormLabel>備註</FormLabel>
+                  <FormControl>
                     <Textarea
                       {...field}
                       placeholder="輸入狀態變更的備註資訊"
                       disabled={isSubmitting}
                       rows={3}
-                      data-oid="ydb2iv8"
+                     
                     />
                   </FormControl>
-                  <FormMessage data-oid="dnhy189" />
+                  <FormMessage />
                 </FormItem>
               )}
-              data-oid="tcsrcad"
+             
             />
 
-            <div className="flex justify-end gap-2" data-oid="t2zohj8">
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
-                data-oid="z9:u0:i"
+               
               >
                 取消
               </Button>
-              <Button type="submit" disabled={isSubmitting} data-oid="k1adjhi">
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && (
                   <Loader2
                     className="mr-2 h-4 w-4 animate-spin"
-                    data-oid="y6850_z"
+                   
                   />
                 )}
                 更新狀態

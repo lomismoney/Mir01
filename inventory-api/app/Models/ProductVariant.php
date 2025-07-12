@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HandlesCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class ProductVariant extends Model
 {
-    use HasFactory;
+    use HasFactory, HandlesCurrency;
 
     /**
      * 允許大量賦值的屬性設定
@@ -33,6 +34,11 @@ class ProductVariant extends Model
         'average_cost',              // 平均成本價格（含運費攤銷）
         'total_purchased_quantity',  // 累計進貨數量
         'total_cost_amount',         // 累計成本金額（含運費攤銷）
+        // 金額欄位（分為單位）
+        'price_cents',
+        'cost_price_cents', 
+        'average_cost_cents',
+        'total_cost_amount_cents',
     ];
 
     /**
@@ -40,13 +46,14 @@ class ProductVariant extends Model
      */
     protected $casts = [
         'product_id' => 'integer',
-        'price' => 'decimal:2',
-        'cost_price' => 'decimal:2',
-        'average_cost' => 'decimal:2',
         'total_purchased_quantity' => 'integer',
-        'total_cost_amount' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        // 金額欄位使用分為單位
+        'price_cents' => 'integer',
+        'cost_price_cents' => 'integer',
+        'average_cost_cents' => 'integer',
+        'total_cost_amount_cents' => 'integer',
     ];
 
     /**
@@ -218,5 +225,79 @@ class ProductVariant extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    // ===== 金額處理方法 =====
+
+    /**
+     * 定義金額欄位
+     */
+    protected function getCurrencyFields(): array
+    {
+        return ['price', 'cost_price', 'average_cost', 'total_cost_amount'];
+    }
+
+    /**
+     * 價格 Accessor
+     */
+    public function getPriceAttribute(): float
+    {
+        return self::centsToYuan($this->getCentsValue('price'));
+    }
+
+    /**
+     * 價格 Mutator
+     */
+    public function setPriceAttribute($value): void
+    {
+        $this->setCurrencyValue('price', $value);
+    }
+
+    /**
+     * 成本價格 Accessor
+     */
+    public function getCostPriceAttribute(): float
+    {
+        return self::centsToYuan($this->getCentsValue('cost_price'));
+    }
+
+    /**
+     * 成本價格 Mutator
+     */
+    public function setCostPriceAttribute($value): void
+    {
+        $this->setCurrencyValue('cost_price', $value);
+    }
+
+    /**
+     * 平均成本 Accessor
+     */
+    public function getAverageCostAttribute(): float
+    {
+        return self::centsToYuan($this->getCentsValue('average_cost'));
+    }
+
+    /**
+     * 平均成本 Mutator
+     */
+    public function setAverageCostAttribute($value): void
+    {
+        $this->setCurrencyValue('average_cost', $value);
+    }
+
+    /**
+     * 總成本金額 Accessor
+     */
+    public function getTotalCostAmountAttribute(): float
+    {
+        return self::centsToYuan($this->getCentsValue('total_cost_amount'));
+    }
+
+    /**
+     * 總成本金額 Mutator
+     */
+    public function setTotalCostAmountAttribute($value): void
+    {
+        $this->setCurrencyValue('total_cost_amount', $value);
     }
 }

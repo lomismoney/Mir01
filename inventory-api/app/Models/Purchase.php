@@ -77,6 +77,99 @@ class Purchase extends Model
     }
 
     /**
+     * 進貨單狀態轉換規則
+     * 定義每個狀態可以轉換到哪些狀態
+     * 
+     * @return array
+     */
+    public static function getStatusTransitionRules(): array
+    {
+        return [
+            self::STATUS_PENDING => [
+                self::STATUS_CONFIRMED,
+                self::STATUS_CANCELLED,
+            ],
+            self::STATUS_CONFIRMED => [
+                self::STATUS_IN_TRANSIT,
+                self::STATUS_CANCELLED,
+            ],
+            self::STATUS_IN_TRANSIT => [
+                self::STATUS_RECEIVED,
+                self::STATUS_PARTIALLY_RECEIVED,
+                self::STATUS_CANCELLED,
+            ],
+            self::STATUS_PARTIALLY_RECEIVED => [
+                self::STATUS_RECEIVED,
+                self::STATUS_CANCELLED,
+            ],
+            self::STATUS_RECEIVED => [
+                self::STATUS_COMPLETED,
+                // 允許回退到已收貨狀態（用於庫存操作錯誤時的修正）
+            ],
+            self::STATUS_COMPLETED => [
+                // 已完成的進貨單通常不允許轉換，除非有特殊業務需求
+            ],
+            self::STATUS_CANCELLED => [
+                // 已取消的進貨單不允許轉換到其他狀態
+            ],
+        ];
+    }
+
+    /**
+     * 檢查狀態轉換是否合法
+     * 
+     * @param string $fromStatus 原始狀態
+     * @param string $toStatus 目標狀態
+     * @return bool
+     */
+    public static function isValidStatusTransition(string $fromStatus, string $toStatus): bool
+    {
+        $rules = self::getStatusTransitionRules();
+        
+        // 相同狀態視為合法（冪等操作）
+        if ($fromStatus === $toStatus) {
+            return true;
+        }
+        
+        // 檢查轉換規則
+        return isset($rules[$fromStatus]) && in_array($toStatus, $rules[$fromStatus]);
+    }
+
+    /**
+     * 獲取當前狀態可以轉換到的狀態列表
+     * 
+     * @return array
+     */
+    public function getAvailableTransitions(): array
+    {
+        $rules = self::getStatusTransitionRules();
+        return $rules[$this->status] ?? [];
+    }
+
+    /**
+     * 驗證狀態轉換並拋出異常（如果不合法）
+     * 
+     * @param string $toStatus 目標狀態
+     * @throws \InvalidArgumentException
+     */
+    public function validateStatusTransition(string $toStatus): void
+    {
+        if (!self::isValidStatusTransition($this->status, $toStatus)) {
+            $fromLabel = self::getStatusOptions()[$this->status] ?? $this->status;
+            $toLabel = self::getStatusOptions()[$toStatus] ?? $toStatus;
+            $availableTransitions = array_map(
+                fn($status) => self::getStatusOptions()[$status] ?? $status,
+                $this->getAvailableTransitions()
+            );
+            
+            throw new \InvalidArgumentException(
+                "進貨單狀態轉換不合法：無法從「{$fromLabel}」轉換到「{$toLabel}」。" .
+                "可用的轉換狀態：" . (empty($availableTransitions) ? '無' : implode('、', $availableTransitions))
+            );
+        }
+    }
+
+    /**
      * 取得狀態的中文描述
      * 
      * @return string

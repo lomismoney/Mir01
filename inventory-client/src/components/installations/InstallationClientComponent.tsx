@@ -8,9 +8,9 @@ import {
   useInstallations,
   useAssignInstaller,
   useUpdateInstallationStatus,
+  useErrorHandler,
 } from "@/hooks";
 import { useUsers } from "@/hooks";
-import { toast } from "sonner";
 import { useDebounce } from "@/hooks/use-debounce";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import { Input } from "@/components/ui/input";
@@ -107,6 +107,9 @@ export function InstallationClientComponent() {
   // API Hooks
   const assignInstallerMutation = useAssignInstaller();
   const updateStatusMutation = useUpdateInstallationStatus();
+  
+  // 統一錯誤處理
+  const { handleError, handleSuccess } = useErrorHandler();
   // 只載入角色為 installer 的用戶作為師傅選項
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({
     'filter[role]': 'installer'
@@ -143,7 +146,7 @@ export function InstallationClientComponent() {
   // 建立確認分配師傅的處理函式
   const handleConfirmAssignInstaller = () => {
     if (!assigningInstaller || !selectedInstallerId) {
-      toast.error("請選擇安裝師傅");
+      handleError("請選擇安裝師傅");
       return;
     }
 
@@ -156,10 +159,10 @@ export function InstallationClientComponent() {
         onSuccess: () => {
           setAssigningInstaller(null);
           setSelectedInstallerId(undefined);
-          toast.success("師傅分配成功");
+          handleSuccess("師傅分配成功");
         },
         onError: (error) => {
-          toast.error(`師傅分配失敗: ${error.message}`);
+          handleError(error);
         },
       },
     );
@@ -179,10 +182,10 @@ export function InstallationClientComponent() {
         onSuccess: () => {
           setUpdatingStatus(null);
           setStatusUpdateReason("");
-          toast.success("狀態更新成功");
+          handleSuccess("狀態更新成功");
         },
         onError: (error) => {
-          toast.error(`狀態更新失敗: ${error.message}`);
+          handleError(error);
         },
       },
     );

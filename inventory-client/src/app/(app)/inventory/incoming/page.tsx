@@ -1,6 +1,10 @@
 "use client";
 
-import { PurchaseManagement } from "@/components/purchases/PurchaseManagement";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+// 動態導入進貨管理組件
+const PurchaseManagement = lazy(() => import("@/components/purchases/PurchaseManagement").then(module => ({ default: module.PurchaseManagement })));
 
 /**
  * 商品入庫管理頁面
@@ -12,5 +16,18 @@ import { PurchaseManagement } from "@/components/purchases/PurchaseManagement";
  * - 顯示操作者信息
  */
 export default function IncomingPage() {
-  return <PurchaseManagement data-oid="fi7oayh" />;
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">載入進貨管理...</p>
+          </div>
+        </div>
+      }
+    >
+      <PurchaseManagement />
+    </Suspense>
+  );
 }

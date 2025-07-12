@@ -23,7 +23,7 @@ import {
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
-import { NavMain, type NavLink } from "@/components/nav-main";
+import { NavMain, type NavLink } from "@/components/nav-main-enhanced";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -76,7 +76,7 @@ const SmartNavLink = memo(function SmartNavLink({
       onMouseEnter={handleMouseEnter}
       prefetch={false} // 使用自定義預加載邏輯
       className={className}
-      data-oid="ch3qgh7"
+     
     >
       {children}
     </Link>
@@ -103,6 +103,7 @@ const data = {
         { title: "庫存清單", url: "/inventory/management" },
         { title: "進貨管理", url: "/inventory/incoming" },
         { title: "庫存轉移", url: "/inventory/transfers" },
+        { title: "庫存預警", url: "/inventory/alerts" },
         { title: "變動歷史", url: "/inventory/history" },
       ],
     },
@@ -117,8 +118,11 @@ const data = {
     },
     {
       title: "訂單管理",
-      url: "/orders",
       icon: IconShoppingCart,
+      children: [
+        { title: "訂單列表", url: "/orders" },
+        { title: "待進貨商品管理", url: "/orders/backorders" },
+      ],
     },
     {
       title: "安裝管理",
@@ -212,18 +216,18 @@ const AppSidebar = memo(function AppSidebar({
   // 移除未使用的 queryClient 和 prefetch 函數以通過 ESLint 檢查
 
   return (
-    <Sidebar collapsible="offcanvas" {...props} data-oid="p1zh0r:">
-      <SidebarHeader data-oid="pnu2s6k">
-        <SidebarMenu data-oid="hxyhgm6">
-          <SidebarMenuItem data-oid="lwzz6_9">
+    <Sidebar collapsible="offcanvas" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
-              data-oid=":5wcwi5"
+             
             >
-              <SmartNavLink href="/dashboard" data-oid="_r:io8m">
-                <IconInnerShadowTop className="!size-5" data-oid="drcb2py" />
-                <span className="text-base font-semibold" data-oid="-oh.-qr">
+              <SmartNavLink href="/dashboard">
+                <IconInnerShadowTop className="!size-5" />
+                <span className="text-base font-semibold">
                   庫存管理系統
                 </span>
               </SmartNavLink>
@@ -231,18 +235,18 @@ const AppSidebar = memo(function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent data-oid="wvi:peh">
+      <SidebarContent>
         {/* 🚀 統一導航系統 - 移除重複項目，保持智能預加載功能 */}
-        <NavMain items={data.navMain} data-oid="j33200a" />
-        <NavDocuments items={data.documents} data-oid="3h.pjy3" />
+        <NavMain items={data.navMain} />
+        <NavDocuments items={data.documents} />
         <NavSecondary
           items={data.navSecondary}
           className="mt-auto"
-          data-oid="9fdpydw"
+         
         />
       </SidebarContent>
-      <SidebarFooter data-oid=":t8l7o5">
-        <NavUser data-oid="mx8ddpb" />
+      <SidebarFooter>
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

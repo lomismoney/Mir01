@@ -1,18 +1,11 @@
 "use client";
 
-import { useState, memo, useEffect, useMemo } from "react";
+import { useState, memo, useEffect, useMemo, useCallback } from "react";
 import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-  getSortedRowModel,
   SortingState,
   ColumnFiltersState,
-  getFilteredRowModel,
   VisibilityState,
   RowSelectionState,
-  getExpandedRowModel,
   ExpandedState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
@@ -38,14 +31,6 @@ import {
   ListFilter,
 } from "lucide-react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -56,74 +41,24 @@ import {
   useProducts,
   useDeleteProduct,
   useDeleteMultipleProducts,
+  useStandardTable,
+  useModalManager,
+  useErrorHandler,
 } from "@/hooks";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useProductDataTransformation } from "@/hooks/useDataTransformation";
 import { columns, type ExpandedProductItem } from "./columns";
 import VariantDetailsModal from "./VariantDetailsModal";
 import { ProductItem } from "@/types/api-helpers";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { AdaptiveTable } from "@/components/ui/AdaptiveTable";
+import { PRODUCT_MODAL_TYPES } from "@/hooks/useModalManager";
+import { flexRender } from "@tanstack/react-table";
 
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-/**
- * 將 SPU 商品數據轉換為支援巢狀顯示的擴展格式
- *
- * @param products - 原始商品數據陣列
- * @returns 轉換後的擴展商品數據陣列，只包含 SPU 主行，變體行通過 getSubRows 動態提供
- */
-function transformProductsForNestedDisplay(
-  products: ProductItem[],
-): ExpandedProductItem[] {
-  return products.map((product) => ({
-    ...product,
-    id: `product-${product.id}`, // 轉換為字符串 ID
-    originalId: product.id, // 保存原始數字 ID
-    isVariantRow: false,
-    // 預處理變體資訊，供 getSubRows 使用
-    processedVariants:
-      product.variants && product.variants.length > 1
-        ? product.variants.map((variant) => ({
-            ...product, // 繼承 SPU 資訊
-            id: `product-${product.id}-variant-${variant.id}`, // 創建唯一字符串 ID
-            originalId: product.id, // 保存原始 SPU ID
-            isVariantRow: true,
-            parentId: product.id,
-            variantInfo: {
-              id: variant.id || 0,
-              sku: variant.sku || "",
-              price: parseFloat(variant.price || "0"), // 轉換字符串價格為數字
-              attribute_values: (variant.attribute_values || []).map(
-                (attr) => ({
-                  id: attr.id || 0,
-                  value: attr.value || "",
-                  attribute: attr.attribute
-                    ? {
-                        id: attr.attribute.id || 0,
-                        name: attr.attribute.name || "",
-                      }
-                    : undefined,
-                }),
-              ),
-              inventory: Array.isArray(variant.inventory)
-                ? variant.inventory.map((inv) => ({
-                    store_id: inv.store?.id || inv.id || 0, // 優先使用 store.id，如果沒有則使用 inv.id
-                    quantity: inv.quantity || 0,
-                    store: inv.store
-                      ? {
-                          id: inv.store.id || 0,
-                          name: inv.store.name || "",
-                        }
-                      : undefined,
-                  }))
-                : [],
-            },
-          }))
-        : undefined,
-  }));
-}
 
 /**
  * 商品管理客戶端頁面組件（巢狀顯示升級版）
@@ -184,18 +119,9 @@ const ProductClientComponent = () => {
   const deleteProductMutation = useDeleteProduct();
   const deleteMultipleProductsMutation = useDeleteMultipleProducts();
 
-  // 刪除確認對話框狀態
-  const [productToDelete, setProductToDelete] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
-  const [showBatchDeleteDialog, setShowBatchDeleteDialog] = useState(false);
-
-  // 規格詳情模態框狀態
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(
-    null,
-  );
+  // 🎯 統一的 Modal 管理器
+  const modalManager = useModalManager<any>();
+  const { handleError, handleSuccess } = useErrorHandler();
 
   // 欄位名稱映射
   const columnNameMap: Record<string, string> = {
@@ -210,107 +136,84 @@ const ProductClientComponent = () => {
     actions: "操作",
   };
 
-  // 轉換商品數據為巢狀顯示格式
-  const expandedProducts = useMemo(() => {
-    const rawProducts = (productsResponse || []) as ProductItem[];
+  // 🎯 使用新的數據轉換 Hook，移除複雜的內聯邏輯
+  const rawProducts = (productsResponse || []) as ProductItem[];
+  const { 
+    expandedProducts, 
+    getSubRows,
+    hasVariants,
+    isMainProduct,
+    isVariant 
+  } = useProductDataTransformation(rawProducts);
 
-    // 🔍 調試：查看搜尋結果
-    if (debouncedSearchQuery) {
-      console.log("搜尋關鍵字:", debouncedSearchQuery);
-      console.log("API 返回的商品數量:", rawProducts.length);
-      console.log(
-        "API 返回的商品:",
-        rawProducts.map((p) => ({ name: p.name, sku: p.variants?.[0]?.sku })),
-      );
-    }
+  // 優化 enableRowSelection 函數
+  const enableRowSelection = useCallback((row: any) => isMainProduct(row.original), [isMainProduct]);
 
-    return transformProductsForNestedDisplay(rawProducts);
-  }, [productsResponse, debouncedSearchQuery]);
-
-  // 初始化表格
-  const table = useReactTable({
+  // 🎯 使用標準表格 Hook - 商品列表
+  const tableManager = useStandardTable({
     data: expandedProducts,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onExpandedChange: setExpanded,
-    autoResetPageIndex: false, // 🎯 斬斷循環：禁用分頁自動重設
-    // 🚀 巢狀顯示核心配置
-    getSubRows: (row) => {
-      // 如果是 SPU 主行且有預處理的變體，返回變體行
-      if (!row.isVariantRow && row.processedVariants) {
-        return row.processedVariants;
-      }
-      return undefined;
-    },
-    // 只允許 SPU 主行被選中
-    enableRowSelection: (row) => !row.original.isVariantRow,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      expanded,
-    },
+    enablePagination: false,
+    enableSorting: true,
+    enableRowSelection: true,
+    enableColumnVisibility: true,
+    isLoading: isProductsLoading,
   });
+
+  // 從表格管理器中獲取 table 實例
+  const table = tableManager.table;
 
   /**
    * 處理搜尋輸入變化
    * 現在會觸發防抖機制，減少 API 請求頻率
    */
-  const handleSearchChange = (value: string) => {
+  const handleSearchChange = useCallback((value: string) => {
     setSearchQuery(value);
-  };
+  }, []);
 
   /**
    * 處理單個商品刪除
    */
-  const handleDeleteProduct = (product: { id: number; name: string }) => {
-    setProductToDelete(product);
-  };
+  const handleDeleteProduct = useCallback((product: { id: number; name: string }) => {
+    modalManager.openModal('delete', product);
+  }, [modalManager]);
 
   /**
    * 確認刪除單個商品
    */
-  const confirmDeleteProduct = () => {
+  const confirmDeleteProduct = useCallback(() => {
+    const productToDelete = modalManager.currentData as { id: number; name: string } | null;
     if (!productToDelete?.id) {
-      toast.error("無效的商品 ID");
+      handleError(new Error("無效的商品 ID"));
       return;
     }
 
     deleteProductMutation.mutate(productToDelete.id, {
       onSuccess: () => {
-        // 成功的 toast 已經在 mutation 內部處理了
-        setProductToDelete(null);
+        modalManager.handleSuccess();
+        handleSuccess("商品已成功刪除");
       },
-      // 移除 onError，讓 mutation 內部的錯誤處理生效
+      onError: (error) => handleError(error),
     });
-  };
+  }, [modalManager, deleteProductMutation, handleSuccess, handleError]);
 
   /**
    * 處理批量刪除
    */
-  const handleBatchDelete = () => {
+  const handleBatchDelete = useCallback(() => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
     if (selectedRows.length === 0) {
-      toast.error("請選擇要刪除的商品");
+      handleError(new Error("請選擇要刪除的商品"));
       return;
     }
-    setShowBatchDeleteDialog(true);
-  };
+    modalManager.openModal('batchDelete', selectedRows);
+  }, [table, modalManager, handleError]);
 
   /**
    * 確認批量刪除
    */
-  const confirmBatchDelete = () => {
-    const selectedRows = table.getFilteredSelectedRowModel().rows;
+  const confirmBatchDelete = useCallback(() => {
+    const selectedRows = modalManager.currentData as any[] || [];
     const selectedIds = selectedRows
       .map((row) => {
         // 確保只獲取 SPU 主行的原始 ID
@@ -322,7 +225,7 @@ const ProductClientComponent = () => {
       .filter((id): id is number => id !== null);
 
     if (selectedIds.length === 0) {
-      toast.error("沒有有效的商品 ID 可供刪除");
+      handleError(new Error("沒有有效的商品 ID 可供刪除"));
       return;
     }
 
@@ -330,14 +233,14 @@ const ProductClientComponent = () => {
       { ids: selectedIds },
       {
         onSuccess: () => {
-          // 成功的 toast 已經在 mutation 內部處理了
-          setShowBatchDeleteDialog(false);
+          modalManager.handleSuccess();
+          handleSuccess(`成功刪除 ${selectedIds.length} 個商品`);
           setRowSelection({}); // 清空選中狀態
         },
-        // 移除 onError，讓 mutation 內部的錯誤處理生效
+        onError: (error) => handleError(error),
       },
     );
-  };
+  }, [modalManager, deleteMultipleProductsMutation, setRowSelection, handleSuccess, handleError]);
 
   /**
    * 設置事件監聽器來處理來自 columns 的操作事件
@@ -355,8 +258,7 @@ const ProductClientComponent = () => {
 
     const handleViewVariantsEvent = (event: CustomEvent) => {
       const product = event.detail;
-      setSelectedProduct(product);
-      setIsModalOpen(true);
+      modalManager.openModal(PRODUCT_MODAL_TYPES.VARIANT_DETAIL, product);
     };
 
     // 添加事件監聽器
@@ -385,14 +287,14 @@ const ProductClientComponent = () => {
         handleViewVariantsEvent as EventListener,
       );
     };
-  }, [router]);
+  }, [router, handleDeleteProduct, modalManager]);
 
   // 權限檢查
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-32" data-oid="z.h0jik">
-        <Loader2 className="h-6 w-6 animate-spin" data-oid="yxh__ab" />
-        <span className="ml-2" data-oid="28e:tit">
+      <div className="flex items-center justify-center h-32">
+        <Loader2 className="h-6 w-6 animate-spin" />
+        <span className="ml-2">
           載入中...
         </span>
       </div>
@@ -401,9 +303,9 @@ const ProductClientComponent = () => {
 
   if (!isAuthorized) {
     return (
-      <Alert data-oid="3ccfywo">
-        <Info className="h-4 w-4" data-oid="l5azkss" />
-        <AlertDescription data-oid="5261a7m">
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
           您沒有權限訪問此頁面。請聯繫管理員。
         </AlertDescription>
       </Alert>
@@ -411,20 +313,20 @@ const ProductClientComponent = () => {
   }
 
   return (
-    <div className="space-y-6" data-oid="gdqq.dj">
+    <div className="space-y-6">
       {/* 整合所有功能在單一卡片中 */}
-      <div className="rounded-lg border bg-card shadow-sm" data-oid="mdg:npg">
+      <div className="rounded-lg border bg-card shadow-sm">
         {/* --- 搜尋與過濾控制區 --- */}
-        <div className="border-b p-6" data-oid="xcwvb95">
+        <div className="border-b p-6">
           <div
             className="flex items-center justify-between gap-4"
-            data-oid="87kd.f."
+           
           >
-            <div className="flex-1" data-oid="io5rgq5">
-              <div className="relative max-w-md" data-oid="sp4avpr">
+            <div className="flex-1">
+              <div className="relative max-w-md">
                 <Search
                   className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"
-                  data-oid="sqswvo."
+                 
                 />
 
                 <Input
@@ -432,11 +334,11 @@ const ProductClientComponent = () => {
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   className="pl-8 h-10 bg-background"
-                  data-oid="s7xkeey"
+                 
                 />
               </div>
             </div>
-            <div className="flex items-center gap-2" data-oid="egi36_n">
+            <div className="flex items-center gap-2">
               {/* 批量刪除按鈕 - 只在有選中項目時顯示 */}
               {table.getFilteredSelectedRowModel().rows.length > 0 && (
                 <Button
@@ -444,26 +346,26 @@ const ProductClientComponent = () => {
                   size="default"
                   onClick={handleBatchDelete}
                   className="gap-2"
-                  data-oid="avr784a"
+                 
                 >
-                  <Trash2 className="h-4 w-4" data-oid="7:olzli" />
+                  <Trash2 className="h-4 w-4" />
                   刪除選中 ({table.getFilteredSelectedRowModel().rows.length})
                 </Button>
               )}
 
               {/* 欄位顯示控制 */}
-              <DropdownMenu data-oid="f1l4w5_">
-                <DropdownMenuTrigger asChild data-oid="b-9yo9l">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
                     className="gap-2"
-                    data-oid="wp82dbw"
+                   
                   >
-                    <ListFilter className="h-4 w-4" data-oid="ea4ml5v" />
+                    <ListFilter className="h-4 w-4" />
                     欄位顯示
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" data-oid="44myufu">
+                <DropdownMenuContent align="end">
                   {table
                     .getAllColumns()
                     .filter((column) => column.getCanHide())
@@ -476,7 +378,7 @@ const ProductClientComponent = () => {
                           onCheckedChange={(value) =>
                             column.toggleVisibility(!!value)
                           }
-                          data-oid="ejlvr6a"
+                         
                         >
                           {columnNameMap[column.id] || column.id}
                         </DropdownMenuCheckboxItem>
@@ -488,180 +390,102 @@ const ProductClientComponent = () => {
           </div>
         </div>
 
-        {/* 巢狀商品表格 */}
+        {/* 🎯 使用 AdaptiveTable 組件 - 商品列表虛擬化 */}
         {isProductsLoading ? (
           <div
             className="flex items-center justify-center h-[400px]"
-            data-oid="nbtgylw"
+           
           >
             <Loader2
               className="h-8 w-8 animate-spin text-primary"
-              data-oid="6dc29k_"
+             
             />
 
-            <span className="ml-3 text-lg" data-oid="h.qrxr9">
+            <span className="ml-3 text-lg">
               載入商品資料中...
             </span>
           </div>
         ) : error ? (
-          <div className="p-6" data-oid="4ubsvhq">
-            <Alert data-oid="ol3v-c0">
-              <Info className="h-4 w-4" data-oid="7cy6.8o" />
-              <AlertDescription data-oid="cc97jax">
+          <div className="p-6">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
                 載入商品資料時發生錯誤。請重新整理頁面。
               </AlertDescription>
             </Alert>
           </div>
         ) : (
           <>
-            <Table data-oid="7vayt.7">
-              <TableHeader data-oid="_w6ftuj">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow
-                    key={headerGroup.id}
-                    className="border-b bg-muted/50 hover:bg-muted/50"
-                    data-oid="396qebq"
-                  >
-                    {headerGroup.headers.map((header) => {
-                      const isCompact = ["expander", "select"].includes(
-                        header.column.id as string,
-                      );
-                      const baseClass = "h-14 align-middle font-medium";
-                      const className = isCompact
-                        ? `${baseClass} p-0 text-center w-[40px]`
-                        : `${baseClass} px-4 text-left`;
-
-                      return (
-                        <TableHead
-                          key={header.id}
-                          className={className}
-                          data-oid="vdm2y0g"
+            <div className="rounded-md border">
+              <div className="relative w-full overflow-auto">
+                <table className="w-full caption-bottom text-sm">
+                  <thead className="[&_tr]:border-b">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id} className="border-b transition-colors hover:bg-muted/50">
+                        {headerGroup.headers.map((header) => (
+                          <th key={header.id} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody className="[&_tr:last-child]:border-0">
+                    {table.getRowModel().rows?.length ? (
+                      table.getRowModel().rows.map((row) => (
+                        <tr
+                          key={row.id}
+                          data-state={row.getIsSelected() && "selected"}
+                          className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                         >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody data-oid="sge9j6m">
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => {
-                    // 檢查是否可以展開（不是變體行，且有多個變體）
-                    const canExpand =
-                      !row.original.isVariantRow &&
-                      (row.original.variants?.length || 0) > 1;
-
-                    return (
-                      <TableRow
-                        key={row.id}
-                        data-state={row.getIsSelected() && "selected"}
-                        className={cn(
-                          row.original.isVariantRow
-                            ? "bg-muted/30 hover:bg-muted/40 transition-colors"
-                            : "hover:bg-muted/10 border-b transition-all",
-                          canExpand && "cursor-pointer",
-                          // 為展開的行添加動畫效果
-                          row.original.isVariantRow &&
-                            "animate-in fade-in-50 slide-in-from-top-1 duration-200",
-                        )}
-                        onClick={(e) => {
-                          // 如果可以展開，且點擊目標不是互動元素
-                          if (canExpand) {
-                            const target = e.target as HTMLElement;
-                            const isInteractiveElement =
-                              target.closest("button") ||
-                              target.closest("input") ||
-                              target.closest('[role="checkbox"]') ||
-                              target.closest('[role="button"]') ||
-                              target.closest("[data-radix-collection-item]");
-
-                            if (!isInteractiveElement) {
-                              row.toggleExpanded();
-                            }
-                          }
-                        }}
-                        data-oid="fk.to._"
-                      >
-                        {row.getVisibleCells().map((cell) => {
-                          const isCompactCol = ["expander", "select"].includes(
-                            cell.column.id as string,
-                          );
-                          const cellClass = isCompactCol
-                            ? "p-0 text-center w-[40px]"
-                            : "py-3";
-
-                          return (
-                            <TableCell
-                              key={cell.id}
-                              className={cellClass}
-                              data-oid="gy3oe5."
-                            >
+                          {row.getVisibleCells().map((cell) => (
+                            <td key={cell.id} className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
                               {flexRender(
                                 cell.column.columnDef.cell,
-                                cell.getContext(),
+                                cell.getContext()
                               )}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })
-                ) : (
-                  <TableRow data-oid="1uumt:z">
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-32 text-center"
-                      data-oid="yhn58kj"
-                    >
-                      <div
-                        className="flex flex-col items-center gap-2"
-                        data-oid="c2gujx_"
-                      >
-                        <Package
-                          className="h-8 w-8 text-muted-foreground"
-                          data-oid="rdsohbx"
-                        />
-
-                        <p
-                          className="text-lg text-muted-foreground"
-                          data-oid="f::ckas"
-                        >
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={columns.length} className="h-24 text-center">
                           沒有找到商品資料
-                        </p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             {/* 分頁控制 */}
-            <div className="border-t p-4" data-oid="j4tgnn7">
+            <div className="border-t p-4">
               <div
                 className="flex items-center justify-between"
-                data-oid="3j-md2g"
+               
               >
                 <div
                   className="text-sm text-muted-foreground"
-                  data-oid="nzr82by"
+                 
                 >
                   已選擇{" "}
                   <span
                     className="font-medium text-foreground"
-                    data-oid="ei_o26j"
+                   
                   >
                     {table.getFilteredSelectedRowModel().rows.length}
                   </span>{" "}
                   個商品， 共{" "}
                   <span
                     className="font-medium text-foreground"
-                    data-oid="7ga7a2i"
+                   
                   >
                     {
                       table
@@ -671,13 +495,13 @@ const ProductClientComponent = () => {
                   </span>{" "}
                   個商品
                 </div>
-                <div className="flex items-center gap-2" data-oid=":jbshig">
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}
-                    data-oid="s7tb917"
+                   
                   >
                     上一頁
                   </Button>
@@ -686,7 +510,7 @@ const ProductClientComponent = () => {
                     size="sm"
                     onClick={() => table.nextPage()}
                     disabled={!table.getCanNextPage()}
-                    data-oid="fo0njh4"
+                   
                   >
                     下一頁
                   </Button>
@@ -697,32 +521,27 @@ const ProductClientComponent = () => {
         )}
       </div>
 
-      {/* 刪除確認對話框 */}
+      {/* 🎯 單一商品刪除對話框 */}
       <AlertDialog
-        open={!!productToDelete}
-        onOpenChange={() => setProductToDelete(null)}
-        data-oid="1y_1zxa"
+        open={modalManager.isModalOpen('delete')}
+        onOpenChange={(open) => !open && modalManager.closeModal()}
       >
-        <AlertDialogContent data-oid="91h_mfy">
-          <AlertDialogHeader data-oid=":082zx7">
-            <AlertDialogTitle data-oid="q9mbwfm">確認刪除商品</AlertDialogTitle>
-            <AlertDialogDescription data-oid="nsrr:or">
-              您確定要刪除商品「{productToDelete?.name}」嗎？此操作無法復原。
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認刪除商品</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要刪除商品「{(modalManager.currentData as any)?.name}」嗎？此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="5-0ccw:">
-            <AlertDialogCancel data-oid="c0k0rq9">取消</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteProduct}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteProductMutation.isPending}
-              data-oid="f22gv0u"
             >
               {deleteProductMutation.isPending && (
-                <Loader2
-                  className="h-4 w-4 animate-spin mr-2"
-                  data-oid="m_01um1"
-                />
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
               )}
               確認刪除
             </AlertDialogAction>
@@ -730,34 +549,27 @@ const ProductClientComponent = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 批量刪除確認對話框 */}
+      {/* 🎯 批量刪除對話框 */}
       <AlertDialog
-        open={showBatchDeleteDialog}
-        onOpenChange={setShowBatchDeleteDialog}
-        data-oid="08bejks"
+        open={modalManager.isModalOpen('batchDelete')}
+        onOpenChange={(open) => !open && modalManager.closeModal()}
       >
-        <AlertDialogContent data-oid="4y-l6bz">
-          <AlertDialogHeader data-oid="6kuc11k">
-            <AlertDialogTitle data-oid="6mwiz.c">確認批量刪除</AlertDialogTitle>
-            <AlertDialogDescription data-oid="79rssi9">
-              您確定要刪除選中的{" "}
-              {table.getFilteredSelectedRowModel().rows.length}{" "}
-              個商品嗎？此操作無法復原。
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認批量刪除</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要刪除選中的 {(modalManager.currentData as any[])?.length || 0} 個商品嗎？此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter data-oid="m9oeof-">
-            <AlertDialogCancel data-oid="nb7zu_n">取消</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmBatchDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteMultipleProductsMutation.isPending}
-              data-oid="yq4djpv"
             >
               {deleteMultipleProductsMutation.isPending && (
-                <Loader2
-                  className="h-4 w-4 animate-spin mr-2"
-                  data-oid="7i7goim"
-                />
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
               )}
               確認刪除
             </AlertDialogAction>
@@ -765,12 +577,11 @@ const ProductClientComponent = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 規格詳情模態框 */}
+      {/* 🎯 規格詳情模態框 */}
       <VariantDetailsModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        product={selectedProduct}
-        data-oid="q.v14n:"
+        isOpen={modalManager.isModalOpen(PRODUCT_MODAL_TYPES.VARIANT_DETAIL)}
+        onClose={() => modalManager.closeModal()}
+        product={modalManager.currentData as ProductItem | null}
       />
     </div>
   );

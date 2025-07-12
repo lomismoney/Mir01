@@ -28,20 +28,20 @@ export function InventoryAdjustmentDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen} data-oid="tamcg38">
-      <DialogTrigger asChild data-oid="71aij10">
-        <Button variant="outline" size="sm" data-oid="0nz.2m7">
-          <ArrowUpDown className="h-4 w-4 mr-2" data-oid="d344ief" />
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <ArrowUpDown className="h-4 w-4 mr-2" />
           修改庫存
         </Button>
       </DialogTrigger>
       <DialogContent
         className="max-w-2xl max-h-[90vh] overflow-y-auto"
-        data-oid="mo_uea0"
+       
       >
-        <DialogHeader data-oid="wcpkqwi">
-          <DialogTitle data-oid="k:665da">修改庫存</DialogTitle>
-          <DialogDescription data-oid="bi9nj1u">
+        <DialogHeader>
+          <DialogTitle>修改庫存</DialogTitle>
+          <DialogDescription>
             調整指定商品的庫存數量（增加、減少或設定）
           </DialogDescription>
         </DialogHeader>
@@ -50,7 +50,7 @@ export function InventoryAdjustmentDialog({
           currentQuantity={0}
           onSuccess={handleSuccess}
           dialogOpen={open}
-          data-oid="igzt5u9"
+         
         />
       </DialogContent>
     </Dialog>

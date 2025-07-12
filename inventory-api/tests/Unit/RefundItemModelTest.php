@@ -41,6 +41,11 @@ class RefundItemModelTest extends TestCase
         
         // 創建測試用戶
         $this->user = User::factory()->create();
+        
+        // 安全地分配角色，避免重複創建
+        if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+            \Spatie\Permission\Models\Role::create(['name' => 'admin']);
+        }
         $this->user->assignRole('admin');
         
         // 創建測試客戶
@@ -506,5 +511,101 @@ class RefundItemModelTest extends TestCase
         
         $this->assertEquals(250.0, $largeQuantityItem->getRefundRatio()); // 1000/4
         $this->assertTrue($largeQuantityItem->isFullItemRefund());
+    }
+
+    /**
+     * 測試 HandlesCurrency trait 功能
+     */
+    public function test_currency_handling(): void
+    {
+        // 創建新的訂單項目以避免唯一約束衝突
+        $newOrderItem = OrderItem::factory()->create([
+            'order_id' => $this->order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'quantity' => 5,
+            'price' => 50.00
+        ]);
+        
+        $refundItem = RefundItem::factory()->create([
+            'refund_id' => $this->refund->id,
+            'order_item_id' => $newOrderItem->id,
+            'quantity' => 2,
+            'refund_subtotal' => 89.99
+        ]);
+        
+        // 驗證金額正確轉換為分並儲存
+        $this->assertEquals(8999, $refundItem->refund_subtotal_cents);
+        
+        // 驗證金額正確從分轉換為元顯示
+        $this->assertEquals(89.99, $refundItem->refund_subtotal);
+    }
+
+    /**
+     * 測試 HandlesCurrency trait 的轉換方法
+     */
+    public function test_currency_conversion_methods(): void
+    {
+        // 測試 yuanToCents
+        $this->assertEquals(0, RefundItem::yuanToCents(null));
+        $this->assertEquals(0, RefundItem::yuanToCents(0));
+        $this->assertEquals(100, RefundItem::yuanToCents(1));
+        $this->assertEquals(8999, RefundItem::yuanToCents(89.99));
+        
+        // 測試 centsToYuan
+        $this->assertEquals(0.00, RefundItem::centsToYuan(0));
+        $this->assertEquals(1.00, RefundItem::centsToYuan(100));
+        $this->assertEquals(89.99, RefundItem::centsToYuan(8999));
+    }
+
+    /**
+     * 測試退款項目小計自動計算
+     */
+    public function test_automatic_subtotal_calculation(): void
+    {
+        // 創建新的訂單項目以避免唯一約束衝突
+        $newOrderItem2 = OrderItem::factory()->create([
+            'order_id' => $this->order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'quantity' => 10,
+            'price' => 100.00
+        ]);
+        
+        // 創建時自動計算小計
+        $refundItem = RefundItem::create([
+            'refund_id' => $this->refund->id,
+            'order_item_id' => $newOrderItem2->id,
+            'quantity' => 3
+            // 不設定 refund_subtotal，應該自動計算
+        ]);
+        
+        $expectedSubtotal = $newOrderItem2->price * 3;
+        $this->assertEquals($expectedSubtotal, $refundItem->refund_subtotal);
+    }
+
+    /**
+     * 測試更新時重新計算小計
+     */
+    public function test_subtotal_recalculation_on_update(): void
+    {
+        // 創建新的訂單項目以避免唯一約束衝突
+        $newOrderItem3 = OrderItem::factory()->create([
+            'order_id' => $this->order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'quantity' => 8,
+            'price' => 75.00
+        ]);
+        
+        $refundItem = RefundItem::factory()->create([
+            'refund_id' => $this->refund->id,
+            'order_item_id' => $newOrderItem3->id,
+            'quantity' => 1,
+            'refund_subtotal' => 100.00
+        ]);
+        
+        // 更新數量，小計應該重新計算
+        $refundItem->update(['quantity' => 2]);
+        
+        $expectedSubtotal = $newOrderItem3->price * 2;
+        $this->assertEquals($expectedSubtotal, $refundItem->fresh()->refund_subtotal);
     }
 } 

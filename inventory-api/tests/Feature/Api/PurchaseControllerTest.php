@@ -227,8 +227,8 @@ class PurchaseControllerTest extends TestCase
         Purchase::create([
             'store_id' => $this->store->id,
             'order_number' => 'PO-DUPLICATE-001',
-            'total_amount' => 1000.00,
-            'shipping_cost' => 100.00,
+            'total_amount' => 100000,  // 1000.00 * 100
+            'shipping_cost' => 10000,   // 100.00 * 100
             'purchased_at' => now()
         ]);
 
@@ -560,8 +560,8 @@ class PurchaseControllerTest extends TestCase
             'purchase_id' => $purchase->id,
             'product_variant_id' => $this->productVariant->id,
             'quantity' => 5,
-            'unit_price' => 100.00,
-            'cost_price' => 100.00,
+            'unit_price' => 10000,  // 100.00 * 100
+            'cost_price' => 10000,  // 100.00 * 100
         ]);
 
         $updateData = [

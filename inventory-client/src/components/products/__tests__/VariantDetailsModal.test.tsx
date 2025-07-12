@@ -2,6 +2,16 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import VariantDetailsModal from '../VariantDetailsModal';
 import { ProductItem } from '@/types/api-helpers';
 
+// Mock console.warn 以避免測試輸出
+const originalConsoleWarn = console.warn;
+beforeAll(() => {
+  console.warn = jest.fn();
+});
+
+afterAll(() => {
+  console.warn = originalConsoleWarn;
+});
+
 // Mock next/image
 jest.mock('next/image', () => ({
   __esModule: true,

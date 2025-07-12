@@ -44,27 +44,27 @@ export function NavDocuments({
   return (
     <SidebarGroup
       className="group-data-[collapsible=icon]:hidden"
-      data-oid="tz6:1v3"
+     
     >
-      <SidebarGroupLabel data-oid="lhx-1yg">Documents</SidebarGroupLabel>
-      <SidebarMenu data-oid="ca8ltvr">
+      <SidebarGroupLabel>Documents</SidebarGroupLabel>
+      <SidebarMenu>
         {items.map((item) => (
-          <SidebarMenuItem key={item.name} data-oid="ly:3tlr">
-            <SidebarMenuButton asChild data-oid="yl:f9-c">
-              <Link href={item.url} prefetch={true} data-oid="l-_qqcv">
-                <item.icon data-oid="o0j-9l." />
-                <span data-oid="b_syfr5">{item.name}</span>
+          <SidebarMenuItem key={item.name}>
+            <SidebarMenuButton asChild>
+              <Link href={item.url} prefetch={true}>
+                <item.icon />
+                <span>{item.name}</span>
               </Link>
             </SidebarMenuButton>
-            <DropdownMenu data-oid="goxti9q">
-              <DropdownMenuTrigger asChild data-oid="tt8uc:-">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <SidebarMenuAction
                   showOnHover
                   className="data-[state=open]:bg-accent rounded-sm"
-                  data-oid="exb06d:"
+                 
                 >
-                  <IconDots data-oid="v7qxi2e" />
-                  <span className="sr-only" data-oid="w-dh646">
+                  <IconDots />
+                  <span className="sr-only">
                     More
                   </span>
                 </SidebarMenuAction>
@@ -75,36 +75,36 @@ export function NavDocuments({
                 side={mounted && isMobile ? "bottom" : "right"}
                 align={mounted && isMobile ? "end" : "start"}
                 suppressHydrationWarning
-                data-oid="i9rqqiy"
+               
               >
-                <DropdownMenuItem data-oid="ea4frca">
-                  <IconFolder data-oid="z9oc1nn" />
-                  <span data-oid="b590qi_">Open</span>
+                <DropdownMenuItem>
+                  <IconFolder />
+                  <span>Open</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem data-oid="xwp8--n">
-                  <IconShare3 data-oid="kfn4cq4" />
-                  <span data-oid="5rb-tty">Share</span>
+                <DropdownMenuItem>
+                  <IconShare3 />
+                  <span>Share</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator data-oid="dy5yhlt" />
-                <DropdownMenuItem variant="destructive" data-oid="rdogr71">
-                  <IconTrash data-oid="7ommoqj" />
-                  <span data-oid="aqiigya">Delete</span>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive">
+                  <IconTrash />
+                  <span>Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem data-oid=":pjm.tc">
+        <SidebarMenuItem>
           <SidebarMenuButton
             className="text-sidebar-foreground/70"
-            data-oid="1jc:fcq"
+           
           >
             <IconDots
               className="text-sidebar-foreground/70"
-              data-oid="nx_lpr0"
+             
             />
 
-            <span data-oid="8t0-m:w">More</span>
+            <span>More</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

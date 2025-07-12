@@ -9,6 +9,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { StagewiseToolbar } from "@stagewise/toolbar-next";
 import { ReactPlugin } from "@stagewise-plugins/react";
 import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
+import { PerformanceProvider } from "@/components/layout/PerformanceProvider";
+import { PreloadProvider } from "@/components/layout/PreloadProvider";
+import { GlobalStateProvider } from "@/contexts/GlobalStateContext";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -28,7 +31,9 @@ export const metadata: Metadata = {
  * 2. Auth.js Session 管理 (SessionProvider)
  * 3. React Query 狀態管理 (QueryProvider)
  * 4. Toast 通知系統 (Toaster)
- * 5. 🔐 身份驗證錯誤邊界保護 (AuthErrorBoundary) - NEW
+ * 5. 🔐 身份驗證錯誤邊界保護 (AuthErrorBoundary)
+ * 6. ⚡ 性能監控系統 (PerformanceProvider)
+ * 7. 🚀 API 預加載系統 (PreloadProvider) - NEW
  *
  * 🛡️ 安全特性升級：
  * - 雙重身份驗證保護 (中介軟體 + 客戶端)
@@ -36,38 +41,58 @@ export const metadata: Metadata = {
  * - 優雅的錯誤處理和用戶引導
  * - 防止未登入用戶觸發客戶端錯誤
  *
+ * ⚡ 性能監控特性：
+ * - 實時性能指標收集和顯示
+ * - 開發模式下的性能儀表板
+ * - 組件渲染時間追蹤
+ * - API 調用性能分析
+ * - 鍵盤快捷鍵控制 (Ctrl+Shift+P/I)
+ *
+ * 🚀 API 預加載特性：
+ * - 路由級資源預加載
+ * - 基於用戶行為的預測性預加載
+ * - 智能緩存管理
+ * - 鄰近路由預加載
+ * - 鼠標懸停預加載
+ *
  * @param children - 子頁面內容
  */
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-TW" suppressHydrationWarning data-oid="hknmx0m">
+    <html lang="zh-TW" suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           fontSans.variable,
         )}
-        data-oid="ztw7ns4"
+       
       >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
-          data-oid="tonwzxq"
+         
         >
-          <SessionProvider data-oid="_g6ifp_">
+          <SessionProvider>
             {/* 🔐 錯誤邊界保護：捕獲身份驗證相關的客戶端錯誤 */}
             <AuthErrorBoundary>
-              <QueryProvider data-oid="ok99bhf">
-                {children}
-                <Toaster data-oid="tm249ru" />
-                <StagewiseToolbar
-                  config={{
-                    plugins: [ReactPlugin],
-                  }}
-                />
-              </QueryProvider>
+              <GlobalStateProvider>
+                <QueryProvider>
+                  <PerformanceProvider>
+                    <PreloadProvider>
+                      {children}
+                      <Toaster />
+                      <StagewiseToolbar
+                        config={{
+                          plugins: [ReactPlugin],
+                        }}
+                      />
+                    </PreloadProvider>
+                  </PerformanceProvider>
+                </QueryProvider>
+              </GlobalStateProvider>
             </AuthErrorBoundary>
           </SessionProvider>
         </ThemeProvider>

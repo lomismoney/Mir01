@@ -106,7 +106,7 @@ export const createStoresColumns = (
         const store = row.original;
         
         return (
-          <div className="flex items-center space-x-3" data-oid="4ib:-:7">
+          <div className="flex items-center space-x-3">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                 {storeInitial}
@@ -133,7 +133,7 @@ export const createStoresColumns = (
       cell: ({ row }) => {
         const address = row.getValue("address") as string | null;
         return (
-          <div className="max-w-[300px] space-y-1" data-oid=":_dojrc">
+          <div className="max-w-[300px] space-y-1">
             {address ? (
               <>
                 <div className="text-sm text-foreground truncate">{address}</div>
@@ -187,7 +187,7 @@ export const createStoresColumns = (
         const dateString = row.getValue("created_at") as string;
         if (!dateString)
           return (
-            <div className="text-muted-foreground text-left" data-oid="d9b0z:b">
+            <div className="text-muted-foreground text-left">
               -
             </div>
           );
@@ -198,14 +198,14 @@ export const createStoresColumns = (
           const timeAgo = format(date, "MM月dd日", { locale: zhTW });
           
           return (
-            <div className="space-y-1" data-oid="men871i">
+            <div className="space-y-1">
               <div className="text-sm font-medium">{formattedDate}</div>
               <div className="text-xs text-muted-foreground">{timeAgo}</div>
             </div>
           );
         } catch {
           return (
-            <div className="text-muted-foreground text-left" data-oid="g_89hpu">
+            <div className="text-muted-foreground text-left">
               格式錯誤
             </div>
           );
@@ -247,7 +247,7 @@ export const createStoresColumns = (
         const dateString = row.getValue("updated_at") as string;
         if (!dateString)
           return (
-            <div className="text-muted-foreground text-left" data-oid="lbgl0vz">
+            <div className="text-muted-foreground text-left">
               -
             </div>
           );
@@ -269,14 +269,14 @@ export const createStoresColumns = (
           }
           
           return (
-            <div className="space-y-1" data-oid="11lczc3">
+            <div className="space-y-1">
               <div className="text-sm font-medium">{format(date, "yyyy-MM-dd", { locale: zhTW })}</div>
               <div className="text-xs text-muted-foreground">{timeDisplay}</div>
             </div>
           );
         } catch {
           return (
-            <div className="text-muted-foreground text-left" data-oid="vbkae:-">
+            <div className="text-muted-foreground text-left">
               格式錯誤
             </div>
           );
@@ -298,31 +298,31 @@ export const createStoresColumns = (
         const store = row.original;
 
         return (
-          <div className="text-center" data-oid="65::g-4">
-            <DropdownMenu data-oid="3cph87w">
-              <DropdownMenuTrigger asChild data-oid="t05io9b">
+          <div className="text-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   className="h-8 w-8 p-0 hover:bg-muted"
-                  data-oid="amapnxg"
+                 
                 >
-                  <span className="sr-only" data-oid="e5oa5ek">
+                  <span className="sr-only">
                     開啟選單
                   </span>
-                  <MoreHorizontal className="h-4 w-4" data-oid="9m_0nph" />
+                  <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" data-oid="0ehomqh">
-                <DropdownMenuLabel data-oid="qrtm1dm">操作</DropdownMenuLabel>
-                <DropdownMenuSeparator data-oid=".:90c7i" />
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>操作</DropdownMenuLabel>
+                <DropdownMenuSeparator />
 
                 {actions.onEdit && (
                   <DropdownMenuItem
                     onClick={() => actions.onEdit?.(store)}
                     className="cursor-pointer"
-                    data-oid="o:5d4d9"
+                   
                   >
-                    <Edit className="mr-2 h-4 w-4" data-oid="prjwp9u" />
+                    <Edit className="mr-2 h-4 w-4" />
                     編輯分店
                   </DropdownMenuItem>
                 )}
@@ -331,9 +331,9 @@ export const createStoresColumns = (
                   <DropdownMenuItem
                     onClick={() => actions.onDelete?.(store)}
                     className="cursor-pointer text-destructive focus:text-destructive"
-                    data-oid="zpz3mw_"
+                   
                   >
-                    <Trash2 className="mr-2 h-4 w-4" data-oid="gj.201o" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     刪除分店
                   </DropdownMenuItem>
                 )}

@@ -53,18 +53,18 @@ export default function LoginPage() {
   return (
     <div
       className="flex items-center justify-center min-h-screen bg-muted/40"
-      data-oid="9wsekxh"
+     
     >
-      <Card className="w-full max-w-sm" data-oid="eg32p3:">
-        <CardHeader data-oid="m9gheu9">
-          <CardTitle className="text-2xl" data-oid="j9hkwfh">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">
             登入
           </CardTitle>
-          <CardDescription data-oid="49vrrjn">
+          <CardDescription>
             請輸入您的帳號密碼以登入系統。
           </CardDescription>
         </CardHeader>
-        <CardContent data-oid="l5o1zsb">
+        <CardContent>
           {/* 錯誤訊息顯示區域 - 直觀且持久的錯誤提示 */}
           {state?.error && (
             <Alert variant="destructive" className="mb-4">
@@ -79,11 +79,11 @@ export default function LoginPage() {
                                - Next.js 會自動處理表單提交和資料傳遞
                                - 無需 onSubmit 事件處理器
                               */}
-          <form action={formAction} data-oid="0:si5x_">
-            <div className="grid gap-4" data-oid="b0c-cai">
+          <form action={formAction}>
+            <div className="grid gap-4">
               {/* 使用者名稱輸入欄位 */}
-              <div className="grid gap-2" data-oid="sfk9aq8">
-                <Label htmlFor="username" data-oid="t-cl892">
+              <div className="grid gap-2">
+                <Label htmlFor="username">
                   帳號
                 </Label>
                 <Input
@@ -93,13 +93,13 @@ export default function LoginPage() {
                   placeholder="superadmin"
                   required
                   className={state?.error ? "border-destructive" : ""}
-                  data-oid="n3q5p8t"
+                 
                 />
               </div>
 
               {/* 密碼輸入欄位 */}
-              <div className="grid gap-2" data-oid="ozvgyit">
-                <Label htmlFor="password" data-oid=".8xu_:k">
+              <div className="grid gap-2">
+                <Label htmlFor="password">
                   密碼
                 </Label>
                 <Input
@@ -108,7 +108,7 @@ export default function LoginPage() {
                   name="password"
                   required
                   className={state?.error ? "border-destructive" : ""}
-                  data-oid="ftopt9f"
+                 
                 />
               </div>
 
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 type="submit"
                 className="w-full"
                 disabled={isPending}
-                data-oid="yf1jv6-"
+               
               >
                 {isPending ? "登入中..." : "登入"}
               </Button>

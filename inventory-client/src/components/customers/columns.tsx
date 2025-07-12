@@ -62,7 +62,7 @@ export const columns = (props: ColumnsProps): ColumnDef<Customer>[] => [
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="全選"
           className="translate-y-[2px]"
-          data-oid="jsfok30"
+         
         />
       </div>
     ),
@@ -73,7 +73,7 @@ export const columns = (props: ColumnsProps): ColumnDef<Customer>[] => [
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="選擇客戶"
           className="translate-y-[2px]"
-          data-oid="ql19t8z"
+         
         />
       </div>
     ),

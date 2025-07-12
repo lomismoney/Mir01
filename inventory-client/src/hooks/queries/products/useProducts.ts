@@ -62,36 +62,38 @@ export function useProducts(filters: ProductFilters = {}) {
             if (!Array.isArray(products)) return [];
 
             // 2. 進行所有必要的數據轉換和類型安全處理
-            return products.map((apiProduct: any) => ({
+            return products.map((apiProduct: unknown) => {
+                const product = apiProduct as Record<string, unknown>;
+                return {
                 // 📋 基本商品資訊
-                id: apiProduct.id || 0,
-                name: apiProduct.name || '未命名商品',
-                description: apiProduct.description || null,
-                category_id: apiProduct.category_id || null,
-                created_at: apiProduct.created_at || '',
-                updated_at: apiProduct.updated_at || '',
+                id: (apiProduct as any).id || 0,
+                name: (apiProduct as any).name || '未命名商品',
+                description: (apiProduct as any).description || null,
+                category_id: (apiProduct as any).category_id || null,
+                created_at: (apiProduct as any).created_at || '',
+                updated_at: (apiProduct as any).updated_at || '',
                 
                 // 🖼️ 圖片處理 - 確保圖片 URL 的完整性
-                image_urls: apiProduct.image_urls ? {
-                    original: apiProduct.image_urls.original || null,
-                    thumb: apiProduct.image_urls.thumb || null,
-                    medium: apiProduct.image_urls.medium || null,
-                    large: apiProduct.image_urls.large || null,
+                image_urls: (apiProduct as any).image_urls ? {
+                    original: (apiProduct as any).image_urls.original || null,
+                    thumb: (apiProduct as any).image_urls.thumb || null,
+                    medium: (apiProduct as any).image_urls.medium || null,
+                    large: (apiProduct as any).image_urls.large || null,
                 } : null,
                 
                 // 🏷️ 分類資訊處理（雙格式支援）
-                category: apiProduct.category ? {
-                    id: apiProduct.category.id || 0,
-                    name: apiProduct.category.name || '未分類',
-                    description: apiProduct.category.description || null,
+                category: (apiProduct as any).category ? {
+                    id: (apiProduct as any).category.id || 0,
+                    name: (apiProduct as any).category.name || '未分類',
+                    description: (apiProduct as any).category.description || null,
                 } : null,
                 
                 // 🎯 向前相容：為 ProductSelector 等元件提供簡化格式
-                categoryName: apiProduct.category?.name || '未分類', // 字串格式的分類名稱
-                mainImageUrl: (apiProduct.image_urls?.original || 'https://via.placeholder.com/300x300').replace('localhost', '127.0.0.1'), // 主圖 URL - 替換為 IPv4
+                categoryName: (apiProduct as any).category?.name || '未分類', // 字串格式的分類名稱
+                mainImageUrl: ((apiProduct as any).image_urls?.original || 'https://via.placeholder.com/300x300').replace('localhost', '127.0.0.1'), // 主圖 URL - 替換為 IPv4
                 
                 // 🎯 變體(SKU)數據的深度清理
-                variants: apiProduct.variants?.map((variant: any) => {
+                variants: (apiProduct as any).variants?.map((variant: any) => {
                     // 處理屬性值
                     const attributeValues = variant.attribute_values?.map((attrValue: any) => ({
                         id: attrValue.id || 0,
@@ -127,7 +129,7 @@ export function useProducts(filters: ProductFilters = {}) {
                         id: variant.id || 0,
                         sku: variant.sku || 'N/A',
                         price: parseFloat(variant.price || '0'), // 字串轉數值
-                        product_id: variant.product_id || apiProduct.id,
+                        product_id: variant.product_id || (apiProduct as any).id,
                         created_at: variant.created_at || '',
                         updated_at: variant.updated_at || '',
                         // 如果變體有自己的圖片，也進行 URL 替換
@@ -136,7 +138,7 @@ export function useProducts(filters: ProductFilters = {}) {
                         // 為 ProductSelector 添加必要欄位
                         specifications: specifications,
                         stock: totalStock,
-                        productName: apiProduct.name, // 添加商品名稱到變體中
+                        productName: (apiProduct as any).name, // 添加商品名稱到變體中
                         
                         // 保留原始數據
                         attribute_values: attributeValues,
@@ -146,7 +148,7 @@ export function useProducts(filters: ProductFilters = {}) {
                 
                 // 💰 價格範圍統計（基於變體價格計算）
                 price_range: (() => {
-                    const prices = apiProduct.variants?.map((v: any) => parseFloat(v.price || '0')).filter((p: number) => p > 0) || [];
+                    const prices = (apiProduct as any).variants?.map((v: any) => parseFloat(v.price || '0')).filter((p: number) => p > 0) || [];
                     if (prices.length === 0) return { min: 0, max: 0, count: 0 };
                     
                     return {
@@ -157,13 +159,14 @@ export function useProducts(filters: ProductFilters = {}) {
                 })(),
                 
                 // 🏷️ 屬性列表處理
-                attributes: apiProduct.attributes?.map((attr: any) => ({
+                attributes: (apiProduct as any).attributes?.map((attr: any) => ({
                     id: attr.id || 0,
                     name: attr.name || '',
                     type: attr.type || '',
                     description: attr.description || null,
                 })) || [],
-            }));
+            };
+        });
         },
         
         // 🚀 體驗優化配置
@@ -183,16 +186,19 @@ export interface ProcessedProduct {
     name: string;
     description: string | null;
     category_id: number | null;
-    category?: any;
+    category?: {
+        id: number;
+        name: string;
+        parent_id?: number;
+    };
     attributes: Array<ProcessedProductAttribute>;
     variants: Array<ProcessedProductVariant>;
     image_url?: string;
     thumbnail_url?: string;
     has_image: boolean;
-    image_urls?: any;
+    image_urls?: string[];
     created_at: string;
     updated_at: string;
-    [key: string]: any;
 }
 
 /**
@@ -201,7 +207,7 @@ export interface ProcessedProduct {
 export interface ProcessedProductAttribute {
     id: number;
     name: string;
-    [key: string]: any;
+    type: string;
 }
 
 /**
@@ -211,8 +217,20 @@ export interface ProcessedProductVariant {
     id: number;
     sku: string;
     price: number;
+    cost_price?: number;
+    stock_quantity: number;
     attribute_values?: Array<ProcessedProductAttributeValue>;
-    [key: string]: any;
+    inventory?: Array<{
+        id: number;
+        store_id: number;
+        quantity: number;
+        reserved_quantity: number;
+        available_quantity: number;
+        store?: {
+            id: number;
+            name: string;
+        };
+    }>;
 }
 
 /**
@@ -222,7 +240,11 @@ export interface ProcessedProductAttributeValue {
     id: number;
     attribute_id: number;
     value: string;
-    [key: string]: any;
+    attribute?: {
+        id: number;
+        name: string;
+        type: string;
+    };
 }
 
 /**
@@ -290,7 +312,7 @@ export function useProductDetail(productId: number | string | undefined) {
                     return {
                         id: a?.id || 0,
                         name: a?.name || '',
-                        ...a
+                        type: a?.type || 'text',
                     };
                 }),
                 variants: variants.map((variant: unknown): ProcessedProductVariant => {
@@ -299,6 +321,7 @@ export function useProductDetail(productId: number | string | undefined) {
                         id: v?.id || 0,
                         sku: v?.sku || '',
                         price: v?.price || 0,
+                        stock_quantity: v?.stock_quantity || 0,
                         attribute_values: Array.isArray(v?.attribute_values) 
                             ? v.attribute_values.map((av: unknown): ProcessedProductAttributeValue => {
                                 const a = av as Record<string, any>;
@@ -306,11 +329,16 @@ export function useProductDetail(productId: number | string | undefined) {
                                     id: a?.id || 0,
                                     attribute_id: a?.attribute_id || 0,
                                     value: a?.value || '',
-                                    ...a
+                                    attribute: a?.attribute ? {
+                                        id: a.attribute.id || 0,
+                                        name: a.attribute.name || '',
+                                        type: a.attribute.type || 'text',
+                                    } : undefined,
                                 };
                             })
                             : [],
-                        ...v
+                        inventory: Array.isArray(v?.inventory) ? v.inventory : [],
+                        cost_price: v?.cost_price,
                     };
                 }),
                 image_url: rawProduct.image_url,

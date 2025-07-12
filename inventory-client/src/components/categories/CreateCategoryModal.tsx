@@ -10,10 +10,11 @@ import {
 import {
   useCategories,
   useCreateCategory,
+  useErrorHandler,
   type CategoryNode,
 } from "@/hooks";
-import { CategoryForm, type FormValues } from "./CategoryForm";
-import { toast } from "sonner";
+import { CategoryForm } from "./CategoryForm";
+import { CreateCategoryData } from "@/lib/validations/category";
 
 /**
  * 新增分類 Modal 組件屬性
@@ -41,26 +42,31 @@ export function CreateCategoryModal({
 }: CreateCategoryModalProps) {
   const { data: categories = [] } = useCategories();
   const createCategory = useCreateCategory();
+  const { handleError, handleSuccess } = useErrorHandler();
 
   /**
    * 處理表單提交
    */
-  const handleSubmit = (data: FormValues) => {
+  const handleSubmit = (data: CreateCategoryData | { id: number; name?: string; description?: string; parent_id?: number | null; sort_order?: number }) => {
+    // 檢查是否是創建資料（沒有 id）
+    if ('id' in data) {
+      // 這是更新資料，但我們在創建模態框中不應該收到這個
+      return;
+    }
+    
     createCategory.mutate(
       {
         name: data.name,
         description: data.description || "",
-        parent_id: data.parent_id ? Number(data.parent_id) : null,
+        parent_id: data.parent_id || undefined,
       },
       {
         onSuccess: () => {
-          toast.success(parentCategory ? "子分類已成功新增" : "分類已成功新增");
+          handleSuccess(parentCategory ? "子分類已成功新增" : "分類已成功新增");
           onSuccess?.();
           onOpenChange(false);
         },
-        onError: (error) => {
-          toast.error(`新增失敗: ${error.message}`);
-        },
+        onError: (error) => handleError(error),
       },
     );
   };
@@ -80,15 +86,15 @@ export function CreateCategoryModal({
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} data-oid="yor.uzp">
-      <DialogContent className="sm:max-w-[425px]" data-oid="1_1abgt">
-        <DialogHeader data-oid="_azl8st">
-          <DialogTitle data-oid="66a3m0i">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>
             {parentCategory
               ? `新增子分類 - ${parentCategory.name}`
               : "新增分類"}
           </DialogTitle>
-          <DialogDescription data-oid="9617060">
+          <DialogDescription>
             {parentCategory
               ? `在「${parentCategory.name}」下新增子分類`
               : "建立新的商品分類"}
@@ -96,11 +102,11 @@ export function CreateCategoryModal({
         </DialogHeader>
 
         <CategoryForm
-          onSubmit={handleSubmit}
-          isLoading={createCategory.isPending}
+          mode="create"
           categories={flatCategories}
           parentId={parentCategory?.id}
-          data-oid="j5kruzw"
+          onSuccess={handleSubmit}
+          onCancel={() => onOpenChange(false)}
         />
       </DialogContent>
     </Dialog>

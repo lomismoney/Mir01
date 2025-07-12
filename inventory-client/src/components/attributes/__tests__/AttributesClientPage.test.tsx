@@ -32,6 +32,22 @@ jest.mock('@/hooks', () => ({
 
 const mockUseAdminAuth = useAdminAuth.useAdminAuth as jest.Mock;
 
+// Mock console.warn 以避免 Radix UI 的警告
+const originalConsoleWarn = console.warn;
+beforeAll(() => {
+  console.warn = jest.fn((message) => {
+    // 忽略 Radix UI Dialog 的 Missing Description 警告
+    if (message && message.includes && message.includes('Missing `Description`')) {
+      return;
+    }
+    originalConsoleWarn(message);
+  });
+});
+
+afterAll(() => {
+  console.warn = originalConsoleWarn;
+});
+
 // 修復：導入正確的 mock hooks
 const mockHooks = require('@/hooks');
 const mockUseAttributes = mockHooks.useAttributes as jest.Mock;
@@ -285,7 +301,7 @@ describe('AttributesClientPage', () => {
     await user.click(confirmButton);
     
     await waitFor(() => {
-        expect(deleteMutateAsync).toHaveBeenCalledWith({ id: 1, attribute: 1 });
+        expect(deleteMutateAsync).toHaveBeenCalledWith({ id: 1 });
         expect(toast.success).toHaveBeenCalledWith('規格刪除成功！');
     });
   });

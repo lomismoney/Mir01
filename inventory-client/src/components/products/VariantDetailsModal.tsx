@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Package, Search } from "lucide-react";
 import { ProductItem, ProductVariant } from "@/types/api-helpers";
+import { formatPrice as formatPriceUtil } from "@/lib/utils";
 
 /**
  * 商品規格詳細資訊模態框元件
@@ -73,18 +74,13 @@ interface VariantDetailsModalProps {
 const formatPrice = (price?: number) => {
   if (price === undefined || price === null) {
     return (
-      <span className="text-muted-foreground" data-oid="zb8-3zo">
+      <span className="text-muted-foreground">
         N/A
       </span>
     );
   }
 
-  return new Intl.NumberFormat("zh-TW", {
-    style: "currency",
-    currency: "TWD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
+  return formatPriceUtil(price);
 };
 
 /**
@@ -103,7 +99,7 @@ const formatVariantAttributes = (
 ) => {
   if (!attributeValues || attributeValues.length === 0) {
     return (
-      <span className="text-muted-foreground" data-oid="a3zpmyz">
+      <span className="text-muted-foreground">
         無規格
       </span>
     );
@@ -118,7 +114,7 @@ const formatVariantAttributes = (
 
   return (
     attributes || (
-      <span className="text-muted-foreground" data-oid="vk7ka3l">
+      <span className="text-muted-foreground">
         無規格
       </span>
     )
@@ -144,9 +140,9 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
     cell: ({ row }) => {
       const sku = row.original.sku;
       return (
-        <Badge variant="outline" className="font-mono" data-oid="mi1m5_j">
+        <Badge variant="outline" className="font-mono">
           {sku || (
-            <span className="text-muted-foreground" data-oid="4ysxdl:">
+            <span className="text-muted-foreground">
               無 SKU
             </span>
           )}
@@ -162,7 +158,7 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
     cell: ({ row }) => {
       const attributeValues = row.original.attribute_values;
       return (
-        <div className="max-w-[250px]" data-oid="wbwy.uj">
+        <div className="max-w-[250px]">
           {formatVariantAttributes(attributeValues)}
         </div>
       );
@@ -176,7 +172,7 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
     cell: ({ row }) => {
       const price = row.original.price;
       return (
-        <div className="font-medium" data-oid="btm00qj">
+        <div className="font-medium">
           {formatPrice(
             Number.isFinite(Number(price)) ? Number(price) : undefined,
           )}
@@ -199,10 +195,10 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
           0,
         );
         return (
-          <div className="text-center" data-oid="e54d3o2">
+          <div className="text-center">
             <Badge
               variant={totalQuantity > 0 ? "default" : "destructive"}
-              data-oid="onajh31"
+             
             >
               {totalQuantity} 件
             </Badge>
@@ -212,8 +208,8 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
 
       // 預留接口提示
       return (
-        <div className="text-center" data-oid="-aq8x-w">
-          <Badge variant="secondary" data-oid="1yh3ybg">
+        <div className="text-center">
+          <Badge variant="secondary">
             待對接
           </Badge>
         </div>
@@ -229,7 +225,7 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
       const createdAt = row.original.created_at;
       if (!createdAt)
         return (
-          <span className="text-muted-foreground" data-oid="7skn.yl">
+          <span className="text-muted-foreground">
             N/A
           </span>
         );
@@ -253,18 +249,18 @@ const skuColumns: ColumnDef<ProductVariant>[] = [
         // 編輯功能尚未實現
       };
       return (
-        <DropdownMenu data-oid="caoi:br">
-          <DropdownMenuTrigger asChild data-oid="cgcdzqx">
-            <Button variant="ghost" className="h-8 w-8 p-0" data-oid="nqpyuto">
-              <span className="sr-only" data-oid="s0_clqx">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">
                 開啟選單
               </span>
-              <MoreHorizontal className="h-4 w-4" data-oid="i7w9xw7" />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" data-oid="b3xe8__">
-            <DropdownMenuItem onClick={handleEditVariant} data-oid="q7ij4lc">
-              <Edit className="mr-2 h-4 w-4" data-oid="5btityx" />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleEditVariant}>
+              <Edit className="mr-2 h-4 w-4" />
               編輯 SKU
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -313,17 +309,17 @@ const VariantDetailsModal = ({
   });
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} data-oid="m:0i36e">
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className="max-w-6xl max-h-[80vh] overflow-y-auto"
-        data-oid="hzprxet"
+       
       >
-        <DialogHeader data-oid="e60jpti">
-          <DialogTitle className="flex items-center gap-2" data-oid="0sl23v9">
-            <Package className="h-5 w-5" data-oid="_vqdmkk" />
-            <span data-oid="1afstow">商品規格詳情</span>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            <span>商品規格詳情</span>
             {product?.name && (
-              <span className="text-muted-foreground" data-oid="8d2fc-k">
+              <span className="text-muted-foreground">
                 - {product.name}
               </span>
             )}
@@ -331,44 +327,44 @@ const VariantDetailsModal = ({
         </DialogHeader>
 
         {/* SKU 詳細表格 */}
-        <div className="mt-4" data-oid="e0s88.0">
+        <div className="mt-4">
           {product ? (
-            <div className="space-y-4" data-oid="1hqmw:g">
+            <div className="space-y-4">
               {/* 商品摘要資訊 */}
               <div
                 className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg"
-                data-oid="q3_9hxs"
+               
               >
-                <div data-oid="296101-">
+                <div>
                   <span
                     className="text-sm font-medium text-muted-foreground"
-                    data-oid="kzt-vkk"
+                   
                   >
                     商品名稱
                   </span>
-                  <p className="font-medium" data-oid=".ue_tq_">
+                  <p className="font-medium">
                     {product.name}
                   </p>
                 </div>
-                <div data-oid="d46ol4j">
+                <div>
                   <span
                     className="text-sm font-medium text-muted-foreground"
-                    data-oid="fpchxb2"
+                   
                   >
                     規格數量
                   </span>
-                  <p className="font-medium" data-oid="-y0mxl1">
+                  <p className="font-medium">
                     {variants.length} 個 SKU
                   </p>
                 </div>
-                <div data-oid="c.5bnma">
+                <div>
                   <span
                     className="text-sm font-medium text-muted-foreground"
-                    data-oid="wd7j7::"
+                   
                   >
                     價格範圍
                   </span>
-                  <p className="font-medium" data-oid="m1d6tsl">
+                  <p className="font-medium">
                     {product.price_range
                       ? `${formatPrice(product.price_range.min)} - ${formatPrice(product.price_range.max)}`
                       : "N/A"}
@@ -378,12 +374,12 @@ const VariantDetailsModal = ({
 
               {/* SKU 表格 */}
               {variants.length > 0 ? (
-                <div className="space-y-4" data-oid="0wihyka">
+                <div className="space-y-4">
                   {/* 搜尋框 */}
-                  <div className="relative max-w-sm" data-oid="tgvt:1.">
+                  <div className="relative max-w-sm">
                     <Search
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"
-                      data-oid="wlk0yay"
+                     
                     />
 
                     <Input
@@ -391,25 +387,25 @@ const VariantDetailsModal = ({
                       value={globalFilter ?? ""}
                       onChange={(e) => setGlobalFilter(e.target.value)}
                       className="pl-10"
-                      data-oid="ax2hpt6"
+                     
                     />
                   </div>
 
                   {/* 表格 */}
-                  <div className="rounded-md border" data-oid="o.gwar.">
-                    <Table data-oid="k118fcn">
-                      <TableHeader data-oid="4v_sms0">
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                           <TableRow
                             key={headerGroup.id}
                             className="border-b hover:bg-transparent"
-                            data-oid=".:whgta"
+                           
                           >
                             {headerGroup.headers.map((header) => (
                               <TableHead
                                 key={header.id}
                                 className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                                data-oid="fss26py"
+                               
                               >
                                 {header.isPlaceholder
                                   ? null
@@ -422,16 +418,16 @@ const VariantDetailsModal = ({
                           </TableRow>
                         ))}
                       </TableHeader>
-                      <TableBody data-oid="_lwbwi_">
+                      <TableBody>
                         {table.getRowModel().rows?.length ? (
                           table.getRowModel().rows.map((row) => (
                             <TableRow
                               key={row.id}
                               data-state={row.getIsSelected() && "selected"}
-                              data-oid="8.z_c67"
+                             
                             >
                               {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id} data-oid="vj1xkpx">
+                                <TableCell key={cell.id}>
                                   {flexRender(
                                     cell.column.columnDef.cell,
                                     cell.getContext(),
@@ -441,11 +437,11 @@ const VariantDetailsModal = ({
                             </TableRow>
                           ))
                         ) : (
-                          <TableRow data-oid="u_a7m_5">
+                          <TableRow>
                             <TableCell
                               colSpan={skuColumns.length}
                               className="h-24 text-center"
-                              data-oid="5x.34_1"
+                             
                             >
                               沒有找到相符的 SKU
                             </TableCell>
@@ -458,21 +454,21 @@ const VariantDetailsModal = ({
                   {/* 分頁控制 */}
                   <div
                     className="flex items-center justify-between space-x-2 py-4"
-                    data-oid="bgbii2g"
+                   
                   >
                     <div
                       className="text-sm text-muted-foreground"
-                      data-oid="_e1ru1f"
+                     
                     >
                       共 {table.getFilteredRowModel().rows.length} 個 SKU
                     </div>
-                    <div className="space-x-2" data-oid="5t1ya:p">
+                    <div className="space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
-                        data-oid="h-cyamk"
+                       
                       >
                         上一頁
                       </Button>
@@ -481,7 +477,7 @@ const VariantDetailsModal = ({
                         size="sm"
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
-                        data-oid="zeyt5px"
+                       
                       >
                         下一頁
                       </Button>
@@ -491,15 +487,15 @@ const VariantDetailsModal = ({
               ) : (
                 <div
                   className="text-center py-8 text-muted-foreground"
-                  data-oid="1vcff17"
+                 
                 >
                   <Package
                     className="h-12 w-12 mx-auto mb-4 opacity-50"
-                    data-oid="t7ldoi-"
+                   
                   />
 
-                  <p data-oid="-61ovjf">此商品尚無 SKU 規格</p>
-                  <p className="text-sm" data-oid="_s-yatv">
+                  <p>此商品尚無 SKU 規格</p>
+                  <p className="text-sm">
                     請先為商品添加規格變體
                   </p>
                 </div>
@@ -508,14 +504,14 @@ const VariantDetailsModal = ({
           ) : (
             <div
               className="text-center py-8 text-muted-foreground"
-              data-oid="n5zfj_q"
+             
             >
               <Package
                 className="h-12 w-12 mx-auto mb-4 opacity-50"
-                data-oid="agaxe0_"
+               
               />
 
-              <p data-oid="or.:1ho">請選擇一個商品以查看其規格詳情</p>
+              <p>請選擇一個商品以查看其規格詳情</p>
             </div>
           )}
         </div>

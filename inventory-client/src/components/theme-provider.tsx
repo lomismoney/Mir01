@@ -13,7 +13,7 @@ export function ThemeProvider({
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
   return (
-    <NextThemesProvider {...props} data-oid="5.h8q40">
+    <NextThemesProvider {...props}>
       {children}
     </NextThemesProvider>
   );

@@ -164,24 +164,24 @@ export function CategoriesDataTable<TData, TValue>({
   });
 
   return (
-    <div className="w-full space-y-4" data-oid="l8_rw.2">
+    <div className="w-full space-y-4">
       {/* 工具列 */}
       {showToolbar && (
-        <div className="flex items-center justify-between" data-oid="xpg45v9">
-          <div className="flex-1" data-oid=":8w:n:_">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
             {/* 可以在這裡添加搜尋或其他過濾器 */}
           </div>
 
-          <div className="flex items-center space-x-2" data-oid="ba-pk5p">
+          <div className="flex items-center space-x-2">
             {/* 欄位顯示控制 */}
-            <DropdownMenu data-oid="g-6-ntq">
-              <DropdownMenuTrigger asChild data-oid=".b3itfq">
-                <Button variant="outline" data-oid="24evw2m">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
                   欄位{" "}
-                  <ChevronDown className="ml-2 h-4 w-4" data-oid="nir.48w" />
+                  <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" data-oid="bwolgdw">
+              <DropdownMenuContent align="end">
                 {table
                   .getAllColumns()
                   .filter((column) => column.getCanHide())
@@ -194,7 +194,7 @@ export function CategoriesDataTable<TData, TValue>({
                         onCheckedChange={(value) =>
                           column.toggleVisibility(!!value)
                         }
-                        data-oid="04..se-"
+                       
                       >
                         {column.id === "name" && "分類名稱"}
                         {column.id === "description" && "描述"}
@@ -214,8 +214,8 @@ export function CategoriesDataTable<TData, TValue>({
 
             {/* 新增分類按鈕 */}
             {showAddButton && onAddCategory && (
-              <Button onClick={onAddCategory} data-oid="u8tkbk8">
-                <Plus className="mr-2 h-4 w-4" data-oid="qh2ox9y" />
+              <Button onClick={onAddCategory}>
+                <Plus className="mr-2 h-4 w-4" />
                 新增分類
               </Button>
             )}
@@ -224,21 +224,21 @@ export function CategoriesDataTable<TData, TValue>({
       )}
 
       {/* 資料表格 */}
-      <div className="rounded-md border" data-oid=":3.oum.">
-        <Table data-oid="5_1gv.9">
-          <TableHeader data-oid="i2rceu6">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
                 className="border-b hover:bg-transparent"
-                data-oid="shz.qr5"
+               
               >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
                       className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                      data-oid="3f0h3o."
+                     
                     >
                       {header.isPlaceholder
                         ? null
@@ -252,24 +252,24 @@ export function CategoriesDataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody data-oid="jrct11r">
+          <TableBody>
             {isLoading ? (
               // 載入狀態
-              <TableRow data-oid="v12o6.1">
+              <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
-                  data-oid="-okyya8"
+                 
                 >
                   <div
                     className="flex items-center justify-center space-x-2"
-                    data-oid="yo.u2.w"
+                   
                   >
                     <div
                       className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
-                      data-oid="l-8c-hv"
+                     
                     ></div>
-                    <span data-oid="xo8th9c">載入中...</span>
+                    <span>載入中...</span>
                   </div>
                 </TableCell>
               </TableRow>
@@ -279,10 +279,10 @@ export function CategoriesDataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  data-oid="jqj0x7p"
+                 
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} data-oid="7c9s.qm">
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -293,17 +293,17 @@ export function CategoriesDataTable<TData, TValue>({
               ))
             ) : (
               // 無資料狀態
-              <TableRow data-oid="xdueodt">
+              <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
-                  data-oid="onjpsrh"
+                 
                 >
                   <div
                     className="flex flex-col items-center justify-center space-y-2"
-                    data-oid="vfak3vs"
+                   
                   >
-                    <div className="text-muted-foreground" data-oid="i9_stk9">
+                    <div className="text-muted-foreground">
                       尚無分類資料
                     </div>
                     {showAddButton && onAddCategory && (
@@ -311,9 +311,9 @@ export function CategoriesDataTable<TData, TValue>({
                         variant="outline"
                         onClick={onAddCategory}
                         className="mt-2"
-                        data-oid="8vz9mq6"
+                       
                       >
-                        <Plus className="mr-2 h-4 w-4" data-oid="zb0_tmn" />
+                        <Plus className="mr-2 h-4 w-4" />
                         建立第一個分類
                       </Button>
                     )}
@@ -328,26 +328,26 @@ export function CategoriesDataTable<TData, TValue>({
       {/* 分頁控制和統計資訊 */}
       <div
         className="flex items-center justify-between space-x-2 py-4"
-        data-oid="gjq_ee."
+       
       >
         <div
           className="flex-1 text-sm text-muted-foreground"
-          data-oid="g5lazcq"
+         
         >
           共 {data.length} 個頂級分類
         </div>
-        <div className="flex items-center space-x-2" data-oid="tx1dvyb">
+        <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage() || isLoading}
-            data-oid="8ok-3py"
+           
           >
             上一頁
           </Button>
-          <div className="flex items-center space-x-1" data-oid="5xkcu6j">
-            <span className="text-sm text-muted-foreground" data-oid="f.t_-:o">
+          <div className="flex items-center space-x-1">
+            <span className="text-sm text-muted-foreground">
               第 {table.getState().pagination.pageIndex + 1} 頁， 共{" "}
               {table.getPageCount()} 頁
             </span>
@@ -357,7 +357,7 @@ export function CategoriesDataTable<TData, TValue>({
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage() || isLoading}
-            data-oid="krp3off"
+           
           >
             下一頁
           </Button>

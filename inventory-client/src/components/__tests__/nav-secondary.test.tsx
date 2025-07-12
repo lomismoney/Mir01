@@ -153,14 +153,14 @@ describe('NavSecondary', () => {
   });
 
   /**
-   * 測試 data-oid 屬性
+   * 測試 data-testid 屬性
    * 驗證組件是否包含正確的追蹤屬性
    */
   it('應該包含追蹤屬性', () => {
     renderWithProvider(<NavSecondary items={mockItems} />);
     
-    // 檢查是否有 data-oid 屬性（用於追蹤）
-    const elementsWithOid = document.querySelectorAll('[data-oid]');
+    // 檢查是否有 data-testid 屬性（用於追蹤）
+    const elementsWithOid = document.querySelectorAll('[data-testid]');
     expect(elementsWithOid.length).toBeGreaterThan(0);
   });
 

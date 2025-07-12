@@ -1,6 +1,10 @@
 "use client";
 
-import InventoryTransfer from "@/components/inventory/InventoryTransfer";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+// 動態導入庫存轉移組件
+const InventoryTransfer = lazy(() => import("@/components/inventory/InventoryTransfer"));
 
 /**
  * 庫存轉移頁面（Auth.js 中間件保護版本）
@@ -18,17 +22,28 @@ import InventoryTransfer from "@/components/inventory/InventoryTransfer";
 export default function InventoryTransferPage() {
   // Auth.js 中間件已確保只有已登入用戶才能到達此頁面
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-6" data-oid="ggc2754">
-      <div className="flex flex-col space-y-2" data-oid="82jyxza">
-        <h1 className="text-3xl font-bold tracking-tight" data-oid="r6ibhir">
+    <div className="container mx-auto p-4 md:p-8 space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">
           庫存轉移
         </h1>
-        <p className="text-muted-foreground" data-oid="no7-byn">
+        <p className="text-muted-foreground">
           管理不同門市間的庫存轉移作業，包括轉移申請、狀態追蹤等功能
         </p>
       </div>
 
-      <InventoryTransfer data-oid="mnmq1nh" />
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
+            <div className="flex flex-col items-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">載入庫存轉移...</p>
+            </div>
+          </div>
+        }
+      >
+        <InventoryTransfer />
+      </Suspense>
     </div>
   );
 }

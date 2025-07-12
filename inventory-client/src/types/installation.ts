@@ -155,7 +155,7 @@ export interface Installation {
  */
 export interface CreateInstallationItemRequest {
   /** 商品變體 ID */
-  product_variant_id?: number | null;
+  product_variant_id?: number;
   /** 商品名稱 */
   product_name: string;
   /** 商品 SKU */
@@ -163,9 +163,9 @@ export interface CreateInstallationItemRequest {
   /** 安裝數量 */
   quantity: number;
   /** 安裝規格說明 */
-  specifications?: string | null;
+  specifications?: string;
   /** 項目備註 */
-  notes?: string | null;
+  notes?: string;
 }
 
 /**
@@ -175,15 +175,15 @@ export interface CreateInstallationRequest {
   /** 客戶姓名 */
   customer_name: string;
   /** 客戶電話 */
-  customer_phone?: string | null;
+  customer_phone?: string;
   /** 安裝地址 */
   installation_address: string;
   /** 安裝師傅 ID */
-  installer_user_id?: number | null;
+  installer_user_id?: number;
   /** 預計安裝日期 */
-  scheduled_date?: string | null;
+  scheduled_date?: string;
   /** 備註 */
-  notes?: string | null;
+  notes?: string;
   /** 安裝項目列表 */
   items: CreateInstallationItemRequest[];
 }
@@ -195,7 +195,7 @@ export interface UpdateInstallationItemRequest {
   /** 項目 ID（編輯現有項目時提供） */
   id?: number;
   /** 商品變體 ID */
-  product_variant_id?: number | null;
+  product_variant_id?: number;
   /** 商品名稱 */
   product_name: string;
   /** 商品 SKU */
@@ -203,9 +203,9 @@ export interface UpdateInstallationItemRequest {
   /** 安裝數量 */
   quantity: number;
   /** 安裝規格說明 */
-  specifications?: string | null;
+  specifications?: string;
   /** 項目備註 */
-  notes?: string | null;
+  notes?: string;
   /** 項目狀態 */
   status?: InstallationItemStatus;
 }
@@ -217,15 +217,15 @@ export interface UpdateInstallationRequest {
   /** 客戶姓名 */
   customer_name: string;
   /** 客戶電話 */
-  customer_phone?: string | null;
+  customer_phone?: string;
   /** 安裝地址 */
   installation_address: string;
   /** 安裝師傅 ID */
-  installer_user_id?: number | null;
+  installer_user_id?: number;
   /** 預計安裝日期 */
-  scheduled_date?: string | null;
+  scheduled_date?: string;
   /** 備註 */
-  notes?: string | null;
+  notes?: string;
   /** 安裝項目列表 */
   items?: UpdateInstallationItemRequest[];
 }

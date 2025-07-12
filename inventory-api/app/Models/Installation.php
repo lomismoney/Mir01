@@ -47,14 +47,6 @@ class Installation extends Model
     }
 
     /**
-     * 一個安裝單包含多個安裝項目 (別名方法)
-     */
-    public function installationItems(): HasMany
-    {
-        return $this->hasMany(InstallationItem::class);
-    }
-
-    /**
      * 一個安裝單可能關聯一個訂單 (Many-to-One / Inverse)
      * 可選關聯，實現鬆耦合
      */

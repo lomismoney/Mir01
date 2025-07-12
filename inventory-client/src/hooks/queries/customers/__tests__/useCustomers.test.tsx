@@ -53,6 +53,16 @@ const createWrapper = () => {
 };
 
 describe('useCustomers hooks', () => {
+  // Mock console.error to avoid test noise
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock window object for toast
@@ -475,9 +485,9 @@ describe('useCustomers hooks', () => {
       expect(mockApiClient.GET).toHaveBeenCalledWith('/api/customers', {
         params: {
           query: {
-            'filter[search]': 'John',
-            'filter[start_date]': '2023-01-01',
-            'filter[end_date]': '2023-12-31',
+            search: 'John',
+            start_date: '2023-01-01',
+            end_date: '2023-12-31',
             page: 1,
             per_page: 20
           }

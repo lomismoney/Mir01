@@ -14,7 +14,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { useErrorHandler } from "@/hooks";
 
 /**
  * 圖片 URL 結構類型
@@ -80,6 +80,8 @@ export function ImageUploader({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  
+  const { handleError, handleSuccess } = useErrorHandler();
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +130,7 @@ export function ImageUploader({
       const validationError = validateFile(file);
       if (validationError) {
         setError(validationError);
-        toast.error(validationError);
+        handleError(new Error(validationError));
         return;
       }
 
@@ -140,7 +142,7 @@ export function ImageUploader({
       setPreviewUrl(URL.createObjectURL(file));
       setError(null);
     },
-    [cleanupPreviewUrl],
+    [cleanupPreviewUrl, handleError],
   );
 
   /**
@@ -207,7 +209,7 @@ export function ImageUploader({
       await onUpload(selectedFile);
 
       // 上傳成功
-      toast.success("圖片上傳成功！正在處理中...");
+      handleSuccess("圖片上傳成功！正在處理中...");
 
       // 如果有成功回調，調用它（注意：實際的 image_urls 需要在父組件中處理）
       if (onUploadSuccess) {
@@ -222,7 +224,7 @@ export function ImageUploader({
     } catch (error: any) {
       const errorMessage = error?.message || "圖片上傳失敗，請重試。";
       setError(errorMessage);
-      toast.error(errorMessage);
+      handleError(error);
     } finally {
       setIsUploading(false);
     }
@@ -254,10 +256,10 @@ export function ImageUploader({
   const displayImageUrl = previewUrl || currentImageUrl;
 
   return (
-    <div className={cn("space-y-3", className)} data-oid="_zx.4x5">
+    <div className={cn("space-y-3", className)}>
       {/* 標籤 */}
       {label && (
-        <Label className="text-sm font-medium" data-oid="bufi7l6">
+        <Label className="text-sm font-medium">
           {label}
         </Label>
       )}
@@ -269,15 +271,15 @@ export function ImageUploader({
           isDragOver && !disabled && "border-primary bg-primary/5",
           disabled && "opacity-50 cursor-not-allowed",
         )}
-        data-oid="r_x.oek"
+       
       >
-        <CardContent className="p-6" data-oid="-o8vt:4">
+        <CardContent className="p-6">
           {/* 圖片顯示區域 */}
           {displayImageUrl && (
-            <div className="mb-4 relative" data-oid="iu170ip">
+            <div className="mb-4 relative">
               <div
                 className="relative aspect-video w-full max-w-md mx-auto rounded-lg overflow-hidden bg-gray-100"
-                data-oid="smhj7kr"
+               
               >
                 <img
                   src={displayImageUrl}
@@ -289,7 +291,7 @@ export function ImageUploader({
                       handleClearFile();
                     }
                   }}
-                  data-oid="l:_dfs8"
+                 
                 />
 
                 {/* 移除按鈕 */}
@@ -300,9 +302,9 @@ export function ImageUploader({
                     size="icon"
                     className="absolute top-2 right-2 h-8 w-8"
                     onClick={handleClearFile}
-                    data-oid="fi8a9oo"
+                   
                   >
-                    <X className="h-4 w-4" data-oid="inejrnc" />
+                    <X className="h-4 w-4" />
                   </Button>
                 )}
               </div>
@@ -332,42 +334,42 @@ export function ImageUploader({
                 handleClickUpload();
               }
             }}
-            data-oid="t4228yu"
+           
           >
-            <div className="space-y-4" data-oid="c9.usxc">
+            <div className="space-y-4">
               {/* 圖標和主要文字 */}
               <div
                 className="flex flex-col items-center space-y-2"
-                data-oid="ec4mbcv"
+               
               >
                 {isUploading ? (
                   <Loader2
                     className="h-12 w-12 text-primary animate-spin"
-                    data-oid="_7j4oo:"
+                   
                   />
                 ) : (
                   <div
                     className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10"
-                    data-oid="92vriav"
+                   
                   >
                     {displayImageUrl ? (
                       <CheckCircle
                         className="h-6 w-6 text-primary"
-                        data-oid=".9ybq.."
+                       
                       />
                     ) : (
                       <Upload
                         className="h-6 w-6 text-primary"
-                        data-oid="2uw6s-z"
+                       
                       />
                     )}
                   </div>
                 )}
 
-                <div data-oid="qg0u3uz">
+                <div>
                   <p
                     className="text-lg font-medium text-gray-900"
-                    data-oid="eczp_ff"
+                   
                   >
                     {isUploading
                       ? "上傳中..."
@@ -375,7 +377,7 @@ export function ImageUploader({
                         ? "點擊更換圖片"
                         : "點擊上傳圖片"}
                   </p>
-                  <p className="text-sm text-gray-500" data-oid="-rai-ja">
+                  <p className="text-sm text-gray-500">
                     或拖拽圖片文件到此區域
                   </p>
                 </div>
@@ -383,7 +385,7 @@ export function ImageUploader({
 
               {/* 輔助文字 */}
               {helperText && (
-                <p className="text-xs text-gray-400" data-oid="ufw8_1o">
+                <p className="text-xs text-gray-400">
                   {helperText}
                 </p>
               )}
@@ -398,29 +400,29 @@ export function ImageUploader({
             onChange={handleFileInputChange}
             className="hidden"
             disabled={disabled}
-            data-oid="16yy2ry"
+           
           />
 
           {/* 上傳按鈕 */}
           {selectedFile && !disabled && (
-            <div className="mt-4 flex justify-center" data-oid="0xl6sm4">
+            <div className="mt-4 flex justify-center">
               <Button
                 onClick={handleUpload}
                 disabled={isUploading}
                 className="min-w-[120px]"
-                data-oid="uo46d5l"
+               
               >
                 {isUploading ? (
                   <>
                     <Loader2
                       className="mr-2 h-4 w-4 animate-spin"
-                      data-oid="o17hoba"
+                     
                     />
                     上傳中...
                   </>
                 ) : (
                   <>
-                    <Upload className="mr-2 h-4 w-4" data-oid="unras.1" />
+                    <Upload className="mr-2 h-4 w-4" />
                     確認上傳
                   </>
                 )}
@@ -432,9 +434,9 @@ export function ImageUploader({
 
       {/* 錯誤提示 */}
       {error && (
-        <Alert variant="destructive" data-oid="csw9l2t">
-          <AlertCircle className="h-4 w-4" data-oid="9o7lwbc" />
-          <AlertDescription data-oid=".arghe_">{error}</AlertDescription>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
     </div>

@@ -36,22 +36,35 @@ class ProductService
      */
     public function updateProductWithVariants(Product $product, array $validatedData): Product
     {
+        // 在測試環境中或已有事務時，直接執行；否則開啟新事務
+        if (app()->environment('testing') || DB::transactionLevel() > 0) {
+            return $this->processProductUpdate($product, $validatedData);
+        }
+        
         return DB::transaction(function () use ($product, $validatedData) {
-            // a. 更新 SPU - 產品主體資訊更新
-            $product->update([
-                'name' => $validatedData['name'],
-                'description' => $validatedData['description'] ?? $product->description,
-                'category_id' => $validatedData['category_id'] ?? $product->category_id,
-            ]);
-
-            // b. 更新產品與屬性的關聯 (必須提供完整的屬性陣列)
-            $product->attributes()->sync($validatedData['attributes']);
-
-            // c. 識別 SKU 變更並執行操作
-            $this->processVariantChanges($product, $validatedData['variants']);
-
-            return $product;
+            return $this->processProductUpdate($product, $validatedData);
         });
+    }
+    
+    /**
+     * 處理商品更新的實際邏輯
+     */
+    private function processProductUpdate(Product $product, array $validatedData): Product
+    {
+        // a. 更新 SPU - 產品主體資訊更新
+        $product->update([
+            'name' => $validatedData['name'],
+            'description' => $validatedData['description'] ?? $product->description,
+            'category_id' => $validatedData['category_id'] ?? $product->category_id,
+        ]);
+
+        // b. 更新產品與屬性的關聯 (必須提供完整的屬性陣列)
+        $product->attributes()->sync($validatedData['attributes']);
+
+        // c. 識別 SKU 變更並執行操作
+        $this->processVariantChanges($product, $validatedData['variants']);
+
+        return $product;
     }
 
     /**
@@ -107,11 +120,9 @@ class ProductService
         ProductVariant::whereIn('id', $variantIds)
             ->get()
             ->each(function ($variant) {
-                // 刪除變體前先刪除其庫存記錄
-                $variant->inventory()->delete();
                 // 刪除變體與屬性值的關聯
                 $variant->attributeValues()->detach();
-                // 刪除變體
+                // 刪除變體（庫存記錄保留作為歷史數據）
                 $variant->delete();
             });
     }

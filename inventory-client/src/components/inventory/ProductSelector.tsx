@@ -229,7 +229,7 @@ export function ProductSelector({
         );
         if (!inventory)
           return (
-            <div className="text-xs text-muted-foreground" data-oid="injinjy">
+            <div className="text-xs text-muted-foreground">
               此門市無庫存
             </div>
           );
@@ -237,10 +237,10 @@ export function ProductSelector({
         return (
           <div
             className="flex items-center gap-2 text-xs text-muted-foreground"
-            data-oid="_x2q7fh"
+           
           >
-            <span data-oid="1i2q4i5">庫存: {inventory.quantity || 0}</span>
-            <span data-oid="f3i-445">@ {inventory.store?.name || ""}</span>
+            <span>庫存: {inventory.quantity || 0}</span>
+            <span>@ {inventory.store?.name || ""}</span>
           </div>
         );
       } else {
@@ -252,15 +252,15 @@ export function ProductSelector({
         return (
           <div
             className="text-xs text-muted-foreground space-y-1"
-            data-oid="a.bhlrn"
+           
           >
-            <div data-oid="hrgekiw">總庫存: {totalStock}</div>
-            <div className="flex flex-wrap gap-1" data-oid=".gj.6us">
+            <div>總庫存: {totalStock}</div>
+            <div className="flex flex-wrap gap-1">
               {variant.inventory.map((inv: any) => (
                 <span
                   key={inv.store_id}
                   className="inline-flex items-center gap-1 px-1 py-0.5 bg-muted rounded text-xs"
-                  data-oid="skuq3oj"
+                 
                 >
                   {inv.store?.name}: {inv.quantity || 0}
                 </span>
@@ -276,10 +276,10 @@ export function ProductSelector({
       return (
         <div
           className="flex items-center gap-2 text-xs text-muted-foreground"
-          data-oid="9nr54o_"
+         
         >
-          <span data-oid="252hab_">庫存: {quantity}</span>
-          {storeName && <span data-oid="s0__nny">@ {storeName}</span>}
+          <span>庫存: {quantity}</span>
+          {storeName && <span>@ {storeName}</span>}
         </div>
       );
     }
@@ -294,59 +294,59 @@ export function ProductSelector({
   }, [variants, selectedProductId]);
 
   return (
-    <div className="space-y-2" data-oid="0zav0f9">
-      <Popover open={open} onOpenChange={setOpen} data-oid="ol9km.b">
-        <PopoverTrigger asChild data-oid=":gzrvod">
+    <div className="space-y-2">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between"
             disabled={disabled || sessionStatus === "unauthenticated"}
-            data-oid="fl2sky-"
+           
           >
-            <span className="truncate" data-oid="qjbp5_2">
+            <span className="truncate">
               {sessionStatus === "unauthenticated"
                 ? "請先登入系統"
                 : getDisplayText()}
             </span>
             <ChevronDown
               className="ml-2 h-4 w-4 shrink-0 opacity-50"
-              data-oid=":39.g4m"
+             
             />
           </Button>
         </PopoverTrigger>
         <PopoverContent
           className="w-[400px] p-0"
           align="start"
-          data-oid="bo4w5vk"
+         
         >
-          <Command data-oid="v.hhz:o">
+          <Command>
             <CommandInput
               placeholder="搜尋商品名稱..."
               value={searchTerm}
               onValueChange={setSearchTerm}
-              data-oid="h2hr-1b"
+             
             />
 
             <CommandList
               className="max-h-[400px] overflow-y-auto"
-              data-oid="x0i0avc"
+             
             >
-              <CommandEmpty data-oid="l-0ermi">
+              <CommandEmpty>
                 {isLoadingProducts ? (
                   "載入中..."
                 ) : productsError ? (
                   <div
                     className="flex flex-col items-center gap-2 p-4 text-sm text-muted-foreground"
-                    data-oid="n1n94dr"
+                   
                   >
                     <AlertCircle
                       className="h-8 w-8 text-destructive"
-                      data-oid="4wdvr.0"
+                     
                     />
 
-                    <div className="text-center" data-oid="fb1x1ql">
+                    <div className="text-center">
                       {sessionStatus === "unauthenticated"
                         ? "請先登入系統才能搜尋商品"
                         : "載入商品失敗，請稍後再試"}
@@ -356,15 +356,15 @@ export function ProductSelector({
                   (Array.isArray(productsData) && productsData.length === 0) ? (
                   <div
                     className="flex flex-col items-center gap-2 p-4 text-sm text-muted-foreground"
-                    data-oid="653p6:r"
+                   
                   >
-                    <div className="text-center" data-oid=".w7cb:0">
+                    <div className="text-center">
                       {searchTerm
                         ? `找不到包含「${searchTerm}」的商品`
                         : "暫無商品資料"}
                     </div>
                     {searchTerm && (
-                      <div className="text-xs" data-oid="46bbiog">
+                      <div className="text-xs">
                         請確認商品名稱或嘗試其他關鍵字
                       </div>
                     )}
@@ -379,26 +379,26 @@ export function ProductSelector({
                 productsData &&
                 Array.isArray(productsData) &&
                 productsData.length > 0 && (
-                  <CommandGroup heading="選擇商品" data-oid="8m5yk36">
+                  <CommandGroup heading="選擇商品">
                     {productsData.map((product: any) => (
                       <CommandItem
                         key={product.id}
                         onSelect={() => handleProductSelect(product.id)}
                         className="flex flex-col items-start gap-1"
-                        data-oid="ysoz2ms"
+                       
                       >
                         <div
                           className="flex items-center gap-2 w-full"
-                          data-oid="h6hurnl"
+                         
                         >
-                          <div className="flex-1" data-oid="0fk4wf8">
-                            <div className="font-medium" data-oid="ypkh7wo">
+                          <div className="flex-1">
+                            <div className="font-medium">
                               {product.name}
                             </div>
                             {product.description && (
                               <div
                                 className="text-xs text-muted-foreground"
-                                data-oid="l_5-meq"
+                               
                               >
                                 {product.description}
                               </div>
@@ -407,7 +407,7 @@ export function ProductSelector({
                           <Badge
                             variant="secondary"
                             className="text-xs"
-                            data-oid="zi.8qxs"
+                           
                           >
                             {product.variants?.length || 0} 個規格
                           </Badge>
@@ -419,29 +419,29 @@ export function ProductSelector({
 
               {/* 變體列表 */}
               {selectedProductId && (
-                <CommandGroup heading="選擇規格" data-oid=".m6r-gd">
+                <CommandGroup heading="選擇規格">
                   <CommandItem
                     onSelect={handleReset}
                     className="text-sm text-muted-foreground border-b"
-                    data-oid="id6i3_2"
+                   
                   >
                     ← 返回商品選擇
                   </CommandItem>
 
                   {isLoadingVariants ? (
-                    <CommandItem disabled data-oid="8.ai4pr">
+                    <CommandItem disabled>
                       載入規格中...
                     </CommandItem>
                   ) : variantsError ? (
                     <CommandItem
                       disabled
                       className="text-red-500"
-                      data-oid="ky1_-e6"
+                     
                     >
                       載入規格失敗: {variantsError.message}
                     </CommandItem>
                   ) : filteredVariants.length === 0 ? (
-                    <CommandItem disabled data-oid="d3.30gf">
+                    <CommandItem disabled>
                       此商品暫無規格 (商品ID: {selectedProductId})
                     </CommandItem>
                   ) : (
@@ -450,11 +450,11 @@ export function ProductSelector({
                         key={variant.id}
                         onSelect={() => handleVariantSelect(variant)}
                         className="flex flex-col items-start gap-1"
-                        data-oid="ff75bh8"
+                       
                       >
                         <div
                           className="flex items-center gap-2 w-full"
-                          data-oid="tey7my6"
+                         
                         >
                           <Check
                             className={cn(
@@ -463,18 +463,18 @@ export function ProductSelector({
                                 ? "opacity-100"
                                 : "opacity-0",
                             )}
-                            data-oid="5lhm_vw"
+                           
                           />
 
-                          <div className="flex-1" data-oid="gp_r5_r">
+                          <div className="flex-1">
                             <div
                               className="flex items-center gap-2"
-                              data-oid=":5nk07y"
+                             
                             >
-                              <span className="font-medium" data-oid="i2:jr_v">
+                              <span className="font-medium">
                                 {variant.sku}
                               </span>
-                              <span className="text-sm" data-oid="swq12ay">
+                              <span className="text-sm">
                                 ${variant.price}
                               </span>
                             </div>
@@ -482,7 +482,7 @@ export function ProductSelector({
                               variant.attribute_values.length > 0 && (
                                 <div
                                   className="text-xs text-muted-foreground"
-                                  data-oid="gd7r8pp"
+                                 
                                 >
                                   {variant.attribute_values
                                     .map(
@@ -507,13 +507,13 @@ export function ProductSelector({
 
       {/* 選中的商品資訊顯示 */}
       {selectedVariant && (
-        <div className="p-3 bg-muted/50 rounded-lg border" data-oid="1ukdrob">
-          <div className="flex items-center justify-between" data-oid="zgm.0x-">
-            <div data-oid="59d52md">
-              <div className="font-medium text-sm" data-oid="p9rm799">
+        <div className="p-3 bg-muted/50 rounded-lg border">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium text-sm">
                 {selectedVariant.product?.name}
               </div>
-              <div className="text-xs text-muted-foreground" data-oid="cay117v">
+              <div className="text-xs text-muted-foreground">
                 SKU: {selectedVariant.sku} • 價格: ${selectedVariant.price}
               </div>
             </div>
@@ -522,7 +522,7 @@ export function ProductSelector({
               size="sm"
               onClick={handleReset}
               className="text-muted-foreground"
-              data-oid=".dzp2yt"
+             
             >
               清除
             </Button>

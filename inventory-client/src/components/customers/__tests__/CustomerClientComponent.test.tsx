@@ -472,7 +472,7 @@ describe('CustomerClientComponent', () => {
       // 等待後台同步觸發
       await waitFor(() => {
         expect(mockRefetchCustomerDetail).toHaveBeenCalled();
-      }, { timeout: 1000 });
+      });
     });
   });
 

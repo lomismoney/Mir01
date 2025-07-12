@@ -157,7 +157,7 @@ class ProductVariantControllerTest extends TestCase
                     ->has('links') // 分頁連結
                     ->has('data.0', fn ($json) =>
                         $json->where('sku', $this->variant3->sku) // 按建立時間降序排列，最新的在前
-                            ->where('price', '399.00')
+                            ->where('price', 399)
                             ->where('product_id', $this->product2->id)
                             ->has('created_at')
                             ->has('updated_at')

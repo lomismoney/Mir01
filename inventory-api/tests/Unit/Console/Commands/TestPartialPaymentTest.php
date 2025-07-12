@@ -30,9 +30,8 @@ class TestPartialPaymentTest extends TestCase
     {
         parent::setUp();
         
-        // 創建測試用戶
-        $this->user = User::factory()->create();
-        $this->user->assignRole('admin');
+        // 使用基類的方法創建管理員用戶
+        $this->user = $this->createAdminUser();
         
         // 創建測試客戶
         $this->customer = Customer::factory()->create();

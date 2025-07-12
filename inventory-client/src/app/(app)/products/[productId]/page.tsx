@@ -64,14 +64,14 @@ export default function ProductDetailPage({
     return (
       <div
         className="flex items-center justify-center min-h-[60vh]"
-        data-oid="_vo_hba"
+       
       >
-        <div className="text-center space-y-4" data-oid="jmvi9e.">
+        <div className="text-center space-y-4">
           <div
             className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"
-            data-oid="m4bt62r"
+           
           ></div>
-          <p className="text-muted-foreground" data-oid="i1j_q9-">
+          <p className="text-muted-foreground">
             載入商品資訊中...
           </p>
         </div>
@@ -83,13 +83,13 @@ export default function ProductDetailPage({
     return (
       <div
         className="flex items-center justify-center min-h-[60vh]"
-        data-oid="phqq_zl"
+       
       >
-        <div className="text-center space-y-4" data-oid="qhj:a29">
-          <p className="text-muted-foreground" data-oid="wbmco8_">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground">
             找不到商品資訊
           </p>
-          <Button onClick={() => router.push("/products")} data-oid="314u0i8">
+          <Button onClick={() => router.push("/products")}>
             返回商品列表
           </Button>
         </div>
@@ -109,50 +109,54 @@ export default function ProductDetailPage({
     }, 0) || 0;
 
   // 計算價格範圍
-  const priceRange = product.price_range;
+  const prices = product.variants?.map((v: any) => v.price).filter((p: any) => p > 0) || [];
+  const priceRange = prices.length > 0 ? {
+    min: Math.min(...prices),
+    max: Math.max(...prices)
+  } : null;
 
   return (
-    <div className="flex flex-col gap-4 p-6" data-oid="h4udatg">
+    <div className="flex flex-col gap-4 p-6">
       {/* 頁面標題 */}
-      <div className="flex items-center justify-between" data-oid=".36atff">
-        <div className="flex items-center gap-4" data-oid="qxh_nj9">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.push("/products")}
-            data-oid="v11-54:"
+           
           >
-            <ArrowLeft className="h-4 w-4" data-oid="i5iu:b4" />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl font-bold" data-oid="hhj.60t">
+          <h1 className="text-2xl font-bold">
             商品詳情
           </h1>
         </div>
         <Button
           onClick={() => router.push(`/products/${productId}/edit`)}
-          data-oid="p.3vwz7"
+         
         >
-          <Edit className="h-4 w-4 mr-2" data-oid="3jh4o9m" />
+          <Edit className="h-4 w-4 mr-2" />
           編輯商品
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3" data-oid="issmgs_">
+      <div className="grid gap-6 md:grid-cols-3">
         {/* 左側：商品圖片和基本資訊 */}
-        <div className="md:col-span-1 space-y-4" data-oid="ny0t_pv">
+        <div className="md:col-span-1 space-y-4">
           {/* 商品圖片 */}
           <Card
             className="bg-gradient-to-t from-primary/5 to-card shadow-xs"
-            data-oid="vtjt0hr"
+           
           >
-            <CardContent className="p-6" data-oid="njj24z9">
+            <CardContent className="p-6">
               <div
                 className="aspect-square relative bg-muted rounded-lg overflow-hidden"
-                data-oid="xu0v_f2"
+               
               >
-                {product.image_urls?.original ? (
+                {product.image_urls && product.image_urls.length > 0 ? (
                   <Image
-                    src={product.image_urls.original.replace(
+                    src={product.image_urls[0].replace(
                       "localhost",
                       "127.0.0.1",
                     )}
@@ -160,16 +164,16 @@ export default function ProductDetailPage({
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    data-oid="isk653d"
+                   
                   />
                 ) : (
                   <div
                     className="w-full h-full flex items-center justify-center"
-                    data-oid="0fcb.f4"
+                   
                   >
                     <ImageIcon
                       className="h-16 w-16 text-muted-foreground"
-                      data-oid="x5qtohw"
+                     
                     />
                   </div>
                 )}
@@ -180,81 +184,81 @@ export default function ProductDetailPage({
           {/* 基本資訊 */}
           <Card
             className="bg-gradient-to-t from-primary/5 to-card shadow-xs"
-            data-oid="egqh6c4"
+           
           >
             <CardHeader
               className="flex flex-row items-center justify-between space-y-0"
-              data-oid="m6f17ov"
+             
             >
-              <div data-oid="0h2_gqo">
-                <CardTitle className="text-lg font-semibold" data-oid="x1ljtrl">
+              <div>
+                <CardTitle className="text-lg font-semibold">
                   基本資訊
                 </CardTitle>
-                <CardDescription data-oid="_cmtztn">
+                <CardDescription>
                   商品基本資料
                 </CardDescription>
               </div>
               <Info
                 className="h-4 w-4 text-muted-foreground"
-                data-oid="0cgxcz."
+               
               />
             </CardHeader>
-            <CardContent className="space-y-4" data-oid="ogkhncm">
-              <div data-oid="l49-.hi">
+            <CardContent className="space-y-4">
+              <div>
                 <p
                   className="text-sm text-muted-foreground mb-1"
-                  data-oid="trk-4or"
+                 
                 >
                   商品名稱
                 </p>
-                <p className="font-medium" data-oid="b50gzct">
+                <p className="font-medium">
                   {product.name}
                 </p>
               </div>
 
               {product.description && (
-                <div data-oid="owpdlj_">
+                <div>
                   <p
                     className="text-sm text-muted-foreground mb-1"
-                    data-oid="5k0-2u8"
+                   
                   >
                     商品描述
                   </p>
-                  <p className="text-sm" data-oid="heig0hf">
+                  <p className="text-sm">
                     {product.description}
                   </p>
                 </div>
               )}
 
               {product.category && (
-                <div data-oid="2y4kzlc">
+                <div>
                   <p
                     className="text-sm text-muted-foreground mb-1"
-                    data-oid=".6gk_rt"
+                   
                   >
                     分類
                   </p>
-                  <Badge variant="outline" data-oid="b:iduoj">
-                    <Tag className="h-3 w-3 mr-1" data-oid="ybijbi." />
+                  <Badge variant="outline">
+                    <Tag className="h-3 w-3 mr-1" />
                     {product.category.name}
                   </Badge>
                 </div>
               )}
 
-              <div data-oid="cy61fi_">
+              <div>
                 <p
                   className="text-sm text-muted-foreground mb-1"
-                  data-oid="m92x8or"
+                 
                 >
                   建立時間
                 </p>
                 <div
                   className="flex items-center gap-2 text-sm"
-                  data-oid="hvie3e3"
+                 
                 >
                   <Calendar
                     className="h-3 w-3 text-muted-foreground"
-                    data-oid="arqciuk"
+                   
                   />
 
                   {new Date(product.created_at).toLocaleString("zh-TW")}
@@ -265,28 +269,28 @@ export default function ProductDetailPage({
         </div>
 
         {/* 右側：詳細資訊 */}
-        <div className="md:col-span-2 space-y-4" data-oid="y:dbnxv">
+        <div className="md:col-span-2 space-y-4">
           {/* 價格和庫存資訊 */}
-          <div className="grid gap-4 md:grid-cols-2" data-oid="gkgnb5c">
+          <div className="grid gap-4 md:grid-cols-2">
             {/* 價格卡片 */}
             <Card
               className="bg-gradient-to-t from-primary/5 to-card shadow-xs @container/card"
-              data-oid="lmzh411"
+             
             >
               <CardHeader
                 className="flex flex-row items-center justify-between space-y-0 pb-2"
-                data-oid="ko-o6w6"
+               
               >
-                <CardDescription data-oid="8sj7wm4">價格範圍</CardDescription>
+                <CardDescription>價格範圍</CardDescription>
                 <DollarSign
                   className="h-4 w-4 text-muted-foreground"
-                  data-oid="1l3wveh"
+                 
                 />
               </CardHeader>
-              <CardContent data-oid="nyrw4nk">
+              <CardContent>
                 <CardTitle
                   className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
-                  data-oid="xpp2.fd"
+                 
                 >
                   {priceRange && priceRange.min !== undefined ? (
                     priceRange.min === priceRange.max ? (
@@ -303,14 +307,14 @@ export default function ProductDetailPage({
                 </CardTitle>
                 <div
                   className="flex items-center gap-2 mt-2"
-                  data-oid="l2yxwoa"
+                 
                 >
                   <Badge
                     variant="outline"
                     className="text-xs"
-                    data-oid="l60sf8k"
+                   
                   >
-                    <Package className="h-3 w-3 mr-1" data-oid="drrr8s." />
+                    <Package className="h-3 w-3 mr-1" />
                     {product.variants?.length || 0} 個規格
                   </Badge>
                 </div>
@@ -320,28 +324,28 @@ export default function ProductDetailPage({
             {/* 庫存卡片 */}
             <Card
               className="bg-gradient-to-t from-primary/5 to-card shadow-xs @container/card"
-              data-oid="y0y6uqi"
+             
             >
               <CardHeader
                 className="flex flex-row items-center justify-between space-y-0 pb-2"
-                data-oid="_r4kbgu"
+               
               >
-                <CardDescription data-oid="yv5lee8">總庫存</CardDescription>
+                <CardDescription>總庫存</CardDescription>
                 <Box
                   className="h-4 w-4 text-muted-foreground"
-                  data-oid="ty-al.:"
+                 
                 />
               </CardHeader>
-              <CardContent data-oid="l-3on.7">
+              <CardContent>
                 <CardTitle
                   className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
-                  data-oid="u2z3kz-"
+                 
                 >
                   {totalStock} 件
                 </CardTitle>
                 <div
                   className="flex items-center gap-2 mt-2"
-                  data-oid="c_1tu1a"
+                 
                 >
                   <Badge
                     variant={
@@ -351,7 +355,7 @@ export default function ProductDetailPage({
                           ? "secondary"
                           : "outline"
                     }
-                    data-oid="9_h8e72"
+                   
                   >
                     {totalStock === 0
                       ? "缺貨"
@@ -362,7 +366,7 @@ export default function ProductDetailPage({
                 </div>
                 <p
                   className="text-xs text-muted-foreground mt-1"
-                  data-oid="c2z8wrj"
+                 
                 >
                   所有門市總計
                 </p>
@@ -373,38 +377,38 @@ export default function ProductDetailPage({
           {/* 規格變體列表 */}
           <Card
             className="bg-gradient-to-t from-primary/5 to-card shadow-xs"
-            data-oid="v-u:v53"
+           
           >
             <CardHeader
               className="flex flex-row items-center justify-between space-y-0"
-              data-oid="h:jwq7g"
+             
             >
-              <div data-oid="0dkgin4">
-                <CardTitle className="text-lg font-semibold" data-oid="i5y_f20">
+              <div>
+                <CardTitle className="text-lg font-semibold">
                   規格變體
                 </CardTitle>
-                <CardDescription data-oid="i2k1czo">
+                <CardDescription>
                   商品的所有規格變體及其庫存狀況
                 </CardDescription>
               </div>
               <Grid3X3
                 className="h-4 w-4 text-muted-foreground"
-                data-oid="il6chji"
+               
               />
             </CardHeader>
-            <CardContent data-oid="nx3us-c">
+            <CardContent>
               {product.variants && product.variants.length > 0 ? (
-                <div className="rounded-md border" data-oid="wkc16rg">
-                  <Table data-oid="av9mjai">
-                    <TableHeader data-oid="cwtw3sv">
-                      <TableRow data-oid="2ew_55l">
-                        <TableHead data-oid="aea0jnd">SKU</TableHead>
-                        <TableHead data-oid="gjiss_k">規格</TableHead>
-                        <TableHead data-oid="pl5a96w">價格</TableHead>
-                        <TableHead data-oid="net_qmc">庫存</TableHead>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>SKU</TableHead>
+                        <TableHead>規格</TableHead>
+                        <TableHead>價格</TableHead>
+                        <TableHead>庫存</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody data-oid="xry6qn_">
+                    <TableBody>
                       {product.variants.map((variant: any) => {
                         const totalStock =
                           variant.inventory?.reduce(
@@ -414,21 +418,21 @@ export default function ProductDetailPage({
                           ) || 0;
 
                         return (
-                          <TableRow key={variant.id} data-oid="3rj9e1s">
-                            <TableCell data-oid="d2dw3hc">
+                          <TableRow key={variant.id}>
+                            <TableCell>
                               <span
                                 className="font-mono text-sm"
-                                data-oid="um1tiyn"
+                               
                               >
                                 {variant.sku}
                               </span>
                             </TableCell>
-                            <TableCell data-oid="d_p4jhq">
+                            <TableCell>
                               {variant.attribute_values &&
                               variant.attribute_values.length > 0 ? (
                                 <div
                                   className="flex flex-wrap gap-1"
-                                  data-oid="bhsk_2y"
+                                 
                                 >
                                   {variant.attribute_values.map(
                                     (attr: any, index: number) => (
@@ -436,17 +440,17 @@ export default function ProductDetailPage({
                                         key={index}
                                         variant="outline"
                                         className="text-xs"
-                                        data-oid="cw0i_nz"
+                                       
                                       >
                                         <span
                                           className="text-muted-foreground"
-                                          data-oid="uxhtt.v"
+                                         
                                         >
                                           {attr.attribute?.name}:
                                         </span>
                                         <span
                                           className="ml-1 font-medium"
-                                          data-oid="d:35k6o"
+                                         
                                         >
                                           {attr.value}
                                         </span>
@@ -457,30 +461,30 @@ export default function ProductDetailPage({
                               ) : (
                                 <span
                                   className="text-muted-foreground"
-                                  data-oid="ov9agle"
+                                 
                                 >
                                   無規格
                                 </span>
                               )}
                             </TableCell>
-                            <TableCell data-oid="2_8o5_d">
+                            <TableCell>
                               {formatPrice(variant.price)}
                             </TableCell>
-                            <TableCell data-oid="-jyghph">
+                            <TableCell>
                               <div
                                 className="flex items-center gap-2"
-                                data-oid="70v-2mj"
+                               
                               >
                                 <Box
                                   className="h-4 w-4 text-muted-foreground"
-                                  data-oid="7e95ali"
+                                 
                                 />
 
                                 <span
                                   className={
                                     totalStock === 0 ? "text-destructive" : ""
                                   }
-                                  data-oid="sbfh1ka"
+                                 
                                 >
                                   {totalStock} 件
                                 </span>
@@ -493,15 +497,15 @@ export default function ProductDetailPage({
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-8" data-oid="u73kt6w">
+                <div className="text-center py-8">
                   <Package
                     className="h-8 w-8 text-muted-foreground mx-auto mb-2"
-                    data-oid="ekyh7dr"
+                   
                   />
 
                   <p
                     className="text-sm text-muted-foreground"
-                    data-oid="mg_rnx3"
+                   
                   >
                     暫無規格變體
                   </p>
@@ -513,27 +517,27 @@ export default function ProductDetailPage({
           {/* 各門市庫存 */}
           <Card
             className="bg-gradient-to-t from-primary/5 to-card shadow-xs"
-            data-oid="8vm2u9u"
+           
           >
             <CardHeader
               className="flex flex-row items-center justify-between space-y-0"
-              data-oid="7mkxlhj"
+             
             >
-              <div data-oid="h2m4:qs">
-                <CardTitle className="text-lg font-semibold" data-oid="bakgmr5">
+              <div>
+                <CardTitle className="text-lg font-semibold">
                   門市庫存分布
                 </CardTitle>
-                <CardDescription data-oid="0qwm7-h">
+                <CardDescription>
                   各門市的庫存數量統計
                 </CardDescription>
               </div>
               <MapPin
                 className="h-4 w-4 text-muted-foreground"
-                data-oid="98.06qg"
+               
               />
             </CardHeader>
-            <CardContent data-oid="5ch5g2g">
-              <div className="space-y-3" data-oid="8cczq-y">
+            <CardContent>
+              <div className="space-y-3">
                 {(() => {
                   // 統計各門市的庫存
                   const storeInventory = new Map<
@@ -557,15 +561,15 @@ export default function ProductDetailPage({
 
                   if (stores.length === 0) {
                     return (
-                      <div className="text-center py-8" data-oid=":cefitl">
+                      <div className="text-center py-8">
                         <Store
                           className="h-8 w-8 text-muted-foreground mx-auto mb-2"
-                          data-oid="7dxt:h6"
+                         
                         />
 
                         <p
                           className="text-sm text-muted-foreground"
-                          data-oid="pxc71kh"
+                         
                         >
                           暫無庫存資訊
                         </p>
@@ -577,37 +581,37 @@ export default function ProductDetailPage({
                     <div
                       key={store.name}
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                      data-oid="e7qjloq"
+                     
                     >
                       <div
                         className="flex items-center gap-2"
-                        data-oid="h9e:khj"
+                       
                       >
                         <Store
                           className="h-4 w-4 text-muted-foreground"
-                          data-oid="765:_ow"
+                         
                         />
 
-                        <span className="font-medium" data-oid="e22f.:_">
+                        <span className="font-medium">
                           {store.name}
                         </span>
                       </div>
                       <div
                         className="flex items-center gap-2"
-                        data-oid=".522i:l"
+                       
                       >
                         <Badge
                           variant={
                             store.quantity === 0 ? "destructive" : "secondary"
                           }
-                          data-oid="u_5zgvd"
+                         
                         >
                           {store.quantity} 件
                         </Badge>
                         {store.quantity > 0 && (
                           <span
                             className="text-xs text-muted-foreground"
-                            data-oid="h48g91r"
+                           
                           >
                             ({Math.round((store.quantity / totalStock) * 100)}%)
                           </span>
