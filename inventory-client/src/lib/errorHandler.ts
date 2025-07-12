@@ -91,12 +91,17 @@ export function parseApiError(error: UnknownError): string {
     const errorMessages: string[] = [];
     
     // 遍歷所有錯誤欄位
-    Object.values(errorsObj).forEach(fieldErrors => {
+    Object.entries(errorsObj).forEach(([field, fieldErrors]) => {
       if (Array.isArray(fieldErrors)) {
         // Laravel 驗證錯誤格式：每個欄位的錯誤是字串陣列
         fieldErrors.forEach(msg => {
           if (typeof msg === 'string') {
-            errorMessages.push(msg);
+            // 特別處理 SKU 重複錯誤，提供更好的用戶體驗
+            if (field.includes('.sku') && msg.includes('已存在')) {
+              errorMessages.push(`⚠️ ${msg}`);
+            } else {
+              errorMessages.push(msg);
+            }
           }
         });
       } else if (typeof fieldErrors === 'string') {

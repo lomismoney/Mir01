@@ -26,8 +26,12 @@ export function useVariantManager({ formData, updateFormData }: UseVariantManage
    * 自動生成 SKU
    */
   const generateAutoSku = (variant: VariantItem, index: number): string => {
+    // 生成唯一後綴：使用時間戳和隨機數確保唯一性
+    const timestamp = Date.now().toString().slice(-6); // 取時間戳後6位
+    const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase(); // 3位隨機字符
+    
     if (!formData.specifications.isVariable) {
-      return `${formData.basicInfo.name.substring(0, 3).toUpperCase()}001`;
+      return `${formData.basicInfo.name.substring(0, 3).toUpperCase()}-${timestamp}-${randomSuffix}`;
     }
 
     const productPrefix = formData.basicInfo.name.substring(0, 3).toUpperCase();
@@ -35,7 +39,7 @@ export function useVariantManager({ formData, updateFormData }: UseVariantManage
       .map(({ value }) => value.substring(0, 2).toUpperCase())
       .join("");
 
-    return `${productPrefix}-${attributeParts}-${String(index + 1).padStart(3, "0")}`;
+    return `${productPrefix}-${attributeParts}-${timestamp}-${randomSuffix}`;
   };
 
   /**

@@ -416,7 +416,8 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
                 alt={item.name || "商品圖片"}
                 width={48}
                 height={48}
-                className="object-cover"
+                className="object-cover w-12 h-12"
+                style={{ width: "48px", height: "48px" }}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = "none";

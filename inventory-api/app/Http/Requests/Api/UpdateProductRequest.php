@@ -79,8 +79,12 @@ class UpdateProductRequest extends FormRequest
                 }
             ],
             'variants.*.price' => 'required|numeric|min:0',
+            // 支援兩種格式：舊格式的 attribute_value_ids 和新格式的 attribute_values
             'variants.*.attribute_value_ids' => 'array', // 🎯 允許空陣列，支援單規格商品
             'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
+            'variants.*.attribute_values' => 'array',
+            'variants.*.attribute_values.*.attribute_id' => 'required_with:variants.*.attribute_values|integer|exists:attributes,id',
+            'variants.*.attribute_values.*.value' => 'required_with:variants.*.attribute_values|string|max:255',
         ];
     }
 

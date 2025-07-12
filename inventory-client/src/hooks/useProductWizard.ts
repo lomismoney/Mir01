@@ -239,23 +239,38 @@ export function useProductWizard(productId?: string | number): UseProductWizardR
 
     setIsSubmitting(true);
     try {
+      // 基本驗證
+      if (!formData.basicInfo.name?.trim()) {
+        throw new Error("商品名稱為必填欄位");
+      }
+      if (!formData.basicInfo.category_id) {
+        throw new Error("請選擇商品分類");
+      }
+      if (!formData.variants.items || formData.variants.items.length === 0) {
+        throw new Error("至少需要一個商品變體");
+      }
+
       // 構建 API 所需的資料格式
       const apiData = {
-        name: formData.basicInfo.name,
-        description: formData.basicInfo.description,
+        name: formData.basicInfo.name.trim(),
+        description: formData.basicInfo.description?.trim() || "",
         category_id: formData.basicInfo.category_id,
-        attributes: formData.specifications.selectedAttributes,
-        attribute_values: formData.specifications.attributeValues,
+        attributes: formData.specifications.selectedAttributes || [],
+        // 注意：attribute_values 不應該在商品層級，而是在變體層級
         variants: formData.variants.items.map(item => ({
-          id: item.id,
-          sku: item.sku,
-          price: parseFloat(item.price),
-          attribute_values: item.options.map(option => ({
+          // 編輯模式時包含 id，創建模式時不包含
+          ...(isEditMode && item.id ? { id: item.id } : {}),
+          sku: item.sku?.trim() || "",
+          price: parseFloat(item.price) || 0,
+          attribute_values: (item.options || []).map(option => ({
             attribute_id: option.attributeId,
             value: option.value,
           })),
         })),
       };
+      
+      // 調試：記錄將要發送的資料
+      console.log('ProductWizard - Submitting data:', apiData);
 
       let productResponse;
       
@@ -267,7 +282,13 @@ export function useProductWizard(productId?: string | number): UseProductWizardR
         });
       } else {
         // 創建商品
-        productResponse = await createProduct.mutateAsync(apiData);
+        try {
+          productResponse = await createProduct.mutateAsync(apiData);
+        } catch (createError) {
+          // 添加更詳細的錯誤信息
+          const errorMsg = createError instanceof Error ? createError.message : "創建商品時發生未知錯誤";
+          throw new Error(`創建商品失敗: ${errorMsg}`);
+        }
       }
 
       // 處理圖片上傳（只在有新選擇的檔案時才上傳）
@@ -297,10 +318,9 @@ export function useProductWizard(productId?: string | number): UseProductWizardR
       // 導航回商品列表
       router.push("/products");
     } catch (error) {
-      // 提交失敗
-      handleError(new Error(
-        isEditMode ? "更新商品失敗" : "創建商品失敗"
-      ));
+      // 提交失敗，保留原始錯誤信息
+      const errorMessage = error instanceof Error ? error.message : (isEditMode ? "更新商品失敗" : "創建商品失敗");
+      handleError(new Error(errorMessage));
     } finally {
       setIsSubmitting(false);
     }

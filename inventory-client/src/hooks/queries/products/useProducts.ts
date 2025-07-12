@@ -51,129 +51,60 @@ export function useProducts(filters: ProductFilters = {}) {
                 throw new Error(errorMessage || '獲取商品列表失敗');
             }
 
+            // 調試：記錄 API 返回的原始數據
+            if (process.env.NODE_ENV === 'development') {
+                console.log('useProducts - API Response:', {
+                    hasData: !!data,
+                    dataType: typeof data,
+                    dataKeys: data ? Object.keys(data) : null,
+                    isArrayData: Array.isArray(data),
+                    hasDataProperty: data?.data !== undefined,
+                    firstItem: Array.isArray(data) ? data[0] : data?.data?.[0]
+                });
+            }
+
             // queryFn 依然返回完整的 response，數據轉換交給 select 處理
+            // 注意：openapi-fetch 可能已經解包了響應
             return data;
         },
         
         // 🎯 數據精煉廠 - 商品數據的完美轉換
         select: (response: any) => {
-            // 1. 解包：處理分頁或普通陣列數據結構
-            const products = response?.data?.data || response?.data || [];
-            if (!Array.isArray(products)) return [];
+            // 調試：記錄 select 收到的原始數據
+            if (process.env.NODE_ENV === 'development') {
+                console.log('useProducts - Select Input:', {
+                    responseType: typeof response,
+                    responseKeys: response ? Object.keys(response) : null,
+                    isArray: Array.isArray(response),
+                    hasData: response?.data !== undefined,
+                    dataIsArray: Array.isArray(response?.data),
+                    dataLength: Array.isArray(response?.data) ? response.data.length : 'N/A'
+                });
+            }
 
-            // 2. 進行所有必要的數據轉換和類型安全處理
-            return products.map((apiProduct: unknown) => {
-                const product = apiProduct as Record<string, unknown>;
-                return {
-                // 📋 基本商品資訊
-                id: (apiProduct as any).id || 0,
-                name: (apiProduct as any).name || '未命名商品',
-                description: (apiProduct as any).description || null,
-                category_id: (apiProduct as any).category_id || null,
-                created_at: (apiProduct as any).created_at || '',
-                updated_at: (apiProduct as any).updated_at || '',
-                
-                // 🖼️ 圖片處理 - 確保圖片 URL 的完整性
-                image_urls: (apiProduct as any).image_urls ? {
-                    original: (apiProduct as any).image_urls.original || null,
-                    thumb: (apiProduct as any).image_urls.thumb || null,
-                    medium: (apiProduct as any).image_urls.medium || null,
-                    large: (apiProduct as any).image_urls.large || null,
-                } : null,
-                
-                // 🏷️ 分類資訊處理（雙格式支援）
-                category: (apiProduct as any).category ? {
-                    id: (apiProduct as any).category.id || 0,
-                    name: (apiProduct as any).category.name || '未分類',
-                    description: (apiProduct as any).category.description || null,
-                } : null,
-                
-                // 🎯 向前相容：為 ProductSelector 等元件提供簡化格式
-                categoryName: (apiProduct as any).category?.name || '未分類', // 字串格式的分類名稱
-                mainImageUrl: ((apiProduct as any).image_urls?.original || 'https://via.placeholder.com/300x300').replace('localhost', '127.0.0.1'), // 主圖 URL - 替換為 IPv4
-                
-                // 🎯 變體(SKU)數據的深度清理
-                variants: (apiProduct as any).variants?.map((variant: any) => {
-                    // 處理屬性值
-                    const attributeValues = variant.attribute_values?.map((attrValue: any) => ({
-                        id: attrValue.id || 0,
-                        value: attrValue.value || '',
-                        attribute_id: attrValue.attribute_id || 0,
-                        attribute: attrValue.attribute ? {
-                            id: attrValue.attribute.id || 0,
-                            name: attrValue.attribute.name || '',
-                        } : null,
-                    })) || [];
-                    
-                    // 處理庫存
-                    const inventoryList = variant.inventory?.map((inv: any) => ({
-                        id: inv.id || 0,
-                        quantity: parseInt(inv.quantity || '0', 10), // 字串轉整數
-                        low_stock_threshold: parseInt(inv.low_stock_threshold || '0', 10),
-                        store: inv.store ? {
-                            id: inv.store.id || 0,
-                            name: inv.store.name || '未知門市',
-                        } : null,
-                    })) || [];
-                    
-                    // 計算總庫存
-                    const totalStock = inventoryList.reduce((sum: number, inv: any) => sum + inv.quantity, 0);
-                    
-                    // 組合規格描述
-                    const specifications = attributeValues
-                        .map((av: any) => av.value)
-                        .filter(Boolean)
-                        .join(' / ') || '標準規格';
-                    
-                    return {
-                        id: variant.id || 0,
-                        sku: variant.sku || 'N/A',
-                        price: parseFloat(variant.price || '0'), // 字串轉數值
-                        product_id: variant.product_id || (apiProduct as any).id,
-                        created_at: variant.created_at || '',
-                        updated_at: variant.updated_at || '',
-                        // 如果變體有自己的圖片，也進行 URL 替換
-                        imageUrl: variant.image_url ? variant.image_url.replace('localhost', '127.0.0.1') : undefined,
-                        
-                        // 為 ProductSelector 添加必要欄位
-                        specifications: specifications,
-                        stock: totalStock,
-                        productName: (apiProduct as any).name, // 添加商品名稱到變體中
-                        
-                        // 保留原始數據
-                        attribute_values: attributeValues,
-                        inventory: inventoryList,
-                    };
-                }) || [],
-                
-                // 💰 價格範圍統計（基於變體價格計算）
-                price_range: (() => {
-                    const prices = (apiProduct as any).variants?.map((v: any) => parseFloat(v.price || '0')).filter((p: number) => p > 0) || [];
-                    if (prices.length === 0) return { min: 0, max: 0, count: 0 };
-                    
-                    return {
-                        min: Math.min(...prices),
-                        max: Math.max(...prices),
-                        count: prices.length,
-                    };
-                })(),
-                
-                // 🏷️ 屬性列表處理
-                attributes: (apiProduct as any).attributes?.map((attr: any) => ({
-                    id: attr.id || 0,
-                    name: attr.name || '',
-                    type: attr.type || '',
-                    description: attr.description || null,
-                })) || [],
-            };
-        });
+            // 1. 解包：處理 Laravel 分頁格式 { data: [...], links: {...}, meta: {...} }
+            const products = response?.data || [];
+            
+            // 確保是陣列
+            if (!Array.isArray(products)) {
+                console.warn('useProducts - 期望陣列但收到:', products);
+                return [];
+            }
+
+            // 如果沒有產品，直接返回空陣列
+            if (products.length === 0) {
+                return [];
+            }
+            
+            // 直接返回原始資料陣列，因為 API 返回的格式已經是正確的
+            return products;
         },
         
         // 🚀 體驗優化配置
         placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
-        refetchOnMount: false,       // 依賴全域 staleTime
+        refetchOnMount: true,        // 修復：頁面掛載時重新獲取，確保資料同步
         refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
-        staleTime: 1 * 60 * 1000,   // 1 分鐘緩存，平衡體驗與資料新鮮度
+        staleTime: 30 * 1000,       // 修復：縮短快取時間至 30 秒，提高資料新鮮度
         retry: 2, // 失敗時重試 2 次
     });
 }
@@ -375,9 +306,24 @@ export function useCreateProduct() {
 
     return useMutation({
         mutationFn: async (productData: CreateProductRequestBody) => {
+            // 調試：記錄請求資料
+            if (process.env.NODE_ENV === 'development') {
+                console.log('useCreateProduct - Request Data:', productData);
+            }
+            
             const { data, error } = await apiClient.POST('/api/products', {
                 body: productData
             });
+            
+            // 調試：記錄響應
+            if (process.env.NODE_ENV === 'development') {
+                console.log('useCreateProduct - Response:', {
+                    hasData: !!data,
+                    hasError: !!error,
+                    data,
+                    error
+                });
+            }
             
             if (error) {
                 const errorMessage = parseApiError(error);
@@ -389,16 +335,17 @@ export function useCreateProduct() {
         onSuccess: async (data: { data?: { name?: string } }) => {
             // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
             await Promise.all([
-                // 1. 失效所有商品查詢緩存
+                // 1. 失效所有商品相關查詢緩存 - 包括所有參數組合
                 queryClient.invalidateQueries({
-                    queryKey: QUERY_KEYS.PRODUCTS,
-                    exact: false,
-                    refetchType: 'active',
+                    predicate: (query) => {
+                        return query.queryKey[0] === 'products';
+                    },
                 }),
                 // 2. 強制重新獲取所有活躍的商品查詢
                 queryClient.refetchQueries({
-                    queryKey: QUERY_KEYS.PRODUCTS,
-                    exact: false,
+                    predicate: (query) => {
+                        return query.queryKey[0] === 'products';
+                    },
                 })
             ]);
             
@@ -456,16 +403,17 @@ export function useUpdateProduct() {
         onSuccess: async (data, variables) => {
             // 🚀 「失效並強制重取」標準快取處理模式 - 雙重保險機制
             await Promise.all([
-                // 1. 失效所有商品查詢緩存
+                // 1. 失效所有商品相關查詢緩存 - 包括所有參數組合
                 queryClient.invalidateQueries({
-                    queryKey: QUERY_KEYS.PRODUCTS,
-                    exact: false,
-                    refetchType: 'active',
+                    predicate: (query) => {
+                        return query.queryKey[0] === 'products';
+                    },
                 }),
                 // 2. 強制重新獲取所有活躍的商品查詢
                 queryClient.refetchQueries({
-                    queryKey: QUERY_KEYS.PRODUCTS,
-                    exact: false,
+                    predicate: (query) => {
+                        return query.queryKey[0] === 'products';
+                    },
                 }),
                 // 3. 單個實體詳情頁的快取處理
                 queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.id) }),
@@ -741,17 +689,36 @@ export function useUploadProductImage() {
             const formData = new FormData();
             formData.append('image', image);
 
-            const { data, error } = await apiClient.POST('/api/products/{product}/upload-image' as any, {
-                params: { path: { product: productId } },
-                body: formData
-            } as any);
-            
-            if (error) {
-                const errorMessage = parseApiError(error);
-                throw new Error(errorMessage || '上傳圖片失敗');
+            // 使用原生 fetch 避免 openapi-fetch 對 FormData 的處理問題
+            // 並正確處理身份驗證
+            const session = await (await import('next-auth/react')).getSession();
+            const accessToken = session?.accessToken;
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/${productId}/upload-image`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    // 不設置 Content-Type，讓瀏覽器自動設置正確的 multipart/form-data boundary
+                    'Accept': 'application/json',
+                    ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                
+                // 如果是驗證錯誤，提取詳細錯誤信息
+                if (response.status === 422 && errorData.errors) {
+                    const errorMessages = Object.values(errorData.errors)
+                        .flat()
+                        .join('\n');
+                    throw new Error(errorMessages || '圖片驗證失敗');
+                }
+                
+                throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
             }
-            
-            return data;
+
+            return await response.json();
         },
         onSuccess: async (data, variables) => {
             // 失效相關的快取

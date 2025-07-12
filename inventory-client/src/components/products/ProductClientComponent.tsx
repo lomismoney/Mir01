@@ -110,12 +110,15 @@ const ProductClientComponent = () => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
-  // 使用防抖後的搜索查詢
+  // 使用防抖後的搜索查詢，並加入更大的每頁數量以顯示所有商品
   const {
     data: productsResponse,
     isLoading: isProductsLoading,
     error,
-  } = useProducts(debouncedSearchQuery ? { search: debouncedSearchQuery } : {});
+  } = useProducts({
+    ...(debouncedSearchQuery ? { search: debouncedSearchQuery } : {}),
+    per_page: 100, // 增加每頁顯示數量以確保顯示所有商品
+  });
 
   const deleteProductMutation = useDeleteProduct();
   const deleteMultipleProductsMutation = useDeleteMultipleProducts();

@@ -37,6 +37,12 @@ const nextConfig: NextConfig = {
         port: '8000',
         pathname: '/storage/**',
       },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '8888',
+        pathname: '/storage/**',
+      },
       // --- 🎯 生產環境 API 域名 ---
       {
         protocol: 'https',

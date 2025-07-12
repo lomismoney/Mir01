@@ -102,7 +102,8 @@ export function OrderItemsTable({
                                 }
                                 width={48}
                                 height={48}
-                                className="h-full w-full object-cover"
+                                className="object-cover w-12 h-12"
+                                style={{ width: "48px", height: "48px" }}
                               />
                             ) : (
                               <ImageIcon className="h-6 w-6 text-muted-foreground" />

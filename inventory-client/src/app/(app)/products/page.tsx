@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useProducts } from "@/hooks";
 import { lazy, Suspense } from "react";
+import { useSession } from "next-auth/react";
 
 // 動態導入產品組件
 const ProductClientComponent = lazy(() => import("@/components/products/ProductClientComponent"));
@@ -30,13 +31,30 @@ const ProductClientComponent = lazy(() => import("@/components/products/ProductC
  */
 export default function ProductsPage() {
   const router = useRouter();
-  const { data: products } = useProducts();
+  const { data: session, status } = useSession();
+  const { data: products, isLoading, error, isError } = useProducts();
+
+  // 開發環境調試資訊
+  if (process.env.NODE_ENV === 'development') {
+    console.log('ProductsPage - Query Status:', {
+      sessionStatus: status,
+      hasAccessToken: !!session?.accessToken,
+      isLoading,
+      isError,
+      error: error?.message,
+      productsCount: Array.isArray(products) ? products.length : 'Not an array',
+      productsType: typeof products,
+      productsIsObject: products && typeof products === 'object' && !Array.isArray(products),
+      products: Array.isArray(products) ? products.slice(0, 3) : null // 只顯示前3個商品
+    });
+  }
 
   // 計算統計數據
+  const productsArray = Array.isArray(products) ? products : [];
   const stats = {
-    total: products?.length || 0,
+    total: productsArray.length,
     active:
-      products?.filter((p: any) => {
+      productsArray.filter((p: any) => {
         // 檢查是否有任何變體有庫存
         return p.variants?.some((v: any) => {
           // 檢查該變體的庫存總和是否大於 0
@@ -49,7 +67,7 @@ export default function ProductsPage() {
         });
       }).length || 0,
     lowStock:
-      products?.filter((p: any) => {
+      productsArray.filter((p: any) => {
         // 檢查是否有任何變體庫存低於 10 但大於 0
         return p.variants?.some((v: any) => {
           const totalStock =
@@ -61,7 +79,7 @@ export default function ProductsPage() {
         });
       }).length || 0,
     outOfStock:
-      products?.filter((p: any) => {
+      productsArray.filter((p: any) => {
         // 檢查是否所有變體都沒有庫存
         return (
           p.variants?.every((v: any) => {

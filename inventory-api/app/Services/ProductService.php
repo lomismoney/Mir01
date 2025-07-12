@@ -145,8 +145,30 @@ class ProductService
         ]);
 
         // 更新屬性值關聯
+        $attributeValueIds = [];
+        
+        // 支援舊格式：直接的 attribute_value_ids 陣列
         if (isset($variantData['attribute_value_ids'])) {
-            $variant->attributeValues()->sync($variantData['attribute_value_ids']);
+            $attributeValueIds = $variantData['attribute_value_ids'];
+        }
+        // 支援新格式：包含 attribute_id 和 value 的對象陣列
+        elseif (isset($variantData['attribute_values'])) {
+            foreach ($variantData['attribute_values'] as $attrValue) {
+                // 查找或創建 AttributeValue
+                $attributeValue = \App\Models\AttributeValue::firstOrCreate([
+                    'attribute_id' => $attrValue['attribute_id'],
+                    'value' => $attrValue['value'],
+                ]);
+                $attributeValueIds[] = $attributeValue->id;
+            }
+        }
+        
+        // 同步屬性值
+        if (!empty($attributeValueIds)) {
+            $variant->attributeValues()->sync($attributeValueIds);
+        } else {
+            // 如果沒有屬性值，清空關聯
+            $variant->attributeValues()->detach();
         }
     }
 
@@ -166,8 +188,27 @@ class ProductService
         ]);
 
         // 關聯屬性值
+        $attributeValueIds = [];
+        
+        // 支援舊格式：直接的 attribute_value_ids 陣列
         if (isset($variantData['attribute_value_ids'])) {
-            $variant->attributeValues()->attach($variantData['attribute_value_ids']);
+            $attributeValueIds = $variantData['attribute_value_ids'];
+        }
+        // 支援新格式：包含 attribute_id 和 value 的對象陣列
+        elseif (isset($variantData['attribute_values'])) {
+            foreach ($variantData['attribute_values'] as $attrValue) {
+                // 查找或創建 AttributeValue
+                $attributeValue = \App\Models\AttributeValue::firstOrCreate([
+                    'attribute_id' => $attrValue['attribute_id'],
+                    'value' => $attrValue['value'],
+                ]);
+                $attributeValueIds[] = $attributeValue->id;
+            }
+        }
+        
+        // 關聯屬性值
+        if (!empty($attributeValueIds)) {
+            $variant->attributeValues()->attach($attributeValueIds);
         }
 
         // 為所有門市創建初始庫存記錄

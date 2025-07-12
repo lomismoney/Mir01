@@ -88,7 +88,8 @@ class ProductController extends Controller
                 // 使用自訂篩選器處理多欄位搜尋
                 AllowedFilter::custom('search', new SearchFilter()),
             ])
-            ->allowedSorts(['name', 'created_at']); // 移除 selling_price 排序
+            ->allowedSorts(['name', 'created_at']) // 移除 selling_price 排序
+            ->defaultSort('-created_at'); // 默認按創建時間降序排序，新商品在前
 
         // 🚀 新增庫存管理篩選功能 (TD-004 解決方案)
         
@@ -148,6 +149,12 @@ class ProductController extends Controller
     {
         // 授權檢查已由 __construct 中的 authorizeResource 處理
         $validatedData = $request->validated();
+        
+        // 調試：記錄接收到的資料
+        Log::info('Creating product', [
+            'user_id' => Auth::id(),
+            'validated_data' => $validatedData
+        ]);
 
         try {
             // 啟動資料庫事務，確保所有操作要麼全部成功，要麼全部失敗
@@ -171,9 +178,28 @@ class ProductController extends Controller
                         'price' => $variantData['price'],
                     ]);
 
-                    // 4. 關聯 SKU 與其對應的屬性值 (attribute_values) - 只有非空時才關聯
+                    // 4. 處理屬性值關聯 - 支援兩種格式
+                    $attributeValueIds = [];
+                    
+                    // 舊格式：直接的 attribute_value_ids 陣列
                     if (!empty($variantData['attribute_value_ids'])) {
-                        $variant->attributeValues()->attach($variantData['attribute_value_ids']);
+                        $attributeValueIds = $variantData['attribute_value_ids'];
+                    }
+                    // 新格式：包含 attribute_id 和 value 的對象陣列
+                    elseif (!empty($variantData['attribute_values'])) {
+                        foreach ($variantData['attribute_values'] as $attrValue) {
+                            // 查找或創建 AttributeValue
+                            $attributeValue = \App\Models\AttributeValue::firstOrCreate([
+                                'attribute_id' => $attrValue['attribute_id'],
+                                'value' => $attrValue['value'],
+                            ]);
+                            $attributeValueIds[] = $attributeValue->id;
+                        }
+                    }
+                    
+                    // 關聯 SKU 與其對應的屬性值
+                    if (!empty($attributeValueIds)) {
+                        $variant->attributeValues()->attach($attributeValueIds);
                     }
 
                     // 5. 為每一個 SKU 在所有門市建立初始庫存記錄
@@ -188,8 +214,17 @@ class ProductController extends Controller
                     }
                 }
                 
+                Log::info('Product created in transaction', [
+                    'product_id' => $product->id,
+                    'variants_count' => $product->variants()->count()
+                ]);
+                
                 return $product;
             });
+            
+            Log::info('Transaction completed', [
+                'product_id' => $product->id
+            ]);
 
             // 回傳經過完整關聯加載的 SPU 資源
             return (new ProductResource($product->load([
@@ -201,6 +236,13 @@ class ProductController extends Controller
             ])))->response()->setStatusCode(201);
 
         } catch (\Exception $e) {
+            // 記錄詳細錯誤
+            Log::error('Product creation failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             // 如果事務中有任何錯誤發生，回傳伺服器錯誤
             abort(500, '建立商品時發生錯誤: ' . $e->getMessage());
         }

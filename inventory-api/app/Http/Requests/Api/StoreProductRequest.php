@@ -32,8 +32,45 @@ class StoreProductRequest extends FormRequest
             'variants'      => 'required|array|min:1',
             'variants.*.sku' => 'required|string|unique:product_variants,sku|max:255',
             'variants.*.price' => 'required|numeric|min:0',
+            // 支援舊格式
             'variants.*.attribute_value_ids' => 'array', // 🎯 允許空陣列，支援單規格商品
             'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
+            // 支援新格式
+            'variants.*.attribute_values' => 'array',
+            'variants.*.attribute_values.*.attribute_id' => 'integer|exists:attributes,id',
+            'variants.*.attribute_values.*.value' => 'required|string|max:255',
+        ];
+    }
+
+    /**
+     * 取得驗證錯誤的自訂屬性名稱
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'name' => '商品名稱',
+            'description' => '商品描述',
+            'category_id' => '商品分類',
+            'variants.*.sku' => 'SKU 編號',
+            'variants.*.price' => '商品價格',
+        ];
+    }
+
+    /**
+     * 取得驗證錯誤的自訂訊息
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'variants.*.sku.unique' => 'SKU 編號 ":value" 已存在，每個 SKU 必須是唯一的。請修改 SKU 編號後重試。',
+            'variants.*.sku.required' => 'SKU 編號為必填欄位',
+            'variants.*.price.required' => '商品價格為必填欄位',
+            'variants.*.price.numeric' => '商品價格必須為數字',
+            'variants.*.price.min' => '商品價格不能小於 0',
         ];
     }
 
