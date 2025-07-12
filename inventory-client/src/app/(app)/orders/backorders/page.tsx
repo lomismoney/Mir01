@@ -33,7 +33,7 @@ export default function BackordersPage() {
             <Loader2 className="h-8 w-8 animate-spin" />
           </CardContent>
         </Card>
-      ) : stats?.data && (
+      ) : stats && (
         <Suspense
           fallback={
             <Card>
@@ -44,12 +44,12 @@ export default function BackordersPage() {
           }
         >
           <BackorderStats stats={{
-            total_items: stats.data?.total_items || 0,
-            unique_products: stats.data?.unique_products || 0,
-            affected_orders: stats.data?.affected_orders || 0,
-            total_quantity: stats.data?.total_quantity || 0,
-            oldest_backorder_date: stats.data?.oldest_backorder_date || null,
-            days_pending: stats.data?.days_pending || 0
+            total_items: (stats as any)?.total_items || 0,
+            unique_products: (stats as any)?.unique_products || 0,
+            affected_orders: (stats as any)?.affected_orders || 0,
+            total_quantity: (stats as any)?.total_quantity || 0,
+            oldest_backorder_date: (stats as any)?.oldest_backorder_date || null,
+            days_pending: (stats as any)?.days_pending || 0
           }} />
         </Suspense>
       )}
