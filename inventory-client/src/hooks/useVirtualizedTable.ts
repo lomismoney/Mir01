@@ -23,7 +23,7 @@ import { createVirtualizationConfig } from '@/components/ui/VirtualizedTable';
  */
 export interface VirtualizedTableOptions<TData> {
   data: TData[];
-  columns: ColumnDef<TData>[];
+  columns: ColumnDef<TData, any>[]; // 🎯 修復：支援任何 TValue 類型，解決與組件 ColumnDef<TData, TValue> 的類型不兼容問題
   enableVirtualization?: boolean;
   rowHeight?: number;
   autoEnable?: boolean;

@@ -10,11 +10,13 @@ export function BackorderAlert() {
   const { data: stats, isLoading } = useBackorderStats();
 
   // 如果沒有待處理的預訂商品，不顯示警示
-  if (isLoading || !stats?.data || stats.data.total_items === 0) {
+  // useBackorderStats 現在已經透過 select 解包了 data，所以直接存取欄位
+  if (isLoading || !stats || (stats.total_items || 0) === 0) {
     return null;
   }
 
-  const { total_items, unique_products, days_pending } = stats.data;
+  // 直接從 stats 存取欄位（已解包）
+  const { total_items, unique_products, days_pending } = stats;
   
   // 根據等待天數決定警示等級
   const isUrgent = (days_pending || 0) > 3;

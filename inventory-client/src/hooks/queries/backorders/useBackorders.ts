@@ -20,12 +20,23 @@ export function useBackorders(filters: BackorderFilters = {}) {
   });
 }
 
+/**
+ * 獲取預訂商品統計資料
+ * 
+ * @returns 解包後的統計資料，直接包含 total_items、unique_products 等欄位
+ */
 export function useBackorderStats() {
   return useQuery({
     queryKey: ['backorder-stats'],
     queryFn: async () => {
       const response = await apiClient.GET('/api/backorders/stats', {});
       return response.data;
+    },
+    // 🎯 數據精煉廠：解包 API 回應的 data 欄位
+    select: (response: any) => {
+      // 如果 API 回應有 data 欄位，直接回傳 data 內容
+      // 否則回傳整個回應（向後兼容）
+      return response?.data || response;
     },
   });
 }
