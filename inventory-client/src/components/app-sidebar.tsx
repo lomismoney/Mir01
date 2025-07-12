@@ -237,7 +237,11 @@ const AppSidebar = memo(function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         {/* 🚀 統一導航系統 - 移除重複項目，保持智能預加載功能 */}
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain.map(item => ({
+          ...item,
+          items: item.children,
+          children: undefined
+        }))} />
         <NavDocuments items={data.documents} />
         <NavSecondary
           items={data.navSecondary}
