@@ -74,7 +74,7 @@ export interface ExpandedProductItem extends Omit<ProductItem, "id"> {
   variantInfo?: {
     id: number;
     sku: string;
-    price: number;
+    price: string;  // API 回傳字符串格式的價格
     attribute_values?: Array<{
       id: number;
       value: string;
@@ -84,8 +84,9 @@ export interface ExpandedProductItem extends Omit<ProductItem, "id"> {
       };
     }>;
     inventory?: Array<{
-      store_id: number;
+      id?: number;
       quantity: number;
+      low_stock_threshold?: number;
       store?: {
         id: number;
         name: string;
@@ -99,11 +100,11 @@ export interface ExpandedProductItem extends Omit<ProductItem, "id"> {
 /**
  * 安全的價格格式化函數
  *
- * @param price - 價格數值
+ * @param price - 價格數值（支援 number 或 string 類型）
  * @returns 格式化的價格字串
  */
-const formatPrice = (price?: number) => {
-  if (price === undefined || price === null) {
+const formatPrice = (price?: number | string) => {
+  if (price === undefined || price === null || price === '') {
     return (
       <span className="text-muted-foreground">
         N/A
@@ -111,7 +112,19 @@ const formatPrice = (price?: number) => {
     );
   }
 
-  return formatPriceUtil(price);
+  // 如果是字串，轉換為數字
+  const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+  
+  // 檢查轉換後是否為有效數字
+  if (isNaN(numericPrice)) {
+    return (
+      <span className="text-muted-foreground">
+        N/A
+      </span>
+    );
+  }
+
+  return formatPriceUtil(numericPrice);
 };
 
 /**

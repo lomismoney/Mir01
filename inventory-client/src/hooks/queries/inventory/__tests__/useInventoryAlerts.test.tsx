@@ -2,17 +2,17 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { useLowStockItems, useInventoryAlertSummary, updateInventoryThresholds } from '../useInventoryAlerts';
-import { api } from '@/lib/api';
+import { apiClient } from '@/lib/apiClient';
 
 // Mock the API
-jest.mock('@/lib/api', () => ({
-  api: {
-    get: jest.fn(),
-    post: jest.fn(),
+jest.mock('@/lib/apiClient', () => ({
+  apiClient: {
+    GET: jest.fn(),
+    POST: jest.fn(),
   },
 }));
 
-const mockApi = api as jest.Mocked<typeof api>;
+const mockApi = apiClient as jest.Mocked<typeof apiClient>;
 
 // Test data
 const mockLowStockItems = {
@@ -115,7 +115,7 @@ describe('useInventoryAlerts', () => {
 
   describe('useLowStockItems', () => {
     it('應該成功獲取低庫存商品列表', async () => {
-      mockApi.get.mockResolvedValueOnce(mockLowStockItems);
+      mockApi.GET.mockResolvedValueOnce(mockLowStockItems);
 
       const { result } = renderHook(() => useLowStockItems(), {
         wrapper: createWrapper(),
@@ -125,12 +125,12 @@ describe('useInventoryAlerts', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/low-stock?');
+      expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/low-stock?');
       expect(result.current.data).toEqual(mockLowStockItems);
     });
 
     it('應該使用正確的查詢參數', async () => {
-      mockApi.get.mockResolvedValueOnce(mockLowStockItems);
+      mockApi.GET.mockResolvedValueOnce(mockLowStockItems);
 
       const params = {
         store_id: 1,
@@ -144,14 +144,14 @@ describe('useInventoryAlerts', () => {
       });
 
       await waitFor(() => {
-        expect(mockApi.get).toHaveBeenCalledWith(
+        expect(mockApi.GET).toHaveBeenCalledWith(
           '/inventory/alerts/low-stock?store_id=1&severity=critical&page=2&per_page=20'
         );
       });
     });
 
     it('應該處理部分參數', async () => {
-      mockApi.get.mockResolvedValueOnce(mockLowStockItems);
+      mockApi.GET.mockResolvedValueOnce(mockLowStockItems);
 
       const params = {
         store_id: 1,
@@ -163,27 +163,27 @@ describe('useInventoryAlerts', () => {
       });
 
       await waitFor(() => {
-        expect(mockApi.get).toHaveBeenCalledWith(
+        expect(mockApi.GET).toHaveBeenCalledWith(
           '/inventory/alerts/low-stock?store_id=1&severity=low'
         );
       });
     });
 
     it('應該處理空參數', async () => {
-      mockApi.get.mockResolvedValueOnce(mockLowStockItems);
+      mockApi.GET.mockResolvedValueOnce(mockLowStockItems);
 
       renderHook(() => useLowStockItems({}), {
         wrapper: createWrapper(),
       });
 
       await waitFor(() => {
-        expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/low-stock?');
+        expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/low-stock?');
       });
     });
 
     it('應該處理 API 錯誤', async () => {
       const error = new Error('Network error');
-      mockApi.get.mockRejectedValueOnce(error);
+      mockApi.GET.mockRejectedValueOnce(error);
 
       const { result } = renderHook(() => useLowStockItems(), {
         wrapper: createWrapper(),
@@ -197,7 +197,7 @@ describe('useInventoryAlerts', () => {
     });
 
     it('應該使用正確的查詢鍵', async () => {
-      mockApi.get.mockResolvedValueOnce(mockLowStockItems);
+      mockApi.GET.mockResolvedValueOnce(mockLowStockItems);
       
       const params = { store_id: 1, severity: 'critical' as const };
       
@@ -210,13 +210,13 @@ describe('useInventoryAlerts', () => {
       });
 
       // 檢查 API 調用是否使用了正確的參數  
-      expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/low-stock?store_id=1&severity=critical');
+      expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/low-stock?store_id=1&severity=critical');
     });
   });
 
   describe('useInventoryAlertSummary', () => {
     it('應該成功獲取庫存警示摘要', async () => {
-      mockApi.get.mockResolvedValueOnce(mockAlertSummary);
+      mockApi.GET.mockResolvedValueOnce(mockAlertSummary);
 
       const { result } = renderHook(() => useInventoryAlertSummary(), {
         wrapper: createWrapper(),
@@ -226,12 +226,12 @@ describe('useInventoryAlerts', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/summary');
+      expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/summary');
       expect(result.current.data).toEqual(mockAlertSummary.data);
     });
 
     it('應該在提供門市 ID 時使用正確的查詢參數', async () => {
-      mockApi.get.mockResolvedValueOnce(mockAlertSummary);
+      mockApi.GET.mockResolvedValueOnce(mockAlertSummary);
 
       const storeId = 1;
       renderHook(() => useInventoryAlertSummary(storeId), {
@@ -239,13 +239,13 @@ describe('useInventoryAlerts', () => {
       });
 
       await waitFor(() => {
-        expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/summary?store_id=1');
+        expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/summary?store_id=1');
       });
     });
 
     it('應該處理 API 錯誤', async () => {
       const error = new Error('Unauthorized');
-      mockApi.get.mockRejectedValueOnce(error);
+      mockApi.GET.mockRejectedValueOnce(error);
 
       const { result } = renderHook(() => useInventoryAlertSummary(), {
         wrapper: createWrapper(),
@@ -259,7 +259,7 @@ describe('useInventoryAlerts', () => {
     });
 
     it('應該使用正確的查詢鍵', async () => {
-      mockApi.get.mockResolvedValueOnce(mockAlertSummary);
+      mockApi.GET.mockResolvedValueOnce(mockAlertSummary);
       
       const storeId = 2;
       
@@ -271,11 +271,11 @@ describe('useInventoryAlerts', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/summary?store_id=2');
+      expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/summary?store_id=2');
     });
 
     it('應該在沒有門市 ID 時使用正確的 API 路徑', async () => {
-      mockApi.get.mockResolvedValueOnce(mockAlertSummary);
+      mockApi.GET.mockResolvedValueOnce(mockAlertSummary);
       
       const { result } = renderHook(() => useInventoryAlertSummary(), {
         wrapper: createWrapper(),
@@ -285,7 +285,7 @@ describe('useInventoryAlerts', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/summary');
+      expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/summary');
     });
   });
 
@@ -296,7 +296,7 @@ describe('useInventoryAlerts', () => {
         updated_count: 2,
       };
       
-      mockApi.post.mockResolvedValueOnce(mockResponse);
+      mockApi.POST.mockResolvedValueOnce(mockResponse);
 
       const updates = [
         { inventory_id: 1, low_stock_threshold: 15 },
@@ -305,7 +305,7 @@ describe('useInventoryAlerts', () => {
 
       const result = await updateInventoryThresholds(updates);
 
-      expect(mockApi.post).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
+      expect(mockApi.POST).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
         updates,
       });
       expect(result).toEqual(mockResponse);
@@ -317,7 +317,7 @@ describe('useInventoryAlerts', () => {
         updated_count: 1,
       };
       
-      mockApi.post.mockResolvedValueOnce(mockResponse);
+      mockApi.POST.mockResolvedValueOnce(mockResponse);
 
       const updates = [
         { inventory_id: 1, low_stock_threshold: 10 },
@@ -325,7 +325,7 @@ describe('useInventoryAlerts', () => {
 
       const result = await updateInventoryThresholds(updates);
 
-      expect(mockApi.post).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
+      expect(mockApi.POST).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
         updates,
       });
       expect(result).toEqual(mockResponse);
@@ -337,13 +337,13 @@ describe('useInventoryAlerts', () => {
         updated_count: 0,
       };
       
-      mockApi.post.mockResolvedValueOnce(mockResponse);
+      mockApi.POST.mockResolvedValueOnce(mockResponse);
 
       const updates: Array<{ inventory_id: number; low_stock_threshold: number }> = [];
 
       const result = await updateInventoryThresholds(updates);
 
-      expect(mockApi.post).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
+      expect(mockApi.POST).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
         updates: [],
       });
       expect(result).toEqual(mockResponse);
@@ -351,7 +351,7 @@ describe('useInventoryAlerts', () => {
 
     it('應該處理 API 錯誤', async () => {
       const error = new Error('Validation failed');
-      mockApi.post.mockRejectedValueOnce(error);
+      mockApi.POST.mockRejectedValueOnce(error);
 
       const updates = [
         { inventory_id: 1, low_stock_threshold: -5 }, // 無效的閾值
@@ -359,14 +359,14 @@ describe('useInventoryAlerts', () => {
 
       await expect(updateInventoryThresholds(updates)).rejects.toThrow('Validation failed');
 
-      expect(mockApi.post).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
+      expect(mockApi.POST).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
         updates,
       });
     });
 
     it('應該處理網路錯誤', async () => {
       const error = new Error('Network timeout');
-      mockApi.post.mockRejectedValueOnce(error);
+      mockApi.POST.mockRejectedValueOnce(error);
 
       const updates = [
         { inventory_id: 1, low_stock_threshold: 15 },
@@ -378,19 +378,19 @@ describe('useInventoryAlerts', () => {
 
   describe('邊界情況', () => {
     it('useLowStockItems 應該處理 null 參數', async () => {
-      mockApi.get.mockResolvedValueOnce(mockLowStockItems);
+      mockApi.GET.mockResolvedValueOnce(mockLowStockItems);
 
       renderHook(() => useLowStockItems(undefined), {
         wrapper: createWrapper(),
       });
 
       await waitFor(() => {
-        expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/low-stock?');
+        expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/low-stock?');
       });
     });
 
     it('useInventoryAlertSummary 應該處理 0 作為門市 ID', async () => {
-      mockApi.get.mockResolvedValueOnce(mockAlertSummary);
+      mockApi.GET.mockResolvedValueOnce(mockAlertSummary);
 
       const { result } = renderHook(() => useInventoryAlertSummary(0), {
         wrapper: createWrapper(),
@@ -401,7 +401,7 @@ describe('useInventoryAlerts', () => {
       });
 
       // 在 JavaScript 中，0 被視為 falsy，所以應該不包含 store_id 參數
-      expect(mockApi.get).toHaveBeenCalledWith('/inventory/alerts/summary');
+      expect(mockApi.GET).toHaveBeenCalledWith('/inventory/alerts/summary');
     });
 
     it('updateInventoryThresholds 應該處理大型更新陣列', async () => {
@@ -410,7 +410,7 @@ describe('useInventoryAlerts', () => {
         updated_count: 100,
       };
       
-      mockApi.post.mockResolvedValueOnce(mockResponse);
+      mockApi.POST.mockResolvedValueOnce(mockResponse);
 
       // 創建 100 個更新項目
       const updates = Array.from({ length: 100 }, (_, index) => ({
@@ -420,7 +420,7 @@ describe('useInventoryAlerts', () => {
 
       const result = await updateInventoryThresholds(updates);
 
-      expect(mockApi.post).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
+      expect(mockApi.POST).toHaveBeenCalledWith('/inventory/alerts/update-thresholds', {
         updates,
       });
       expect(result).toEqual(mockResponse);

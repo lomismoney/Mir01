@@ -57,12 +57,6 @@ describe('Step3_ConfigureVariants', () => {
     variants: {
       items: [],
     },
-    metadata: {
-      currentStep: 3,
-      completedSteps: [1, 2],
-      lastSaved: null,
-      validationErrors: {},
-    },
   };
 
   const mockAttributes = [

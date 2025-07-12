@@ -58,11 +58,12 @@ describe('CreatePurchaseDialog', () => {
 
     mockUseSession.mockReturnValue({
       data: {
-        user: { id: 1, name: 'Test User' },
+        user: { id: '1', name: 'Test User' },
         expires: '2024-12-31',
       },
       status: 'authenticated',
-    });
+      update: jest.fn(),
+    } as any);
 
     mockUseCreatePurchase.mockReturnValue({
       mutate: mockMutate,

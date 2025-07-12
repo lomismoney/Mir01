@@ -20,14 +20,17 @@ const mockFormData: WizardFormData = {
     description: '',
     category_id: null,
   },
-  attributes: [],
+  imageData: {
+    selectedFile: null,
+    previewUrl: null,
+  },
+  specifications: {
+    isVariable: false,
+    selectedAttributes: [],
+    attributeValues: {},
+  },
   variants: {
     items: []
-  },
-  summary: {
-    totalVariants: 0,
-    priceRange: null,
-    hasInventory: false,
   },
 };
 

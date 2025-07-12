@@ -39,7 +39,7 @@ const mockProduct: ExpandedProductItem = {
     {
       id: 1,
       sku: 'TEST001',
-      price: 100,
+      price: "100",
       created_at: '2023-01-01T00:00:00Z',
       attribute_values: [
         {
@@ -55,7 +55,7 @@ const mockProduct: ExpandedProductItem = {
         {
           id: 1,
           quantity: 5,
-          store_id: 1,
+          low_stock_threshold: 5,
           store: {
             id: 1,
             name: '門市1'
@@ -66,14 +66,18 @@ const mockProduct: ExpandedProductItem = {
     {
       id: 2,
       sku: 'TEST002',
-      price: 200,
+      price: "200",
       created_at: '2023-01-01T00:00:00Z',
       attribute_values: [],
       inventory: [
         {
           id: 2,
           quantity: 15,
-          store_id: 1
+          low_stock_threshold: 10,
+          store: {
+            id: 1,
+            name: '門市1'
+          }
         }
       ]
     }
@@ -92,7 +96,7 @@ const mockVariantRow: ExpandedProductItem = {
   variantInfo: {
     id: 1,
     sku: 'TEST001',
-    price: 100,
+    price: "100",
     attribute_values: [
       {
         id: 1,
@@ -105,8 +109,13 @@ const mockVariantRow: ExpandedProductItem = {
     ],
     inventory: [
       {
-        store_id: 1,
-        quantity: 10
+        id: 1,
+        quantity: 10,
+        low_stock_threshold: 5,
+        store: {
+          id: 1,
+          name: '門市1'
+        }
       }
     ]
   }
@@ -128,14 +137,18 @@ const mockSingleVariantProduct: ExpandedProductItem = {
     {
       id: 3,
       sku: 'SINGLE001',
-      price: 150,
+      price: "150",
       created_at: '2023-01-01T00:00:00Z',
       attribute_values: [],
       inventory: [
         {
           id: 3,
           quantity: 25,
-          store_id: 1
+          low_stock_threshold: 10,
+          store: {
+            id: 1,
+            name: '門市1'
+          }
         }
       ]
     }
@@ -333,7 +346,7 @@ describe('Product Columns', () => {
         ...mockVariantRow, 
         variantInfo: { 
           ...mockVariantRow.variantInfo!, 
-          price: undefined 
+          price: "" 
         } 
       };
       render(<TestTable data={[variantWithoutPrice]} />);
@@ -390,7 +403,15 @@ describe('Product Columns', () => {
         ...mockVariantRow, 
         variantInfo: { 
           ...mockVariantRow.variantInfo!, 
-          inventory: [{ store_id: 1, quantity: 0 }] 
+          inventory: [{ 
+            id: 1,
+            quantity: 0,
+            low_stock_threshold: 5,
+            store: {
+              id: 1,
+              name: '門市1'
+            }
+          }] 
         } 
       };
       render(<TestTable data={[variantWithoutStock]} />);
@@ -506,7 +527,15 @@ describe('Product Columns', () => {
       const productWithPartialStock = {
         ...mockProduct,
         variants: [
-          { ...mockProduct.variants![0], inventory: [{ id: 1, quantity: 5, store_id: 1 }] },
+          { ...mockProduct.variants![0], inventory: [{ 
+            id: 1, 
+            quantity: 5, 
+            low_stock_threshold: 5,
+            store: {
+              id: 1,
+              name: '門市1'
+            }
+          }] },
           { ...mockProduct.variants![1], inventory: [] }
         ]
       };

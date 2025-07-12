@@ -235,7 +235,7 @@ describe('useDebounce', () => {
      */
     it('應該正確處理 null 和 undefined', () => {
       const { result, rerender } = renderHook(
-        ({ value, delay }: { value: any; delay: number }) => useDebounce(value, delay),
+        ({ value, delay }: { value: null | undefined; delay: number }) => useDebounce(value, delay),
         {
           initialProps: { value: null, delay: 100 },
         }
@@ -470,7 +470,7 @@ describe('useDebounce', () => {
       const { result, rerender } = renderHook(
         ({ value, delay }: { value: any; delay: number }) => useDebounce(value, delay),
         {
-          initialProps: { value: null, delay: 150 },
+          initialProps: { value: null as any, delay: 150 },
         }
       );
 

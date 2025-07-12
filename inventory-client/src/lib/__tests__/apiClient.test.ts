@@ -366,7 +366,8 @@ describe('API Client 測試套件', () => {
       // 設置 mock 後模擬攔截器調用
       mockGetSession.mockResolvedValue({ 
         accessToken: mockAccessToken,
-        user: { id: '1', email: 'test@example.com' }
+        user: { id: '1', email: 'test@example.com' },
+        expires: '2024-12-31T23:59:59.999Z'
       });
       
       // 模擬攔截器調用
@@ -402,7 +403,8 @@ describe('API Client 測試套件', () => {
 
     it('應該在 session 存在但沒有 accessToken 時不設置 Authorization header', async () => {
       mockGetSession.mockResolvedValue({ 
-        user: { id: '1', email: 'test@example.com' }
+        user: { id: '1', email: 'test@example.com' },
+        expires: '2024-12-31T23:59:59.999Z'
         // accessToken 未定義
       });
       
@@ -475,7 +477,8 @@ describe('API Client 測試套件', () => {
       // 設置 mock 後模擬攔截器調用
       mockGetSession.mockResolvedValue({ 
         accessToken: mockAccessToken,
-        user: { id: '1' }
+        user: { id: '1' },
+        expires: '2024-12-31T23:59:59.999Z'
       });
       
       const interceptors = mockUse.mock.calls[0][0];
@@ -517,7 +520,8 @@ describe('API Client 測試套件', () => {
       // 設置空字串的 accessToken
       mockGetSession.mockResolvedValue({ 
         accessToken: '',
-        user: { id: '1' }
+        user: { id: '1' },
+        expires: '2024-12-31T23:59:59.999Z'
       });
       
       const interceptors = mockUse.mock.calls[0][0];
@@ -543,7 +547,8 @@ describe('API Client 測試套件', () => {
       // 設置 undefined 的 accessToken
       mockGetSession.mockResolvedValue({ 
         accessToken: undefined,
-        user: { id: '1' }
+        user: { id: '1' },
+        expires: '2024-12-31T23:59:59.999Z'
       });
       
       const interceptors = mockUse.mock.calls[0][0];

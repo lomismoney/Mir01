@@ -97,12 +97,12 @@ describe('users-columns', () => {
       
       expect(columns).toHaveLength(8); // 7 data columns + 1 actions column
       expect(columns[0].id).toBe('avatar');
-      expect(columns[1].accessorKey).toBe('name');
-      expect(columns[2].accessorKey).toBe('username');
-      expect(columns[3].accessorKey).toBe('roles');
+      expect('accessorKey' in columns[1] && columns[1].accessorKey).toBe('name');
+      expect('accessorKey' in columns[2] && columns[2].accessorKey).toBe('username');
+      expect('accessorKey' in columns[3] && columns[3].accessorKey).toBe('roles');
       expect(columns[4].id).toBe('stores');
-      expect(columns[5].accessorKey).toBe('created_at');
-      expect(columns[6].accessorKey).toBe('updated_at');
+      expect('accessorKey' in columns[5] && columns[5].accessorKey).toBe('created_at');
+      expect('accessorKey' in columns[6] && columns[6].accessorKey).toBe('updated_at');
       expect(columns[7].id).toBe('actions');
     });
 

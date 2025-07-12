@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StoreController;
 use App\Http\Controllers\Api\UserStoreController;
 use App\Http\Controllers\Api\InventoryAlertController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Resources\Api\UserResource;
 
 /**
@@ -58,6 +59,19 @@ Route::middleware('auth:sanctum')->group(function () {
      * 此操作會刪除當前請求使用的 Token，但不會影響該使用者的其他活動 Token。
      */
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    /**
+     * @group 儀表板
+     * @authenticated
+     *
+     * 儀表板統計數據
+     * 
+     * 獲取系統整體統計概覽，包含訂單、商品、客戶、庫存等統計資訊
+     * 
+     * 路由列表：
+     * GET    /api/dashboard/stats  - 獲取儀表板統計數據
+     */
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
     /**
      * 商品管理路由

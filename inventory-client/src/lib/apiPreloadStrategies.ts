@@ -183,8 +183,10 @@ export const dashboardPreloadStrategies = [
     priority: 'medium' as const,
   },
   {
-    queryKey: queryKeys.inventory.ALERTS ? queryKeys.inventory.ALERTS({}) : ['inventory', 'alerts'],
-    queryFn: () => apiClient.GET('/api/inventory/alerts' as any, {} as any),
+    queryKey: queryKeys.inventory.ALERTS ? queryKeys.inventory.ALERTS({}) : ['inventory', 'alerts', 'summary'],
+    queryFn: () => apiClient.GET('/api/inventory/alerts/summary', {
+      params: { query: {} }
+    }),
     staleTime: 5 * 60 * 1000,
     priority: 'medium' as const,
   },

@@ -74,12 +74,6 @@ describe('Step2_DefineSpecs', () => {
     variants: {
       items: [],
     },
-    metadata: {
-      currentStep: 2,
-      completedSteps: [1],
-      lastSaved: null,
-      validationErrors: {},
-    },
   };
 
   const mockSession = {

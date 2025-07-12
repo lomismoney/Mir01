@@ -53,12 +53,6 @@ describe('Step1_BasicInfoWithImage', () => {
     variants: {
       items: [],
     },
-    metadata: {
-      currentStep: 1,
-      completedSteps: [],
-      lastSaved: null,
-      validationErrors: {},
-    },
   };
 
   const mockImageSelection = {

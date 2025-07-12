@@ -93,10 +93,10 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       
       expect(columns).toHaveLength(5); // 4 data columns + 1 actions column
-      expect(columns[0].accessorKey).toBe('name');
-      expect(columns[1].accessorKey).toBe('address');
-      expect(columns[2].accessorKey).toBe('created_at');
-      expect(columns[3].accessorKey).toBe('updated_at');
+      expect('accessorKey' in columns[0] && columns[0].accessorKey).toBe('name');
+      expect('accessorKey' in columns[1] && columns[1].accessorKey).toBe('address');
+      expect('accessorKey' in columns[2] && columns[2].accessorKey).toBe('created_at');
+      expect('accessorKey' in columns[3] && columns[3].accessorKey).toBe('updated_at');
       expect(columns[4].id).toBe('actions');
     });
 
@@ -488,10 +488,10 @@ describe('stores-columns', () => {
     it('should have correct accessor keys', () => {
       const columns = createStoresColumns();
       
-      expect(columns[0].accessorKey).toBe('name');
-      expect(columns[1].accessorKey).toBe('address');
-      expect(columns[2].accessorKey).toBe('created_at');
-      expect(columns[3].accessorKey).toBe('updated_at');
+      expect('accessorKey' in columns[0] && columns[0].accessorKey).toBe('name');
+      expect('accessorKey' in columns[1] && columns[1].accessorKey).toBe('address');
+      expect('accessorKey' in columns[2] && columns[2].accessorKey).toBe('created_at');
+      expect('accessorKey' in columns[3] && columns[3].accessorKey).toBe('updated_at');
     });
 
     it('should have actions column with correct id', () => {

@@ -265,7 +265,7 @@ describe('QueryProvider 組件測試', () => {
         
         return (
           <div data-testid="query-config">
-            <div data-testid="stale-time">{defaultOptions.queries?.staleTime}</div>
+            <div data-testid="stale-time">{String(defaultOptions.queries?.staleTime)}</div>
             <div data-testid="gc-time">{defaultOptions.queries?.gcTime}</div>
             <div data-testid="refetch-on-window-focus">{String(defaultOptions.queries?.refetchOnWindowFocus)}</div>
             <div data-testid="throw-on-error">{String(defaultOptions.queries?.throwOnError)}</div>
@@ -365,7 +365,7 @@ describe('QueryProvider 組件測試', () => {
         
         return (
           <div data-testid="mutation-config">
-            <div data-testid="mutation-retry">{defaultOptions.mutations?.retry}</div>
+            <div data-testid="mutation-retry">{String(defaultOptions.mutations?.retry)}</div>
             <div data-testid="mutation-throw-on-error">{String(defaultOptions.mutations?.throwOnError)}</div>
             <div data-testid="mutation-network-mode">{defaultOptions.mutations?.networkMode}</div>
           </div>

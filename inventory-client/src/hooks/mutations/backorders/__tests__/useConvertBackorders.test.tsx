@@ -104,7 +104,7 @@ describe('useConvertBackorders', () => {
       });
 
       const convertData = {
-        item_ids: [1, 2, 3],
+        item_ids: ['1', '2', '3'],
         store_id: 1,
       };
 
@@ -126,7 +126,7 @@ describe('useConvertBackorders', () => {
       });
 
       const convertData = {
-        item_ids: [1, 2],
+        item_ids: ['1', '2'],
       };
 
       result.current.mutate(convertData);

@@ -71,13 +71,13 @@ describe('queryKeys', () => {
   });
 
   describe('INSTALLATION_QUERY_KEYS', () => {
-    it('should have correct INSTALLATIONS key', () => {
-      expect(INSTALLATION_QUERY_KEYS.INSTALLATIONS).toEqual(['installations']);
+    it('should have correct ALL key', () => {
+      expect(INSTALLATION_QUERY_KEYS.ALL).toEqual(['installations']);
     });
 
-    it('should generate correct INSTALLATION key with id', () => {
-      expect(INSTALLATION_QUERY_KEYS.INSTALLATION(1)).toEqual(['installations', 1]);
-      expect(INSTALLATION_QUERY_KEYS.INSTALLATION(555)).toEqual(['installations', 555]);
+    it('should generate correct DETAIL key with id', () => {
+      expect(INSTALLATION_QUERY_KEYS.DETAIL(1)).toEqual(['installations', 1]);
+      expect(INSTALLATION_QUERY_KEYS.DETAIL(555)).toEqual(['installations', 555]);
     });
 
     it('should have correct SCHEDULE key', () => {
@@ -85,8 +85,8 @@ describe('queryKeys', () => {
     });
 
     it('should return arrays for all keys', () => {
-      expect(Array.isArray(INSTALLATION_QUERY_KEYS.INSTALLATIONS)).toBe(true);
-      expect(Array.isArray(INSTALLATION_QUERY_KEYS.SCHEDULE)).toBe(true);
+      expect(Array.isArray(INSTALLATION_QUERY_KEYS.ALL)).toBe(true);
+      expect(Array.isArray(INSTALLATION_QUERY_KEYS.SCHEDULE())).toBe(true);
     });
   });
 

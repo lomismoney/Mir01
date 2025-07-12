@@ -47,12 +47,6 @@ describe('Step4_Review', () => {
         { key: 'single', options: [], sku: 'TEST-001', price: '100' },
       ],
     },
-    metadata: {
-      currentStep: 4,
-      completedSteps: [1, 2, 3],
-      lastSaved: null,
-      validationErrors: {},
-    },
   };
 
   // 多規格表單資料
