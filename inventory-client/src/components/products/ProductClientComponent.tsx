@@ -56,6 +56,7 @@ import { useSession } from "next-auth/react";
 import { AdaptiveTable } from "@/components/ui/AdaptiveTable";
 import { PRODUCT_MODAL_TYPES } from "@/hooks/useModalManager";
 import { flexRender } from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, getExpandedRowModel, getSortedRowModel, getFilteredRowModel } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
 
@@ -139,7 +140,7 @@ const ProductClientComponent = () => {
   // 🎯 使用新的數據轉換 Hook，移除複雜的內聯邏輯
   const rawProducts = (productsResponse || []) as ProductItem[];
   const { 
-    expandedProducts, 
+    transformedProducts, // 使用這個而不是 expandedProducts
     getSubRows,
     hasVariants,
     isMainProduct,
@@ -149,19 +150,30 @@ const ProductClientComponent = () => {
   // 優化 enableRowSelection 函數
   const enableRowSelection = useCallback((row: any) => isMainProduct(row.original), [isMainProduct]);
 
-  // 🎯 使用標準表格 Hook - 商品列表
-  const tableManager = useStandardTable({
-    data: expandedProducts,
-    columns,
-    enablePagination: false,
-    enableSorting: true,
-    enableRowSelection: true,
-    enableColumnVisibility: true,
-    isLoading: isProductsLoading,
+  // 🎯 直接使用 useReactTable 配置展開功能
+  const table = useReactTable({
+    data: transformedProducts,
+    columns: columns as any, // 類型斷言解決 TanStack Table 的類型匹配問題
+    getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSubRows,
+    enableExpanding: true,
+    state: {
+      expanded,
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+    onExpandedChange: setExpanded,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: enableRowSelection,
   });
-
-  // 從表格管理器中獲取 table 實例
-  const table = tableManager.table;
 
   /**
    * 處理搜尋輸入變化
@@ -487,11 +499,7 @@ const ProductClientComponent = () => {
                     className="font-medium text-foreground"
                    
                   >
-                    {
-                      table
-                        .getFilteredRowModel()
-                        .rows.filter((row) => !row.original.isVariantRow).length
-                    }
+                    {table.getFilteredRowModel().rows.length}
                   </span>{" "}
                   個商品
                 </div>
