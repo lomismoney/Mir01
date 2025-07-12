@@ -157,6 +157,14 @@ export default function UsersPage() {
   };
 
   const stats = getUserStats();
+  
+  // 計算百分比變化（模擬數據）
+  const percentageChanges = {
+    total: 8.5,
+    admins: 12.3,
+    staff: -5.2,
+    viewers: 15.7,
+  };
 
   /**
    * 處理創建新用戶的函式
@@ -397,98 +405,86 @@ export default function UsersPage() {
         </p>
       </div>
 
-      {/* 🎯 統計卡片區域 - 數據概覽（與儀表板統一風格） */}
-      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs md:grid-cols-2 lg:grid-cols-4">
+      {/* 🎯 統計卡片區域 - 與產品頁面相同樣式 */}
+      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:grid-cols-4">
         <Card className="@container/card">
-          <CardHeader>
-            <CardDescription>總用戶數量</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardHeader className="space-y-1">
+            <CardDescription className="text-xs">
+              總用戶數量
+            </CardDescription>
+            <CardTitle className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl">
               {isLoading ? "..." : stats.total}
             </CardTitle>
-            <CardAction>
-              <Badge variant="outline">
-                <TrendingUp />
-                系統用戶
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                系統中所有註冊用戶
+              </p>
+              <Badge variant="outline" className="text-xs h-5">
+                <TrendingUp className="h-3 w-3 mr-1" />+
+                {percentageChanges.total}%
               </Badge>
-            </CardAction>
+            </div>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 text-sm">
-            <div className="line-clamp-1 flex gap-2 font-medium">
-              平台用戶管理 <Users className="size-4" />
-            </div>
-            <div className="text-muted-foreground">
-              {isLoading ? "載入中..." : `系統內共有 ${stats.total} 位註冊用戶`}
-            </div>
-          </CardFooter>
         </Card>
 
         <Card className="@container/card">
-          <CardHeader>
-            <CardDescription>管理員用戶</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardHeader className="space-y-1">
+            <CardDescription className="text-xs">
+              管理員用戶
+            </CardDescription>
+            <CardTitle className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl">
               {isLoading ? "..." : stats.admins}
             </CardTitle>
-            <CardAction>
-              <Badge variant="destructive">
-                <Crown />
-                最高權限
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                具有完整系統權限
+              </p>
+              <Badge variant="outline" className="text-xs h-5">
+                <TrendingUp className="h-3 w-3 mr-1" />+
+                {percentageChanges.admins}%
               </Badge>
-            </CardAction>
+            </div>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 text-sm">
-            <div className="line-clamp-1 flex gap-2 font-medium">
-              完整系統控制 <Shield className="size-4" />
-            </div>
-            <div className="text-muted-foreground">
-              具有系統完整管理權限
-            </div>
-          </CardFooter>
         </Card>
 
         <Card className="@container/card">
-          <CardHeader>
-            <CardDescription>員工用戶</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardHeader className="space-y-1">
+            <CardDescription className="text-xs">
+              員工用戶
+            </CardDescription>
+            <CardTitle className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl">
               {isLoading ? "..." : stats.staff}
             </CardTitle>
-            <CardAction>
-              <Badge variant="outline">
-                <TrendingUp />
-                日常操作
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                負責日常業務操作
+              </p>
+              <Badge variant="outline" className="text-xs h-5">
+                <TrendingDown className="h-3 w-3 mr-1" />
+                {percentageChanges.staff}%
               </Badge>
-            </CardAction>
+            </div>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 text-sm">
-            <div className="line-clamp-1 flex gap-2 font-medium">
-              業務操作人員 <Store className="size-4" />
-            </div>
-            <div className="text-muted-foreground">
-              負責日常庫存管理作業
-            </div>
-          </CardFooter>
         </Card>
 
         <Card className="@container/card">
-          <CardHeader>
-            <CardDescription>檢視者</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardHeader className="space-y-1">
+            <CardDescription className="text-xs">
+              檢視者
+            </CardDescription>
+            <CardTitle className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl">
               {isLoading ? "..." : stats.viewers}
             </CardTitle>
-            <CardAction>
-              <Badge variant="outline">
-                <CheckCircle />
-                只讀權限
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                僅具備資料查看權限
+              </p>
+              <Badge variant="outline" className="text-xs h-5">
+                <TrendingUp className="h-3 w-3 mr-1" />+
+                {percentageChanges.viewers}%
               </Badge>
-            </CardAction>
+            </div>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 text-sm">
-            <div className="line-clamp-1 flex gap-2 font-medium">
-              資料檢視 <Eye className="size-4" />
-            </div>
-            <div className="text-muted-foreground">
-              僅具備資料查看權限
-            </div>
-          </CardFooter>
         </Card>
       </div>
 

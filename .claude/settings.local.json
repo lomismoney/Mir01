@@ -5,7 +5,6 @@
       "Bash(./vendor/bin/sail test --coverage-text --coverage-html=coverage)",
       "Bash(find:*)",
       "Bash(ls:*)",
-      "Bash(find:*)",
       "Bash(./vendor/bin/sail test --coverage-text)",
       "Bash(grep:*)",
       "Bash(php artisan api:check-docs:*)",
@@ -88,11 +87,11 @@
       "Bash(./vendor/bin/sail exec laravel.test ./vendor/bin/paratest:*)",
       "Bash(./vendor/bin/paratest:*)",
       "Bash(./vendor/bin/sail php artisan test:*)",
-      "Bash(cp:*)",
       "Bash(npm run:*)",
       "Bash(touch:*)",
       "Bash(npx eslint:*)",
-      "Bash(claude --version)"
+      "Bash(claude --version)",
+      "Bash(npm outdated)"
     ],
     "deny": []
   }
