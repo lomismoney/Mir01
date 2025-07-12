@@ -52,10 +52,17 @@ class ApiPreloader {
       priority?: 'high' | 'medium' | 'low'; // 覆蓋預設優先級
     }
   ) {
-    // 優先使用動態策略，否則使用配置中的策略
-    const strategies = getPreloadStrategyForRoute(route) || this.config.routes[route] || [];
-    
-    if (strategies.length === 0) return;
+    try {
+      // 確保 route 參數有效
+      if (!route || typeof route !== 'string') {
+        console.warn('ApiPreloader: Invalid route provided:', route);
+        return;
+      }
+
+      // 優先使用動態策略，否則使用配置中的策略
+      const strategies = getPreloadStrategyForRoute(route) || this.config.routes[route] || [];
+      
+      if (strategies.length === 0) return;
 
     // 按優先級排序
     const sortedStrategies = strategies;
@@ -104,6 +111,9 @@ class ApiPreloader {
       if (this.config.delay) {
         await new Promise(resolve => setTimeout(resolve, this.config.delay));
       }
+    }
+    } catch (error) {
+      console.error('ApiPreloader: Error in preloadRoute:', error);
     }
   }
 
@@ -274,6 +284,12 @@ export function SmartPreloadLink({
   const preloadTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
+    // 確保 href 存在且為有效字串
+    if (!href || typeof href !== 'string') {
+      console.warn('PreloadLink: href is required and must be a string');
+      return;
+    }
+    
     preloadTimeoutRef.current = setTimeout(() => {
       apiPreloader.preloadRoute(href, queryClient);
     }, preloadDelay);

@@ -202,6 +202,11 @@ export const dashboardPreloadStrategies = [
 
 // 智能預加載決策函數
 export function getPreloadStrategyForRoute(pathname: string) {
+  // 確保 pathname 存在
+  if (!pathname || typeof pathname !== 'string') {
+    return [];
+  }
+
   // 產品相關路由
   if (pathname === '/products') {
     return productPreloadStrategies.listPage;
