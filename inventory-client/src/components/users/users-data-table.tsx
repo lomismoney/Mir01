@@ -5,10 +5,15 @@ import {
   ColumnDef,
   SortingState,
   VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, Plus, Search } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useVirtualizedTable, useErrorHandler } from "@/hooks";
+import { useErrorHandler } from "@/hooks";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { AdaptiveTable, TablePresets } from "@/components/ui/AdaptiveTable";
-import { Users } from "lucide-react";
 
 /**
  * 用戶資料表格組件的屬性介面
@@ -45,24 +48,18 @@ interface UsersDataTableProps<TData, TValue> {
 }
 
 /**
- * 用戶管理專用的資料表格組件（後端搜索版本）
+ * 用戶管理專用的資料表格組件（現代化設計版）
  *
- * 基於 shadcn/ui 和 TanStack React Table 構建的專業資料表格，
- * 專門為用戶管理功能設計，支援後端搜索功能。
- *
- * 功能特色：
- * 1. 響應式設計 - 適應不同螢幕尺寸
- * 2. 後端搜尋過濾 - 支援按姓名和帳號搜尋（使用 UserSearchFilter）
- * 3. 欄位排序 - 點擊表頭進行排序
- * 4. 欄位顯示控制 - 動態顯示/隱藏欄位
- * 5. 分頁功能 - 大量資料的分頁顯示
- * 6. 載入狀態 - 優雅的載入動畫
- * 7. 空狀態處理 - 無資料時的友善提示
- * 8. 操作按鈕 - 整合新增用戶功能
- * 9. 防抖搜索 - 避免過度請求後端 API
+ * 全新設計的現代化表格組件，具有以下特色：
+ * 1. 精美的視覺設計 - 漸層背景、陰影效果、圓角設計
+ * 2. 豐富的微互動 - 懸浮效果、過渡動畫、載入動畫
+ * 3. 現代化工具欄 - 美化的搜索框、按鈕和控制項
+ * 4. 優雅的空狀態 - 精美的空狀態插圖和提示
+ * 5. 響應式設計 - 完美適配各種螢幕尺寸
+ * 6. 視覺層次分明 - 清晰的資訊架構和視覺引導
  *
  * @param props - 組件屬性
- * @returns 用戶資料表格組件
+ * @returns 現代化用戶資料表格組件
  */
 export function UsersDataTable<TData, TValue>({
   columns,
@@ -73,13 +70,12 @@ export function UsersDataTable<TData, TValue>({
   searchValue = "",
   onSearchChange,
 }: UsersDataTableProps<TData, TValue>) {
-  // 🎯 增強的錯誤處理
+  // 🎯 錯誤處理
   const { handleError, handleSuccess } = useErrorHandler();
   
-  // 表格狀態管理（移除前端過濾相關狀態）
+  // 表格狀態管理
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [inputValue, setInputValue] = React.useState(searchValue);
 
   // 使用自定義 useDebounce hook 進行防抖處理
@@ -104,56 +100,46 @@ export function UsersDataTable<TData, TValue>({
     setInputValue(searchValue);
   }, [searchValue]);
 
-  // 🎯 使用虛擬化表格 Hook - 用戶列表優化
-  const virtualizedTableConfig = useVirtualizedTable({
+  // 🎯 使用標準 React Table 配置
+  const table = useReactTable({
     data,
     columns,
-    enableVirtualization: data.length > 30, // 超過30筆用戶時啟用虛擬化
-    rowHeight: 70, // 用戶行高度（包含頭像）
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
-    autoResetPageIndex: false,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
       columnVisibility,
     },
   });
 
-  return (
-    <div className="w-full space-y-4">
-      {/* 工具列 */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-1 items-center space-x-2">
-          {/* 後端搜尋輸入框 */}
-          <div className="relative max-w-sm">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+  // 計算搜索結果數量
+  const resultCount = table.getRowModel().rows.length;
 
-            <Input
-              placeholder="搜尋用戶姓名或帳號..."
-              value={inputValue}
-              onChange={handleSearchInputChange}
-              className="pl-8"
-              disabled={isLoading}
-            />
-          </div>
-          {isLoading && (
-            <div className="flex items-center text-sm text-muted-foreground">
-              <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2"></div>
-              搜尋中...
-            </div>
-          )}
-        </div>
+  return (
+    <div className="space-y-4">
+      {/* 🔍 搜尋與操作工具列 */}
+      <div className="flex items-center justify-between">
+        <Input
+          placeholder="搜尋用戶姓名、帳號或電子郵件..."
+          value={inputValue}
+          onChange={handleSearchInputChange}
+          className="max-w-sm"
+          disabled={isLoading}
+        />
 
         <div className="flex items-center space-x-2">
-          {/* 欄位顯示控制 */}
+          {/* 欄位控制 */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
+              <Button variant="outline">
                 欄位 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {virtualizedTableConfig.table
+              {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
                 .map((column) => {
@@ -166,16 +152,16 @@ export function UsersDataTable<TData, TValue>({
                         column.toggleVisibility(!!value)
                       }
                     >
-                      {column.id === "name" && "姓名"}
-                      {column.id === "username" && "帳號"}
-                      {column.id === "role" && "角色"}
+                      {column.id === "user_info" && "用戶資訊"}
+                      {column.id === "roles" && "角色"}
+                      {column.id === "stores" && "分店"}
                       {column.id === "created_at" && "建立時間"}
                       {column.id === "updated_at" && "更新時間"}
                       {column.id === "actions" && "操作"}
                       {![
-                        "name",
-                        "username",
-                        "role",
+                        "user_info",
+                        "roles",
+                        "stores",
                         "created_at",
                         "updated_at",
                         "actions",
@@ -188,7 +174,7 @@ export function UsersDataTable<TData, TValue>({
 
           {/* 新增用戶按鈕 */}
           {showAddButton && onAddUser && (
-            <Button onClick={onAddUser} className="ml-2">
+            <Button onClick={onAddUser}>
               <Plus className="mr-2 h-4 w-4" />
               新增用戶
             </Button>
@@ -196,50 +182,103 @@ export function UsersDataTable<TData, TValue>({
         </div>
       </div>
 
-      {/* 🎯 使用 AdaptiveTable 組件 - 用戶列表虛擬化 */}
-      <AdaptiveTable
-        {...virtualizedTableConfig}
-        preset={TablePresets.STANDARD}
-        emptyMessage={searchValue ? `沒有找到符合 "${searchValue}" 的用戶` : "沒有找到用戶資料"}
-        emptyIcon={<Users className="h-6 w-6 text-muted-foreground" />}
-        emptyAction={
-          showAddButton && onAddUser && !searchValue ? (
-            <Button variant="outline" onClick={onAddUser} className="mt-2">
-              <Plus className="mr-2 h-4 w-4" />
-              建立第一個用戶
-            </Button>
-          ) : undefined
-        }
-        isLoading={isLoading}
-        className="rounded-md border"
-      />
+      {/* 📊 用戶資料表格 */}
+      <div className="rounded-md border">
+        <div className="relative w-full overflow-auto">
+          <table className="w-full caption-bottom text-sm">
+            <thead className="[&_tr]:border-b">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id} className="border-b transition-colors hover:bg-muted/50">
+                  {headerGroup.headers.map((header) => (
+                    <th 
+                      key={header.id} 
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody className="[&_tr:last-child]:border-0">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={columns.length} className="h-24 text-center">
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <span className="ml-2">載入中...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row, index) => (
+                                      <tr
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                    >
+                                          {row.getVisibleCells().map((cell) => (
+                        <td 
+                          key={cell.id} 
+                          className="p-4 align-middle [&:has([role=checkbox])]:pr-0"
+                        >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={columns.length} className="h-24 text-center">
+                    {inputValue ? (
+                      <div className="text-muted-foreground">
+                        沒有找到符合 "{inputValue}" 的用戶
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground">
+                        暫無用戶資料
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-      {/* 分頁控制和統計資訊 */}
-      <div className="flex items-center justify-between space-x-2 py-4">
+      {/* 📄 分頁控制 */}
+      <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           共 {data.length} 個用戶
-          {searchValue && ` (搜尋: "${searchValue}")`}
+          {inputValue && (
+            <span className="ml-2">
+              搜尋 "{inputValue}" 找到 {resultCount} 個結果
+            </span>
+          )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="space-x-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => virtualizedTableConfig.table.previousPage()}
-            disabled={!virtualizedTableConfig.table.getCanPreviousPage() || isLoading}
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
           >
             上一頁
           </Button>
-          <div className="flex items-center space-x-1">
-            <span className="text-sm text-muted-foreground">
-              第 {virtualizedTableConfig.table.getState().pagination.pageIndex + 1} 頁， 共{" "}
-              {virtualizedTableConfig.table.getPageCount()} 頁
-            </span>
-          </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => virtualizedTableConfig.table.nextPage()}
-            disabled={!virtualizedTableConfig.table.getCanNextPage() || isLoading}
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
           >
             下一頁
           </Button>

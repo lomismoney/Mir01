@@ -22,8 +22,33 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Plus, UserCheck, Shield } from "lucide-react";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle, 
+  CardAction,
+  CardFooter 
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Loader2, 
+  Plus, 
+  UserCheck, 
+  Shield, 
+  Users, 
+  Crown, 
+  Store, 
+  Eye,
+  Edit,
+  TrendingUp,
+  TrendingDown,
+  Settings,
+  UserPlus,
+  CheckCircle
+} from "lucide-react";
 import {
   useUsers,
   useCreateUser,
@@ -42,7 +67,14 @@ import { RoleSelector } from "@/components/users/role-selector";
 import { useQueryClient } from "@tanstack/react-query";
 
 /**
- * 用戶管理頁面（伺服器端認證版本）
+ * 用戶管理頁面（美化版）
+ *
+ * 重新設計的用戶管理頁面，具有以下特色：
+ * 1. 現代化的頁面佈局和視覺設計
+ * 2. 統計卡片展示用戶數據概覽
+ * 3. 優化的表格設計和互動體驗
+ * 4. 美觀的對話框和表單設計
+ * 5. 響應式設計和微互動效果
  *
  * 安全特性：
  * - 雙重認證檢查：用戶登入 + 管理員權限
@@ -97,13 +129,34 @@ export default function UsersPage() {
   const updateUserMutation = useUpdateUser();
 
   // 用戶分店管理狀態（整合到 modalManager）
-
   const queryClient = useQueryClient();
 
   // 處理分店管理按鈕點擊
   const handleManageUserStores = (user: UserItem) => {
     modalManager.openModal('stores', user);
   };
+
+  // 計算用戶統計數據
+  const getUserStats = () => {
+    const totalUsers = usersData.length;
+    const roleStats = usersData.reduce((acc, user) => {
+      const roles = (user as any).roles || [];
+      roles.forEach((role: string) => {
+        acc[role] = (acc[role] || 0) + 1;
+      });
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      total: totalUsers,
+      admins: roleStats.admin || 0,
+      staff: roleStats.staff || 0,
+      viewers: roleStats.viewer || 0,
+      installers: roleStats.installer || 0,
+    };
+  };
+
+  const stats = getUserStats();
 
   /**
    * 處理創建新用戶的函式
@@ -311,26 +364,18 @@ export default function UsersPage() {
   // 檢查管理員權限 - 使用 useAuth hook 來檢查權限
   if (!user?.isAdmin) {
     return (
-      <div className="container mx-auto py-8">
-        <Card>
+      <div className="container mx-auto py-12">
+        <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
-              <Shield
-                className="mx-auto h-12 w-12 text-gray-400"
-               
-              />
-
-              <h3
-                className="mt-2 text-sm font-medium text-gray-900 dark:text-white"
-               
-              >
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 dark:bg-destructive/20">
+                <Shield className="h-6 w-6 text-destructive" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-foreground">
                 權限不足
               </h3>
-              <p
-                className="mt-1 text-sm text-gray-500 dark:text-gray-400"
-               
-              >
-                您沒有權限訪問用戶管理功能
+              <p className="mt-2 text-sm text-muted-foreground">
+                您沒有權限訪問用戶管理功能。請聯繫管理員以取得存取權限。
               </p>
             </div>
           </CardContent>
@@ -341,205 +386,252 @@ export default function UsersPage() {
 
   // 只有已登入且為管理員的用戶才會執行到這裡
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      {/* 頁面標題 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1
-            className="text-3xl font-bold text-gray-900 dark:text-white"
-           
-          >
-            用戶管理
-          </h1>
-          <p
-            className="text-gray-600 dark:text-gray-300 mt-2"
-           
-          >
-            管理系統中的所有用戶帳號
-          </p>
-        </div>
+    <div className="space-y-6">
+      {/* 📱 頁面標題區域 - 與客戶頁面一致的簡潔設計 */}
+      <div>
+        <h2 className="text-2xl font-bold">
+          用戶管理
+        </h2>
+        <p className="text-muted-foreground">
+          管理系統中的所有用戶帳號和權限設定。
+        </p>
       </div>
 
-      {/* 用戶資料表格 */}
-      <div className="space-y-4">
-        <UsersDataTable
-          columns={columns}
-          data={usersData}
-          isLoading={isLoading}
-          showAddButton={user?.isAdmin}
-          onAddUser={handleAddUser}
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
-         
-        />
+      {/* 🎯 統計卡片區域 - 數據概覽（與儀表板統一風格） */}
+      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs md:grid-cols-2 lg:grid-cols-4">
+        <Card className="@container/card">
+          <CardHeader>
+            <CardDescription>總用戶數量</CardDescription>
+            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+              {isLoading ? "..." : stats.total}
+            </CardTitle>
+            <CardAction>
+              <Badge variant="outline">
+                <TrendingUp />
+                系統用戶
+              </Badge>
+            </CardAction>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-1.5 text-sm">
+            <div className="line-clamp-1 flex gap-2 font-medium">
+              平台用戶管理 <Users className="size-4" />
+            </div>
+            <div className="text-muted-foreground">
+              {isLoading ? "載入中..." : `系統內共有 ${stats.total} 位註冊用戶`}
+            </div>
+          </CardFooter>
+        </Card>
+
+        <Card className="@container/card">
+          <CardHeader>
+            <CardDescription>管理員用戶</CardDescription>
+            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+              {isLoading ? "..." : stats.admins}
+            </CardTitle>
+            <CardAction>
+              <Badge variant="destructive">
+                <Crown />
+                最高權限
+              </Badge>
+            </CardAction>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-1.5 text-sm">
+            <div className="line-clamp-1 flex gap-2 font-medium">
+              完整系統控制 <Shield className="size-4" />
+            </div>
+            <div className="text-muted-foreground">
+              具有系統完整管理權限
+            </div>
+          </CardFooter>
+        </Card>
+
+        <Card className="@container/card">
+          <CardHeader>
+            <CardDescription>員工用戶</CardDescription>
+            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+              {isLoading ? "..." : stats.staff}
+            </CardTitle>
+            <CardAction>
+              <Badge variant="outline">
+                <TrendingUp />
+                日常操作
+              </Badge>
+            </CardAction>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-1.5 text-sm">
+            <div className="line-clamp-1 flex gap-2 font-medium">
+              業務操作人員 <Store className="size-4" />
+            </div>
+            <div className="text-muted-foreground">
+              負責日常庫存管理作業
+            </div>
+          </CardFooter>
+        </Card>
+
+        <Card className="@container/card">
+          <CardHeader>
+            <CardDescription>檢視者</CardDescription>
+            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+              {isLoading ? "..." : stats.viewers}
+            </CardTitle>
+            <CardAction>
+              <Badge variant="outline">
+                <CheckCircle />
+                只讀權限
+              </Badge>
+            </CardAction>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-1.5 text-sm">
+            <div className="line-clamp-1 flex gap-2 font-medium">
+              資料檢視 <Eye className="size-4" />
+            </div>
+            <div className="text-muted-foreground">
+              僅具備資料查看權限
+            </div>
+          </CardFooter>
+        </Card>
       </div>
 
-      {/* 新增用戶對話框 */}
+      {/* 📊 用戶資料表格區域 */}
+      <UsersDataTable
+        columns={columns}
+        data={usersData}
+        isLoading={isLoading}
+        showAddButton={true} // 與客戶頁面一致，在表格工具欄顯示新增按鈕
+        onAddUser={handleAddUser}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+
+      {/* 🎨 新增用戶對話框 - 美化版 */}
       <Dialog
         open={modalManager.isModalOpen('create')}
         onOpenChange={handleDialogClose}
-       
       >
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserCheck className="w-5 h-5" />
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <UserCheck className="h-5 w-5" />
+              </div>
               建立新用戶
             </DialogTitle>
-            <DialogDescription>
-              填寫以下資訊以建立一個新的使用者帳號。
+            <DialogDescription className="text-base">
+              填寫以下資訊以建立一個新的使用者帳號。所有標有 * 的欄位都是必填項目。
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            {/* 姓名欄位 */}
-            <div
-              className="grid grid-cols-4 items-center gap-4"
-             
-            >
-              <Label
-                htmlFor="name"
-                className="text-right font-medium"
-               
-              >
-                姓名{" "}
-                <span className="text-red-500">
-                  *
-                </span>
-              </Label>
-              <Input
-                id="name"
-                placeholder="輸入用戶姓名"
-                value={newUserName}
-                onChange={(e) => setNewUserName(e.target.value)}
-                className="col-span-3"
-                disabled={createUserMutation.isPending}
-               
-              />
-            </div>
+          <Separator className="my-4" />
 
-            {/* 帳號欄位 */}
-            <div
-              className="grid grid-cols-4 items-center gap-4"
-             
-            >
-              <Label
-                htmlFor="username"
-                className="text-right font-medium"
-               
-              >
-                用戶名{" "}
-                <span className="text-red-500">
-                  *
-                </span>
-              </Label>
-              <Input
-                id="username"
-                placeholder="輸入用戶名"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-                className="col-span-3"
-                disabled={createUserMutation.isPending}
-               
-              />
-            </div>
+          <div className="grid gap-6 py-4">
+            {/* 基本資訊區塊 */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-foreground flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                基本資訊
+              </h4>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    姓名 <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="請輸入用戶姓名"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                    disabled={createUserMutation.isPending}
+                    className="h-10"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-sm font-medium">
+                    用戶名 <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="username"
+                    placeholder="請輸入用戶名"
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    disabled={createUserMutation.isPending}
+                    className="h-10"
+                  />
+                </div>
+              </div>
 
-            {/* Email 欄位 */}
-            <div
-              className="grid grid-cols-4 items-center gap-4"
-             
-            >
-              <Label
-                htmlFor="email"
-                className="text-right font-medium"
-              >
-                電子郵件{" "}
-                <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="輸入電子郵件"
-                value={newUserEmail}
-                onChange={(e) => setNewUserEmail(e.target.value)}
-                className="col-span-3"
-                disabled={createUserMutation.isPending}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  電子郵件 <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="請輸入電子郵件地址"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  disabled={createUserMutation.isPending}
+                  className="h-10"
+                />
+              </div>
 
-            {/* 密碼欄位 */}
-            <div
-              className="grid grid-cols-4 items-center gap-4"
-             
-            >
-              <Label
-                htmlFor="password"
-                className="text-right font-medium"
-               
-              >
-                密碼{" "}
-                <span className="text-red-500">
-                  *
-                </span>
-              </Label>
-              <div className="col-span-3 space-y-1">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  密碼 <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="輸入密碼"
+                  placeholder="請輸入密碼（至少8個字元）"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={createUserMutation.isPending}
-                 
+                  className="h-10"
                 />
-
-                <p className="text-xs text-gray-500">
-                  密碼至少需要 8 個字元
-                </p>
               </div>
             </div>
 
-            {/* 角色選擇 */}
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label className="text-right font-medium mt-3">
-                角色 <span className="text-red-500">*</span>
-              </Label>
-              <div className="col-span-3">
-                <RoleSelector
-                  selectedRoles={newRoles}
-                  onRolesChange={(roles) => setNewRoles(roles)}
-                  disabled={createUserMutation.isPending}
-                />
-              </div>
+            <Separator />
+
+            {/* 權限設定區塊 */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-foreground flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                權限設定
+              </h4>
+              
+              <RoleSelector
+                selectedRoles={newRoles}
+                onRolesChange={setNewRoles}
+                disabled={createUserMutation.isPending}
+              />
             </div>
           </div>
 
-          <DialogFooter>
+          <Separator className="my-4" />
+
+          <DialogFooter className="gap-2">
             <Button
               variant="outline"
-              onClick={() => handleDialogClose(false)}
+              onClick={() => modalManager.closeModal()}
               disabled={createUserMutation.isPending}
-             
             >
               取消
             </Button>
             <Button
               onClick={handleCreateUser}
               disabled={createUserMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700"
-             
+              className="bg-primary hover:bg-primary/90"
             >
               {createUserMutation.isPending ? (
                 <>
-                  <Loader2
-                    className="w-4 h-4 mr-2 animate-spin"
-                   
-                  />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   建立中...
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4 mr-2" />
+                  <UserCheck className="mr-2 h-4 w-4" />
                   建立用戶
                 </>
               )}
@@ -548,159 +640,135 @@ export default function UsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 編輯用戶對話框 */}
+      {/* 🖊️ 編輯用戶對話框 - 美化版 */}
       <Dialog
         open={modalManager.isModalOpen('edit')}
         onOpenChange={handleEditDialogClose}
-       
       >
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserCheck className="w-5 h-5" />
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
+                <Edit className="h-5 w-5" />
+              </div>
               編輯用戶
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base">
               修改用戶資訊。密碼欄位留空表示不更改密碼。
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            {/* 姓名欄位 */}
-            <div
-              className="grid grid-cols-4 items-center gap-4"
-             
-            >
-              <Label
-                htmlFor="edit-name"
-                className="text-right font-medium"
-               
-              >
-                姓名{" "}
-                <span className="text-red-500">
-                  *
-                </span>
-              </Label>
-              <Input
-                id="edit-name"
-                placeholder="輸入用戶姓名"
-                value={editUserName}
-                onChange={(e) => setEditUserName(e.target.value)}
-                className="col-span-3"
-                disabled={updateUserMutation.isPending}
-               
-              />
-            </div>
+          <Separator className="my-4" />
 
-            {/* 帳號欄位 */}
-            <div
-              className="grid grid-cols-4 items-center gap-4"
-             
-            >
-              <Label
-                htmlFor="edit-username"
-                className="text-right font-medium"
-               
-              >
-                用戶名{" "}
-                <span className="text-red-500">
-                  *
-                </span>
-              </Label>
-              <Input
-                id="edit-username"
-                placeholder="輸入用戶名"
-                value={editUsername}
-                onChange={(e) => setEditUsername(e.target.value)}
-                className="col-span-3"
-                disabled={updateUserMutation.isPending}
-               
-              />
-            </div>
+          <div className="grid gap-6 py-4">
+            {/* 基本資訊區塊 */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-foreground flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                基本資訊
+              </h4>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name" className="text-sm font-medium">
+                    姓名 <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="edit-name"
+                    placeholder="請輸入用戶姓名"
+                    value={editUserName}
+                    onChange={(e) => setEditUserName(e.target.value)}
+                    disabled={updateUserMutation.isPending}
+                    className="h-10"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit-username" className="text-sm font-medium">
+                    用戶名 <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="edit-username"
+                    placeholder="請輸入用戶名"
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value)}
+                    disabled={updateUserMutation.isPending}
+                    className="h-10"
+                  />
+                </div>
+              </div>
 
-            {/* Email 編輯欄位 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-email" className="text-right">
-                電子郵件 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={editUserEmail}
-                onChange={(e) => setEditUserEmail(e.target.value)}
-                className="col-span-3"
-                disabled={updateUserMutation.isPending}
-              />
-            </div>
-
-            {/* 密碼欄位 */}
-            <div
-              className="grid grid-cols-4 items-center gap-4"
-             
-            >
-              <Label
-                htmlFor="edit-password"
-                className="text-right font-medium"
-               
-              >
-                密碼{" "}
-                <span className="text-gray-500">
-                  (留空不更改)
-                </span>
-              </Label>
-              <Input
-                id="edit-password"
-                type="password"
-                placeholder="輸入新密碼（或留空）"
-                value={editPassword}
-                onChange={(e) => setEditPassword(e.target.value)}
-                className="col-span-3"
-                disabled={updateUserMutation.isPending}
-               
-              />
-            </div>
-
-            {/* 角色選擇 */}
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label className="text-right font-medium mt-3">
-                角色 <span className="text-red-500">*</span>
-              </Label>
-              <div className="col-span-3">
-                <RoleSelector
-                  selectedRoles={editRoles}
-                  onRolesChange={(roles) => setEditRoles(roles)}
+              <div className="space-y-2">
+                <Label htmlFor="edit-email" className="text-sm font-medium">
+                  電子郵件 <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  placeholder="請輸入電子郵件地址"
+                  value={editUserEmail}
+                  onChange={(e) => setEditUserEmail(e.target.value)}
                   disabled={updateUserMutation.isPending}
+                  className="h-10"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-password" className="text-sm font-medium">
+                  密碼 <span className="text-muted-foreground">(留空表示不更改)</span>
+                </Label>
+                <Input
+                  id="edit-password"
+                  type="password"
+                  placeholder="請輸入新密碼（至少8個字元）"
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                  disabled={updateUserMutation.isPending}
+                  className="h-10"
                 />
               </div>
             </div>
+
+            <Separator />
+
+            {/* 權限設定區塊 */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-foreground flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                權限設定
+              </h4>
+              
+              <RoleSelector
+                selectedRoles={editRoles}
+                onRolesChange={setEditRoles}
+                disabled={updateUserMutation.isPending}
+              />
+            </div>
           </div>
 
-          <DialogFooter>
+          <Separator className="my-4" />
+
+          <DialogFooter className="gap-2">
             <Button
               variant="outline"
-              onClick={() => handleEditDialogClose(false)}
+              onClick={() => modalManager.closeModal()}
               disabled={updateUserMutation.isPending}
-             
             >
               取消
             </Button>
             <Button
               onClick={handleUpdateUser}
               disabled={updateUserMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700"
-             
+              className="bg-accent hover:bg-accent/90"
             >
               {updateUserMutation.isPending ? (
                 <>
-                  <Loader2
-                    className="w-4 h-4 mr-2 animate-spin"
-                   
-                  />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   更新中...
                 </>
               ) : (
                 <>
-                  <UserCheck className="w-4 h-4 mr-2" />
+                  <Edit className="mr-2 h-4 w-4" />
                   更新用戶
                 </>
               )}
@@ -709,25 +777,28 @@ export default function UsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 刪除確認對話框 */}
+      {/* 🗑️ 刪除確認對話框 - 美化版 */}
       <AlertDialog
         open={modalManager.isModalOpen('delete')}
         onOpenChange={(isOpen) => !isOpen && modalManager.closeModal()}
-       
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              確定要執行刪除嗎？
+            <AlertDialogTitle className="flex items-center gap-3 text-xl">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <Shield className="h-5 w-5 text-destructive" />
+              </div>
+              確定要刪除用戶嗎？
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              你正準備刪除用戶「{modalManager.currentData?.name}」。此操作無法復原。
+            <AlertDialogDescription className="text-base">
+              您正準備刪除用戶「<span className="font-semibold text-foreground">{modalManager.currentData?.name}</span>」。
+              此操作無法復原，該用戶的所有資料都將永久刪除。
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="gap-2">
             <AlertDialogCancel
               onClick={() => modalManager.closeModal()}
-             
+              disabled={deleteUserMutation.isPending}
             >
               取消
             </AlertDialogCancel>
@@ -735,22 +806,27 @@ export default function UsersPage() {
               className="bg-destructive hover:bg-destructive/90"
               onClick={handleConfirmDelete}
               disabled={deleteUserMutation.isPending}
-             
             >
-              {deleteUserMutation.isPending ? "刪除中..." : "確定刪除"}
+              {deleteUserMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  刪除中...
+                </>
+              ) : (
+                "確定刪除"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 用戶分店管理對話框 */}
+      {/* 🏪 用戶分店管理對話框 */}
       {modalManager.currentData && modalManager.isModalOpen('stores') && (
         <UserStoresDialog
           userId={modalManager.currentData.id as number}
           userName={modalManager.currentData.name as string}
           open={modalManager.isModalOpen('stores')}
           onOpenChange={(open) => !open && modalManager.closeModal()}
-         
         />
       )}
     </div>
