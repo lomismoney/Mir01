@@ -40,6 +40,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { OrderPreviewModal } from "@/components/orders/OrderPreviewModal";
+import RecordPaymentModal from "@/components/orders/RecordPaymentModal";
+import RefundModal from "@/components/orders/RefundModal";
+import { ShipmentFormModal } from "@/components/orders/ShipmentFormModal";
+import { ProcessedOrder } from "@/types/api-helpers";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -115,6 +121,12 @@ export function OrdersPageClient() {
   // 刪除確認對話框狀態
   const [deleteOrderId, setDeleteOrderId] = useState<number | null>(null);
   const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
+  
+  // 訂單預覽 Modal 狀態
+  const [previewOrderId, setPreviewOrderId] = useState<number | null>(null);
+  const [recordPaymentOrderId, setRecordPaymentOrderId] = useState<number | null>(null);
+  const [refundOrderId, setRefundOrderId] = useState<number | null>(null);
+  const [shipOrderId, setShipOrderId] = useState<number | null>(null);
   
   // Mutations
   const deleteOrderMutation = useDeleteOrder();
@@ -210,6 +222,43 @@ export function OrdersPageClient() {
     );
   };
   
+  // 預覽 Modal 的操作回調函數
+  const handleEdit = (order: ProcessedOrder) => {
+    router.push(`/orders/${order.id}/edit`);
+    setPreviewOrderId(null);
+  };
+
+  const handlePrint = (order: ProcessedOrder) => {
+    // 暫時使用 toast 提示，之後可以實作真正的列印功能
+    toast.info("列印功能開發中...");
+  };
+
+  const handleCancel = (order: ProcessedOrder) => {
+    // 暫時使用 toast 提示，之後可以實作取消訂單功能
+    toast.info("取消訂單功能開發中...");
+  };
+
+  const handleShipOrder = (order: ProcessedOrder) => {
+    setShipOrderId(order.id);
+    setPreviewOrderId(null);
+  };
+
+  const handleRecordPayment = (order: ProcessedOrder) => {
+    setRecordPaymentOrderId(order.id);
+    setPreviewOrderId(null);
+  };
+
+  const handleRefund = (order: ProcessedOrder) => {
+    setRefundOrderId(order.id);
+    setPreviewOrderId(null);
+  };
+
+  // 獲取單個訂單資料（用於 Modal）
+  const previewOrder = orders.find(order => order.id === previewOrderId);
+  const paymentOrder = orders.find(order => order.id === recordPaymentOrderId);
+  const refundOrder = orders.find(order => order.id === refundOrderId);
+  const shipOrder = orders.find(order => order.id === shipOrderId);
+
   // 狀態顏色
   const getPaymentStatusVariant = (status: string) => {
     switch (status) {
@@ -373,7 +422,15 @@ export function OrdersPageClient() {
                       onCheckedChange={() => handleSelectRow(order.id)}
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{order.order_number}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto font-medium text-primary hover:underline"
+                      onClick={() => setPreviewOrderId(order.id)}
+                    >
+                      {order.order_number}
+                    </Button>
+                  </TableCell>
                   <TableCell>{order.customer?.name || "未知客戶"}</TableCell>
                   <TableCell>{formatPrice(order.grand_total)}</TableCell>
                   <TableCell>
@@ -501,6 +558,40 @@ export function OrdersPageClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* 訂單預覽 Modal */}
+      <OrderPreviewModal
+        open={previewOrderId !== null}
+        onOpenChange={(open) => !open && setPreviewOrderId(null)}
+        orderId={previewOrderId}
+        onEdit={handleEdit}
+        onPrint={handlePrint}
+        onCancel={handleCancel}
+        onShipOrder={handleShipOrder}
+        onRecordPayment={handleRecordPayment}
+        onRefund={handleRefund}
+      />
+      
+      {/* 記錄付款 Modal */}
+      <RecordPaymentModal
+        order={paymentOrder as any || null}
+        open={recordPaymentOrderId !== null}
+        onOpenChange={(open) => !open && setRecordPaymentOrderId(null)}
+      />
+      
+      {/* 退款 Modal */}
+      <RefundModal
+        order={refundOrder as any || null}
+        open={refundOrderId !== null}
+        onOpenChange={(open) => !open && setRefundOrderId(null)}
+      />
+      
+      {/* 出貨 Modal */}
+      <ShipmentFormModal
+        order={shipOrder as any || null}
+        open={shipOrderId !== null}
+        onOpenChange={(open) => !open && setShipOrderId(null)}
+      />
     </div>
   );
 }
