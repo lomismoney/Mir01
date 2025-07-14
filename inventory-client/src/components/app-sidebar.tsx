@@ -33,6 +33,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 import { memo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
@@ -224,9 +225,14 @@ const AppSidebar = memo(function AppSidebar({
             >
               <SmartNavLink href="/dashboard">
                 <Layers className="h-5 w-5" />
-                <span className="text-base font-semibold">
-                  庫存管理系統
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-semibold">
+                    LOMIS Flow
+                  </span>
+                  <Badge variant="success" className="text-xs bg-green-600 text-white hover:bg-green-700 px-2 py-0.5 text-[12px] h-5">
+                    Beta
+                  </Badge>
+                </div>
               </SmartNavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
