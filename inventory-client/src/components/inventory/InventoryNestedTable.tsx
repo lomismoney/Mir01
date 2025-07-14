@@ -73,6 +73,8 @@ interface InventoryNestedTableProps {
   onAdjustInventory?: (skuId: number, currentQuantity: number) => void;
   /** SPU 管理回調 */
   onManageProduct?: (spuId: number) => void;
+  /** 空狀態組件 */
+  emptyState?: React.ReactNode;
 }
 
 /**
@@ -86,6 +88,7 @@ export function InventoryNestedTable({
   isLoading,
   onAdjustInventory,
   onManageProduct,
+  emptyState,
 }: InventoryNestedTableProps) {
   const router = useRouter();
 
@@ -297,37 +300,39 @@ export function InventoryNestedTable({
             <TableRow>
               <TableCell
                 colSpan={8}
-                className="h-24 text-center"
+                className="p-0"
                
               >
-                <div
-                  className="flex flex-col items-center justify-center space-y-3 py-6"
-                 
-                >
-                  <Package
-                    className="h-12 w-12 text-muted-foreground"
+                {emptyState || (
+                  <div
+                    className="flex flex-col items-center justify-center space-y-3 py-16"
                    
-                  />
+                  >
+                    <Package
+                      className="h-12 w-12 text-muted-foreground"
+                     
+                    />
 
-                  <p
-                    className="text-lg font-medium text-muted-foreground"
-                   
-                  >
-                    沒有庫存資料
-                  </p>
-                  <p
-                    className="text-sm text-muted-foreground"
-                   
-                  >
-                    此區域顯示按商品分組的庫存詳情，點擊商品可展開查看各變體的庫存狀況
-                  </p>
-                  <p
-                    className="text-xs text-muted-foreground mt-2"
-                   
-                  >
-                    請先為商品變體建立庫存記錄，或調整上方篩選條件
-                  </p>
-                </div>
+                    <p
+                      className="text-lg font-medium text-muted-foreground"
+                     
+                    >
+                      沒有庫存資料
+                    </p>
+                    <p
+                      className="text-sm text-muted-foreground max-w-md text-center"
+                     
+                    >
+                      此區域顯示按商品分組的庫存詳情，點擊商品可展開查看各變體的庫存狀況
+                    </p>
+                    <p
+                      className="text-xs text-muted-foreground mt-2"
+                     
+                    >
+                      請先為商品變體建立庫存記錄，或調整上方篩選條件
+                    </p>
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           ) : (

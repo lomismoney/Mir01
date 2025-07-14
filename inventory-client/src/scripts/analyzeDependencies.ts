@@ -332,7 +332,6 @@ async function main() {
   
   // 讀取 package.json
   const packageJson = readPackageJson();
-  const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
   
   console.log(`📦 發現 ${Object.keys(packageJson.dependencies).length} 個生產依賴`);
   console.log(`🛠️ 發現 ${Object.keys(packageJson.devDependencies).length} 個開發依賴\n`);
@@ -404,6 +403,7 @@ async function main() {
 }
 
 // 執行腳本
-if (require.main === module) {
+// 檢查是否為直接執行（而非導入）
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }

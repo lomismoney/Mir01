@@ -1,11 +1,16 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StoresDataTable } from '../stores-data-table';
+import {
+  MockComponentProps,
+  MockButtonProps,
+  MockInputProps
+} from '@/test-utils/mock-types';
 
 // Mock UI components
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, variant, size, ...props }: any) => (
+  Button: ({ children, onClick, disabled, variant, size, ...props }: MockButtonProps) => (
     <button onClick={onClick} disabled={disabled} {...props}>
       {children}
     </button>
@@ -13,28 +18,37 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: ({ ...props }: any) => <input {...props} />,
+  Input: ({ ...props }: MockInputProps) => <input {...props} />,
 }));
+
+interface MockTableCellProps extends MockComponentProps {
+  colSpan?: number;
+}
 
 jest.mock('@/components/ui/table', () => ({
-  Table: ({ children }: any) => <table>{children}</table>,
-  TableHeader: ({ children }: any) => <thead>{children}</thead>,
-  TableBody: ({ children }: any) => <tbody>{children}</tbody>,
-  TableHead: ({ children }: any) => <th>{children}</th>,
-  TableRow: ({ children }: any) => <tr>{children}</tr>,
-  TableCell: ({ children, colSpan }: any) => <td colSpan={colSpan}>{children}</td>,
+  Table: ({ children }: MockComponentProps) => <table>{children}</table>,
+  TableHeader: ({ children }: MockComponentProps) => <thead>{children}</thead>,
+  TableBody: ({ children }: MockComponentProps) => <tbody>{children}</tbody>,
+  TableHead: ({ children }: MockComponentProps) => <th>{children}</th>,
+  TableRow: ({ children }: MockComponentProps) => <tr>{children}</tr>,
+  TableCell: ({ children, colSpan }: MockTableCellProps) => <td colSpan={colSpan}>{children}</td>,
 }));
 
+interface MockDropdownMenuCheckboxItemProps extends MockComponentProps {
+  checked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+}
+
 jest.mock('@/components/ui/dropdown-menu', () => ({
-  DropdownMenu: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuTrigger: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuCheckboxItem: ({ children, checked, onCheckedChange }: any) => (
+  DropdownMenu: ({ children }: MockComponentProps) => <div>{children}</div>,
+  DropdownMenuTrigger: ({ children }: MockComponentProps) => <div>{children}</div>,
+  DropdownMenuContent: ({ children }: MockComponentProps) => <div>{children}</div>,
+  DropdownMenuCheckboxItem: ({ children, checked, onCheckedChange }: MockDropdownMenuCheckboxItemProps) => (
     <div>
       <input
         type="checkbox"
         checked={checked}
-        onChange={(e) => onCheckedChange(e.target.checked)}
+        onChange={(e) => onCheckedChange?.(e.target.checked)}
       />
       {children}
     </div>
@@ -88,24 +102,28 @@ const mockStores: Store[] = [
   },
 ];
 
+interface MockRowData {
+  original: Store;
+}
+
 // 模擬的列定義
 const mockColumns = [
   {
     id: 'name',
     header: '分店名稱',
     accessorKey: 'name',
-    cell: ({ row }: any) => <div>{row.original.name}</div>,
+    cell: ({ row }: { row: MockRowData }) => <div>{row.original.name}</div>,
   },
   {
     id: 'address',
     header: '地址',
     accessorKey: 'address',
-    cell: ({ row }: any) => <div>{row.original.address}</div>,
+    cell: ({ row }: { row: MockRowData }) => <div>{row.original.address}</div>,
   },
   {
     id: 'actions',
     header: '操作',
-    cell: ({ row }: any) => (
+    cell: ({ row }: { row: MockRowData }) => (
       <div>
         <button>編輯</button>
         <button>刪除</button>

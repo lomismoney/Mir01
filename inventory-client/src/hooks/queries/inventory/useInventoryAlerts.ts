@@ -1,26 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/apiClient';
-import type { paths } from '@/types/api';
+import type { LowStockResponse, InventoryAlertSummary } from '@/types/inventory';
 
-interface LowStockItem {
-  id: number;
-  product_variant_id: number;
-  store_id: number;
-  store_name: string;
-  product_name: string;
-  sku: string;
-  quantity: number;
-  low_stock_threshold: number;
-  shortage: number;
-  severity: 'critical' | 'low' | 'normal';
-  last_sale_date: string | null;
-  average_daily_sales: number;
-  estimated_days_until_stockout: number | null;
-}
-
-// 使用從 API 生成的類型而不是本地定義
-type InventoryAlertSummaryResponse = paths['/api/inventory/alerts/summary']['get']['responses'][200]['content']['application/json'];
-type InventoryAlertSummary = NonNullable<InventoryAlertSummaryResponse['data']>;
 
 interface LowStockParams {
   store_id?: number;
@@ -30,10 +11,10 @@ interface LowStockParams {
 }
 
 export function useLowStockItems(params: LowStockParams = {}) {
-  return useQuery({
+  return useQuery<LowStockResponse>({
     queryKey: ['inventory-alerts', 'low-stock', params],
-    queryFn: async () => {
-      const query: Record<string, any> = {};
+    queryFn: async (): Promise<LowStockResponse> => {
+      const query: Record<string, string | number> = {};
       
       if (params.store_id) {
         query.store_id = params.store_id;
@@ -56,16 +37,16 @@ export function useLowStockItems(params: LowStockParams = {}) {
         throw new Error('獲取低庫存警報失敗');
       }
       
-      return response.data;
+      return (response.data as LowStockResponse) || { data: [], meta: { current_page: 1, last_page: 1, per_page: 15, total: 0 }, links: { first: '', last: '', prev: null, next: null } };
     },
   });
 }
 
 export function useInventoryAlertSummary(storeId?: number) {
-  return useQuery({
+  return useQuery<InventoryAlertSummary>({
     queryKey: ['inventory-alerts', 'summary', storeId],
     queryFn: async (): Promise<InventoryAlertSummary> => {
-      const query: Record<string, any> = {};
+      const query: Record<string, number> = {};
       if (storeId) {
         query.store_id = storeId;
       }
@@ -79,7 +60,16 @@ export function useInventoryAlertSummary(storeId?: number) {
       }
       
       // 確保返回正確的數據結構
-      return response.data?.data as InventoryAlertSummary;
+      return (response.data as { data: InventoryAlertSummary })?.data || {
+        total_products: 0,
+        critical_stock_count: 0,
+        low_stock_count: 0,
+        alerts: {
+          critical_percentage: 0,
+          low_percentage: 0,
+          health_score: 100,
+        },
+      };
     },
   });
 }
@@ -91,12 +81,12 @@ interface ThresholdUpdate {
 
 export async function updateInventoryThresholds(updates: ThresholdUpdate[]) {
   const response = await apiClient.POST('/api/inventory/alerts/update-thresholds', {
-    body: updates as any // 臨時類型修復
+    body: updates
   });
   
   if (response.error) {
     throw new Error('更新庫存門檻失敗');
   }
   
-  return response.data;
+  return response.data || {};
 }

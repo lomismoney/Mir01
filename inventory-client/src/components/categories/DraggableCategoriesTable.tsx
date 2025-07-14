@@ -137,6 +137,7 @@ interface DraggableCategoriesTableProps<TData, TValue> {
   onColumnVisibilityChange?: (visibility: VisibilityState) => void;
   expanded?: ExpandedState;
   onExpandedChange?: (expanded: ExpandedState) => void;
+  emptyState?: React.ReactNode;
 }
 
 /**
@@ -157,6 +158,7 @@ export function DraggableCategoriesTable<TData, TValue>({
   onColumnVisibilityChange,
   expanded,
   onExpandedChange,
+  emptyState,
 }: DraggableCategoriesTableProps<TData, TValue>) {
   // 🎯 增強的錯誤處理
   const { handleError, handleSuccess } = useErrorHandler();
@@ -395,10 +397,14 @@ export function DraggableCategoriesTable<TData, TValue>({
                 <TableRow>
                   <TableCell
                     colSpan={columns.length + 1}
-                    className="h-24 text-center"
+                    className="p-0"
                    
                   >
-                    尚無分類資料
+                    {emptyState || (
+                      <div className="h-24 flex items-center justify-center text-muted-foreground">
+                        尚無分類資料
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               )}

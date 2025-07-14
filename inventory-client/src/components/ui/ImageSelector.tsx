@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useRef } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ImageIcon, X, AlertCircle } from "lucide-react";
+import { X, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageSelectionData } from "@/hooks/useImageSelection";
 
@@ -194,13 +195,12 @@ export function ImageSelector({
         <div className="relative">
           <div
             className="relative w-full max-w-sm h-48 mx-auto overflow-hidden rounded-lg border border-border bg-muted/30"
-           
           >
-            <img
+            <Image
               src={imageData.preview!}
               alt="商品圖片預覽"
-              className="w-full h-full object-contain p-2"
-             
+              fill
+              className="object-contain p-2"
             />
 
             {/* 清除按鈕 */}

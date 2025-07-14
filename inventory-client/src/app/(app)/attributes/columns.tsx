@@ -52,7 +52,7 @@ const formatDate = (dateString?: string) => {
       month: "2-digit",
       day: "2-digit",
     });
-  } catch (error) {
+  } catch {
     return (
       <span className="text-muted-foreground">
         無效日期

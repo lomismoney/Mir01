@@ -66,9 +66,16 @@ trait HandlesInventoryOperations
     {
         $sortedIds = $this->sortIdsForDeadlockPrevention($variantIds);
         
-        return \App\Models\ProductVariant::whereIn('id', $sortedIds)
-            ->orderByRaw('FIELD(id, ' . implode(',', $sortedIds) . ')')
-            ->get();
+        if (empty($sortedIds)) {
+            return collect();
+        }
+        
+        $variants = \App\Models\ProductVariant::whereIn('id', $sortedIds)->get();
+        
+        // 手動按照指定順序排序，兼容不同數據庫
+        return $variants->sortBy(function ($variant) use ($sortedIds) {
+            return array_search($variant->id, $sortedIds);
+        })->values();
     }
     
     /**

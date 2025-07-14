@@ -14,7 +14,6 @@ import {
   VisibilityState,
   RowSelectionState,
 } from '@tanstack/react-table';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Package, TrendingUp, Zap } from 'lucide-react';

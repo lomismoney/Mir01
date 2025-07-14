@@ -10,7 +10,7 @@ jest.mock('../../auth', () => ({
 }));
 
 // Now import the middleware after mocking
-import middleware from '../middleware';
+import '../middleware';
 
 // Mock console methods
 const originalWarn = console.warn;
@@ -80,7 +80,7 @@ describe('Middleware', () => {
           if (host === allowedHost) {
             return NextResponse.next();
           }
-        } catch (error) {
+        } catch {
           console.warn('無法解析 NEXTAUTH_URL:', nextAuthUrl);
         }
       }

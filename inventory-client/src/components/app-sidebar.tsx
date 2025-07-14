@@ -1,26 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { IconChartBar } from "@tabler/icons-react";
 import {
-  IconBox,
-  IconDashboard,
-  IconDatabase,
-  IconFileDescription,
-  IconHelp,
-  IconHistory,
-  IconInnerShadowTop,
-  IconPackage,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconShoppingCart,
-  IconUsers,
-  IconBuilding,
-  IconBuildingStore,
-  IconUserCheck,
-  IconTool,
-} from "@tabler/icons-react";
+  Package,
+  LayoutDashboard,
+  Database,
+  FileText,
+  HelpCircle,
+  Layers,
+  FileSearch,
+  Search,
+  Settings,
+  ShoppingCart,
+  Users,
+  Building2,
+  Store,
+  UserCheck,
+  Wrench,
+  BarChart3,
+} from "lucide-react";
 
 import { NavDocuments } from "@/components/nav-documents";
 import { NavMain, type NavLink } from "@/components/nav-main-enhanced";
@@ -94,11 +92,11 @@ const data = {
     {
       title: "儀表板",
       url: "/dashboard",
-      icon: IconDashboard,
+      icon: LayoutDashboard,
     },
     {
       title: "庫存管理",
-      icon: IconBuilding,
+      icon: Building2,
       children: [
         { title: "庫存清單", url: "/inventory/management" },
         { title: "進貨管理", url: "/inventory/incoming" },
@@ -109,7 +107,7 @@ const data = {
     },
     {
       title: "商品管理",
-      icon: IconBox,
+      icon: Package,
       children: [
         { title: "商品列表", url: "/products" },
         { title: "分類管理", url: "/categories" },
@@ -118,7 +116,7 @@ const data = {
     },
     {
       title: "訂單管理",
-      icon: IconShoppingCart,
+      icon: ShoppingCart,
       children: [
         { title: "訂單列表", url: "/orders" },
         { title: "待進貨商品管理", url: "/orders/backorders" },
@@ -127,28 +125,28 @@ const data = {
     {
       title: "安裝管理",
       url: "/installations",
-      icon: IconTool,
+      icon: Wrench,
     },
     {
       title: "客戶管理",
       url: "/customers",
-      icon: IconUserCheck,
+      icon: UserCheck,
     },
     {
       title: "分店管理",
       url: "/stores",
-      icon: IconBuildingStore,
+      icon: Store,
     },
     {
       title: "用戶管理",
       url: "/users",
-      icon: IconUsers,
+      icon: Users,
     },
   ] as NavLink[],
   navClouds: [
     {
       title: "庫存報告",
-      icon: IconFileDescription,
+      icon: FileText,
       url: "/reports",
       items: [
         {
@@ -167,17 +165,17 @@ const data = {
     {
       title: "系統設定",
       url: "/settings",
-      icon: IconSettings,
+      icon: Settings,
     },
     {
       title: "幫助中心",
       url: "/help",
-      icon: IconHelp,
+      icon: HelpCircle,
     },
     {
       title: "搜尋",
       url: "/search",
-      icon: IconSearch,
+      icon: Search,
     },
   ],
 
@@ -185,17 +183,17 @@ const data = {
     {
       name: "數據中心",
       url: "/data",
-      icon: IconDatabase,
+      icon: Database,
     },
     {
       name: "分析報表",
       url: "/analytics",
-      icon: IconChartBar,
+      icon: BarChart3,
     },
     {
       name: "系統報告",
       url: "/system-reports",
-      icon: IconReport,
+      icon: FileSearch,
     },
   ],
 };
@@ -222,11 +220,10 @@ const AppSidebar = memo(function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-             
+              className="group flex w-full items-center gap-2 overflow-hidden rounded-md px-1.5 py-1.5 text-left text-sm transition-all hover:bg-accent hover:text-accent-foreground"
             >
               <SmartNavLink href="/dashboard">
-                <IconInnerShadowTop className="!size-5" />
+                <Layers className="h-5 w-5" />
                 <span className="text-base font-semibold">
                   庫存管理系統
                 </span>

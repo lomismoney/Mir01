@@ -52,7 +52,7 @@ const defaultConfig: BatchApiConfig = {
  */
 export class BatchApiClient {
   private config: BatchApiConfig;
-  private requestQueue: Map<string, BatchRequestItem<any, any>> = new Map();
+  private requestQueue: Map<string, BatchRequestItem<keyof paths, keyof paths[keyof paths]>> = new Map();
   private processingBatch = false;
 
   constructor(config: BatchApiConfig = {}) {
@@ -99,9 +99,9 @@ export class BatchApiClient {
   /**
    * 創建批次
    */
-  private createBatches(): BatchRequestItem<any, any>[][] {
+  private createBatches(): BatchRequestItem<keyof paths, keyof paths[keyof paths]>[][] {
     const requests = Array.from(this.requestQueue.values());
-    const batches: BatchRequestItem<any, any>[][] = [];
+    const batches: BatchRequestItem<keyof paths, keyof paths[keyof paths]>[][] = [];
 
     for (let i = 0; i < requests.length; i += this.config.maxBatchSize!) {
       batches.push(requests.slice(i, i + this.config.maxBatchSize!));
@@ -114,7 +114,7 @@ export class BatchApiClient {
    * 處理單個批次
    */
   private async processBatch<T>(
-    batch: BatchRequestItem<any, any>[]
+    batch: BatchRequestItem<keyof paths, keyof paths[keyof paths]>[]
   ): Promise<BatchResponseItem<T>[]> {
     // 使用並發控制執行請求
     const results: BatchResponseItem<T>[] = [];
@@ -151,7 +151,7 @@ export class BatchApiClient {
    * 執行單個請求（帶重試）
    */
   private async executeRequest<T>(
-    request: BatchRequestItem<any, any>
+    request: BatchRequestItem<keyof paths, keyof paths[keyof paths]>
   ): Promise<BatchResponseItem<T>> {
     let lastError: Error | null = null;
     
@@ -166,7 +166,8 @@ export class BatchApiClient {
 
         try {
           // 執行 API 調用
-          const response = await (apiClient as any)[request.method.toString()](
+          // Type assertion for dynamic method call - this is safe as we know the method exists
+          const response = await (apiClient as Record<string, Function>)[request.method.toString()](
             request.path,
             {
               ...request.options,
@@ -244,7 +245,7 @@ export function useBatchApi(config?: BatchApiConfig) {
   const client = new BatchApiClient(config);
 
   const execute = async <T = unknown>(
-    requests: BatchRequestItem<any, any>[],
+    requests: BatchRequestItem<keyof paths, keyof paths[keyof paths]>[],
     options?: {
       onProgress?: (completed: number, total: number) => void;
       onError?: (error: BatchResponseItem) => void;
@@ -298,7 +299,7 @@ export const batchOperations = {
   }> {
     const requests = ids.map(id => ({
       id: id.toString(),
-      path: pathTemplate.replace('{id}', id.toString()) as any,
+      path: pathTemplate.replace('{id}', id.toString()) as keyof paths,
       method: 'DELETE' as const,
     }));
 
@@ -325,7 +326,7 @@ export const batchOperations = {
    * 批量更新
    */
   async updateMany<T>(
-    items: Array<{ id: string | number; data: any }>,
+    items: Array<{ id: string | number; data: Record<string, unknown> }>,
     pathTemplate: string,
     options?: {
       method?: 'PUT' | 'PATCH';
@@ -337,7 +338,7 @@ export const batchOperations = {
   }> {
     const requests = items.map(item => ({
       id: item.id.toString(),
-      path: pathTemplate.replace('{id}', item.id.toString()) as any,
+      path: pathTemplate.replace('{id}', item.id.toString()) as keyof paths,
       method: (options?.method || 'PATCH') as 'PATCH',
       options: {
         body: item.data,
@@ -370,7 +371,7 @@ export const batchOperations = {
    * 批量創建
    */
   async createMany<T>(
-    items: any[],
+    items: Record<string, unknown>[],
     path: string,
     options?: {
       onProgress?: (completed: number, total: number) => void;
@@ -381,7 +382,7 @@ export const batchOperations = {
   }> {
     const requests = items.map((item, index) => ({
       id: index.toString(),
-      path: path as any,
+      path: path as keyof paths,
       method: 'POST' as const,
       options: {
         body: item,

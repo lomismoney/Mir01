@@ -12,3 +12,6 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 export { Skeleton };
+
+// 重新導出所有 skeleton 子組件
+export * from "./skeleton/index";

@@ -121,20 +121,20 @@ export function useCreateStore() {
       }
       return data;
     },
-    onSuccess: (newStore) => {
+    onSuccess: async (newStore) => {
       // 無效化門市列表快取，觸發重新獲取最新的門市列表
       queryClient.invalidateQueries({ queryKey: ['stores'] });
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success(`門市「${newStore?.data?.name}」創建成功！`);
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔔 錯誤通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('門市創建失敗', {
           description: error.message || '請檢查輸入資料並重試。'
         });
@@ -165,21 +165,21 @@ export function useUpdateStore() {
       }
       return data;
     },
-    onSuccess: (updatedStore, variables) => {
+    onSuccess: async (updatedStore, variables) => {
       // 無效化相關快取
       queryClient.invalidateQueries({ queryKey: ['stores'] });
       queryClient.invalidateQueries({ queryKey: ['stores', variables.id] });
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success(`門市資料更新成功！`);
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔔 錯誤通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('門市更新失敗', {
           description: error.message || '請檢查輸入資料並重試。'
         });
@@ -211,21 +211,21 @@ export function useDeleteStore() {
         throw new Error('刪除門市失敗');
       }
     },
-    onSuccess: (_, id) => {
+    onSuccess: async (_, id) => {
       // 無效化門市列表快取
       queryClient.invalidateQueries({ queryKey: ['stores'] });
       queryClient.removeQueries({ queryKey: ['stores', id] });
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('門市已成功刪除');
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔔 錯誤通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('門市刪除失敗', {
           description: error.message || '此門市可能有關聯資料，無法刪除。'
         });

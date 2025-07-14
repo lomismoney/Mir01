@@ -138,7 +138,7 @@ export interface ProductsResponse {
       price: number;
       cost?: number;
       stock_quantity: number;
-      attributes?: Record<string, any>;
+      attributes?: Record<string, unknown>;
     }>;
   }>;
   meta?: PaginationMeta;

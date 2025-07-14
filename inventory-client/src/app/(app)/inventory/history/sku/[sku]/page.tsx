@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useSkuInventoryHistory } from "@/hooks";
+import { useDynamicBreadcrumb } from "@/components/breadcrumb-context";
 import {
   getTransactionIcon,
   getTransactionTypeName,
@@ -41,43 +42,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { zhTW } from "date-fns/locale";
-// 定義 API 響應類型
-interface SkuHistoryResponse {
-  message: string;
-  data: InventoryTransaction[];
-  inventories: InventoryItem[];
-  pagination: {
-    current_page: number;
-    per_page: number;
-    total: number;
-    last_page: number;
-  };
-}
-
-interface InventoryTransaction {
-  id: number;
-  inventory_id: number;
-  user_id: number;
-  type: string;
-  quantity: number;
-  before_quantity: number;
-  after_quantity: number;
-  notes?: string;
-  metadata?: any;
-  created_at: string;
-  updated_at: string;
-  store?: {
-    id: number;
-    name: string;
-  };
-  user?: {
-    name: string;
-  };
-  product?: {
-    name: string;
-    sku: string;
-  };
-}
+import type { InventoryTransaction } from '@/types/api-helpers';
 
 interface InventoryItem {
   id: number;
@@ -95,6 +60,26 @@ interface InventoryItem {
   };
 }
 
+// 合併的轉移記錄類型
+interface MergedTransferTransaction {
+  id: string;
+  type: 'transfer';
+  quantity: number;
+  from_store: { id?: number; name: string };
+  to_store: { id?: number; name: string };
+  created_at?: string;
+  user?: { name?: string };
+  notes?: string;
+  metadata?: Record<string, unknown> | string;
+  _original?: {
+    out: InventoryTransaction;
+    in: InventoryTransaction;
+  };
+}
+
+// 處理後的交易類型（可能是原始交易或合併的轉移交易）
+type ProcessedTransaction = InventoryTransaction | MergedTransferTransaction;
+
 interface SkuHistoryPageProps {
   params: Promise<{
     sku: string;
@@ -111,6 +96,7 @@ export default function SkuHistoryPage({
   const [sku, setSku] = useState<string>("");
   const [productName, setProductName] = useState<string>("未知商品");
   const [mounted, setMounted] = useState(false);
+  const { setLabel } = useDynamicBreadcrumb();
   const [filters, setFilters] = useState({
     type: "",
     store_id: "",
@@ -130,6 +116,13 @@ export default function SkuHistoryPage({
     }
     resolveParams();
   }, [params, searchParams]);
+  
+  // 動態設置麵包屑標籤
+  useEffect(() => {
+    if (sku) {
+      setLabel(`SKU: ${sku}`);
+    }
+  }, [sku, setLabel]);
 
   // 🎯 最終純化：直接使用標準化的 SKU 歷史查詢 API
   const {
@@ -152,11 +145,11 @@ export default function SkuHistoryPage({
 
   // 處理並合併轉移記錄
   const processedTransactions = useMemo(() => {
-    const processed: any[] = [];
-    const transferMap = new Map<string, any>();
+    const processed: ProcessedTransaction[] = [];
+    const transferMap = new Map<string, { out: InventoryTransaction | null; in: InventoryTransaction | null }>();
 
     // 首先收集所有轉移記錄
-    allTransactions.forEach((transaction: any) => {
+    allTransactions.forEach((transaction: InventoryTransaction) => {
       if (
         transaction.type === "transfer_out" ||
         transaction.type === "transfer_in"
@@ -169,7 +162,7 @@ export default function SkuHistoryPage({
           if (typeof metadataObj === "string") {
             try {
               metadataObj = JSON.parse(metadataObj);
-            } catch (e) {
+            } catch {
               // 解析失敗，保持原樣
             }
           }
@@ -201,10 +194,10 @@ export default function SkuHistoryPage({
       if (transfer.out && transfer.in) {
         // 找到配對的轉移記錄，創建合併記錄
         const fromInventory = matchingInventories.find(
-          (inv: any) => inv.id === transfer.out.inventory_id,
+          (inv: InventoryItem) => inv.id === transfer.out?.inventory_id,
         );
         const toInventory = matchingInventories.find(
-          (inv: any) => inv.id === transfer.in.inventory_id,
+          (inv: InventoryItem) => inv.id === transfer.in?.inventory_id,
         );
 
         processed.push({
@@ -241,7 +234,7 @@ export default function SkuHistoryPage({
 
     // 類型篩選
     if (filters.type) {
-      filtered = filtered.filter((transaction: any) => {
+      filtered = filtered.filter((transaction: ProcessedTransaction) => {
         // 處理合併的轉移記錄
         if (filters.type === "transfer") {
           return (
@@ -257,17 +250,19 @@ export default function SkuHistoryPage({
     // 分店篩選
     if (filters.store_id) {
       const storeIdToFilter = parseInt(filters.store_id);
-      filtered = filtered.filter((transaction: any) => {
+      filtered = filtered.filter((transaction: ProcessedTransaction) => {
         if (transaction.type === "transfer") {
           // 轉移記錄，檢查是否涉及篩選的門市
+          const transferTx = transaction as MergedTransferTransaction;
           return (
-            transaction.from_store?.id === storeIdToFilter ||
-            transaction.to_store?.id === storeIdToFilter
+            transferTx.from_store?.id === storeIdToFilter ||
+            transferTx.to_store?.id === storeIdToFilter
           );
         } else {
           // 其他記錄，檢查庫存所屬門市
+          const inventoryTx = transaction as InventoryTransaction;
           const relatedInventory = matchingInventories.find(
-            (inv: any) => inv.id === transaction.inventory_id,
+            (inv: InventoryItem) => inv.id === inventoryTx.inventory_id,
           );
           return relatedInventory?.store?.id === storeIdToFilter;
         }
@@ -340,7 +335,7 @@ export default function SkuHistoryPage({
       <div className="container mx-auto py-8">
         <Alert>
           <AlertDescription>
-            找不到 SKU 為 "{sku}" 的庫存項目。
+            找不到 SKU 為 &ldquo;{sku}&rdquo; 的庫存項目。
           </AlertDescription>
         </Alert>
       </div>
@@ -578,9 +573,10 @@ export default function SkuHistoryPage({
             </div>
           ) : filteredTransactions.length > 0 ? (
             <div className="space-y-4">
-              {filteredTransactions.map((transaction: any, index: number) => {
+              {filteredTransactions.map((transaction: ProcessedTransaction, index: number) => {
                 // 處理合併的轉移記錄
                 if (transaction.type === "transfer") {
+                  const transferTx = transaction as MergedTransferTransaction;
                   return (
                     <div
                       key={`${transaction.id}-${index}`}
@@ -614,7 +610,7 @@ export default function SkuHistoryPage({
                               className="text-sm text-muted-foreground"
                              
                             >
-                              數量: {transaction.quantity}
+                              數量: {transferTx.quantity}
                             </span>
                           </div>
                           <div
@@ -622,9 +618,9 @@ export default function SkuHistoryPage({
                            
                           >
                             <Calendar className="h-4 w-4" />
-                            {transaction.created_at &&
+                            {transferTx.created_at &&
                               formatDistanceToNow(
-                                new Date(transaction.created_at),
+                                new Date(transferTx.created_at),
                                 {
                                   addSuffix: true,
                                   locale: zhTW,
@@ -638,7 +634,7 @@ export default function SkuHistoryPage({
                          
                         >
                           <Badge variant="outline">
-                            {transaction.from_store.name}
+                            {transferTx.from_store.name}
                           </Badge>
                           <ArrowRight
                             className="h-4 w-4 text-muted-foreground"
@@ -646,7 +642,7 @@ export default function SkuHistoryPage({
                           />
 
                           <Badge variant="outline">
-                            {transaction.to_store.name}
+                            {transferTx.to_store.name}
                           </Badge>
                         </div>
 
@@ -654,25 +650,25 @@ export default function SkuHistoryPage({
                           className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"
                          
                         >
-                          {transaction._original?.out && (
+                          {transferTx._original?.out && (
                             <div>
                               <span className="font-medium">
-                                {transaction.from_store.name} 轉出後:
+                                {transferTx.from_store.name} 轉出後:
                               </span>{" "}
-                              {transaction._original.out.after_quantity ??
+                              {transferTx._original.out.after_quantity ??
                                 "未知"}
                             </div>
                           )}
-                          {transaction._original?.in && (
+                          {transferTx._original?.in && (
                             <div>
                               <span className="font-medium">
-                                {transaction.to_store.name} 轉入後:
+                                {transferTx.to_store.name} 轉入後:
                               </span>{" "}
-                              {transaction._original.in.after_quantity ??
+                              {transferTx._original.in.after_quantity ??
                                 "未知"}
                             </div>
                           )}
-                          {transaction.user && (
+                          {transferTx.user && (
                             <div
                               className="flex items-center gap-1 md:col-span-2"
                              
@@ -681,12 +677,12 @@ export default function SkuHistoryPage({
                               <span className="font-medium">
                                 操作人:
                               </span>{" "}
-                              {transaction.user.name}
+                              {transferTx.user.name}
                             </div>
                           )}
                         </div>
 
-                        {transaction.notes && (
+                        {transferTx.notes && (
                           <div
                             className="text-sm text-muted-foreground"
                            
@@ -694,11 +690,11 @@ export default function SkuHistoryPage({
                             <span className="font-medium">
                               備註:
                             </span>{" "}
-                            {transaction.notes}
+                            {transferTx.notes}
                           </div>
                         )}
 
-                        {transaction.metadata && (
+                        {transferTx.metadata && (
                           <div
                             className="text-xs text-muted-foreground"
                            
@@ -707,11 +703,11 @@ export default function SkuHistoryPage({
                               轉移編號:
                             </span>
                             {(() => {
-                              let metadataObj = transaction.metadata;
+                              let metadataObj = transferTx.metadata;
                               if (typeof metadataObj === "string") {
                                 try {
                                   metadataObj = JSON.parse(metadataObj);
-                                } catch (e) {
+                                } catch {
                                   return "未知";
                                 }
                               }
@@ -729,8 +725,9 @@ export default function SkuHistoryPage({
                 }
 
                 // 原始的單一記錄顯示邏輯
+                const inventoryTx = transaction as InventoryTransaction;
                 const relatedInventory = matchingInventories.find(
-                  (inv: any) => inv.id === transaction.inventory_id,
+                  (inv: InventoryItem) => inv.id === inventoryTx.inventory_id,
                 );
 
                 return (
@@ -742,11 +739,11 @@ export default function SkuHistoryPage({
                     <div className="mt-1">
                       {(() => {
                         const IconComponent = getTransactionIcon(
-                          transaction.type,
+                          inventoryTx.type,
                         );
                         return (
                           <IconComponent
-                            className={`h-4 w-4 ${getTransactionIconColor(transaction.type)}`}
+                            className={`h-4 w-4 ${getTransactionIconColor(inventoryTx.type)}`}
                            
                           />
                         );
@@ -764,11 +761,11 @@ export default function SkuHistoryPage({
                         >
                           <Badge
                             variant={getTransactionTypeVariant(
-                              transaction.type,
+                              inventoryTx.type,
                             )}
                            
                           >
-                            {getTransactionTypeName(transaction.type)}
+                            {getTransactionTypeName(inventoryTx.type)}
                           </Badge>
                           <Badge variant="outline">
                             {relatedInventory?.store?.name ||
@@ -779,8 +776,8 @@ export default function SkuHistoryPage({
                            
                           >
                             數量變動:{" "}
-                            {(transaction.quantity || 0) > 0 ? "+" : ""}
-                            {transaction.quantity || 0}
+                            {(inventoryTx.quantity || 0) > 0 ? "+" : ""}
+                            {inventoryTx.quantity || 0}
                           </span>
                         </div>
                         <div
@@ -788,9 +785,9 @@ export default function SkuHistoryPage({
                          
                         >
                           <Calendar className="h-4 w-4" />
-                          {transaction.created_at &&
+                          {inventoryTx.created_at &&
                             formatDistanceToNow(
-                              new Date(transaction.created_at),
+                              new Date(inventoryTx.created_at),
                               {
                                 addSuffix: true,
                                 locale: zhTW,
@@ -807,15 +804,15 @@ export default function SkuHistoryPage({
                           <span className="font-medium">
                             變動前:
                           </span>{" "}
-                          {transaction.before_quantity ?? "未知"}
+                          {inventoryTx.before_quantity ?? "未知"}
                         </div>
                         <div>
                           <span className="font-medium">
                             變動後:
                           </span>{" "}
-                          {transaction.after_quantity ?? "未知"}
+                          {inventoryTx.after_quantity ?? "未知"}
                         </div>
-                        {transaction.user && (
+                        {inventoryTx.user && (
                           <div
                             className="flex items-center gap-1"
                            
@@ -824,12 +821,12 @@ export default function SkuHistoryPage({
                             <span className="font-medium">
                               操作人:
                             </span>{" "}
-                            {transaction.user.name}
+                            {inventoryTx.user.name}
                           </div>
                         )}
                       </div>
 
-                      {transaction.notes && (
+                      {inventoryTx.notes && (
                         <div
                           className="text-sm text-muted-foreground"
                          
@@ -837,7 +834,7 @@ export default function SkuHistoryPage({
                           <span className="font-medium">
                             備註:
                           </span>{" "}
-                          {transaction.notes}
+                          {inventoryTx.notes}
                         </div>
                       )}
 
@@ -849,15 +846,15 @@ export default function SkuHistoryPage({
                           額外資訊:
                         </span>
                         {(() => {
-                          if (!transaction.metadata) return "無";
+                          if (!inventoryTx.metadata) return "無";
                           // 處理 metadata，可能是字符串或對象
-                          let metadataObj = transaction.metadata;
+                          let metadataObj = inventoryTx.metadata;
 
                           // 如果是字符串，嘗試解析為 JSON
                           if (typeof metadataObj === "string") {
                             try {
                               metadataObj = JSON.parse(metadataObj);
-                            } catch (e) {
+                            } catch {
                               // 如果解析失敗，直接返回原始字符串
                               return metadataObj;
                             }

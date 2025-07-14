@@ -2,9 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect, useCallback } from 'react';
 import React from 'react';
-import { queryKeys } from '@/hooks/queries/shared/queryKeys';
-import { apiClient } from './apiClient';
-import { getPreloadStrategyForRoute, sortByPriority } from './apiPreloadStrategies';
+import { getPreloadStrategyForRoute } from './apiPreloadStrategies';
 
 // 預加載配置
 interface PreloadConfig {
@@ -17,7 +15,7 @@ interface PreloadConfig {
 // 預加載策略
 interface PreloadStrategy {
   queryKey: readonly unknown[];
-  queryFn: () => Promise<any>;
+  queryFn: () => Promise<unknown>;
   staleTime?: number;
   priority?: 'high' | 'medium' | 'low';
 }
@@ -46,7 +44,7 @@ class ApiPreloader {
    */
   async preloadRoute(
     route: string,
-    queryClient: any,
+    queryClient: ReturnType<typeof useQueryClient>,
     options?: {
       force?: boolean; // 強制預加載，忽略緩存
       priority?: 'high' | 'medium' | 'low'; // 覆蓋預設優先級
@@ -122,7 +120,7 @@ class ApiPreloader {
    */
   async preloadAdjacentRoutes(
     currentRoute: string,
-    queryClient: any,
+    queryClient: ReturnType<typeof useQueryClient>,
     adjacentRoutes: string[]
   ) {
     // 低優先級預加載相鄰路由
@@ -179,7 +177,6 @@ export const apiPreloader = new ApiPreloader();
  */
 export function useRoutePreloader() {
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -278,7 +275,7 @@ export function SmartPreloadLink({
   children: React.ReactNode;
   className?: string;
   preloadDelay?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }) {
   const queryClient = useQueryClient();
   const preloadTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);

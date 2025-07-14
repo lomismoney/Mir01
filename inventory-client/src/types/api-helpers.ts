@@ -1,5 +1,4 @@
 import { Category } from '@/types/category';
-import { operations } from '@/types/api';
 
 /**
  * 將 API 回傳的分組分類資料轉換為正確的類型
@@ -311,7 +310,7 @@ export type InventoryTransaction = {
   before_quantity?: number;
   after_quantity?: number;
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown> | string;
   created_at?: string;
   updated_at?: string;
   store?: {
@@ -436,7 +435,7 @@ export interface OrderItem {
   is_stocked_sale: boolean;
   is_backorder: boolean; // 🎯 Operation: Precise Tagging - 新增預訂標記欄位
   status: string;
-  custom_specifications: Record<string, any> | null;
+  custom_specifications: Record<string, unknown> | null;
   product_name: string;
   sku: string;
   price: string;
@@ -579,7 +578,7 @@ export interface ProcessedOrderItem {
   is_stocked_sale: boolean;
   is_backorder: boolean; // 🎯 Operation: Precise Tagging - 新增預訂標記欄位
   status: string;
-  custom_specifications: Record<string, any> | null;
+  custom_specifications: Record<string, unknown> | null;
   product_name: string;
   sku: string;
   price: number;        // 已精煉為 number

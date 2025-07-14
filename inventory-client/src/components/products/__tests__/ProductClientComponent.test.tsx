@@ -356,21 +356,21 @@ describe('ProductClientComponent', () => {
     
     // Setup router mock
     mockRouter = { push: jest.fn() };
-    mockUseRouter = require('next/navigation').useRouter as jest.Mock;
+    mockUseRouter = jest.requireMock<typeof import('next/navigation')>('next/navigation').useRouter as jest.Mock;
     mockUseRouter.mockReturnValue(mockRouter);
     
     // Setup session mock
-    mockUseSession = require('next-auth/react').useSession as jest.Mock;
+    mockUseSession = jest.requireMock<typeof import('next-auth/react')>('next-auth/react').useSession as jest.Mock;
     mockUseSession.mockReturnValue({
       data: { user: { id: 1, name: 'Test User' } },
       status: 'authenticated',
     });
     
     // Setup hooks mocks
-    mockUseProducts = require('@/hooks').useProducts as jest.Mock;
-    mockUseDeleteProduct = require('@/hooks').useDeleteProduct as jest.Mock;
-    mockUseDeleteMultipleProducts = require('@/hooks').useDeleteMultipleProducts as jest.Mock;
-    mockUseAdminAuth = require('@/hooks/use-admin-auth').useAdminAuth as jest.Mock;
+    mockUseProducts = jest.requireMock<typeof import('@/hooks')>('@/hooks').useProducts as jest.Mock;
+    mockUseDeleteProduct = jest.requireMock<typeof import('@/hooks')>('@/hooks').useDeleteProduct as jest.Mock;
+    mockUseDeleteMultipleProducts = jest.requireMock<typeof import('@/hooks')>('@/hooks').useDeleteMultipleProducts as jest.Mock;
+    mockUseAdminAuth = jest.requireMock<typeof import('@/hooks/use-admin-auth')>('@/hooks/use-admin-auth').useAdminAuth as jest.Mock;
     
     // Setup mutation mocks
     mockDeleteMutation = { mutate: jest.fn() };

@@ -6,8 +6,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/toaster";
-import { StagewiseToolbar } from "@stagewise/toolbar-next";
-import { ReactPlugin } from "@stagewise-plugins/react";
 import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
 import { PerformanceProvider } from "@/components/layout/PerformanceProvider";
 import { PreloadProvider } from "@/components/layout/PreloadProvider";
@@ -84,11 +82,6 @@ export default function RootLayout({
                     <PreloadProvider>
                       {children}
                       <Toaster />
-                      <StagewiseToolbar
-                        config={{
-                          plugins: [ReactPlugin],
-                        }}
-                      />
                     </PreloadProvider>
                   </PerformanceProvider>
                 </QueryProvider>

@@ -1,11 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus, TrendingUp, TrendingDown, Loader2 } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -14,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useProducts } from "@/hooks";
 import { lazy, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { LoadingFallback } from "@/components/ui/skeleton";
 
 // 動態導入產品組件
 const ProductClientComponent = lazy(() => import("@/components/products/ProductClientComponent"));
@@ -51,41 +51,50 @@ export default function ProductsPage() {
 
   // 計算統計數據
   const productsArray = Array.isArray(products) ? products : [];
+  
+  type ProductVariant = {
+    inventory?: { quantity?: number }[];
+  };
+  
+  type Product = {
+    variants?: ProductVariant[];
+  };
+  
   const stats = {
     total: productsArray.length,
     active:
-      productsArray.filter((p: any) => {
+      productsArray.filter((p: Product) => {
         // 檢查是否有任何變體有庫存
-        return p.variants?.some((v: any) => {
+        return p.variants?.some((v: ProductVariant) => {
           // 檢查該變體的庫存總和是否大於 0
           const totalStock =
             v.inventory?.reduce(
-              (sum: number, inv: any) => sum + (inv.quantity || 0),
+              (sum: number, inv: { quantity?: number }) => sum + (inv.quantity || 0),
               0,
             ) || 0;
           return totalStock > 0;
         });
       }).length || 0,
     lowStock:
-      productsArray.filter((p: any) => {
+      productsArray.filter((p: Product) => {
         // 檢查是否有任何變體庫存低於 10 但大於 0
-        return p.variants?.some((v: any) => {
+        return p.variants?.some((v: ProductVariant) => {
           const totalStock =
             v.inventory?.reduce(
-              (sum: number, inv: any) => sum + (inv.quantity || 0),
+              (sum: number, inv: { quantity?: number }) => sum + (inv.quantity || 0),
               0,
             ) || 0;
           return totalStock > 0 && totalStock < 10;
         });
       }).length || 0,
     outOfStock:
-      productsArray.filter((p: any) => {
+      productsArray.filter((p: Product) => {
         // 檢查是否所有變體都沒有庫存
         return (
-          p.variants?.every((v: any) => {
+          p.variants?.every((v: ProductVariant) => {
             const totalStock =
               v.inventory?.reduce(
-                (sum: number, inv: any) => sum + (inv.quantity || 0),
+                (sum: number, inv: { quantity?: number }) => sum + (inv.quantity || 0),
                 0,
               ) || 0;
             return totalStock === 0;
@@ -254,16 +263,7 @@ export default function ProductsPage() {
       </div>
 
       {/* 商品列表 - 使用 Suspense 包裝動態導入組件 */}
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
-            <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">載入商品列表...</p>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<LoadingFallback type="section" text="載入商品列表..." />}>
         <ProductClientComponent />
       </Suspense>
     </div>

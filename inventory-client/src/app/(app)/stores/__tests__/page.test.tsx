@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useSession } from 'next-auth/react';
 import StoresPage from '../page';
@@ -30,48 +30,48 @@ jest.mock('@/hooks', () => ({
 
 // Mock UI components
 jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children, open }: any) => open ? <div data-testid="dialog">{children}</div> : null,
-  DialogContent: ({ children }: any) => <div data-testid="dialog-content">{children}</div>,
-  DialogHeader: ({ children }: any) => <div>{children}</div>,
-  DialogTitle: ({ children }: any) => <h2>{children}</h2>,
-  DialogDescription: ({ children }: any) => <p>{children}</p>,
-  DialogFooter: ({ children }: any) => <div>{children}</div>,
+  Dialog: ({ children, open }: { children: React.ReactNode; open?: boolean }) => open ? <div data-testid="dialog">{children}</div> : null,
+  DialogContent: ({ children }: { children: React.ReactNode }) => <div data-testid="dialog-content">{children}</div>,
+  DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
+  DialogDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+  DialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 jest.mock('@/components/ui/alert-dialog', () => ({
-  AlertDialog: ({ children, open }: any) => open ? <div data-testid="alert-dialog">{children}</div> : null,
-  AlertDialogContent: ({ children }: any) => <div data-testid="alert-dialog-content">{children}</div>,
-  AlertDialogHeader: ({ children }: any) => <div>{children}</div>,
-  AlertDialogTitle: ({ children }: any) => <h2>{children}</h2>,
-  AlertDialogDescription: ({ children }: any) => <p>{children}</p>,
-  AlertDialogFooter: ({ children }: any) => <div>{children}</div>,
-  AlertDialogCancel: ({ children, onClick, disabled }: any) => (
+  AlertDialog: ({ children, open }: { children: React.ReactNode; open?: boolean }) => open ? <div data-testid="alert-dialog">{children}</div> : null,
+  AlertDialogContent: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-dialog-content">{children}</div>,
+  AlertDialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
+  AlertDialogDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+  AlertDialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertDialogCancel: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
     <button onClick={onClick} disabled={disabled}>{children}</button>
   ),
-  AlertDialogAction: ({ children, onClick, disabled }: any) => (
+  AlertDialogAction: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
     <button onClick={onClick} disabled={disabled}>{children}</button>
   ),
 }));
 
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, ...props }: any) => (
+  Button: ({ children, onClick, disabled, ...props }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; [key: string]: unknown }) => (
     <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
   ),
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: ({ ...props }: any) => <input {...props} />,
+  Input: ({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
 }));
 
 jest.mock('@/components/ui/label', () => ({
-  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
+  Label: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => <label {...props}>{children}</label>,
 }));
 
 // Mock components
 jest.mock('@/components/stores/stores-data-table', () => ({
-  StoresDataTable: ({ data, onAddStore, columns }: any) => {
+  StoresDataTable: ({ data, onAddStore, columns }: { data: Array<{ id: number; name: string }>; onAddStore: () => void; columns: Array<{ id: string; header: string; cell: (props: { row: { original: { id: number; name: string } } }) => React.ReactNode }> }) => {
     // 模擬渲染表格內容，包括列定義中的操作
-    const renderStore = (store: any) => {
+    const renderStore = (store: { id: number; name: string }) => {
       const column = columns[0]; // 簡化：只使用第一列
       return (
         <div key={store.id} data-testid={`store-${store.id}`}>
@@ -91,11 +91,11 @@ jest.mock('@/components/stores/stores-data-table', () => ({
 }));
 
 jest.mock('@/components/stores/stores-columns', () => ({
-  createStoresColumns: (actions: any) => [
+  createStoresColumns: (actions: { onEdit: (store: { id: number; name: string }) => void; onDelete: (store: { id: number; name: string }) => void }) => [
     {
       id: 'name',
       header: '分店名稱',
-      cell: ({ row }: any) => (
+      cell: ({ row }: { row: { original: { id: number; name: string } } }) => (
         <div>
           {row.original.name}
           <button onClick={() => actions.onEdit(row.original)}>編輯</button>

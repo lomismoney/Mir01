@@ -70,7 +70,7 @@ apiClient.use({
       request.headers.set('Content-Type', 'application/json');
 
       return request;
-    } catch (error) {
+    } catch {
       // 認證攔截器錯誤
       
       // 即使認證失敗，也要設定基本 headers 並繼續請求
@@ -135,7 +135,7 @@ export const safeApiClient = {
   updateStore: async (id: number, data: UpdateStoreRequest) => {
     return apiClient.PUT('/api/stores/{store}', {
       params: { path: { store: id } },
-      body: data as any
+      body: data as UpdateStoreRequest
     });
   },
 

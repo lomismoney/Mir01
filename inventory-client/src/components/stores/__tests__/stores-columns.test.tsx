@@ -1,36 +1,44 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { createStoresColumns, StoreActions } from '../stores-columns';
+import {
+  MockComponentProps,
+  MockButtonProps
+} from '@/test-utils/mock-types';
 
 // Mock UI components
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, ...props }: any) => (
+  Button: ({ children, onClick, ...props }: MockButtonProps) => (
     <button onClick={onClick} {...props}>
       {children}
     </button>
   ),
 }));
 
+interface MockDropdownMenuItemProps extends MockComponentProps {
+  onClick?: () => void;
+}
+
 jest.mock('@/components/ui/dropdown-menu', () => ({
-  DropdownMenu: ({ children }: any) => <div data-testid="dropdown-menu">{children}</div>,
-  DropdownMenuTrigger: ({ children }: any) => <div data-testid="dropdown-trigger">{children}</div>,
-  DropdownMenuContent: ({ children }: any) => <div data-testid="dropdown-content">{children}</div>,
-  DropdownMenuItem: ({ children, onClick }: any) => (
+  DropdownMenu: ({ children }: MockComponentProps) => <div data-testid="dropdown-menu">{children}</div>,
+  DropdownMenuTrigger: ({ children }: MockComponentProps) => <div data-testid="dropdown-trigger">{children}</div>,
+  DropdownMenuContent: ({ children }: MockComponentProps) => <div data-testid="dropdown-content">{children}</div>,
+  DropdownMenuItem: ({ children, onClick }: MockDropdownMenuItemProps) => (
     <div data-testid="dropdown-item" onClick={onClick}>
       {children}
     </div>
   ),
-  DropdownMenuLabel: ({ children }: any) => <div data-testid="dropdown-label">{children}</div>,
+  DropdownMenuLabel: ({ children }: MockComponentProps) => <div data-testid="dropdown-label">{children}</div>,
   DropdownMenuSeparator: () => <div data-testid="dropdown-separator" />,
 }));
 
 jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children }: any) => <span data-testid="badge">{children}</span>,
+  Badge: ({ children }: MockComponentProps) => <span data-testid="badge">{children}</span>,
 }));
 
 jest.mock('@/components/ui/avatar', () => ({
-  Avatar: ({ children }: any) => <div data-testid="avatar">{children}</div>,
-  AvatarFallback: ({ children }: any) => <div data-testid="avatar-fallback">{children}</div>,
+  Avatar: ({ children }: MockComponentProps) => <div data-testid="avatar">{children}</div>,
+  AvatarFallback: ({ children }: MockComponentProps) => <div data-testid="avatar-fallback">{children}</div>,
 }));
 
 // Mock lucide-react icons
@@ -125,7 +133,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const nameColumn = columns[0];
       
-      const HeaderComponent = nameColumn.header as any;
+      const HeaderComponent = nameColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       const { container } = render(<HeaderComponent column={mockColumn} />);
       
       expect(screen.getByText('分店名稱')).toBeInTheDocument();
@@ -138,7 +146,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const nameColumn = columns[0];
       
-      const HeaderComponent = nameColumn.header as any;
+      const HeaderComponent = nameColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       render(<HeaderComponent column={mockColumn} />);
       
       expect(screen.getByTestId('arrow-up')).toBeInTheDocument();
@@ -149,7 +157,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const nameColumn = columns[0];
       
-      const HeaderComponent = nameColumn.header as any;
+      const HeaderComponent = nameColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       render(<HeaderComponent column={mockColumn} />);
       
       expect(screen.getByTestId('arrow-down')).toBeInTheDocument();
@@ -159,7 +167,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const nameColumn = columns[0];
       
-      const HeaderComponent = nameColumn.header as any;
+      const HeaderComponent = nameColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       render(<HeaderComponent column={mockColumn} />);
       
       const sortButton = screen.getByRole('button');
@@ -172,7 +180,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const nameColumn = columns[0];
       
-      const CellComponent = nameColumn.cell as any;
+      const CellComponent = nameColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('Test Store')).toBeInTheDocument();
@@ -192,7 +200,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const nameColumn = columns[0];
       
-      const CellComponent = nameColumn.cell as any;
+      const CellComponent = nameColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={emptyRow} />);
       
       expect(screen.getByText('未知分店')).toBeInTheDocument();
@@ -205,7 +213,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const addressColumn = columns[1];
       
-      const HeaderComponent = addressColumn.header as any;
+      const HeaderComponent = addressColumn.header as React.ComponentType;
       render(<HeaderComponent />);
       
       expect(screen.getByText('分店地址')).toBeInTheDocument();
@@ -216,7 +224,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const addressColumn = columns[1];
       
-      const CellComponent = addressColumn.cell as any;
+      const CellComponent = addressColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('Test Address')).toBeInTheDocument();
@@ -233,7 +241,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const addressColumn = columns[1];
       
-      const CellComponent = addressColumn.cell as any;
+      const CellComponent = addressColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={nullAddressRow} />);
       
       expect(screen.getByText('未設定地址')).toBeInTheDocument();
@@ -245,7 +253,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const createdAtColumn = columns[2];
       
-      const HeaderComponent = createdAtColumn.header as any;
+      const HeaderComponent = createdAtColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       render(<HeaderComponent column={mockColumn} />);
       
       expect(screen.getByText('建立時間')).toBeInTheDocument();
@@ -256,7 +264,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const createdAtColumn = columns[2];
       
-      const CellComponent = createdAtColumn.cell as any;
+      const CellComponent = createdAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('2024-01-01')).toBeInTheDocument();
@@ -273,7 +281,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const createdAtColumn = columns[2];
       
-      const CellComponent = createdAtColumn.cell as any;
+      const CellComponent = createdAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={emptyDateRow} />);
       
       expect(screen.getByText('-')).toBeInTheDocument();
@@ -287,7 +295,7 @@ describe('stores-columns', () => {
       invalidDateRow.getValue.mockImplementation((key) => invalidDateRow.original[key as keyof typeof invalidDateRow.original]);
       
       // Mock date-fns to throw error
-      const { format } = require('date-fns');
+      const { format } = jest.requireMock<typeof import('date-fns')>('date-fns');
       format.mockImplementation(() => {
         throw new Error('Invalid date');
       });
@@ -295,7 +303,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const createdAtColumn = columns[2];
       
-      const CellComponent = createdAtColumn.cell as any;
+      const CellComponent = createdAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={invalidDateRow} />);
       
       expect(screen.getByText('格式錯誤')).toBeInTheDocument();
@@ -307,7 +315,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const updatedAtColumn = columns[3];
       
-      const HeaderComponent = updatedAtColumn.header as any;
+      const HeaderComponent = updatedAtColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       render(<HeaderComponent column={mockColumn} />);
       
       expect(screen.getByText('更新時間')).toBeInTheDocument();
@@ -318,7 +326,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const updatedAtColumn = columns[3];
       
-      const CellComponent = updatedAtColumn.cell as any;
+      const CellComponent = updatedAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       // Should display some time-related text
@@ -335,7 +343,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const updatedAtColumn = columns[3];
       
-      const CellComponent = updatedAtColumn.cell as any;
+      const CellComponent = updatedAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={emptyDateRow} />);
       
       expect(screen.getByText('-')).toBeInTheDocument();
@@ -355,7 +363,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const updatedAtColumn = columns[3];
       
-      const CellComponent = updatedAtColumn.cell as any;
+      const CellComponent = updatedAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={yesterdayRow} />);
       
       expect(screen.getByText('格式錯誤')).toBeInTheDocument();
@@ -375,7 +383,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const updatedAtColumn = columns[3];
       
-      const CellComponent = updatedAtColumn.cell as any;
+      const CellComponent = updatedAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={recentRow} />);
       
       expect(screen.getByText('格式錯誤')).toBeInTheDocument();
@@ -387,7 +395,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns();
       const actionsColumn = columns[4];
       
-      const HeaderComponent = actionsColumn.header as any;
+      const HeaderComponent = actionsColumn.header as React.ComponentType;
       render(<HeaderComponent />);
       
       expect(screen.getByText('操作')).toBeInTheDocument();
@@ -402,7 +410,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns(mockActions);
       const actionsColumn = columns[4];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByTestId('dropdown-menu')).toBeInTheDocument();
@@ -418,7 +426,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns(mockActions);
       const actionsColumn = columns[4];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       const editButton = screen.getByText('編輯分店');
@@ -436,7 +444,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns(mockActions);
       const actionsColumn = columns[4];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       const deleteButton = screen.getByText('刪除分店');
@@ -453,7 +461,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns(mockActions);
       const actionsColumn = columns[4];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.queryByText('編輯分店')).not.toBeInTheDocument();
@@ -468,7 +476,7 @@ describe('stores-columns', () => {
       const columns = createStoresColumns(mockActions);
       const actionsColumn = columns[4];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('編輯分店')).toBeInTheDocument();

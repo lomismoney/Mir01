@@ -1,48 +1,156 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { ProductFilters, ProductItem, ProductVariant } from '@/types/api-helpers';
 import { QUERY_KEYS } from '../shared/queryKeys';
+import { createIntelligentQueryConfig } from '../shared/config';
 
 /**
- * API Hooks - 商品管理
+ * API Hooks - 商品管理 - 性能優化版
  * 使用生成的 API 類型定義進行類型安全的資料操作
+ * 
+ * 性能優化特性：
+ * 1. 智能緩存配置，根據使用模式動態調整
+ * 2. 優化的數據轉換邏輯，減少重複計算
+ * 3. 記憶化查詢參數構建
+ * 4. 數據預處理和規範化
  */
 
 /**
- * 商品列表查詢 Hook - 架構升級版（標準化作戰單位 #2）
+ * 商品數據處理器 - 緩存和記憶化優化
+ */
+class ProductDataProcessor {
+  private static cache = new Map<string, unknown>();
+  
+  /**
+   * 處理原始 API 響應數據
+   */
+  static processApiResponse(response: unknown): unknown[] {
+    if (!response) return [];
+    
+    // 生成緩存鍵
+    const cacheKey = JSON.stringify(response).slice(0, 100);
+    
+    // 檢查緩存
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
+    }
+    
+    // 解包：處理 Laravel 分頁格式
+    const products = response?.data?.data || response?.data || [];
+    
+    // 確保是陣列
+    if (!Array.isArray(products)) {
+      console.warn('useProducts - 期望陣列但收到:', products);
+      return [];
+    }
+
+    // 如果沒有產品，直接返回空陣列
+    if (products.length === 0) {
+      return [];
+    }
+    
+    // 數據規範化處理
+    const processedProducts = products.map(product => ({
+      ...product,
+      // 確保必要欄位存在
+      id: product.id || 0,
+      name: product.name || '',
+      description: product.description || null,
+      category_id: product.category_id || null,
+      // 預處理圖片 URL
+      image_url: product.image_url || null,
+      thumbnail_url: product.thumbnail_url || product.image_url || null,
+      has_image: Boolean(product.image_url || product.thumbnail_url),
+      // 預處理變體信息
+      variants: Array.isArray(product.variants) ? product.variants : [],
+      variants_count: Array.isArray(product.variants) ? product.variants.length : 0,
+      // 預計算常用統計
+      total_stock: Array.isArray(product.variants) 
+        ? product.variants.reduce((sum: number, variant: Record<string, unknown>) => {
+            // 優先使用 stock 欄位，如果沒有則從 inventory 陣列計算
+            if (variant.stock !== undefined) {
+              return sum + (Number(variant.stock) || 0);
+            }
+            // 如果有 inventory 陣列，計算總和
+            if (Array.isArray(variant.inventory)) {
+              const variantStock = variant.inventory.reduce((invSum: number, inv: any) => 
+                invSum + (Number(inv.quantity) || 0), 0);
+              return sum + variantStock;
+            }
+            return sum;
+          }, 0)
+        : 0,
+    }));
+    
+    // 緩存處理結果
+    this.cache.set(cacheKey, processedProducts);
+    
+    // 限制緩存大小
+    if (this.cache.size > 20) {
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+    }
+    
+    return processedProducts;
+  }
+  
+  /**
+   * 清理緩存
+   */
+  static clearCache() {
+    this.cache.clear();
+  }
+}
+
+/**
+ * 查詢參數構建器 - 記憶化優化
+ */
+function useQueryParamsBuilder(filters: ProductFilters) {
+  return useMemo(() => {
+    const queryParams: Record<string, string | number | boolean> = {};
+    
+    if (filters.product_name) queryParams.product_name = filters.product_name;
+    if (filters.store_id !== undefined) queryParams.store_id = filters.store_id;
+    if (filters.category_id !== undefined) queryParams.category_id = filters.category_id;
+    if (filters.low_stock !== undefined) queryParams.low_stock = filters.low_stock;
+    if (filters.out_of_stock !== undefined) queryParams.out_of_stock = filters.out_of_stock;
+    if (filters.search) queryParams['filter[search]'] = filters.search;
+    if (filters.page !== undefined) queryParams.page = filters.page;
+    if (filters.per_page !== undefined) queryParams.per_page = filters.per_page;
+
+    return Object.keys(queryParams).length > 0 ? queryParams : undefined;
+  }, [filters]);
+}
+
+/**
+ * 商品列表查詢 Hook - 性能優化版
  * 
- * 功能特性：
- * 1. 支援完整的後端篩選參數（product_name, store_id, category_id, low_stock, out_of_stock）
- * 2. 智能查詢鍵結構，支援所有篩選參數的精確緩存
- * 3. 向後相容舊版 search 參數
- * 4. 高效能緩存策略，減少不必要的 API 請求
- * 5. 🎯 資料精煉廠 - 在源頭處理所有數據轉換和類型安全
- * 6. 🚫 根除 any 類型 - 確保產品數據的純淨契約
+ * 新增優化特性：
+ * 1. 智能查詢配置，根據使用模式動態調整緩存
+ * 2. 記憶化查詢參數構建，避免重複計算
+ * 3. 優化的數據處理器，減少 select 函數重複執行
+ * 4. 減少開發環境日誌輸出的性能影響
+ * 5. 更高效的數據規範化和預計算
  * 
  * @param filters - 篩選參數物件，包含所有可用的篩選條件
  * @returns React Query 查詢結果，返回處理乾淨、類型完美的 ProductItem 陣列
  */
 export function useProducts(filters: ProductFilters = {}) {
+    // 記憶化查詢參數構建
+    const queryParams = useQueryParamsBuilder(filters);
+    
+    // 記憶化查詢鍵
+    const queryKey = useMemo(() => [...QUERY_KEYS.PRODUCTS, filters], [filters]);
+    
     return useQuery({
-        queryKey: [...QUERY_KEYS.PRODUCTS, filters],
+        ...createIntelligentQueryConfig(queryKey, 'STABLE', true),
+        queryKey,
         queryFn: async () => {
-            // 構建查詢參數，移除 undefined 值
-            const queryParams: Record<string, string | number | boolean> = {};
-            
-            if (filters.product_name) queryParams.product_name = filters.product_name;
-            if (filters.store_id !== undefined) queryParams.store_id = filters.store_id;
-            if (filters.category_id !== undefined) queryParams.category_id = filters.category_id;
-            if (filters.low_stock !== undefined) queryParams.low_stock = filters.low_stock;
-            if (filters.out_of_stock !== undefined) queryParams.out_of_stock = filters.out_of_stock;
-            // 修正：使用 Spatie QueryBuilder 的格式
-            if (filters.search) queryParams['filter[search]'] = filters.search;
-            if (filters.page !== undefined) queryParams.page = filters.page;
-            if (filters.per_page !== undefined) queryParams.per_page = filters.per_page;
-
             const { data, error } = await apiClient.GET('/api/products', {
                 params: { 
-                    query: Object.keys(queryParams).length > 0 ? queryParams : undefined 
+                    query: queryParams
                 }
             });
             
@@ -51,61 +159,26 @@ export function useProducts(filters: ProductFilters = {}) {
                 throw new Error(errorMessage || '獲取商品列表失敗');
             }
 
-            // 調試：記錄 API 返回的原始數據
-            if (process.env.NODE_ENV === 'development') {
+            // 簡化開發環境日誌，減少性能影響
+            if (process.env.NODE_ENV === 'development' && data) {
                 console.log('useProducts - API Response:', {
+                    itemCount: Array.isArray(data?.data?.data) ? data.data.data.length : 'N/A',
                     hasData: !!data,
-                    dataType: typeof data,
-                    dataKeys: data ? Object.keys(data) : null,
-                    isArrayData: Array.isArray(data),
-                    hasDataProperty: data?.data !== undefined,
-                    firstItem: Array.isArray(data) ? data[0] : data?.data?.[0]
+                    dataType: typeof data
                 });
             }
 
-            // queryFn 依然返回完整的 response，數據轉換交給 select 處理
-            // 注意：openapi-fetch 可能已經解包了響應
             return data;
         },
         
-        // 🎯 數據精煉廠 - 商品數據的完美轉換
-        select: (response: any) => {
-            // 調試：記錄 select 收到的原始數據
-            if (process.env.NODE_ENV === 'development') {
-                console.log('useProducts - Select Input:', {
-                    responseType: typeof response,
-                    responseKeys: response ? Object.keys(response) : null,
-                    isArray: Array.isArray(response),
-                    hasData: response?.data !== undefined,
-                    dataIsArray: Array.isArray(response?.data),
-                    dataLength: Array.isArray(response?.data) ? response.data.length : 'N/A'
-                });
-            }
-
-            // 1. 解包：處理 Laravel 分頁格式 { data: [...], links: {...}, meta: {...} }
-            const products = response?.data || [];
-            
-            // 確保是陣列
-            if (!Array.isArray(products)) {
-                console.warn('useProducts - 期望陣列但收到:', products);
-                return [];
-            }
-
-            // 如果沒有產品，直接返回空陣列
-            if (products.length === 0) {
-                return [];
-            }
-            
-            // 直接返回原始資料陣列，因為 API 返回的格式已經是正確的
-            return products;
-        },
+        // 🎯 使用優化的數據處理器
+        select: (response: unknown) => ProductDataProcessor.processApiResponse(response),
         
-        // 🚀 體驗優化配置
-        placeholderData: (previousData) => previousData, // 篩選時保持舊資料，避免載入閃爍
-        refetchOnMount: true,        // 修復：頁面掛載時重新獲取，確保資料同步
-        refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
-        staleTime: 30 * 1000,       // 修復：縮短快取時間至 30 秒，提高資料新鮮度
-        retry: 2, // 失敗時重試 2 次
+        // 保留體驗優化配置，但使用智能配置中的值
+        placeholderData: (previousData) => previousData,
+        refetchOnMount: true,
+        refetchOnWindowFocus: false,
+        retry: 2,
     });
 }
 
@@ -214,7 +287,7 @@ export function useProductDetail(productId: number | string | undefined) {
             return data;
         },
         // 🎯 數據精煉廠 - 確保類型完整性和數據一致性
-        select: (response: any): ProcessedProduct | null => {
+        select: (response: unknown): ProcessedProduct | null => {
             const rawProduct = response?.data;
             
             if (!rawProduct) {
@@ -239,7 +312,7 @@ export function useProductDetail(productId: number | string | undefined) {
                 category_id: rawProduct.category_id || null,
                 category: rawProduct.category,
                 attributes: attributes.map((attr: unknown): ProcessedProductAttribute => {
-                    const a = attr as Record<string, any>;
+                    const a = attr as Record<string, unknown>;
                     return {
                         id: a?.id || 0,
                         name: a?.name || '',
@@ -247,7 +320,7 @@ export function useProductDetail(productId: number | string | undefined) {
                     };
                 }),
                 variants: variants.map((variant: unknown): ProcessedProductVariant => {
-                    const v = variant as Record<string, any>;
+                    const v = variant as Record<string, unknown>;
                     return {
                         id: v?.id || 0,
                         sku: v?.sku || '',
@@ -255,7 +328,7 @@ export function useProductDetail(productId: number | string | undefined) {
                         stock_quantity: v?.stock_quantity || 0,
                         attribute_values: Array.isArray(v?.attribute_values) 
                             ? v.attribute_values.map((av: unknown): ProcessedProductAttributeValue => {
-                                const a = av as Record<string, any>;
+                                const a = av as Record<string, unknown>;
                                 return {
                                     id: a?.id || 0,
                                     attribute_id: a?.attribute_id || 0,
@@ -351,16 +424,16 @@ export function useCreateProduct() {
             
             // 使用 toast 顯示成功訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.success('商品創建成功！', {
                     description: `商品「${data?.data?.name}」已成功創建，商品列表已自動更新。`
                 });
             }
         },
-        onError: (error) => {
+        onError: async (error) => {
             // 錯誤處理並顯示錯誤訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.error('商品創建失敗', {
                     description: error.message || '請檢查輸入資料並重試。'
                 });
@@ -423,10 +496,10 @@ export function useUpdateProduct() {
             // 🎯 在 Hook 層級不顯示 toast，讓組件層級處理
             // 這樣可以提供更靈活的用戶反饋控制
         },
-        onError: (error) => {
+        onError: async (error) => {
             // 錯誤處理並顯示錯誤訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.error('商品更新失敗', {
                     description: error.message || '請檢查輸入資料並重試。'
                 });
@@ -477,16 +550,16 @@ export function useDeleteProduct() {
             
             // 顯示成功訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.success('商品刪除成功！', {
                     description: '商品已成功刪除，商品列表已自動更新。'
                 });
             }
         },
-        onError: (error) => {
+        onError: async (error) => {
             // 錯誤處理並顯示錯誤訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.error('商品刪除失敗', {
                     description: error.message || '請檢查並重試。'
                 });
@@ -534,16 +607,16 @@ export function useDeleteMultipleProducts() {
             
             // 顯示成功訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.success('批量刪除成功！', {
-                    description: `已成功刪除 ${(data as any)?.data?.deleted_count || 0} 個商品。`
+                    description: `已成功刪除 ${(data as Record<string, unknown>)?.data ? ((data as Record<string, unknown>).data as Record<string, unknown>)?.deleted_count || 0 : 0} 個商品。`
                 });
             }
         },
-        onError: (error) => {
+        onError: async (error) => {
             // 錯誤處理並顯示錯誤訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.error('批量刪除失敗', {
                     description: error.message || '請檢查並重試。'
                 });
@@ -570,7 +643,7 @@ export function useProductVariants(params: {
         queryKey: [...QUERY_KEYS.PRODUCT_VARIANTS, params],
         queryFn: async () => {
             // 構建查詢參數
-            const queryParams: Record<string, any> = {};
+            const queryParams: Record<string, string | number> = {};
             
             if (params.product_id) queryParams.product_id = params.product_id;
             if (params.product_name) queryParams.product_name = params.product_name;
@@ -578,11 +651,11 @@ export function useProductVariants(params: {
             if (params.page) queryParams.page = params.page;
             if (params.per_page) queryParams.per_page = params.per_page;
 
-            const { data, error } = await apiClient.GET('/api/products/variants' as any, {
+            const { data, error } = await apiClient.GET('/api/products/variants', {
                 params: { 
                     query: Object.keys(queryParams).length > 0 ? queryParams : undefined 
                 }
-            } as any);
+            });
             
             if (error) {
                 const errorMessage = parseApiError(error);
@@ -592,52 +665,61 @@ export function useProductVariants(params: {
             return data;
         },
         // 🎯 數據精煉廠 - 確保類型安全和數據一致性
-        select: (response: any) => {
+        select: (response: unknown) => {
             // 解包 API 響應數據，確保返回陣列格式
             const variants = response?.data || [];
             if (!Array.isArray(variants)) return [];
             
             // 進行數據清理和類型轉換
-            return variants.map((variant: any) => ({
-                id: variant.id || 0,
-                sku: variant.sku || '',
-                price: parseFloat(variant.price || '0'),
-                product_id: variant.product_id || 0,
-                created_at: variant.created_at || '',
-                updated_at: variant.updated_at || '',
+            return variants.map((variant: unknown) => {
+                const v = variant as Record<string, unknown>;
+                return {
+                id: v.id as number || 0,
+                sku: v.sku as string || '',
+                price: parseFloat((v.price as string) || '0'),
+                product_id: v.product_id as number || 0,
+                created_at: v.created_at as string || '',
+                updated_at: v.updated_at as string || '',
                 // 商品資訊
-                product: variant.product ? {
-                    id: variant.product.id || 0,
-                    name: variant.product.name || '未知商品',
-                    description: variant.product.description || null,
+                product: v.product ? {
+                    id: (v.product as Record<string, unknown>).id as number || 0,
+                    name: (v.product as Record<string, unknown>).name as string || '未知商品',
+                    description: (v.product as Record<string, unknown>).description as string || null,
                 } : null,
                 // 屬性值資訊
-                attribute_values: Array.isArray(variant.attribute_values) 
-                    ? variant.attribute_values.map((av: any) => ({
-                        id: av.id || 0,
-                        value: av.value || '',
-                        attribute_id: av.attribute_id || 0,
-                        attribute: av.attribute ? {
-                            id: av.attribute.id || 0,
-                            name: av.attribute.name || '',
-                        } : null,
-                    }))
+                attribute_values: Array.isArray(v.attribute_values) 
+                    ? (v.attribute_values as unknown[]).map((av: unknown) => {
+                        const avRecord = av as Record<string, unknown>;
+                        return {
+                            id: avRecord.id as number || 0,
+                            value: avRecord.value as string || '',
+                            attribute_id: avRecord.attribute_id as number || 0,
+                            attribute: avRecord.attribute ? {
+                                id: (avRecord.attribute as Record<string, unknown>).id as number || 0,
+                                name: (avRecord.attribute as Record<string, unknown>).name as string || '',
+                            } : null,
+                        };
+                    })
                     : [],
                 // 庫存資訊
-                inventory: Array.isArray(variant.inventory) 
-                    ? variant.inventory.map((inv: any) => ({
-                        id: inv.id || 0,
-                        quantity: parseInt(inv.quantity || '0', 10),
-                        low_stock_threshold: parseInt(inv.low_stock_threshold || '0', 10),
-                        store: inv.store ? {
-                            id: inv.store.id || 0,
-                            name: inv.store.name || '未知門市',
-                        } : null,
-                    }))
+                inventory: Array.isArray(v.inventory) 
+                    ? (v.inventory as unknown[]).map((inv: unknown) => {
+                        const invRecord = inv as Record<string, unknown>;
+                        return {
+                            id: invRecord.id as number || 0,
+                            quantity: parseInt((invRecord.quantity as string) || '0', 10),
+                            low_stock_threshold: parseInt((invRecord.low_stock_threshold as string) || '0', 10),
+                            store: invRecord.store ? {
+                                id: (invRecord.store as Record<string, unknown>).id as number || 0,
+                                name: (invRecord.store as Record<string, unknown>).name as string || '未知門市',
+                            } : null,
+                        };
+                    })
                     : [],
                 // 保留原始數據
-                ...variant
-            }));
+                ...v
+                };
+            });
         },
         enabled: options?.enabled !== false,
         staleTime: 2 * 60 * 1000, // 2 分鐘緩存時間
@@ -655,9 +737,9 @@ export function useProductVariantDetail(id: number) {
     return useQuery({
         queryKey: [...QUERY_KEYS.PRODUCT_VARIANT(id), 'detail'],
         queryFn: async () => {
-            const { data, error } = await apiClient.GET('/api/products/variants/{variant}' as any, {
+            const { data, error } = await apiClient.GET('/api/products/variants/{variant}', {
                 params: { path: { variant: id } }
-            } as any);
+            });
             
             if (error) {
                 const errorMessage = parseApiError(error);
@@ -729,16 +811,16 @@ export function useUploadProductImage() {
             
             // 顯示成功訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.success('圖片上傳成功！', {
                     description: '商品圖片已更新。'
                 });
             }
         },
-        onError: (error) => {
+        onError: async (error) => {
             // 錯誤處理並顯示錯誤訊息
             if (typeof window !== 'undefined') {
-                const { toast } = require('sonner');
+                const { toast } = await import('sonner');
                 toast.error('圖片上傳失敗', {
                     description: error.message || '請檢查圖片格式並重試。'
                 });

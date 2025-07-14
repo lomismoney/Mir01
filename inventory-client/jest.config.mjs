@@ -1,4 +1,4 @@
-const nextJest = require('next/jest')
+import nextJest from 'next/jest.js'
 
 /**
  * Jest 測試框架配置
@@ -82,4 +82,4 @@ const config = {
 }
 
 // 匯出使用 Next.js 優化的 Jest 配置
-module.exports = createJestConfig(config)
+export default createJestConfig(config)

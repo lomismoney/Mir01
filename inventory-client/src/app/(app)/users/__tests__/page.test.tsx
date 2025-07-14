@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -11,6 +11,13 @@ import {
   useUpdateUser, 
   useDeleteUser 
 } from '@/hooks';
+import {
+  MockDialogProps,
+  MockComponentProps,
+  MockButtonProps,
+  MockInputProps,
+  MockUser
+} from '@/test-utils/mock-types';
 
 // Mock dependencies
 jest.mock('next-auth/react');
@@ -29,52 +36,60 @@ jest.mock('@/hooks', () => ({
 
 // Mock UI components
 jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children, open }: any) => open ? <div data-testid="dialog">{children}</div> : null,
-  DialogContent: ({ children }: any) => <div data-testid="dialog-content">{children}</div>,
-  DialogHeader: ({ children }: any) => <div>{children}</div>,
-  DialogTitle: ({ children }: any) => <h2>{children}</h2>,
-  DialogDescription: ({ children }: any) => <p>{children}</p>,
-  DialogFooter: ({ children }: any) => <div>{children}</div>,
+  Dialog: ({ children, open }: MockDialogProps) => open ? <div data-testid="dialog">{children}</div> : null,
+  DialogContent: ({ children }: MockComponentProps) => <div data-testid="dialog-content">{children}</div>,
+  DialogHeader: ({ children }: MockComponentProps) => <div>{children}</div>,
+  DialogTitle: ({ children }: MockComponentProps) => <h2>{children}</h2>,
+  DialogDescription: ({ children }: MockComponentProps) => <p>{children}</p>,
+  DialogFooter: ({ children }: MockComponentProps) => <div>{children}</div>,
 }));
 
 jest.mock('@/components/ui/alert-dialog', () => ({
-  AlertDialog: ({ children, open }: any) => open ? <div data-testid="alert-dialog">{children}</div> : null,
-  AlertDialogContent: ({ children }: any) => <div data-testid="alert-dialog-content">{children}</div>,
-  AlertDialogHeader: ({ children }: any) => <div>{children}</div>,
-  AlertDialogTitle: ({ children }: any) => <h2>{children}</h2>,
-  AlertDialogDescription: ({ children }: any) => <p>{children}</p>,
-  AlertDialogFooter: ({ children }: any) => <div>{children}</div>,
-  AlertDialogCancel: ({ children, onClick }: any) => (
+  AlertDialog: ({ children, open }: MockDialogProps) => open ? <div data-testid="alert-dialog">{children}</div> : null,
+  AlertDialogContent: ({ children }: MockComponentProps) => <div data-testid="alert-dialog-content">{children}</div>,
+  AlertDialogHeader: ({ children }: MockComponentProps) => <div>{children}</div>,
+  AlertDialogTitle: ({ children }: MockComponentProps) => <h2>{children}</h2>,
+  AlertDialogDescription: ({ children }: MockComponentProps) => <p>{children}</p>,
+  AlertDialogFooter: ({ children }: MockComponentProps) => <div>{children}</div>,
+  AlertDialogCancel: ({ children, onClick }: MockButtonProps) => (
     <button onClick={onClick}>{children}</button>
   ),
-  AlertDialogAction: ({ children, onClick }: any) => (
+  AlertDialogAction: ({ children, onClick }: MockButtonProps) => (
     <button onClick={onClick}>{children}</button>
   ),
 }));
 
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, ...props }: any) => (
+  Button: ({ children, onClick, disabled, ...props }: MockButtonProps) => (
     <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
   ),
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: ({ ...props }: any) => <input {...props} />,
+  Input: ({ ...props }: MockInputProps) => <input {...props} />,
 }));
 
 jest.mock('@/components/ui/label', () => ({
-  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
+  Label: ({ children, ...props }: MockComponentProps) => <label {...props}>{children}</label>,
 }));
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children }: any) => <div>{children}</div>,
-  CardContent: ({ children }: any) => <div>{children}</div>,
+  Card: ({ children }: MockComponentProps) => <div>{children}</div>,
+  CardContent: ({ children }: MockComponentProps) => <div>{children}</div>,
 }));
 
 // Mock components
+interface MockUsersDataTableProps {
+  data: MockUser[];
+  onAddUser: () => void;
+  columns: Array<{ id: string; header: string; cell: (props: { row: { original: MockUser } }) => React.ReactNode }>;
+  searchValue?: string;
+  onSearchChange: (value: string) => void;
+}
+
 jest.mock('@/components/users/users-data-table', () => ({
-  UsersDataTable: ({ data, onAddUser, columns, searchValue, onSearchChange }: any) => {
-    const renderUser = (user: any) => {
+  UsersDataTable: ({ data, onAddUser, columns, searchValue, onSearchChange }: MockUsersDataTableProps) => {
+    const renderUser = (user: MockUser) => {
       const column = columns[0];
       return (
         <div key={user.id} data-testid={`user-${user.id}`}>
@@ -99,12 +114,18 @@ jest.mock('@/components/users/users-data-table', () => ({
   },
 }));
 
+interface MockUsersColumnsActions {
+  onEdit: (user: MockUser) => void;
+  onDelete: (user: MockUser) => void;
+  onManageStores: (user: MockUser) => void;
+}
+
 jest.mock('@/components/users/users-columns', () => ({
-  createUsersColumns: (actions: any) => [
+  createUsersColumns: (actions: MockUsersColumnsActions) => [
     {
       id: 'name',
       header: '用戶名稱',
-      cell: ({ row }: any) => (
+      cell: ({ row }: { row: { original: MockUser } }) => (
         <div>
           {row.original.name}
           <button onClick={() => actions.onEdit(row.original)}>編輯</button>
@@ -116,8 +137,14 @@ jest.mock('@/components/users/users-columns', () => ({
   ],
 }));
 
+interface MockUserStoresDialogProps {
+  userName: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
 jest.mock('@/components/users/user-stores-dialog', () => ({
-  UserStoresDialog: ({ userName, open, onOpenChange }: any) => 
+  UserStoresDialog: ({ userName, open, onOpenChange }: MockUserStoresDialogProps) => 
     open ? (
       <div data-testid="user-stores-dialog">
         <h3>管理 {userName} 的分店</h3>
@@ -126,8 +153,13 @@ jest.mock('@/components/users/user-stores-dialog', () => ({
     ) : null,
 }));
 
+interface MockRoleSelectorProps {
+  onChange: (roles: string[]) => void;
+  disabled?: boolean;
+}
+
 jest.mock('@/components/users/role-selector', () => ({
-  RoleSelector: ({ value, onChange, disabled }: any) => (
+  RoleSelector: ({ onChange, disabled }: MockRoleSelectorProps) => (
     <div data-testid="role-selector">
       <button 
         onClick={() => onChange(['admin'])} 
@@ -217,7 +249,7 @@ describe('UsersPage', () => {
       isFetching: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as any);
+    });
 
     mockUseCreateUser.mockReturnValue({
       mutate: mockCreateMutate,
@@ -228,7 +260,7 @@ describe('UsersPage', () => {
       error: null,
       data: undefined,
       reset: jest.fn(),
-    } as any);
+    });
 
     mockUseUpdateUser.mockReturnValue({
       mutate: mockUpdateMutate,
@@ -239,7 +271,7 @@ describe('UsersPage', () => {
       error: null,
       data: undefined,
       reset: jest.fn(),
-    } as any);
+    });
 
     mockUseDeleteUser.mockReturnValue({
       mutate: mockDeleteMutate,
@@ -250,7 +282,7 @@ describe('UsersPage', () => {
       error: null,
       data: undefined,
       reset: jest.fn(),
-    } as any);
+    });
   });
 
   // 包裝器組件提供 QueryClient

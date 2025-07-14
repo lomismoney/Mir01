@@ -36,6 +36,8 @@ import {
 
 import Link from "next/link";
 import { InventoryPagination } from "./InventoryPagination";
+import { useEmptyState } from "@/hooks/use-empty-state";
+import { EmptyTable, EmptySearch, EmptyError } from "@/components/ui/empty-state";
 
 export function InventoryManagement() {
   // 使用自定義 hook 獲取所有業務邏輯
@@ -69,6 +71,9 @@ export function InventoryManagement() {
     getActiveFiltersCount,
   } = useInventoryManagement();
 
+  // 使用空狀態配置
+  const { config: emptyConfig, handleAction } = useEmptyState('inventory');
+
   // 顯示錯誤狀態
   if (inventoryError) {
     return (
@@ -83,26 +88,17 @@ export function InventoryManagement() {
           </p>
         </div>
 
-        <Alert className="mt-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>載入失敗</AlertTitle>
-          <AlertDescription
-            className="flex items-center justify-between"
-           
-          >
-            <span>無法載入庫存資料，請稍後再試</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              className="ml-4"
-             
-            >
-              <RefreshIcon className="h-4 w-4 mr-2" />
-              重試
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <Card>
+          <CardContent className="p-6">
+            <EmptyError
+              title="載入庫存資料失敗"
+              description="無法載入庫存列表，請稍後再試"
+              onRetry={handleRefresh}
+              showDetails={true}
+              error={inventoryError}
+            />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -354,6 +350,26 @@ export function InventoryManagement() {
               isLoading={isLoadingInventory}
               onAdjustInventory={handleAdjustInventory}
               onManageProduct={handleManageProduct}
+              emptyState={
+                productNameInput || filters.store_id || filters.category_id || filters.show_low_stock || filters.show_out_of_stock ? (
+                  <EmptySearch
+                    searchTerm={productNameInput}
+                    onClearSearch={handleResetFilters}
+                    suggestions={[
+                      '嘗試搜尋商品名稱或 SKU',
+                      '調整倉庫或分類篩選',
+                      '檢查庫存警示篩選條件',
+                    ]}
+                  />
+                ) : (
+                  <EmptyTable
+                    title={emptyConfig.title}
+                    description={emptyConfig.description}
+                    actionLabel={emptyConfig.actionLabel}
+                    onAction={handleAction}
+                  />
+                )
+              }
              
             />
           )}

@@ -32,13 +32,13 @@ export const PURCHASE_STATUS_LABELS: Record<PurchaseStatus, string> = {
 
 // 狀態顏色對照表
 export const PURCHASE_STATUS_COLORS: Record<PurchaseStatus, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-blue-100 text-blue-800',
-  in_transit: 'bg-purple-100 text-purple-800',
-  received: 'bg-orange-100 text-orange-800',
-  completed: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
-  partially_received: 'bg-indigo-100 text-indigo-800',
+  pending: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-700',
+  confirmed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700',
+  in_transit: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700',
+  received: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700',
+  completed: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700',
+  cancelled: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-700',
+  partially_received: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 border-indigo-200 dark:border-indigo-700',
 }
 
 // 進貨單操作權限檢查
@@ -57,8 +57,8 @@ export const getValidStatusTransitions = (currentStatus: PurchaseStatus): Purcha
     pending: ['confirmed', 'cancelled'],
     confirmed: ['in_transit', 'cancelled'],
     in_transit: ['received', 'partially_received'],
-    received: ['completed', 'partially_received'],
-    partially_received: ['completed', 'received'],
+    received: ['completed', 'partially_received'], // ✅ received 可以轉到 partially_received（支援調整收貨數量）
+    partially_received: ['completed', 'received', 'partially_received'], // 🎯 支援再次進行部分收貨調整
     completed: [],
     cancelled: [],
   }

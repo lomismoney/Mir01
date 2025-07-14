@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createColumns } from '../columns';
 import { Order, ProcessedOrder } from '@/types/api-helpers';
@@ -81,7 +81,7 @@ const mockOrder: Order = {
       },
     },
   ],
-} as any;
+};
 
 // Helper function to render table cell
 const renderCell = (column: ColumnDef<Order>, order: Order, columnId?: string) => {
@@ -94,7 +94,7 @@ const renderCell = (column: ColumnDef<Order>, order: Order, columnId?: string) =
       // Handle nested keys like 'customer.name'
       if (key.includes('.')) {
         const keys = key.split('.');
-        let value: any = order;
+        let value: unknown = order;
         for (const k of keys) {
           value = value?.[k];
         }
@@ -126,7 +126,7 @@ const renderCell = (column: ColumnDef<Order>, order: Order, columnId?: string) =
     cell: { column: mockColumn, getContext: () => ({}) },
   };
 
-  return render(<div>{cell(cellProps as any)}</div>);
+  return render(<div>{cell(cellProps as Parameters<typeof cell>[0])}</div>);
 };
 
 // Helper function to render header
@@ -156,7 +156,7 @@ const renderHeader = (column: ColumnDef<Order>) => {
       header: { column: mockColumn, getContext: () => ({}) },
     };
 
-    return render(<div>{header(headerProps as any)}</div>);
+    return render(<div>{header(headerProps as Parameters<typeof header>[0])}</div>);
   }
 
   return null;
@@ -179,7 +179,7 @@ describe('Order Columns', () => {
     mockUseDeleteOrder.mockReturnValue({
       mutate: mockDeleteMutate,
       isPending: false,
-    } as any);
+    });
   });
 
   describe('列定義結構', () => {

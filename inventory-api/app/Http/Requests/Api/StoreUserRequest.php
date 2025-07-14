@@ -53,6 +53,7 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
+            'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['string', Rule::in(array_keys(User::getAvailableRoles()))],
@@ -78,6 +79,11 @@ class StoreUserRequest extends FormRequest
             'username.max' => '用戶名不能超過 255 個字元',
             'username.unique' => '此用戶名已被使用，請選擇其他用戶名',
             
+            'email.string' => '電子郵件必須是文字格式',
+            'email.email' => '請輸入有效的電子郵件地址',
+            'email.max' => '電子郵件不能超過 255 個字元',
+            'email.unique' => '此電子郵件已被使用',
+            
             'password.required' => '密碼為必填欄位',
             'password.string' => '密碼必須是文字格式',
             'password.min' => '密碼至少需要 8 個字元',
@@ -100,6 +106,7 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => '姓名',
             'username' => '用戶名',
+            'email' => '電子郵件',
             'password' => '密碼',
             'role' => '角色',
         ];
@@ -122,6 +129,11 @@ class StoreUserRequest extends FormRequest
                 'description' => '用戶名（唯一）',
                 'example' => 'zhangsan',
                 'required' => true,
+            ],
+            'email' => [
+                'description' => '電子郵件地址（可選）',
+                'example' => 'zhangsan@example.com',
+                'required' => false,
             ],
             'password' => [
                 'description' => '用戶密碼（至少8個字元）',

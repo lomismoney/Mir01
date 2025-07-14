@@ -9,11 +9,37 @@ import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { QUERY_KEYS } from '../shared/queryKeys';
 
-// 這些類型現在將由 api.ts 精確提供
-type UserQueryParams = import('@/types/api').paths["/api/users"]["get"]["parameters"]["query"];
-type CreateUserRequestBody = import('@/types/api').paths["/api/users"]["post"]["requestBody"]["content"]["application/json"];
-type UpdateUserRequestBody = import('@/types/api').paths["/api/users/{user}"]["put"]["requestBody"]["content"]["application/json"];
-type UserPathParams = import('@/types/api').paths["/api/users/{user}"]["get"]["parameters"]["path"];
+// 臨時類型定義 - 等待後端 API 實現
+// TODO: 與後端同步用戶管理 API 規範
+type UserQueryParams = {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  role?: string;
+};
+
+type CreateUserRequestBody = {
+  name: string;
+  username: string;
+  email?: string; // 修正為可選欄位，匹配後端 API 契約
+  password: string;
+  password_confirmation: string; // 修正為必要欄位，匹配後端 API 契約
+  roles?: string[];
+  role: string; // 修正為必要欄位，匹配後端 API 契約
+};
+
+type UpdateUserRequestBody = {
+  name?: string;
+  username?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+  roles?: string[];
+};
+
+type UserPathParams = {
+  user: string | number;
+};
 
 /**
  * 獲取用戶列表（高性能版本 - 整合第二階段優化）
@@ -38,6 +64,7 @@ export function useUsers(filters?: UserQueryParams) {
         ...(queryFilters as UserQueryParams),
       };
       
+      // 使用正確的用戶管理 API 端點
       const response = await apiClient.GET('/api/users', {
         params: { query: queryParams },
       });
@@ -106,11 +133,19 @@ export function useCreateUser() {
   
   return useMutation({
     mutationFn: async (body: CreateUserRequestBody) => {
-      const { data, error } = await apiClient.POST('/api/users', { body });
-      if (error) { 
-        // 使用類型安全的錯誤處理
-        const errorMessage = parseApiError(error) || '建立用戶失敗';
-        
+      const { data, error } = await apiClient.POST('/api/users', {
+        body: {
+          name: body.name,
+          username: body.username,
+          ...(body.email && { email: body.email }), // 只有存在時才傳送 email
+          password: body.password,
+          password_confirmation: body.password_confirmation, // 必要欄位，直接傳送
+          ...(body.roles && { roles: body.roles }),
+          role: body.role // 必要欄位，直接傳送
+        },
+      });
+      if (error) {
+        const errorMessage = parseApiError(error) || '創建用戶失敗';
         throw new Error(errorMessage);
       }
       return data;
@@ -133,17 +168,17 @@ export function useCreateUser() {
       
       // 🔔 成功通知 - 提升用戶體驗
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('用戶已成功創建', {
           description: `用戶「${data?.data?.name}」已成功加入系統`
         });
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('創建失敗', { description: errorMessage });
       }
     },
@@ -175,7 +210,14 @@ export function useUpdateUser() {
     mutationFn: async ({ id, body }: UpdateUserPayload) => {
       const { data, error } = await apiClient.PUT('/api/users/{user}', {
         params: { path: { user: id } },
-        body,
+        body: {
+          name: body.name || '',
+          username: body.username || '',
+          email: body.email || '',
+          ...(body.password && { password: body.password }),
+          ...(body.password_confirmation && { password_confirmation: body.password_confirmation }),
+          ...(body.roles && { roles: body.roles })
+        },
       });
       if (error) { 
         // 使用類型安全的錯誤處理
@@ -202,17 +244,17 @@ export function useUpdateUser() {
       
       // 🔔 成功通知 - 提升用戶體驗
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('用戶資料已成功更新', {
           description: `用戶「${data?.data?.name}」的資料已更新`
         });
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('更新失敗', { description: errorMessage });
       }
     },
@@ -260,15 +302,15 @@ export function useDeleteUser() {
       
       // 🔔 成功通知 - 提升用戶體驗
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("用戶已成功刪除");
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("刪除失敗", { description: errorMessage });
       }
     },

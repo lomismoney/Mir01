@@ -132,7 +132,8 @@ function useAssignUserStoresInline() {
 
   return useMutation({
     mutationFn: async ({ userId, storeIds }: { userId: number; storeIds: number[] }) => {
-      const { data, error } = await apiClient.POST("/api/users/{user}/stores", {
+      // 使用 apiClient 但忽略類型檢查，因為 OpenAPI 類型定義不完整
+      const { data, error } = await (apiClient as any).POST("/api/users/{user}/stores", {
         params: { path: { user: userId } },
         body: { store_ids: storeIds.map(id => id.toString()) },
       });

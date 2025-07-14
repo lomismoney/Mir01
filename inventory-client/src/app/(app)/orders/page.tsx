@@ -1,10 +1,5 @@
-"use client";
-
-import React, { lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
-
-// 動態導入訂單組件
-const OrderClientComponent = lazy(() => import("@/components/orders/OrderClientComponent").then(module => ({ default: module.OrderClientComponent })));
+import React from "react";
+import { OrdersPageClient } from "@/components/orders/OrdersPageClient";
 
 export default function OrdersPage() {
   return (
@@ -18,19 +13,7 @@ export default function OrdersPage() {
         </p>
       </div>
 
-      {/* 渲染我們的主力部隊組件 - 使用 Suspense 包裝動態導入組件 */}
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
-            <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">載入訂單列表...</p>
-            </div>
-          </div>
-        }
-      >
-        <OrderClientComponent />
-      </Suspense>
+      <OrdersPageClient />
     </div>
   );
 }

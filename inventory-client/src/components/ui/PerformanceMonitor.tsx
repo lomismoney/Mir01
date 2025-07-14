@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { 
   Activity, 
@@ -69,7 +68,7 @@ function usePerformanceMetrics(config: PerformanceMonitorConfig) {
       const renderTime = performance.now() - (window.performance?.timing?.navigationStart || 0);
       
       // 記憶體使用 (如果瀏覽器支援)
-      const memoryInfo = (performance as any).memory;
+      const memoryInfo = (performance as { memory?: { usedJSHeapSize: number } }).memory;
       const memoryUsage = memoryInfo ? 
         Math.round(memoryInfo.usedJSHeapSize / 1024 / 1024 * 100) / 100 : 0;
       
@@ -82,7 +81,7 @@ function usePerformanceMetrics(config: PerformanceMonitorConfig) {
                         entry.name.includes('/api/')).length;
       
       // 錯誤計數 (從全局錯誤處理器獲取)
-      const errorCount = (window as any).__performanceErrorCount || 0;
+      const errorCount = (window as { __performanceErrorCount?: number }).__performanceErrorCount || 0;
 
       return {
         renderTime: Math.round(renderTime),

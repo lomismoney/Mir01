@@ -9,10 +9,12 @@ jest.mock('@/hooks', () => ({
   useCategories: jest.fn(),
 }));
 
+import * as hooks from '@/hooks';
+
 describe('Step4_Review', () => {
   const mockUpdateFormData = jest.fn();
-  const mockUseAttributes = require('@/hooks').useAttributes;
-  const mockUseCategories = require('@/hooks').useCategories;
+  const mockUseAttributes = hooks.useAttributes;
+  const mockUseCategories = hooks.useCategories;
 
   // Mock 屬性資料
   const mockAttributes = [

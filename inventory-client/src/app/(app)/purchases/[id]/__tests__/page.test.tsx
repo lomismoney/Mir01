@@ -53,15 +53,15 @@ jest.mock('date-fns/locale', () => ({
 
 // Mock UI components
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children }: any) => <div className="card">{children}</div>,
-  CardContent: ({ children }: any) => <div className="card-content">{children}</div>,
-  CardDescription: ({ children }: any) => <div className="card-description">{children}</div>,
-  CardHeader: ({ children }: any) => <div className="card-header">{children}</div>,
-  CardTitle: ({ children }: any) => <h3 className="card-title">{children}</h3>,
+  Card: ({ children }: { children: React.ReactNode }) => <div className="card">{children}</div>,
+  CardContent: ({ children }: { children: React.ReactNode }) => <div className="card-content">{children}</div>,
+  CardDescription: ({ children }: { children: React.ReactNode }) => <div className="card-description">{children}</div>,
+  CardHeader: ({ children }: { children: React.ReactNode }) => <div className="card-header">{children}</div>,
+  CardTitle: ({ children }: { children: React.ReactNode }) => <h3 className="card-title">{children}</h3>,
 }))
 
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, variant, ...props }: any) => (
+  Button: ({ children, onClick, variant, ...props }: { children: React.ReactNode; onClick?: () => void; variant?: string; [key: string]: unknown }) => (
     <button onClick={onClick} className={variant} {...props}>
       {children}
     </button>
@@ -69,7 +69,7 @@ jest.mock('@/components/ui/button', () => ({
 }))
 
 jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, className }: any) => (
+  Badge: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <span className={`badge ${className}`}>{children}</span>
   )
 }))
@@ -136,7 +136,7 @@ const PurchaseDetailPage = () => {
     )
   }
 
-  const purchaseData = purchase as any
+  const purchaseData = purchase as { status: string; order_number: string; store?: { name: string }; purchased_at?: string; shipping_cost?: number; total_amount?: number; created_at?: string; updated_at?: string; items?: Array<{ id: number; product_name?: string; sku?: string; quantity?: number; cost_price?: number; allocated_shipping_cost?: number }> }
   const permissions = {
     canModify: purchaseData.status === 'draft',
   }
@@ -277,7 +277,7 @@ const PurchaseDetailPage = () => {
           <div className="card-content">
             {purchaseData.items && purchaseData.items.length > 0 ? (
               <div className="space-y-4">
-                {purchaseData.items.map((item: any, index: number) => {
+                {purchaseData.items.map((item: { id: number; product_name?: string; sku?: string; quantity?: number; cost_price?: number; allocated_shipping_cost?: number }, index: number) => {
                   const quantity = item.quantity || 0
                   const costPrice = Number(item.cost_price || 0)
                   const allocatedShippingCost = Number(item.allocated_shipping_cost || 0)
@@ -363,7 +363,7 @@ const PurchaseDetailPage = () => {
                       <div className="text-sm text-muted-foreground">
                         商品總計: NT$ {purchaseData.items
                           .reduce(
-                            (sum: number, item: any) =>
+                            (sum: number, item: { quantity?: number; cost_price?: number }) =>
                               sum + (item.quantity || 0) * (item.cost_price || 0),
                             0
                           )

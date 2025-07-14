@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCreateInstallation, useErrorHandler } from "@/hooks";
 import { InstallationForm, InstallationFormValues } from "@/components/installations";
 import { CreateInstallationRequest } from "@/types/installation";
+import { ApiResponse } from "@/types/api-responses";
 
 /**
  * 新增安裝單頁面
@@ -49,7 +50,7 @@ export default function NewInstallationPage() {
     createInstallation(installationData, {
       onSuccess: (data) => {
         
-        const newInstallationId = (data as any)?.data?.id;
+        const newInstallationId = (data as ApiResponse<{ id: number }>)?.data?.id;
         if (newInstallationId) {
           // 跳轉到新建立的安裝單詳情頁
           router.push(`/installations/${newInstallationId}`);

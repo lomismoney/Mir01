@@ -1,6 +1,5 @@
 import { auth } from '../auth'
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 
 /**
  * 安全的 Host 驗證函數
@@ -32,7 +31,7 @@ function isValidHost(host: string): boolean {
       if (host === allowedHost) {
         return true;
       }
-    } catch (error) {
+    } catch {
       console.warn('無法解析 NEXTAUTH_URL:', nextAuthUrl);
     }
   }

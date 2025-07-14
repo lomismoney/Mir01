@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useAttributeValues } from "@/hooks";
 import { Attribute } from "@/types/attribute";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import {
 import {
   Loader2,
   Plus,
-  X,
   Edit,
   Trash2,
   MoreVertical,
@@ -38,7 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
 
 interface AttributeValuesManagerProps {
   attribute: Attribute;

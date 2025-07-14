@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -219,7 +217,6 @@ export function CategoryForm({
     form,
     isSubmitting,
     handleSubmit: submitForm,
-    reset,
   } = useStandardForm({
     schema: validationSchema,
     defaultValues: formDefaults,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { WizardFormData } from "../../CreateProductWizard";
 import { VariantItem, useVariantGenerator } from "./useVariantGenerator";
@@ -25,7 +25,7 @@ export function useVariantManager({ formData, updateFormData }: UseVariantManage
   /**
    * 自動生成 SKU
    */
-  const generateAutoSku = (variant: VariantItem, index: number): string => {
+  const generateAutoSku = useCallback((variant: VariantItem, index: number): string => {
     // 生成唯一後綴：使用時間戳和隨機數確保唯一性
     const timestamp = Date.now().toString().slice(-6); // 取時間戳後6位
     const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase(); // 3位隨機字符
@@ -40,7 +40,7 @@ export function useVariantManager({ formData, updateFormData }: UseVariantManage
       .join("");
 
     return `${productPrefix}-${attributeParts}-${timestamp}-${randomSuffix}`;
-  };
+  }, [formData.basicInfo.name, formData.specifications.isVariable]);
 
   /**
    * 初始化或更新變體資料
@@ -104,7 +104,7 @@ export function useVariantManager({ formData, updateFormData }: UseVariantManage
 
     // 標記為已初始化
     isInitialized.current = true;
-  }, [generateVariants, autoSku, formData.variants.items]);
+  }, [generateVariants, autoSku, formData.variants.items, generateAutoSku, updateFormData]);
 
   /**
    * 處理變體欄位變更

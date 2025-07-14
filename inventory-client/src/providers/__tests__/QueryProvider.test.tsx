@@ -289,7 +289,7 @@ describe('QueryProvider 組件測試', () => {
       const RetryTester = () => {
         const queryClient = useQueryClient();
         const defaultOptions = queryClient.getDefaultOptions();
-        const retryFunction = defaultOptions.queries?.retry as Function;
+        const retryFunction = defaultOptions.queries?.retry as (failureCount: number, error: unknown) => boolean;
         
         // 測試 4xx 錯誤不重試
         const error4xx = { status: 400 };
@@ -332,7 +332,7 @@ describe('QueryProvider 組件測試', () => {
       const DelayTester = () => {
         const queryClient = useQueryClient();
         const defaultOptions = queryClient.getDefaultOptions();
-        const retryDelayFunction = defaultOptions.queries?.retryDelay as Function;
+        const retryDelayFunction = defaultOptions.queries?.retryDelay as (attemptIndex: number) => number;
         
         const delay1 = retryDelayFunction(0); // 第一次重試
         const delay2 = retryDelayFunction(1); // 第二次重試
@@ -410,8 +410,8 @@ describe('QueryProvider 組件測試', () => {
     });
 
     it('應該在客戶端重用 QueryClient 實例', () => {
-      let firstQueryClient: any;
-      let secondQueryClient: any;
+      let firstQueryClient: ReturnType<typeof useQueryClient>;
+      let secondQueryClient: ReturnType<typeof useQueryClient>;
 
       const FirstClientTester = () => {
         firstQueryClient = useQueryClient();
@@ -444,11 +444,11 @@ describe('QueryProvider 組件測試', () => {
       // 模擬服務端環境
       const originalWindow = global.window;
       const originalLocation = global.location;
-      delete (global as any).window;
-      delete (global as any).location;
+      delete (global as typeof global & { window?: unknown }).window;
+      delete (global as typeof global & { location?: unknown }).location;
       
-      let firstQueryClient: any = null;
-      let secondQueryClient: any = null;
+      let firstQueryClient: ReturnType<typeof useQueryClient> | null = null;
+      let secondQueryClient: ReturnType<typeof useQueryClient> | null = null;
 
       const FirstClientTester = () => {
         const queryClient = useQueryClient();
@@ -486,7 +486,7 @@ describe('QueryProvider 組件測試', () => {
 
     it('應該處理單例模式的邊界情況', () => {
       // 確保多次調用 getQueryClient() 返回相同實例
-      let clients: any[] = [];
+      const clients: ReturnType<typeof useQueryClient>[] = [];
       
       const ClientTester = () => {
         const queryClient = useQueryClient();

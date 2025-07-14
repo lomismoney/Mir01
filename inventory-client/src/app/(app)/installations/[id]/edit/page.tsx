@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useInstallation, useUpdateInstallation, useErrorHandler } from "@/hooks";
 import { InstallationForm, InstallationFormValues } from "@/components/installations";
 import { UpdateInstallationRequest } from "@/types/installation";
+import { installationItemSchema } from "@/lib/validations/installation";
+import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -102,7 +104,7 @@ export default function EditInstallationPage() {
         ...installationData,
       },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           handleSuccess("安裝單更新成功");
           // 返回安裝單詳情頁
           router.push(`/installations/${installationId}`);
@@ -124,7 +126,7 @@ export default function EditInstallationPage() {
     scheduled_date: installation?.scheduled_date || undefined,
     notes: installation?.notes || "",
     items: installation?.items && installation.items.length > 0 
-      ? installation.items.map((item: any) => {
+      ? installation.items.map((item: z.infer<typeof installationItemSchema>) => {
           return {
             product_variant_id: item.product_variant_id ? Number(item.product_variant_id) : 0,
             product_name: item.product_name || "",

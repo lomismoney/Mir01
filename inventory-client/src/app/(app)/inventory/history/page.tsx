@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useAllInventoryTransactions } from "@/hooks";
 import {
   InventoryTransaction,
 } from "@/types/api-helpers";
 import { StoreCombobox } from "@/components/ui/store-combobox";
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale";
 import { formatDate as safeDateFormat } from "@/lib/dateHelpers";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
@@ -44,13 +42,61 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * 轉移交易的 metadata 類型定義
+ * 用於處理 transfer_in 和 transfer_out 類型的交易記錄
+ */
+interface TransferMetadata {
+  transfer_id?: string | number;
+  from_store_id?: string | number;
+  from_store_name?: string;
+  to_store_id?: string | number;
+  to_store_name?: string;
+}
+
+/**
+ * 類型守衛函數，檢查 metadata 是否為轉移相關的 metadata
+ * @param metadata - 需要檢查的 metadata 物件
+ * @returns 是否為 TransferMetadata 類型
+ */
+function isTransferMetadata(metadata: unknown): metadata is TransferMetadata {
+  return typeof metadata === 'object' && metadata !== null;
+}
+
+/**
+ * 安全解析 metadata 字符串或物件
+ * @param metadata - 原始的 metadata 資料
+ * @returns 解析後的 metadata 物件，如果解析失敗則返回 null
+ */
+function parseMetadata(metadata: Record<string, unknown> | string | null | undefined): TransferMetadata | null {
+  if (!metadata) return null;
+  
+  let metadataObj: unknown;
+  
+  if (typeof metadata === "string") {
+    try {
+      metadataObj = JSON.parse(metadata);
+    } catch {
+      // 解析失敗，返回 null
+      return null;
+    }
+  } else {
+    metadataObj = metadata;
+  }
+  
+  return isTransferMetadata(metadataObj) ? metadataObj : null;
+}
+
 export default function InventoryHistoryPage() {
   const [filters, setFilters] = useState({
     store_id: undefined as number | undefined,
     type: undefined as string | undefined,
     page: 1,
-    per_page: 20,
+    per_page: 10, // 🎯 優化：減少預設每頁項目數，避免一次載入過多資料
   });
+
+  // 🎯 新增每頁項目數選項
+  const pageSizeOptions = [5, 10, 20, 50];
 
   // 🎯 新增商品名稱搜尋功能
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,17 +133,10 @@ export default function InventoryHistoryPage() {
         transaction.type === "transfer_in"
       ) {
         // 從 metadata 獲取 transfer_id
-        let transferId = null;
-        if (transaction.metadata) {
-          let metadataObj = transaction.metadata;
-          if (typeof metadataObj === "string") {
-            try {
-              metadataObj = JSON.parse(metadataObj);
-            } catch (e) {
-              // 解析失敗，保持原樣
-            }
-          }
-          transferId = metadataObj?.transfer_id;
+        let transferId: string | null = null;
+        const metadataObj = parseMetadata(transaction.metadata);
+        if (metadataObj && metadataObj.transfer_id) {
+          transferId = String(metadataObj.transfer_id);
         }
 
         if (transferId) {
@@ -123,32 +162,23 @@ export default function InventoryHistoryPage() {
     });
 
     // 處理配對的轉移記錄
-    transferMap.forEach((transfer, transferId) => {
+    transferMap.forEach((transfer) => {
       if (transfer.out && transfer.in) {
         // 找到配對的轉移記錄，創建合併記錄
         let fromStoreInfo = null;
         let toStoreInfo = null;
 
         // 從 metadata 獲取門市資訊
-        if (transfer.out.metadata) {
-          let metadataObj = transfer.out.metadata;
-          if (typeof metadataObj === "string") {
-            try {
-              metadataObj = JSON.parse(metadataObj);
-            } catch (e) {
-              // 解析失敗
-            }
-          }
-          if (metadataObj) {
-            fromStoreInfo = {
-              id: metadataObj.from_store_id,
-              name: metadataObj.from_store_name || transfer.out.store?.name,
-            };
-            toStoreInfo = {
-              id: metadataObj.to_store_id,
-              name: metadataObj.to_store_name || transfer.in.store?.name,
-            };
-          }
+        const metadataObj = parseMetadata(transfer.out.metadata);
+        if (metadataObj) {
+          fromStoreInfo = {
+            id: metadataObj.from_store_id ? Number(metadataObj.from_store_id) : null,
+            name: metadataObj.from_store_name || transfer.out.store?.name,
+          };
+          toStoreInfo = {
+            id: metadataObj.to_store_id ? Number(metadataObj.to_store_id) : null,
+            name: metadataObj.to_store_name || transfer.in.store?.name,
+          };
         }
 
         // 如果沒有從 metadata 獲取到門市資訊，使用關聯的 store
@@ -214,6 +244,18 @@ export default function InventoryHistoryPage() {
     setFilters((prev) => ({
       ...prev,
       page: newPage,
+    }));
+  };
+
+  /**
+   * 處理每頁項目數變更
+   * 變更時自動回到第一頁
+   */
+  const handlePageSizeChange = (newPageSize: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      page: 1, // 重置到第一頁
+      per_page: parseInt(newPageSize),
     }));
   };
 
@@ -317,7 +359,7 @@ export default function InventoryHistoryPage() {
         </CardHeader>
         <CardContent>
           <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
            
           >
             {/* 商品名稱搜尋 */}
@@ -393,6 +435,29 @@ export default function InventoryHistoryPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* 每頁項目數選擇器 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                每頁顯示
+              </label>
+              <Select
+                value={filters.per_page.toString()}
+                onValueChange={handlePageSizeChange}
+               
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="選擇每頁項目數" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageSizeOptions.map((size) => (
+                    <SelectItem key={size} value={size.toString()}>
+                      {size} 筆記錄
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -411,7 +476,8 @@ export default function InventoryHistoryPage() {
         <CardContent>
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 10 }).map((_, index) => (
+              {/* 🎯 優化：根據實際每頁項目數動態顯示骨架屏 */}
+              {Array.from({ length: Math.min(filters.per_page, 10) }).map((_, index) => (
                 <div
                   key={index}
                   className="flex items-center space-x-4 p-4 border rounded-lg"
@@ -726,9 +792,13 @@ export default function InventoryHistoryPage() {
               className="flex items-center justify-between mt-6 pt-6 border-t"
              
             >
-              <div className="text-sm text-muted-foreground">
-                第 {pagination.current_page} 頁，共 {pagination.last_page} 頁
-                （總計 {pagination.total} 筆記錄）
+              <div className="text-sm text-muted-foreground flex flex-col sm:flex-row gap-1 sm:gap-4">
+                <span>
+                  顯示第 {((pagination.current_page - 1) * filters.per_page) + 1} - {Math.min(pagination.current_page * filters.per_page, pagination.total)} 筆記錄
+                </span>
+                <span>
+                  第 {pagination.current_page} / {pagination.last_page} 頁，共 {pagination.total} 筆
+                </span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -738,7 +808,7 @@ export default function InventoryHistoryPage() {
                   onClick={() =>
                     handlePageChange((pagination.current_page || 1) - 1)
                   }
-                  disabled={pagination.current_page === 1}
+                  disabled={pagination.current_page === 1 || isLoading}
                  
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -771,6 +841,7 @@ export default function InventoryHistoryPage() {
                           }
                           size="sm"
                           onClick={() => handlePageChange(pageNumber)}
+                          disabled={isLoading}
                           className="w-10"
                          
                         >
@@ -787,7 +858,7 @@ export default function InventoryHistoryPage() {
                   onClick={() =>
                     handlePageChange((pagination.current_page || 1) + 1)
                   }
-                  disabled={pagination.current_page === pagination.last_page}
+                  disabled={pagination.current_page === pagination.last_page || isLoading}
                  
                 >
                   下一頁

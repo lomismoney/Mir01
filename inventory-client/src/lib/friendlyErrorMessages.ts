@@ -292,9 +292,9 @@ const BUSINESS_ERROR_MESSAGES: Record<string, Omit<FriendlyErrorMessage, 'action
 /**
  * 轉換錯誤為友善訊息
  */
-export function convertToFriendlyError(error: any): FriendlyErrorMessage {
+export function convertToFriendlyError(error: unknown): FriendlyErrorMessage {
   // 處理網路錯誤
-  if (error?.message && NETWORK_ERROR_MESSAGES[error.message]) {
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && NETWORK_ERROR_MESSAGES[error.message]) {
     return {
       ...NETWORK_ERROR_MESSAGES[error.message],
       actions: [
@@ -312,11 +312,11 @@ export function convertToFriendlyError(error: any): FriendlyErrorMessage {
   }
   
   // 處理 HTTP 狀態碼錯誤
-  if (error?.response?.status && HTTP_ERROR_MESSAGES[error.response.status]) {
-    const baseMessage = HTTP_ERROR_MESSAGES[error.response.status];
+  if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'status' in error.response && typeof error.response.status === 'number' && HTTP_ERROR_MESSAGES[error.response.status]) {
+    const baseMessage = HTTP_ERROR_MESSAGES[(error as { response: { status: number } }).response.status];
     let actions: FriendlyErrorMessage['actions'] = [];
     
-    switch (error.response.status) {
+    switch ((error as { response: { status: number } }).response.status) {
       case 401:
         actions = [
           {
@@ -365,9 +365,9 @@ export function convertToFriendlyError(error: any): FriendlyErrorMessage {
   }
   
   // 處理業務邏輯錯誤
-  if (error?.code && BUSINESS_ERROR_MESSAGES[error.code]) {
+  if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'string' && BUSINESS_ERROR_MESSAGES[error.code]) {
     return {
-      ...BUSINESS_ERROR_MESSAGES[error.code],
+      ...BUSINESS_ERROR_MESSAGES[(error as { code: string }).code],
       actions: [
         {
           label: '了解',
@@ -379,8 +379,8 @@ export function convertToFriendlyError(error: any): FriendlyErrorMessage {
   }
   
   // 處理 API 回應中的錯誤訊息
-  if (error?.response?.data?.message) {
-    const serverMessage = error.response.data.message;
+  if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+    const serverMessage = (error as { response: { data: { message: string } } }).response.data.message;
     
     // 嘗試匹配已知的錯誤模式
     for (const [key, message] of Object.entries(BUSINESS_ERROR_MESSAGES)) {
@@ -431,14 +431,14 @@ export function convertToFriendlyError(error: any): FriendlyErrorMessage {
  */
 export class ErrorTracker {
   private static errors: Array<{
-    error: any;
+    error: unknown;
     friendlyMessage: FriendlyErrorMessage;
     timestamp: Date;
     url: string;
     userAgent: string;
   }> = [];
   
-  static track(error: any, friendlyMessage: FriendlyErrorMessage) {
+  static track(error: unknown, friendlyMessage: FriendlyErrorMessage) {
     this.errors.push({
       error,
       friendlyMessage,
@@ -488,7 +488,7 @@ export class ErrorTracker {
         category: friendlyMessage.category,
         severity: friendlyMessage.severity,
         title: friendlyMessage.title,
-        originalError: error?.message || String(error),
+        originalError: (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') ? error.message : String(error),
       })),
       browser: navigator.userAgent,
       timestamp: new Date().toISOString(),
@@ -499,15 +499,15 @@ export class ErrorTracker {
 /**
  * 錯誤回報輔助函數
  */
-export function generateErrorReport(error: any, friendlyMessage: FriendlyErrorMessage) {
+export function generateErrorReport(error: unknown, friendlyMessage: FriendlyErrorMessage) {
   return {
     timestamp: new Date().toISOString(),
     url: window.location.href,
     userAgent: navigator.userAgent,
     error: {
-      message: error?.message,
-      stack: error?.stack,
-      name: error?.name,
+      message: (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') ? error.message : undefined,
+      stack: (error && typeof error === 'object' && 'stack' in error && typeof error.stack === 'string') ? error.stack : undefined,
+      name: (error && typeof error === 'object' && 'name' in error && typeof error.name === 'string') ? error.name : undefined,
     },
     friendlyMessage: {
       title: friendlyMessage.title,

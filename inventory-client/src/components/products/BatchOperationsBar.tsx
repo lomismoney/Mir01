@@ -27,7 +27,6 @@ import {
   PackageX,
   Edit,
   Download,
-  Upload,
   CheckCircle,
   XCircle
 } from 'lucide-react';

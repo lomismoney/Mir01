@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -99,7 +99,7 @@ export function VirtualizationToggle({
                 <BarChart3 className="h-4 w-4" />
                 性能分析
               </h4>
-              <Badge variant={performanceAnalysis.recommendation.color as any}>
+              <Badge variant={performanceAnalysis.recommendation.color as "destructive" | "default" | "secondary" | "outline"}>
                 {performanceAnalysis.recommendation.level.toUpperCase()}
               </Badge>
             </div>

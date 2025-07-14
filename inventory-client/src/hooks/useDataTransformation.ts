@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { useApiProcessor } from '@/lib/standardApiProcessors';
 
 /**
  * 商品巢狀顯示項目類型
@@ -16,6 +15,10 @@ export interface ExpandedProductItem {
   isVariantRow?: boolean;
   parentId?: number;
   processedVariants?: ExpandedProductItem[];
+  // 變體分頁功能
+  isViewMoreRow?: boolean; // 標記是否為"查看更多"行
+  remainingCount?: number; // 剩餘變體數量
+  allVariants?: ExpandedProductItem[]; // 保存所有變體資料
   // 變體專用字段
   variantInfo?: {
     id: number;
@@ -166,11 +169,9 @@ export function useProductDataTransformation(rawProducts: any[] = []) {
     return expanded;
   }, [transformedProducts]);
 
-  // 獲取子行的函數
+  // 獲取子行的函數 - 簡化版，不展開變體
   const getSubRows = (row: ExpandedProductItem) => {
-    if (!row.isVariantRow && row.processedVariants) {
-      return row.processedVariants;
-    }
+    // 不再自動展開變體，所有變體通過點擊商品名稱查看
     return undefined;
   };
 

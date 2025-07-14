@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { LoadingFallback } from "@/components/ui/skeleton";
 
 // 動態導入進貨管理組件
 const PurchaseManagement = lazy(() => import("@/components/purchases/PurchaseManagement").then(module => ({ default: module.PurchaseManagement })));
@@ -17,16 +17,7 @@ const PurchaseManagement = lazy(() => import("@/components/purchases/PurchaseMan
  */
 export default function IncomingPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
-          <div className="flex flex-col items-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">載入進貨管理...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingFallback type="page" text="載入進貨管理..." />}>
       <PurchaseManagement />
     </Suspense>
   );

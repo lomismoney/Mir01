@@ -58,9 +58,12 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: ReactNode }) => (
+  const TestWrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  
+  return TestWrapper;
 };
 
 describe('useOrders hooks', () => {
@@ -204,7 +207,7 @@ describe('useOrders hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(orderData as any);
+      result.current.mutate(orderData as { customer_id: number; shipping_status: string; payment_status: string; items: Array<{ product_variant_id: number; quantity: number; price: number }> });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -243,7 +246,7 @@ describe('useOrders hooks', () => {
         items: [{ product_variant_id: 1, quantity: 10, price: 50 }]
       };
 
-      result.current.mutate(orderData as any);
+      result.current.mutate(orderData as { customer_id: number; shipping_status: string; payment_status: string; items: Array<{ product_variant_id: number; quantity: number; price: number }> });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -267,7 +270,7 @@ describe('useOrders hooks', () => {
         items: [{ product_variant_id: 1, quantity: 2, price: 50 }]
       };
 
-      result.current.mutate(orderData as any);
+      result.current.mutate(orderData as { customer_id: number; shipping_status: string; payment_status: string; items: Array<{ product_variant_id: number; quantity: number; price: number }> });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -972,7 +975,7 @@ describe('useOrders hooks', () => {
   describe('useDeleteOrder window environment tests', () => {
     it('should handle error in browser environment', async () => {
       // Mock sonner toast
-      const { toast } = require('sonner');
+      const { toast } = jest.requireMock<typeof import('sonner')>('sonner');
       jest.clearAllMocks();
 
       mockApiClient.DELETE.mockResolvedValueOnce({
@@ -1000,7 +1003,7 @@ describe('useOrders hooks', () => {
   describe('useAddOrderPayment window environment tests', () => {
     it('should handle error in browser environment', async () => {
       // Mock sonner toast
-      const { toast } = require('sonner');
+      const { toast } = jest.requireMock<typeof import('sonner')>('sonner');
       jest.clearAllMocks();
 
       mockApiClient.POST.mockResolvedValueOnce({
@@ -1032,7 +1035,7 @@ describe('useOrders hooks', () => {
 
     it('should handle error with fallback message in browser environment', async () => {
       // Mock sonner toast
-      const { toast } = require('sonner');
+      const { toast } = jest.requireMock<typeof import('sonner')>('sonner');
       jest.clearAllMocks();
       
       // Mock parseApiError to return null

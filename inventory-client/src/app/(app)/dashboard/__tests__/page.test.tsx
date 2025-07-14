@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DashboardPage from '../page';
@@ -27,24 +27,24 @@ jest.mock('@/components/chart-area-interactive', () => ({
 }));
 
 jest.mock('@/components/ui/select', () => ({
-  Select: ({ children, value, onValueChange }: any) => (
+  Select: ({ children, value, onValueChange }: { children: React.ReactNode; value?: string; onValueChange?: (value: string) => void }) => (
     <div data-testid="select" data-value={value}>
       {children}
-      <button onClick={() => onValueChange('1')} data-testid="select-item-1">Select Item 1</button>
-      <button onClick={() => onValueChange('2')} data-testid="select-item-2">Select Item 2</button>
+      <button onClick={() => onValueChange?.('1')} data-testid="select-item-1">Select Item 1</button>
+      <button onClick={() => onValueChange?.('2')} data-testid="select-item-2">Select Item 2</button>
     </div>
   ),
-  SelectContent: ({ children }: any) => <div data-testid="select-content">{children}</div>,
-  SelectItem: ({ children, value }: any) => <div data-testid={`select-item-${value}`}>{children}</div>,
-  SelectTrigger: ({ children }: any) => <div data-testid="select-trigger">{children}</div>,
-  SelectValue: ({ placeholder }: any) => <div data-testid="select-value">{placeholder}</div>
+  SelectContent: ({ children }: { children: React.ReactNode }) => <div data-testid="select-content">{children}</div>,
+  SelectItem: ({ children, value }: { children: React.ReactNode; value?: string }) => <div data-testid={`select-item-${value}`}>{children}</div>,
+  SelectTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="select-trigger">{children}</div>,
+  SelectValue: ({ placeholder }: { placeholder?: string }) => <div data-testid="select-value">{placeholder}</div>
 }));
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children }: any) => <div data-testid="card">{children}</div>,
-  CardContent: ({ children }: any) => <div data-testid="card-content">{children}</div>,
-  CardHeader: ({ children }: any) => <div data-testid="card-header">{children}</div>,
-  CardTitle: ({ children }: any) => <div data-testid="card-title">{children}</div>
+  Card: ({ children }: { children: React.ReactNode }) => <div data-testid="card">{children}</div>,
+  CardContent: ({ children }: { children: React.ReactNode }) => <div data-testid="card-content">{children}</div>,
+  CardHeader: ({ children }: { children: React.ReactNode }) => <div data-testid="card-header">{children}</div>,
+  CardTitle: ({ children }: { children: React.ReactNode }) => <div data-testid="card-title">{children}</div>
 }));
 
 // Mock hooks
@@ -59,9 +59,11 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = 'TestWrapper';
+  return Wrapper;
 };
 
 describe('DashboardPage', () => {

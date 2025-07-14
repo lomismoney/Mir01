@@ -80,8 +80,9 @@ describe('queryKeys', () => {
       expect(INSTALLATION_QUERY_KEYS.DETAIL(555)).toEqual(['installations', 555]);
     });
 
-    it('should have correct SCHEDULE key', () => {
-      expect(INSTALLATION_QUERY_KEYS.SCHEDULE).toEqual(['installations', 'schedule']);
+    it('should have correct SCHEDULE key function', () => {
+      expect(INSTALLATION_QUERY_KEYS.SCHEDULE()).toEqual(['installations', 'schedule', undefined]);
+      expect(INSTALLATION_QUERY_KEYS.SCHEDULE({ start_date: '2024-01-01' })).toEqual(['installations', 'schedule', { start_date: '2024-01-01' }]);
     });
 
     it('should return arrays for all keys', () => {
@@ -96,13 +97,13 @@ describe('queryKeys', () => {
       expect(QUERY_KEYS.PRODUCT(id)).toEqual(QUERY_KEYS.PRODUCT(id));
       expect(QUERY_KEYS.USER(id)).toEqual(QUERY_KEYS.USER(id));
       expect(QUERY_KEYS.CUSTOMER(id)).toEqual(QUERY_KEYS.CUSTOMER(id));
-      expect(INSTALLATION_QUERY_KEYS.INSTALLATION(id)).toEqual(INSTALLATION_QUERY_KEYS.INSTALLATION(id));
+      expect(INSTALLATION_QUERY_KEYS.DETAIL(id)).toEqual(INSTALLATION_QUERY_KEYS.DETAIL(id));
     });
 
     it('should generate different keys for different ids', () => {
       expect(QUERY_KEYS.PRODUCT(1)).not.toEqual(QUERY_KEYS.PRODUCT(2));
       expect(QUERY_KEYS.USER(10)).not.toEqual(QUERY_KEYS.USER(20));
-      expect(INSTALLATION_QUERY_KEYS.INSTALLATION(100)).not.toEqual(INSTALLATION_QUERY_KEYS.INSTALLATION(200));
+      expect(INSTALLATION_QUERY_KEYS.DETAIL(100)).not.toEqual(INSTALLATION_QUERY_KEYS.DETAIL(200));
     });
 
     it('should handle edge case ids', () => {

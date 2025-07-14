@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { columns } from '../columns';
 import { Attribute } from '@/types/attribute';
@@ -18,9 +18,9 @@ const mockAttribute: Attribute = {
   id: 1,
   name: '顏色',
   values: [
-    { id: 1, name: '紅色', value: 'red' },
-    { id: 2, name: '藍色', value: 'blue' },
-    { id: 3, name: '綠色', value: 'green' },
+    { id: 1, value: '紅色', attribute_id: 1 },
+    { id: 2, value: '藍色', attribute_id: 1 },
+    { id: 3, value: '綠色', attribute_id: 1 },
   ],
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
@@ -112,14 +112,14 @@ describe('Attribute Columns', () => {
       expect(columns[0].size).toBe(40);
 
       // 檢查 name 列
-      expect(columns[1].accessorKey).toBe('name');
+      expect((columns[1] as any).accessorKey).toBe('name');
 
       // 檢查 value_count 列
       expect(columns[2].id).toBe('value_count');
       expect(columns[2].enableSorting).toBe(false);
 
       // 檢查 created_at 列
-      expect(columns[3].accessorKey).toBe('created_at');
+      expect((columns[3] as any).accessorKey).toBe('created_at');
       
       // 檢查 actions 列
       expect(columns[4].id).toBe('actions');
@@ -163,9 +163,8 @@ describe('Attribute Columns', () => {
     test('應該正確顯示規格值數量', () => {
       renderCell(columns[2], mockAttribute);
       
-      // 由於文字被分開在不同元素中，使用更靈活的選擇器
-      const badge = screen.getByText(/3/).closest('[data-testid]');
-      expect(badge).toHaveTextContent('Tags3 個值');
+      // 檢查數量顯示
+      expect(screen.getByText('3 個值')).toBeInTheDocument();
     });
 
     test('沒有規格值時應該顯示無值', () => {

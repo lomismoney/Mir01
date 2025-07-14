@@ -49,8 +49,8 @@ jest.mock("@/components/mode-toggle", () => ({
 }));
 
 // 取得模擬的 hooks
-const { useSession } = require("next-auth/react");
-const { usePathname } = require("next/navigation");
+const { useSession } = jest.requireMock<typeof import("next-auth/react")>("next-auth/react");
+const { usePathname } = jest.requireMock<typeof import("next/navigation")>("next/navigation");
 
 describe("SiteHeader", () => {
   beforeEach(() => {

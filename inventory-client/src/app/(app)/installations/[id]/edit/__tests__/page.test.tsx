@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useParams, useRouter } from 'next/navigation';
 import { useInstallation, useUpdateInstallation } from '@/hooks';
 import { toast } from 'sonner';
+import { UpdateInstallationData } from '@/lib/validations/installation';
 import EditInstallationPage from '../page';
 
 // Mock dependencies
@@ -14,6 +15,9 @@ jest.mock('next/navigation', () => ({
 jest.mock('@/hooks', () => ({
   useInstallation: jest.fn(),
   useUpdateInstallation: jest.fn(),
+  useErrorHandler: jest.fn(() => ({
+    handleError: jest.fn(),
+  })),
 }));
 
 jest.mock('sonner', () => ({
@@ -23,12 +27,20 @@ jest.mock('sonner', () => ({
   },
 }));
 
+interface MockInstallationFormProps {
+  onSubmit: (data: UpdateInstallationData) => void;
+  onCancel: () => void;
+  isSubmitting: boolean;
+  initialData?: Partial<UpdateInstallationData>;
+}
+
 jest.mock('@/components/installations', () => ({
-  InstallationForm: ({ onSubmit, onCancel, isSubmitting, initialData }: any) => (
+  InstallationForm: ({ onSubmit, onCancel, isSubmitting, initialData }: MockInstallationFormProps) => (
     <div data-testid="installation-form">
       <div>Form with initial data: {JSON.stringify(initialData)}</div>
       <button 
         onClick={() => onSubmit({
+          id: 123,
           customer_name: 'Test Customer',
           customer_phone: '123456789',
           installation_address: 'Test Address',
@@ -69,12 +81,12 @@ describe('EditInstallationPage', () => {
     
     mockUseRouter.mockReturnValue({
       push: mockPush,
-    } as any);
+    } as ReturnType<typeof useRouter>);
 
     mockUseUpdateInstallation.mockReturnValue({
       mutate: mockMutate,
       isPending: false,
-    } as any);
+    } as ReturnType<typeof useUpdateInstallation>);
   });
 
   describe('參數驗證', () => {
@@ -85,7 +97,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -100,7 +112,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -115,7 +127,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -132,7 +144,7 @@ describe('EditInstallationPage', () => {
         isLoading: true,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -146,7 +158,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: true,
         error: { message: 'Network error' },
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -161,7 +173,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -200,7 +212,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -216,7 +228,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -237,7 +249,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -268,7 +280,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -311,7 +323,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       mockMutate.mockImplementation((data, options) => {
         options.onSuccess({ data: { id: 123 } });
@@ -335,7 +347,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       mockMutate.mockImplementation((data, options) => {
         options.onError(new Error('Update failed'));
@@ -360,7 +372,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       mockMutate.mockImplementation((data, options) => {
         options.onError({ message: null });
@@ -392,7 +404,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -425,7 +437,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       
@@ -454,7 +466,7 @@ describe('EditInstallationPage', () => {
         isLoading: false,
         isError: false,
         error: null,
-      } as any);
+      } as ReturnType<typeof useInstallation>);
       
       render(<EditInstallationPage />);
       

@@ -37,7 +37,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useDeleteCustomer } from "@/hooks";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -45,6 +44,7 @@ import { zhTW } from "date-fns/locale";
 // 🎯 【Task 3】columns 函數參數類型定義
 interface ColumnsProps {
   onEditCustomer: (customer: Customer) => void;
+  onDeleteCustomer: (customerId: number) => void;
 }
 
 // 🎯 【Task 3】將 columns 改為函數，接收編輯回調
@@ -306,7 +306,6 @@ export const columns = (props: ColumnsProps): ColumnDef<Customer>[] => [
     ),
     cell: ({ row }) => {
       const customer = row.original;
-      const { mutate: deleteCustomer } = useDeleteCustomer();
 
       return (
         <div className="flex items-center justify-center">
@@ -350,7 +349,7 @@ export const columns = (props: ColumnsProps): ColumnDef<Customer>[] => [
                   <AlertDialogFooter>
                     <AlertDialogCancel>取消</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => deleteCustomer(customer.id!)}
+                      onClick={() => props.onDeleteCustomer(customer.id!)}
                       className="bg-destructive hover:bg-destructive/90"
                     >
                       確認刪除

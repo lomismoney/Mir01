@@ -25,7 +25,7 @@ describe('CategoriesPage', () => {
   });
 
   it('should render without crashing', () => {
-    const { container } = render(<CategoriesPage />);
-    expect(container).toBeInTheDocument();
+    render(<CategoriesPage />);
+    expect(screen.getByTestId('categories-client-page')).toBeInTheDocument();
   });
 });

@@ -1,6 +1,5 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,121 +11,155 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { loginAction } from "@/actions/auth";
-import { toast } from "sonner";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
+
+// 提交按鈕組件（需要在表單內使用 useFormStatus）
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  
+  return (
+    <Button
+      type="submit"
+      className="w-full relative"
+      disabled={pending}
+      size="lg"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          登入中...
+        </>
+      ) : (
+        "登入"
+      )}
+    </Button>
+  );
+}
 
 /**
- * 登入頁面元件 (Auth.js + React 19 現代化版本)
- *
- * 使用 Auth.js 和 Server Actions 重構的登入頁面
- *
- * 核心特色：
- * 1. Server Actions - 伺服器端表單處理
- * 2. useActionState - React 19 現代化表單狀態管理
- * 3. Auth.js 整合 - 統一認證流程
- * 4. 自動重導向 - 登入成功後自動跳轉
- * 5. 雙重錯誤顯示 - 表單內持久顯示 + Toast 提醒
- * 6. 內建 Pending 狀態 - 自動載入中狀態管理
- *
- * 技術優勢：
- * - 內建 isPending 狀態，無需手動管理
- * - 無需 useState 儲存表單資料
- * - 伺服器端驗證，安全性更高
- * - 與 Auth.js 生態系統完美整合
- * - 符合 React 19 最佳實踐
+ * 簡化版登入頁面
+ * 
+ * 使用標準的 Server Action 流程：
+ * 1. 表單使用 action 屬性
+ * 2. Server Action 處理驗證和重定向
+ * 3. 使用 useActionState 處理錯誤狀態
+ * 4. 使用 useFormStatus 處理載入狀態
  */
 export default function LoginPage() {
-  // 使用 useActionState Hook 處理 Server Action 的狀態 (React 19+)
-  // state 包含從 Server Action 回傳的資料（如錯誤訊息）
-  // formAction 是包裝後的 action 函式，會自動處理表單提交
-  // isPending 提供內建的載入中狀態，無需手動管理
-  const [state, formAction, isPending] = useActionState(loginAction, undefined);
-
-  // 監聽 Server Action 的回傳狀態，顯示錯誤訊息
-  useEffect(() => {
-    if (state?.error) {
-      toast.error(state.error);
-    }
-  }, [state]);
-
+  const [state, formAction] = useActionState(loginAction, undefined);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  
   return (
-    <div
-      className="flex items-center justify-center min-h-screen bg-muted/40"
-     
-    >
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">
-            登入
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-muted/20 to-muted/40">
+      {/* 背景裝飾 */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-1/2 -right-1/2 w-[1000px] h-[1000px] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -bottom-1/2 -left-1/2 w-[1000px] h-[1000px] rounded-full bg-primary/5 blur-3xl" />
+      </div>
+      
+      <Card className="w-full max-w-sm relative z-10 shadow-2xl">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            歡迎回來
           </CardTitle>
           <CardDescription>
-            請輸入您的帳號密碼以登入系統。
+            請輸入您的帳號密碼以登入系統
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* 錯誤訊息顯示區域 - 直觀且持久的錯誤提示 */}
+          {/* 錯誤訊息顯示 */}
           {state?.error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           )}
-
-          {/* 
-                               使用 Server Action 的表單
-                               - action={formAction}: 將 Server Action 直接綁定到表單
-                               - Next.js 會自動處理表單提交和資料傳遞
-                               - 無需 onSubmit 事件處理器
-                              */}
+          
           <form action={formAction}>
             <div className="grid gap-4">
-              {/* 使用者名稱輸入欄位 */}
+              {/* 帳號輸入欄位 */}
               <div className="grid gap-2">
-                <Label htmlFor="username">
-                  帳號
-                </Label>
-                <Input
-                  id="username"
-                  type="text"
-                  name="username"
-                  placeholder="superadmin"
-                  required
-                  className={state?.error ? "border-destructive" : ""}
-                 
-                />
+                <Label htmlFor="username">帳號</Label>
+                <div className="relative">
+                  <Input
+                    id="username"
+                    type="text"
+                    name="username"
+                    placeholder="請輸入您的帳號"
+                    required
+                    className="pr-10"
+                    autoComplete="username"
+                  />
+                </div>
               </div>
 
               {/* 密碼輸入欄位 */}
               <div className="grid gap-2">
-                <Label htmlFor="password">
-                  密碼
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  name="password"
-                  required
-                  className={state?.error ? "border-destructive" : ""}
-                 
-                />
+                <Label htmlFor="password">密碼</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="請輸入您的密碼"
+                    required
+                    className="pr-10"
+                    autoComplete="current-password"
+                  />
+                  {/* 密碼顯示/隱藏切換按鈕 */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
               </div>
 
-              {/* 登入按鈕 - 使用 isPending 狀態控制載入中顯示 */}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isPending}
-               
-              >
-                {isPending ? "登入中..." : "登入"}
-              </Button>
+              {/* 記住我選項 */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember"
+                  name="rememberMe"
+                  value="true"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  aria-label="記住我的登入狀態"
+                />
+                <Label
+                  htmlFor="remember"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                >
+                  記住我
+                </Label>
+              </div>
+
+              {/* 登入按鈕 */}
+              <SubmitButton />
             </div>
           </form>
 
           {/* 友善提示 */}
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            預設帳號：superadmin
+          <div className="mt-4 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              預設帳號：superadmin
+            </p>
+            <p className="text-xs text-muted-foreground">
+              提示：勾選「記住我」可保持登入狀態 30 天
+            </p>
           </div>
         </CardContent>
       </Card>

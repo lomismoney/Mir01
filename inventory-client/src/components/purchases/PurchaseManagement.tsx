@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -79,6 +79,8 @@ import {
 } from "lucide-react";
 
 import { CreatePurchaseDialog } from "./CreatePurchaseDialog";
+import { PurchaseProgressTracker } from "./PurchaseProgressTracker";
+import { PartialReceiptDialog } from "./PartialReceiptDialog";
 
 interface PurchaseFilters {
   store_id?: number;
@@ -109,10 +111,19 @@ export function PurchaseManagement() {
   const modalManager = useModalManager<any>();
   const { handleError, handleSuccess } = useErrorHandler();
 
+  // 部分收貨對話框狀態
+  const [partialReceiptDialog, setPartialReceiptDialog] = useState<{
+    isOpen: boolean;
+    purchase: any | null;
+  }>({
+    isOpen: false,
+    purchase: null,
+  });
+
   // 狀態管理
   const [filters, setFilters] = useState<PurchaseFilters>({
     page: 1,
-    per_page: 20,
+    per_page: 10, // 改為每頁10筆，提升使用者體驗
     status: "",
   });
   const [orderNumberInput, setOrderNumberInput] = useState("");
@@ -152,7 +163,7 @@ export function PurchaseManagement() {
    * 重置篩選器
    */
   const handleResetFilters = () => {
-    setFilters({ page: 1, per_page: 20 });
+    setFilters({ page: 1, per_page: 10 });
     setOrderNumberInput("");
   };
 
@@ -197,6 +208,26 @@ export function PurchaseManagement() {
         modalManager.closeModal();
       },
       onError: (error) => handleError(error),
+    });
+  };
+
+  /**
+   * 開啟部分收貨對話框
+   */
+  const handleOpenPartialReceipt = (purchase: any) => {
+    setPartialReceiptDialog({
+      isOpen: true,
+      purchase,
+    });
+  };
+
+  /**
+   * 關閉部分收貨對話框
+   */
+  const handleClosePartialReceipt = () => {
+    setPartialReceiptDialog({
+      isOpen: false,
+      purchase: null,
     });
   };
 
@@ -555,8 +586,8 @@ export function PurchaseManagement() {
                   ))}
                 </div>
               ) : purchasesResponse?.data && purchasesResponse.data.length > 0 ? (
-                <div className="space-y-4">
-                  {purchasesResponse.data.map((purchase: any) => {
+                <div className="space-y-6">
+                  {purchasesResponse.data.map((purchase: any, index: number) => {
                     const permissions = getPurchasePermissions(
                       purchase.status as PurchaseStatus,
                     );
@@ -565,175 +596,185 @@ export function PurchaseManagement() {
                     );
 
                     return (
-                      <div
-                        key={purchase.id}
-                        className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                       
-                      >
+                      <React.Fragment key={purchase.id}>
+                        {/* 主要資料行 */}
                         <div
-                          className="flex items-start justify-between"
-                         
+                          className={`
+                            border rounded-lg transition-all duration-200
+                            ${index % 2 === 0 ? 'bg-background/60' : 'bg-muted/20'}
+                            hover:bg-accent/50 hover:shadow-sm
+                          `}
                         >
-                          <div className="space-y-2 flex-1">
-                            <div
-                              className="flex items-center gap-2"
-                             
-                            >
-                              <h3 className="font-semibold">
-                                {purchase.order_number}
-                              </h3>
-                              <Badge
-                                className={
-                                  PURCHASE_STATUS_COLORS[
-                                    purchase.status as PurchaseStatus
-                                  ]
-                                }
-                               
-                              >
-                                {
-                                  PURCHASE_STATUS_LABELS[
-                                    purchase.status as PurchaseStatus
-                                  ]
-                                }
-                              </Badge>
-                            </div>
+                          {/* 進貨單頭部信息 */}
+                          <div className="p-4 border-b border-border/50">
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-2 flex-1">
+                                <div className="flex items-center gap-3">
+                                  <h3 className="text-lg font-semibold text-foreground">
+                                    {purchase.order_number}
+                                  </h3>
+                                  <Badge
+                                    className={
+                                      PURCHASE_STATUS_COLORS[
+                                        purchase.status as PurchaseStatus
+                                      ]
+                                    }
+                                  >
+                                    {
+                                      PURCHASE_STATUS_LABELS[
+                                        purchase.status as PurchaseStatus
+                                      ]
+                                    }
+                                  </Badge>
+                                </div>
 
-                            <div
-                              className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground"
-                             
-                            >
-                              <div
-                                className="flex items-center gap-1"
-                               
-                              >
-                                <Store className="h-4 w-4" />
-                                <span>
-                                  {purchase.store?.name}
-                                </span>
-                              </div>
-                              <div
-                                className="flex items-center gap-1"
-                               
-                              >
-                                <Calendar className="h-4 w-4" />
-                                <span>
-                                  {purchase.purchased_at
-                                    ? format(
-                                        new Date(purchase.purchased_at),
-                                        "yyyy/MM/dd",
-                                        { locale: zhTW },
-                                      )
-                                    : "未設定"}
-                                </span>
-                              </div>
-                              <div>
-                                總金額: NT${" "}
-                                {Number(
-                                  purchase.total_amount || 0,
-                                ).toLocaleString()}
-                              </div>
-                            </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-2">
+                                    <Store className="h-4 w-4" />
+                                    <span className="font-medium">門市：</span>
+                                    <span>{purchase.store?.name || '未指定'}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Calendar className="h-4 w-4" />
+                                    <span className="font-medium">進貨日期：</span>
+                                    <span>
+                                      {purchase.purchased_at
+                                        ? format(
+                                            new Date(purchase.purchased_at),
+                                            "yyyy/MM/dd",
+                                            { locale: zhTW },
+                                          )
+                                        : "未設定"}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <TrendingUp className="h-4 w-4" />
+                                    <span className="font-medium">總金額：</span>
+                                    <span className="text-green-600 font-semibold">
+                                      NT$ {Number(purchase.total_amount || 0).toLocaleString()}
+                                    </span>
+                                  </div>
+                                </div>
 
-                            {purchase.items && purchase.items.length > 0 && (
-                              <div
-                                className="text-sm text-muted-foreground"
-                               
-                              >
-                                共 {purchase.items.length} 項商品， 總數量:{" "}
-                                {purchase.items.reduce(
-                                  (sum: number, item: any) =>
-                                    sum + (item.quantity || 0),
-                                  0,
+                                {purchase.items && purchase.items.length > 0 && (
+                                  <div className="text-sm text-muted-foreground">
+                                    <Package className="h-4 w-4 inline mr-1" />
+                                    共 {purchase.items.length} 項商品，總數量：{" "}
+                                    {purchase.items.reduce(
+                                      (sum: number, item: any) =>
+                                        sum + (item.quantity || 0),
+                                      0,
+                                    )}
+                                  </div>
                                 )}
                               </div>
-                            )}
-                          </div>
 
-                          {/* 操作選單 */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal
-                                  className="h-4 w-4"
-                                 
-                                />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  router.push(`/purchases/${purchase.id}`)
-                                }
-                               
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                查看詳情
-                              </DropdownMenuItem>
+                              {/* 操作選單 */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      router.push(`/purchases/${purchase.id}`)
+                                    }
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    查看詳情
+                                  </DropdownMenuItem>
 
-                              {permissions.canModify && (
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    router.push(`/purchases/${purchase.id}/edit`)
-                                  }
-                                 
-                                >
-                                  <Edit
-                                    className="h-4 w-4 mr-2"
-                                   
-                                  />
-                                  編輯
-                                </DropdownMenuItem>
-                              )}
-
-                              {statusTransitions.length > 0 && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  {statusTransitions.map((status) => (
+                                  {permissions.canModify && (
                                     <DropdownMenuItem
-                                      key={status}
                                       onClick={() =>
-                                        handleUpdateStatus(purchase.id, status)
+                                        router.push(`/purchases/${purchase.id}/edit`)
                                       }
-                                     
                                     >
-                                      <CheckCircle
-                                        className="h-4 w-4 mr-2"
-                                       
-                                      />
-                                      更新為 {PURCHASE_STATUS_LABELS[status]}
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      編輯
                                     </DropdownMenuItem>
-                                  ))}
-                                </>
-                              )}
+                                  )}
 
-                              {permissions.canCancel && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => modalManager.openModal('cancel', purchase)}
-                                  >
-                                    <X className="h-4 w-4 mr-2" />
-                                    取消進貨單
-                                  </DropdownMenuItem>
-                                </>
-                              )}
+                                  {statusTransitions.length > 0 && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      {statusTransitions.map((status) => {
+                                        // 特殊處理部分收貨狀態
+                                        if (status === 'partially_received') {
+                                          return (
+                                            <DropdownMenuItem
+                                              key={status}
+                                              onClick={() => handleOpenPartialReceipt(purchase)}
+                                            >
+                                              <Package className="h-4 w-4 mr-2" />
+                                              部分收貨處理
+                                            </DropdownMenuItem>
+                                          );
+                                        }
+                                        
+                                        // 其他狀態使用原有邏輯
+                                        return (
+                                          <DropdownMenuItem
+                                            key={status}
+                                            onClick={() =>
+                                              handleUpdateStatus(purchase.id, status)
+                                            }
+                                          >
+                                            <CheckCircle className="h-4 w-4 mr-2" />
+                                            更新為 {PURCHASE_STATUS_LABELS[status]}
+                                          </DropdownMenuItem>
+                                        );
+                                      })}
+                                    </>
+                                  )}
 
-                              {permissions.canDelete && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => modalManager.openModal('delete', purchase)}
-                                    className="text-red-600"
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    刪除
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                                  {permissions.canCancel && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => modalManager.openModal('cancel', purchase)}
+                                      >
+                                        <X className="h-4 w-4 mr-2" />
+                                        取消進貨單
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+
+                                  {permissions.canDelete && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => modalManager.openModal('delete', purchase)}
+                                        className="text-red-600"
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        刪除
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                          
+                          {/* 進度條行 */}
+                          <div className="p-4">
+                            <div className="flex justify-center">
+                              <div className="w-full max-w-4xl">
+                                <PurchaseProgressTracker 
+                                  purchase={{
+                                    ...purchase,
+                                    confirmed_at: purchase.confirmed_at || purchase.purchased_at,
+                                  }}
+                                  variant="compact" 
+                                />
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      </React.Fragment>
                     );
                   })}
 
@@ -840,7 +881,7 @@ export function PurchaseManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>確認取消進貨單</AlertDialogTitle>
             <AlertDialogDescription>
-              確定要取消進貨單 "{modalManager.currentData?.order_number}" 嗎？此操作無法復原。
+              確定要取消進貨單 &ldquo;{modalManager.currentData?.order_number}&rdquo; 嗎？此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -863,7 +904,7 @@ export function PurchaseManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>確認刪除進貨單</AlertDialogTitle>
             <AlertDialogDescription>
-              確定要刪除進貨單 "{modalManager.currentData?.order_number}" 嗎？此操作無法復原。
+              確定要刪除進貨單 &ldquo;{modalManager.currentData?.order_number}&rdquo; 嗎？此操作無法復原。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -877,6 +918,18 @@ export function PurchaseManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 🎯 部分收貨對話框 */}
+      <PartialReceiptDialog
+        isOpen={partialReceiptDialog.isOpen}
+        onClose={handleClosePartialReceipt}
+        purchase={partialReceiptDialog.purchase}
+        onSuccess={() => {
+          handleSuccess("進貨單部分收貨已更新");
+          handleClosePartialReceipt();
+          refetch(); // 刷新列表
+        }}
+      />
     </div>
   );
 }

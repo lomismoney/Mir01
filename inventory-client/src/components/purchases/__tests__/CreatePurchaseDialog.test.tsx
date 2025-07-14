@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { CreatePurchaseDialog } from '../CreatePurchaseDialog';
 import { useCreatePurchase, useStores } from '@/hooks';
 import { useToast } from '@/components/ui/use-toast';
+import { Session } from 'next-auth';
 
 // Mock hooks
 jest.mock('next-auth/react', () => ({
@@ -20,11 +21,16 @@ jest.mock('@/components/ui/use-toast', () => ({
   useToast: jest.fn(),
 }));
 
+interface MockProductSelectorProps {
+  onSelect?: (productId: number) => void;
+  value?: number;
+}
+
 // Mock components
 jest.mock('@/components/inventory/ProductSelector', () => ({
-  ProductSelector: ({ onSelect, value }: any) => (
+  ProductSelector: ({ onSelect, value }: MockProductSelectorProps) => (
     <div data-testid="product-selector">
-      <button onClick={() => onSelect(1)}>Select Product</button>
+      <button onClick={() => onSelect?.(1)}>Select Product</button>
       <span>{value}</span>
     </div>
   ),
@@ -60,10 +66,10 @@ describe('CreatePurchaseDialog', () => {
       data: {
         user: { id: '1', name: 'Test User' },
         expires: '2024-12-31',
-      },
+      } as Session,
       status: 'authenticated',
       update: jest.fn(),
-    } as any);
+    } as ReturnType<typeof useSession>);
 
     mockUseCreatePurchase.mockReturnValue({
       mutate: mockMutate,
@@ -123,7 +129,7 @@ describe('CreatePurchaseDialog', () => {
     mockUseSession.mockReturnValue({
       data: null,
       status: 'unauthenticated',
-    });
+    } as ReturnType<typeof useSession>);
 
     render(
       <CreatePurchaseDialog open={true} onOpenChange={() => {}} />,

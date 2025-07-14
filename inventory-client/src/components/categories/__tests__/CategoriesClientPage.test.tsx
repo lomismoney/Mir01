@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CategoriesClientPage } from "../CategoriesClientPage";
 import { type CategoryNode } from "@/hooks";
@@ -117,9 +117,9 @@ jest.mock("../categories-columns", () => ({
 }));
 
 // 取得模擬的 hooks 和函式
-const { useCategories, useDeleteCategory } = require("@/hooks");
-const { useRouter } = require("next/navigation");
-const { toast } = require("sonner");
+const { useCategories, useDeleteCategory } = jest.requireMock<typeof import("@/hooks")>("@/hooks");
+const { useRouter } = jest.requireMock<typeof import("next/navigation")>("next/navigation");
+const { toast } = jest.requireMock<typeof import("sonner")>("sonner");
 
 describe("CategoriesClientPage", () => {
   let user: ReturnType<typeof userEvent.setup>;

@@ -43,7 +43,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { Order, ProcessedOrder } from "@/types/api-helpers";
-import { useDeleteOrder } from "@/hooks";
 import { formatPrice } from "@/lib/utils";
 
 // 創建 columns 函數，接受預覽、出貨、收款、退款、取消和刪除回調
@@ -376,7 +375,6 @@ export const createColumns = ({
 
     cell: ({ row }) => {
       const order = row.original;
-      const { mutate: deleteOrder, isPending } = useDeleteOrder();
 
       // 🎯 權限判斷邏輯
       const canCancel = !["shipped", "delivered", "cancelled"].includes(
@@ -410,11 +408,11 @@ export const createColumns = ({
                   <Eye className="mr-2 h-4 w-4" />
                   <span>快速預覽</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/orders/${order.id}`}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span>查看完整詳情</span>
-                  </Link>
+                <DropdownMenuItem
+                  onSelect={() => window.location.href = `/orders/${order.id}`}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>查看完整詳情</span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
@@ -486,48 +484,19 @@ export const createColumns = ({
 
               {/* --- 編輯與刪除分組 --- */}
               <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                  <Link href={`/orders/${order.id}/edit`}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    <span>編輯</span>
-                  </Link>
+                <DropdownMenuItem
+                  onSelect={() => window.location.href = `/orders/${order.id}/edit`}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  <span>編輯</span>
                 </DropdownMenuItem>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onSelect={(e) => e.preventDefault()} // 防止 DropdownMenu 立即關閉
-                     
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>刪除</span>
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        確定要刪除此訂單嗎？
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        此操作無法撤銷。這將永久刪除訂單「{order.order_number}
-                        」。
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>
-                        取消
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={() => deleteOrder(order.id)}
-                        disabled={isPending}
-                       
-                      >
-                        {isPending ? "刪除中..." : "確定刪除"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onSelect={() => onDelete?.(order.id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>刪除</span>
+                </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>

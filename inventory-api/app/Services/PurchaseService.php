@@ -708,6 +708,7 @@ class PurchaseService extends BaseService
             Purchase::STATUS_PARTIALLY_RECEIVED => [
                 Purchase::STATUS_COMPLETED,
                 Purchase::STATUS_RECEIVED,
+                Purchase::STATUS_PARTIALLY_RECEIVED, // 🎯 允許部分收貨狀態再次調整數量
             ],
             // 已完成的進貨單可以回退到已收貨狀態（用於修正錯誤）
             Purchase::STATUS_COMPLETED => [
@@ -949,16 +950,16 @@ class PurchaseService extends BaseService
                 break;
                 
             case Purchase::STATUS_RECEIVED:
-                // 轉換到收貨狀態時，檢查是否處於運輸中
+                // 轉換到收貨狀態時，檢查是否處於運輸中或部分收貨
                 if (!in_array($oldStatus, [Purchase::STATUS_IN_TRANSIT, Purchase::STATUS_PARTIALLY_RECEIVED])) {
                     throw new \InvalidArgumentException('只有運輸中或部分收貨的進貨單才能標記為已收貨');
                 }
                 break;
                 
             case Purchase::STATUS_PARTIALLY_RECEIVED:
-                // 部分收貨狀態的業務邏輯檢查
-                if ($oldStatus !== Purchase::STATUS_IN_TRANSIT) {
-                    throw new \InvalidArgumentException('只有運輸中的進貨單才能標記為部分收貨');
+                // 🎯 放寬部分收貨狀態的業務邏輯檢查，支援多次調整
+                if (!in_array($oldStatus, [Purchase::STATUS_IN_TRANSIT, Purchase::STATUS_PARTIALLY_RECEIVED])) {
+                    throw new \InvalidArgumentException('只有運輸中或部分收貨的進貨單才能進行部分收貨操作');
                 }
                 break;
         }
@@ -1052,5 +1053,204 @@ class PurchaseService extends BaseService
                 // 'statusHistories.user'
             ])
             ->get();
+    }
+
+    /**
+     * 處理部分收貨
+     * 
+     * 根據實際收到的商品數量更新進貨項目，並自動處理庫存入庫和狀態更新
+     * 
+     * @param Purchase $purchase 進貨單實例
+     * @param array $receiptData 收貨資料
+     * @return Purchase 更新後的進貨單
+     * @throws \InvalidArgumentException 當收貨資料不合法時
+     * @throws \Exception 當庫存操作失敗時
+     */
+    public function processPartialReceipt(Purchase $purchase, array $receiptData): Purchase
+    {
+        return $this->executeInTransaction(function () use ($purchase, $receiptData) {
+            $userId = $this->requireAuthentication('部分收貨處理');
+            $items = $receiptData['items'];
+            $notes = $receiptData['notes'] ?? '';
+
+            // 1. 驗證所有項目都屬於此進貨單
+            $purchaseItemIds = collect($items)->pluck('purchase_item_id');
+            $validItems = $purchase->items()->whereIn('id', $purchaseItemIds)->get()->keyBy('id');
+            
+            if ($validItems->count() !== count($purchaseItemIds)) {
+                throw new \InvalidArgumentException('部分項目不屬於此進貨單');
+            }
+
+            // 2. 逐項處理收貨
+            $totalReceivedItems = 0;
+            $totalPendingItems = 0;
+            $inventoryUpdates = [];
+
+            foreach ($items as $itemData) {
+                $purchaseItemId = $itemData['purchase_item_id'];
+                $receivedQuantity = $itemData['received_quantity'];
+                $purchaseItem = $validItems[$purchaseItemId];
+                
+                // 驗證收貨數量
+                if ($receivedQuantity > $purchaseItem->quantity) {
+                    throw new \InvalidArgumentException(
+                        "項目 {$purchaseItem->productVariant->sku} 的收貨數量 ({$receivedQuantity}) 不能超過訂購數量 ({$purchaseItem->quantity})"
+                    );
+                }
+
+                // 計算新增收貨數量（增量）
+                $previousReceived = $purchaseItem->received_quantity;
+                $incrementalReceived = $receivedQuantity - $previousReceived;
+                
+                // 更新進貨項目收貨數量
+                $purchaseItem->updateReceivedQuantity($receivedQuantity);
+
+                // 如果有新增收貨，需要更新庫存
+                if ($incrementalReceived > 0) {
+                    $inventoryUpdates[] = [
+                        'purchase_item' => $purchaseItem,
+                        'incremental_quantity' => $incrementalReceived,
+                    ];
+                }
+
+                // 統計整體收貨狀態
+                if ($purchaseItem->isFullyReceived()) {
+                    $totalReceivedItems++;
+                } else {
+                    $totalPendingItems++;
+                }
+            }
+
+            // 3. 批量處理庫存更新
+            foreach ($inventoryUpdates as $update) {
+                $this->processInventoryForReceivedItem(
+                    $update['purchase_item'], 
+                    $update['incremental_quantity'], 
+                    $purchase, 
+                    $userId, 
+                    $notes
+                );
+            }
+
+            // 4. 更新進貨單整體狀態
+            $newStatus = $this->calculatePurchaseStatusFromItems($purchase);
+            if ($newStatus !== $purchase->status) {
+                $purchase->update(['status' => $newStatus]);
+                
+                $this->logStatusChange(
+                    $purchase, 
+                    $purchase->getOriginal('status'), 
+                    $newStatus, 
+                    $userId, 
+                    "部分收貨處理: $notes"
+                );
+            }
+
+            // 5. 記錄部分收貨操作日誌
+            Log::info('部分收貨處理完成', [
+                'purchase_id' => $purchase->id,
+                'order_number' => $purchase->order_number,
+                'processed_items' => count($items),
+                'total_received_items' => $totalReceivedItems,
+                'total_pending_items' => $totalPendingItems,
+                'new_status' => $newStatus,
+                'user_id' => $userId,
+                'notes' => $notes
+            ]);
+
+            return $purchase->fresh(['store', 'items.productVariant.product']);
+        });
+    }
+
+    /**
+     * 處理單個收貨項目的庫存入庫
+     * 
+     * @param PurchaseItem $purchaseItem 進貨項目
+     * @param int $quantity 收貨數量
+     * @param Purchase $purchase 進貨單
+     * @param int $userId 操作用戶ID
+     * @param string $notes 備註
+     */
+    private function processInventoryForReceivedItem(
+        PurchaseItem $purchaseItem, 
+        int $quantity, 
+        Purchase $purchase, 
+        int $userId, 
+        string $notes
+    ): void {
+        if ($quantity <= 0) {
+            return; // 沒有新增收貨，跳過庫存處理
+        }
+
+        // 更新或建立對應的庫存記錄
+        $inventory = Inventory::firstOrCreate(
+            [
+                'store_id' => $purchase->store_id,
+                'product_variant_id' => $purchaseItem->product_variant_id,
+            ],
+            ['quantity' => 0, 'low_stock_threshold' => 5]
+        );
+
+        // 增加庫存
+        $inventory->addStock(
+            $quantity, 
+            $userId, 
+            "部分收貨 - 進貨單 #{$purchase->order_number}" . ($notes ? " ($notes)" : ""),
+            [
+                'purchase_id' => $purchase->id,
+                'purchase_item_id' => $purchaseItem->id,
+                'operation_type' => 'partial_receipt'
+            ]
+        );
+
+        // 更新商品變體的平均成本（按收貨數量計算）
+        $productVariant = ProductVariant::find($purchaseItem->product_variant_id);
+        if ($productVariant) {
+            $allocatedShippingPerUnit = $purchaseItem->allocated_shipping_cost / $purchaseItem->quantity;
+            $totalAllocatedShipping = $allocatedShippingPerUnit * $quantity;
+            
+            $productVariant->updateAverageCost(
+                $quantity, 
+                $purchaseItem->cost_price, 
+                $totalAllocatedShipping
+            );
+        }
+    }
+
+    /**
+     * 根據項目收貨情況計算進貨單整體狀態
+     * 
+     * @param Purchase $purchase 進貨單
+     * @return string 新的狀態
+     */
+    private function calculatePurchaseStatusFromItems(Purchase $purchase): string
+    {
+        $items = $purchase->items()->get();
+        
+        $fullyReceivedCount = 0;
+        $partiallyReceivedCount = 0;
+        $pendingCount = 0;
+        
+        foreach ($items as $item) {
+            if ($item->isFullyReceived()) {
+                $fullyReceivedCount++;
+            } elseif ($item->isPartiallyReceived()) {
+                $partiallyReceivedCount++;
+            } else {
+                $pendingCount++;
+            }
+        }
+        
+        // 判斷整體狀態
+        if ($fullyReceivedCount === $items->count()) {
+            // 所有項目都已完全收貨
+            return Purchase::STATUS_RECEIVED;
+        } elseif ($pendingCount === $items->count()) {
+            // 所有項目都還沒收貨，保持原狀態
+            return $purchase->status;
+        } else {
+            // 部分項目已收貨
+            return Purchase::STATUS_PARTIALLY_RECEIVED;
+        }
     }
 }

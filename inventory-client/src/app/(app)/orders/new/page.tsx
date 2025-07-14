@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateOrder } from "@/hooks";
 import { OrderFormValues } from "@/components/orders/OrderForm";
 // StockCheckDialog 已移除，預訂系統現在為自動模式
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { LoadingFallback } from "@/components/ui/skeleton";
+import { OrderFormErrorBoundary } from "@/components/orders/OrderFormErrorBoundary";
 
 // 動態導入訂單表單組件
 const OrderForm = lazy(() => import("@/components/orders/OrderForm").then(module => ({ default: module.OrderForm })));
@@ -15,8 +16,8 @@ const OrderForm = lazy(() => import("@/components/orders/OrderForm").then(module
  * 擴展的錯誤介面，支援庫存檢查結構化異常
  */
 interface StockCheckError extends Error {
-  stockCheckResults?: any[];
-  insufficientStockItems?: any[];
+  stockCheckResults?: unknown[];
+  insufficientStockItems?: unknown[];
 }
 
 /**
@@ -75,8 +76,9 @@ export default function NewOrderPage() {
     createOrder(orderData, {
       onSuccess: (data) => {
         // 🎯 成功建立訂單
-        const newOrderId = (data as any)?.data?.id;
-        const orderNumber = (data as any)?.data?.order_number;
+        const response = data as { data?: { id?: number; order_number?: string } };
+        const newOrderId = response?.data?.id;
+        const orderNumber = response?.data?.order_number;
         
         // 根據是否為預訂模式顯示不同的成功訊息
         if (forceCreate) {
@@ -120,19 +122,14 @@ export default function NewOrderPage() {
           createOrder(forceOrder, {
             onSuccess: (data) => {
               // 🎯 成功建立訂單
-              const newOrderId = (data as any)?.data?.id;
-              const orderNumber = (data as any)?.data?.order_number;
+              const response = data as { data?: { id?: number; order_number?: string } };
+              const newOrderId = response?.data?.id;
+              const orderNumber = response?.data?.order_number;
               
-              // 根據是否為預訂模式顯示不同的成功訊息
-              if (forceCreate) {
-                toast.success('預訂訂單建立成功！', {
-                  description: `訂單編號：${orderNumber}，部分商品將於補貨後出貨`,
-                });
-              } else {
-                toast.success('訂單建立成功！', {
-                  description: `訂單編號：${orderNumber}`,
-                });
-              }
+              // 顯示成功訊息
+              toast.success('預訂訂單建立成功！', {
+                description: `訂單編號：${orderNumber}，部分商品將於補貨後出貨`,
+              });
 
               // 🎯 訂單建立成功，準備導航
 
@@ -178,21 +175,14 @@ export default function NewOrderPage() {
         </p>
       </div>
       
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
-            <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">載入訂單表單...</p>
-            </div>
-          </div>
-        }
-      >
-        <OrderForm
-          isSubmitting={isPending}
-          onSubmit={(values) => handleSubmit(values, false)} // 初始提交，不強制建單
-        />
-      </Suspense>
+      <OrderFormErrorBoundary>
+        <Suspense fallback={<LoadingFallback type="page" text="載入訂單表單..." />}>
+          <OrderForm
+            isSubmitting={isPending}
+            onSubmit={(values) => handleSubmit(values, false)} // 初始提交，不強制建單
+          />
+        </Suspense>
+      </OrderFormErrorBoundary>
 
       {/* 🎯 預訂系統：自動模式，不需要對話框 */}
     </div>

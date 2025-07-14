@@ -43,8 +43,8 @@ describe('API Client 測試套件', () => {
 
   // 暫時跳過攔截器測試，專注於 safeApiClient 功能測試
   describe('API 攔截器測試', () => {
-    it('應該正確匯出 API client', () => {
-      const { safeApiClient } = require('../apiClient');
+    it('應該正確匯出 API client', async () => {
+      const { safeApiClient } = await import('../apiClient');
       expect(safeApiClient).toBeDefined();
       expect(typeof safeApiClient.getInventoryDetail).toBe('function');
       expect(typeof safeApiClient.getStore).toBe('function');
@@ -270,9 +270,9 @@ describe('API Client 測試套件', () => {
       expect(typeof envVar).toMatch(/string|undefined/);
     });
 
-    it('模組應該正確初始化', () => {
+    it('模組應該正確初始化', async () => {
       // 檢查 openapi-fetch 的 mock 是否被正確設置
-      const createClient = require('openapi-fetch').default;
+      const createClient = (await import('openapi-fetch')).default;
       expect(typeof createClient).toBe('function');
     });
   });

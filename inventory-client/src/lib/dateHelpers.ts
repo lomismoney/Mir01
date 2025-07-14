@@ -14,7 +14,7 @@ import { zhTW } from "date-fns/locale";
 export function safeFormatDate(
   date: string | Date | null | undefined,
   formatString: string,
-  options: { locale?: any } = { locale: zhTW },
+  options: { locale?: typeof zhTW } = { locale: zhTW },
   fallback: string = "未設定"
 ): string {
   if (!date) {

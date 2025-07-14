@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StoreCombobox } from '../store-combobox';
 
@@ -130,7 +130,7 @@ describe('StoreCombobox 組件', () => {
 
   describe('載入狀態', () => {
     it('應該在載入時禁用按鈕', () => {
-      const { useStores } = require('@/hooks');
+      const { useStores } = jest.requireMock<typeof import('@/hooks')>('@/hooks');
       useStores.mockReturnValue({
         data: { data: [] },
         isLoading: true,
@@ -214,7 +214,7 @@ describe('StoreCombobox 組件', () => {
 
   describe('分店數據處理', () => {
     it('應該處理空的分店列表', () => {
-      const { useStores } = require('@/hooks');
+      const { useStores } = jest.requireMock<typeof import('@/hooks')>('@/hooks');
       useStores.mockReturnValue({
         data: { data: [] },
         isLoading: false,
@@ -232,7 +232,7 @@ describe('StoreCombobox 組件', () => {
     });
 
     it('應該處理 null 的分店數據', () => {
-      const { useStores } = require('@/hooks');
+      const { useStores } = jest.requireMock<typeof import('@/hooks')>('@/hooks');
       useStores.mockReturnValue({
         data: null,
         isLoading: false,
@@ -250,7 +250,7 @@ describe('StoreCombobox 組件', () => {
     });
 
     it('應該處理 undefined 的分店數據', () => {
-      const { useStores } = require('@/hooks');
+      const { useStores } = jest.requireMock<typeof import('@/hooks')>('@/hooks');
       useStores.mockReturnValue({
         data: undefined,
         isLoading: false,
@@ -323,7 +323,7 @@ describe('StoreCombobox 組件', () => {
 
     it('應該處理快速的 prop 變更', () => {
       // 確保 mock 數據被正確設置
-      const { useStores } = require('@/hooks');
+      const { useStores } = jest.requireMock<typeof import('@/hooks')>('@/hooks');
       useStores.mockReturnValue({
         data: { data: mockStores },
         isLoading: false,
@@ -361,7 +361,7 @@ describe('StoreCombobox 組件', () => {
   describe('邊界情況', () => {
     it('應該處理字符串類型的分店 ID', () => {
       // 重新設置 mock 數據
-      const { useStores } = require('@/hooks');
+      const { useStores } = jest.requireMock<typeof import('@/hooks')>('@/hooks');
       useStores.mockReturnValue({
         data: { data: mockStores },
         isLoading: false,
@@ -379,7 +379,7 @@ describe('StoreCombobox 組件', () => {
 
     it('應該處理數字類型的 value prop（作為字符串）', () => {
       // 重新設置 mock 數據
-      const { useStores } = require('@/hooks');
+      const { useStores } = jest.requireMock<typeof import('@/hooks')>('@/hooks');
       useStores.mockReturnValue({
         data: { data: mockStores },
         isLoading: false,
@@ -397,7 +397,7 @@ describe('StoreCombobox 組件', () => {
     });
 
     it('應該處理分店名稱為 null 的情況', () => {
-      const { useStores } = require('@/hooks');
+      const { useStores } = jest.requireMock<typeof import('@/hooks')>('@/hooks');
       useStores.mockReturnValue({
         data: {
           data: [

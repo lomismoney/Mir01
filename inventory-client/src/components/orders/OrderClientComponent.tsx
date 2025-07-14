@@ -59,6 +59,8 @@ import {
   type RowSelectionState, // 🎯 新增
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
+import { useEmptyState } from "@/hooks/use-empty-state";
+import { EmptyTable, EmptySearch, EmptyError } from "@/components/ui/empty-state";
 
 export function OrderClientComponent() {
   // 🎯 分頁狀態管理 - 分段進軍終章
@@ -125,6 +127,9 @@ export function OrderClientComponent() {
   // 🎯 類型安全的響應數據解析
   const pageData = extractResponseData(response || []);
   const meta = extractPaginationMeta(response || []);
+
+  // 使用空狀態配置
+  const { config: emptyConfig, handleAction } = useEmptyState('orders');
 
   // 🎯 建立確認取消的處理函式
   const handleConfirmCancel = () => {
@@ -237,6 +242,14 @@ export function OrderClientComponent() {
 
   const router = useRouter();
 
+  // 搜尋建議
+  const suggestions = [
+    '訂單編號',
+    '客戶名稱',
+    '商品名稱',
+    'SKU'
+  ];
+
   if (isLoading) {
     // 預計會有 8 列，顯示 10 行骨架屏
     return <DataTableSkeleton columns={8} />;
@@ -332,12 +345,12 @@ export function OrderClientComponent() {
         </div>
 
         {/* 右側的操作按鈕區域 */}
-        <Link href="/orders/new" passHref>
-          <Button>
+        <Button asChild>
+          <Link href="/orders/new">
             <PlusCircle className="mr-2 h-4 w-4" />
             新增訂單
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {/* --- 🎯 新增的批量操作欄 --- */}
@@ -432,8 +445,22 @@ export function OrderClientComponent() {
       </div>
       {/* --- 批量操作欄結束 --- */}
 
+      {/* 錯誤狀態處理 */}
+      {isError && (
+        <div className="rounded-lg border bg-card shadow-sm p-6">
+          <EmptyError
+            title="載入訂單資料失敗"
+            description="無法載入訂單列表，請稍後再試"
+            onRetry={() => window.location.reload()}
+            showDetails={true}
+            error={error}
+          />
+        </div>
+      )}
+
       {/* 🎯 使用 AdaptiveTable 組件 - 訂單列表虛擬化 */}
-      <AdaptiveTable
+      {!isError && (
+        <AdaptiveTable
         table={table}
         className="rounded-lg border bg-card shadow-sm"
         virtualizationOptions={{
@@ -443,14 +470,33 @@ export function OrderClientComponent() {
         }}
         showVirtualizationToggle={true}
         dataType="訂單"
+        emptyState={
+          filters.search ? (
+            <EmptySearch
+              searchTerm={filters.search}
+              onClearSearch={() => setFilters(prev => ({ ...prev, search: '' }))}
+              suggestions={suggestions}
+            />
+          ) : (
+            <EmptyTable
+              title={emptyConfig.title}
+              description={emptyConfig.description}
+              actionLabel={emptyConfig.actionLabel}
+              onAction={handleAction}
+            />
+          )
+        }
       />
+      )}
 
       {/* 🎯 分頁控制器 - 分段進軍終章完成 */}
-      <DataTablePagination
+      {!isError && (
+        <DataTablePagination
         table={table}
         totalCount={meta?.total} // 傳入後端返回的總數據量
        
       />
+      )}
 
       {/* 🎯 訂單預覽模態 */}
       <OrderPreviewModal

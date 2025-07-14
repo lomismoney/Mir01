@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { OrderFormValues } from "./useOrderForm";
 
@@ -6,19 +7,31 @@ interface UsePriceCalculatorProps {
 }
 
 export function usePriceCalculator({ form }: UsePriceCalculatorProps) {
-  // 實時價格計算
-  const items = form.watch("items");
-  const shippingFee = form.watch("shipping_fee") || 0;
-  const tax = form.watch("tax") || 0;
-  const discountAmount = form.watch("discount_amount") || 0;
+  // 使用單一 watch 調用來獲取所有需要的值，避免多次訂閱
+  const watchedValues = form.watch(["items", "shipping_fee", "tax", "discount_amount"]);
+  
+  const items = watchedValues[0] || [];
+  const shippingFee = watchedValues[1] || 0;
+  const tax = watchedValues[2] || 0;
+  const discountAmount = watchedValues[3] || 0;
 
-  const subtotal =
-    items?.reduce((acc, item) => {
+  // 使用 useMemo 來優化計算
+  const { subtotal, grandTotal } = useMemo(() => {
+    const calculatedSubtotal = items.reduce((acc, item) => {
       const itemTotal = (item.price ?? 0) * (item.quantity || 0);
       return acc + itemTotal;
-    }, 0) || 0;
+    }, 0);
 
-  const grandTotal = Math.max(0, subtotal + shippingFee + tax - discountAmount);
+    const calculatedGrandTotal = Math.max(
+      0,
+      calculatedSubtotal + shippingFee + tax - discountAmount
+    );
+
+    return {
+      subtotal: calculatedSubtotal,
+      grandTotal: calculatedGrandTotal,
+    };
+  }, [items, shippingFee, tax, discountAmount]);
 
   return {
     items,

@@ -32,10 +32,24 @@ jest.mock('@/hooks', () => ({
     },
     isLoading: false,
   })),
+  useErrorHandler: jest.fn(() => ({
+    handleError: jest.fn(),
+  })),
 }));
 
+interface MockProductSelectorProps {
+  onValueChange?: (productVariantId: number, productVariant?: {
+    id: number;
+    sku: string;
+    product: { name: string };
+  }) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  showCurrentStock?: boolean;
+}
+
 jest.mock('@/components/inventory/ProductSelector', () => ({
-  ProductSelector: ({ onValueChange, disabled, placeholder, showCurrentStock }: any) => (
+  ProductSelector: ({ onValueChange, disabled, placeholder, showCurrentStock }: MockProductSelectorProps) => (
     <div>
       <input
         data-testid="product-selector"
@@ -44,7 +58,7 @@ jest.mock('@/components/inventory/ProductSelector', () => ({
         onChange={(e) => {
           const value = parseInt(e.target.value);
           if (value > 0) {
-            onValueChange(value, {
+            onValueChange?.(value, {
               id: value,
               sku: `SKU-${value}`,
               product: { name: `產品${value}` },
@@ -72,9 +86,12 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  
+  return TestWrapper;
 };
 
 describe('InstallationForm', () => {

@@ -1,9 +1,10 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProductDetail } from "@/hooks";
 import { Button } from "@/components/ui/button";
+import { useDynamicBreadcrumb } from "@/components/breadcrumb-context";
 import {
   Card,
   CardContent,
@@ -12,8 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// 移除未使用的組件
 import {
   ArrowLeft,
   Edit,
@@ -24,7 +24,6 @@ import {
   Box,
   ImageIcon,
   Store,
-  TrendingUp,
   Info,
   Grid3X3,
   MapPin,
@@ -49,16 +48,26 @@ import {
  * - 規格變體列表
  * - 各門市庫存狀況
  */
+interface ProductDetailPageProps {
+  params: Promise<{ productId: string }>;
+}
+
 export default function ProductDetailPage({
   params,
-}: {
-  params: Promise<{ productId: string }>;
-}) {
+}: ProductDetailPageProps) {
   const router = useRouter();
   const { productId } = use(params);
+  const { setLabel } = useDynamicBreadcrumb();
 
   // 獲取商品詳情
   const { data: product, isLoading } = useProductDetail(Number(productId));
+  
+  // 動態設置麵包屑標籤
+  useEffect(() => {
+    if (product?.name) {
+      setLabel(product.name);
+    }
+  }, [product?.name, setLabel]);
 
   if (isLoading) {
     return (
@@ -99,17 +108,17 @@ export default function ProductDetailPage({
 
   // 計算總庫存
   const totalStock =
-    product.variants?.reduce((sum: number, variant: any) => {
+    product.variants?.reduce((sum: number, variant: { inventory?: { quantity?: number }[] }) => {
       const variantStock =
         variant.inventory?.reduce(
-          (vSum: number, inv: any) => vSum + (inv.quantity || 0),
+          (vSum: number, inv: { quantity?: number }) => vSum + (inv.quantity || 0),
           0,
         ) || 0;
       return sum + variantStock;
     }, 0) || 0;
 
   // 計算價格範圍
-  const prices = product.variants?.map((v: any) => v.price).filter((p: any) => p > 0) || [];
+  const prices = product.variants?.map((v: { price?: number }) => v.price).filter((p): p is number => p !== undefined && p > 0) || [];
   const priceRange = prices.length > 0 ? {
     min: Math.min(...prices),
     max: Math.max(...prices)
@@ -409,10 +418,16 @@ export default function ProductDetailPage({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {product.variants.map((variant: any) => {
+                      {product.variants.map((variant: {
+                        id: number;
+                        sku?: string;
+                        price?: number;
+                        attribute_values?: { attribute?: { name?: string }; value?: string }[];
+                        inventory?: { quantity?: number }[];
+                      }) => {
                         const totalStock =
                           variant.inventory?.reduce(
-                            (sum: number, inv: any) =>
+                            (sum: number, inv: { quantity?: number }) =>
                               sum + (inv.quantity || 0),
                             0,
                           ) || 0;
@@ -435,7 +450,7 @@ export default function ProductDetailPage({
                                  
                                 >
                                   {variant.attribute_values.map(
-                                    (attr: any, index: number) => (
+                                    (attr: { attribute?: { name?: string }; value?: string }, index: number) => (
                                       <Badge
                                         key={index}
                                         variant="outline"
@@ -545,8 +560,10 @@ export default function ProductDetailPage({
                     { name: string; quantity: number }
                   >();
 
-                  product.variants?.forEach((variant: any) => {
-                    variant.inventory?.forEach((inv: any) => {
+                  product.variants?.forEach((variant: {
+                    inventory?: { store?: { name?: string }; quantity?: number }[];
+                  }) => {
+                    variant.inventory?.forEach((inv: { store?: { name?: string }; quantity?: number }) => {
                       const storeName = inv.store?.name || "未知門市";
                       const current = storeInventory.get(storeName) || {
                         name: storeName,

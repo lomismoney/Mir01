@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import ProductDetailPage from '../page';
@@ -13,34 +13,35 @@ jest.mock('next/navigation');
 // Mock the use() function
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
-  use: jest.fn((promise) => ({ productId: '123' })),
+  use: jest.fn(() => ({ productId: '123' })),
 }))
 
 // Mock Next.js Image component
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, fill, className }: any) => (
+  default: ({ src, alt, fill, className }: { src: string; alt: string; fill?: boolean; className?: string }) => (
+    // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} className={className} data-fill={fill} />
   ),
 }))
 
 // Mock UI components
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, ...props }: any) => (
+  Button: ({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void; [key: string]: unknown }) => (
     <button onClick={onClick} {...props}>{children}</button>
   )
 }))
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children, className }: any) => <div className={`card ${className}`}>{children}</div>,
-  CardContent: ({ children, className }: any) => <div className={`card-content ${className}`}>{children}</div>,
-  CardDescription: ({ children }: any) => <div className="card-description">{children}</div>,
-  CardHeader: ({ children, className }: any) => <div className={`card-header ${className}`}>{children}</div>,
-  CardTitle: ({ children, className }: any) => <h3 className={`card-title ${className}`}>{children}</h3>,
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={`card ${className}`}>{children}</div>,
+  CardContent: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={`card-content ${className}`}>{children}</div>,
+  CardDescription: ({ children }: { children: React.ReactNode }) => <div className="card-description">{children}</div>,
+  CardHeader: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={`card-header ${className}`}>{children}</div>,
+  CardTitle: ({ children, className }: { children: React.ReactNode; className?: string }) => <h3 className={`card-title ${className}`}>{children}</h3>,
 }))
 
 jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, variant, className }: any) => (
+  Badge: ({ children, variant, className }: { children: React.ReactNode; variant?: string; className?: string }) => (
     <span className={`badge ${variant} ${className}`}>{children}</span>
   )
 }))
@@ -50,18 +51,19 @@ jest.mock('@/components/ui/separator', () => ({
 }))
 
 jest.mock('@/components/ui/avatar', () => ({
-  Avatar: ({ children }: any) => <div className="avatar">{children}</div>,
-  AvatarFallback: ({ children }: any) => <div className="avatar-fallback">{children}</div>,
-  AvatarImage: ({ src, alt }: any) => <img src={src} alt={alt} className="avatar-image" />,
+  Avatar: ({ children }: { children: React.ReactNode }) => <div className="avatar">{children}</div>,
+  AvatarFallback: ({ children }: { children: React.ReactNode }) => <div className="avatar-fallback">{children}</div>,
+  // eslint-disable-next-line @next/next/no-img-element
+  AvatarImage: ({ src, alt }: { src: string; alt: string }) => <img src={src} alt={alt} className="avatar-image" />,
 }))
 
 jest.mock('@/components/ui/table', () => ({
-  Table: ({ children }: any) => <table>{children}</table>,
-  TableHeader: ({ children }: any) => <thead>{children}</thead>,
-  TableBody: ({ children }: any) => <tbody>{children}</tbody>,
-  TableCell: ({ children }: any) => <td>{children}</td>,
-  TableHead: ({ children }: any) => <th>{children}</th>,
-  TableRow: ({ children }: any) => <tr>{children}</tr>,
+  Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
+  TableHeader: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>,
+  TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
+  TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td>,
+  TableHead: ({ children }: { children: React.ReactNode }) => <th>{children}</th>,
+  TableRow: ({ children }: { children: React.ReactNode }) => <tr>{children}</tr>,
 }))
 
 // Mock lucide-react icons
@@ -84,7 +86,7 @@ jest.mock('lucide-react', () => ({
 // Mock formatPrice utility
 jest.mock('@/lib/utils', () => ({
   formatPrice: (price: number) => `NT$${price.toLocaleString()}`,
-  cn: (...classes: any[]) => classes.filter(Boolean).join(' '),
+  cn: (...classes: (string | undefined | null | false)[]) => classes.filter(Boolean).join(' '),
 }))
 
 // Mock product data
@@ -221,7 +223,7 @@ describe('ProductDetailPage', () => {
 
   beforeEach(() => {
     // Mock the useRouter hook to return a mock object with push, back, forward, refresh, and replace
-    useRouter.mockReturnValue({
+    (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
       back: jest.fn(),
       forward: jest.fn(),
@@ -237,7 +239,7 @@ describe('ProductDetailPage', () => {
 
   describe('載入狀態', () => {
     it('應該顯示載入中狀態', () => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: undefined,
         isLoading: true,
         isError: false,
@@ -250,7 +252,7 @@ describe('ProductDetailPage', () => {
     })
 
     it('應該顯示找不到商品的狀態', () => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: undefined,
         isLoading: false,
         isError: false,
@@ -266,7 +268,7 @@ describe('ProductDetailPage', () => {
 
   describe('商品資訊顯示', () => {
     beforeEach(() => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProduct,
         isLoading: false,
         isError: false,
@@ -290,7 +292,7 @@ describe('ProductDetailPage', () => {
     })
 
     it('應該在沒有圖片時顯示圖標', () => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProductNoImage,
         isLoading: false,
         isError: false,
@@ -310,7 +312,7 @@ describe('ProductDetailPage', () => {
     })
 
     it('應該顯示單一價格當最低最高價相同時', () => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProductSinglePrice,
         isLoading: false,
         isError: false,
@@ -332,7 +334,7 @@ describe('ProductDetailPage', () => {
 
   describe('規格變體顯示', () => {
     beforeEach(() => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProduct,
         isLoading: false,
         isError: false,
@@ -361,7 +363,7 @@ describe('ProductDetailPage', () => {
     })
 
     it('應該在沒有變體時顯示提示', () => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProductNoVariants,
         isLoading: false,
         isError: false,
@@ -376,7 +378,7 @@ describe('ProductDetailPage', () => {
 
   describe('門市庫存顯示', () => {
     beforeEach(() => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProduct,
         isLoading: false,
         isError: false,
@@ -396,7 +398,7 @@ describe('ProductDetailPage', () => {
     })
 
     it('應該在沒有庫存時顯示提示', () => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProductNoVariants,
         isLoading: false,
         isError: false,
@@ -411,7 +413,7 @@ describe('ProductDetailPage', () => {
 
   describe('按鈕功能', () => {
     beforeEach(() => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProduct,
         isLoading: false,
         isError: false,
@@ -440,7 +442,7 @@ describe('ProductDetailPage', () => {
     })
 
     it('應該在找不到商品時能返回列表', async () => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: undefined,
         isLoading: false,
         isError: false,
@@ -469,7 +471,7 @@ describe('ProductDetailPage', () => {
         ],
       }
 
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: productOutOfStock,
         isLoading: false,
         isError: false,
@@ -492,7 +494,7 @@ describe('ProductDetailPage', () => {
         ],
       }
 
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: productLowStock,
         isLoading: false,
         isError: false,
@@ -507,7 +509,7 @@ describe('ProductDetailPage', () => {
 
   describe('時間格式化', () => {
     it('應該正確顯示建立時間', () => {
-      useProductDetail.mockReturnValue({
+      (useProductDetail as jest.Mock).mockReturnValue({
         data: mockProduct,
         isLoading: false,
         isError: false,

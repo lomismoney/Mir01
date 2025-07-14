@@ -1,10 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useOrderDetail, useUpdateOrder } from '@/hooks/queries/orders/useOrders';
 import { Order } from '@/types/api-helpers';
-import EditOrderPage from '../page';
 
 // Mock the hooks
 jest.mock('@/hooks/queries/orders/useOrders');
@@ -19,9 +19,26 @@ jest.mock('@/components/orders/OrderForm', () => {
     isSubmitting, 
     onSubmit 
   }: { 
-    initialData: any, 
+    initialData: { 
+      customer_id?: number; 
+      shipping_address?: string; 
+      payment_method?: string; 
+      items?: unknown[];
+      [key: string]: unknown; 
+    }, 
     isSubmitting: boolean, 
-    onSubmit: (values: any) => void 
+    onSubmit: (values: {
+      customer_id: number;
+      shipping_address: string;
+      payment_method: string;
+      items: Array<{
+        id: number;
+        product_variant_id: number;
+        quantity: number;
+        price: number;
+        custom_specifications: Record<string, unknown>;
+      }>;
+    }) => void 
   }) {
     return (
       <div data-testid="order-form">
@@ -93,10 +110,21 @@ const TestEditOrderPage = () => {
   const { data: order, isLoading, isError, error } = useOrderDetail(orderId)
   const { mutate: updateOrder, isPending: isUpdating } = useUpdateOrder()
   
-  const handleUpdateSubmit = (values: any) => {
+  const handleUpdateSubmit = (values: {
+    customer_id: number;
+    shipping_address: string;
+    payment_method: string;
+    items: Array<{
+      id: number;
+      product_variant_id: number;
+      quantity: number;
+      price: number;
+      custom_specifications: Record<string, unknown>;
+    }>;
+  }) => {
     const orderData = {
       ...values,
-      items: values.items.map((item: any) => ({
+      items: values.items.map((item) => ({
         ...item,
         id: item.id,
         custom_specifications: item.custom_specifications
@@ -120,10 +148,10 @@ const TestEditOrderPage = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <div className="button outline sm">
-            <a href="/orders">
+            <Link href="/orders">
               <span>ArrowLeft</span>
               返回訂單列表
-            </a>
+            </Link>
           </div>
           <div>
             <h1 className="text-2xl font-bold">編輯訂單</h1>
@@ -151,10 +179,10 @@ const TestEditOrderPage = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <div className="button outline sm">
-            <a href="/orders">
+            <Link href="/orders">
               <span>ArrowLeft</span>
               返回訂單列表
-            </a>
+            </Link>
           </div>
           <div>
             <h1 className="text-2xl font-bold">編輯訂單</h1>
@@ -171,7 +199,7 @@ const TestEditOrderPage = () => {
         shipping_address: typeof order.shipping_address === 'string' 
           ? order.shipping_address 
           : order.shipping_address && 'address' in order.shipping_address 
-            ? (order.shipping_address as any).address 
+            ? (order.shipping_address as { address: string }).address 
             : "",
         payment_method: order.payment_method,
         order_source: order.order_source,
@@ -182,7 +210,7 @@ const TestEditOrderPage = () => {
         discount_amount: order.discount_amount || 0,
         notes: order.notes || "",
         items:
-          order.items?.map((item: any) => ({
+          order.items?.map((item) => ({
             id: item.id,
             product_variant_id: item.product_variant_id,
             is_stocked_sale: item.is_stocked_sale,

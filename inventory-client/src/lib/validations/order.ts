@@ -5,11 +5,9 @@
 import { z } from "zod";
 import {
   databaseId,
-  optionalDatabaseId,
   price,
   quantity,
   optionalString,
-  requiredString,
   dateString,
   notes,
   status,

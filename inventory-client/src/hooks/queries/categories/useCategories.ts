@@ -25,7 +25,7 @@ export interface CategoryNode extends Category {
  * @param groupedCategories - 以 parent_id 分組的分類對象
  * @returns 樹狀結構的分類陣列
  */
-function buildCategoryTree(groupedCategories: Record<string, any[]>): CategoryNode[] {
+function buildCategoryTree(groupedCategories: Record<string, CategoryNode[]>): CategoryNode[] {
   // 確保數據是有效的對象
   if (!groupedCategories || typeof groupedCategories !== 'object') {
     return [];
@@ -105,7 +105,7 @@ export function useCategories(filters: { search?: string } = {}) {
         queryKey: [...QUERY_KEYS.CATEGORIES, filters],
         queryFn: async () => {
             // 🚀 構建符合 Spatie QueryBuilder 的查詢參數格式
-            const queryParams: Record<string, any> = {};
+            const queryParams: Record<string, string | number> = {};
             
             // 使用 filter[...] 格式進行篩選參數
             if (filters.search) queryParams['filter[search]'] = filters.search;
@@ -126,7 +126,7 @@ export function useCategories(filters: { search?: string } = {}) {
             return data;
         },
         // 🎯 新的數據精煉廠 - 返回已構建好的樹狀結構
-        select: (response: any): CategoryNode[] => {
+        select: (response: Awaited<ReturnType<typeof apiClient.GET<'/api/categories'>>>['data']): CategoryNode[] => {
             // API 返回的是 CategoryResource 集合（陣列格式）
             const categories = response?.data || response || [];
             
@@ -136,8 +136,8 @@ export function useCategories(filters: { search?: string } = {}) {
             }
             
             // 將陣列轉換為以 parent_id 分組的物件格式
-            const groupedData: Record<string, any[]> = {};
-            categories.forEach((category: any) => {
+            const groupedData: Record<string, CategoryNode[]> = {};
+            categories.forEach((category: NonNullable<typeof categories>[number]) => {
                 const parentKey = category.parent_id?.toString() || '';
                 if (!groupedData[parentKey]) {
                     groupedData[parentKey] = [];
@@ -193,15 +193,15 @@ export function useCreateCategory() {
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("分類已成功創建");
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔴 錯誤處理
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("創建失敗", { description: errorMessage });
       }
     },
@@ -270,15 +270,15 @@ export function useUpdateCategory() {
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("分類已成功更新");
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔴 錯誤處理
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("更新失敗", { description: errorMessage });
       }
     },
@@ -325,15 +325,15 @@ export function useDeleteCategory() {
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("分類已成功刪除");
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔴 錯誤處理
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("刪除失敗", { description: errorMessage });
       }
     },

@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 /**
  * Modal 狀態類型定義
  */
-export interface ModalState<T = any> {
+export interface ModalState<T = unknown> {
   type: string | null;
   data: T | null;
   isOpen: boolean;

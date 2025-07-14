@@ -3,6 +3,7 @@ import { useParams } from 'next/navigation'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
+import Link from 'next/link'
 import { useOrderDetail, useConfirmOrderPayment, useCreateOrderShipment } from '@/hooks'
 import { Order } from '@/types/api'
 
@@ -25,11 +26,10 @@ jest.mock('@/components/orders/OrderDetailComponent', () => {
 
 jest.mock('@/components/orders/RecordPaymentModal', () => {
   return function MockRecordPaymentModal({ 
-    order, 
     open, 
     onOpenChange 
   }: { 
-    order: Order | null, 
+    order?: Order | null, 
     open: boolean, 
     onOpenChange: (open: boolean) => void 
   }) {
@@ -50,7 +50,7 @@ jest.mock('next/link', () => {
 
 // Mock UI Components
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, variant, size, asChild, ...props }: any) => {
+  Button: ({ children, onClick, disabled, variant, size, asChild, ...props }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; variant?: string; size?: string; asChild?: boolean; [key: string]: unknown }) => {
     // 如果是 asChild，直接返回子元素而不包裝
     if (asChild) {
       return <div className={`button ${variant} ${size}`} {...props}>{children}</div>
@@ -69,7 +69,7 @@ jest.mock('@/components/ui/button', () => ({
 }))
 
 jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, variant, className, ...props }: any) => (
+  Badge: ({ children, variant, className, ...props }: { children: React.ReactNode; variant?: string; className?: string; [key: string]: unknown }) => (
     <div className={`badge ${variant} ${className}`} {...props}>
       {children}
     </div>
@@ -179,10 +179,10 @@ const OrderDetailPage = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <div className="button outline sm">
-            <a href="/orders">
+            <Link href="/orders">
               <span>ArrowLeft</span>
               返回訂單列表
-            </a>
+            </Link>
           </div>
           <div>
             <h1 className="text-2xl font-bold">訂單詳情</h1>
@@ -199,10 +199,10 @@ const OrderDetailPage = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <div className="button outline sm">
-            <a href="/orders">
+            <Link href="/orders">
               <span>ArrowLeft</span>
               返回訂單列表
-            </a>
+            </Link>
           </div>
           <div>
             <h1 className="text-2xl font-bold">訂單詳情</h1>
@@ -218,10 +218,10 @@ const OrderDetailPage = () => {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-4">
           <div className="button outline sm">
-            <a href="/orders">
+            <Link href="/orders">
               <span>ChevronLeft</span>
               <span className="sr-only">返回訂單列表</span>
-            </a>
+            </Link>
           </div>
           <h1 className="text-xl font-semibold">
             訂單編號：{order?.order_number || `#${orderId}`}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import RootLayout from '../layout';
 
 // Mock the components that might cause issues in tests
@@ -23,14 +23,6 @@ jest.mock('next-auth/react', () => ({
 
 jest.mock('@/components/ui/toaster', () => ({
   Toaster: () => <div data-testid="toaster">Toaster</div>,
-}));
-
-jest.mock('@stagewise/toolbar-next', () => ({
-  StagewiseToolbar: () => <div data-testid="stagewise-toolbar">Stagewise Toolbar</div>,
-}));
-
-jest.mock('@stagewise-plugins/react', () => ({
-  ReactPlugin: {},
 }));
 
 jest.mock('@/lib/utils', () => ({
@@ -73,7 +65,6 @@ describe.skip('RootLayout', () => {
     expect(htmlElement.querySelector('[data-testid="query-provider"]')).toBeInTheDocument();
     expect(htmlElement.querySelector('[data-testid="session-provider"]')).toBeInTheDocument();
     expect(htmlElement.querySelector('[data-testid="toaster"]')).toBeInTheDocument();
-    expect(htmlElement.querySelector('[data-testid="stagewise-toolbar"]')).toBeInTheDocument();
   });
 
   it('should have correct html structure', () => {

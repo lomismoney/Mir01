@@ -45,9 +45,12 @@ const createTestQueryClient = () =>
  */
 const createWrapper = () => {
   const queryClient = createTestQueryClient();
-  return ({ children }: { children: React.ReactNode }) => (
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  
+  return TestWrapper;
 };
 
 /**
@@ -91,7 +94,7 @@ describe("useStores", () => {
       mockedApiClient.GET.mockResolvedValue({
         data: { data: mockStores },
         error: undefined,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useStores(), {
         wrapper: createWrapper(),
@@ -135,7 +138,7 @@ describe("useStores", () => {
       mockedApiClient.GET.mockResolvedValue({
         data: undefined,
         error: mockError,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       mockedHandleApiError.mockImplementation(() => {
         throw new Error("處理後的錯誤");
@@ -156,7 +159,7 @@ describe("useStores", () => {
       mockedApiClient.GET.mockResolvedValue({
         data: null,
         error: undefined,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useStores(), {
         wrapper: createWrapper(),
@@ -173,7 +176,7 @@ describe("useStores", () => {
       mockedApiClient.GET.mockResolvedValue({
         data: mockStores,
         error: undefined,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useStores(), {
         wrapper: createWrapper(),
@@ -217,7 +220,7 @@ describe("useStores", () => {
       mockedApiClient.GET.mockResolvedValue({
         data: { data: mockStore },
         error: undefined,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useStore(1), {
         wrapper: createWrapper(),
@@ -238,7 +241,7 @@ describe("useStores", () => {
       mockedApiClient.GET.mockResolvedValue({
         data: undefined,
         error: { message: "分店不存在" },
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useStore(999), {
         wrapper: createWrapper(),
@@ -264,7 +267,7 @@ describe("useStores", () => {
       mockedApiClient.GET.mockResolvedValue({
         data: mockStore,
         error: undefined,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useStore(1), {
         wrapper: createWrapper(),
@@ -286,7 +289,7 @@ describe("useStores", () => {
       mockedApiClient.POST.mockResolvedValue({
         data: responseData,
         error: undefined,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useCreateStore(), {
         wrapper: createWrapper(),
@@ -311,7 +314,7 @@ describe("useStores", () => {
       mockedApiClient.POST.mockResolvedValue({
         data: undefined,
         error: { message: "驗證失敗" },
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useCreateStore(), {
         wrapper: createWrapper(),
@@ -339,7 +342,7 @@ describe("useStores", () => {
       mockedApiClient.PUT.mockResolvedValue({
         data: responseData,
         error: undefined,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useUpdateStore(), {
         wrapper: createWrapper(),
@@ -365,7 +368,7 @@ describe("useStores", () => {
       mockedApiClient.PUT.mockResolvedValue({
         data: undefined,
         error: { message: "更新失敗" },
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useUpdateStore(), {
         wrapper: createWrapper(),
@@ -390,7 +393,7 @@ describe("useStores", () => {
       mockedApiClient.DELETE.mockResolvedValue({
         data: undefined,
         error: undefined,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       const { result } = renderHook(() => useDeleteStore(), {
         wrapper: createWrapper(),
@@ -415,7 +418,7 @@ describe("useStores", () => {
       mockedApiClient.DELETE.mockResolvedValue({
         data: undefined,
         error: mockError,
-      } as any);
+      } as { data: { data: Store[] }; error: undefined });
 
       mockedHandleApiError.mockReturnValue("刪除失敗");
 

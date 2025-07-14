@@ -29,6 +29,7 @@ import {
   CheckCircle,
   Pencil,
   Archive,
+  ExternalLink,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -70,6 +71,10 @@ export interface ExpandedProductItem extends Omit<ProductItem, "id"> {
   isVariantRow?: boolean;
   // 父商品 ID（僅 SKU 變體行使用）
   parentId?: number;
+  // 變體分頁功能
+  isViewMoreRow?: boolean; // 標記是否為"查看更多"行
+  remainingCount?: number; // 剩餘變體數量
+  allVariants?: ExpandedProductItem[]; // 保存所有變體資料
   // 變體資訊（僅 SKU 變體行使用）
   variantInfo?: {
     id: number;
@@ -307,57 +312,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     size: 40,
   },
 
-  // 展開/收合欄位
-  {
-    id: "expander",
-    header: "",
-    cell: ({ row, table }) => {
-      // 如果是變體行，顯示連接線
-      if (row.original.isVariantRow) {
-        return (
-          <div
-            className="flex h-full w-full items-center justify-center"
-           
-          >
-            <div className="h-full w-px bg-border"></div>
-          </div>
-        );
-      }
-
-      const hasVariants = (row.original.variants?.length || 0) > 1;
-      if (!hasVariants) {
-        return null;
-      }
-
-      return (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 hover:bg-muted data-[state=open]:bg-muted"
-          onClick={(e) => {
-            e.stopPropagation();
-            row.toggleExpanded();
-          }}
-         
-        >
-          {row.getIsExpanded() ? (
-            <ChevronDown
-              className="h-4 w-4 transition-transform duration-200"
-             
-            />
-          ) : (
-            <ChevronRight
-              className="h-4 w-4 transition-transform duration-200"
-             
-            />
-          )}
-        </Button>
-      );
-    },
-    enableSorting: false,
-    enableHiding: false,
-    size: 40,
-  },
+  // 移除展開列，改為點擊商品名稱查看變體
 
   // 重鑄的商品主欄（移除複選框，保持圖片+名稱+SKU）
   {
@@ -366,36 +321,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
     cell: ({ row }) => {
       const item = row.original;
 
-      if (item.isVariantRow && item.variantInfo) {
-        // SKU 變體行顯示
-        return (
-          <div
-            className="flex items-center gap-3 py-2 pl-10"
-           
-          >
-            <div
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-muted/50 border border-muted"
-             
-            >
-              <Package
-                className="h-4 w-4 text-muted-foreground"
-               
-              />
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="font-mono text-sm">
-                {item.variantInfo.sku}
-              </span>
-              <span
-                className="text-xs text-muted-foreground"
-               
-              >
-                變體規格
-              </span>
-            </div>
-          </div>
-        );
-      }
+      // 由於不再展開變體，移除變體行顯示邏輯
 
       // SPU 主行顯示
       let imageUrl = item.image_urls?.thumb || item.image_urls?.original;
@@ -433,28 +359,35 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
             )}
           </div>
 
-          {/* 名稱與 SKU */}
+          {/* 商品名稱（SPU 層級） */}
           <div className="min-w-0">
-            <Link
-              href={`/products/${item.originalId}`}
-              className="font-medium truncate hover:underline inline-block max-w-[200px]"
+            {/* 商品名稱 - 點擊查看變體 */}
+            <div
+              className="font-medium truncate hover:underline inline-block max-w-[200px] cursor-pointer hover:text-foreground/80"
               onClick={(e) => {
                 e.stopPropagation();
+                // 觸發查看所有變體的事件
+                const event = new CustomEvent("viewAllVariants", {
+                  detail: { 
+                    product: item,
+                    allVariants: item.processedVariants || []
+                  }
+                });
+                window.dispatchEvent(event);
               }}
-             
+              title="點擊查看所有變體"
             >
               {item.name || "未命名商品"}
-            </Link>
-            {item.variants &&
-              item.variants.length > 0 &&
-              item.variants[0].sku && (
-                <div
-                  className="text-sm text-muted-foreground truncate"
-                 
-                >
-                  SKU: {item.variants[0].sku}
-                </div>
-              )}
+            </div>
+            
+            {/* SPU 主商品顯示變體數量 */}
+            {item.variants && item.variants.length > 0 && (
+              <div
+                className="text-sm text-muted-foreground truncate mt-1"
+              >
+                {item.variants.length} 個變體
+              </div>
+            )}
           </div>
         </div>
       );
@@ -758,6 +691,10 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
           );
         };
 
+        const handleViewDetails = () => {
+          router.push(`/products/${item.originalId}`);
+        };
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -779,6 +716,13 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
             >
               <DropdownMenuLabel>操作選項</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleViewDetails}
+                className="cursor-pointer"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                查看詳情
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={handleEdit}
                 className="cursor-pointer"

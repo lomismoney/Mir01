@@ -27,13 +27,14 @@ import { AuthError } from 'next-auth';
  * @returns Promise<{error?: string}> - 錯誤訊息（如果有的話）
  */
 export async function loginAction(
-  prevState: { error?: string } | undefined,
+  prevState: { error?: string; success?: boolean } | undefined,
   formData: FormData
-) {
+): Promise<{ error?: string; success?: boolean }> {
   try {
     // 獲取表單資料
     const username = formData.get('username')?.toString()?.trim();
     const password = formData.get('password')?.toString();
+    const rememberMe = formData.get('rememberMe') === 'true';
     
     // 基本驗證
     if (!username || !password) {
@@ -49,12 +50,22 @@ export async function loginAction(
     }
     
     // 將資料轉換為 signIn 需要的格式
-    const credentials = { username, password };
+    const credentials = { 
+      username, 
+      password,
+      rememberMe: rememberMe ? 'true' : 'false'
+    };
     
     // 呼叫 Auth.js 的 signIn 方法
-    // 🔧 關鍵修復：移除 redirectTo，讓 auth.ts 中的 authorized 回調統一處理重定向
-    // 避免雙重重定向造成的衝突和載入卡住問題
-    await signIn('credentials', credentials);
+    // 使用標準的 Auth.js 重定向流程
+    await signIn('credentials', {
+      ...credentials,
+      redirectTo: '/dashboard',
+    });
+    
+    // 注意：如果執行到這裡，通常表示出現了非預期的情況
+    // 因為成功和失敗都應該在 signIn 內部處理
+    return { error: '登入過程發生未預期的錯誤' };
     
   } catch (error) {
     // 🔧 處理 Next.js Server Actions 的重定向機制
@@ -64,7 +75,7 @@ export async function loginAction(
       // 檢查是否為 Next.js 的重定向錯誤
       // NEXT_REDIRECT 是 Next.js 內部使用的標記
       const isNextRedirect = error.message?.includes('NEXT_REDIRECT') || 
-                            (error as any).digest?.includes('NEXT_REDIRECT');
+                            (error as Error & { digest?: string }).digest?.includes('NEXT_REDIRECT');
       
       if (isNextRedirect) {
         // 重要：這不是錯誤，而是成功登入後的正常重定向

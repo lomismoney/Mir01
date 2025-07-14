@@ -23,21 +23,21 @@ jest.mock('@/components/products/ProductClientComponent', () => {
 });
 
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, ...props }: any) => (
+  Button: ({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void; [key: string]: unknown }) => (
     <button onClick={onClick} {...props}>{children}</button>
   )
 }));
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children, className }: any) => <div className={className} data-testid="card">{children}</div>,
-  CardContent: ({ children }: any) => <div data-testid="card-content">{children}</div>,
-  CardDescription: ({ children, className }: any) => <div className={className} data-testid="card-description">{children}</div>,
-  CardHeader: ({ children, className }: any) => <div className={className} data-testid="card-header">{children}</div>,
-  CardTitle: ({ children, className }: any) => <div className={className} data-testid="card-title">{children}</div>
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={className} data-testid="card">{children}</div>,
+  CardContent: ({ children }: { children: React.ReactNode }) => <div data-testid="card-content">{children}</div>,
+  CardDescription: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={className} data-testid="card-description">{children}</div>,
+  CardHeader: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={className} data-testid="card-header">{children}</div>,
+  CardTitle: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={className} data-testid="card-title">{children}</div>
 }));
 
 jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, variant, className }: any) => (
+  Badge: ({ children, variant, className }: { children: React.ReactNode; variant?: string; className?: string }) => (
     <span data-testid="badge" data-variant={variant} className={className}>{children}</span>
   )
 }));

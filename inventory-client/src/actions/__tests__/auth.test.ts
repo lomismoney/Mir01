@@ -93,7 +93,8 @@ describe('loginAction', () => {
 
       expect(mockedSignIn).toHaveBeenCalledWith('credentials', {
         username: 'testuser',
-        password: 'password123'
+        password: 'password123',
+        rememberMe: 'false'
       });
     });
   });
@@ -109,6 +110,7 @@ describe('loginAction', () => {
       expect(mockedSignIn).toHaveBeenCalledWith('credentials', {
         username: 'testuser',
         password: 'password123',
+        rememberMe: 'false'
       });
     });
 
@@ -139,7 +141,7 @@ describe('loginAction', () => {
       formData.append('username', 'testuser');
       formData.append('password', 'password123');
 
-      const redirectError = new Error('Some error') as any;
+      const redirectError = new Error('Some error') as Error & { digest?: string };
       redirectError.digest = 'NEXT_REDIRECT';
       mockedSignIn.mockRejectedValue(redirectError);
 
@@ -214,7 +216,7 @@ describe('loginAction', () => {
       formData.append('password', 'password123');
 
       const error = new AuthError('UnknownError');
-      error.type = 'UnknownError' as any;
+      (error as AuthError & { type: string }).type = 'CredentialsSignin';
       mockedSignIn.mockRejectedValue(error);
 
       const result = await loginAction(undefined, formData);
@@ -228,7 +230,7 @@ describe('loginAction', () => {
       formData.append('password', 'password123');
 
       const error = new AuthError('');
-      error.type = 'UnknownError' as any;
+      (error as AuthError & { type: string }).type = 'CredentialsSignin';
       error.message = '';
       mockedSignIn.mockRejectedValue(error);
 

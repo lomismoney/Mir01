@@ -3,7 +3,7 @@
  * 測試產品表單的基本功能、驗證邏輯和用戶交互
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ProductForm } from '../ProductForm';
 import { useAttributes, useCreateProduct } from '@/hooks';
@@ -62,16 +62,16 @@ describe('ProductForm', () => {
       data: mockAttributes,
       isLoading: false,
       error: null,
-    } as any);
+    });
 
     mockUseCreateProduct.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
       error: null,
-    } as any);
+    });
 
     // Mock router
-    require('next/navigation').useRouter.mockReturnValue({
+    jest.requireMock<typeof import('next/navigation')>('next/navigation').useRouter.mockReturnValue({
       push: mockPush,
     });
   });
@@ -118,7 +118,7 @@ describe('ProductForm', () => {
         data: undefined,
         isLoading: true,
         error: null,
-      } as any);
+      });
 
       render(<ProductForm />);
 
@@ -130,7 +130,7 @@ describe('ProductForm', () => {
         data: undefined,
         isLoading: false,
         error: new Error('載入失敗'),
-      } as any);
+      });
 
       render(<ProductForm />);
 
@@ -238,7 +238,7 @@ describe('ProductForm', () => {
         mutateAsync: mockMutateAsync,
         isPending: true,
         error: null,
-      } as any);
+      });
 
       render(<ProductForm />);
 
@@ -269,7 +269,7 @@ describe('ProductForm', () => {
         mutateAsync: mockMutateAsync,
         isPending: true,
         error: null,
-      } as any);
+      });
       
       render(<ProductForm />);
 
@@ -286,7 +286,7 @@ describe('ProductForm', () => {
         data: null,
         isLoading: false,
         error: null,
-      } as any);
+      });
 
       render(<ProductForm />);
 
@@ -298,7 +298,7 @@ describe('ProductForm', () => {
         data: { some: 'invalid data' },
         isLoading: false,
         error: null,
-      } as any);
+      });
 
       render(<ProductForm />);
 

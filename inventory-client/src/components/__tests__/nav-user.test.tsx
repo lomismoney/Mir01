@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NavUser } from "../nav-user";
 import { SidebarProvider } from "../ui/sidebar";
@@ -33,9 +33,9 @@ jest.mock("@/hooks/use-mobile", () => ({
 }));
 
 // 取得模擬的 hooks 和函式
-const { useSession, signOut } = require("next-auth/react");
-const { clearTokenCache } = require("@/lib/apiClient");
-const { useIsMobile } = require("@/hooks/use-mobile");
+import { useSession, signOut } from "next-auth/react";
+import { clearTokenCache } from "@/lib/apiClient";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
  * 測試包裝器組件，提供必要的上下文
@@ -323,11 +323,7 @@ describe("NavUser", () => {
       </TestWrapper>
     );
     
-    // 檢查是否有 suppressHydrationWarning 屬性（需要轉換為小寫）
-    const elementsWithSuppression = container.querySelectorAll(
-      "[suppresshydrationwarning]"
-    );
-    // 如果找不到，檢查是否有相關的 button 元素
+    // 檢查是否有相關的 button 元素
     const buttonElement = container.querySelector("button");
     expect(buttonElement).toBeInTheDocument();
   });

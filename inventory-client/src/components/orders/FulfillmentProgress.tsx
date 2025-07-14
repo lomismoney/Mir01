@@ -18,7 +18,6 @@ export function FulfillmentProgress({
   description = "訂單項目的整體履行狀況"
 }: FulfillmentProgressProps) {
   // 計算統計數據
-  const totalItems = orderItems.length;
   const fullyFulfilledItems = orderItems.filter(item => item.is_fulfilled).length;
   const partiallyFulfilledItems = orderItems.filter(item => 
     item.fulfilled_quantity > 0 && !item.is_fulfilled

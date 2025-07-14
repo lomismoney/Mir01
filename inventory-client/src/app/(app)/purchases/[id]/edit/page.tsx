@@ -62,9 +62,9 @@ interface PurchaseEditFormData {
 }
 
 export default function PurchaseEditPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const router = useRouter();
-  const purchaseId = params.id as string;
+  const purchaseId = params.id;
   const { handleError, handleSuccess } = useErrorHandler();
 
   const { data: purchase, isLoading, error } = usePurchase(purchaseId);
@@ -90,7 +90,19 @@ export default function PurchaseEditPage() {
   // 當進貨單數據載入後，更新表單預設值
   useEffect(() => {
     if (purchase) {
-      const purchaseData = purchase as any;
+      const purchaseData = purchase as {
+        store_id?: number;
+        order_number?: string;
+        purchased_at?: string;
+        shipping_cost?: number;
+        status?: string;
+        items?: {
+          id?: number;
+          product_variant_id?: number;
+          quantity?: number;
+          cost_price?: number;
+        }[];
+      };
       form.reset({
         store_id: purchaseData.store_id?.toString() || "",
         order_number: purchaseData.order_number || "",
@@ -100,7 +112,12 @@ export default function PurchaseEditPage() {
         shipping_cost: purchaseData.shipping_cost?.toString() || "0",
         status: purchaseData.status || PURCHASE_STATUS.PENDING,
         items:
-          purchaseData.items?.map((item: any) => ({
+          purchaseData.items?.map((item: {
+            id?: number;
+            product_variant_id?: number;
+            quantity?: number;
+            cost_price?: number;
+          }) => ({
             id: item.id,
             product_variant_id: item.product_variant_id,
             quantity: item.quantity?.toString() || "0",
@@ -155,7 +172,10 @@ export default function PurchaseEditPage() {
     );
   }
 
-  const purchaseData = purchase as any;
+  const purchaseData = purchase as {
+    status?: string;
+    order_number?: string;
+  };
   const permissions = getPurchasePermissions(
     purchaseData.status as PurchaseStatus,
   );
@@ -323,7 +343,7 @@ export default function PurchaseEditPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {(storesData as any)?.data?.map((store: any) => (
+                            {(storesData as { data?: { id?: number; name?: string }[] })?.data?.map((store: { id?: number; name?: string }) => (
                               <SelectItem
                                 key={store.id}
                                 value={store.id?.toString() || ""}

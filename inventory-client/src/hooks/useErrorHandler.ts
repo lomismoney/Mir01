@@ -334,7 +334,11 @@ export function useApiErrorHandler() {
       }
     },
     onError: (error: any) => {
-      customErrorHandler?.(error) || errorHandler.handleError(error);
+      if (customErrorHandler) {
+        customErrorHandler(error);
+      } else {
+        errorHandler.handleError(error);
+      }
     },
   }), [errorHandler]);
 

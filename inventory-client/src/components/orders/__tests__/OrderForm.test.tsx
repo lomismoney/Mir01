@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OrderForm, OrderFormValues } from '../OrderForm';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -110,9 +110,12 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  
+  return TestWrapper;
 };
 
 describe('OrderForm', () => {
@@ -255,7 +258,7 @@ describe('OrderForm', () => {
         options?.onSuccess?.({ data: { id: 1, name: '新客戶', phone: '0912345678' } });
       });
       
-      jest.spyOn(require('@/hooks/queries/customers/useCustomers'), 'useCreateCustomer')
+      jest.spyOn(jest.requireMock<typeof import('@/hooks/queries/customers/useCustomers')>('@/hooks/queries/customers/useCustomers'), 'useCreateCustomer')
         .mockReturnValue({
           mutate: mockMutate,
           isPending: false,

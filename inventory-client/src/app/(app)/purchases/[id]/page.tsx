@@ -27,7 +27,6 @@ import {
   Package,
   Store,
   Calendar,
-  User,
   Truck,
   Receipt,
   Hash,
@@ -35,9 +34,9 @@ import {
 } from "lucide-react";
 
 export default function PurchaseDetailPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const router = useRouter();
-  const purchaseId = params.id as string;
+  const purchaseId = params.id;
 
   const { data: purchase, isLoading, error } = usePurchase(purchaseId);
 
@@ -86,7 +85,24 @@ export default function PurchaseDetailPage() {
     );
   }
 
-  const purchaseData = purchase as any;
+  const purchaseData = purchase as {
+    status?: string;
+    order_number?: string;
+    store?: { name?: string };
+    purchased_at?: string;
+    shipping_cost?: number;
+    total_amount?: number;
+    created_at?: string;
+    updated_at?: string;
+    items?: {
+      id?: number;
+      quantity?: number;
+      cost_price?: number;
+      allocated_shipping_cost?: number;
+      product_name?: string;
+      sku?: string;
+    }[];
+  };
   const permissions = getPurchasePermissions(
     purchaseData.status as PurchaseStatus,
   );
@@ -284,7 +300,14 @@ export default function PurchaseDetailPage() {
           <CardContent>
             {purchaseData.items && purchaseData.items.length > 0 ? (
               <div className="space-y-4">
-                {purchaseData.items.map((item: any, index: number) => {
+                {purchaseData.items.map((item: {
+                  id?: number;
+                  quantity?: number;
+                  cost_price?: number;
+                  allocated_shipping_cost?: number;
+                  product_name?: string;
+                  sku?: string;
+                }, index: number) => {
                   const quantity = item.quantity || 0;
                   const costPrice = Number(item.cost_price || 0);
                   const allocatedShippingCost = Number(
@@ -415,7 +438,10 @@ export default function PurchaseDetailPage() {
                         商品總計: NT${" "}
                         {purchaseData.items
                           .reduce(
-                            (sum: number, item: any) =>
+                            (sum: number, item: {
+                              quantity?: number;
+                              cost_price?: number;
+                            }) =>
                               sum +
                               (item.quantity || 0) * (item.cost_price || 0),
                             0,

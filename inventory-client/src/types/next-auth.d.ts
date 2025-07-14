@@ -29,6 +29,7 @@ declare module 'next-auth' {
     isAdmin?: boolean;
     username?: string;
     apiToken?: string;
+    rememberMe?: boolean;
   }
 
   /**
@@ -65,5 +66,6 @@ declare module 'next-auth/jwt' {
     roleDisplay?: string;
     isAdmin?: boolean;
     username?: string;
+    rememberMe?: boolean;
   }
 } 

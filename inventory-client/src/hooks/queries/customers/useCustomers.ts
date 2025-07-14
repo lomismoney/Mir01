@@ -57,7 +57,7 @@ export function useCustomerDetail(customerId: number | null) {
         
       return data;
     },
-    select: (response: any) => response?.data,
+    select: (response: Awaited<ReturnType<typeof apiClient.GET<'/api/customers/{customer}'>>>['data']) => response?.data,
     enabled: !!customerId,
     staleTime: 5 * 60 * 1000,
     retry: 2,
@@ -86,7 +86,7 @@ export function useCreateCustomer() {
       };
       
       const { data, error } = await apiClient.POST('/api/customers', {
-        body: apiPayload as any,
+        body: apiPayload,
       });
 
       if (error) {
@@ -110,16 +110,16 @@ export function useCreateCustomer() {
       ]);
       
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('客戶已成功創建', {
           description: `客戶「${data?.data?.name}」已成功加入系統`
         });
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('創建失敗', { description: errorMessage });
       }
     },
@@ -152,14 +152,14 @@ export function useDeleteCustomer() {
       ]);
       
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("客戶已成功刪除");
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("刪除失敗", { description: errorMessage });
       }
     },
@@ -196,7 +196,7 @@ export function useCustomers(filters?: CustomerFilters) {
     queryKey: [...QUERY_KEYS.CUSTOMERS, filters],
     queryFn: async ({ queryKey }) => {
       const [, queryFilters] = queryKey;
-      const queryParams: Record<string, any> = {};
+      const queryParams: Record<string, string | number | undefined> = {};
       
       // 🔧 修復 API 契約：客戶管理後端期望直接參數，不是 Spatie QueryBuilder 格式
       if ((queryFilters as CustomerFilters)?.search) {
@@ -227,7 +227,7 @@ export function useCustomers(filters?: CustomerFilters) {
       
       return data;
     },
-    select: (response: any) => {
+    select: (response: Awaited<ReturnType<typeof apiClient.GET<'/api/customers'>>>['data']) => {
       const data = response?.data?.data || response?.data || response || [];
       
       const meta = response?.meta || response?.data?.meta || { 
@@ -324,16 +324,16 @@ export function useUpdateCustomer() {
       ]);
       
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('客戶資料已成功更新', {
           description: `客戶「${data?.data?.name}」的資料已更新`
         });
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('更新失敗', { description: errorMessage });
       }
     },

@@ -69,8 +69,7 @@ export function useOptimisticCRUD<T extends { id: number | string }>(
   /**
    * 樂觀創建操作
    */
-  const useOptimisticCreate = useCallback(
-    <TInput>(config: CreateConfig<T, TInput>) => {
+  const createOptimisticCreateMutation = <TInput>(config: CreateConfig<T, TInput>) => {
       const {
         queryKey,
         entityName,
@@ -125,23 +124,12 @@ export function useOptimisticCRUD<T extends { id: number | string }>(
           onError?.(error);
         },
       });
-    },
-    [
-      baseConfig,
-      optimisticCreate,
-      smartInvalidate,
-      invalidateQueries,
-      handleError,
-      handleSuccess,
-      rollback,
-    ]
-  );
+  };
 
   /**
    * 樂觀更新操作
    */
-  const useOptimisticUpdateMutation = useCallback(
-    <TInput>(config: UpdateConfig<T, TInput>) => {
+  const createOptimisticUpdateMutation = <TInput>(config: UpdateConfig<T, TInput>) => {
       const {
         queryKey,
         entityName,
@@ -202,24 +190,12 @@ export function useOptimisticCRUD<T extends { id: number | string }>(
           onError?.(error);
         },
       });
-    },
-    [
-      baseConfig,
-      optimisticUpdateItem,
-      smartInvalidate,
-      invalidateQueries,
-      handleError,
-      handleSuccess,
-      rollback,
-      queryClient,
-    ]
-  );
+  };
 
   /**
    * 樂觀刪除操作
    */
-  const useOptimisticDelete = useCallback(
-    (config: DeleteConfig) => {
+  const createOptimisticDeleteMutation = (config: DeleteConfig) => {
       const {
         queryKey,
         entityName,
@@ -272,23 +248,12 @@ export function useOptimisticCRUD<T extends { id: number | string }>(
           onError?.(error);
         },
       });
-    },
-    [
-      baseConfig,
-      optimisticDelete,
-      smartInvalidate,
-      invalidateQueries,
-      handleError,
-      handleSuccess,
-      rollback,
-    ]
-  );
+  };
 
   /**
    * 批量刪除操作
    */
-  const useOptimisticBatchDelete = useCallback(
-    (config: BatchConfig<void, { ids: (number | string)[] }>) => {
+  const createOptimisticBatchDeleteMutation = (config: BatchConfig<void, { ids: (number | string)[] }>) => {
       const {
         queryKey,
         entityName,
@@ -346,22 +311,13 @@ export function useOptimisticCRUD<T extends { id: number | string }>(
           onError?.(error);
         },
       });
-    },
-    [
-      baseConfig,
-      smartInvalidate,
-      invalidateQueries,
-      handleError,
-      handleSuccess,
-      queryClient,
-    ]
-  );
+  };
 
   return {
-    useOptimisticCreate,
-    useOptimisticUpdate: useOptimisticUpdateMutation,
-    useOptimisticDelete,
-    useOptimisticBatchDelete,
+    createOptimisticCreateMutation,
+    createOptimisticUpdateMutation,
+    createOptimisticDeleteMutation,
+    createOptimisticBatchDeleteMutation,
   };
 }
 

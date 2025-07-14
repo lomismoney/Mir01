@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 use App\Http\Resources\Api\PurchaseResource;
+use App\Http\Requests\Api\PartialReceiptRequest;
 
 class PurchaseController extends Controller
 {
@@ -397,4 +398,106 @@ class PurchaseController extends Controller
         return response()->json(['message' => '進貨單已刪除']);
     }
 
+    /**
+     * Process partial receipt for a purchase order.
+     * 
+     * @group 進貨管理
+     * @authenticated
+     * @summary 部分收貨處理
+     * @description 處理進貨單的部分收貨，允許為每個項目指定實際收到的數量，並自動更新庫存和進貨單狀態。
+     * 
+     * **⚠️ 重要說明**：
+     * - 此操作會根據實際收貨情況更新庫存
+     * - 只有運輸中或部分收貨狀態的進貨單可以執行此操作
+     * - 系統會自動計算進貨單的整體收貨狀態
+     * - 所有操作在資料庫事務中執行，失敗時自動回滾
+     * 
+     * **🔄 業務邏輯副作用**：
+     * - 庫存數量變更：根據實際收貨數量增加對應的庫存
+     * - 庫存異動記錄：會自動生成詳細的庫存交易記錄
+     * - 進貨單狀態更新：自動判斷並更新為部分收貨或已收貨狀態
+     * - 成本計算：更新商品變體的平均成本
+     * 
+     * **📊 資料影響範圍**：
+     * - `purchase_items` 表：更新 received_quantity 和 receipt_status
+     * - `purchases` 表：可能更新整體狀態
+     * - `inventories` 表：增加對應的庫存數量
+     * - `inventory_transactions` 表：新增庫存異動記錄
+     * - `product_variants` 表：更新平均成本
+     * 
+     * @urlParam purchase integer required 進貨單ID。 Example: 1
+     * @bodyParam items object[] required 收貨項目列表，至少包含一個項目
+     * @bodyParam items[].purchase_item_id integer required 進貨項目ID Example: 1
+     * @bodyParam items[].received_quantity integer required 實際收到的數量 Example: 8
+     * @bodyParam notes string nullable 收貨備註 Example: 部分商品有輕微包裝破損，但不影響使用
+     * 
+     * @response 200 scenario="部分收貨成功" {
+     *   "data": {
+     *     "id": 1,
+     *     "order_number": "PO-20250101-001",
+     *     "status": "partially_received",
+     *     "total_amount": 1500,
+     *     "shipping_cost": 150,
+     *     "purchased_at": "2025-01-01T10:00:00.000000Z",
+     *     "created_at": "2025-01-01T10:00:00.000000Z",
+     *     "updated_at": "2025-01-15T14:30:00.000000Z",
+     *     "store": {...},
+     *     "items": [
+     *       {
+     *         "id": 1,
+     *         "quantity": 10,
+     *         "received_quantity": 8,
+     *         "receipt_status": "partial",
+     *         "receipt_progress": 80.0,
+     *         "pending_receipt_quantity": 2,
+     *         "product_variant": {...}
+     *       }
+     *     ]
+     *   }
+     * }
+     * 
+     * @response 422 scenario="進貨單狀態不允許收貨" {
+     *   "message": "只有運輸中或部分收貨狀態的進貨單才能執行收貨操作"
+     * }
+     * 
+     * @response 422 scenario="收貨數量超過訂購數量" {
+     *   "message": "收貨數量不能超過訂購數量"
+     * }
+     * 
+     * @apiResource \App\Http\Resources\Api\PurchaseResource
+     * @apiResourceModel \App\Models\Purchase
+     */
+    public function partialReceipt(Purchase $purchase, PartialReceiptRequest $request, PurchaseService $purchaseService)
+    {
+        // 權限檢查
+        $this->authorize('update', $purchase);
+
+        // 檢查進貨單狀態是否允許收貨
+        if (!in_array($purchase->status, ['in_transit', 'partially_received'])) {
+            return response()->json([
+                'message' => '只有運輸中或部分收貨狀態的進貨單才能執行收貨操作'
+            ], 422);
+        }
+
+        try {
+            $updatedPurchase = $purchaseService->processPartialReceipt(
+                $purchase, 
+                $request->validated()
+            );
+            
+            return new PurchaseResource($updatedPurchase);
+            
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        } catch (\Exception $e) {
+            Log::error('部分收貨處理失敗', [
+                'purchase_id' => $purchase->id,
+                'request_data' => $request->validated(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['message' => '部分收貨處理失敗，請稍後再試'], 500);
+        }
+    }
 }

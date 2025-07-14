@@ -14,7 +14,6 @@ import {
   Package, 
   ShoppingCart,
   DollarSign,
-  Calendar,
   Download,
   RefreshCw,
   BarChart3,

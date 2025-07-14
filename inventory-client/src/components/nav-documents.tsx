@@ -1,14 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import { SmartPreloadLink } from "@/lib/apiPreloader";
 import { useState, useEffect } from "react";
 import {
-  IconDots,
-  IconFolder,
-  IconShare3,
-  IconTrash,
-  type Icon,
-} from "@tabler/icons-react";
+  MoreHorizontal,
+  Folder,
+  Share2,
+  Trash2,
+  type LucideIcon,
+} from "lucide-react";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 import {
   DropdownMenu,
@@ -30,9 +32,10 @@ import {
 export function NavDocuments({
   items,
 }: {
-  items: { name: string; url: string; icon: Icon }[];
+  items: { name: string; url: string; icon: LucideIcon }[];
 }) {
   const { isMobile } = useSidebar();
+  const pathname = usePathname();
 
   // 🚀 修復 Hydration 錯誤：延遲獲取 mobile 狀態
   const [mounted, setMounted] = useState(false);
@@ -46,15 +49,22 @@ export function NavDocuments({
       className="group-data-[collapsible=icon]:hidden"
      
     >
-      <SidebarGroupLabel>Documents</SidebarGroupLabel>
+      <SidebarGroupLabel>文件中心</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <Link href={item.url} prefetch={true}>
-                <item.icon />
+              <SmartPreloadLink
+                href={item.url}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent hover:text-primary",
+                  pathname === item.url && "bg-accent text-primary font-medium"
+                )}
+                preloadDelay={150}
+              >
+                <item.icon className="h-4 w-4" />
                 <span>{item.name}</span>
-              </Link>
+              </SmartPreloadLink>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -63,7 +73,7 @@ export function NavDocuments({
                   className="data-[state=open]:bg-accent rounded-sm"
                  
                 >
-                  <IconDots />
+                  <MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">
                     More
                   </span>
@@ -77,18 +87,18 @@ export function NavDocuments({
                 suppressHydrationWarning
                
               >
-                <DropdownMenuItem>
-                  <IconFolder />
-                  <span>Open</span>
+                <DropdownMenuItem className="flex items-center gap-2">
+                  <Folder className="h-4 w-4" />
+                  <span>開啟</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <IconShare3 />
-                  <span>Share</span>
+                <DropdownMenuItem className="flex items-center gap-2">
+                  <Share2 className="h-4 w-4" />
+                  <span>分享</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  <IconTrash />
-                  <span>Delete</span>
+                <DropdownMenuItem variant="destructive" className="flex items-center gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  <span>刪除</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -96,15 +106,10 @@ export function NavDocuments({
         ))}
         <SidebarMenuItem>
           <SidebarMenuButton
-            className="text-sidebar-foreground/70"
-           
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent hover:text-primary text-muted-foreground"
           >
-            <IconDots
-              className="text-sidebar-foreground/70"
-             
-            />
-
-            <span>More</span>
+            <MoreHorizontal className="h-4 w-4" />
+            <span>更多</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

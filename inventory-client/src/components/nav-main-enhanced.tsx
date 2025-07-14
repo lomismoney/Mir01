@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronRight, type LucideIcon } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
@@ -65,9 +64,7 @@ export function NavMainEnhanced({ items, label }: NavMainEnhancedProps) {
 function NavItem({ item, pathname }: { item: NavLink; pathname: string }) {
   const isActive = item.isActive || pathname === item.url;
   const hasSubItems = item.items && item.items.length > 0;
-  const [isOpen, setIsOpen] = React.useState(
-    hasSubItems && item.items!.some(subItem => pathname === subItem.url)
-  );
+  const [isOpen, setIsOpen] = React.useState(false);
 
   if (!hasSubItems) {
     return (
@@ -76,10 +73,10 @@ function NavItem({ item, pathname }: { item: NavLink; pathname: string }) {
           <SmartPreloadLink
             href={item.url}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
-              isActive && "bg-muted text-primary"
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent hover:text-primary",
+              isActive && "bg-accent text-primary font-medium"
             )}
-            preloadDelay={150} // 更短的延遲以提升響應速度
+            preloadDelay={150}
           >
             {item.icon && <item.icon className="h-4 w-4" />}
             <span>{item.title}</span>
@@ -99,8 +96,11 @@ function NavItem({ item, pathname }: { item: NavLink; pathname: string }) {
     >
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
-          <SidebarMenuButton tooltip={item.title}>
-            {item.icon && <item.icon />}
+          <SidebarMenuButton
+            tooltip={item.title}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent hover:text-primary"
+          >
+            {item.icon && <item.icon className="h-4 w-4" />}
             <span>{item.title}</span>
             <ChevronRight
               className={cn(
@@ -118,11 +118,12 @@ function NavItem({ item, pathname }: { item: NavLink; pathname: string }) {
                   <SmartPreloadLink
                     href={subItem.url}
                     className={cn(
-                      pathname === subItem.url && "text-primary"
+                      "block rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent hover:text-primary",
+                      pathname === subItem.url && "bg-accent text-primary font-medium"
                     )}
                     preloadDelay={150}
                   >
-                    <span>{subItem.title}</span>
+                    {subItem.title}
                   </SmartPreloadLink>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>

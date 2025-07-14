@@ -6,7 +6,6 @@ import { useInventoryTransfers } from "@/hooks";
 import { useToast } from "@/components/ui/use-toast";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { RefreshIcon } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -201,7 +199,7 @@ export const InventoryTransferList = () => {
                         className="text-sm text-muted-foreground"
                        
                       >
-                        點擊"新增轉移"標籤來創建庫存轉移
+                        點擊&ldquo;新增轉移&rdquo;標籤來創建庫存轉移
                       </p>
                     </div>
                   </TableCell>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { columns } from '../columns';
 import { Customer } from '@/types/api-helpers';
@@ -247,7 +247,7 @@ describe('Customer Columns', () => {
     test('排序按鈕應該正常工作', async () => {
       const user = userEvent.setup();
       const cols = columns({ onEditCustomer: mockOnEditCustomer });
-      const { container } = renderHeader(cols[1]);
+      renderHeader(cols[1]);
       
       const sortButton = screen.getByRole('button');
       await user.click(sortButton);

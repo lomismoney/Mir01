@@ -19,7 +19,7 @@ jest.mock('date-fns/locale', () => ({
 
 // Mock utils
 jest.mock('@/lib/utils', () => ({
-  cn: (...args: any[]) => args.filter(Boolean).join(' '),
+  cn: (...args: (string | undefined | null | boolean)[]) => args.filter(Boolean).join(' '),
 }));
 
 describe('InstallationProgressTracker', () => {
@@ -46,7 +46,7 @@ describe('InstallationProgressTracker', () => {
       email: 'test@example.com',
     },
     installation_items: [],
-  } as any;
+  } as Partial<InstallationWithRelations>;
 
   describe('基本渲染', () => {
     it('應該正確渲染緊湊版本', () => {
@@ -199,7 +199,7 @@ describe('InstallationProgressTracker', () => {
            id: 1,
            name: '李師傅',
          },
-       } as any;
+       } as Partial<InstallationWithRelations>;
 
       render(<InstallationProgressTracker installation={installation} variant="full" />);
 
@@ -211,7 +211,7 @@ describe('InstallationProgressTracker', () => {
          ...baseInstallation,
          status: 'scheduled' as InstallationStatus,
          installer: null,
-       } as any;
+       } as Partial<InstallationWithRelations>;
 
       render(<InstallationProgressTracker installation={installation} variant="full" />);
 
@@ -276,7 +276,7 @@ describe('InstallationProgressTracker', () => {
       const installation = {
         ...baseInstallation,
         installer: undefined,
-      } as any;
+      } as Partial<InstallationWithRelations>;
 
       render(<InstallationProgressTracker installation={installation} variant="full" />);
 
@@ -292,7 +292,7 @@ describe('InstallationProgressTracker', () => {
         scheduled_date: null,
         actual_start_time: null,
         actual_end_time: null,
-      } as any;
+      } as Partial<InstallationWithRelations>;
 
       render(<InstallationProgressTracker installation={installation} />);
 

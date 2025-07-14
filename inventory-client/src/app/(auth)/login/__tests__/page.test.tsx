@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import LoginPage from '../page';
 import { loginAction } from '@/actions/auth';
@@ -48,6 +48,10 @@ jest.mock('@/components/ui/label', () => ({
   Label: ({ children, ...props }: any) => <label {...props}>{children}</label>
 }));
 
+jest.mock('@/components/ui/checkbox', () => ({
+  Checkbox: ({ id, ...props }: any) => <input type="checkbox" id={id} {...props} />
+}));
+
 jest.mock('@/components/ui/alert', () => ({
   Alert: ({ children, variant, className }: any) => (
     <div data-testid="alert" data-variant={variant} className={className}>{children}</div>
@@ -56,7 +60,10 @@ jest.mock('@/components/ui/alert', () => ({
 }));
 
 jest.mock('lucide-react', () => ({
-  AlertCircle: () => <div data-testid="alert-circle-icon" />
+  AlertCircle: () => <div data-testid="alert-circle-icon" />,
+  Eye: () => <div data-testid="eye-icon" />,
+  EyeOff: () => <div data-testid="eye-off-icon" />,
+  Loader2: () => <div data-testid="loader-icon" />
 }));
 
 describe('LoginPage', () => {
@@ -74,7 +81,7 @@ describe('LoginPage', () => {
     expect(screen.getByTestId('card')).toBeInTheDocument();
     expect(screen.getByTestId('card-header')).toBeInTheDocument();
     expect(screen.getByTestId('card-title')).toBeInTheDocument();
-    expect(screen.getByTestId('card-title')).toHaveTextContent('登入');
+    expect(screen.getByTestId('card-title')).toHaveTextContent('歡迎回來');
     expect(screen.getByTestId('card-description')).toBeInTheDocument();
     expect(screen.getByText('請輸入您的帳號密碼以登入系統。')).toBeInTheDocument();
 

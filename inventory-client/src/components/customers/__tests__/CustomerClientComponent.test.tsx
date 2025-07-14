@@ -17,6 +17,12 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CustomerClientComponent } from '../CustomerClientComponent';
 import { Customer } from '@/types/api-helpers';
+import {
+  MockComponentProps,
+  MockButtonProps,
+  MockInputProps,
+  MockDialogProps
+} from '@/test-utils/mock-types';
 
 // Mock 所有相關的 hooks
 jest.mock('@/hooks', () => ({
@@ -32,7 +38,7 @@ jest.mock('@/hooks/use-debounce', () => ({
 
 // 簡化 UI 組件 Mock
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, ...props }: any) => (
+  Button: ({ children, onClick, disabled, ...props }: MockButtonProps) => (
     <button onClick={onClick} disabled={disabled} {...props}>
       {children}
     </button>
@@ -40,7 +46,7 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: ({ value, onChange, placeholder, ...props }: any) => (
+  Input: ({ value, onChange, placeholder, ...props }: MockInputProps) => (
     <input 
       value={value} 
       onChange={onChange} 
@@ -58,7 +64,7 @@ jest.mock('@/components/ui/dialog', () => {
   };
 
   return {
-    Dialog: ({ children, open, onOpenChange }: any) => {
+    Dialog: ({ children, open, onOpenChange }: MockDialogProps) => {
       React.useEffect(() => {
         // 當組件卸載時重置狀態
         return () => {
@@ -73,7 +79,7 @@ jest.mock('@/components/ui/dialog', () => {
             if (React.isValidElement(child)) {
               if (child.props && typeof child.props === 'object' && 'asChild' in child.props) {
                 // DialogTrigger
-                return React.cloneElement(child as any, {
+                return React.cloneElement(child as React.ReactElement, {
                   onClick: () => {
                     onOpenChange?.(!open);
                   }
@@ -88,27 +94,27 @@ jest.mock('@/components/ui/dialog', () => {
         </div>
       );
     },
-    DialogContent: ({ children }: any) => (
+    DialogContent: ({ children }: MockComponentProps) => (
       <div data-testid="dialog-content" role="dialog">
         {children}
       </div>
     ),
-    DialogHeader: ({ children }: any) => (
+    DialogHeader: ({ children }: MockComponentProps) => (
       <div data-testid="dialog-header">
         {children}
       </div>
     ),
-    DialogTitle: ({ children }: any) => (
+    DialogTitle: ({ children }: MockComponentProps) => (
       <h2 data-testid="dialog-title">
         {children}
       </h2>
     ),
-    DialogTrigger: ({ children, asChild }: any) => {
-      return React.cloneElement(children, {
+    DialogTrigger: ({ children }: MockComponentProps) => {
+      return React.cloneElement(children as React.ReactElement, {
         'data-testid': 'dialog-trigger',
       });
     },
-    DialogDescription: ({ children }: any) => (
+    DialogDescription: ({ children }: MockComponentProps) => (
       <div data-testid="dialog-description">
         {children}
       </div>
@@ -117,32 +123,32 @@ jest.mock('@/components/ui/dialog', () => {
 });
 
 jest.mock('@/components/ui/table', () => ({
-  Table: ({ children, ...props }: any) => (
+  Table: ({ children, ...props }: MockComponentProps) => (
     <table data-testid="customers-table" {...props}>
       {children}
     </table>
   ),
-  TableHeader: ({ children, ...props }: any) => (
+  TableHeader: ({ children, ...props }: MockComponentProps) => (
     <thead {...props}>
       {children}
     </thead>
   ),
-  TableBody: ({ children, ...props }: any) => (
+  TableBody: ({ children, ...props }: MockComponentProps) => (
     <tbody {...props}>
       {children}
     </tbody>
   ),
-  TableRow: ({ children, ...props }: any) => (
+  TableRow: ({ children, ...props }: MockComponentProps) => (
     <tr {...props}>
       {children}
     </tr>
   ),
-  TableHead: ({ children, ...props }: any) => (
+  TableHead: ({ children, ...props }: MockComponentProps) => (
     <th {...props}>
       {children}
     </th>
   ),
-  TableCell: ({ children, ...props }: any) => (
+  TableCell: ({ children, ...props }: MockComponentProps) => (
     <td {...props}>
       {children}
     </td>
@@ -150,26 +156,31 @@ jest.mock('@/components/ui/table', () => ({
 }));
 
 jest.mock('@/components/ui/skeleton', () => ({
-  Skeleton: ({ className, ...props }: any) => (
+  Skeleton: ({ className, ...props }: MockComponentProps) => (
     <div data-testid="skeleton" className={className} {...props} />
   ),
 }));
 
 jest.mock('@/components/ui/alert', () => ({
-  Alert: ({ children, className, ...props }: any) => (
+  Alert: ({ children, className, ...props }: MockComponentProps) => (
     <div data-testid="alert" className={className} {...props}>
       {children}
     </div>
   ),
-  AlertDescription: ({ children, ...props }: any) => (
+  AlertDescription: ({ children, ...props }: MockComponentProps) => (
     <div data-testid="alert-description" {...props}>
       {children}
     </div>
   ),
 }));
 
+interface MockDataTableSkeletonProps extends MockComponentProps {
+  columns: number;
+  rows: number;
+}
+
 jest.mock('@/components/ui/data-table-skeleton', () => ({
-  DataTableSkeleton: ({ columns, rows, ...props }: any) => (
+  DataTableSkeleton: ({ columns, rows, ...props }: MockDataTableSkeletonProps) => (
     <div data-testid="data-table-skeleton" {...props}>
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} data-testid="skeleton-row">
@@ -183,20 +194,26 @@ jest.mock('@/components/ui/data-table-skeleton', () => ({
 }));
 
 jest.mock('lucide-react', () => ({
-  RefreshCw: ({ className, ...props }: any) => (
+  RefreshCw: ({ className, ...props }: MockComponentProps) => (
     <div data-testid="refresh-icon" className={className} {...props} />
   ),
-  AlertCircle: ({ className, ...props }: any) => (
+  AlertCircle: ({ className, ...props }: MockComponentProps) => (
     <div data-testid="alert-icon" className={className} {...props} />
   ),
-  Loader2: ({ className, ...props }: any) => (
+  Loader2: ({ className, ...props }: MockComponentProps) => (
     <div data-testid="loader-icon" className={className} {...props} />
   ),
 }));
 
+interface MockCustomerFormProps extends MockComponentProps {
+  initialData?: Customer;
+  isSubmitting?: boolean;
+  onSubmit: (data: { name: string }) => void;
+}
+
 // Mock CustomerForm 組件
 jest.mock('../CustomerForm', () => ({
-  CustomerForm: ({ initialData, isSubmitting, onSubmit, ...props }: any) => (
+  CustomerForm: ({ initialData, isSubmitting, onSubmit, ...props }: MockCustomerFormProps) => (
     <div data-testid="customer-form" {...props}>
       <button 
         data-testid="submit-form" 
@@ -214,18 +231,26 @@ jest.mock('../CustomerForm', () => ({
   ),
 }));
 
+interface MockColumnsActions {
+  onEditCustomer: (customer: Customer) => void;
+}
+
+interface MockRowData {
+  original: Customer;
+}
+
 // Mock columns - 簡化實現
 jest.mock('../columns', () => ({
-  columns: jest.fn(({ onEditCustomer }: any) => [
+  columns: jest.fn(({ onEditCustomer }: MockColumnsActions) => [
     {
       id: 'name',
       header: '客戶名稱',
-      cell: ({ row }: any) => row.original.name,
+      cell: ({ row }: { row: MockRowData }) => row.original.name,
     },
     {
       id: 'actions',
       header: '操作',
-      cell: ({ row }: any) => (
+      cell: ({ row }: { row: MockRowData }) => (
         <button 
           data-testid={`edit-customer-${row.original.id}`}
           onClick={() => onEditCustomer(row.original)}
@@ -296,10 +321,10 @@ describe('CustomerClientComponent', () => {
     jest.clearAllMocks();
     
     // 設置 hook mocks
-    mockUseCustomers = require('@/hooks').useCustomers as jest.Mock;
-    mockUseCreateCustomer = require('@/hooks').useCreateCustomer as jest.Mock;
-    mockUseUpdateCustomer = require('@/hooks').useUpdateCustomer as jest.Mock;
-    mockUseCustomerDetail = require('@/hooks').useCustomerDetail as jest.Mock;
+    mockUseCustomers = jest.requireMock<typeof import('@/hooks')>('@/hooks').useCustomers as jest.Mock;
+    mockUseCreateCustomer = jest.requireMock<typeof import('@/hooks')>('@/hooks').useCreateCustomer as jest.Mock;
+    mockUseUpdateCustomer = jest.requireMock<typeof import('@/hooks')>('@/hooks').useUpdateCustomer as jest.Mock;
+    mockUseCustomerDetail = jest.requireMock<typeof import('@/hooks')>('@/hooks').useCustomerDetail as jest.Mock;
     
     // 設置 mutation functions
     mockCreateCustomer = jest.fn();
@@ -491,7 +516,7 @@ describe('CustomerClientComponent', () => {
       const queryClient = createQueryClient();
       renderComponent(queryClient);
 
-      const columnsMock = require('../columns').columns;
+      const columnsMock = jest.requireMock<typeof import('../columns')>('../columns').columns;
       expect(columnsMock).toHaveBeenCalledWith({
         onEditCustomer: expect.any(Function),
       });

@@ -119,6 +119,8 @@ describe('purchase.ts', () => {
         const colorClass = PURCHASE_STATUS_COLORS[status];
         expect(colorClass).toMatch(/bg-\w+-\d+/); // 背景色格式
         expect(colorClass).toMatch(/text-\w+-\d+/); // 文字色格式
+        expect(colorClass).toMatch(/dark:bg-\w+-\d+/); // 深色模式背景色
+        expect(colorClass).toMatch(/dark:text-\w+-\d+/); // 深色模式文字色
       });
     });
 
@@ -126,13 +128,13 @@ describe('purchase.ts', () => {
      * 測試具體顏色配置
      */
     it('應該有正確的顏色配置', () => {
-      expect(PURCHASE_STATUS_COLORS.pending).toBe('bg-yellow-100 text-yellow-800');
-      expect(PURCHASE_STATUS_COLORS.confirmed).toBe('bg-blue-100 text-blue-800');
-      expect(PURCHASE_STATUS_COLORS.in_transit).toBe('bg-purple-100 text-purple-800');
-      expect(PURCHASE_STATUS_COLORS.received).toBe('bg-orange-100 text-orange-800');
-      expect(PURCHASE_STATUS_COLORS.completed).toBe('bg-green-100 text-green-800');
-      expect(PURCHASE_STATUS_COLORS.cancelled).toBe('bg-red-100 text-red-800');
-      expect(PURCHASE_STATUS_COLORS.partially_received).toBe('bg-indigo-100 text-indigo-800');
+      expect(PURCHASE_STATUS_COLORS.pending).toBe('bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-700');
+      expect(PURCHASE_STATUS_COLORS.confirmed).toBe('bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700');
+      expect(PURCHASE_STATUS_COLORS.in_transit).toBe('bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700');
+      expect(PURCHASE_STATUS_COLORS.received).toBe('bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700');
+      expect(PURCHASE_STATUS_COLORS.completed).toBe('bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700');
+      expect(PURCHASE_STATUS_COLORS.cancelled).toBe('bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-700');
+      expect(PURCHASE_STATUS_COLORS.partially_received).toBe('bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 border-indigo-200 dark:border-indigo-700');
     });
 
     /**
@@ -301,15 +303,15 @@ describe('purchase.ts', () => {
      */
     it('received 狀態應該可以轉換到 completed 或 partially_received', () => {
       const transitions = getValidStatusTransitions('received');
-      expect(transitions).toEqual(['completed', 'partially_received']);
+      expect(transitions).toEqual(['completed', 'partially_received']); // ✅ 修正：received 可以轉到 partially_received
     });
 
     /**
      * 測試 partially_received 狀態的轉換
      */
-    it('partially_received 狀態應該可以轉換到 completed 或 received', () => {
+    it('partially_received 狀態應該可以轉換到 completed、received 或再次 partially_received', () => {
       const transitions = getValidStatusTransitions('partially_received');
-      expect(transitions).toEqual(['completed', 'received']);
+      expect(transitions).toEqual(['completed', 'received', 'partially_received']); // 🎯 支援再次調整
     });
 
     /**
@@ -326,8 +328,8 @@ describe('purchase.ts', () => {
     it('無效狀態應該返回空陣列', () => {
       expect(getValidStatusTransitions('invalid_status' as PurchaseStatus)).toEqual([]);
       expect(getValidStatusTransitions('' as PurchaseStatus)).toEqual([]);
-      expect(getValidStatusTransitions(null as any)).toEqual([]);
-      expect(getValidStatusTransitions(undefined as any)).toEqual([]);
+      expect(getValidStatusTransitions(null as unknown as PurchaseStatus)).toEqual([]);
+      expect(getValidStatusTransitions(undefined as unknown as PurchaseStatus)).toEqual([]);
     });
 
     /**
@@ -374,12 +376,19 @@ describe('purchase.ts', () => {
     /**
      * 測試部分收貨邏輯
      */
-    it('應該支援部分收貨和完全收貨之間的轉換', () => {
-      // received 可以變回 partially_received（修正錯誤）
-      expect(getValidStatusTransitions('received')).toContain('partially_received');
+    it('應該支援部分收貨和完全收貨之間的轉換，以及再次調整', () => {
+      // 🎯 修正：根據新的業務邏輯，支援多次調整收貨數量
+      // in_transit 狀態可以轉換到 partially_received
+      expect(getValidStatusTransitions('in_transit')).toContain('partially_received');
       
       // partially_received 可以變成 received（完成收貨）
       expect(getValidStatusTransitions('partially_received')).toContain('received');
+      
+      // 🎯 新增：partially_received 可以再次調整（支援修正錯誤數量）
+      expect(getValidStatusTransitions('partially_received')).toContain('partially_received');
+      
+      // received 也可以回到 partially_received（支援重新調整）
+      expect(getValidStatusTransitions('received')).toContain('partially_received');
       
       // 兩者都可以變成 completed
       expect(getValidStatusTransitions('received')).toContain('completed');
@@ -426,7 +435,7 @@ describe('purchase.ts', () => {
       const invalidInputs = [null, undefined, '', 'invalid'];
       
       invalidInputs.forEach(input => {
-        const permissions = getPurchasePermissions(input as any);
+        const permissions = getPurchasePermissions(input as unknown as PurchaseStatus);
         expect(typeof permissions.canModify).toBe('boolean');
         expect(typeof permissions.canCancel).toBe('boolean');
         expect(typeof permissions.canReceiveStock).toBe('boolean');
@@ -469,7 +478,7 @@ describe('purchase.ts', () => {
         {
           status: 'received' as PurchaseStatus,
           expectedPermissions: { canModify: true, canCancel: false, canReceiveStock: true, canDelete: false },
-          expectedTransitions: ['completed', 'partially_received']
+          expectedTransitions: ['completed', 'partially_received'] // ✅ 修正：received 狀態只能轉到 completed
         },
         {
           status: 'completed' as PurchaseStatus,

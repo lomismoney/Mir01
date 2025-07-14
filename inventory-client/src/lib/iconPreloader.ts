@@ -139,7 +139,7 @@ export function createRouteIconPreloader() {
       for (const [route, pages] of Object.entries(routeIconMap)) {
         if (pathname.startsWith(route)) {
           for (const page of pages) {
-            await iconPreloader.preloadPageIcons(page as any);
+            await iconPreloader.preloadPageIcons(page as Parameters<typeof iconPreloader.preloadPageIcons>[0]);
           }
           break;
         }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // Mock 變量定義
@@ -338,7 +338,7 @@ describe('ShipmentFormModal', () => {
       }));
       
       // 重新渲染組件
-      const { rerender } = render(<ShipmentFormModal {...defaultProps} />);
+      render(<ShipmentFormModal {...defaultProps} />);
       
       // 由於 Jest mock 的限制，這裡我們測試預期的行為
       expect(screen.getByTestId('button-submit')).toBeInTheDocument();
@@ -447,7 +447,7 @@ describe('ShipmentFormModal', () => {
 
   describe('成功處理測試', () => {
     test('成功提交後應該顯示成功訊息', async () => {
-      const { toast } = require('sonner');
+      const { toast } = jest.requireMock<typeof import('sonner')>('sonner');
       const user = userEvent.setup();
       render(<ShipmentFormModal {...defaultProps} />);
       
@@ -549,7 +549,7 @@ describe('ShipmentFormModal', () => {
 
   describe('錯誤處理測試', () => {
     test('API 錯誤應該顯示錯誤訊息', async () => {
-      const { toast } = require('sonner');
+      const { toast } = jest.requireMock<typeof import('sonner')>('sonner');
       const user = userEvent.setup();
       render(<ShipmentFormModal {...defaultProps} />);
       
@@ -584,7 +584,7 @@ describe('ShipmentFormModal', () => {
     });
 
     test('網路錯誤應該顯示預設錯誤訊息', async () => {
-      const { toast } = require('sonner');
+      const { toast } = jest.requireMock<typeof import('sonner')>('sonner');
       const user = userEvent.setup();
       render(<ShipmentFormModal {...defaultProps} />);
       

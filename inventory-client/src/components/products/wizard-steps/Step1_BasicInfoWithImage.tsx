@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -160,7 +161,7 @@ export function Step1_BasicInfoWithImage({
     });
 
     // 動態建立後續階段
-    let currentOptions = parentCategories;
+    const currentOptions = parentCategories;
     for (let i = 0; i < categoryPath.length; i++) {
       const selectedId = categoryPath[i];
       const selectedCategory = allCategoriesMap.get(selectedId);
@@ -463,7 +464,7 @@ export function Step1_BasicInfoWithImage({
                     {stage.level === 0 ? '主分類' : `${stage.parentCategory?.name} 的子分類`}
                     {stage.level > 0 && (
                       <span className="text-xs text-muted-foreground ml-1">
-                        (可選，不選則使用 "{stage.parentCategory?.name}")
+                        (可選，不選則使用 &ldquo;{stage.parentCategory?.name}&rdquo;)
                       </span>
                     )}
                   </Label>
@@ -546,14 +547,13 @@ export function Step1_BasicInfoWithImage({
               /* 已上傳圖片的預覽區 */
               <div className="relative">
                 <div
-                  className="w-24 h-24 border rounded-md overflow-hidden bg-muted"
-                 
+                  className="relative w-24 h-24 border rounded-md overflow-hidden bg-muted"
                 >
-                  <img
+                  <Image
                     src={imageSelection.imageData.preview || formData.imageData.previewUrl || ""}
                     alt="商品圖片預覽"
-                    className="w-full h-full object-cover"
-                   
+                    fill
+                    className="object-cover"
                   />
 
                   {/* 移除按鈕 */}

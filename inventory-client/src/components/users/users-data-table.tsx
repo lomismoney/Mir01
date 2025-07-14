@@ -240,7 +240,7 @@ export function UsersDataTable<TData, TValue>({
                   <td colSpan={columns.length} className="h-24 text-center">
                     {inputValue ? (
                       <div className="text-muted-foreground">
-                        沒有找到符合 "{inputValue}" 的用戶
+                        沒有找到符合 &ldquo;{inputValue}&rdquo; 的用戶
                       </div>
                     ) : (
                       <div className="text-muted-foreground">
@@ -261,7 +261,7 @@ export function UsersDataTable<TData, TValue>({
           共 {data.length} 個用戶
           {inputValue && (
             <span className="ml-2">
-              搜尋 "{inputValue}" 找到 {resultCount} 個結果
+              搜尋 &ldquo;{inputValue}&rdquo; 找到 {resultCount} 個結果
             </span>
           )}
         </div>

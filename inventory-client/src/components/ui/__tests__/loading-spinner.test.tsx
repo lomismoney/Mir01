@@ -371,8 +371,8 @@ describe('LoadingSpinner', () => {
      * 測試 undefined 和 null 屬性
      */
     it('應該正確處理 undefined 和 null 屬性', () => {
-      // @ts-ignore - 測試邊界條件
-      render(<LoadingSpinner size={undefined} text={null} className={undefined} />);
+      // 測試邊界條件 - 使用類型斷言來測試運行時行為
+      render(<LoadingSpinner {...{size: undefined as any, text: null as any, className: undefined}} />);
 
       const icon = screen.getByTestId('loader2-icon');
       expect(icon).toBeInTheDocument();
@@ -396,8 +396,8 @@ describe('LoadingSpinner', () => {
      * 測試非標準尺寸值（TypeScript 應該防止這種情況，但測試運行時行為）
      */
     it('應該優雅處理非標準的尺寸值', () => {
-      // @ts-ignore - 測試邊界條件
-      render(<LoadingSpinner size="xl" />);
+      // 測試邊界條件 - 非標準尺寸值的運行時行為
+      render(<LoadingSpinner size={"xl" as any} />);
 
       const icon = screen.getByTestId('loader2-icon');
       expect(icon).toBeInTheDocument();

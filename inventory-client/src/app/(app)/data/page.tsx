@@ -12,13 +12,9 @@ import {
   HardDrive, 
   Activity, 
   Download, 
-  Upload,
-  RefreshCw,
-  AlertTriangle,
   CheckCircle,
   Clock,
-  BarChart3,
-  PieChart
+  BarChart3
 } from "lucide-react";
 
 /**

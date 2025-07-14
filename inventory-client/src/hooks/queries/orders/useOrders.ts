@@ -65,7 +65,7 @@ export function useOrders(filters: {
       if (filters.page) queryParams.page = filters.page;
       if (filters.per_page) queryParams.per_page = filters.per_page;
       
-      const { data, error } = await apiClient.GET("/api/orders" as any, {
+      const { data, error } = await apiClient.GET("/api/orders", {
         params: {
           query: queryParams,
         },
@@ -184,13 +184,13 @@ export function useCreateOrder() {
       
       // 使用 toast 顯示成功訊息
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('訂單創建成功！', {
           description: `訂單已成功創建，訂單列表已自動更新。`
         });
       }
     },
-    onError: (error: any) => {
+    onError: async (error: any) => {
       // 🎯 在 onError 回調中，我們現在可以更安全地檢查錯誤類型
       if (error.stockCheckResults || error.insufficientStockItems) {
         // 這裡是處理庫存不足的邏輯...
@@ -198,7 +198,7 @@ export function useCreateOrder() {
       } else {
         // 這裡是處理其他通用錯誤的邏輯...
         if (typeof window !== 'undefined') {
-          const { toast } = require('sonner');
+          const { toast } = await import('sonner');
           toast.error('訂單創建失敗', {
             description: error.message || '請檢查輸入資料並重試。'
           });
@@ -316,7 +316,7 @@ export function useConfirmOrderPayment() {
     },
     onSuccess: async (data, orderId) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("訂單款項已確認");
       }
       // 🚀 強化快取同步機制 - 確保頁面即時更新
@@ -341,9 +341,9 @@ export function useConfirmOrderPayment() {
         })
       ]);
     },
-    onError: (error) => {
+    onError: async (error) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("操作失敗", { description: parseApiError(error) });
       }
     },
@@ -382,18 +382,18 @@ export function useCreateOrderShipment() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data, payload) => {
+    onSuccess: async (data, payload) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("訂單已標記為已出貨");
       }
       // 標準化快取處理
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(payload.orderId), refetchType: 'active' });
     },
-    onError: (error) => {
+    onError: async (error) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("操作失敗", { description: parseApiError(error) });
       }
     },
@@ -434,7 +434,7 @@ export function useAddOrderPayment() {
     },
     onSuccess: async (data, payload) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("付款記錄已成功新增", {
           description: `已記錄 $${(payload.data as any).amount} 的付款`
         });
@@ -461,10 +461,10 @@ export function useAddOrderPayment() {
         })
       ]);
     },
-    onError: (error) => {
+    onError: async (error) => {
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("付款記錄新增失敗", { 
           description: errorMessage || "請檢查付款金額是否正確" 
         });
@@ -516,18 +516,18 @@ export function useUpdateOrder() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: async (data, variables) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("訂單已成功更新");
       }
       // 同時失效列表和詳情的快取
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(variables.id), refetchType: 'active' });
     },
-    onError: (error) => {
+    onError: async (error) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("更新失敗", { description: parseApiError(error) });
       }
     },
@@ -547,9 +547,9 @@ export function useDeleteOrder() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("訂單已成功刪除");
       }
       // 標準化快取處理
@@ -558,9 +558,9 @@ export function useDeleteOrder() {
         refetchType: 'active',
       });
     },
-    onError: (error) => {
+    onError: async (error) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("刪除失敗", { description: parseApiError(error) });
       }
     },
@@ -640,17 +640,17 @@ export function useUpdateOrderItemStatus() {
       
       // 🔔 成功通知 - 提升用戶體驗
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('訂單項目狀態已更新', {
           description: `項目狀態已更新為「${variables.status}」`
         });
       }
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('狀態更新失敗', { description: errorMessage });
       }
     },
@@ -689,9 +689,9 @@ export function useCreateRefund() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data: { data?: { total_refund_amount?: string | number } }, payload) => {
+    onSuccess: async (data: { data?: { total_refund_amount?: string | number } }, payload) => {
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         const amount = data?.data?.total_refund_amount;
         const displayAmount = typeof amount === 'string' ? parseFloat(amount) : (amount || 0);
         toast.success("退款已成功處理", {
@@ -702,10 +702,10 @@ export function useCreateRefund() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(payload.orderId), refetchType: 'active' });
     },
-    onError: (error) => {
+    onError: async (error) => {
       const errorMessage = parseApiError(error);
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error("退款處理失敗", { 
           description: errorMessage || "請檢查退款資料是否正確" 
         });
@@ -741,10 +741,10 @@ export function useCancelOrder() {
         throw new Error(errorMessage || '取消訂單失敗');
       }
     },
-    onSuccess: (_, { orderId }) => {
+    onSuccess: async (_, { orderId }) => {
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('訂單已成功取消');
       }
       
@@ -753,10 +753,10 @@ export function useCancelOrder() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS, refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(orderId), refetchType: 'active' });
     },
-    onError: (error) => {
+    onError: async (error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error(error.message);
       }
     },
@@ -791,10 +791,10 @@ export function useBatchDeleteOrders() {
         throw new Error(errorMessage || '批量刪除訂單失敗');
       }
     },
-    onSuccess: (_, { ids }) => {
+    onSuccess: async (_, { ids }) => {
       // 🔔 成功通知 - 顯示操作結果
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('所選訂單已成功刪除', {
           description: `已刪除 ${ids.length} 個訂單`
         });
@@ -814,10 +814,10 @@ export function useBatchDeleteOrders() {
         queryClient.removeQueries({ queryKey: QUERY_KEYS.ORDER(numericId) });
       });
     },
-    onError: (error: Error) => {
+    onError: async (error: Error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('批量刪除失敗', { 
           description: error.message || '請檢查選擇的訂單是否允許刪除'
         });
@@ -859,10 +859,10 @@ export function useBatchUpdateStatus() {
         throw new Error(errorMessage || '批量更新狀態失敗');
       }
     },
-    onSuccess: (_, { status_type, status_value, ids }) => {
+    onSuccess: async (_, { status_type, status_value, ids }) => {
       // 🔔 成功通知 - 顯示詳細的操作結果
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         const statusTypeName = status_type === 'payment_status' ? '付款狀態' : '貨物狀態';
         toast.success('所選訂單狀態已成功更新', {
           description: `已將 ${ids.length} 個訂單的${statusTypeName}更新為「${status_value}」`
@@ -883,10 +883,10 @@ export function useBatchUpdateStatus() {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDER(numericId) });
       });
     },
-    onError: (error: Error) => {
+    onError: async (error: Error) => {
       // 🔴 錯誤處理 - 友善的錯誤訊息
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.error('批量狀態更新失敗', { 
           description: error.message || '請檢查選擇的訂單和狀態設定'
         });

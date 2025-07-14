@@ -10,7 +10,6 @@ exports[`RoleSelector 應該匹配快照 - 有選擇狀態 1`] = `
     <button
       aria-checked="true"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
-      data-oid="5z3vdta"
       data-state="checked"
       id="role-admin"
       role="checkbox"
@@ -19,14 +18,12 @@ exports[`RoleSelector 應該匹配快照 - 有選擇狀態 1`] = `
     >
       <span
         class="flex items-center justify-center text-current"
-        data-oid="jprc2.c"
         data-state="checked"
         style="pointer-events: none;"
       >
         <svg
           aria-hidden="true"
           class="lucide lucide-check h-4 w-4"
-          data-oid="aog05t_"
           fill="none"
           height="24"
           stroke="currentColor"
@@ -83,7 +80,6 @@ exports[`RoleSelector 應該匹配快照 - 有選擇狀態 1`] = `
     <button
       aria-checked="true"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
-      data-oid="5z3vdta"
       data-state="checked"
       id="role-staff"
       role="checkbox"
@@ -92,14 +88,12 @@ exports[`RoleSelector 應該匹配快照 - 有選擇狀態 1`] = `
     >
       <span
         class="flex items-center justify-center text-current"
-        data-oid="jprc2.c"
         data-state="checked"
         style="pointer-events: none;"
       >
         <svg
           aria-hidden="true"
           class="lucide lucide-check h-4 w-4"
-          data-oid="aog05t_"
           fill="none"
           height="24"
           stroke="currentColor"
@@ -168,7 +162,6 @@ exports[`RoleSelector 應該匹配快照 - 有選擇狀態 1`] = `
     <button
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
-      data-oid="5z3vdta"
       data-state="unchecked"
       id="role-viewer"
       role="checkbox"
@@ -220,7 +213,6 @@ exports[`RoleSelector 應該匹配快照 - 有選擇狀態 1`] = `
     <button
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
-      data-oid="5z3vdta"
       data-state="unchecked"
       id="role-installer"
       role="checkbox"
@@ -277,7 +269,6 @@ exports[`RoleSelector 應該匹配快照 - 無選擇狀態 1`] = `
     <button
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
-      data-oid="5z3vdta"
       data-state="unchecked"
       id="role-admin"
       role="checkbox"
@@ -324,7 +315,6 @@ exports[`RoleSelector 應該匹配快照 - 無選擇狀態 1`] = `
     <button
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
-      data-oid="5z3vdta"
       data-state="unchecked"
       id="role-staff"
       role="checkbox"
@@ -383,7 +373,6 @@ exports[`RoleSelector 應該匹配快照 - 無選擇狀態 1`] = `
     <button
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
-      data-oid="5z3vdta"
       data-state="unchecked"
       id="role-viewer"
       role="checkbox"
@@ -435,7 +424,6 @@ exports[`RoleSelector 應該匹配快照 - 無選擇狀態 1`] = `
     <button
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
-      data-oid="5z3vdta"
       data-state="unchecked"
       id="role-installer"
       role="checkbox"
@@ -498,7 +486,6 @@ exports[`RoleSelector 應該匹配快照 - 禁用狀態 1`] = `
       aria-checked="true"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
       data-disabled=""
-      data-oid="5z3vdta"
       data-state="checked"
       disabled=""
       id="role-admin"
@@ -509,14 +496,12 @@ exports[`RoleSelector 應該匹配快照 - 禁用狀態 1`] = `
       <span
         class="flex items-center justify-center text-current"
         data-disabled=""
-        data-oid="jprc2.c"
         data-state="checked"
         style="pointer-events: none;"
       >
         <svg
           aria-hidden="true"
           class="lucide lucide-check h-4 w-4"
-          data-oid="aog05t_"
           fill="none"
           height="24"
           stroke="currentColor"
@@ -574,7 +559,6 @@ exports[`RoleSelector 應該匹配快照 - 禁用狀態 1`] = `
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
       data-disabled=""
-      data-oid="5z3vdta"
       data-state="unchecked"
       disabled=""
       id="role-staff"
@@ -635,7 +619,6 @@ exports[`RoleSelector 應該匹配快照 - 禁用狀態 1`] = `
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
       data-disabled=""
-      data-oid="5z3vdta"
       data-state="unchecked"
       disabled=""
       id="role-viewer"
@@ -689,7 +672,6 @@ exports[`RoleSelector 應該匹配快照 - 禁用狀態 1`] = `
       aria-checked="false"
       class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mt-1"
       data-disabled=""
-      data-oid="5z3vdta"
       data-state="unchecked"
       disabled=""
       id="role-installer"

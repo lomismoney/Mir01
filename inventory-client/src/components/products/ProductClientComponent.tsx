@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo, useEffect, useMemo, useCallback } from "react";
+import { useState, memo, useEffect, useCallback } from "react";
 import {
   SortingState,
   ColumnFiltersState,
@@ -48,8 +48,11 @@ import {
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useProductDataTransformation } from "@/hooks/useDataTransformation";
+import { useEmptyState } from "@/hooks/use-empty-state";
+import { EmptyTable, EmptySearch, EmptyError } from "@/components/ui/empty-state";
 import { columns, type ExpandedProductItem } from "./columns";
 import VariantDetailsModal from "./VariantDetailsModal";
+import { AllVariantsModal } from "./AllVariantsModal";
 import { ProductItem } from "@/types/api-helpers";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -110,6 +113,13 @@ const ProductClientComponent = () => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
+  // 所有變體模態框狀態管理
+  const [allVariantsModal, setAllVariantsModal] = useState({
+    isOpen: false,
+    product: null as ExpandedProductItem | null,
+    variants: [] as ExpandedProductItem[],
+  });
+
   // 使用防抖後的搜索查詢，並加入更大的每頁數量以顯示所有商品
   const {
     data: productsResponse,
@@ -149,6 +159,14 @@ const ProductClientComponent = () => {
     isMainProduct,
     isVariant 
   } = useProductDataTransformation(rawProducts);
+
+  // 使用空狀態配置
+  const { config: emptyConfig, handleAction } = useEmptyState('products');
+
+  // 搜尋建議
+  const suggestions = [
+    "iPhone", "MacBook", "T恤", "牛仔褲", "辦公椅", "坐墊"
+  ];
 
   // 優化 enableRowSelection 函數
   const enableRowSelection = useCallback((row: any) => isMainProduct(row.original), [isMainProduct]);
@@ -282,6 +300,15 @@ const ProductClientComponent = () => {
       modalManager.openModal(PRODUCT_MODAL_TYPES.VARIANT_DETAIL, product);
     };
 
+    const handleViewAllVariantsEvent = (event: CustomEvent) => {
+      const { product, allVariants } = event.detail;
+      setAllVariantsModal({
+        isOpen: true,
+        product,
+        variants: allVariants || [],
+      });
+    };
+
     // 添加事件監聽器
     window.addEventListener("editProduct", handleEditEvent as EventListener);
     window.addEventListener(
@@ -291,6 +318,10 @@ const ProductClientComponent = () => {
     window.addEventListener(
       "viewVariants",
       handleViewVariantsEvent as EventListener,
+    );
+    window.addEventListener(
+      "viewAllVariants",
+      handleViewAllVariantsEvent as EventListener,
     );
 
     // 清理事件監聽器
@@ -306,6 +337,10 @@ const ProductClientComponent = () => {
       window.removeEventListener(
         "viewVariants",
         handleViewVariantsEvent as EventListener,
+      );
+      window.removeEventListener(
+        "viewAllVariants",
+        handleViewAllVariantsEvent as EventListener,
       );
     };
   }, [router, handleDeleteProduct, modalManager]);
@@ -428,12 +463,13 @@ const ProductClientComponent = () => {
           </div>
         ) : error ? (
           <div className="p-6">
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                載入商品資料時發生錯誤。請重新整理頁面。
-              </AlertDescription>
-            </Alert>
+            <EmptyError
+              title="載入商品資料失敗"
+              description="無法載入商品列表，請稍後再試"
+              onRetry={() => window.location.reload()}
+              showDetails={true}
+              error={error}
+            />
           </div>
         ) : (
           <>
@@ -476,8 +512,21 @@ const ProductClientComponent = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={columns.length} className="h-24 text-center">
-                          沒有找到商品資料
+                        <td colSpan={columns.length} className="p-0">
+                          {searchQuery ? (
+                            <EmptySearch
+                              searchTerm={searchQuery}
+                              onClearSearch={() => setSearchQuery('')}
+                              suggestions={suggestions}
+                            />
+                          ) : (
+                            <EmptyTable
+                              title={emptyConfig.title}
+                              description={emptyConfig.description}
+                              actionLabel={emptyConfig.actionLabel}
+                              onAction={handleAction}
+                            />
+                          )}
                         </td>
                       </tr>
                     )}
@@ -638,6 +687,14 @@ const ProductClientComponent = () => {
         isOpen={modalManager.isModalOpen(PRODUCT_MODAL_TYPES.VARIANT_DETAIL)}
         onClose={() => modalManager.closeModal()}
         product={modalManager.currentData as ProductItem | null}
+      />
+
+      {/* 🎯 所有變體查看模態框 */}
+      <AllVariantsModal
+        isOpen={allVariantsModal.isOpen}
+        onClose={() => setAllVariantsModal(prev => ({ ...prev, isOpen: false }))}
+        product={allVariantsModal.product}
+        variants={allVariantsModal.variants}
       />
     </div>
   );

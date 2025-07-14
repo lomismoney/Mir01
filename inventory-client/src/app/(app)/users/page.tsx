@@ -28,26 +28,25 @@ import {
   CardDescription, 
   CardHeader, 
   CardTitle, 
-  CardAction,
-  CardFooter 
+ 
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { 
   Loader2, 
-  Plus, 
+ 
   UserCheck, 
   Shield, 
-  Users, 
-  Crown, 
-  Store, 
-  Eye,
+ 
+ 
+ 
   Edit,
   TrendingUp,
   TrendingDown,
   Settings,
-  UserPlus,
-  CheckCircle
+  Eye,
+  Crown,
+  Store,
 } from "lucide-react";
 import {
   useUsers,
@@ -60,11 +59,11 @@ import {
 import { useSession } from "next-auth/react";
 import { UsersDataTable } from "@/components/users/users-data-table";
 import { createUsersColumns } from "@/components/users/users-columns";
-import { UserItem } from "@/types/api-helpers";
+import { UserItem, StoreItem } from "@/types/api-helpers";
 import { UserActions } from "@/components/users/users-columns";
 import { UserStoresDialog } from "@/components/users/user-stores-dialog";
 import { RoleSelector } from "@/components/users/role-selector";
-import { useQueryClient } from "@tanstack/react-query";
+import { formatDate } from "@/lib/dateHelpers";
 
 /**
  * 用戶管理頁面（美化版）
@@ -98,11 +97,9 @@ export default function UsersPage() {
   const {
     data: usersResponse,
     isLoading,
-    error,
-  } = useUsers(searchQuery ? { "filter[search]": searchQuery } : undefined);
+  } = useUsers(searchQuery ? { search: searchQuery } : undefined);
 
   const usersData = usersResponse?.data || [];
-  const meta = usersResponse?.meta;
 
   const createUserMutation = useCreateUser();
   const deleteUserMutation = useDeleteUser();
@@ -129,7 +126,6 @@ export default function UsersPage() {
   const updateUserMutation = useUpdateUser();
 
   // 用戶分店管理狀態（整合到 modalManager）
-  const queryClient = useQueryClient();
 
   // 處理分店管理按鈕點擊
   const handleManageUserStores = (user: UserItem) => {
@@ -140,7 +136,7 @@ export default function UsersPage() {
   const getUserStats = () => {
     const totalUsers = usersData.length;
     const roleStats = usersData.reduce((acc, user) => {
-      const roles = (user as any).roles || [];
+      const roles = (user as { roles?: string[] }).roles || [];
       roles.forEach((role: string) => {
         acc[role] = (acc[role] || 0) + 1;
       });
@@ -177,7 +173,7 @@ export default function UsersPage() {
    */
   const handleCreateUser = () => {
     // 基本驗證
-    if (!newUserName.trim() || !newUsername.trim() || !newPassword.trim() || !newUserEmail.trim()) {
+    if (!newUserName.trim() || !newUsername.trim() || !newPassword.trim()) {
       handleError(new Error("請填寫所有必填欄位"));
       return;
     }
@@ -198,6 +194,7 @@ export default function UsersPage() {
       {
         name: newUserName,
         username: newUsername,
+        email: newUserEmail || undefined,  // 電子郵件為可選欄位
         password: newPassword,
         password_confirmation: newPassword,  // ✅ 新增確認密碼字段
         roles: newRoles as ("admin" | "staff" | "viewer" | "installer")[],
@@ -256,7 +253,14 @@ export default function UsersPage() {
     }
 
     // 構建更新資料 - 條件性包含密碼欄位
-    const updatePayload: any = {
+    const updatePayload: {
+      name: string;
+      username: string;
+      email: string;
+      roles: ("admin" | "staff" | "viewer" | "installer")[];
+      password?: string;
+      password_confirmation?: string;
+    } = {
       name: editUserName,
       username: editUsername,
       email: editUserEmail,
@@ -359,7 +363,7 @@ export default function UsersPage() {
   // 用戶動作定義（符合新的 UserActions 介面）
   const userActions: UserActions = {
     onView: (user: UserItem) => {
-      handleSuccess(`查看用戶：${user.name}`);
+      modalManager.openModal('view', user);
     },
     onEdit: handleEditUser,
     onDelete: handleDeleteUser,
@@ -559,7 +563,7 @@ export default function UsersPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
-                  電子郵件 <span className="text-destructive">*</span>
+                  電子郵件
                 </Label>
                 <Input
                   id="email"
@@ -696,7 +700,7 @@ export default function UsersPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-email" className="text-sm font-medium">
-                  電子郵件 <span className="text-destructive">*</span>
+                  電子郵件
                 </Label>
                 <Input
                   id="edit-email"
@@ -825,6 +829,125 @@ export default function UsersPage() {
           onOpenChange={(open) => !open && modalManager.closeModal()}
         />
       )}
+
+      {/* 👁️ 查看用戶詳情對話框 */}
+      <Dialog
+        open={modalManager.isModalOpen('view')}
+        onOpenChange={(open) => !open && modalManager.closeModal()}
+      >
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Eye className="h-5 w-5" />
+              </div>
+              用戶詳情
+            </DialogTitle>
+          </DialogHeader>
+
+          {modalManager.currentData && (
+            <div className="space-y-6 mt-4">
+              {/* 基本資訊 */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground">基本資訊</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">姓名</Label>
+                    <p className="text-sm font-medium">{modalManager.currentData.name || '-'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">用戶名</Label>
+                    <p className="text-sm font-medium font-mono">@{modalManager.currentData.username || '-'}</p>
+                  </div>
+                </div>
+                {modalManager.currentData.email && (
+                  <div className="space-y-1 mt-4">
+                    <Label className="text-xs text-muted-foreground">電子郵件</Label>
+                    <p className="text-sm font-medium">{modalManager.currentData.email}</p>
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* 角色權限 */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground">角色權限</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(modalManager.currentData.roles || []).length > 0 ? (
+                    (modalManager.currentData.roles as string[]).map((role) => {
+                      const roleConfig = {
+                        admin: { label: "管理員", icon: <Crown className="h-3 w-3" /> },
+                        staff: { label: "員工", icon: <Shield className="h-3 w-3" /> },
+                        viewer: { label: "檢視者", icon: <Eye className="h-3 w-3" /> },
+                        installer: { label: "安裝師傅", icon: <Settings className="h-3 w-3" /> }
+                      };
+                      const config = roleConfig[role as keyof typeof roleConfig] || { label: role, icon: null };
+                      return (
+                        <Badge key={role} variant="secondary" className="flex items-center gap-1">
+                          {config.icon}
+                          {config.label}
+                        </Badge>
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm text-muted-foreground">無角色分配</p>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* 所屬分店 */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground">所屬分店</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(modalManager.currentData.stores || []).length > 0 ? (
+                    (modalManager.currentData.stores as StoreItem[]).map((store) => (
+                      <Badge key={store.id} variant="outline" className="flex items-center gap-1">
+                        <Store className="h-3 w-3" />
+                        {store.name}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">未分配分店</p>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* 時間資訊 */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground">時間資訊</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">建立時間</Label>
+                    <p className="text-sm">{formatDate.fullDateTime(modalManager.currentData.created_at || '', '-')}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">最後更新</Label>
+                    <p className="text-sm">{formatDate.fullDateTime(modalManager.currentData.updated_at || '', '-')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => modalManager.closeModal()}>
+              關閉
+            </Button>
+            <Button onClick={() => {
+              modalManager.closeModal();
+              handleEditUser(modalManager.currentData as UserItem);
+            }}>
+              <Edit className="mr-2 h-4 w-4" />
+              編輯用戶
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

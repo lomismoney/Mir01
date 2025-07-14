@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Package, TrendingDown, ArrowRight, RefreshCw } from 'lucide-react';
+import { AlertTriangle, TrendingDown, ArrowRight, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useInventoryAlertSummary } from '@/hooks/queries/inventory/useInventoryAlerts';
 import type { paths } from '@/types/api';

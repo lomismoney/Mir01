@@ -53,8 +53,8 @@ jest.mock('@/lib/utils', () => ({
         }
         if (typeof cls === 'object' && cls !== null) {
           return Object.entries(cls)
-            .filter(([_, value]) => Boolean(value))
-            .map(([key, _]) => key)
+            .filter(([, value]) => Boolean(value))
+            .map(([key]) => key)
             .join(' ');
         }
         return '';

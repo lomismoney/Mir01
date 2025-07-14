@@ -21,13 +21,17 @@ export const productPreloadStrategies = {
     },
     {
       queryKey: queryKeys.categories.ALL,
-      queryFn: () => apiClient.GET('/api/categories'),
+      queryFn: () => apiClient.GET('/api/categories', {
+        params: { query: {} }
+      }),
       staleTime: 10 * 60 * 1000,
       priority: 'medium' as const,
     },
     {
       queryKey: queryKeys.attributes.ALL,
-      queryFn: () => apiClient.GET('/api/attributes'),
+      queryFn: () => apiClient.GET('/api/attributes', {
+        params: { query: {} }
+      }),
       staleTime: 10 * 60 * 1000,
       priority: 'low' as const,
     },
@@ -37,17 +41,9 @@ export const productPreloadStrategies = {
   detailPage: (productId: number) => [
     {
       queryKey: queryKeys.products.DETAIL(productId),
-      queryFn: () => apiClient.GET('/api/products/{product}' as any, {
+      queryFn: () => apiClient.GET('/api/products/{product}', {
         params: { path: { product: productId } }
-      } as any),
-      staleTime: 5 * 60 * 1000,
-      priority: 'high' as const,
-    },
-    {
-      queryKey: queryKeys.products.VARIANTS(productId),
-      queryFn: () => apiClient.GET('/api/products/{product}/variants' as any, {
-        params: { path: { product: productId } }
-      } as any),
+      }),
       staleTime: 5 * 60 * 1000,
       priority: 'high' as const,
     },
@@ -57,19 +53,25 @@ export const productPreloadStrategies = {
   createPage: [
     {
       queryKey: queryKeys.categories.ALL,
-      queryFn: () => apiClient.GET('/api/categories'),
+      queryFn: () => apiClient.GET('/api/categories', {
+        params: { query: {} }
+      }),
       staleTime: 10 * 60 * 1000,
       priority: 'high' as const,
     },
     {
       queryKey: queryKeys.attributes.ALL,
-      queryFn: () => apiClient.GET('/api/attributes'),
+      queryFn: () => apiClient.GET('/api/attributes', {
+        params: { query: {} }
+      }),
       staleTime: 10 * 60 * 1000,
       priority: 'high' as const,
     },
     {
       queryKey: queryKeys.stores.ALL,
-      queryFn: () => apiClient.GET('/api/stores'),
+      queryFn: () => apiClient.GET('/api/stores', {
+        params: { query: {} }
+      }),
       staleTime: 10 * 60 * 1000,
       priority: 'medium' as const,
     },
@@ -80,21 +82,16 @@ export const productPreloadStrategies = {
 export const orderPreloadStrategies = {
   // 訂單列表頁面
   listPage: [
-    {
-      queryKey: queryKeys.orders.LIST({ page: 1, per_page: 15 }),
-      queryFn: () => apiClient.GET('/api/orders', {
-        params: { query: { per_page: 15 } as any }
-      }),
-      staleTime: 2 * 60 * 1000,
-      priority: 'high' as const,
-    },
+    // Note: No direct orders list endpoint available in API
   ],
   
   // 新增訂單頁面
   createPage: [
     {
       queryKey: queryKeys.customers.ALL,
-      queryFn: () => apiClient.GET('/api/customers'),
+      queryFn: () => apiClient.GET('/api/customers', {
+        params: { query: {} }
+      }),
       staleTime: 5 * 60 * 1000,
       priority: 'high' as const,
     },
@@ -108,7 +105,9 @@ export const orderPreloadStrategies = {
     },
     {
       queryKey: queryKeys.stores.ALL,
-      queryFn: () => apiClient.GET('/api/stores'),
+      queryFn: () => apiClient.GET('/api/stores', {
+        params: { query: {} }
+      }),
       staleTime: 10 * 60 * 1000,
       priority: 'medium' as const,
     },
@@ -118,9 +117,9 @@ export const orderPreloadStrategies = {
   detailPage: (orderId: number) => [
     {
       queryKey: queryKeys.orders.DETAIL(orderId),
-      queryFn: () => apiClient.GET('/api/orders/{order}' as any, {
+      queryFn: () => apiClient.GET('/api/orders/{order}', {
         params: { path: { order: orderId } }
-      } as any),
+      }),
       staleTime: 2 * 60 * 1000,
       priority: 'high' as const,
     },
@@ -141,7 +140,9 @@ export const inventoryPreloadStrategies = {
     },
     {
       queryKey: queryKeys.stores.ALL,
-      queryFn: () => apiClient.GET('/api/stores'),
+      queryFn: () => apiClient.GET('/api/stores', {
+        params: { query: {} }
+      }),
       staleTime: 10 * 60 * 1000,
       priority: 'medium' as const,
     },
@@ -151,7 +152,9 @@ export const inventoryPreloadStrategies = {
   transferPage: [
     {
       queryKey: queryKeys.stores.ALL,
-      queryFn: () => apiClient.GET('/api/stores'),
+      queryFn: () => apiClient.GET('/api/stores', {
+        params: { query: {} }
+      }),
       staleTime: 10 * 60 * 1000,
       priority: 'high' as const,
     },
@@ -170,18 +173,11 @@ export const inventoryPreloadStrategies = {
 export const dashboardPreloadStrategies = [
   {
     queryKey: ['dashboard', 'stats'],
-    queryFn: () => apiClient.GET('/api/dashboard/stats' as any, {} as any),
+    queryFn: () => apiClient.GET('/api/dashboard/stats'),
     staleTime: 1 * 60 * 1000,
     priority: 'high' as const,
   },
-  {
-    queryKey: queryKeys.orders.LIST({ page: 1, per_page: 5 }),
-    queryFn: () => apiClient.GET('/api/orders', {
-      params: { query: { per_page: 5, sort: '-created_at' } as any }
-    }),
-    staleTime: 2 * 60 * 1000,
-    priority: 'medium' as const,
-  },
+  // Note: Orders list endpoint not available, removing for now
   {
     queryKey: queryKeys.inventory.ALERTS ? queryKeys.inventory.ALERTS({}) : ['inventory', 'alerts', 'summary'],
     queryFn: () => apiClient.GET('/api/inventory/alerts/summary', {
@@ -193,7 +189,7 @@ export const dashboardPreloadStrategies = [
   {
     queryKey: queryKeys.installations.LIST({ status: 'pending', page: 1, per_page: 5 }),
     queryFn: () => apiClient.GET('/api/installations', {
-      params: { query: { status: 'pending', per_page: 5 } as any }
+      params: { query: { status: 'pending', per_page: '5' } }
     }),
     staleTime: 3 * 60 * 1000,
     priority: 'low' as const,

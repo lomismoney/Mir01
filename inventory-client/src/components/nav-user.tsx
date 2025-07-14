@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconLogout,
-  IconNotification,
-  IconUserCircle,
-} from "@tabler/icons-react";
+  CreditCard,
+  MoreVertical,
+  LogOut,
+  Bell,
+  UserCircle,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -168,7 +168,7 @@ export function NavUser() {
                   {user?.username || "無帳號資訊"}
                 </span>
               </div>
-              <IconDotsVertical className="ml-auto size-4" />
+              <MoreVertical className="ml-auto h-4 w-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -208,23 +208,23 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                個人資料
+              <DropdownMenuItem className="flex items-center gap-2">
+                <UserCircle className="h-4 w-4" />
+                <span>個人資料</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                帳戶設定
+              <DropdownMenuItem className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                <span>帳戶設定</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                通知設定
+              <DropdownMenuItem className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                <span>通知設定</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <IconLogout />
-              登出
+            <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2">
+              <LogOut className="h-4 w-4" />
+              <span>登出</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

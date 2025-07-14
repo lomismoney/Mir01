@@ -53,6 +53,7 @@ class UserResource extends JsonResource
             'id' => (int) $this->id,
             'name' => $this->name,
             'username' => $this->username,
+            'email' => $this->email,
             'roles' => $this->resource->getRoleNames()->toArray(), // 用戶的所有角色
             'roles_display' => $this->getRolesDisplayNames(), // 角色顯示名稱
             'is_admin' => $this->hasRole('admin'), // 是否有管理員角色

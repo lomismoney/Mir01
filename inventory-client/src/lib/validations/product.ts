@@ -8,7 +8,6 @@ import {
   description,
   sku,
   price,
-  stockQuantity,
   optionalString,
   requiredString,
   databaseId,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo, useEffect } from "react";
+import { useState } from "react";
 import {
   useAttributes,
   useCreateAttribute,
@@ -9,7 +9,6 @@ import {
   useCreateAttributeValue,
   useUpdateAttributeValue,
   useDeleteAttributeValue,
-  useAttributeValues,
   useModalManager,
   useErrorHandler,
 } from "@/hooks";
@@ -18,7 +17,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -37,20 +36,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
   Loader2,
   Plus,
   Search,
-  Trash2,
   X,
-  Edit,
-  MoreVertical,
   Package,
   Tag,
 } from "lucide-react";
@@ -70,7 +59,7 @@ import { AttributeValuesManager } from "./AttributeValuesManager";
  * 4. 保留原有的所有功能
  */
 const AttributesClientPage = () => {
-  const { user, isLoading, isAuthorized } = useAdminAuth();
+  const { isLoading, isAuthorized } = useAdminAuth();
 
   // 搜索狀態管理 - 使用防抖優化
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,7 +73,6 @@ const AttributesClientPage = () => {
   const {
     data: hookResponse,
     isLoading: isAttributesLoading,
-    error,
   } = useAttributes();
 
   // 🎯 統一的 Modal 管理器
@@ -98,7 +86,6 @@ const AttributesClientPage = () => {
   const updateAttributeMutation = useUpdateAttribute();
   const deleteAttributeMutation = useDeleteAttribute();
   const createValueMutation = useCreateAttributeValue();
-  const updateValueMutation = useUpdateAttributeValue();
   const deleteValueMutation = useDeleteAttributeValue();
 
   // 表單資料狀態
@@ -115,7 +102,6 @@ const AttributesClientPage = () => {
    * Hook 已經在 select 函數中處理好了數據結構
    */
   const attributes = (hookResponse?.data ?? []) as Attribute[];
-  const meta = hookResponse?.meta;
 
   /**
    * 根據搜索條件過濾規格

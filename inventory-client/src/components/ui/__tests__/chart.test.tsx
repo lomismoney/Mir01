@@ -265,7 +265,7 @@ describe('Chart Components', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       const TestComponent = () => {
-        const { ChartTooltipContent } = require('../chart');
+        const { ChartTooltipContent } = jest.requireMock<typeof import('../chart')>('../chart');
         return <ChartTooltipContent />;
       };
 

@@ -52,7 +52,7 @@ export interface OrderItem {
   
   // 訂製商品相關
   custom_product_name?: string;
-  custom_specifications?: any;
+  custom_specifications?: Record<string, unknown>;
   custom_product_specs?: string;
   custom_product_image?: string;
   custom_product_category?: string;
@@ -94,7 +94,7 @@ export interface OrderItemFormData {
   
   // 訂製商品相關
   custom_product_name?: string;
-  custom_specifications?: any;
+  custom_specifications?: Record<string, unknown>;
 }
 
 // 工具函數：判斷商品類型

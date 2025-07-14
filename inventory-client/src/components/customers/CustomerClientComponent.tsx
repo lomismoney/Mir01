@@ -1,16 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  useCustomers,
-  useCreateCustomer,
-  useUpdateCustomer,
-  useCustomerDetail,
-  useStandardTable,
-} from "@/hooks";
-import { useDebounce } from "@/hooks/use-debounce";
-import { useCustomerModalManager, CUSTOMER_MODAL_TYPES } from "@/hooks/useModalManager";
-import { useApiErrorHandler } from "@/hooks/useErrorHandler";
+import React from "react";
+import { useCustomerManagement } from "@/hooks/useCustomerManagement";
+import { CUSTOMER_MODAL_TYPES } from "@/hooks/useModalManager";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,84 +14,43 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { flexRender } from "@tanstack/react-table";
-import { Customer } from "@/types/api-helpers";
 import { columns } from "./columns";
 import { CustomerForm } from "./CustomerForm";
+import { EmptyTable, EmptySearch, EmptyError } from "@/components/ui/empty-state";
 
 export function CustomerClientComponent() {
-  // 【升級】搜尋功能實現
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-  // 🎯 統一的 Modal 管理器
-  const modalManager = useCustomerModalManager();
-  const { handleError, handleSuccess } = useApiErrorHandler();
-
-  // API 查詢 Hook - 現在支援搜尋參數
+  // === 使用業務邏輯 Hook ===
   const {
-    data: customerResponse,
+    // 資料狀態
     isLoading,
     isError,
     error,
-  } = useCustomers({
-    search: debouncedSearchQuery || undefined, // 僅在有值時傳遞
-  });
-
-  // 創建和更新客戶的 Mutation Hook
-  const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
-  const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
-
-
-  // 🎯 純淨消費：直接從 Hook 返回的物件中解構出 data 和 meta
-  const customers = customerResponse?.data ?? [];
-  const pageMeta = customerResponse?.meta;
-
-  // 表單提交處理邏輯
-  const handleCreateSubmit = (values: any) => {
-    createCustomer(values, {
-      onSuccess: () => {
-        modalManager.handleSuccess();
-        handleSuccess('客戶新增成功');
-      },
-      onError: (error) => handleError(error),
-    });
-  };
-
-  // 簡化的編輯處理函數
-  const handleEditCustomer = (customer: Customer) => {
-    modalManager.openModal(CUSTOMER_MODAL_TYPES.EDIT, customer);
-  };
-
-  // 編輯提交處理邏輯
-  const handleEditSubmit = (values: any) => {
-    const customer = modalManager.currentData;
-    if (!customer) return;
     
-    updateCustomer(
-      { id: customer.id!, data: values },
-      {
-        onSuccess: () => {
-          modalManager.handleSuccess();
-          handleSuccess('客戶更新成功');
-        },
-        onError: (error) => handleError(error),
-      }
-    );
-  };
-
-  // 🎯 使用標準表格 Hook
-  const tableManager = useStandardTable({
-    data: customerResponse,
-    columns: columns({ onEditCustomer: handleEditCustomer }),
-    enablePagination: true,
-    enableSorting: true,
-    enableRowSelection: false,
-    initialPageSize: 15,
-  });
+    // 搜尋狀態
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+    
+    // 表格狀態
+    tableManager,
+    
+    // Modal 狀態
+    modalManager,
+    isCreating,
+    isUpdating,
+    
+    // 空狀態配置
+    emptyConfig,
+    suggestions,
+    
+    // 操作函數
+    handleCreateSubmit,
+    handleEditSubmit,
+    handleEditCustomer,
+    openCreateModal,
+    closeModal,
+  } = useCustomerManagement();
 
   // 【修復】現在才進行條件性渲染，所有 Hooks 都已調用完畢
   if (isLoading) {
@@ -116,8 +67,14 @@ export function CustomerClientComponent() {
 
   if (isError) {
     return (
-      <div className="text-red-500">
-        無法加載客戶資料: {error?.message || "未知錯誤"}
+      <div className="rounded-lg border bg-card shadow-sm p-6">
+        <EmptyError
+          title="載入客戶資料失敗"
+          description="無法載入客戶列表，請稍後再試"
+          onRetry={() => window.location.reload()}
+          showDetails={true}
+          error={error}
+        />
       </div>
     );
   }
@@ -139,9 +96,9 @@ export function CustomerClientComponent() {
           open={modalManager.isModalOpen(CUSTOMER_MODAL_TYPES.CREATE)}
           onOpenChange={(isOpen) => {
             if (isOpen) {
-              modalManager.openModal(CUSTOMER_MODAL_TYPES.CREATE, null);
+              openCreateModal();
             } else {
-              modalManager.closeModal();
+              closeModal();
             }
           }}
         >
@@ -163,7 +120,7 @@ export function CustomerClientComponent() {
       {/* 編輯客戶 Modal */}
       <Dialog 
         open={modalManager.isModalOpen(CUSTOMER_MODAL_TYPES.EDIT)} 
-        onOpenChange={(isOpen) => !isOpen && modalManager.closeModal()}
+        onOpenChange={(isOpen) => !isOpen && closeModal()}
       >
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
@@ -222,8 +179,21 @@ export function CustomerClientComponent() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={columns({ onEditCustomer: handleEditCustomer }).length} className="h-24 text-center">
-                    暫無客戶資料
+                  <td colSpan={columns({ onEditCustomer: handleEditCustomer }).length} className="p-0">
+                    {searchQuery ? (
+                      <EmptySearch
+                        searchTerm={searchQuery}
+                        onClearSearch={clearSearch}
+                        suggestions={suggestions}
+                      />
+                    ) : (
+                      <EmptyTable
+                        title={emptyConfig.title}
+                        description={emptyConfig.description}
+                        actionLabel={emptyConfig.actionLabel}
+                        onAction={openCreateModal}
+                      />
+                    )}
                   </td>
                 </tr>
               )}

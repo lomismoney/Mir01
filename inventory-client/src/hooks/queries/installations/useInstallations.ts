@@ -297,7 +297,7 @@ export function useCreateInstallation() {
       ]);
       
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('安裝單創建成功！', {
           description: `安裝單號：${data?.data?.installation_number}`
         });
@@ -315,10 +315,7 @@ export function useCreateInstallationFromOrder() {
   return useMutation({
     mutationFn: async (data: CreateInstallationFromOrderRequest) => {
       const { data: response, error } = await apiClient.POST('/api/installations/create-from-order', {
-        body: {
-          ...data,
-          order_item_ids: [], // 暫時設為空陣列，等待 API 類型完善
-        }
+        body: data
       });
       
       if (error) {
@@ -343,7 +340,7 @@ export function useCreateInstallationFromOrder() {
       ]);
       
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('安裝單創建成功！', {
           description: `已從訂單創建安裝單：${data?.data?.installation_number}`
         });
@@ -420,7 +417,7 @@ export function useDeleteInstallation() {
       });
       
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('安裝單已刪除');
       }
     },
@@ -467,7 +464,7 @@ export function useAssignInstaller() {
       ]);
       
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('已成功分配安裝師傅');
       }
     },
@@ -509,7 +506,7 @@ export function useUpdateInstallationStatus() {
       ]);
       
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success('安裝單狀態已更新');
       }
     },
@@ -529,17 +526,13 @@ export function useInstallationSchedule(params: {
     queryFn: async () => {
       const queryParams: Record<string, string | number> = {};
       
-      if (params.installer_user_id !== undefined) queryParams['filter[installer_user_id]'] = params.installer_user_id;
-      if (params.start_date) queryParams['filter[start_date]'] = params.start_date;
-      if (params.end_date) queryParams['filter[end_date]'] = params.end_date;
+      if (params.installer_user_id !== undefined) queryParams['installer_user_id'] = params.installer_user_id;
+      if (params.start_date) queryParams['start_date'] = params.start_date;
+      if (params.end_date) queryParams['end_date'] = params.end_date;
 
       const { data, error } = await apiClient.GET('/api/installations/schedule', {
         params: { 
-          query: {
-            installer_user_id: Number(queryParams.installer_user_id) || 0,
-            start_date: String(queryParams.start_date) || '',
-            end_date: String(queryParams.end_date) || '',
-          }
+          query: queryParams
         }
       });
       

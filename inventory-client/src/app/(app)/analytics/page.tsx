@@ -8,12 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
   PieChart, 
   LineChart, 
   Download, 
-  Calendar,
   DollarSign,
   Package,
   ShoppingCart,

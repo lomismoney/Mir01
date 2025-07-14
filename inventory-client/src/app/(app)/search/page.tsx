@@ -15,8 +15,6 @@ import {
   ShoppingCart, 
   Users, 
   FileText,
-  Truck,
-  MapPin
 } from "lucide-react";
 
 /**

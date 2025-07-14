@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,8 +19,6 @@ import {
 } from "@/components/ui/tooltip";
 import {
   AlertCircle,
-  Package,
-  FileText,
   FolderTree,
   HelpCircle,
 } from "lucide-react";
@@ -477,7 +474,7 @@ export function Step1_BasicInfo({
                     {stage.level === 0 ? '主分類' : `${stage.parentCategory?.name} 的子分類`}
                     {stage.level > 0 && (
                       <span className="text-xs text-muted-foreground ml-1">
-                        (可選，不選則使用 "{stage.parentCategory?.name}")
+                        (可選，不選則使用 &ldquo;{stage.parentCategory?.name}&rdquo;)
                       </span>
                     )}
                   </Label>

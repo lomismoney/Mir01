@@ -2,9 +2,6 @@
 
 import React from 'react';
 import { Table as TanStackTable } from '@tanstack/react-table';
-import { VirtualizedTable } from './VirtualizedTable';
-import { VirtualizationToggle } from './VirtualizationToggle';
-import { useVirtualizedTable } from '@/hooks/useVirtualizedTable';
 import {
   Table,
   TableBody,
@@ -27,30 +24,31 @@ interface AdaptiveTableProps<TData> {
     overscan?: number;
   };
   dataType?: string;
-  onRowClick?: (row: any) => void;
-  customRowClassName?: (row: any) => string;
+  onRowClick?: (row: TData) => void;
+  customRowClassName?: (row: TData) => string;
+  emptyState?: React.ReactNode;
   
   // 向後兼容性屬性（臨時支持）
-  preset?: any;
+  preset?: string | Record<string, unknown>;
   emptyMessage?: string;
   emptyDescription?: string;
   emptyIcon?: React.ReactNode;
   emptyAction?: React.ReactNode;
   isVirtualizationEnabled?: boolean;
   showMetrics?: boolean;
-  virtualizationConfig?: any;
-  performanceAnalysis?: any;
-  toggleVirtualization?: any;
-  toggleMetrics?: any;
-  updateRecommendation?: any;
+  virtualizationConfig?: Record<string, unknown>;
+  performanceAnalysis?: Record<string, unknown>;
+  toggleVirtualization?: () => void;
+  toggleMetrics?: () => void;
+  updateRecommendation?: (recommendation: string) => void;
   shouldUseVirtualization?: boolean;
   shouldRecommendVirtualization?: boolean;
   isLargeDataset?: boolean;
-  tableData?: any;
+  tableData?: TData[];
   dataLength?: number;
   isLoading?: boolean;
   // 允許任何其他屬性以保持完全兼容性
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -73,6 +71,7 @@ export function AdaptiveTable<TData>({
   dataType = '項目',
   onRowClick,
   customRowClassName,
+  emptyState,
   ...rest // 忽略其他屬性以保持向後兼容性
 }: AdaptiveTableProps<TData>) {
   // 簡化版本：只使用標準表格渲染（臨時修復）
@@ -131,9 +130,13 @@ export function AdaptiveTable<TData>({
             <TableRow>
               <TableCell
                 colSpan={table.getAllColumns().length}
-                className="h-24 text-center"
+                className="p-0"
               >
-                暫無數據
+                {emptyState || (
+                  <div className="h-24 flex items-center justify-center text-muted-foreground">
+                    暫無數據
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           )}

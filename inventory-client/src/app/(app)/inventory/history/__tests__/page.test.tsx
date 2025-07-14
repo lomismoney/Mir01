@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
@@ -15,7 +15,7 @@ jest.mock('@/hooks/use-debounce', () => ({
 }))
 
 jest.mock('date-fns', () => ({
-  format: (date: Date, formatStr: string) => {
+  format: (date: Date) => {
     const d = new Date(date)
     return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
   }
@@ -41,7 +41,7 @@ jest.mock('@/components/ui/store-combobox', () => ({
 }))
 
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, variant, size, ...props }: any) => (
+  Button: ({ children, onClick, disabled, ...props }: any) => (
     <button onClick={onClick} disabled={disabled} {...props}>
       {children}
     </button>
@@ -62,9 +62,6 @@ jest.mock('@/components/ui/input', () => ({
 
 jest.mock('@/components/ui/select', () => ({
   Select: ({ value, onValueChange, children }: any) => {
-    const trigger = React.Children.toArray(children).find(
-      (child: any) => child.type?.name === 'SelectTrigger'
-    )
     const content = React.Children.toArray(children).find(
       (child: any) => child.type?.name === 'SelectContent'
     )
@@ -77,8 +74,8 @@ jest.mock('@/components/ui/select', () => ({
   },
   SelectContent: ({ children }: any) => <>{children}</>,
   SelectItem: ({ value, children }: any) => <option value={value}>{children}</option>,
-  SelectTrigger: ({ children }: any) => null,
-  SelectValue: ({ placeholder }: any) => null,
+  SelectTrigger: () => null,
+  SelectValue: () => null,
 }))
 
 jest.mock('@/components/ui/badge', () => ({
@@ -445,7 +442,6 @@ const mockTransactions: InventoryTransaction[] = [
     before_quantity: 0,
     after_quantity: 10,
     product: {
-      id: 1,
       name: '測試商品A',
       sku: 'TEST-001',
     },
@@ -454,7 +450,6 @@ const mockTransactions: InventoryTransaction[] = [
       name: '台北店',
     },
     user: {
-      id: 1,
       name: '王小明',
     },
     created_at: '2024-01-01T10:00:00Z',
@@ -467,7 +462,6 @@ const mockTransactions: InventoryTransaction[] = [
     before_quantity: 10,
     after_quantity: 5,
     product: {
-      id: 1,
       name: '測試商品A',
       sku: 'TEST-001',
     },
@@ -476,7 +470,6 @@ const mockTransactions: InventoryTransaction[] = [
       name: '台北店',
     },
     user: {
-      id: 2,
       name: '李小華',
     },
     created_at: '2024-01-02T14:30:00Z',
@@ -489,7 +482,6 @@ const mockTransactions: InventoryTransaction[] = [
     before_quantity: 5,
     after_quantity: 2,
     product: {
-      id: 1,
       name: '測試商品A',
       sku: 'TEST-001',
     },
@@ -498,11 +490,10 @@ const mockTransactions: InventoryTransaction[] = [
       name: '台北店',
     },
     user: {
-      id: 1,
       name: '王小明',
     },
     created_at: '2024-01-03T09:00:00Z',
-    metadata: JSON.stringify({ transfer_id: 'TR-001', to_store_name: '台中店' }),
+    metadata: { transfer_id: 'TR-001', to_store_name: '台中店' },
   },
 ]
 
@@ -542,7 +533,26 @@ describe('InventoryHistoryPage', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
-    })
+      isError: false,
+      isPending: false,
+      isLoadingError: false,
+      isRefetchError: false,
+      isSuccess: true,
+      status: 'success',
+      dataUpdatedAt: Date.now(),
+      errorUpdatedAt: 0,
+      failureCount: 0,
+      failureReason: null,
+      errorUpdateCount: 0,
+      isFetched: true,
+      isFetchedAfterMount: true,
+      isFetching: false,
+      isRefetching: false,
+      isStale: false,
+      isPlaceholderData: false,
+      isPaused: false,
+      fetchStatus: 'idle',
+    } as any)
   })
 
   afterEach(() => {
@@ -671,11 +681,30 @@ describe('InventoryHistoryPage', () => {
   describe('載入狀態', () => {
     it('應該顯示載入中的骨架屏', () => {
       mockUseAllInventoryTransactions.mockReturnValue({
-        data: null,
+        data: undefined,
         isLoading: true,
         error: null,
         refetch: mockRefetch,
-      })
+        isError: false,
+        isPending: true,
+        isLoadingError: false,
+        isRefetchError: false,
+        isSuccess: false,
+        status: 'pending',
+        dataUpdatedAt: 0,
+        errorUpdatedAt: 0,
+        failureCount: 0,
+        failureReason: null,
+        errorUpdateCount: 0,
+        isFetched: false,
+        isFetchedAfterMount: false,
+        isFetching: true,
+        isRefetching: false,
+        isStale: false,
+        isPlaceholderData: false,
+        isPaused: false,
+        fetchStatus: 'fetching',
+      } as any)
 
       renderWithQueryClient(<InventoryHistoryPage />)
 
@@ -687,11 +716,30 @@ describe('InventoryHistoryPage', () => {
   describe('錯誤處理', () => {
     it('應該顯示錯誤訊息', () => {
       mockUseAllInventoryTransactions.mockReturnValue({
-        data: null,
+        data: undefined,
         isLoading: false,
         error: new Error('載入失敗'),
         refetch: mockRefetch,
-      })
+        isError: true,
+        isPending: false,
+        isLoadingError: true,
+        isRefetchError: false,
+        isSuccess: false,
+        status: 'error',
+        dataUpdatedAt: 0,
+        errorUpdatedAt: Date.now(),
+        failureCount: 1,
+        failureReason: new Error('載入失敗'),
+        errorUpdateCount: 1,
+        isFetched: true,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isRefetching: false,
+        isStale: false,
+        isPlaceholderData: false,
+        isPaused: false,
+        fetchStatus: 'idle',
+      } as any)
 
       renderWithQueryClient(<InventoryHistoryPage />)
 
@@ -706,7 +754,26 @@ describe('InventoryHistoryPage', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      })
+        isError: false,
+        isPending: false,
+        isLoadingError: false,
+        isRefetchError: false,
+        isSuccess: true,
+        status: 'success',
+        dataUpdatedAt: Date.now(),
+        errorUpdatedAt: 0,
+        failureCount: 0,
+        failureReason: null,
+        errorUpdateCount: 0,
+        isFetched: true,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isRefetching: false,
+        isStale: false,
+        isPlaceholderData: false,
+        isPaused: false,
+        fetchStatus: 'idle',
+      } as any)
 
       renderWithQueryClient(<InventoryHistoryPage />)
 
@@ -753,7 +820,26 @@ describe('InventoryHistoryPage', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      })
+        isError: false,
+        isPending: false,
+        isLoadingError: false,
+        isRefetchError: false,
+        isSuccess: true,
+        status: 'success',
+        dataUpdatedAt: Date.now(),
+        errorUpdatedAt: 0,
+        failureCount: 0,
+        failureReason: null,
+        errorUpdateCount: 0,
+        isFetched: true,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isRefetching: false,
+        isStale: false,
+        isPlaceholderData: false,
+        isPaused: false,
+        fetchStatus: 'idle',
+      } as any)
 
       renderWithQueryClient(<InventoryHistoryPage />)
 
@@ -773,7 +859,26 @@ describe('InventoryHistoryPage', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      })
+        isError: false,
+        isPending: false,
+        isLoadingError: false,
+        isRefetchError: false,
+        isSuccess: true,
+        status: 'success',
+        dataUpdatedAt: Date.now(),
+        errorUpdatedAt: 0,
+        failureCount: 0,
+        failureReason: null,
+        errorUpdateCount: 0,
+        isFetched: true,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isRefetching: false,
+        isStale: false,
+        isPlaceholderData: false,
+        isPaused: false,
+        fetchStatus: 'idle',
+      } as any)
 
       renderWithQueryClient(<InventoryHistoryPage />)
 

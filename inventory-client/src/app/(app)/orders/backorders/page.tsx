@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBackorderStats } from '@/hooks/queries/backorders/useBackorders';
 import { Loader2 } from 'lucide-react';
+import { SectionLoading } from '@/components/ui/skeleton';
 
 // 動態導入 backorder 組件
 const BackorderList = lazy(() => import('@/components/backorders/BackorderList').then(module => ({ default: module.BackorderList })));
@@ -44,12 +45,12 @@ export default function BackordersPage() {
           }
         >
           <BackorderStats stats={{
-            total_items: (stats as any)?.total_items || 0,
-            unique_products: (stats as any)?.unique_products || 0,
-            affected_orders: (stats as any)?.affected_orders || 0,
-            total_quantity: (stats as any)?.total_quantity || 0,
-            oldest_backorder_date: (stats as any)?.oldest_backorder_date || null,
-            days_pending: (stats as any)?.days_pending || 0
+            total_items: stats?.total_items || 0,
+            unique_products: stats?.unique_products || 0,
+            affected_orders: stats?.affected_orders || 0,
+            total_quantity: stats?.total_quantity || 0,
+            oldest_backorder_date: stats?.oldest_backorder_date || null,
+            days_pending: stats?.days_pending || 0
           }} />
         </Suspense>
       )}
@@ -70,13 +71,7 @@ export default function BackordersPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                  </div>
-                }
-              >
+              <Suspense fallback={<SectionLoading variant="inline" text="載入清單..." />}>
                 <BackorderList />
               </Suspense>
             </CardContent>
@@ -92,13 +87,7 @@ export default function BackordersPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                  </div>
-                }
-              >
+              <Suspense fallback={<SectionLoading variant="inline" text="載入彙總..." />}>
                 <BackorderSummary />
               </Suspense>
             </CardContent>

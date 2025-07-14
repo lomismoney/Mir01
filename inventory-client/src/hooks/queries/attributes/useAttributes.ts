@@ -28,7 +28,7 @@ export function useAttributes() {
             return data;
         },
         // 🎯 標準化數據精煉廠 - 處理屬性數據的解包和轉換
-        select: (response: any) => {
+        select: (response: Awaited<ReturnType<typeof apiClient.GET<'/api/attributes'>>>['data']) => {
             // 處理可能的巢狀或分頁數據結構
             const data = response?.data?.data || response?.data || response || [];
             const meta = response?.data?.meta || {
@@ -39,7 +39,7 @@ export function useAttributes() {
             };
             
             // 確保數據的類型安全和結構一致性
-            const attributes = Array.isArray(data) ? data.map((attribute: any) => ({
+            const attributes = Array.isArray(data) ? data.map((attribute: NonNullable<typeof data>[number]) => ({
                 id: attribute.id || 0,
                 name: attribute.name || '未命名屬性',
                 type: attribute.type || 'text',
@@ -100,7 +100,7 @@ export function useCreateAttribute() {
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("屬性已成功創建");
       }
     },
@@ -132,7 +132,7 @@ export function useUpdateAttribute() {
       }
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       // 無效化屬性快取，觸發重新獲取更新後的屬性列表
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTRIBUTES });
     },
@@ -179,7 +179,7 @@ export function useDeleteAttribute() {
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("屬性已成功刪除");
       }
     },
@@ -228,7 +228,7 @@ export function useCreateAttributeValue() {
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("屬性值已成功創建");
       }
     },
@@ -272,7 +272,7 @@ export function useUpdateAttributeValue() {
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("屬性值已成功更新");
       }
     },
@@ -314,7 +314,7 @@ export function useDeleteAttributeValue() {
       
       // 🔔 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         toast.success("屬性值已成功刪除");
       }
     },
@@ -355,7 +355,7 @@ export function useAttributeValues(attributeId: number | null) {
     // 只有在 attributeId 為真值時，這個查詢才會被啟用
     enabled: !!attributeId,
     // 🎯 數據精煉廠：確保返回的是一個標準的分頁結構或空陣列
-    select: (response: any) => {
+    select: (response: Awaited<ReturnType<typeof apiClient.GET<'/api/attributes/{attribute}/values'>>>['data']) => {
       if (!response) return { data: [], meta: null };
       
       const data = response?.data?.data || response?.data || response || [];
@@ -367,7 +367,7 @@ export function useAttributeValues(attributeId: number | null) {
       };
       
       // 確保數據的類型安全
-      const values = Array.isArray(data) ? data.map((value: any) => ({
+      const values = Array.isArray(data) ? data.map((value: NonNullable<typeof data>[number]) => ({
         id: value.id || 0,
         value: value.value || '',
         attribute_id: value.attribute_id || attributeId,

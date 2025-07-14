@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { LoadingFallback } from "@/components/ui/skeleton";
 
 // 動態導入庫存轉移組件
 const InventoryTransfer = lazy(() => import("@/components/inventory/InventoryTransfer"));
@@ -32,16 +32,7 @@ export default function InventoryTransferPage() {
         </p>
       </div>
 
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
-            <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">載入庫存轉移...</p>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<LoadingFallback type="page" text="載入庫存轉移..." />}>
         <InventoryTransfer />
       </Suspense>
     </div>

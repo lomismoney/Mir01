@@ -13,29 +13,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AlertTriangle, Package, Calendar, TrendingUp } from 'lucide-react';
-
-interface LowStockItem {
-  id: number;
-  product_variant_id: number;
-  store_id: number;
-  store_name: string;
-  product_name: string;
-  sku: string;
-  quantity: number;
-  low_stock_threshold: number;
-  shortage: number;
-  severity: 'critical' | 'low' | 'normal';
-  last_sale_date: string | null;
-  average_daily_sales: number;
-  estimated_days_until_stockout: number | null;
-}
+import type { LowStockResponse } from '@/types/inventory';
 
 interface LowStockTableProps {
-  data: {
-    data: LowStockItem[];
-    links: any;
-    meta: any;
-  };
+  data: LowStockResponse;
 }
 
 export function LowStockTable({ data }: LowStockTableProps) {

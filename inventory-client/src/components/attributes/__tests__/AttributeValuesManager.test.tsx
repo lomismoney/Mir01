@@ -13,7 +13,7 @@ jest.mock('@/hooks', () => ({
 }));
 
 // 修復：從正確位置導入 mock hooks
-const mockHooks = require('@/hooks');
+import * as mockHooks from '@/hooks';
 const mockUseAttributeValues = mockHooks.useAttributeValues as jest.Mock;
 
 const createQueryClient = () => new QueryClient({

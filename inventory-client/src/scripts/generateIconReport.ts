@@ -9,7 +9,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import { analyzeIconUsage, generateOptimizationReport } from '../lib/iconOptimizer';
 
 // 掃描目錄配置
 const SCAN_DIRECTORIES = [
@@ -19,11 +18,6 @@ const SCAN_DIRECTORIES = [
   'src/hooks'
 ];
 
-const ICON_IMPORT_PATTERNS = [
-  /import\s*{([^}]+)}\s*from\s*["']lucide-react["']/g,
-  /from\s*["']lucide-react["']/g,
-  /<(\w+Icon?)\s/g,  // 匹配 JSX 中的圖標使用
-];
 
 /**
  * 遞歸掃描目錄中的文件
@@ -148,11 +142,8 @@ async function main() {
   
   // 生成統計數據
   const stats = generateUsageStats(iconUsage);
-  const allIcons = Object.keys(iconUsage);
   
-  // 生成優化分析
-  const analysis = analyzeIconUsage(allIcons);
-  const optimizationReport = generateOptimizationReport(allIcons);
+  // 移除未使用的優化分析
   
   // 創建完整報告
   let report = `# 圖標使用分析報告\n\n`;
@@ -185,8 +176,7 @@ async function main() {
   }
   report += `\n`;
   
-  // 添加優化分析報告
-  report += optimizationReport;
+  // 移除優化分析報告部分
   
   // 文件詳細使用情況
   report += `\n## 📁 文件圖標使用詳情\n\n`;
@@ -212,6 +202,7 @@ async function main() {
 }
 
 // 執行腳本
-if (require.main === module) {
+// 檢查是否為直接執行（而非導入）
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }

@@ -40,12 +40,22 @@ export interface ApiResponse<T> {
 }
 
 /**
+ * 原始 API 響應類型定義
+ */
+type RawApiResponse = {
+  data?: unknown;
+  meta?: unknown;
+  links?: unknown;
+  [key: string]: unknown;
+};
+
+/**
  * 通用分頁響應處理器
  * 標準化不同 API 端點的分頁響應格式
  */
 export const processPaginatedResponse = <T>(
-  response: any,
-  itemProcessor?: (item: any) => T
+  response: RawApiResponse,
+  itemProcessor?: (item: unknown) => T
 ): PaginatedResponse<T> => {
   // 處理不同的響應結構
   const data = response?.data?.data || response?.data || response || [];
@@ -78,8 +88,8 @@ export const processPaginatedResponse = <T>(
  * 標準化單項數據響應格式
  */
 export const processSingleItemResponse = <T>(
-  response: any,
-  itemProcessor?: (item: any) => T
+  response: RawApiResponse,
+  itemProcessor?: (item: unknown) => T
 ): T => {
   const data = response?.data || response;
   return itemProcessor ? itemProcessor(data) : data;
@@ -89,17 +99,18 @@ export const processSingleItemResponse = <T>(
  * 金額欄位處理器
  * 將字符串金額轉換為數字，處理 null/undefined 值
  */
-export const processMoneyFields = <T extends Record<string, any>>(
+export const processMoneyFields = <T extends Record<string, unknown>>(
   obj: T,
   fields: (keyof T)[]
 ): T => {
   const processed = { ...obj };
   
   fields.forEach(field => {
-    if (processed[field] !== undefined && processed[field] !== null) {
-      (processed as any)[field] = parseFloat(String(processed[field]) || '0');
+    const value = processed[field];
+    if (value !== undefined && value !== null) {
+      (processed as Record<string, unknown>)[field as string] = parseFloat(String(value) || '0');
     } else {
-      (processed as any)[field] = 0;
+      (processed as Record<string, unknown>)[field as string] = 0;
     }
   });
   
@@ -110,15 +121,16 @@ export const processMoneyFields = <T extends Record<string, any>>(
  * 日期欄位處理器
  * 標準化日期格式處理
  */
-export const processDateFields = <T extends Record<string, any>>(
+export const processDateFields = <T extends Record<string, unknown>>(
   obj: T,
   fields: (keyof T)[]
 ): T => {
   const processed = { ...obj };
   
   fields.forEach(field => {
-    if (processed[field] && typeof processed[field] === 'string') {
-      (processed as any)[field] = new Date(processed[field] as string);
+    const value = processed[field];
+    if (value && typeof value === 'string') {
+      (processed as Record<string, unknown>)[field as string] = new Date(value);
     }
   });
   
@@ -129,7 +141,7 @@ export const processDateFields = <T extends Record<string, any>>(
  * 布林欄位處理器
  * 處理 '1'/'0', 'true'/'false', 1/0 等不同的布林值格式
  */
-export const processBooleanFields = <T extends Record<string, any>>(
+export const processBooleanFields = <T extends Record<string, unknown>>(
   obj: T,
   fields: (keyof T)[]
 ): T => {
@@ -138,7 +150,7 @@ export const processBooleanFields = <T extends Record<string, any>>(
   fields.forEach(field => {
     const value = processed[field];
     if (value !== undefined && value !== null) {
-      (processed as any)[field] = Boolean(
+      (processed as Record<string, unknown>)[field as string] = Boolean(
         value === 1 || 
         value === '1' || 
         value === true || 
@@ -154,7 +166,7 @@ export const processBooleanFields = <T extends Record<string, any>>(
  * 數字欄位處理器
  * 將字符串數字轉換為實際數字
  */
-export const processNumberFields = <T extends Record<string, any>>(
+export const processNumberFields = <T extends Record<string, unknown>>(
   obj: T,
   fields: (keyof T)[]
 ): T => {
@@ -164,9 +176,9 @@ export const processNumberFields = <T extends Record<string, any>>(
     const value = processed[field];
     if (value !== undefined && value !== null && value !== '') {
       const numValue = Number(value);
-      (processed as any)[field] = isNaN(numValue) ? 0 : numValue;
+      (processed as Record<string, unknown>)[field as string] = isNaN(numValue) ? 0 : numValue;
     } else {
-      (processed as any)[field] = 0;
+      (processed as Record<string, unknown>)[field as string] = 0;
     }
   });
   
@@ -177,7 +189,7 @@ export const processNumberFields = <T extends Record<string, any>>(
  * 陣列欄位處理器
  * 確保指定欄位始終為陣列
  */
-export const processArrayFields = <T extends Record<string, any>>(
+export const processArrayFields = <T extends Record<string, unknown>>(
   obj: T,
   fields: (keyof T)[]
 ): T => {
@@ -185,7 +197,7 @@ export const processArrayFields = <T extends Record<string, any>>(
   
   fields.forEach(field => {
     if (!Array.isArray(processed[field])) {
-      (processed as any)[field] = [];
+      (processed as Record<string, unknown>)[field as string] = [];
     }
   });
   
@@ -196,7 +208,7 @@ export const processArrayFields = <T extends Record<string, any>>(
  * 組合處理器
  * 允許一次性應用多個處理器
  */
-export const processWithMultipleProcessors = <T extends Record<string, any>>(
+export const processWithMultipleProcessors = <T extends Record<string, unknown>>(
   obj: T,
   processors: Array<(obj: T) => T>
 ): T => {
@@ -207,7 +219,7 @@ export const processWithMultipleProcessors = <T extends Record<string, any>>(
  * 商品特定處理器
  * 處理商品相關的數據轉換
  */
-export const processProductData = (product: any) => {
+export const processProductData = (product: Record<string, unknown>) => {
   return processWithMultipleProcessors(product, [
     (p) => processMoneyFields(p, ['price', 'cost_price', 'selling_price']),
     (p) => processNumberFields(p, ['stock_quantity', 'reserved_quantity', 'available_quantity']),
@@ -221,7 +233,7 @@ export const processProductData = (product: any) => {
  * 訂單特定處理器
  * 處理訂單相關的數據轉換
  */
-export const processOrderData = (order: any) => {
+export const processOrderData = (order: Record<string, unknown>) => {
   return processWithMultipleProcessors(order, [
     (o) => processMoneyFields(o, ['total_amount', 'paid_amount', 'discount_amount', 'tax_amount']),
     (o) => processNumberFields(o, ['quantity', 'item_count']),
@@ -235,7 +247,7 @@ export const processOrderData = (order: any) => {
  * 客戶特定處理器
  * 處理客戶相關的數據轉換
  */
-export const processCustomerData = (customer: any) => {
+export const processCustomerData = (customer: Record<string, unknown>) => {
   return processWithMultipleProcessors(customer, [
     (c) => processArrayFields(c, ['addresses', 'orders', 'contacts']),
     (c) => processBooleanFields(c, ['is_active', 'is_vip']),
@@ -247,7 +259,7 @@ export const processCustomerData = (customer: any) => {
  * 庫存特定處理器
  * 處理庫存相關的數據轉換
  */
-export const processInventoryData = (inventory: any) => {
+export const processInventoryData = (inventory: Record<string, unknown>) => {
   return processWithMultipleProcessors(inventory, [
     (i) => processNumberFields(i, ['quantity', 'reserved_quantity', 'available_quantity', 'min_stock', 'max_stock']),
     (i) => processMoneyFields(i, ['unit_cost', 'total_value']),
@@ -260,7 +272,7 @@ export const processInventoryData = (inventory: any) => {
  * 安裝特定處理器
  * 處理安裝相關的數據轉換
  */
-export const processInstallationData = (installation: any) => {
+export const processInstallationData = (installation: Record<string, unknown>) => {
   return processWithMultipleProcessors(installation, [
     (i) => processMoneyFields(i, ['total_amount', 'labor_cost', 'material_cost']),
     (i) => processArrayFields(i, ['items', 'technicians']),
@@ -273,7 +285,7 @@ export const processInstallationData = (installation: any) => {
  * 創建自定義數據處理器
  * 允許為特定需求創建自定義處理邏輯
  */
-export const createCustomProcessor = <T extends Record<string, any>>(
+export const createCustomProcessor = <T extends Record<string, unknown>>(
   processors: {
     moneyFields?: (keyof T)[];
     numberFields?: (keyof T)[];
@@ -310,24 +322,24 @@ export const createCustomProcessor = <T extends Record<string, any>>(
  * 創建標準化的查詢響應處理器
  */
 export const createQueryProcessor = <T>(
-  itemProcessor?: (item: any) => T
+  itemProcessor?: (item: unknown) => T
 ) => ({
   /**
    * 處理分頁響應
    */
-  paginated: (response: any): PaginatedResponse<T> => 
+  paginated: (response: RawApiResponse): PaginatedResponse<T> => 
     processPaginatedResponse(response, itemProcessor),
 
   /**
    * 處理單項響應
    */
-  single: (response: any): T => 
+  single: (response: RawApiResponse): T => 
     processSingleItemResponse(response, itemProcessor),
 
   /**
    * 處理陣列響應（非分頁）
    */
-  array: (response: any): T[] => {
+  array: (response: RawApiResponse): T[] => {
     const data = response?.data || response || [];
     return Array.isArray(data) 
       ? (itemProcessor ? data.map(itemProcessor) : data)

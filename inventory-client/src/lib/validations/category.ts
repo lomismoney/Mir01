@@ -8,7 +8,6 @@ import {
   description,
   optionalDatabaseId,
   databaseId,
-  booleanStatus,
   optionalString,
 } from "./common";
 

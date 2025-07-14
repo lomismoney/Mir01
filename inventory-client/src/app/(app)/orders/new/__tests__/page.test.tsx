@@ -49,7 +49,7 @@ let mockFormData = {
 };
 
 jest.mock('@/components/orders/OrderForm', () => ({
-  OrderForm: ({ onSubmit, isSubmitting }: any) => (
+  OrderForm: ({ onSubmit, isSubmitting }: { onSubmit: (data: typeof mockFormData) => void; isSubmitting: boolean }) => (
     <div data-testid="order-form">
       <button 
         onClick={() => onSubmit(mockFormData)}
@@ -99,12 +99,17 @@ describe('NewOrderPage', () => {
     
     mockUseRouter.mockReturnValue({
       push: mockPush,
-    } as any);
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    });
 
     mockUseCreateOrder.mockReturnValue({
       mutate: mockMutate,
       isPending: false,
-    } as any);
+    });
   });
 
   describe('頁面渲染', () => {
@@ -181,7 +186,7 @@ describe('NewOrderPage', () => {
             quantity: '2',
           }
         ]
-      } as any;
+      };
 
       render(<NewOrderPage />);
       
@@ -511,7 +516,7 @@ describe('NewOrderPage', () => {
       mockUseCreateOrder.mockReturnValue({
         mutate: mockMutate,
         isPending: true,
-      } as any);
+      });
       
       render(<NewOrderPage />);
       
@@ -523,7 +528,7 @@ describe('NewOrderPage', () => {
       mockUseCreateOrder.mockReturnValue({
         mutate: mockMutate,
         isPending: false,
-      } as any);
+      });
       
       render(<NewOrderPage />);
       

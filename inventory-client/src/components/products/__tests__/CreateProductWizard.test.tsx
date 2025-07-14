@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateProductWizard } from '../CreateProductWizard';
 import { ProductItem } from '@/types/api-helpers';
@@ -45,7 +45,7 @@ jest.mock('sonner', () => ({
 
 // Mock step components
 jest.mock('../wizard-steps', () => ({
-  Step1_BasicInfo: ({ formData, updateFormData }: any) => (
+  Step1_BasicInfo: ({ formData, updateFormData }: { formData: { basicInfo: { name: string } }; updateFormData: (data: Record<string, unknown>) => void }) => (
     <div data-testid="step1-basic-info">
       <div>基本資訊步驟</div>
       <input
@@ -58,7 +58,7 @@ jest.mock('../wizard-steps', () => ({
       />
     </div>
   ),
-  Step1_BasicInfoWithImage: ({ formData, updateFormData }: any) => (
+  Step1_BasicInfoWithImage: ({ formData, updateFormData }: { formData: { basicInfo: { name: string } }; updateFormData: (data: Record<string, unknown>) => void }) => (
     <div data-testid="step1-basic-info-with-image">
       <div>基本資訊步驟（含圖片）</div>
       <input
@@ -71,7 +71,7 @@ jest.mock('../wizard-steps', () => ({
       />
     </div>
   ),
-  Step2_DefineSpecs: ({ formData, updateFormData }: any) => (
+  Step2_DefineSpecs: ({ formData, updateFormData }: { formData: { specifications: { isVariable: boolean } }; updateFormData: (data: Record<string, unknown>) => void }) => (
     <div data-testid="step2-define-specs">
       <div>規格定義步驟</div>
       <label>
@@ -87,7 +87,7 @@ jest.mock('../wizard-steps', () => ({
       </label>
     </div>
   ),
-  Step3_ConfigureVariants: ({ formData, updateFormData }: any) => {
+  Step3_ConfigureVariants: ({ formData, updateFormData }: { formData: { variants: { items: Array<{ key: string; sku: string; price: string; options: unknown[] }> } }; updateFormData: (data: Record<string, unknown>) => void }) => {
     // 確保有至少一個變體用於測試
     if (!formData.variants.items || formData.variants.items.length === 0) {
       // 當組件掛載時自動創建一個變體
@@ -134,7 +134,7 @@ jest.mock('../wizard-steps', () => ({
       </div>
     );
   },
-  Step4_Review: ({ formData }: any) => (
+  Step4_Review: ({ formData }: { formData: Record<string, unknown> }) => (
     <div data-testid="step4-review">
       <div>預覽確認步驟</div>
       <div data-testid="review-content">
@@ -149,7 +149,7 @@ jest.mock('../wizard-steps', () => ({
 
 // Mock UI components
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, ...props }: any) => (
+  Button: ({ children, onClick, disabled, ...props }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; [key: string]: unknown }) => (
     <button onClick={onClick} disabled={disabled} {...props}>
       {children}
     </button>
@@ -157,20 +157,20 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  CardContent: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  CardHeader: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  CardTitle: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Card: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => <div {...props}>{children}</div>,
+  CardContent: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => <div {...props}>{children}</div>,
+  CardHeader: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => <div {...props}>{children}</div>,
+  CardTitle: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => <div {...props}>{children}</div>,
 }));
 
 jest.mock('@/components/ui/progress', () => ({
-  Progress: ({ value, ...props }: any) => (
+  Progress: ({ value, ...props }: { value: number; [key: string]: unknown }) => (
     <div data-testid="progress-bar" data-value={value} {...props} />
   ),
 }));
 
 jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, ...props }: any) => (
+  Badge: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
     <span data-testid="badge" {...props}>
       {children}
     </span>
@@ -179,7 +179,7 @@ jest.mock('@/components/ui/badge', () => ({
 
 // Mock wizard components
 jest.mock('../components/WizardSidebar', () => ({
-  WizardSidebar: ({ currentStep, progressPercentage, isEditMode }: any) => (
+  WizardSidebar: ({ currentStep, progressPercentage, isEditMode }: { currentStep: number; progressPercentage: number; isEditMode: boolean }) => (
     <div data-testid="wizard-sidebar">
       <div data-testid="current-step">步驟 {currentStep}</div>
       <div data-testid="progress-percentage">{progressPercentage}%</div>
@@ -198,7 +198,7 @@ jest.mock('../components/WizardNavigation', () => ({
     onNext, 
     onSubmit, 
     isEditMode 
-  }: any) => (
+  }: { currentStep: number; setCurrentStep: (step: number) => void; canProceed: boolean; isLastStep: boolean; isFirstStep: boolean; isValidStep: boolean; isSubmitting: boolean; submitError: string | null; handleSubmit: () => Promise<void> }) => (
     <div data-testid="wizard-navigation">
       {currentStep > 1 && (
         <button onClick={onPrevious} data-testid="prev-button">
@@ -229,7 +229,7 @@ let mockSetIsSubmitting = jest.fn();
 
 // 模擬當前步驟狀態
 let mockCurrentStep = 1;
-let mockFormData: any = {
+let mockFormData: Record<string, unknown> = {
   basicInfo: { name: '', description: '', category_id: null },
   imageData: { selectedFile: null, previewUrl: null },
   specifications: { isVariable: false, selectedAttributes: [], attributeValues: {} },
@@ -357,37 +357,37 @@ describe('CreateProductWizard', () => {
       push: mockPush,
       back: jest.fn(),
       replace: jest.fn(),
-    } as any);
+    });
 
     mockUseCreateProduct.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isLoading: false,
       error: null,
-    } as any);
+    });
 
     mockUseUpdateProduct.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isLoading: false,
       error: null,
-    } as any);
+    });
 
     mockUseProductDetail.mockReturnValue({
       data: null,
       isLoading: false,
       error: null,
-    } as any);
+    });
 
     mockUseAttributes.mockReturnValue({
       data: mockAttributes,
       isLoading: false,
       error: null,
-    } as any);
+    });
 
     mockUseUploadProductImage.mockReturnValue({
       mutateAsync: jest.fn(),
       isLoading: false,
       error: null,
-    } as any);
+    });
 
     // Set up default mock functions
     mockValidateStep = jest.fn((step, formData) => {
@@ -446,7 +446,7 @@ describe('CreateProductWizard', () => {
         data: null,
         isLoading: true,
         error: null,
-      } as any);
+      });
 
       render(<CreateProductWizard productId={1} />);
 
@@ -458,7 +458,7 @@ describe('CreateProductWizard', () => {
         data: mockProduct,
         isLoading: false,
         error: null,
-      } as any);
+      });
 
       render(<CreateProductWizard productId={1} />);
 
@@ -473,7 +473,7 @@ describe('CreateProductWizard', () => {
         data: null,
         isLoading: false,
         error: new Error('載入失敗'),
-      } as any);
+      });
 
       render(<CreateProductWizard productId={1} />);
 
@@ -657,7 +657,7 @@ describe('CreateProductWizard', () => {
         data: mockProduct,
         isLoading: false,
         error: null,
-      } as any);
+      });
 
       render(<CreateProductWizard productId={1} />);
 
@@ -771,7 +771,7 @@ describe('CreateProductWizard', () => {
         data: null,
         isLoading: false,
         error: new Error('找不到商品'),
-      } as any);
+      });
 
       render(<CreateProductWizard productId={999} />);
 
@@ -785,7 +785,7 @@ describe('CreateProductWizard', () => {
         data: null,
         isLoading: false,
         error: null,
-      } as any);
+      });
 
       render(<CreateProductWizard />);
 

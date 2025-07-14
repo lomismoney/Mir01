@@ -27,6 +27,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'username',
+        'email',
         'password',
         // 'role' 字段已廢棄，使用 Spatie Permission 管理角色
     ];

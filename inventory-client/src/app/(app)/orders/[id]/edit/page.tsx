@@ -8,8 +8,10 @@ import {
 } from "@/hooks";
 import { OrderFormValues } from "@/components/orders/OrderForm";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { LoadingFallback } from "@/components/ui/skeleton";
+import type { OrderItem } from "@/types/api-helpers";
 
 // 動態導入訂單表單組件
 const OrderForm = lazy(() => import("@/components/orders/OrderForm").then(module => ({ default: module.OrderForm })));
@@ -57,7 +59,7 @@ export default function EditOrderPage() {
     };
 
     updateOrder(
-      { id: orderId, data: orderData as any },
+      { id: orderId, data: orderData },
       {
         onSuccess: () => {
           router.push(`/orders/${orderId}`);
@@ -70,12 +72,13 @@ export default function EditOrderPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/orders">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              返回訂單列表
-            </Link>
-          </Button>
+          <Link 
+            href="/orders"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            返回訂單列表
+          </Link>
           <div>
             <h1 className="text-2xl font-bold">
               編輯訂單
@@ -94,12 +97,13 @@ export default function EditOrderPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/orders">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              返回訂單列表
-            </Link>
-          </Button>
+          <Link 
+            href="/orders"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            返回訂單列表
+          </Link>
           <div>
             <h1 className="text-2xl font-bold">
               編輯訂單
@@ -127,7 +131,7 @@ export default function EditOrderPage() {
         discount_amount: order.discount_amount || 0,
         notes: order.notes || "",
         items:
-          order.items?.map((item: any) => ({
+          order.items?.map((item: OrderItem) => ({
             id: item.id,
             product_variant_id: item.product_variant_id,
             is_stocked_sale: item.is_stocked_sale,
@@ -146,12 +150,13 @@ export default function EditOrderPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/orders/${orderId}`}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            返回訂單詳情
-          </Link>
-        </Button>
+        <Link 
+          href={`/orders/${orderId}`}
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          返回訂單詳情
+        </Link>
         <div>
           <h1 className="text-2xl font-bold">
             編輯訂單
@@ -162,16 +167,7 @@ export default function EditOrderPage() {
         </div>
       </div>
 
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
-            <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">載入編輯表單...</p>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<LoadingFallback type="page" text="載入編輯表單..." />}>
         <OrderForm
           initialData={initialData}
           isSubmitting={isUpdating}

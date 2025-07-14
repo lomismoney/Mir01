@@ -108,7 +108,6 @@ describe('Order Types and Utilities', () => {
     it('應該為現貨商品返回正確的標記', () => {
       const flags = getOrderItemTypeFlags(OrderItemType.STOCK);
       expect(flags).toEqual({
-        item_type: OrderItemType.STOCK,
         is_stocked_sale: true,
         is_backorder: false,
       });

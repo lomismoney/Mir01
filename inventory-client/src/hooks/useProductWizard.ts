@@ -35,6 +35,7 @@ export interface WizardFormData {
     isVariable: boolean;
     selectedAttributes: number[];
     attributeValues: Record<number, string[]>;
+    selectedAttributeValues?: Record<number, string[]>; // 新增：選中的屬性值
   };
   variants: {
     items: Array<{
@@ -303,7 +304,7 @@ export function useProductWizard(productId?: string | number): UseProductWizardR
           // 圖片上傳失敗不應該阻止商品創建成功
           // 只顯示警告訊息
           if (typeof window !== 'undefined') {
-            const { toast } = require('sonner');
+            const { toast } = await import('sonner');
             toast.warning('商品已創建，但圖片上傳失敗', {
               description: '您可以稍後在編輯頁面重新上傳圖片。'
             });

@@ -19,8 +19,8 @@ describe('Auth Route Handler', () => {
     expect(typeof POST).toBe('function');
   });
 
-  it('should be the same handlers from auth module', () => {
-    const { handlers } = require('../../../../../../auth');
+  it('should be the same handlers from auth module', async () => {
+    const { handlers } = await import('../../../../../../auth');
     expect(GET).toBe(handlers.GET);
     expect(POST).toBe(handlers.POST);
   });

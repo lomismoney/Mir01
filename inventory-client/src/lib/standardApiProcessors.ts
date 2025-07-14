@@ -16,27 +16,27 @@ export class StandardListProcessor {
   /**
    * 處理訂單列表響應
    */
-  static processOrdersList(response: any) {
+  static processOrdersList(response: unknown) {
     const data = safeExtractData(response, []);
     const meta = safeExtractMeta(response);
     
     return {
-      orders: (data as any[]).map((order: any) => {
+      orders: (data as unknown[]).map((order: unknown) => {
         // 臨時修復：直接返回處理後的對象
         const processedOrder = {
-          id: order?.id || 0,
-          order_number: order?.order_number || '',
-          status: order?.status || 'pending',
-          payment_status: order?.payment_status || 'pending',
-          shipping_status: order?.shipping_status || 'pending',
-          total_amount: order?.total_amount || 0,
-          customer_name: order?.customer?.name || '未知客戶',
-          store_name: order?.store?.name || '未知門市',
-          created_at: order?.created_at || '',
+          id: (order as Record<string, unknown>)?.id as number || 0,
+          order_number: (order as Record<string, unknown>)?.order_number as string || '',
+          status: (order as Record<string, unknown>)?.status as string || 'pending',
+          payment_status: (order as Record<string, unknown>)?.payment_status as string || 'pending',
+          shipping_status: (order as Record<string, unknown>)?.shipping_status as string || 'pending',
+          total_amount: (order as Record<string, unknown>)?.total_amount as number || 0,
+          customer_name: (order as Record<string, unknown> & { customer?: { name?: string } })?.customer?.name || '未知客戶',
+          store_name: (order as Record<string, unknown> & { store?: { name?: string } })?.store?.name || '未知門市',
+          created_at: (order as Record<string, unknown>)?.created_at as string || '',
         };
         
         // 合併原始屬性
-        return Object.assign({}, order || {}, processedOrder);
+        return Object.assign({}, (order as Record<string, unknown>) || {}, processedOrder);
       }),
       pagination: meta,
       total: meta?.total || data.length,
@@ -47,12 +47,12 @@ export class StandardListProcessor {
   /**
    * 處理客戶列表響應
    */
-  static processCustomersList(response: any) {
+  static processCustomersList(response: unknown) {
     const data = safeExtractData(response, []);
     const meta = safeExtractMeta(response);
     
     return {
-      customers: (data as any[]).map((customer: any) => {
+      customers: (data as unknown[]).map((customer: unknown) => {
         const processedCustomer = {
           id: customer?.id || 0,
           name: customer?.name || '未知客戶',
@@ -62,7 +62,7 @@ export class StandardListProcessor {
           created_at: customer?.created_at || '',
         };
         
-        return Object.assign({}, customer || {}, processedCustomer);
+        return Object.assign({}, (customer as Record<string, unknown>) || {}, processedCustomer);
       }),
       pagination: meta,
       total: meta?.total || data.length,
@@ -73,12 +73,12 @@ export class StandardListProcessor {
   /**
    * 處理商品列表響應
    */
-  static processProductsList(response: any) {
+  static processProductsList(response: unknown) {
     const data = safeExtractData(response, []);
     const meta = safeExtractMeta(response);
     
     return {
-      products: (data as any[]).map((product: any) => {
+      products: (data as unknown[]).map((product: unknown) => {
         const processedProduct = {
           id: product?.id || 0,
           name: product?.name || '未知商品',
@@ -89,7 +89,7 @@ export class StandardListProcessor {
           created_at: product?.created_at || '',
         };
         
-        return Object.assign({}, product || {}, processedProduct);
+        return Object.assign({}, (product as Record<string, unknown>) || {}, processedProduct);
       }),
       pagination: meta,
       total: meta?.total || data.length,
@@ -100,12 +100,12 @@ export class StandardListProcessor {
   /**
    * 處理庫存列表響應
    */
-  static processInventoryList(response: any) {
+  static processInventoryList(response: unknown) {
     const data = safeExtractData(response, []);
     const meta = safeExtractMeta(response);
     
     return {
-      inventory: (data as any[]).map((item: any) => {
+      inventory: (data as unknown[]).map((item: unknown) => {
         const processedItem = {
           id: item?.id || 0,
           quantity: item?.quantity || 0,
@@ -118,7 +118,7 @@ export class StandardListProcessor {
           last_updated: item?.last_updated || '',
         };
         
-        return Object.assign({}, item || {}, processedItem);
+        return Object.assign({}, (item as Record<string, unknown>) || {}, processedItem);
       }),
       pagination: meta,
       total: meta?.total || data.length,
@@ -129,12 +129,12 @@ export class StandardListProcessor {
   /**
    * 處理安裝列表響應
    */
-  static processInstallationsList(response: any) {
+  static processInstallationsList(response: unknown) {
     const data = safeExtractData(response, []);
     const meta = safeExtractMeta(response);
     
     return {
-      installations: (data as any[]).map((installation: any) => {
+      installations: (data as unknown[]).map((installation: unknown) => {
         const processedInstallation = {
           id: installation?.id || 0,
           installation_number: installation?.installation_number || '',
@@ -146,7 +146,7 @@ export class StandardListProcessor {
           created_at: installation?.created_at || '',
         };
         
-        return Object.assign({}, installation || {}, processedInstallation);
+        return Object.assign({}, (installation as Record<string, unknown>) || {}, processedInstallation);
       }),
       pagination: meta,
       total: meta?.total || data.length,
@@ -157,12 +157,12 @@ export class StandardListProcessor {
   /**
    * 處理採購列表響應
    */
-  static processPurchasesList(response: any) {
+  static processPurchasesList(response: unknown) {
     const data = safeExtractData(response, []);
     const meta = safeExtractMeta(response);
     
     return {
-      purchases: (data as any[]).map((purchase: any) => {
+      purchases: (data as unknown[]).map((purchase: unknown) => {
         const processedPurchase = {
           id: purchase?.id || 0,
           purchase_number: purchase?.purchase_number || '',
@@ -174,7 +174,7 @@ export class StandardListProcessor {
           created_at: purchase?.created_at || '',
         };
         
-        return Object.assign({}, purchase || {}, processedPurchase);
+        return Object.assign({}, (purchase as Record<string, unknown>) || {}, processedPurchase);
       }),
       pagination: meta,
       total: meta?.total || data.length,
@@ -192,7 +192,7 @@ export class StandardItemProcessor {
   /**
    * 處理訂單詳情響應
    */
-  static processOrderDetail(response: any) {
+  static processOrderDetail(response: unknown) {
     const order = ApiResponseHandler.handleItemResponse(response);
     
     if (!order.data) {
@@ -200,14 +200,14 @@ export class StandardItemProcessor {
     }
 
     return {
-      order: Object.assign({}, order.data as any, {
-        customer_name: (order.data as any)?.customer?.name || '未知客戶',
-        store_name: (order.data as any)?.store?.name || '未知門市',
-        items: (order.data as any)?.items?.map((item: any) => 
-          Object.assign({}, item, {
-            product_name: item.product_variant?.product?.name || '未知商品',
-            variant_name: item.product_variant?.name || '',
-            sku: item.product_variant?.sku || '',
+      order: Object.assign({}, order.data as Record<string, unknown>, {
+        customer_name: (order.data as Record<string, unknown> & { customer?: { name?: string } })?.customer?.name || '未知客戶',
+        store_name: (order.data as Record<string, unknown> & { store?: { name?: string } })?.store?.name || '未知門市',
+        items: (order.data as Record<string, unknown> & { items?: unknown[] })?.items?.map((item: unknown) => 
+          Object.assign({}, item as Record<string, unknown>, {
+            product_name: (item as Record<string, unknown> & { product_variant?: { product?: { name?: string } } })?.product_variant?.product?.name || '未知商品',
+            variant_name: (item as Record<string, unknown> & { product_variant?: { name?: string } })?.product_variant?.name || '',
+            sku: (item as Record<string, unknown> & { product_variant?: { sku?: string } })?.product_variant?.sku || '',
           })
         ) || [],
       }),
@@ -218,7 +218,7 @@ export class StandardItemProcessor {
   /**
    * 處理客戶詳情響應
    */
-  static processCustomerDetail(response: any) {
+  static processCustomerDetail(response: unknown) {
     const customer = ApiResponseHandler.handleItemResponse(response);
     
     if (!customer.data) {
@@ -226,11 +226,11 @@ export class StandardItemProcessor {
     }
 
     return {
-      customer: Object.assign({}, customer.data as any, {
-        name: (customer.data as any)?.name || '未知客戶',
-        email: (customer.data as any)?.email || '',
-        phone: (customer.data as any)?.phone || '',
-        company: (customer.data as any)?.company || '',
+      customer: Object.assign({}, customer.data as Record<string, unknown>, {
+        name: (customer.data as Record<string, unknown> & { name?: string })?.name || '未知客戶',
+        email: (customer.data as Record<string, unknown> & { email?: string })?.email || '',
+        phone: (customer.data as Record<string, unknown> & { phone?: string })?.phone || '',
+        company: (customer.data as Record<string, unknown> & { company?: string })?.company || '',
       }),
       exists: true,
     };
@@ -239,7 +239,7 @@ export class StandardItemProcessor {
   /**
    * 處理商品詳情響應
    */
-  static processProductDetail(response: any) {
+  static processProductDetail(response: unknown) {
     const product = ApiResponseHandler.handleItemResponse(response);
     
     if (!product.data) {
@@ -247,11 +247,11 @@ export class StandardItemProcessor {
     }
 
     return {
-      product: Object.assign({}, product.data as any, {
-        category_name: (product.data as any)?.category?.name || '未分類',
-        variants: (product.data as any)?.variants?.map((variant: any) => 
-          Object.assign({}, variant, {
-            stock_status: variant.stock_quantity > 0 ? 'in_stock' : 'out_of_stock',
+      product: Object.assign({}, product.data as Record<string, unknown>, {
+        category_name: (product.data as Record<string, unknown> & { category?: { name?: string } })?.category?.name || '未分類',
+        variants: (product.data as Record<string, unknown> & { variants?: unknown[] })?.variants?.map((variant: unknown) => 
+          Object.assign({}, variant as Record<string, unknown>, {
+            stock_status: ((variant as Record<string, unknown>)?.stock_quantity as number) > 0 ? 'in_stock' : 'out_of_stock',
           })
         ) || [],
       }),
@@ -269,32 +269,32 @@ export class StandardStatsProcessor {
   /**
    * 處理庫存統計響應
    */
-  static processInventoryStats(response: any) {
+  static processInventoryStats(response: unknown) {
     const stats = ApiResponseHandler.handleItemResponse(response);
     
     return {
-      total_products: (stats.data as any)?.total_products || 0,
-      total_variants: (stats.data as any)?.total_variants || 0,
-      low_stock_count: (stats.data as any)?.low_stock_count || 0,
-      out_of_stock_count: (stats.data as any)?.out_of_stock_count || 0,
-      total_value: (stats.data as any)?.total_value || 0,
-      last_updated: (stats.data as any)?.last_updated || '',
+      total_products: (stats.data as Record<string, unknown>)?.total_products as number || 0,
+      total_variants: (stats.data as Record<string, unknown>)?.total_variants as number || 0,
+      low_stock_count: (stats.data as Record<string, unknown>)?.low_stock_count as number || 0,
+      out_of_stock_count: (stats.data as Record<string, unknown>)?.out_of_stock_count as number || 0,
+      total_value: (stats.data as Record<string, unknown>)?.total_value as number || 0,
+      last_updated: (stats.data as Record<string, unknown>)?.last_updated as string || '',
     };
   }
 
   /**
    * 處理銷售統計響應
    */
-  static processSalesStats(response: any) {
+  static processSalesStats(response: unknown) {
     const stats = ApiResponseHandler.handleItemResponse(response);
     
     return {
-      total_orders: (stats.data as any)?.total_orders || 0,
-      total_revenue: (stats.data as any)?.total_revenue || 0,
-      pending_orders: (stats.data as any)?.pending_orders || 0,
-      completed_orders: (stats.data as any)?.completed_orders || 0,
-      average_order_value: (stats.data as any)?.average_order_value || 0,
-      growth_rate: (stats.data as any)?.growth_rate || 0,
+      total_orders: (stats.data as Record<string, unknown>)?.total_orders as number || 0,
+      total_revenue: (stats.data as Record<string, unknown>)?.total_revenue as number || 0,
+      pending_orders: (stats.data as Record<string, unknown>)?.pending_orders as number || 0,
+      completed_orders: (stats.data as Record<string, unknown>)?.completed_orders as number || 0,
+      average_order_value: (stats.data as Record<string, unknown>)?.average_order_value as number || 0,
+      growth_rate: (stats.data as Record<string, unknown>)?.growth_rate as number || 0,
     };
   }
 }
@@ -305,7 +305,7 @@ export class StandardStatsProcessor {
  * 根據響應類型自動選擇合適的處理器
  */
 export class ResponseProcessorFactory {
-  private static processors: Record<string, any> = {
+  private static processors: Record<string, (response: unknown) => unknown> = {
     // 列表處理器
     'orders.list': StandardListProcessor.processOrdersList,
     'customers.list': StandardListProcessor.processCustomersList,
@@ -327,7 +327,7 @@ export class ResponseProcessorFactory {
   /**
    * 根據類型處理響應
    */
-  static process(type: string, response: any) {
+  static process(type: string, response: unknown) {
     const processor = this.processors[type];
     
     if (processor) {
@@ -341,7 +341,7 @@ export class ResponseProcessorFactory {
   /**
    * 註冊自定義處理器
    */
-  static registerProcessor(type: string, processor: (response: any) => any) {
+  static registerProcessor(type: string, processor: (response: unknown) => unknown) {
     this.processors[type] = processor;
   }
 }
@@ -355,7 +355,7 @@ export const useApiProcessor = {
   /**
    * 在 Hook 中處理列表響應
    */
-  processList: <T>(response: any, type?: string) => {
+  processList: <T>(response: unknown, type?: string) => {
     if (type && ResponseProcessorFactory.process) {
       return ResponseProcessorFactory.process(`${type}.list`, response);
     }
@@ -365,7 +365,7 @@ export const useApiProcessor = {
   /**
    * 在 Hook 中處理項目響應
    */
-  processItem: <T>(response: any, type?: string) => {
+  processItem: <T>(response: unknown, type?: string) => {
     if (type && ResponseProcessorFactory.process) {
       return ResponseProcessorFactory.process(`${type}.detail`, response);
     }
@@ -375,7 +375,7 @@ export const useApiProcessor = {
   /**
    * 在 Hook 中處理統計響應
    */
-  processStats: (response: any, type?: string) => {
+  processStats: (response: unknown, type?: string) => {
     if (type && ResponseProcessorFactory.process) {
       return ResponseProcessorFactory.process(`${type}.stats`, response);
     }

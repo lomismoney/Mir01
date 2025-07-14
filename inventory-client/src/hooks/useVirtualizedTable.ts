@@ -23,7 +23,7 @@ import { createVirtualizationConfig } from '@/components/ui/VirtualizedTable';
  */
 export interface VirtualizedTableOptions<TData> {
   data: TData[];
-  columns: ColumnDef<TData, any>[]; // 🎯 修復：支援任何 TValue 類型，解決與組件 ColumnDef<TData, TValue> 的類型不兼容問題
+  columns: ColumnDef<TData, unknown>[]; // 🎯 修復：支援任何 TValue 類型，解決與組件 ColumnDef<TData, TValue> 的類型不兼容問題
   enableVirtualization?: boolean;
   rowHeight?: number;
   autoEnable?: boolean;
@@ -33,7 +33,7 @@ export interface VirtualizedTableOptions<TData> {
   overscan?: number;
   
   // Table 配置選項
-  enableRowSelection?: boolean | ((row: any) => boolean);
+  enableRowSelection?: boolean | ((row: TData) => boolean);
   enableMultiRowSelection?: boolean;
   enablePagination?: boolean;
   manualPagination?: boolean;
@@ -188,44 +188,9 @@ export function useVirtualizedTable<TData>(options: VirtualizedTableOptions<TDat
     };
   }, [dataLength, containerHeight, estimateSize, rowHeight, overscan]);
 
-  // 性能分析
+  // 性能分析 - 使用提取的函數避免重複計算
   const performanceAnalysis = useMemo(() => {
-    const memoryEstimate = dataLength > 100 ? 
-      Math.round((dataLength - 20) / dataLength * 100) : 0;
-    
-    const performanceGain = dataLength > 1000 ? 'high' : 
-                           dataLength > 500 ? 'medium' : 
-                           dataLength > 100 ? 'low' : 'none';
-    
-    const recommendation = dataLength > 1000 ? {
-      level: 'critical' as const,
-      message: '強烈建議啟用',
-      reason: '大數據集，虛擬化可大幅提升性能',
-      shouldEnable: true,
-    } : dataLength > 500 ? {
-      level: 'warning' as const, 
-      message: '建議啟用',
-      reason: '中等數據量，虛擬化有明顯效果',
-      shouldEnable: true,
-    } : dataLength > 100 ? {
-      level: 'info' as const,
-      message: '可選擇啟用',
-      reason: '小幅性能提升，取決於使用場景',
-      shouldEnable: false,
-    } : {
-      level: 'success' as const,
-      message: '無需虛擬化', 
-      reason: '數據量小，標準表格已足夠',
-      shouldEnable: false,
-    };
-
-    return {
-      memoryEstimate,
-      performanceGain,
-      recommendation,
-      dataLength,
-      threshold,
-    };
+    return createPerformanceAnalysis(dataLength, threshold);
   }, [dataLength, threshold]);
 
   // 切換虛擬化狀態
@@ -313,6 +278,48 @@ export const VirtualizationMode = {
 export type VirtualizationModeType = typeof VirtualizationMode[keyof typeof VirtualizationMode];
 
 /**
+ * 創建性能分析 - 提取邏輯避免重複計算
+ */
+function createPerformanceAnalysis(dataLength: number, threshold: number): PerformanceAnalysis {
+  const memoryEstimate = dataLength > 100 ? 
+    Math.round((dataLength - 20) / dataLength * 100) : 0;
+  
+  const performanceGain = dataLength > 1000 ? 'high' : 
+                         dataLength > 500 ? 'medium' : 
+                         dataLength > 100 ? 'low' : 'none';
+  
+  const recommendation = dataLength > 1000 ? {
+    level: 'critical' as const,
+    message: '強烈建議啟用',
+    reason: '大數據集，虛擬化可大幅提升性能',
+    shouldEnable: true,
+  } : dataLength > 500 ? {
+    level: 'warning' as const, 
+    message: '建議啟用',
+    reason: '中等數據量，虛擬化有明顯效果',
+    shouldEnable: true,
+  } : dataLength > 100 ? {
+    level: 'info' as const,
+    message: '可選擇啟用',
+    reason: '小幅性能提升，取決於使用場景',
+    shouldEnable: false,
+  } : {
+    level: 'success' as const,
+    message: '無需虛擬化', 
+    reason: '數據量小，標準表格已足夠',
+    shouldEnable: false,
+  };
+
+  return {
+    memoryEstimate,
+    performanceGain,
+    recommendation,
+    dataLength,
+    threshold,
+  };
+}
+
+/**
  * 高級虛擬化表格管理 Hook (遺留版本)
  * 
  * @deprecated 請使用新的 useVirtualizedTable API
@@ -345,7 +352,7 @@ export function useAdvancedVirtualizedTable<TData>(
   // 性能指標顯示狀態
   const [showMetrics, setShowMetrics] = useState(false);
 
-  // 自動生成虛擬化配置
+  // 自動生成虛擬化配置 - 優化記憶化依賴
   const virtualizationConfig = useMemo(() => {
     const autoConfig = createVirtualizationConfig(dataLength);
     
@@ -354,46 +361,11 @@ export function useAdvancedVirtualizedTable<TData>(
       estimateSize: config.estimateSize ?? autoConfig.estimateSize,
       overscan: config.overscan ?? autoConfig.overscan,
     };
-  }, [dataLength, config]);
+  }, [dataLength, config.containerHeight, config.estimateSize, config.overscan]);
 
-  // 性能分析
+  // 性能分析 - 使用提取的函數避免重複計算
   const performanceAnalysis = useMemo(() => {
-    const memoryEstimate = dataLength > 100 ? 
-      Math.round((dataLength - 20) / dataLength * 100) : 0;
-    
-    const performanceGain = dataLength > 1000 ? 'high' : 
-                           dataLength > 500 ? 'medium' : 
-                           dataLength > 100 ? 'low' : 'none';
-    
-    const recommendation = dataLength > 1000 ? {
-      level: 'critical' as const,
-      message: '強烈建議啟用',
-      reason: '大數據集，虛擬化可大幅提升性能',
-      shouldEnable: true,
-    } : dataLength > 500 ? {
-      level: 'warning' as const, 
-      message: '建議啟用',
-      reason: '中等數據量，虛擬化有明顯效果',
-      shouldEnable: true,
-    } : dataLength > 100 ? {
-      level: 'info' as const,
-      message: '可選擇啟用',
-      reason: '小幅性能提升，取決於使用場景',
-      shouldEnable: false,
-    } : {
-      level: 'success' as const,
-      message: '無需虛擬化', 
-      reason: '數據量小，標準表格已足夠',
-      shouldEnable: false,
-    };
-
-    return {
-      memoryEstimate,
-      performanceGain,
-      recommendation,
-      dataLength,
-      threshold,
-    };
+    return createPerformanceAnalysis(dataLength, threshold);
   }, [dataLength, threshold]);
 
   // 切換虛擬化狀態

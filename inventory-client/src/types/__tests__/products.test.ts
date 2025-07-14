@@ -11,11 +11,7 @@
 import {
   isValidProduct,
   isValidAttribute,
-  Product,
-  Attribute,
   ProductFormData,
-  ProductAttributeConfig,
-  ProductVariantConfig,
   ProductSubmissionData,
 } from '../products';
 
@@ -532,7 +528,7 @@ describe('products.ts', () => {
      * 測試循環參考的物件
      */
     it('應該處理循環參考的物件', () => {
-      const circularProduct: any = {
+      const circularProduct: Record<string, unknown> = {
         id: 1,
         name: '循環商品'
       };
@@ -548,7 +544,7 @@ describe('products.ts', () => {
       const maliciousData = JSON.parse('{"id": 1, "name": "test", "__proto__": {"polluted": true}}');
       
       expect(isValidProduct(maliciousData)).toBe(true);
-      expect((Object.prototype as any).polluted).toBeUndefined();
+      expect((Object.prototype as Record<string, unknown>).polluted).toBeUndefined();
     });
   });
 });

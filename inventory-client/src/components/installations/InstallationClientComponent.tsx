@@ -8,6 +8,7 @@ import {
   useInstallations,
   useAssignInstaller,
   useUpdateInstallationStatus,
+  useDeleteInstallation,
   useErrorHandler,
 } from "@/hooks";
 import { useUsers } from "@/hooks";
@@ -70,6 +71,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { InstallationPreviewContent } from "./InstallationPreviewContent";
 import { InstallationProgressTracker } from "./InstallationProgressTracker";
+import { useEmptyState } from "@/hooks/use-empty-state";
+import { EmptyTable, EmptySearch, EmptyError } from "@/components/ui/empty-state";
 
 /**
  * 安裝管理主要客戶端組件
@@ -103,16 +106,18 @@ export function InstallationClientComponent() {
     status: InstallationStatus;
   } | null>(null);
   const [statusUpdateReason, setStatusUpdateReason] = useState("");
+  const [deletingInstallation, setDeletingInstallation] = useState<InstallationWithRelations | null>(null);
 
   // API Hooks
   const assignInstallerMutation = useAssignInstaller();
   const updateStatusMutation = useUpdateInstallationStatus();
+  const deleteInstallationMutation = useDeleteInstallation();
   
   // 統一錯誤處理
   const { handleError, handleSuccess } = useErrorHandler();
   // 只載入角色為 installer 的用戶作為師傅選項
   const { data: usersData, isLoading: isLoadingUsers } = useUsers({
-    'filter[role]': 'installer'
+    role: 'installer'
   });
 
   // 表格狀態管理
@@ -142,6 +147,9 @@ export function InstallationClientComponent() {
   // 從響應中解析資料
   const pageData = ((response as any)?.data || []) as InstallationWithRelations[];
   const meta = (response as any)?.meta;
+
+  // 使用空狀態配置
+  const { config: emptyConfig, handleAction } = useEmptyState('installations');
 
   // 建立確認分配師傅的處理函式
   const handleConfirmAssignInstaller = () => {
@@ -191,6 +199,21 @@ export function InstallationClientComponent() {
     );
   };
 
+  // 建立確認刪除安裝單的處理函式
+  const handleConfirmDelete = () => {
+    if (!deletingInstallation) return;
+
+    deleteInstallationMutation.mutate(deletingInstallation.id, {
+      onSuccess: () => {
+        setDeletingInstallation(null);
+        handleSuccess("安裝單已刪除");
+      },
+      onError: (error) => {
+        handleError(error);
+      },
+    });
+  };
+
   // 建立 columns 回調函式
   const columns = useMemo(
     () =>
@@ -203,10 +226,14 @@ export function InstallationClientComponent() {
           window.location.href = `/installations/${id}/edit`;
         },
         onDelete: (id: number) => {
-          // 刪除功能已在 columns 中實現
+          // 找到要刪除的安裝單並設置到狀態中
+          const installationToDelete = pageData.find(installation => installation.id === id);
+          if (installationToDelete) {
+            setDeletingInstallation(installationToDelete);
+          }
         },
       }),
-    [],
+    [pageData],
   );
 
   // 配置表格
@@ -236,8 +263,14 @@ export function InstallationClientComponent() {
 
   if (isError) {
     return (
-      <div className="text-red-500">
-        無法載入安裝資料: {error?.message}
+      <div className="rounded-lg border bg-card shadow-sm p-6">
+        <EmptyError
+          title="載入安裝記錄失敗"
+          description="無法載入安裝記錄列表，請稍後再試"
+          onRetry={() => window.location.reload()}
+          showDetails={true}
+          error={error}
+        />
       </div>
     );
   }
@@ -443,28 +476,25 @@ export function InstallationClientComponent() {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-32 text-center">
-                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                    <div className="rounded-full bg-muted/50 p-3 mb-4">
-                      <svg
-                        className="h-6 w-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-sm font-medium">暫無安裝資料</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">
-                      點擊上方「新增安裝單」按鈕開始建立第一個安裝單
-                    </p>
-                  </div>
+                <TableCell colSpan={columns.length} className="p-0">
+                  {filters.search || filters.status || filters.installer_user_id ? (
+                    <EmptySearch
+                      searchTerm={filters.search}
+                      onClearSearch={() => setFilters({ search: "", status: undefined, installer_user_id: undefined })}
+                      suggestions={[
+                        '嘗試搜尋安裝單編號',
+                        '使用客戶名稱搜尋',
+                        '調整狀態篩選條件',
+                      ]}
+                    />
+                  ) : (
+                    <EmptyTable
+                      title={emptyConfig.title}
+                      description={emptyConfig.description}
+                      actionLabel={emptyConfig.actionLabel}
+                      onAction={handleAction}
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             )}
@@ -562,6 +592,33 @@ export function InstallationClientComponent() {
               disabled={updateStatusMutation.isPending}
             >
               {updateStatusMutation.isPending ? "更新中..." : "確定更新"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 刪除安裝單確認對話框 */}
+      <AlertDialog 
+        open={!!deletingInstallation} 
+        onOpenChange={(open) => !open && setDeletingInstallation(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認刪除安裝單</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要刪除安裝單「{deletingInstallation?.installation_number}」嗎？
+              <br />
+              此操作無法復原，安裝單及其相關資料將被永久刪除。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleteInstallationMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteInstallationMutation.isPending ? "刪除中..." : "確定刪除"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

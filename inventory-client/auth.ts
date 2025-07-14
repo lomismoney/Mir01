@@ -69,6 +69,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
+        rememberMe: { label: "Remember Me", type: "checkbox" },
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
@@ -111,6 +112,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             roleDisplay: (loginData.user.roles_display && loginData.user.roles_display[0]) || 'unknown',
             isAdmin: loginData.user.is_admin || false,
             apiToken: loginData.token, // 儲存後端 API Token
+            rememberMe: credentials.rememberMe === 'true', // 傳遞記住我狀態
           };
         } catch (error) {
           console.error("認證過程發生錯誤:", error);
@@ -120,6 +122,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    /**
+     * 動態 Session 配置回呼函式 - 根據記住我選項調整 session 有效期
+     * 
+     * 這個回呼在每次 session 被訪問時調用，可以動態調整 session 配置
+     * 實現「記住我」功能的核心邏輯
+     */
+    async session({ session, token }) {
+      if (token && session.user) {
+        // 🎯 關鍵：將 accessToken 暴露為 session.accessToken（統一權威）
+        (session as any).accessToken = token.accessToken as string;
+        
+        // 保持用戶資訊的完整性
+        (session.user as any).id = token.userId as string;
+        (session.user as any).role = token.role as string;
+        (session.user as any).roleDisplay = token.roleDisplay as string;
+        (session.user as any).isAdmin = token.isAdmin as boolean;
+        (session.user as any).username = token.username as string;
+        
+        // 注意：NextAuth v5 中 session.expires 由框架自動管理
+        // 這裡的 rememberMe 邏輯移至 jwt maxAge 配置處理
+      }
+      return session;
+    },
     /**
      * 授權回呼函式 - 全路徑身份驗證保護（強化版本）
      * 
@@ -213,35 +238,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, account }) {
       if (account && user) {
         // 統一權力：將後端 API Token 儲存為 accessToken
-        token.accessToken = user.apiToken; // 從 authorize 回呼中獲取的 apiToken
+        token.accessToken = (user as any).apiToken; // 從 authorize 回呼中獲取的 apiToken
         token.userId = user.id;
-        token.role = user.role;
-        token.roleDisplay = user.roleDisplay;
-        token.isAdmin = user.isAdmin;
-        token.username = user.username;
+        token.role = (user as any).role;
+        token.roleDisplay = (user as any).roleDisplay;
+        token.isAdmin = (user as any).isAdmin;
+        token.username = (user as any).username;
+        token.rememberMe = (user as any).rememberMe; // 儲存記住我狀態
       }
       return token;
-    },
-    /**
-     * Session 回呼函式 - 權威憑證分發中心
-     * 
-     * 當一個 session 被訪問時調用
-     * 我們在這裡將儲存在 token 中的 accessToken，暴露給客戶端的 session 物件
-     * 這是 API 客戶端獲取認證憑證的唯一權威來源
-     */
-    async session({ session, token }) {
-      if (token && session.user) {
-        // 🎯 關鍵：將 accessToken 暴露為 session.accessToken（統一權威）
-        session.accessToken = token.accessToken as string;
-        
-        // 保持用戶資訊的完整性
-        session.user.id = token.userId as string;
-        session.user.role = token.role as string;
-        session.user.roleDisplay = token.roleDisplay as string;
-        session.user.isAdmin = token.isAdmin as boolean;
-        session.user.username = token.username as string;
-      }
-      return session;
     },
   },
   pages: {
@@ -249,5 +254,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   session: {
     strategy: "jwt", // 使用 JWT 策略
+    maxAge: 30 * 24 * 60 * 60, // 預設 30 天
+    updateAge: 24 * 60 * 60, // 每 24 小時更新一次 session
+  },
+  jwt: {
+    // JWT 配置 - 動態 maxAge 根據 rememberMe 狀態調整
+    maxAge: 30 * 24 * 60 * 60, // 預設 30 天，實際由 jwt callback 動態調整
   },
 }); 

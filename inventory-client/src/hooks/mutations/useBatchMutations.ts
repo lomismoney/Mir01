@@ -191,12 +191,12 @@ export function useEnhancedBatchUpdateOrderStatus() {
       const previousOrders = queryClient.getQueryData(queryKeys.orders.ALL);
       
       // 更新緩存中的訂單
-      queryClient.setQueryData(queryKeys.orders.ALL, (old: any) => {
+      queryClient.setQueryData(queryKeys.orders.ALL, (old: unknown) => {
         if (!old?.data) return old;
         
         return {
           ...old,
-          data: old.data.map((order: any) => 
+          data: old.data.map((order: Record<string, unknown>) => 
             params.orderIds.includes(order.id)
               ? { ...order, ...params.updates }
               : order

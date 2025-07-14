@@ -31,7 +31,7 @@ export const useInventoryList = (filters: ProductFilters = {}) => {
       return data;
     },
     select: (response: any) => 
-      processPaginatedResponse(response, processInventoryData),
+      processPaginatedResponse(response, (item) => processInventoryData(item as Record<string, unknown>)),
   });
 };
 
@@ -43,9 +43,9 @@ export function useInventoryDetail(id: number) {
     ...BUSINESS_QUERY_CONFIG.INVENTORY.DETAIL,
     queryKey: INVENTORY_KEYS.DETAIL(id),
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/inventory/{inventory}' as any, {
+      const { data, error } = await apiClient.GET('/api/inventory/{inventory}', {
         params: { path: { inventory: id } },
-      } as any);
+      });
       if (error) {
         throw new Error('獲取庫存詳情失敗');
       }
@@ -236,11 +236,11 @@ export function useAllInventoryTransactions(filters: InventoryTransactionFilters
       if (filters.per_page) queryParams.per_page = filters.per_page;
       if (filters.page) queryParams.page = filters.page;
       
-      const { data, error } = await apiClient.GET('/api/inventory/transactions' as any, {
+      const { data, error } = await apiClient.GET('/api/inventory/transactions', {
         params: {
           query: queryParams
         }
-      } as any);
+      });
       if (error) {
         throw new Error('獲取庫存交易記錄失敗');
       }
@@ -249,9 +249,12 @@ export function useAllInventoryTransactions(filters: InventoryTransactionFilters
     select: (response: any) => {
       if (!response) return { data: [], pagination: null };
       
+      // 🎯 修復分頁資訊提取：Laravel API 的分頁資訊通常在 meta 中
+      const paginationInfo = response.meta || response.pagination || null;
+      
       return {
         data: response.data || [],
-        pagination: response.pagination || null
+        pagination: paginationInfo
       };
     },
     staleTime: 2 * 60 * 1000,
@@ -442,7 +445,7 @@ export function useInventoryTimeSeries(filters: {
         throw new Error('必須指定商品變體 ID');
       }
       
-      const { data, error } = await apiClient.GET('/api/inventory/timeseries' as any, {
+      const { data, error } = await apiClient.GET('/api/reports/inventory-time-series', {
         params: {
           query: {
             product_variant_id: filters.product_variant_id,
@@ -450,7 +453,7 @@ export function useInventoryTimeSeries(filters: {
             end_date: filters.end_date,
           }
         }
-      } as any);
+      });
       
       if (error) {
         throw new Error('獲取庫存時間序列數據失敗');

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IncomingManagement } from '../IncomingManagement';
 import { useStores, useAllInventoryTransactions } from '@/hooks';
@@ -49,11 +49,16 @@ jest.mock('@/components/purchases/CreatePurchaseDialog', () => ({
 }));
 
 // Mock inventory utils
-jest.mock('@/lib/inventory-utils', () => ({
-  getTransactionIcon: jest.fn(() => ({ className }: any) => <div className={`icon ${className}`} />),
-  getTransactionTypeName: jest.fn(() => '商品入庫'),
-  getTransactionTypeVariant: jest.fn(() => 'default'),
-}));
+jest.mock('@/lib/inventory-utils', () => {
+  const MockIcon = ({ className }: any) => <div className={`icon ${className}`} />;
+  MockIcon.displayName = 'MockIcon';
+  
+  return {
+    getTransactionIcon: jest.fn(() => MockIcon),
+    getTransactionTypeName: jest.fn(() => '商品入庫'),
+    getTransactionTypeVariant: jest.fn(() => 'default'),
+  };
+});
 
 describe('IncomingManagement', () => {
   const mockToast = jest.fn();

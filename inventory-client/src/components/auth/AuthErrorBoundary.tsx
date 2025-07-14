@@ -78,6 +78,7 @@ export class AuthErrorBoundary extends Component<
    * 錯誤記錄和分析
    */
   private logError = (error: Error, errorInfo: React.ErrorInfo) => {
+    // 組織錯誤資料用於記錄
     const errorData = {
       message: error.message,
       stack: error.stack,
@@ -95,7 +96,12 @@ export class AuthErrorBoundary extends Component<
       error.message.includes("unauthorized") ||
       error.message.includes("unauthenticated");
 
-    // 錯誤已經被記錄，不需要額外的 console.error
+    // 記錄錯誤資訊
+    if (isAuthError) {
+      console.error("Auth Error:", errorData);
+    } else {
+      console.error("App Error:", errorData);
+    }
   };
 
   /**

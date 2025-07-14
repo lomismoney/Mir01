@@ -36,7 +36,6 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
     
     // 資料
     attributesData,
-    productDetail,
     isLoadingProduct,
     productError,
     
@@ -115,7 +114,7 @@ export function CreateProductWizard({ productId }: CreateProductWizardProps = {}
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/40">
+    <div className="min-h-screen bg-muted/20">
       <div className="container mx-auto max-w-7xl px-4 py-6">
         {/* 頁面標題 */}
         <div className="mb-8">

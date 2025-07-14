@@ -1,6 +1,9 @@
-const { Request, Response } = require('node-fetch');
-global.Request = Request;
-global.Response = Response;
+// 動態導入 node-fetch 以支援 ES6 模組
+(async () => {
+  const { Request, Response } = await import('node-fetch');
+  global.Request = Request;
+  global.Response = Response;
+})();
 
 /**
  * Jest 測試環境設置

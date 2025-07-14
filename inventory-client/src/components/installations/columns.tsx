@@ -41,7 +41,6 @@ import {
   InstallationWithRelations, 
   InstallationStatus 
 } from "@/types/installation";
-import { useDeleteInstallation } from "@/hooks";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { formatDate } from "@/lib/dateHelpers";
@@ -248,7 +247,6 @@ export const createInstallationColumns = ({
     header: () => <div className="text-right">操作</div>,
     cell: ({ row }) => {
       const installation = row.original;
-      const { mutate: deleteInstallation, isPending } = useDeleteInstallation();
 
       // 權限判斷邏輯
       const canAssignInstaller = installation.status === 'pending';
@@ -275,18 +273,18 @@ export const createInstallationColumns = ({
                   <Eye className="mr-2 h-4 w-4" />
                   <span>快速預覽</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/installations/${installation.id}`}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span>查看完整詳情</span>
-                  </Link>
+                <DropdownMenuItem
+                  onSelect={() => window.location.href = `/installations/${installation.id}`}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>查看完整詳情</span>
                 </DropdownMenuItem>
                 {installation.order_id && (
-                  <DropdownMenuItem asChild>
-                    <Link href={`/orders/${installation.order_id}`}>
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      <span>查看關聯訂單</span>
-                    </Link>
+                  <DropdownMenuItem
+                    onSelect={() => window.location.href = `/orders/${installation.order_id}`}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    <span>查看關聯訂單</span>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuGroup>
@@ -374,10 +372,9 @@ export const createInstallationColumns = ({
                       <AlertDialogCancel>取消</AlertDialogCancel>
                       <AlertDialogAction
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={() => deleteInstallation(installation.id)}
-                        disabled={isPending}
+                        onClick={() => onDelete(installation.id)}
                       >
-                        {isPending ? "刪除中..." : "確定刪除"}
+                        確定刪除
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

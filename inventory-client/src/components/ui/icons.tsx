@@ -105,9 +105,13 @@ export {
 };
 
 // 便捷的包裝器函數，用於快速遷移
-export const createIconComponent = (name: IconName) => (props: any) => (
-  <DynamicIcon name={name} {...props} />
-);
+export const createIconComponent = (name: IconName) => {
+  const IconComponent = (props: React.ComponentProps<typeof DynamicIcon>) => (
+    <DynamicIcon name={name} {...props} />
+  );
+  IconComponent.displayName = `IconComponent(${name})`;
+  return IconComponent;
+};
 
 // 常用圖標的便捷組件
 export const EditIcon = createIconComponent('Edit');

@@ -33,9 +33,9 @@ jest.mock("@/components/ui/sidebar", () => ({
 }));
 
 // 取得模擬的 hooks 和函式
-const { useSession, signOut } = require("next-auth/react");
-const { useSidebar } = require("@/components/ui/sidebar");
-const { clearTokenCache } = require("@/lib/apiClient");
+const { useSession, signOut } = jest.requireMock<typeof import("next-auth/react")>("next-auth/react");
+const { useSidebar } = jest.requireMock<typeof import("@/components/ui/sidebar")>("@/components/ui/sidebar");
+const { clearTokenCache } = jest.requireMock<typeof import("@/lib/apiClient")>("@/lib/apiClient");
 
 describe("NavUser", () => {
   let user: ReturnType<typeof userEvent.setup>;

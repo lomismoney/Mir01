@@ -45,9 +45,12 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: ReactNode }) => (
+  const TestWrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  
+  return TestWrapper;
 };
 
 describe('useUsers hooks', () => {
@@ -392,7 +395,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(userData as any);
+      result.current.mutate(userData as { name: string; username: string; email: string; password: string; password_confirmation: string; role: string; stores: number[]; roles: string[] });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -423,7 +426,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(userData as any);
+      result.current.mutate(userData as { name: string; username: string; email: string; password: string; password_confirmation: string; role: string; stores: number[]; roles: string[] });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -452,7 +455,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(userData as any);
+      result.current.mutate(userData as { name: string; username: string; email: string; password: string; password_confirmation: string; role: string; stores: number[]; roles: string[] });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -480,7 +483,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(userData as any);
+      result.current.mutate(userData as { name: string; username: string; email: string; password: string; password_confirmation: string; role: string; stores: number[]; roles: string[] });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -515,7 +518,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updatePayload as any);
+      result.current.mutate(updatePayload as { id: number; name?: string; username?: string; email?: string; role?: string; stores?: number[]; roles?: string[] });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -547,7 +550,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updatePayload as any);
+      result.current.mutate(updatePayload as { id: number; name?: string; username?: string; email?: string; role?: string; stores?: number[]; roles?: string[] });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -579,7 +582,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updatePayload as any);
+      result.current.mutate(updatePayload as { id: number; name?: string; username?: string; email?: string; role?: string; stores?: number[]; roles?: string[] });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -610,7 +613,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updatePayload as any);
+      result.current.mutate(updatePayload as { id: number; name?: string; username?: string; email?: string; role?: string; stores?: number[]; roles?: string[] });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -639,7 +642,7 @@ describe('useUsers hooks', () => {
         wrapper: createWrapper()
       });
 
-      result.current.mutate(updatePayload as any);
+      result.current.mutate(updatePayload as { id: number; name?: string; username?: string; email?: string; role?: string; stores?: number[]; roles?: string[] });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -725,8 +728,7 @@ describe('useUsers hooks', () => {
       // We are testing that the hook doesn't break with bad input,
       // but in a typed world this would be a compile error.
       // For JS robustness, we test it. The hook should handle it gracefully.
-      // @ts-ignore
-      result.current.mutate(); 
+      (result.current.mutate as () => void)(); 
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);

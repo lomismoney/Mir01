@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +53,7 @@ interface Step2Props {
     section: K,
     data: Partial<WizardFormData[K]>,
   ) => void;
+  setFormData?: React.Dispatch<React.SetStateAction<WizardFormData>>;
 }
 
 /**
@@ -64,7 +65,7 @@ interface Step2Props {
  * - 動態屬性值添加
  * - 規格組合預覽
  */
-export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
+export function Step2_DefineSpecs({ formData, updateFormData, setFormData }: Step2Props) {
   // 統一錯誤處理
   const { handleError } = useErrorHandler();
   
@@ -103,6 +104,24 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
 
   // 本地狀態：屬性值輸入框
   const [inputValues, setInputValues] = useState<Record<number, string>>({});
+  
+  // 新增：選中的屬性值狀態
+  const [selectedAttributeValues, setSelectedAttributeValues] = useState<
+    Record<number, string[]>
+  >({});
+  
+  // 同步選中的屬性值到 formData
+  useEffect(() => {
+    if (setFormData) {
+      setFormData(prev => ({
+        ...prev,
+        specifications: {
+          ...prev.specifications,
+          selectedAttributeValues: selectedAttributeValues
+        }
+      }));
+    }
+  }, [selectedAttributeValues, setFormData]);
 
   /**
    * 處理規格類型切換
@@ -143,11 +162,20 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
       if (attribute?.values && attribute.values.length > 0) {
         const defaultValues = attribute.values.map((v) => v.value);
         newAttributeValues[attributeId] = defaultValues;
+        // 同時將所有預設值設為選中
+        setSelectedAttributeValues(prev => ({
+          ...prev,
+          [attributeId]: defaultValues
+        }));
         toast.success(
           `已自動添加 ${attribute.name} 的 ${defaultValues.length} 個預設值`,
         );
       } else {
         newAttributeValues[attributeId] = [];
+        setSelectedAttributeValues(prev => ({
+          ...prev,
+          [attributeId]: []
+        }));
       }
     } else {
       // 如果取消選擇，移除該屬性的所有值
@@ -156,6 +184,12 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
       const newInputValues = { ...inputValues };
       delete newInputValues[attributeId];
       setInputValues(newInputValues);
+      // 清空選中的屬性值
+      setSelectedAttributeValues(prev => {
+        const newSelected = { ...prev };
+        delete newSelected[attributeId];
+        return newSelected;
+      });
     }
 
     updateFormData("specifications", {
@@ -220,6 +254,12 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
     updateFormData("specifications", {
       attributeValues: newAttributeValues,
     });
+    
+    // 將新添加的值設為選中
+    setSelectedAttributeValues(prev => ({
+      ...prev,
+      [attributeId]: [...(prev[attributeId] || []), inputValue]
+    }));
 
     // 清空輸入框
     setInputValues((prev) => ({
@@ -237,6 +277,25 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
       console.error("創建屬性值失敗:", error);
       handleError(error);
     }
+  };
+
+  /**
+   * 處理屬性值的選擇/取消選擇
+   */
+  const handleToggleAttributeValue = (attributeId: number, value: string) => {
+    setSelectedAttributeValues(prev => {
+      const currentSelected = prev[attributeId] || [];
+      const isSelected = currentSelected.includes(value);
+      
+      const newSelected = isSelected
+        ? currentSelected.filter(v => v !== value)
+        : [...currentSelected, value];
+      
+      return {
+        ...prev,
+        [attributeId]: newSelected
+      };
+    });
   };
 
   /**
@@ -258,6 +317,12 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
     updateFormData("specifications", {
       attributeValues: newAttributeValues,
     });
+    
+    // 同時從選中狀態中移除
+    setSelectedAttributeValues(prev => ({
+      ...prev,
+      [attributeId]: (prev[attributeId] || []).filter(v => v !== valueToRemove)
+    }));
 
     toast.success(`已移除屬性值：${valueToRemove}`);
   };
@@ -271,15 +336,15 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
 
     let count = 1;
     for (const attributeId of selectedAttributeIds) {
-      const values = formData.specifications.attributeValues[attributeId] || [];
-      if (values.length === 0) return 0;
-      count *= values.length;
+      const selectedValues = selectedAttributeValues[attributeId] || [];
+      if (selectedValues.length === 0) return 0;
+      count *= selectedValues.length;
     }
 
     return count;
   }, [
     formData.specifications.selectedAttributes,
-    formData.specifications.attributeValues,
+    selectedAttributeValues,
   ]);
 
   /**
@@ -587,34 +652,71 @@ export function Step2_DefineSpecs({ formData, updateFormData }: Step2Props) {
 
                           {/* 現有屬性值 */}
                           {currentValues.length > 0 && (
-                            <div
-                              className="flex flex-wrap gap-2"
-                             
-                            >
-                              {currentValues.map((value) => (
-                                <Badge
-                                  key={value}
-                                  variant="secondary"
-                                  className="flex items-center space-x-1 pr-1"
-                                 
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="text-sm text-muted-foreground">
+                                  選擇要在此商品中使用的屬性值：
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const allSelected = (selectedAttributeValues[attributeId] || []).length === currentValues.length;
+                                    setSelectedAttributeValues(prev => ({
+                                      ...prev,
+                                      [attributeId]: allSelected ? [] : currentValues
+                                    }));
+                                  }}
                                 >
-                                  <span>{value}</span>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-auto p-0.5 hover:bg-destructive hover:text-destructive-foreground"
-                                    onClick={() =>
-                                      handleRemoveAttributeValue(
-                                        attributeId,
-                                        value,
-                                      )
-                                    }
-                                   
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </Badge>
-                              ))}
+                                  {(selectedAttributeValues[attributeId] || []).length === currentValues.length ? '取消全選' : '全選'}
+                                </Button>
+                              </div>
+                              <div
+                                className="flex flex-wrap gap-2"
+                               
+                              >
+                                {currentValues.map((value) => {
+                                  const isSelected = (selectedAttributeValues[attributeId] || []).includes(value);
+                                  return (
+                                    <div
+                                      key={value}
+                                      className={cn(
+                                        "group relative flex items-center space-x-2 px-3 py-1.5 rounded-md border-2 cursor-pointer transition-all",
+                                        isSelected
+                                          ? "border-primary bg-primary/10"
+                                          : "border-border hover:border-primary/50"
+                                      )}
+                                      onClick={() => handleToggleAttributeValue(attributeId, value)}
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() => handleToggleAttributeValue(attributeId, value)}
+                                        className="pointer-events-none"
+                                      />
+                                      <span className="text-sm font-medium">{value}</span>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-auto p-0.5 ml-2 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition-opacity"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleRemoveAttributeValue(
+                                            attributeId,
+                                            value,
+                                          );
+                                        }}
+                                       
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                已選擇 {(selectedAttributeValues[attributeId] || []).length} / {currentValues.length} 個值
+                              </div>
                             </div>
                           )}
 

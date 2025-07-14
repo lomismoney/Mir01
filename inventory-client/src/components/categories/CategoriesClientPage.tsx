@@ -37,6 +37,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useEmptyState } from "@/hooks/use-empty-state";
+import { EmptyTable, EmptySearch, EmptyError } from "@/components/ui/empty-state";
 
 /**
  * 分類管理客戶端組件
@@ -92,6 +94,9 @@ export function CategoriesClientPage() {
   };
 
   const filteredCategories = filterCategories(categories, searchQuery);
+
+  // 使用空狀態配置
+  const { config: emptyConfig, handleAction } = useEmptyState('categories');
 
   // 遞迴查找分類函數
   const findCategoryById = (
@@ -251,6 +256,22 @@ export function CategoriesClientPage() {
             onColumnVisibilityChange={setColumnVisibility}
             expanded={expanded}
             onExpandedChange={setExpanded}
+            emptyState={
+              searchQuery ? (
+                <EmptySearch
+                  searchTerm={searchQuery}
+                  onClearSearch={() => setSearchQuery('')}
+                  suggestions={suggestions}
+                />
+              ) : (
+                <EmptyTable
+                  title={emptyConfig.title}
+                  description={emptyConfig.description}
+                  actionLabel={emptyConfig.actionLabel}
+                  onAction={() => modalManager.openModal('create', null)}
+                />
+              )
+            }
            
           />
         </CardContent>

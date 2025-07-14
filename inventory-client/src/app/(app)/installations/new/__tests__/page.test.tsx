@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { useCreateInstallation } from '@/hooks';
 import { toast } from 'sonner';
+import { CreateInstallationData } from '@/lib/validations/installation';
 import NewInstallationPage from '../page';
 
 // Mock dependencies
@@ -12,6 +13,9 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('@/hooks', () => ({
   useCreateInstallation: jest.fn(),
+  useErrorHandler: jest.fn(() => ({
+    handleError: jest.fn(),
+  })),
 }));
 
 jest.mock('sonner', () => ({
@@ -41,8 +45,13 @@ let mockFormData = {
   ]
 };
 
+interface MockInstallationFormProps {
+  onSubmit: (data: CreateInstallationData) => void;
+  isSubmitting: boolean;
+}
+
 jest.mock('@/components/installations', () => ({
-  InstallationForm: ({ onSubmit, isSubmitting }: any) => (
+  InstallationForm: ({ onSubmit, isSubmitting }: MockInstallationFormProps) => (
     <div data-testid="installation-form">
       <button 
         onClick={() => onSubmit(mockFormData)}
@@ -86,12 +95,12 @@ describe('NewInstallationPage', () => {
     
     mockUseRouter.mockReturnValue({
       push: mockPush,
-    } as any);
+    } as ReturnType<typeof useRouter>);
 
     mockUseCreateInstallation.mockReturnValue({
       mutate: mockMutate,
       isPending: false,
-    } as any);
+    } as ReturnType<typeof useCreateInstallation>);
   });
 
   describe('頁面渲染', () => {
@@ -164,7 +173,7 @@ describe('NewInstallationPage', () => {
             notes: null,
           }
         ]
-      } as any;
+      } as CreateInstallationData;
 
       render(<NewInstallationPage />);
       
@@ -191,7 +200,10 @@ describe('NewInstallationPage', () => {
               })
             ])
           }),
-          expect.any(Object)
+          expect.objectContaining({
+            onSuccess: expect.any(Function),
+            onError: expect.any(Function),
+          })
         );
       });
     });
@@ -336,7 +348,7 @@ describe('NewInstallationPage', () => {
       mockUseCreateInstallation.mockReturnValue({
         mutate: mockMutate,
         isPending: true,
-      } as any);
+      } as ReturnType<typeof useCreateInstallation>);
       
       render(<NewInstallationPage />);
       
@@ -348,7 +360,7 @@ describe('NewInstallationPage', () => {
       mockUseCreateInstallation.mockReturnValue({
         mutate: mockMutate,
         isPending: false,
-      } as any);
+      } as ReturnType<typeof useCreateInstallation>);
       
       render(<NewInstallationPage />);
       

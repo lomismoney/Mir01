@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
-export interface StandardFormProps<TSchema extends z.ZodType<any, any, any>> {
+export interface StandardFormProps<TSchema extends z.ZodType = z.ZodType> {
   title: string;
   description?: string;
   form: UseFormReturn<z.infer<TSchema>>;
@@ -33,7 +33,7 @@ export interface StandardFormProps<TSchema extends z.ZodType<any, any, any>> {
   errorMessage?: string;
 }
 
-export function StandardForm<TSchema extends z.ZodType<any, any, any>>({
+export function StandardForm<TSchema extends z.ZodType = z.ZodType>({
   title,
   description,
   form,
@@ -137,12 +137,12 @@ export function StandardForm<TSchema extends z.ZodType<any, any, any>>({
 /**
  * 簡化版表單組件（無卡片包裝）
  */
-export interface StandardFormInlineProps<TSchema extends z.ZodType<any, any, any>> 
+export interface StandardFormInlineProps<TSchema extends z.ZodType = z.ZodType> 
   extends Omit<StandardFormProps<TSchema>, 'title' | 'description' | 'className'> {
   className?: string;
 }
 
-export function StandardFormInline<TSchema extends z.ZodType<any, any, any>>({
+export function StandardFormInline<TSchema extends z.ZodType = z.ZodType>({
   form,
   isSubmitting,
   onSubmit,

@@ -146,8 +146,8 @@ describe('useIsMobile', () => {
     // 模擬服務器端環境（沒有 window.innerWidth）
     const originalInnerWidth = Object.getOwnPropertyDescriptor(window, 'innerWidth')
     
-    // @ts-ignore - 故意刪除 innerWidth 來模擬 SSR
-    delete (window as any).innerWidth
+    // 故意刪除 innerWidth 來模擬 SSR 環境
+    delete (window as Window & { innerWidth?: number }).innerWidth
 
     const { result } = renderHook(() => useIsMobile())
 

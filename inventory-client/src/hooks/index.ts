@@ -149,6 +149,7 @@ export {
 export { useInventoryManagement } from './useInventoryManagement';
 export { useInstallationItems } from './useInstallationItems';
 export { useProductWizard, type WizardFormData } from './useProductWizard';
+export { useCustomerManagement, type CustomerManagementHook } from './useCustomerManagement';
 
 // 其他專門的鉤子
 export * from './use-admin-auth';
@@ -172,6 +173,7 @@ export * from './useQueryInvalidation';
 export * from './useOptimisticCRUD';
 export * from './useStandardTable';
 export * from './useLoadingState';
+export * from './useEnhancedLoadingState';
 export * from './useDataTransformation';
 export * from './useVirtualizedTable';
 
@@ -184,4 +186,7 @@ export {
   useFeatureToggle,
   useTemporaryState,
   useSettingsManager,
-} from '@/contexts/GlobalStateContext'; 
+} from '@/contexts/GlobalStateContext';
+
+// 空狀態管理 hook
+export * from './use-empty-state'; 

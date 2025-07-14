@@ -20,11 +20,27 @@ class PurchaseItem extends Model
      */
     protected $casts = [
         'quantity' => 'integer',
+        'received_quantity' => 'integer', // 新增：已收貨數量
+        'receipt_status' => 'string',     // 新增：收貨狀態
         'unit_price' => 'integer',
         'cost_price' => 'integer',
         'allocated_shipping_cost' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+    ];
+
+    /**
+     * 允許大量賦值的屬性設定
+     */
+    protected $fillable = [
+        'purchase_id',
+        'product_variant_id',
+        'quantity',
+        'received_quantity',  // 新增：已收貨數量
+        'receipt_status',     // 新增：收貨狀態
+        'unit_price',
+        'cost_price',
+        'allocated_shipping_cost',
     ];
 
     /**
@@ -109,5 +125,104 @@ class PurchaseItem extends Model
     public function getAvailableQuantityAttribute(): int
     {
         return $this->quantity - $this->allocated_quantity;
+    }
+
+    /**
+     * 獲取待收貨數量
+     * 
+     * @return int
+     */
+    public function getPendingReceiptQuantityAttribute(): int
+    {
+        return max(0, $this->quantity - $this->received_quantity);
+    }
+
+    /**
+     * 獲取收貨進度百分比
+     * 
+     * @return float
+     */
+    public function getReceiptProgressAttribute(): float
+    {
+        if ($this->quantity === 0) {
+            return 0.0;
+        }
+        
+        return round(($this->received_quantity / $this->quantity) * 100, 2);
+    }
+
+    /**
+     * 檢查是否已完全收貨
+     * 
+     * @return bool
+     */
+    public function isFullyReceived(): bool
+    {
+        return $this->received_quantity >= $this->quantity;
+    }
+
+    /**
+     * 檢查是否部分收貨
+     * 
+     * @return bool
+     */
+    public function isPartiallyReceived(): bool
+    {
+        return $this->received_quantity > 0 && $this->received_quantity < $this->quantity;
+    }
+
+    /**
+     * 檢查是否尚未收貨
+     * 
+     * @return bool
+     */
+    public function isPendingReceipt(): bool
+    {
+        return $this->received_quantity === 0;
+    }
+
+    /**
+     * 更新收貨數量並自動設定收貨狀態
+     * 
+     * @param int $quantity 收貨數量
+     * @return bool
+     */
+    public function updateReceivedQuantity(int $quantity): bool
+    {
+        if ($quantity < 0) {
+            throw new \InvalidArgumentException('收貨數量不能為負數');
+        }
+        
+        if ($quantity > $this->quantity) {
+            throw new \InvalidArgumentException('收貨數量不能超過訂購數量');
+        }
+        
+        $this->received_quantity = $quantity;
+        
+        // 自動更新收貨狀態
+        if ($quantity === 0) {
+            $this->receipt_status = 'pending';
+        } elseif ($quantity < $this->quantity) {
+            $this->receipt_status = 'partial';
+        } else {
+            $this->receipt_status = 'completed';
+        }
+        
+        return $this->save();
+    }
+
+    /**
+     * 獲取收貨狀態的中文描述
+     * 
+     * @return string
+     */
+    public function getReceiptStatusLabelAttribute(): string
+    {
+        return match($this->receipt_status) {
+            'pending' => '待收貨',
+            'partial' => '部分收貨',
+            'completed' => '已收貨',
+            default => '未知狀態'
+        };
     }
 }

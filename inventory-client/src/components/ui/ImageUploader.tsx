@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Upload,
-  ImageIcon,
   X,
   Loader2,
   AlertCircle,
@@ -85,15 +85,41 @@ export function ImageUploader({
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
 
   /**
    * 清理預覽 URL 以避免記憶體洩漏
    */
   const cleanupPreviewUrl = useCallback(() => {
     if (previewUrl && previewUrl.startsWith("blob:")) {
-      URL.revokeObjectURL(previewUrl);
+      try {
+        URL.revokeObjectURL(previewUrl);
+      } catch (error) {
+        // 忽略清理錯誤，可能 URL 已經被撤銷
+        console.warn('Failed to revoke object URL:', error);
+      }
     }
   }, [previewUrl]);
+
+  /**
+   * 中止當前上傳操作
+   */
+  const abortCurrentUpload = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
+  /**
+   * 安全的狀態更新函數
+   */
+  const safeSetState = useCallback((updateFn: () => void) => {
+    if (isMountedRef.current) {
+      updateFn();
+    }
+  }, []);
 
   /**
    * 文件格式和大小驗證
@@ -202,31 +228,65 @@ export function ImageUploader({
   const handleUpload = async () => {
     if (!selectedFile || isUploading) return;
 
-    setIsUploading(true);
-    setError(null);
+    // 中止之前的上傳
+    abortCurrentUpload();
+
+    // 創建新的 AbortController
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    safeSetState(() => {
+      setIsUploading(true);
+      setError(null);
+    });
 
     try {
+      // 檢查是否已被中止
+      if (abortController.signal.aborted) {
+        return;
+      }
+
       await onUpload(selectedFile);
 
-      // 上傳成功
-      handleSuccess("圖片上傳成功！正在處理中...");
+      // 檢查組件是否還在掛載狀態且操作未被中止
+      if (!abortController.signal.aborted && isMountedRef.current) {
+        // 上傳成功
+        handleSuccess("圖片上傳成功！正在處理中...");
 
-      // 如果有成功回調，調用它（注意：實際的 image_urls 需要在父組件中處理）
-      if (onUploadSuccess) {
-        // 這裡只是示例，實際的 imageUrls 應該從 API 響應中獲取
-        onUploadSuccess({
-          original: previewUrl || undefined,
-          thumb: previewUrl || undefined,
-          medium: previewUrl || undefined,
-          large: previewUrl || undefined,
+        // 如果有成功回調，調用它（注意：實際的 image_urls 需要在父組件中處理）
+        if (onUploadSuccess) {
+          // 這裡只是示例，實際的 imageUrls 應該從 API 響應中獲取
+          onUploadSuccess({
+            original: previewUrl || undefined,
+            thumb: previewUrl || undefined,
+            medium: previewUrl || undefined,
+            large: previewUrl || undefined,
+          });
+        }
+      }
+    } catch (error: unknown) {
+      // 檢查是否是中止錯誤
+      if ((error instanceof Error && error.name === 'AbortError') || abortController.signal.aborted) {
+        return; // 忽略中止錯誤
+      }
+
+      if (isMountedRef.current) {
+        const errorMessage = error instanceof Error ? error.message : "圖片上傳失敗，請重試。";
+        safeSetState(() => {
+          setError(errorMessage);
+        });
+        handleError(error);
+      }
+    } finally {
+      if (isMountedRef.current && !abortController.signal.aborted) {
+        safeSetState(() => {
+          setIsUploading(false);
         });
       }
-    } catch (error: any) {
-      const errorMessage = error?.message || "圖片上傳失敗，請重試。";
-      setError(errorMessage);
-      handleError(error);
-    } finally {
-      setIsUploading(false);
+      // 清理 AbortController
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -234,10 +294,17 @@ export function ImageUploader({
    * 清除選擇的文件
    */
   const handleClearFile = () => {
+    // 中止任何進行中的上傳
+    abortCurrentUpload();
+    
     cleanupPreviewUrl();
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    setError(null);
+    
+    safeSetState(() => {
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setError(null);
+      setIsUploading(false);
+    });
 
     // 重置文件輸入
     if (fileInputRef.current) {
@@ -245,12 +312,37 @@ export function ImageUploader({
     }
   };
 
-  // 組件卸載時清理預覽 URL
-  React.useEffect(() => {
+  // 組件掛載狀態管理
+  useEffect(() => {
+    isMountedRef.current = true;
+    
     return () => {
+      isMountedRef.current = false;
+      // 中止任何進行中的上傳
+      abortCurrentUpload();
+      // 清理預覽 URL
       cleanupPreviewUrl();
     };
-  }, [cleanupPreviewUrl]);
+  }, [cleanupPreviewUrl, abortCurrentUpload]);
+
+  // 監聽預覽 URL 變化，清理舊的 URL
+  useEffect(() => {
+    return () => {
+      // 當 previewUrl 改變時，清理舊的 URL
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        // 使用 setTimeout 延遲清理，確保新的 URL 已經設置
+        const timeoutId = setTimeout(() => {
+          try {
+            URL.revokeObjectURL(previewUrl);
+          } catch (error) {
+            console.warn('Failed to revoke object URL:', error);
+          }
+        }, 100);
+        
+        return () => clearTimeout(timeoutId);
+      }
+    };
+  }, [previewUrl]);
 
   // 確定要顯示的圖片 URL（優先順序：預覽 > 當前圖片）
   const displayImageUrl = previewUrl || currentImageUrl;
@@ -279,19 +371,18 @@ export function ImageUploader({
             <div className="mb-4 relative">
               <div
                 className="relative aspect-video w-full max-w-md mx-auto rounded-lg overflow-hidden bg-gray-100"
-               
               >
-                <img
+                <Image
                   src={displayImageUrl}
                   alt="商品圖片預覽"
-                  className="w-full h-full object-contain"
+                  fill
+                  className="object-contain"
                   onError={() => {
                     // 圖片載入失敗時的處理
                     if (previewUrl) {
                       handleClearFile();
                     }
                   }}
-                 
                 />
 
                 {/* 移除按鈕 */}

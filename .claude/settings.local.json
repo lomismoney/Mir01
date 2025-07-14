@@ -91,7 +91,25 @@
       "Bash(touch:*)",
       "Bash(npx eslint:*)",
       "Bash(claude --version)",
-      "Bash(npm outdated)"
+      "Bash(npm outdated)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(npm audit:*)",
+      "Bash(./vendor/bin/sail php:*)",
+      "Bash(npx next build:*)",
+      "Bash(node:*)",
+      "Bash(rm:*)",
+      "Bash(composer validate:*)",
+      "Bash(./vendor/bin/sail --version)",
+      "Bash(for:*)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(done)",
+      "Bash(chmod:*)",
+      "Bash(npx next lint:*)",
+      "Bash(do)",
+      "Bash(echo \"Processing: $file\")",
+      "Bash(./vendor/bin/sail logs:*)",
+      "Bash(./vendor/bin/sail exec laravel.test tail:*)",
+      "Bash(./test-api.sh:*)"
     ],
     "deny": []
   }

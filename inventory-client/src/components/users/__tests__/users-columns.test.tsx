@@ -1,36 +1,44 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { createUsersColumns, UserActions } from '../users-columns';
+import {
+  MockComponentProps,
+  MockButtonProps
+} from '@/test-utils/mock-types';
 
 // Mock UI components
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, ...props }: any) => (
+  Button: ({ children, onClick, ...props }: MockButtonProps) => (
     <button onClick={onClick} {...props}>
       {children}
     </button>
   ),
 }));
 
+interface MockDropdownMenuItemProps extends MockComponentProps {
+  onClick?: () => void;
+}
+
 jest.mock('@/components/ui/dropdown-menu', () => ({
-  DropdownMenu: ({ children }: any) => <div data-testid="dropdown-menu">{children}</div>,
-  DropdownMenuTrigger: ({ children }: any) => <div data-testid="dropdown-trigger">{children}</div>,
-  DropdownMenuContent: ({ children }: any) => <div data-testid="dropdown-content">{children}</div>,
-  DropdownMenuItem: ({ children, onClick }: any) => (
+  DropdownMenu: ({ children }: MockComponentProps) => <div data-testid="dropdown-menu">{children}</div>,
+  DropdownMenuTrigger: ({ children }: MockComponentProps) => <div data-testid="dropdown-trigger">{children}</div>,
+  DropdownMenuContent: ({ children }: MockComponentProps) => <div data-testid="dropdown-content">{children}</div>,
+  DropdownMenuItem: ({ children, onClick }: MockDropdownMenuItemProps) => (
     <div data-testid="dropdown-item" onClick={onClick}>
       {children}
     </div>
   ),
-  DropdownMenuLabel: ({ children }: any) => <div data-testid="dropdown-label">{children}</div>,
+  DropdownMenuLabel: ({ children }: MockComponentProps) => <div data-testid="dropdown-label">{children}</div>,
   DropdownMenuSeparator: () => <div data-testid="dropdown-separator" />,
 }));
 
 jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children }: any) => <span data-testid="badge">{children}</span>,
+  Badge: ({ children }: MockComponentProps) => <span data-testid="badge">{children}</span>,
 }));
 
 jest.mock('@/components/ui/avatar', () => ({
-  Avatar: ({ children }: any) => <div data-testid="avatar">{children}</div>,
-  AvatarFallback: ({ children }: any) => <div data-testid="avatar-fallback">{children}</div>,
+  Avatar: ({ children }: MockComponentProps) => <div data-testid="avatar">{children}</div>,
+  AvatarFallback: ({ children }: MockComponentProps) => <div data-testid="avatar-fallback">{children}</div>,
 }));
 
 // Mock lucide-react icons
@@ -134,7 +142,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const nameColumn = columns[1];
       
-      const HeaderComponent = nameColumn.header as any;
+      const HeaderComponent = nameColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       const { container } = render(<HeaderComponent column={mockColumn} />);
       
       expect(screen.getByText('姓名')).toBeInTheDocument();
@@ -146,7 +154,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const nameColumn = columns[1];
       
-      const HeaderComponent = nameColumn.header as any;
+      const HeaderComponent = nameColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       render(<HeaderComponent column={mockColumn} />);
       
       expect(screen.getByTestId('arrow-up-down')).toBeInTheDocument();
@@ -157,7 +165,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const nameColumn = columns[1];
       
-      const HeaderComponent = nameColumn.header as any;
+      const HeaderComponent = nameColumn.header as React.ComponentType<{ column: typeof mockColumn }>;
       render(<HeaderComponent column={mockColumn} />);
       
       expect(screen.getByTestId('arrow-up-down')).toBeInTheDocument();
@@ -167,7 +175,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const nameColumn = columns[1];
       
-      const CellComponent = nameColumn.cell as any;
+      const CellComponent = nameColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('Test User')).toBeInTheDocument();
@@ -187,7 +195,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const avatarColumn = columns[0];
       
-      const CellComponent = avatarColumn.cell as any;
+      const CellComponent = avatarColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByTestId('avatar')).toBeInTheDocument();
@@ -205,7 +213,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const avatarColumn = columns[0];
       
-      const CellComponent = avatarColumn.cell as any;
+      const CellComponent = avatarColumn.cell as React.ComponentType<{ row: typeof emptyNameRow }>;
       render(<CellComponent row={emptyNameRow} />);
       
       expect(screen.getByText('未')).toBeInTheDocument(); // Default fallback
@@ -217,7 +225,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const usernameColumn = columns[2];
       
-      const HeaderComponent = usernameColumn.header as any;
+      const HeaderComponent = usernameColumn.header as React.ComponentType;
       render(<HeaderComponent />);
       
       expect(screen.getByText('用戶名')).toBeInTheDocument();
@@ -228,7 +236,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const usernameColumn = columns[2];
       
-      const CellComponent = usernameColumn.cell as any;
+      const CellComponent = usernameColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('testuser')).toBeInTheDocument();
@@ -247,7 +255,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const rolesColumn = columns[3];
       
-      const CellComponent = rolesColumn.cell as any;
+      const CellComponent = rolesColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByTestId('badge')).toBeInTheDocument();
@@ -265,7 +273,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const rolesColumn = columns[3];
       
-      const CellComponent = rolesColumn.cell as any;
+      const CellComponent = rolesColumn.cell as React.ComponentType<{ row: typeof userRow }>;
       render(<CellComponent row={userRow} />);
       
       expect(screen.getByText('檢視者')).toBeInTheDocument();
@@ -284,7 +292,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const storesColumn = columns[4];
       
-      const CellComponent = storesColumn.cell as any;
+      const CellComponent = storesColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('Store 1')).toBeInTheDocument();
@@ -297,7 +305,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const createdAtColumn = columns[5];
       
-      const HeaderComponent = createdAtColumn.header as any;
+      const HeaderComponent = createdAtColumn.header as React.ComponentType;
       render(<HeaderComponent />);
       
       expect(screen.getByText('建立時間')).toBeInTheDocument();
@@ -307,7 +315,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const createdAtColumn = columns[5];
       
-      const CellComponent = createdAtColumn.cell as any;
+      const CellComponent = createdAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('2024-01-01')).toBeInTheDocument();
@@ -323,7 +331,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const createdAtColumn = columns[5];
       
-      const CellComponent = createdAtColumn.cell as any;
+      const CellComponent = createdAtColumn.cell as React.ComponentType<{ row: typeof emptyDateRow }>;
       render(<CellComponent row={emptyDateRow} />);
       
       expect(screen.getByText('-')).toBeInTheDocument();
@@ -335,7 +343,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const updatedAtColumn = columns[6];
       
-      const HeaderComponent = updatedAtColumn.header as any;
+      const HeaderComponent = updatedAtColumn.header as React.ComponentType;
       render(<HeaderComponent />);
       
       expect(screen.getByText('更新時間')).toBeInTheDocument();
@@ -345,7 +353,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns();
       const updatedAtColumn = columns[6];
       
-      const CellComponent = updatedAtColumn.cell as any;
+      const CellComponent = updatedAtColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('2024-01-01')).toBeInTheDocument();
@@ -371,7 +379,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns(mockActions);
       const actionsColumn = columns[7];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByTestId('dropdown-menu')).toBeInTheDocument();
@@ -389,7 +397,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns(mockActions);
       const actionsColumn = columns[7];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       const viewButton = screen.getByText('查看詳情');
@@ -409,7 +417,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns(mockActions);
       const actionsColumn = columns[7];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       const editButton = screen.getByText('編輯用戶');
@@ -429,7 +437,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns(mockActions);
       const actionsColumn = columns[7];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       const deleteButton = screen.getByText('刪除用戶');
@@ -449,7 +457,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns(mockActions);
       const actionsColumn = columns[7];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       const manageStoresButton = screen.getByText('分配分店');
@@ -466,7 +474,7 @@ describe('users-columns', () => {
       const columns = createUsersColumns(mockActions);
       const actionsColumn = columns[7];
       
-      const CellComponent = actionsColumn.cell as any;
+      const CellComponent = actionsColumn.cell as React.ComponentType<{ row: typeof mockRow }>;
       render(<CellComponent row={mockRow} />);
       
       expect(screen.getByText('查看詳情')).toBeInTheDocument();

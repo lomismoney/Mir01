@@ -200,3 +200,35 @@ export function useDeletePurchase() {
     },
   });
 }
+
+/**
+ * 部分收貨處理
+ */
+export function usePartialReceipt() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, receiptData }: { 
+      id: number; 
+      receiptData: {
+        items: Array<{
+          purchase_item_id: number;
+          received_quantity: number;
+        }>;
+        notes?: string;
+      }
+    }) => {
+      const { data, error } = await apiClient.POST('/api/purchases/{purchase}/partial-receipt', {
+        params: { path: { purchase: id } },
+        body: receiptData
+      });
+      if (error) {
+        throw new Error('部分收貨處理失敗');
+      }
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['purchases'] });
+      await queryClient.invalidateQueries({ queryKey: ['purchase'] });
+    },
+  });
+}

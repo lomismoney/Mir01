@@ -31,6 +31,13 @@ import {
   StandardTextareaField, 
   StandardSelectField 
 } from "@/components/forms/StandardFormField";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 /**
  * 安裝表單值類型（向下相容）
@@ -103,7 +110,7 @@ export function InstallationForm({
     customer_name: initialData?.customer_name || '',
     customer_phone: initialData?.customer_phone || '',
     installation_address: initialData?.installation_address || '',
-    installer_user_id: initialData?.installer_user_id || undefined,
+    installer_user_id: initialData?.installer_user_id || null,
     scheduled_date: initialData?.scheduled_date || '',
     notes: initialData?.notes || '',
     items: initialData?.items || [
@@ -124,7 +131,6 @@ export function InstallationForm({
     form,
     isSubmitting,
     handleSubmit: submitForm,
-    reset,
   } = useStandardForm({
     schema: validationSchema,
     defaultValues: formDefaults,
@@ -172,7 +178,7 @@ export function InstallationForm({
 
   // 準備安裝師傅選項
   const installerOptions = [
-    { value: '', label: '暫不分配' },
+    { value: '0', label: '暫不分配' },
     ...(usersData?.map((user: any) => ({
       value: user.id.toString(),
       label: `${user.name || user.username}${user.email ? ` (${user.email})` : ''}`,
@@ -427,14 +433,28 @@ export function InstallationForm({
                   </div>
 
                   {/* 安裝師傅選擇 */}
-                  <StandardSelectField
-                    control={form.control}
-                    name="installer_user_id"
-                    label="安裝師傅"
-                    options={installerOptions}
-                    disabled={isLoading || isLoadingUsers}
-                    placeholder={isLoadingUsers ? "載入中..." : "選擇安裝師傅"}
-                  />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">安裝師傅</label>
+                    <Select 
+                      value={form.watch('installer_user_id')?.toString() || '0'} 
+                      onValueChange={(value: string) => {
+                        const numericValue = value === '0' ? null : parseInt(value, 10);
+                        form.setValue('installer_user_id', numericValue);
+                      }}
+                      disabled={isLoading || isLoadingUsers}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={isLoadingUsers ? "載入中..." : "選擇安裝師傅"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {installerOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
             </Card>

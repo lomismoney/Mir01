@@ -44,7 +44,7 @@ import {
 import { toast } from 'sonner';
 
 interface FriendlyErrorDisplayProps {
-  error: any;
+  error: Error | unknown;
   friendlyMessage: FriendlyErrorMessage;
   onRetry?: () => void;
   onDismiss?: () => void;
@@ -369,23 +369,23 @@ ${JSON.stringify(report, null, 2)}
  */
 interface ErrorBoundaryProps {
   children: React.ReactNode;
-  fallback?: (error: any) => React.ReactNode;
+  fallback?: (error: Error | unknown) => React.ReactNode;
 }
 
 export class FriendlyErrorBoundary extends React.Component<
   ErrorBoundaryProps,
-  { hasError: boolean; error: any }
+  { hasError: boolean; error: Error | unknown }
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(error: Error | unknown) {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: any, errorInfo: any) {
+  componentDidCatch(error: Error | unknown, errorInfo: React.ErrorInfo) {
     console.error('Error caught by FriendlyErrorBoundary:', error, errorInfo);
     ErrorTracker.track(error, {
       title: '應用程式錯誤',

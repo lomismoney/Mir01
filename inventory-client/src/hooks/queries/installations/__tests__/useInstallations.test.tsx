@@ -51,9 +51,12 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: ReactNode }) => (
+  const TestWrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  
+  return TestWrapper;
 };
 
 describe('useInstallations hooks', () => {
@@ -644,7 +647,7 @@ describe('useInstallations hooks', () => {
         reason: 'Installation finished successfully'
       };
 
-      mockApiClient.PATCH.mockResolvedValueOnce({
+      mockApiClient.POST.mockResolvedValueOnce({
         data: mockData,
         error: null
       });
@@ -660,8 +663,8 @@ describe('useInstallations hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockData);
-      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/installations/{installation_id}/status', {
-        params: { path: { installation_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/installations/{installation}/status', {
+        params: { path: { installation: 1 } },
         body: {
           status: 'completed',
           reason: 'Installation finished successfully'
@@ -676,7 +679,7 @@ describe('useInstallations hooks', () => {
         status: 'cancelled'
       };
 
-      mockApiClient.PATCH.mockResolvedValueOnce({
+      mockApiClient.POST.mockResolvedValueOnce({
         data: mockData,
         error: null
       });
@@ -691,8 +694,8 @@ describe('useInstallations hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockApiClient.PATCH).toHaveBeenCalledWith('/api/installations/{installation_id}/status', {
-        params: { path: { installation_id: 1 } },
+      expect(mockApiClient.POST).toHaveBeenCalledWith('/api/installations/{installation}/status', {
+        params: { path: { installation: 1 } },
         body: { status: 'cancelled' }
       });
     });
@@ -703,7 +706,7 @@ describe('useInstallations hooks', () => {
         status: 'invalid_status'
       };
 
-      mockApiClient.PATCH.mockResolvedValueOnce({
+      mockApiClient.POST.mockResolvedValueOnce({
         data: null,
         error: { message: 'Invalid status' }
       });
@@ -779,9 +782,9 @@ describe('useInstallations hooks', () => {
       expect(mockApiClient.GET).toHaveBeenCalledWith('/api/installations/schedule', {
         params: {
           query: {
-            'filter[installer_user_id]': 1,
-            'filter[start_date]': '2023-01-01',
-            'filter[end_date]': '2023-01-31'
+            'installer_user_id': 1,
+            'start_date': '2023-01-01',
+            'end_date': '2023-01-31'
           }
         }
       });

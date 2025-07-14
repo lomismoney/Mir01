@@ -146,23 +146,21 @@ class DashboardController extends Controller
      */
     private function getOrderStats(Carbon $today, Carbon $thisMonth, Carbon $thisYear): array
     {
-        $orders = Order::query();
-
         return [
-            'total' => $orders->count(),
-            'today' => $orders->whereDate('created_at', $today)->count(),
-            'this_month' => $orders->where('created_at', '>=', $thisMonth)->count(),
-            'pending' => $orders->where('shipping_status', 'pending')->count(),
-            'completed' => $orders->where('shipping_status', 'completed')->count(),
-            'revenue_today' => (float) $orders->whereDate('created_at', $today)
+            'total' => Order::count(),
+            'today' => Order::whereDate('created_at', $today)->count(),
+            'this_month' => Order::where('created_at', '>=', $thisMonth)->count(),
+            'pending' => Order::where('shipping_status', 'pending')->count(),
+            'completed' => Order::where('shipping_status', 'completed')->count(),
+            'revenue_today' => (float) Order::whereDate('created_at', $today)
                 ->where('payment_status', 'paid')
-                ->sum('total_amount'),
-            'revenue_this_month' => (float) $orders->where('created_at', '>=', $thisMonth)
+                ->sum('grand_total'),
+            'revenue_this_month' => (float) Order::where('created_at', '>=', $thisMonth)
                 ->where('payment_status', 'paid')
-                ->sum('total_amount'),
-            'revenue_this_year' => (float) $orders->where('created_at', '>=', $thisYear)
+                ->sum('grand_total'),
+            'revenue_this_year' => (float) Order::where('created_at', '>=', $thisYear)
                 ->where('payment_status', 'paid')
-                ->sum('total_amount'),
+                ->sum('grand_total'),
         ];
     }
 
@@ -189,14 +187,12 @@ class DashboardController extends Controller
      */
     private function getCustomerStats(Carbon $today, Carbon $thisMonth): array
     {
-        $customers = Customer::query();
-
         return [
-            'total' => $customers->count(),
-            'today' => $customers->whereDate('created_at', $today)->count(),
-            'this_month' => $customers->where('created_at', '>=', $thisMonth)->count(),
-            'companies' => $customers->where('type', 'company')->count(),
-            'individuals' => $customers->where('type', 'individual')->count(),
+            'total' => Customer::count(),
+            'today' => Customer::whereDate('created_at', $today)->count(),
+            'this_month' => Customer::where('created_at', '>=', $thisMonth)->count(),
+            'companies' => Customer::where('is_company', true)->count(),
+            'individuals' => Customer::where('is_company', false)->count(),
         ];
     }
 

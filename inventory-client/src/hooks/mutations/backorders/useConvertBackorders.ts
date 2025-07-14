@@ -15,7 +15,7 @@ export function useConvertBackorders() {
       const response = await apiClient.POST('/api/backorders/convert', { body: data });
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success('成功轉換為進貨單');
       
       // 清除相關快取
@@ -24,7 +24,7 @@ export function useConvertBackorders() {
       queryClient.invalidateQueries({ queryKey: ['backorder-summary'] });
       queryClient.invalidateQueries({ queryKey: ['purchases'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error.response?.data?.message || '轉換失敗');
     },
   });

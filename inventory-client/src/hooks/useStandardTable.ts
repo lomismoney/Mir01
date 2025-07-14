@@ -14,14 +14,13 @@ import {
 } from '@tanstack/react-table';
 import { useDebounce } from './use-debounce';
 import { safeExtractData, safeExtractMeta } from '@/lib/apiResponseHelpers';
-import type { PaginationMeta } from '@/types/api-responses';
 
 /**
  * 標準表格配置選項
  */
 export interface StandardTableConfig<T> {
   // 數據相關
-  data: any; // API 響應數據
+  data: unknown; // API 響應數據
   columns: ColumnDef<T>[];
   
   // 分頁配置
@@ -62,13 +61,13 @@ export interface StandardTableConfig<T> {
  */
 export interface TableFilters {
   search?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
  * 表格狀態
  */
-export interface TableState<T> {
+export interface TableState {
   // React Table 狀態
   sorting: SortingState;
   columnFilters: ColumnFiltersState;
@@ -143,7 +142,7 @@ export function useStandardTable<T>(config: StandardTableConfig<T>) {
 
   // 構建查詢參數（用於服務端操作）
   const queryParams = useMemo(() => {
-    const params: Record<string, any> = {};
+    const params: Record<string, unknown> = {};
 
     // 搜尋參數
     if (enableServerSideFiltering && debouncedGlobalFilter) {
@@ -243,7 +242,7 @@ export function useStandardTable<T>(config: StandardTableConfig<T>) {
   }, [initialPageSize]);
 
   // 篩選管理
-  const updateFilter = useCallback((key: string, value: any) => {
+  const updateFilter = useCallback((key: string, value: unknown) => {
     setCustomFilters(prev => ({
       ...prev,
       [key]: value,
@@ -289,7 +288,7 @@ export function useStandardTable<T>(config: StandardTableConfig<T>) {
   }, []);
 
   // 狀態對象
-  const tableState: TableState<T> = {
+  const tableState: TableState = {
     sorting,
     columnFilters,
     columnVisibility,
@@ -369,8 +368,8 @@ export const TableUtils = {
   /**
    * 構建篩選查詢參數
    */
-  buildFilterParams: (filters: TableFilters): Record<string, any> => {
-    const params: Record<string, any> = {};
+  buildFilterParams: (filters: TableFilters): Record<string, unknown> => {
+    const params: Record<string, unknown> = {};
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         params[key] = value;
@@ -402,7 +401,7 @@ export const TableUtils = {
   ): number[] => {
     const half = Math.floor(maxVisible / 2);
     let start = Math.max(0, currentPage - half);
-    let end = Math.min(totalPages - 1, start + maxVisible - 1);
+    const end = Math.min(totalPages - 1, start + maxVisible - 1);
 
     if (end - start + 1 < maxVisible) {
       start = Math.max(0, end - maxVisible + 1);

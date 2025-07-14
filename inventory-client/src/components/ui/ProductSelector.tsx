@@ -9,12 +9,24 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Package } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useProducts } from "@/hooks";
-import { toast } from "sonner";
+import { useProducts, ProcessedProduct } from "@/hooks";
 import { useErrorHandler } from "@/hooks";
 import { cn } from "@/lib/utils";
+
+/**
+ * 訂製商品項目介面
+ */
+export interface CustomItem {
+  product_id: string | number;
+  product_variant_id: null;
+  custom_product_name: string;
+  custom_specifications: Record<string, string>;
+  price: number;
+  quantity: number;
+  sku: string;
+}
 
 /**
  * 商品規格（變體/SKU）介面
@@ -38,52 +50,12 @@ export interface Variant {
   productName?: string;
 }
 
-/**
- * 商品介面 - 匹配數據精煉廠的輸出格式
- *
- * 代表一個商品主體，包含多個規格變體
- */
-export interface Product {
-  /** 商品的唯一識別碼 */
-  id: string | number;
-  /** 商品名稱 */
-  name: string;
-  /** 商品描述 */
-  description?: string | null;
-  /** 分類 ID */
-  category_id?: number | null;
-  /** 創建時間 */
-  created_at?: string;
-  /** 更新時間 */
-  updated_at?: string;
-  /** 圖片 URLs */
-  image_urls?: {
-    original?: string | null;
-    thumb?: string | null;
-    medium?: string | null;
-    large?: string | null;
-  } | null;
-  /** 商品分類物件 */
-  category?: {
-    id: number;
-    name: string;
-    description?: string | null;
-  } | null;
-  /** 商品分類名稱（簡化格式） */
+// 使用從 hook 導入的 ProcessedProduct 類型，並創建兼容的 Product 類型別名
+type Product = ProcessedProduct & {
   categoryName: string;
-  /** 商品主圖 URL（簡化格式） */
   mainImageUrl: string;
-  /** 商品的所有規格變體 */
   variants: Variant[];
-  /** 價格範圍 */
-  price_range?: {
-    min: number;
-    max: number;
-    count: number;
-  };
-  /** 屬性列表 */
-  attributes?: any[];
-}
+};
 
 // Shadcn/UI Dialog 相關元件
 import {
@@ -136,7 +108,7 @@ interface ProductSelectorProps {
   // 選擇商品後的回調函數 - 回傳完整的 Variant 物件陣列
   onSelect: (selectedVariants: Variant[]) => void;
   // 新增訂製商品的回調函數
-  onCustomItemAdd: (item: any) => void;
+  onCustomItemAdd: (item: CustomItem) => void;
   // 是否允許多選，預設為 true
   multiple?: boolean;
   // 已選擇的規格 (Variant) ID 列表，用於顯示已選狀態
@@ -200,13 +172,35 @@ export function ProductSelector({
 
   // 🎯 直接消費「數據精煉廠」處理過的純淨數據
   const {
-    data: products = [], // 直接將 data 解構為 products，並提供預設值
+    data: rawProducts = [], 
     isLoading,
     error,
   } = useProducts({
     product_name: debouncedSearchQuery, // 將 debounced 搜尋字串作為 product_name 參數傳遞
+    per_page: 50, // 限制每次載入的商品數量，避免過多數據導致崩潰
     // 暫不傳遞 category，詳見戰術註記
   });
+
+  // 類型安全的數據轉換
+  const products = useMemo(() => {
+    return (rawProducts as unknown[]).map((product: unknown) => {
+      const p = product as ProcessedProduct;
+      return {
+        ...p,
+        categoryName: p.category?.name || "未分類",
+        mainImageUrl: p.image_url || p.thumbnail_url || "",
+        variants: (p.variants || []).map((variant): Variant => ({
+          id: variant.id,
+          sku: variant.sku || "",
+          specifications: variant.sku || `規格-${variant.id}`,
+          price: variant.price || 0,
+          stock: variant.stock_quantity || 0,
+          imageUrl: "", // API 中沒有變體圖片字段
+          productName: p.name
+        }))
+      } as Product;
+    });
+  }, [rawProducts]);
 
   /**
    * 處理規格選擇/取消選擇
@@ -484,14 +478,23 @@ export function ProductSelector({
                         className="relative aspect-square mb-3"
                        
                       >
-                        <Image
-                          src={product.mainImageUrl}
-                          alt={product.name}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-cover rounded-md"
-                         
-                        />
+                        {product.mainImageUrl && product.mainImageUrl.trim() !== "" ? (
+                          <Image
+                            src={product.mainImageUrl}
+                            alt={product.name}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="object-cover rounded-md"
+                           
+                          />
+                        ) : (
+                          <div
+                            className="w-full h-full bg-muted rounded-md flex items-center justify-center text-muted-foreground"
+                           
+                          >
+                            <Package className="h-8 w-8" />
+                          </div>
+                        )}
                       </div>
 
                       {/* 產品名稱 */}
@@ -867,10 +870,11 @@ export function ProductSelector({
                     <TableBody>
                       {selectedProduct.variants.map((variant) => {
                         const isSelected = selectedVariants.has(variant.id);
+                        const v = variant as unknown as Variant;
                         const stockLevel =
-                          variant.stock === 0
+                          v.stock === 0
                             ? "destructive"
-                            : variant.stock <= 10
+                            : v.stock <= 10
                               ? "secondary"
                               : "default";
 
@@ -910,13 +914,13 @@ export function ProductSelector({
                               />
                             </TableCell>
                             <TableCell>
-                              {variant.imageUrl ? (
+                              {v.imageUrl && v.imageUrl.trim() !== "" ? (
                                 <div
                                   className="relative w-12 h-12"
                                  
                                 >
                                   <Image
-                                    src={variant.imageUrl}
+                                    src={v.imageUrl}
                                     alt={variant.sku}
                                     fill
                                     sizes="48px"
@@ -937,11 +941,11 @@ export function ProductSelector({
                               {variant.sku}
                             </TableCell>
                             <TableCell>
-                              {variant.specifications}
+                              {v.specifications}
                             </TableCell>
                             <TableCell>
                               <Badge variant={stockLevel}>
-                                {variant.stock} 件
+                                {v.stock} 件
                               </Badge>
                             </TableCell>
                             <TableCell

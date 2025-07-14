@@ -2,7 +2,6 @@
 import {
   QueryClient,
   QueryClientProvider,
-  defaultShouldDehydrateQuery,
   isServer,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";

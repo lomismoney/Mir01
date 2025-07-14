@@ -10,10 +10,12 @@ use App\Http\Controllers\Api\ProductVariantController;
 use App\Http\Controllers\Api\PurchaseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\StoreController;
 use App\Http\Controllers\Api\UserStoreController;
 use App\Http\Controllers\Api\InventoryAlertController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\GlobalSearchController;
 use App\Http\Resources\Api\UserResource;
 
 /**
@@ -74,6 +76,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
     /**
+     * @group 全局搜索
+     * @authenticated
+     *
+     * 全局搜索功能
+     * 
+     * 跨模塊搜索產品、訂單、客戶，返回分組結果
+     * 
+     * 路由列表：
+     * POST   /api/search/global  - 執行全局搜索
+     */
+    Route::post('/search/global', [GlobalSearchController::class, 'search']);
+
+    /**
      * 商品管理路由
      * 批量刪除商品路由 - 使用 POST 方法進行語義更明確的批量操作
      */
@@ -128,6 +143,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('purchases', PurchaseController::class)->parameters(['purchases' => 'purchase']);
     Route::patch('purchases/{purchase}/status', [PurchaseController::class, 'updateStatus']);
     Route::patch('purchases/{purchase}/cancel', [PurchaseController::class, 'cancel']);
+    Route::post('purchases/{purchase}/partial-receipt', [PurchaseController::class, 'partialReceipt']);
 
     /**
      * 用戶管理路由
@@ -135,6 +151,19 @@ Route::middleware('auth:sanctum')->group(function () {
      * 只有管理員可以管理用戶，且不能刪除自己
      */
     Route::apiResource('users', UserController::class)->parameters(['users' => 'user']);
+    
+    /**
+     * 用戶個人資料管理路由
+     * 提供當前用戶的個人資料查看、更新和密碼變更功能
+     * 
+     * 路由列表：
+     * GET    /api/user/profile           - 獲取當前用戶個人資料
+     * PUT    /api/user/profile           - 更新當前用戶個人資料
+     * POST   /api/user/change-password   - 變更當前用戶密碼
+     */
+    Route::get('/user/profile', [UserProfileController::class, 'show']);
+    Route::put('/user/profile', [UserProfileController::class, 'update']);
+    Route::post('/user/change-password', [UserProfileController::class, 'changePassword']);
     
     /**
      * 分店管理路由

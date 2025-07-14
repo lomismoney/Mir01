@@ -8,13 +8,13 @@
  * 4. 成功/失敗回調
  */
 
-import { useForm, UseFormReturn, FieldValues, DefaultValues } from "react-hook-form";
+import { useForm, UseFormReturn, DefaultValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useState } from "react";
 
-export interface UseStandardFormOptions<TSchema extends z.ZodType<any, any, any>> {
+export interface UseStandardFormOptions<TSchema extends z.ZodType> {
   schema: TSchema;
   defaultValues?: DefaultValues<z.infer<TSchema>>;
   onSubmit: (data: z.infer<TSchema>) => Promise<void> | void;
@@ -24,14 +24,14 @@ export interface UseStandardFormOptions<TSchema extends z.ZodType<any, any, any>
   errorMessage?: string;
 }
 
-export interface UseStandardFormReturn<TSchema extends z.ZodType<any, any, any>> {
+export interface UseStandardFormReturn<TSchema extends z.ZodType> {
   form: UseFormReturn<z.infer<TSchema>>;
   isSubmitting: boolean;
   handleSubmit: () => void;
   reset: (values?: DefaultValues<z.infer<TSchema>>) => void;
 }
 
-export function useStandardForm<TSchema extends z.ZodType<any, any, any>>({
+export function useStandardForm<TSchema extends z.ZodType>({
   schema,
   defaultValues,
   onSubmit,

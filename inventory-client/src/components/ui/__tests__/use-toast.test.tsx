@@ -82,7 +82,7 @@ describe('Toast 系統測試', () => {
       const { result } = renderHook(() => useToast());
       
       const initialLength = result.current.toasts.length;
-      let testToastIds: string[] = [];
+      const testToastIds: string[] = [];
       
       act(() => {
         testToastIds.push(result.current.toast({ title: 'Toast 1' }).id);
@@ -181,7 +181,7 @@ describe('Toast 系統測試', () => {
     it('應該支援不同的 toast 變體', () => {
       const { result } = renderHook(() => useToast());
       
-      let toastIds: string[] = [];
+      const toastIds: string[] = [];
       
       act(() => {
         toastIds.push(result.current.toast({

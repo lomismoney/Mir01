@@ -79,7 +79,7 @@ jest.mock('@/components/ui/sidebar', () => ({
       {children}
     </div>
   ),
-  SidebarMenuButton: ({ children, asChild, className, ...props }: any) => (
+  SidebarMenuButton: ({ children, className, ...props }: any) => (
     <div data-testid="sidebar-menu-button" className={className} {...props}>
       {children}
     </div>

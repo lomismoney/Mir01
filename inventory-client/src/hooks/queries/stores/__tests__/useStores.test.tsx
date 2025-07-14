@@ -41,9 +41,12 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: ReactNode }) => (
+  const TestWrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  
+  return TestWrapper;
 };
 
 describe('useStores hooks', () => {
@@ -219,7 +222,7 @@ describe('useStores hooks', () => {
     });
 
     it('should handle params in meta generation', async () => {
-      const mockData: any[] = [];
+      const mockData: Array<unknown> = [];
       const params = { page: 2, per_page: 50 };
 
       mockApiClient.GET.mockResolvedValueOnce({

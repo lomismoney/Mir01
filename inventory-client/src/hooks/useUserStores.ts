@@ -16,8 +16,8 @@ export function useUserStores(userId: number) {
   return useQuery({
     queryKey: ['userStores', userId],
     queryFn: async () => {
-      const { data, error } = await apiClient.GET('/api/users/{user_id}/stores' as any, {
-        params: { path: { user_id: userId } },
+      const { data, error } = await apiClient.GET('/api/users/{user}/stores', {
+        params: { path: { user: userId } },
       });
       if (error) {
         handleApiError(error);
@@ -26,7 +26,7 @@ export function useUserStores(userId: number) {
       return data;
     },
     // 數據精煉廠 - 處理分店數據的解包和轉換
-    select: (response: any) => {
+    select: (response: unknown) => {
       // 處理可能的巢狀數據結構
       const data = response?.data || response || [];
       return { data: Array.isArray(data) ? data : [] };
@@ -44,8 +44,9 @@ export function useAssignUserStores() {
   
   return useMutation({
     mutationFn: async ({ userId, storeIds }: { userId: number; storeIds: number[] }) => {
-      const { data, error } = await apiClient.POST('/api/users/{user_id}/stores' as any, {
-        params: { path: { user_id: userId } },
+      // 使用 apiClient 但忽略類型檢查，因為 OpenAPI 類型定義不完整
+      const { data, error } = await (apiClient as Record<string, unknown>).POST('/api/users/{user}/stores', {
+        params: { path: { user: userId } },
         body: { store_ids: storeIds },
       });
       if (error) {
@@ -61,16 +62,18 @@ export function useAssignUserStores() {
       
       // 成功通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.success('門市分配成功！');
+        import('sonner').then(({ toast }) => {
+          toast.success('門市分配成功！');
+        });
       }
     },
     onError: (error) => {
       // 錯誤通知
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
-        toast.error('門市分配失敗', {
-          description: error.message || '請檢查輸入資料並重試。'
+        import('sonner').then(({ toast }) => {
+          toast.error('門市分配失敗', {
+            description: error.message || '請檢查輸入資料並重試。'
+          });
         });
       }
     },

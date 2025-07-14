@@ -1,16 +1,18 @@
 "use client"; // 因為使用了 useParams，此頁面需為客戶端組件
 
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState, lazy, Suspense, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useDynamicBreadcrumb } from "@/components/breadcrumb-context";
 import {
   ArrowLeft,
   CreditCard,
   Truck,
   ChevronLeft,
   DollarSign,
-  Loader2,
 } from "lucide-react";
+import { LoadingFallback } from "@/components/ui/skeleton";
 
 // 動態導入訂單詳情組件
 const OrderDetailComponent = lazy(() => import("@/components/orders/OrderDetailComponent").then(module => ({ default: module.OrderDetailComponent })));
@@ -26,6 +28,7 @@ import RecordPaymentModal from "@/components/orders/RecordPaymentModal";
 export default function OrderDetailPage() {
   const params = useParams();
   const orderId = Number(params.id);
+  const { setLabel } = useDynamicBreadcrumb();
 
   // 數據獲取邏輯上移到頁面組件
   const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
@@ -36,6 +39,13 @@ export default function OrderDetailPage() {
 
   // 🎯 新增：部分付款 Modal 狀態
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  
+  // 動態設置麵包屑標籤
+  useEffect(() => {
+    if (order?.order_number) {
+      setLabel(`訂單 #${order.order_number}`);
+    }
+  }, [order?.order_number, setLabel]);
 
   // 🎯 useOrderDetail 的 select 函數已經處理好資料格式，直接使用純淨的訂單物件
 
@@ -157,12 +167,13 @@ export default function OrderDetailPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/orders">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              返回訂單列表
-            </Link>
-          </Button>
+          <Link 
+            href="/orders"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            返回訂單列表
+          </Link>
           <div>
             <h1 className="text-2xl font-bold">
               訂單詳情
@@ -181,12 +192,13 @@ export default function OrderDetailPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/orders">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              返回訂單列表
-            </Link>
-          </Button>
+          <Link 
+            href="/orders"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            返回訂單列表
+          </Link>
           <div>
             <h1 className="text-2xl font-bold">
               訂單詳情
@@ -208,20 +220,18 @@ export default function OrderDetailPage() {
        
       >
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-7 w-7"
-            asChild
-           
+          <Link 
+            href="/orders"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "icon" }),
+              "h-7 w-7"
+            )}
           >
-            <Link href="/orders">
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">
-                返回訂單列表
-              </span>
-            </Link>
-          </Button>
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">
+              返回訂單列表
+            </span>
+          </Link>
           <h1
             className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0"
            
@@ -257,16 +267,7 @@ export default function OrderDetailPage() {
       </div>
 
       {/* 訂單詳情組件 - 現在只負責展示 */}
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-64 rounded-lg border bg-card">
-            <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">載入訂單詳情...</p>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<LoadingFallback type="page" text="載入訂單詳情..." />}>
         <OrderDetailComponent orderId={orderId} />
       </Suspense>
 

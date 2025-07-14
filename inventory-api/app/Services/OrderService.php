@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\ProductVariant;
 use App\Enums\OrderItemType;
 use App\Services\BaseService;
 use App\Services\Traits\HandlesInventoryOperations;
@@ -964,8 +966,35 @@ class OrderService extends BaseService
             });
         }
 
-        // 返回詳細清單
-        return $query->orderBy('created_at', 'asc')->get();
+        // 返回詳細清單，加入格式轉換
+        return $query->orderBy('created_at', 'asc')->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'order_id' => $item->order_id,
+                'product_variant_id' => $item->product_variant_id,
+                'product_name' => $item->product_name,
+                'sku' => $item->sku,
+                'quantity' => $item->quantity,
+                'is_backorder' => $item->is_backorder,
+                'purchase_item_id' => $item->purchase_item_id,
+                'purchase_status' => $this->getPurchaseStatus($item),
+                'purchase_status_text' => $this->getPurchaseStatusText($item),
+                'created_at' => $item->created_at->toIso8601String(),
+                'order' => [
+                    'order_number' => $item->order->order_number ?? '',
+                    'customer' => $item->order->customer ? [
+                        'name' => $item->order->customer->name,
+                    ] : null,
+                ],
+                'productVariant' => $item->productVariant ? [
+                    'sku' => $item->productVariant->sku,
+                    'cost' => $item->productVariant->cost_price ?? 0,
+                    'product' => $item->productVariant->product ? [
+                        'name' => $item->productVariant->product->name,
+                    ] : null,
+                ] : null,
+            ];
+        });
     }
 
     /**
@@ -1008,6 +1037,34 @@ class OrderService extends BaseService
                 ? now()->diffInDays($stats->oldest_backorder_date) 
                 : 0
         ];
+    }
+
+    /**
+     * 獲取購買狀態
+     * 
+     * @param OrderItem $item
+     * @return string
+     */
+    private function getPurchaseStatus(OrderItem $item): string
+    {
+        if ($item->purchase_item_id) {
+            return 'purchase_created';
+        }
+        return 'pending_purchase';
+    }
+
+    /**
+     * 獲取購買狀態文字
+     * 
+     * @param OrderItem $item
+     * @return string
+     */
+    private function getPurchaseStatusText(OrderItem $item): string
+    {
+        if ($item->purchase_item_id) {
+            return '已建立進貨單';
+        }
+        return '待建立進貨單';
     }
 
     /**

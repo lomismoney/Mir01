@@ -3,12 +3,10 @@
 exports[`AuthLoading 應該匹配快照 1`] = `
 <div
   class="flex items-center justify-center h-screen"
-  data-oid=".:9r_i9"
 >
   <svg
     aria-hidden="true"
     class="lucide lucide-loader-circle h-8 w-8 animate-spin text-primary"
-    data-oid="d66h:w0"
     fill="none"
     height="24"
     stroke="currentColor"

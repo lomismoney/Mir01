@@ -67,7 +67,7 @@ class InventoryAlertController extends Controller
                 END as severity
             '))
             ->addSelect(DB::raw('
-                MAX(0, low_stock_threshold - quantity) as shortage
+                GREATEST(0, low_stock_threshold - quantity) as shortage
             '));
 
         // 按門市篩選

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AttributesClientPage from '../AttributesClientPage';
 import * as useAdminAuth from '@/hooks/use-admin-auth';
@@ -49,7 +49,7 @@ afterAll(() => {
 });
 
 // 修復：導入正確的 mock hooks
-const mockHooks = require('@/hooks');
+const mockHooks = jest.requireMock<typeof import('@/hooks')>('@/hooks');
 const mockUseAttributes = mockHooks.useAttributes as jest.Mock;
 const mockUseCreateAttribute = mockHooks.useCreateAttribute as jest.Mock;
 const mockUseUpdateAttribute = mockHooks.useUpdateAttribute as jest.Mock;

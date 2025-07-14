@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OrderClientComponent } from "../OrderClientComponent";
 import { ProcessedOrder, Order } from "@/types/api-helpers";
@@ -171,9 +171,9 @@ const {
   useCancelOrder,
   useBatchDeleteOrders,
   useBatchUpdateStatus,
-} = require("@/hooks");
-const { useRouter } = require("next/navigation");
-const { toast } = require("sonner");
+} = jest.requireMock<typeof import("@/hooks")>("@/hooks");
+const { useRouter } = jest.requireMock<typeof import("next/navigation")>("next/navigation");
+const { toast } = jest.requireMock<typeof import("sonner")>("sonner");
 
 describe("OrderClientComponent", () => {
   let user: ReturnType<typeof userEvent.setup>;

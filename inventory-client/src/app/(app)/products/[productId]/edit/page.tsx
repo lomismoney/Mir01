@@ -1,7 +1,7 @@
 "use client";
 
 import { use, lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { LoadingFallback } from "@/components/ui/skeleton";
 
 // 動態導入產品嚮導組件
 const CreateProductWizard = lazy(() => import("@/components/products/CreateProductWizard").then(module => ({ default: module.CreateProductWizard })));
@@ -21,16 +21,7 @@ export default function ProductEditPage({
   const { productId } = use(params);
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">載入商品編輯器...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingFallback type="page" text="載入商品編輯器..." />}>
       <CreateProductWizard productId={productId} />
     </Suspense>
   );

@@ -9,7 +9,6 @@
  */
 
 import { transformCategoriesGroupedResponse } from '../api-helpers';
-import type { Category } from '@/types/category';
 
 describe('api-helpers', () => {
   describe('transformCategoriesGroupedResponse', () => {
@@ -100,7 +99,7 @@ describe('api-helpers', () => {
      * 測試 null 輸入的處理
      */
     it('應該在輸入為 null 時返回空物件', () => {
-      const result = transformCategoriesGroupedResponse(null as any);
+      const result = transformCategoriesGroupedResponse(null as unknown as Record<string, unknown[]>);
       expect(result).toEqual({});
     });
 
@@ -188,9 +187,9 @@ describe('api-helpers', () => {
      */
     it('應該將非陣列的分類群組轉換為空陣列', () => {
       const input = {
-        'not_array_string': 'not an array' as any,
-        'not_array_object': { id: 1, name: 'test' } as any,
-        'not_array_number': 123 as any,
+        'not_array_string': 'not an array' as unknown as unknown[],
+        'not_array_object': { id: 1, name: 'test' } as unknown as unknown[],
+        'not_array_number': 123 as unknown as unknown[],
         'valid_array': [{ id: 1, name: 'valid' }]
       };
 
@@ -226,7 +225,7 @@ describe('api-helpers', () => {
           }
         ],
         'empty_array': [],
-        'non_array': 'not array' as any
+        'non_array': 'not array' as unknown as unknown[]
       };
 
       const result = transformCategoriesGroupedResponse(input);

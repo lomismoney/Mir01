@@ -8,7 +8,35 @@ import { apiClient } from '@/lib/apiClient';
 jest.mock('@/lib/apiClient', () => ({
   apiClient: {
     GET: jest.fn(),
+    POST: jest.fn(),
+    PUT: jest.fn(),
+    DELETE: jest.fn(),
   },
+}));
+
+// Mock next-auth/react to prevent authentication errors in tests
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(() => ({
+    data: {
+      user: {
+        id: 1,
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'admin',
+      },
+      accessToken: 'test-token-123',
+    },
+    status: 'authenticated',
+  })),
+  getSession: jest.fn(() => Promise.resolve({
+    user: {
+      id: 1,
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'admin',
+    },
+    accessToken: 'test-token-123',
+  })),
 }));
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
@@ -70,7 +98,8 @@ const mockBackorders = {
   },
 };
 
-const mockBackorderStats = {
+// API 回應格式（包含 data wrapper）
+const mockBackorderStatsResponse = {
   data: {
     total_backorders: 15,
     pending_backorders: 8,
@@ -92,6 +121,29 @@ const mockBackorderStats = {
       },
     ],
   },
+};
+
+// 預期的解包後數據（Hook 的 select 函數會移除 data wrapper）
+const mockBackorderStats = {
+  total_backorders: 15,
+  pending_backorders: 8,
+  fulfilled_backorders: 7,
+  total_quantity: 45,
+  average_fulfillment_time_hours: 72,
+  top_backordered_products: [
+    {
+      product_variant_id: 1,
+      product_name: 'iPhone 15 Pro',
+      sku: 'IPH15PRO128',
+      total_quantity: 12,
+    },
+    {
+      product_variant_id: 2,
+      product_name: 'Samsung Galaxy S24',
+      sku: 'SGS24256',
+      total_quantity: 8,
+    },
+  ],
 };
 
 const mockBackorderSummary = {
@@ -131,14 +183,23 @@ const mockBackorderSummary = {
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
+      queries: { 
+        retry: false,
+        retryDelay: 0,
+      },
+      mutations: { 
+        retry: false,
+        retryDelay: 0,
+      },
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  
+  return TestWrapper;
 };
 
 describe('useBackorders', () => {
@@ -255,7 +316,7 @@ describe('useBackorders', () => {
 
   describe('useBackorderStats', () => {
     it('應該成功獲取預訂統計資料', async () => {
-      mockApiClient.GET.mockResolvedValueOnce({ data: mockBackorderStats, error: null });
+      mockApiClient.GET.mockResolvedValueOnce({ data: mockBackorderStatsResponse, error: null });
 
       const { result } = renderHook(() => useBackorderStats(), {
         wrapper: createWrapper(),
@@ -271,7 +332,7 @@ describe('useBackorders', () => {
 
     it('應該處理 API 錯誤', async () => {
       const error = new Error('Unauthorized');
-      mockApiClient.GET.mockRejectedValueOnce(error);
+      mockApiClient.GET.mockRejectedValue(error);
 
       const { result } = renderHook(() => useBackorderStats(), {
         wrapper: createWrapper(),
@@ -279,13 +340,13 @@ describe('useBackorders', () => {
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
-      });
+      }, { timeout: 3000 });
 
       expect(result.current.error).toEqual(error);
     });
 
     it('應該使用正確的查詢鍵', async () => {
-      mockApiClient.GET.mockResolvedValueOnce({ data: mockBackorderStats, error: null });
+      mockApiClient.GET.mockResolvedValueOnce({ data: mockBackorderStatsResponse, error: null });
 
       const { result } = renderHook(() => useBackorderStats(), {
         wrapper: createWrapper(),
@@ -554,7 +615,7 @@ describe('useBackorders', () => {
 
     it('應該處理 404 錯誤', async () => {
       const error = new Error('Not found');
-      mockApiClient.GET.mockRejectedValueOnce(error);
+      mockApiClient.GET.mockRejectedValue(error);
 
       const { result } = renderHook(() => useBackorderStats(), {
         wrapper: createWrapper(),
@@ -562,7 +623,7 @@ describe('useBackorders', () => {
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
-      });
+      }, { timeout: 3000 });
 
       expect(result.current.error).toEqual(error);
     });

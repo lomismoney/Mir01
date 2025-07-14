@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Store as StoreIcon, PlusSquare, Edit, Trash } from "lucide-react";
+import { Store as StoreIcon, Edit } from "lucide-react";
 import {
   useStores,
   useCreateStore,

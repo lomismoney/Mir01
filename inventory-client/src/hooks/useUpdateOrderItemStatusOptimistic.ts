@@ -26,7 +26,7 @@ type UpdateOrderItemStatusPayload = {
  */
 type OptimisticUpdateContext = {
   /** 原始訂單數據快照 */
-  previousOrderData: any;
+  previousOrderData: unknown;
   /** 訂單 ID */
   orderId: number | null;
   /** 項目 ID */
@@ -139,9 +139,9 @@ export function useUpdateOrderItemStatusOptimistic() {
       // 遍歷所有快取的訂單，找到包含此項目的訂單
       const orderQueries = queryClient.getQueriesData({ queryKey: ['orders'] });
       
-      for (const [queryKey, data] of orderQueries) {
+      for (const [, data] of orderQueries) {
         if (data && typeof data === 'object' && 'data' in data) {
-          const orderData = (data as any).data;
+          const orderData = (data as Record<string, unknown>).data;
           if (orderData && orderData.items && Array.isArray(orderData.items)) {
             const hasItem = orderData.items.some((item: any) => item.id === orderItemId);
             if (hasItem) {
@@ -175,7 +175,7 @@ export function useUpdateOrderItemStatusOptimistic() {
         
         // 4. 🔔 即時反饋：立即顯示樂觀成功提示
         if (typeof window !== 'undefined') {
-          const { toast } = require('sonner');
+          const { toast } = await import('sonner');
           toast.success('狀態已更新', {
             description: `項目狀態已更新為「${status}」`,
             duration: 2000, // 較短的持續時間，避免與後續錯誤提示衝突
@@ -205,7 +205,7 @@ export function useUpdateOrderItemStatusOptimistic() {
      * @param {UpdateOrderItemStatusPayload} variables - 原始請求變數
      * @param {OptimisticUpdateContext | undefined} context - 樂觀更新上下文
      */
-    onError: (error: Error, variables: UpdateOrderItemStatusPayload, context?: OptimisticUpdateContext) => {
+    onError: async (error: Error, variables: UpdateOrderItemStatusPayload, context?: OptimisticUpdateContext) => {
       // 1. 🔙 回滾快取數據：恢復到樂觀更新前的狀態
       if (context?.previousOrderData && context?.orderId) {
         const orderQueryKey = QUERY_KEYS.ORDER(context.orderId);
@@ -220,7 +220,7 @@ export function useUpdateOrderItemStatusOptimistic() {
       
       // 3. 🔴 增強版用戶通知：提供可操作的錯誤反饋
       if (typeof window !== 'undefined') {
-        const { toast } = require('sonner');
+        const { toast } = await import('sonner');
         
         let userFriendlyMessage = '狀態更新失敗，已恢復到原始狀態';
         let actionSuggestion = '請稍後再試';

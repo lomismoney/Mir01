@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { CustomerForm } from '../CustomerForm';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
@@ -11,11 +11,11 @@ jest.mock('@/hooks', () => ({
 
 // Mock the useDebounce hook
 jest.mock('@/hooks/use-debounce', () => ({
-  useDebounce: (value: any) => value,
+  useDebounce: (value: unknown) => value,
 }));
 
 // 修復：從正確位置導入 mock hooks
-const mockHooks = require('@/hooks');
+const mockHooks = jest.requireMock<typeof import('@/hooks')>('@/hooks');
 const useCheckCustomerExistence = mockHooks.useCheckCustomerExistence as jest.Mock;
 
 describe('CustomerForm', () => {

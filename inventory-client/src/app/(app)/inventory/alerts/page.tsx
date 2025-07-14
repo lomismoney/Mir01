@@ -8,22 +8,7 @@ import { AlertTriangle, Package, TrendingDown, TrendingUp, Settings, Filter, Ref
 import { useLowStockItems, useInventoryAlertSummary } from '@/hooks/queries/inventory/useInventoryAlerts';
 import { SimpleDataTable } from '@/components/simple-data-table';
 import { ColumnDef } from '@tanstack/react-table';
-
-interface LowStockItem {
-  id: number;
-  product_variant_id: number;
-  store_id: number;
-  store_name: string;
-  product_name: string;
-  sku: string;
-  quantity: number;
-  low_stock_threshold: number;
-  shortage: number;
-  severity: 'critical' | 'low' | 'normal';
-  last_sale_date: string | null;
-  average_daily_sales: number;
-  estimated_days_until_stockout: number | null;
-}
+import type { LowStockItem } from '@/types/inventory';
 
 const columns: ColumnDef<LowStockItem>[] = [
   {
@@ -84,7 +69,7 @@ const columns: ColumnDef<LowStockItem>[] = [
 ];
 
 export default function InventoryAlertsPage() {
-  const [filters, setFilters] = useState<{
+  const [filters] = useState<{
     severity?: 'critical' | 'low' | 'all';
     store_id?: number;
   }>({});
@@ -203,7 +188,7 @@ export default function InventoryAlertsPage() {
           ) : (
             <SimpleDataTable
               columns={columns}
-              data={(lowStockData as any)?.data || []}
+              data={lowStockData?.data || []}
               searchKey="product_name"
               searchPlaceholder="搜尋商品名稱..."
             />

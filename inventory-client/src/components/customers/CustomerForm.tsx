@@ -89,7 +89,7 @@ export function CustomerForm({
     phone: initialData?.phone || '',
     is_company: initialData?.is_company ?? false,
     tax_number: initialData?.tax_id || '', // 向下相容：tax_id -> tax_number
-    industry_type: initialData?.industry_type || '',
+    industry_type: initialData?.industry_type || undefined, // 改為 undefined 而非空字串
     payment_type: (initialData?.payment_type as any) || 'cash',
     contact_address: initialData?.contact_address || '',
     addresses: initialData?.addresses || [],
@@ -101,7 +101,6 @@ export function CustomerForm({
     form,
     isSubmitting,
     handleSubmit: submitForm,
-    reset,
   } = useStandardForm({
     schema: validationSchema,
     defaultValues: formDefaults,
@@ -246,8 +245,8 @@ export function CustomerForm({
             control={form.control}
             name="industry_type"
             label="客戶行業別"
+            placeholder="請選擇行業別"
             options={[
-              { value: '', label: '請選擇行業別' },
               { value: '一般客戶', label: '一般客戶' },
               { value: '設計師', label: '設計師' },
               { value: '建設公司', label: '建設公司' },

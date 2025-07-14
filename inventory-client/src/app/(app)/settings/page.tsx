@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Settings, User, Shield, Database, Palette, Bell, Globe, HardDrive } from "lucide-react";
+import { EditProfileDialog } from "@/components/settings/EditProfileDialog";
+import { ChangePasswordDialog } from "@/components/settings/ChangePasswordDialog";
 
 /**
  * 系統設定頁面
@@ -12,6 +15,9 @@ import { Settings, User, Shield, Database, Palette, Bell, Globe, HardDrive } fro
  * 提供系統配置和用戶設定選項
  */
 export default function SettingsPage() {
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* 頁面標題 */}
@@ -43,13 +49,13 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <h4 className="text-sm font-medium">個人資料</h4>
-              <Button variant="outline" size="sm" className="w-full">
+              <Button variant="outline" size="sm" className="w-full" onClick={() => setEditProfileOpen(true)}>
                 編輯個人資料
               </Button>
             </div>
             <div className="space-y-2">
               <h4 className="text-sm font-medium">密碼安全</h4>
-              <Button variant="outline" size="sm" className="w-full">
+              <Button variant="outline" size="sm" className="w-full" onClick={() => setChangePasswordOpen(true)}>
                 變更密碼
               </Button>
             </div>
@@ -268,6 +274,10 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Dialogs */}
+      <EditProfileDialog open={editProfileOpen} onOpenChange={setEditProfileOpen} />
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
     </div>
   );
 } 
