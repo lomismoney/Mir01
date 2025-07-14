@@ -34,12 +34,16 @@ return new class extends Migration
 
         // 為現有資料設定預設值
         // 假設已完成的進貨單項目都是完全收貨的
+        // 使用 SQLite 兼容的語法（子查詢方式）
         DB::statement('
             UPDATE purchase_items 
-            INNER JOIN purchases ON purchase_items.purchase_id = purchases.id 
-            SET purchase_items.received_quantity = purchase_items.quantity, 
-                purchase_items.receipt_status = "completed"
-            WHERE purchases.status IN ("completed", "received")
+            SET received_quantity = quantity, 
+                receipt_status = "completed"
+            WHERE purchase_id IN (
+                SELECT id 
+                FROM purchases 
+                WHERE status IN ("completed", "received")
+            )
         ');
     }
 
