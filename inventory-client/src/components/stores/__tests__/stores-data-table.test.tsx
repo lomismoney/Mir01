@@ -169,7 +169,7 @@ describe('StoresDataTable', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText('搜索分店名稱或地址...');
+    const searchInput = screen.getByPlaceholderText('搜尋分店名稱或地址...');
     expect(searchInput).toBeInTheDocument();
   });
 
@@ -182,7 +182,7 @@ describe('StoresDataTable', () => {
       />
     );
 
-    expect(screen.queryByPlaceholderText('搜索分店名稱或地址...')).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('搜尋分店名稱或地址...')).not.toBeInTheDocument();
   });
 
   test('應該顯示新增分店按鈕', () => {
@@ -270,7 +270,7 @@ describe('StoresDataTable', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText('搜索分店名稱或地址...');
+    const searchInput = screen.getByPlaceholderText('搜尋分店名稱或地址...');
     await user.type(searchInput, '總店');
 
     // 檢查 onChange 回調是否被調用
@@ -289,7 +289,7 @@ describe('StoresDataTable', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText('搜索分店名稱或地址...');
+    const searchInput = screen.getByPlaceholderText('搜尋分店名稱或地址...');
     expect(searchInput).toHaveValue('');
 
     rerender(
@@ -357,7 +357,7 @@ describe('StoresDataTable', () => {
     );
 
     expect(screen.getByText('找到 0 個分店')).toBeInTheDocument();
-    expect(screen.getByText('嘗試調整搜索條件')).toBeInTheDocument();
+    expect(screen.getByText('嘗試調整搜尋條件')).toBeInTheDocument();
   });
 
   test('應該顯示分頁控制', () => {
@@ -386,7 +386,7 @@ describe('StoresDataTable', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText('搜索分店名稱或地址...');
+    const searchInput = screen.getByPlaceholderText('搜尋分店名稱或地址...');
     expect(searchInput).toBeDisabled();
   });
 
@@ -432,7 +432,7 @@ describe('StoresDataTable', () => {
     );
 
     // 不應該顯示搜尋輸入框
-    expect(screen.queryByPlaceholderText('搜索分店名稱或地址...')).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('搜尋分店名稱或地址...')).not.toBeInTheDocument();
   });
 
   test('應該正確渲染表格標題', () => {

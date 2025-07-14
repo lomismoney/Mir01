@@ -48,6 +48,7 @@ class StoreController extends Controller
     {
         $stores = QueryBuilder::for(Store::class)
             ->allowedIncludes(['users', 'inventories', 'purchases', 'sales', 'transfersOut', 'transfersIn'])
+            ->withCount(['users', 'inventories'])
             ->paginate(15);
             
         return StoreResource::collection($stores);

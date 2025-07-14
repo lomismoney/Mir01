@@ -41,6 +41,10 @@ class StoreResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             
+            // 統計數據
+            'users_count' => $this->whenNotNull($this->users_count),
+            'inventory_count' => $this->whenNotNull($this->inventories_count),
+            
             // Conditionally include relationships
             'users' => UserResource::collection($this->whenLoaded('users')),
             'inventories' => InventoryResource::collection($this->whenLoaded('inventories')),

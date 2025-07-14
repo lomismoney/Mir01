@@ -7,7 +7,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { useVirtualizedTable, useErrorHandler } from "@/hooks";
-import { ChevronDown, Plus, Store as StoreIcon, Search } from "lucide-react";
+import { ChevronDown, Plus, Store as StoreIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -35,9 +35,9 @@ interface StoresDataTableProps<TData, TValue> {
   onAddStore?: () => void;
   /** 是否正在載入資料 */
   isLoading?: boolean;
-  /** 搜索值 */
+  /** 搜尋值 */
   searchValue?: string;
-  /** 搜索變更處理器 */
+  /** 搜尋變更處理器 */
   onSearchChange?: (value: string) => void;
 }
 
@@ -93,23 +93,17 @@ export function StoresDataTable<TData, TValue>({
 
   return (
     <div className="w-full space-y-4">
-      {/* 工具列 */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1 max-w-sm">
-          {/* 搜索框 */}
-          {onSearchChange && (
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="搜索分店名稱或地址..."
-                value={searchValue}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10"
-                disabled={isLoading}
-              />
-            </div>
-          )}
-        </div>
+      {/* 🔍 搜尋與操作工具列 */}
+      <div className="flex items-center justify-between">
+        {onSearchChange && (
+          <Input
+            placeholder="搜尋分店名稱或地址..."
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="max-w-sm"
+            disabled={isLoading}
+          />
+        )}
 
         <div className="flex items-center space-x-2">
           {/* 欄位顯示控制 */}
@@ -197,7 +191,7 @@ export function StoresDataTable<TData, TValue>({
             <span>
               找到 {data.length} 個分店
               <span className="text-xs ml-2">
-                {data.length === 0 ? "嘗試調整搜索條件" : ""}
+                {data.length === 0 ? "嘗試調整搜尋條件" : ""}
               </span>
             </span>
           ) : (

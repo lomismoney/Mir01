@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -99,7 +99,29 @@ export default function UsersPage() {
     isLoading,
   } = useUsers(searchQuery ? { search: searchQuery } : undefined);
 
-  const usersData = usersResponse?.data || [];
+  // 獲取原始用戶數據
+  const allUsersData = usersResponse?.data || [];
+  
+  // 🔍 客戶端搜尋過濾功能作為備案（如果 API 搜尋失效）
+  const usersData = React.useMemo(() => {
+    // 如果沒有搜尋查詢，直接返回所有數據
+    if (!searchQuery.trim()) {
+      return allUsersData;
+    }
+    
+    // 如果 API 返回的數據已經被過濾（數量明顯減少），使用 API 結果
+    // 否則使用客戶端過濾作為備案
+    const query = searchQuery.toLowerCase().trim();
+    const clientFiltered = allUsersData.filter((user: any) => {
+      return (
+        user.name?.toLowerCase().includes(query) ||
+        user.username?.toLowerCase().includes(query) ||
+        user.email?.toLowerCase().includes(query)
+      );
+    });
+    
+    return clientFiltered;
+  }, [allUsersData, searchQuery]);
 
   const createUserMutation = useCreateUser();
   const deleteUserMutation = useDeleteUser();
@@ -132,10 +154,10 @@ export default function UsersPage() {
     modalManager.openModal('stores', user);
   };
 
-  // 計算用戶統計數據
+  // 計算用戶統計數據（基於所有用戶，不受搜尋過濾影響）
   const getUserStats = () => {
-    const totalUsers = usersData.length;
-    const roleStats = usersData.reduce((acc, user) => {
+    const totalUsers = allUsersData.length;
+    const roleStats = allUsersData.reduce((acc, user) => {
       const roles = (user as { roles?: string[] }).roles || [];
       roles.forEach((role: string) => {
         acc[role] = (acc[role] || 0) + 1;

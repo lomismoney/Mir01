@@ -9,6 +9,7 @@ import {
   Store as StoreIcon,
   Edit,
   Trash2,
+  Eye,
   MapPin,
   Calendar,
   Clock,
@@ -43,6 +44,7 @@ type Store = {
 
 // 定義分店操作介面
 export interface StoreActions {
+  onView?: (store: Store) => void;
   onEdit?: (store: Store) => void;
   onDelete?: (store: Store) => void;
 }
@@ -316,11 +318,20 @@ export const createStoresColumns = (
                 <DropdownMenuLabel>操作</DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
+                {actions.onView && (
+                  <DropdownMenuItem
+                    onClick={() => actions.onView?.(store)}
+                    className="cursor-pointer"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    查看詳情
+                  </DropdownMenuItem>
+                )}
+
                 {actions.onEdit && (
                   <DropdownMenuItem
                     onClick={() => actions.onEdit?.(store)}
                     className="cursor-pointer"
-                   
                   >
                     <Edit className="mr-2 h-4 w-4" />
                     編輯分店
@@ -328,14 +339,16 @@ export const createStoresColumns = (
                 )}
 
                 {actions.onDelete && (
-                  <DropdownMenuItem
-                    onClick={() => actions.onDelete?.(store)}
-                    className="cursor-pointer text-destructive focus:text-destructive"
-                   
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    刪除分店
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => actions.onDelete?.(store)}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      刪除分店
+                    </DropdownMenuItem>
+                  </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
