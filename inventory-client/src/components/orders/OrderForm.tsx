@@ -79,11 +79,8 @@ export function OrderForm({
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          {/* 頂層按鈕區 */}
-          <div className="flex items-center gap-4">
-            <h1 className="flex-1 text-2xl font-semibold">
-              {initialData ? "編輯訂單" : "新增訂單"}
-            </h1>
+          {/* 頂層按鈕區 - 移除重複標題，只保留提交按鈕 */}
+          <div className="flex justify-end">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "儲存中..." : "儲存訂單"}
             </Button>
