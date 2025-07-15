@@ -78,6 +78,10 @@ inventory-client/.env*
 inventory-client/*.tsbuildinfo
 inventory-client/next-env.d.ts
 
+# ========== Next.js 構建檔案 (可能出現在錯誤位置) ==========
+inventory-api/.next/
+.next/
+
 # ========== 測試和覆蓋率 ==========
 coverage/
 .nyc_output/
