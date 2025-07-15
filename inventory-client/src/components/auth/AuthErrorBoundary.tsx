@@ -78,14 +78,14 @@ export class AuthErrorBoundary extends Component<
    * 錯誤記錄和分析
    */
   private logError = (error: Error, errorInfo: React.ErrorInfo) => {
-    // 組織錯誤資料用於記錄
+    // 組織錯誤資料用於記錄，確保所有值都是可序列化的
     const errorData = {
-      message: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
+      message: error.message || "Unknown error",
+      stack: error.stack || "No stack trace available",
+      componentStack: errorInfo.componentStack || "No component stack available",
       timestamp: new Date().toISOString(),
-      userAgent: typeof window !== "undefined" ? window.navigator.userAgent : "unknown",
-      url: typeof window !== "undefined" ? window.location.href : "unknown",
+      userAgent: typeof window !== "undefined" ? (window.navigator?.userAgent || "unknown") : "unknown",
+      url: typeof window !== "undefined" ? (window.location?.href || "unknown") : "unknown",
     };
 
     // 🔍 判斷是否為身份驗證相關錯誤
@@ -97,10 +97,23 @@ export class AuthErrorBoundary extends Component<
       error.message.includes("unauthenticated");
 
     // 記錄錯誤資訊
-    if (isAuthError) {
-      console.error("Auth Error:", errorData);
-    } else {
-      console.error("App Error:", errorData);
+    try {
+      if (isAuthError) {
+        console.error("Auth Error:", JSON.stringify(errorData, null, 2));
+      } else {
+        console.error("App Error:", JSON.stringify(errorData, null, 2));
+      }
+    } catch (logError) {
+      // 如果序列化失敗，使用基本的日誌記錄
+      try {
+        console.error("Error logging failed, using basic log:", {
+          message: error.message,
+          name: error.name,
+          timestamp: new Date().toISOString()
+        });
+      } catch (finalError) {
+        console.error("Critical error logging failure:", error.message);
+      }
     }
   };
 

@@ -61,6 +61,8 @@ class CustomerController extends Controller
         $customers = Customer::query()
             // 預加載預設地址，防止 N+1 問題
             ->with('defaultAddress')
+            // 添加統計數據計算
+            ->withCount(['orders', 'addresses'])
             // 條件化查詢：當請求中存在對應參數時才執行
             ->when($request->filled('search'), function ($query) use ($request) {
                 $searchTerm = '%' . $request->input('search') . '%';
@@ -171,6 +173,7 @@ class CustomerController extends Controller
 
         // 預加載所有需要的關聯數據，以優化性能
         $customer->load(['addresses', 'defaultAddress']);
+        $customer->loadCount(['orders', 'addresses']);
 
         // 3. 返回標準化的單一資源
         return new CustomerResource($customer);

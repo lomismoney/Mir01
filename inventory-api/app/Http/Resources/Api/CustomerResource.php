@@ -29,6 +29,10 @@ class CustomerResource extends JsonResource
             'contact_address' => $this->contact_address,
             'total_unpaid_amount' => $this->total_unpaid_amount,
             'total_completed_amount' => $this->total_completed_amount,
+            
+            // 統計數據
+            'orders_count' => $this->whenNotNull($this->orders_count),
+            'addresses_count' => $this->whenNotNull($this->addresses_count),
             'addresses' => $this->whenLoaded('addresses', function () {
                 return $this->addresses->map(function ($address) {
                     return [

@@ -46,17 +46,16 @@ export const customerAddressSchema = z.object({
 // 客戶基本資料 Schema
 // ============================================================================
 
-/** 創建客戶驗證 */
-export const createCustomerSchema = z.object({
+/** 基礎客戶 Schema（不包含驗證規則） */
+const baseCustomerSchema = z.object({
   // 基本資訊
   name: name,
-  email: email,
   phone: phoneNumber,
   
   // 公司資訊
   is_company: booleanStatus,
   company: optionalString,
-  tax_number: taiwanTaxId,
+  tax_number: optionalString,
   industry_type: optionalString,
   
   // 付款方式
@@ -77,9 +76,30 @@ export const createCustomerSchema = z.object({
   addresses: z.array(customerAddressSchema).optional().default([]),
 });
 
+/** 創建客戶驗證 */
+export const createCustomerSchema = baseCustomerSchema.refine((data) => {
+  // 當 is_company 為 true 時，tax_number 必須填寫且符合格式
+  if (data.is_company) {
+    return data.tax_number && /^\d{8}$/.test(data.tax_number);
+  }
+  return true;
+}, {
+  message: "公司客戶必須填寫8位數字的統一編號",
+  path: ["tax_number"],
+});
+
 /** 更新客戶驗證 */
-export const updateCustomerSchema = createCustomerSchema.partial().extend({
+export const updateCustomerSchema = baseCustomerSchema.partial().extend({
   id: z.number().positive("無效的客戶 ID"),
+}).refine((data) => {
+  // 當 is_company 為 true 時，tax_number 必須填寫且符合格式
+  if (data.is_company) {
+    return data.tax_number && /^\d{8}$/.test(data.tax_number);
+  }
+  return true;
+}, {
+  message: "公司客戶必須填寫8位數字的統一編號",
+  path: ["tax_number"],
 });
 
 // ============================================================================
@@ -106,7 +126,7 @@ export const customerFiltersSchema = z.object({
 /** 批量匯入客戶驗證 */
 export const importCustomersSchema = z.object({
   customers: nonEmptyArray(
-    createCustomerSchema.omit({ addresses: true }),
+    baseCustomerSchema.omit({ addresses: true }),
     "至少需要一個客戶資料"
   ),
   overwrite_existing: booleanStatus.default(false),

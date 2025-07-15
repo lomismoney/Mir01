@@ -125,6 +125,14 @@ export function CustomerForm({
   const finalIsSubmitting = legacyIsSubmitting ?? isSubmitting;
 
   const isCompany = form.watch("is_company");
+  
+  // 當 is_company 變更時，重置 tax_number 欄位
+  React.useEffect(() => {
+    if (!isCompany) {
+      form.setValue("tax_number", "");
+      form.clearErrors("tax_number");
+    }
+  }, [isCompany, form]);
 
   // 監聽姓名和電話欄位的變化
   const [name, phone] = form.watch(["name", "phone"]);
@@ -195,16 +203,6 @@ export function CustomerForm({
             disabled={isLoading}
           />
           
-          {/* Email */}
-          <StandardInputField
-            control={form.control}
-            name="email"
-            label="電子郵件"
-            type="email"
-            placeholder="請輸入電子郵件"
-            disabled={isLoading}
-          />
-
           {/* 公司戶複選框 */}
           <div className="md:col-span-2">
             <StandardCheckboxField
@@ -235,7 +233,7 @@ export function CustomerForm({
               name="tax_number"
               label="統一編號"
               placeholder="請輸入公司統一編號"
-              required
+              required={isCompany}
               disabled={isLoading}
             />
           )}
