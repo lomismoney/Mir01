@@ -67,80 +67,76 @@ export function CustomerBatchOperationsBar({
     return `${selectedCustomers.slice(0, 2).map(customer => customer.name).join('、')} 等 ${selectedCount} 個客戶`;
   };
 
-  return (
-    <div 
-      className={cn(
-        "min-h-[64px] transition-all duration-200 border-b",
-        hasSelection 
-          ? "opacity-100 bg-muted/50" 
-          : "opacity-0 bg-transparent pointer-events-none"
-      )}
-    >
-      {hasSelection && (
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-3">
-            <Badge variant="outline" className="text-sm">
-              已選擇 {selectedCount} 個客戶
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              {getSelectionDescription()}
-            </span>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {/* 批量刪除按鈕 */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  disabled={isBatchOperating}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  批量刪除
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>確認批量刪除客戶？</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    您即將刪除 <strong>{selectedCount}</strong> 個客戶：
-                    <br />
-                    <span className="font-medium">{getSelectionDescription()}</span>
-                    <br />
-                    <br />
-                    此操作將會永久移除這些客戶的資料，且無法復原。
-                    如果客戶有相關的訂單記錄，將無法刪除。
-                    <br />
-                    <br />
-                    請確認是否要繼續？
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleBatchDelete}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    確認刪除
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+  // 如果沒有選擇客戶，直接返回 null 不渲染任何內容
+  if (!hasSelection) {
+    return null;
+  }
 
-            {/* 清除選擇按鈕 */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onClearSelection}
-              disabled={isBatchOperating}
-            >
-              <X className="h-4 w-4 mr-2" />
-              清除選擇
-            </Button>
-          </div>
+  return (
+    <div className="bg-muted/50 border-b transition-all duration-200">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center space-x-3">
+          <Badge variant="outline" className="text-sm">
+            已選擇 {selectedCount} 個客戶
+          </Badge>
+          <span className="text-sm text-muted-foreground">
+            {getSelectionDescription()}
+          </span>
         </div>
-      )}
+        
+        <div className="flex items-center space-x-2">
+          {/* 批量刪除按鈕 */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={isBatchOperating}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                批量刪除
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>確認批量刪除客戶？</AlertDialogTitle>
+                <AlertDialogDescription>
+                  您即將刪除 <strong>{selectedCount}</strong> 個客戶：
+                  <br />
+                  <span className="font-medium">{getSelectionDescription()}</span>
+                  <br />
+                  <br />
+                  此操作將會永久移除這些客戶的資料，且無法復原。
+                  如果客戶有相關的訂單記錄，將無法刪除。
+                  <br />
+                  <br />
+                  請確認是否要繼續？
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>取消</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleBatchDelete}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  確認刪除
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* 清除選擇按鈕 */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onClearSelection}
+            disabled={isBatchOperating}
+          >
+            <X className="h-4 w-4 mr-2" />
+            清除選擇
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

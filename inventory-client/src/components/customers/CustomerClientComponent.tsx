@@ -257,13 +257,15 @@ export function CustomerClientComponent() {
 
       {/* 📊 客戶資料表格區域 */}
       <div className="space-y-4">
-        {/* 🎯 批量操作工具欄 */}
-        <CustomerBatchOperationsBar
-          selectedCustomers={selectedCustomers}
-          onBatchDelete={handleBatchDeleteCustomers}
-          onClearSelection={handleClearSelection}
-          isBatchOperating={isBatchDeleting}
-        />
+        {/* 🎯 批量操作工具欄 - 只在有選擇客戶時顯示 */}
+        {selectedCustomers.length > 0 && (
+          <CustomerBatchOperationsBar
+            selectedCustomers={selectedCustomers}
+            onBatchDelete={handleBatchDeleteCustomers}
+            onClearSelection={handleClearSelection}
+            isBatchOperating={isBatchDeleting}
+          />
+        )}
 
         {/* 🔍 搜尋與操作工具列 */}
         <div className="flex items-center justify-between">
