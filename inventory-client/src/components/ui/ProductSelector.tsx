@@ -188,14 +188,14 @@ export function ProductSelector({
       return {
         ...p,
         categoryName: p.category?.name || "未分類",
-        mainImageUrl: p.image_url || p.thumbnail_url || "",
+        mainImageUrl: p.image_urls?.thumb || p.image_urls?.original || "",
         variants: (p.variants || []).map((variant): Variant => ({
           id: variant.id,
           sku: variant.sku || "",
           specifications: variant.sku || `規格-${variant.id}`,
           price: variant.price || 0,
           stock: variant.stock_quantity || 0,
-          imageUrl: "", // API 中沒有變體圖片字段
+          imageUrl: p.image_urls?.thumb || p.image_urls?.original || "", // 繼承 SPU 的商品圖片
           productName: p.name
         }))
       } as Product;
@@ -237,6 +237,7 @@ export function ProductSelector({
           selectedVariantObjects.push({
             ...variant,
             productName: product.name, // 添加商品名稱
+            imageUrl: variant.imageUrl || product.mainImageUrl, // 添加圖片資訊，優先使用變體圖片，否則使用商品主圖片
           });
         }
       });

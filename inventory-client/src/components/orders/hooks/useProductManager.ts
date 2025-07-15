@@ -39,6 +39,7 @@ export function useProductManager({ form }: UseProductManagerProps) {
         update(existingIndex, {
           ...currentItems[existingIndex],
           price: Number(variant.price) || 0,
+          imageUrl: variant.imageUrl || null, // 🎯 確保更新時也包含圖片資訊
         });
       } else {
         append({

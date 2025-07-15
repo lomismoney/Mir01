@@ -59,10 +59,10 @@ class ProductDataProcessor {
       name: product.name || '',
       description: product.description || null,
       category_id: product.category_id || null,
-      // 預處理圖片 URL
-      image_url: product.image_url || null,
-      thumbnail_url: product.thumbnail_url || product.image_url || null,
-      has_image: Boolean(product.image_url || product.thumbnail_url),
+      // 預處理圖片 URL - 使用正確的 API 結構
+      image_url: product.image_urls?.original || null,
+      thumbnail_url: product.image_urls?.thumb || product.image_urls?.original || null,
+      has_image: Boolean(product.image_urls?.original || product.image_urls?.thumb),
       // 預處理變體信息
       variants: Array.isArray(product.variants) ? product.variants : [],
       variants_count: Array.isArray(product.variants) ? product.variants.length : 0,
