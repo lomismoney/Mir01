@@ -111,6 +111,9 @@ export function OrderForm({
                   discountAmount={discountAmount}
                   grandTotal={grandTotal}
                 />
+
+                {/* 訂單備註卡片 - 移動到價格摘要下方 */}
+                <OrderNotes form={form} />
               </div>
 
               {/* 右側邊欄 */}
@@ -121,9 +124,6 @@ export function OrderForm({
                 />
               </div>
             </div>
-
-            {/* 訂單備註卡片 */}
-            <OrderNotes form={form} />
           </div>
         </form>
       </Form>
