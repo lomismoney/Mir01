@@ -540,6 +540,7 @@ export type OrderFilters = {
  */
 export interface OrderFormData {
   customer_id: number;
+  store_id: string;
   shipping_status: string;
   payment_status: string;
   shipping_fee?: number | null;

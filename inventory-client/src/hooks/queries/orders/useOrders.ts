@@ -130,6 +130,7 @@ export function useCreateOrder() {
       // 🎯 重新整理數據格式以匹配後端 API 期望
       const apiPayload = {
         customer_id: orderData.customer_id,
+        store_id: orderData.store_id,
         shipping_status: orderData.shipping_status,
         payment_status: orderData.payment_status,
         shipping_fee: orderData.shipping_fee || 0,
