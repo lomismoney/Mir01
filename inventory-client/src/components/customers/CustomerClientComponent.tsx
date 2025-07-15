@@ -35,6 +35,7 @@ import {
 import { flexRender } from "@tanstack/react-table";
 import { columns } from "./columns";
 import { CustomerForm } from "./CustomerForm";
+import { CustomerBatchOperationsBar } from "./CustomerBatchOperationsBar";
 import { EmptyTable, EmptySearch, EmptyError } from "@/components/ui/empty-state";
 
 export function CustomerClientComponent() {
@@ -61,6 +62,7 @@ export function CustomerClientComponent() {
     modalManager,
     isCreating,
     isUpdating,
+    isBatchDeleting,
     
     // 空狀態配置
     emptyConfig,
@@ -70,6 +72,7 @@ export function CustomerClientComponent() {
     handleCreateSubmit,
     handleEditSubmit,
     handleEditCustomer,
+    handleBatchDeleteCustomers,
     openCreateModal,
     closeModal,
   } = useCustomerManagement();
@@ -111,6 +114,15 @@ export function CustomerClientComponent() {
   };
 
   const stats = getCustomerStats();
+
+  // 獲取選中的客戶
+  const selectedRows = tableManager.table.getFilteredSelectedRowModel().rows;
+  const selectedCustomers = selectedRows.map(row => row.original);
+
+  // 批量操作處理函數
+  const handleClearSelection = () => {
+    tableManager.table.resetRowSelection();
+  };
 
   // 計算百分比變化（模擬數據，未來可接入真實趨勢數據）
   const percentageChanges = {
@@ -245,6 +257,14 @@ export function CustomerClientComponent() {
 
       {/* 📊 客戶資料表格區域 */}
       <div className="space-y-4">
+        {/* 🎯 批量操作工具欄 */}
+        <CustomerBatchOperationsBar
+          selectedCustomers={selectedCustomers}
+          onBatchDelete={handleBatchDeleteCustomers}
+          onClearSelection={handleClearSelection}
+          isBatchOperating={isBatchDeleting}
+        />
+
         {/* 🔍 搜尋與操作工具列 */}
         <div className="flex items-center justify-between">
           <Input

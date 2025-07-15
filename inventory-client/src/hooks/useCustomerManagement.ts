@@ -10,6 +10,7 @@ import {
   useDeleteCustomer,
   useStandardTable,
 } from '@/hooks';
+import { useBatchDeleteCustomers } from '@/hooks/mutations/useBatchMutations';
 import { Customer, CreateCustomerData, UpdateCustomerData } from '@/types/api-helpers';
 import { columns } from '@/components/customers/columns';
 
@@ -47,6 +48,7 @@ export function useCustomerManagement() {
   const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
   const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
   const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer();
+  const { mutate: batchDeleteCustomers, isPending: isBatchDeleting } = useBatchDeleteCustomers();
 
   // === 表格管理 ===
   const handleEditCustomer = (customer: Customer) => {
@@ -70,7 +72,7 @@ export function useCustomerManagement() {
     }),
     enablePagination: true,
     enableSorting: true,
-    enableRowSelection: false,
+    enableRowSelection: true,
     initialPageSize: 15,
   });
 
@@ -119,6 +121,17 @@ export function useCustomerManagement() {
     setSearchQuery('');
   };
 
+  // === 批量操作 ===
+  const handleBatchDeleteCustomers = (customerIds: number[]) => {
+    batchDeleteCustomers(customerIds, {
+      onSuccess: () => {
+        // 清除表格選擇狀態
+        tableManager.table.resetRowSelection();
+      },
+      onError: (error) => handleError(error),
+    });
+  };
+
   return {
     // === 資料狀態 ===
     customers,
@@ -140,6 +153,7 @@ export function useCustomerManagement() {
     isCreating,
     isUpdating,
     isDeleting,
+    isBatchDeleting,
 
     // === 空狀態配置 ===
     emptyConfig,
@@ -149,6 +163,7 @@ export function useCustomerManagement() {
     handleCreateSubmit,
     handleEditSubmit,
     handleEditCustomer,
+    handleBatchDeleteCustomers,
     openCreateModal,
     openEditModal,
     closeModal,

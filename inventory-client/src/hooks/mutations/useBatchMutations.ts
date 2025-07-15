@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { batchOperations } from '@/lib/batchApiClient';
+import { apiClient } from '@/lib/apiClient';
 import { queryKeys } from '@/hooks/queries/shared/queryKeys';
 
 /**
@@ -309,6 +310,53 @@ export function useBatchImportCustomers() {
     },
     onError: (error: Error) => {
       toast.error(`客戶導入失敗: ${error.message}`);
+    },
+  });
+}
+
+/**
+ * 批量刪除客戶 Hook
+ */
+export function useBatchDeleteCustomers() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (customerIds: number[]) => {
+      const { data, error } = await apiClient.POST('/api/customers/batch-delete', {
+        body: {
+          ids: customerIds,
+        },
+      });
+
+      if (error) {
+        // 處理特殊錯誤情況
+        if (error.status === 422 && error.customers_with_orders) {
+          throw new Error(
+            `以下客戶有相關訂單，無法刪除：${error.customers_with_orders
+              .map((c: any) => `${c.name}(${c.orders_count}個訂單)`)
+              .join(', ')}`
+          );
+        }
+        
+        if (error.status === 404 && error.invalid_ids) {
+          throw new Error(`部分客戶不存在：ID ${error.invalid_ids.join(', ')}`);
+        }
+
+        throw new Error(error.message || '批量刪除失敗');
+      }
+
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.ALL });
+      if (data?.deleted_count) {
+        toast.success(`成功刪除 ${data.deleted_count} 個客戶`);
+      } else {
+        toast.success('客戶刪除完成');
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreCustomerRequest;
 use App\Http\Requests\Api\UpdateCustomerRequest;
+use App\Http\Requests\Api\DestroyMultipleCustomersRequest;
 use App\Http\Resources\Api\CustomerResource;
 use App\Models\Customer;
 use App\Services\CustomerService;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
@@ -255,6 +257,81 @@ class CustomerController extends Controller
 
         // 3. 返回 204 No Content 響應，這是 RESTful API 中成功刪除操作的標準實踐
         return response()->noContent();
+    }
+
+    /**
+     * @group 客戶管理
+     * @authenticated
+     * @summary 批量刪除客戶
+     * @description 批量刪除指定的客戶，在刪除前會檢查是否有相關的訂單記錄。
+     * 如果客戶有相關的訂單，則不允許刪除。
+     * 
+     * @bodyParam ids integer[] required 要刪除的客戶 ID 陣列。 Example: [1, 2, 3]
+     * 
+     * @response 204 scenario="刪除成功"
+     * @response 422 scenario="客戶有相關訂單" {"message": "以下客戶有相關訂單，無法刪除", "customers_with_orders": [{"id": 1, "name": "客戶A", "orders_count": 3}]}
+     * @response 404 scenario="部分客戶不存在" {"message": "部分指定的客戶不存在", "invalid_ids": [999]}
+     */
+    public function destroyMultiple(DestroyMultipleCustomersRequest $request): JsonResponse
+    {
+        // 權限檢查 - 檢查是否有批量刪除客戶的權限
+        $this->authorize('deleteMultiple', Customer::class);
+        
+        $validatedData = $request->validated();
+        
+        // 獲取要刪除的 ID 並轉換為整數陣列
+        $ids = array_map('intval', $validatedData['ids']);
+        
+        try {
+            // 使用事務確保操作的原子性
+            return DB::transaction(function () use ($ids) {
+                // 檢查是否有客戶存在相關聯的訂單
+                $customersWithOrders = Customer::whereIn('id', $ids)
+                    ->withCount('orders')
+                    ->having('orders_count', '>', 0)
+                    ->get(['id', 'name', 'orders_count']);
+
+                // 如果有客戶存在相關訂單，返回錯誤響應
+                if ($customersWithOrders->isNotEmpty()) {
+                    return response()->json([
+                        'message' => '以下客戶有相關訂單，無法刪除',
+                        'customers_with_orders' => $customersWithOrders->map(function ($customer) {
+                            return [
+                                'id' => $customer->id,
+                                'name' => $customer->name,
+                                'orders_count' => $customer->orders_count,
+                            ];
+                        })->toArray(),
+                    ], 422);
+                }
+
+                // 檢查所有指定的客戶是否都存在
+                $existingCustomers = Customer::whereIn('id', $ids)->pluck('id')->toArray();
+                $invalidIds = array_diff($ids, $existingCustomers);
+
+                if (!empty($invalidIds)) {
+                    return response()->json([
+                        'message' => '部分指定的客戶不存在',
+                        'invalid_ids' => $invalidIds,
+                    ], 404);
+                }
+
+                // 執行批量刪除
+                $deletedCount = Customer::whereIn('id', $ids)->delete();
+
+                // 返回成功響應
+                return response()->json([
+                    'message' => "成功刪除 {$deletedCount} 個客戶",
+                    'deleted_count' => $deletedCount,
+                ], 200);
+            });
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => '批量刪除失敗',
+                'error' => '系統錯誤，請稍後再試',
+            ], 500);
+        }
     }
 
     /**

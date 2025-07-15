@@ -269,6 +269,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * 
      * 路由列表：
      * GET    /api/customers/check-existence  - 檢查客戶名稱是否存在
+     * POST   /api/customers/batch-delete     - 批量刪除客戶
      * GET    /api/customers        - 獲取客戶列表（支援搜尋和日期篩選）
      * POST   /api/customers        - 創建新客戶
      * GET    /api/customers/{id}   - 獲取指定客戶
@@ -276,6 +277,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * DELETE /api/customers/{id}   - 刪除指定客戶
      */
     Route::get('/customers/check-existence', [App\Http\Controllers\Api\CustomerController::class, 'checkExistence']);
+    Route::post('/customers/batch-delete', [App\Http\Controllers\Api\CustomerController::class, 'destroyMultiple']);
     Route::apiResource('customers', App\Http\Controllers\Api\CustomerController::class)->parameters(['customers' => 'customer']);
 
     /**
