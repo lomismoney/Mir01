@@ -112,7 +112,9 @@ export {
   useUpdatePurchase,
   useUpdatePurchaseStatus,
   useCancelPurchase,
-  useDeletePurchase
+  useDeletePurchase,
+  usePartialReceipt,
+  useUpdatePurchaseNotes
 } from './queries/purchases/usePurchases';
 
 // 安裝管理相關 hooks（已拆分到獨立檔案）

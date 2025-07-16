@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { usePurchase } from "@/hooks";
+import { usePurchase, useUpdatePurchaseNotes } from "@/hooks";
 import {
   PURCHASE_STATUS_LABELS,
   PURCHASE_STATUS_COLORS,
@@ -10,6 +11,9 @@ import {
 } from "@/types/purchase";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { PartialReceiptDialog } from "@/components/purchases/PartialReceiptDialog";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 import {
   Card,
@@ -31,6 +35,12 @@ import {
   Receipt,
   Hash,
   DollarSign,
+  PackageCheck,
+  FileText,
+  Save,
+  XCircle,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 
 export default function PurchaseDetailPage() {
@@ -39,6 +49,14 @@ export default function PurchaseDetailPage() {
   const purchaseId = params.id;
 
   const { data: purchase, isLoading, error } = usePurchase(purchaseId);
+  const updateNotesMutation = useUpdatePurchaseNotes();
+  
+  // 部分收貨對話框狀態
+  const [partialReceiptOpen, setPartialReceiptOpen] = useState(false);
+  
+  // 記事編輯狀態
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [notesInput, setNotesInput] = useState("");
 
   if (isLoading) {
     return (
@@ -94,9 +112,12 @@ export default function PurchaseDetailPage() {
     total_amount?: number;
     created_at?: string;
     updated_at?: string;
+    notes?: string;
     items?: {
       id?: number;
       quantity?: number;
+      received_quantity?: number;
+      receipt_status?: string;
       cost_price?: number;
       allocated_shipping_cost?: number;
       product_name?: string;
@@ -106,6 +127,29 @@ export default function PurchaseDetailPage() {
   const permissions = getPurchasePermissions(
     purchaseData.status as PurchaseStatus,
   );
+  
+  // 處理記事保存
+  const handleSaveNotes = async () => {
+    if (!purchase?.id) return;
+    
+    updateNotesMutation.mutate(
+      { id: purchase.id, notes: notesInput },
+      {
+        onSuccess: () => {
+          toast.success("記事已更新");
+          setIsEditingNotes(false);
+        },
+        onError: () => {
+          toast.error("記事更新失敗");
+        },
+      }
+    );
+  };
+  
+  // 當 purchase 數據加載後，設置 notes
+  if (purchase && notesInput === "" && !isEditingNotes) {
+    setNotesInput(purchaseData.notes || "");
+  }
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -135,15 +179,27 @@ export default function PurchaseDetailPage() {
             </div>
           </div>
 
-          {permissions.canModify && (
-            <Button
-              onClick={() => router.push(`/purchases/${purchaseId}/edit`)}
-             
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              編輯
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {(purchaseData.status === "in_transit" || purchaseData.status === "partially_received") && (
+              <Button
+                variant="outline"
+                onClick={() => setPartialReceiptOpen(true)}
+               
+              >
+                <PackageCheck className="h-4 w-4 mr-2" />
+                部分收貨
+              </Button>
+            )}
+            {permissions.canModify && (
+              <Button
+                onClick={() => router.push(`/purchases/${purchaseId}/edit`)}
+               
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                編輯
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* 基本資訊卡片 */}
@@ -345,10 +401,27 @@ export default function PurchaseDetailPage() {
                             className="text-sm text-muted-foreground"
                            
                           >
-                            數量
+                            訂購 / 實收數量
                           </p>
-                          <p className="font-medium">
+                          <p className="font-medium flex items-center gap-2">
                             {quantity}
+                            {item.received_quantity !== undefined && (
+                              <>
+                                <span className="text-muted-foreground">/</span>
+                                <span className={item.received_quantity === quantity ? "text-green-600" : item.received_quantity === 0 ? "text-red-600" : "text-orange-600"}>
+                                  {item.received_quantity}
+                                </span>
+                                {item.receipt_status === "full" && (
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                )}
+                                {item.receipt_status === "partial" && (
+                                  <AlertCircle className="h-4 w-4 text-orange-600" />
+                                )}
+                                {item.receipt_status === "none" && (
+                                  <XCircle className="h-4 w-4 text-red-600" />
+                                )}
+                              </>
+                            )}
                           </p>
                         </div>
 
@@ -477,7 +550,81 @@ export default function PurchaseDetailPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* 記事卡片 */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  記事
+                </CardTitle>
+                <CardDescription>
+                  記錄進貨過程中的特殊情況
+                </CardDescription>
+              </div>
+              {!isEditingNotes ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditingNotes(true)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  編輯
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsEditingNotes(false);
+                      setNotesInput(purchaseData.notes || "");
+                    }}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveNotes}
+                    disabled={updateNotesMutation.isPending}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    保存
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isEditingNotes ? (
+              <Textarea
+                value={notesInput}
+                onChange={(e) => setNotesInput(e.target.value)}
+                placeholder="輸入記事內容..."
+                className="min-h-[120px]"
+                maxLength={1000}
+              />
+            ) : (
+              <div className="whitespace-pre-wrap text-sm">
+                {purchaseData.notes || (
+                  <span className="text-muted-foreground">尚無記事</span>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+      
+      {/* 部分收貨對話框 */}
+      {purchase && (
+        <PartialReceiptDialog
+          isOpen={partialReceiptOpen}
+          onClose={() => setPartialReceiptOpen(false)}
+          purchase={purchase}
+        />
+      )}
     </div>
   );
 }

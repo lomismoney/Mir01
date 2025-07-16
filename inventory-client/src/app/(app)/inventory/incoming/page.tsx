@@ -18,7 +18,7 @@ const PurchaseManagement = lazy(() => import("@/components/purchases/PurchaseMan
 export default function IncomingPage() {
   return (
     <Suspense fallback={<LoadingFallback type="page" text="載入進貨管理..." />}>
-      <PurchaseManagement />
+      <PurchaseManagement statusFilter={["pending", "confirmed", "in_transit", "received", "partially_received"]} />
     </Suspense>
   );
 }

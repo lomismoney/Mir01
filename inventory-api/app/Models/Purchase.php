@@ -100,6 +100,7 @@ class Purchase extends Model
             ],
             self::STATUS_PARTIALLY_RECEIVED => [
                 self::STATUS_RECEIVED,
+                self::STATUS_COMPLETED,  // 允許部分收貨直接完成
                 self::STATUS_CANCELLED,
             ],
             self::STATUS_RECEIVED => [

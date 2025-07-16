@@ -253,6 +253,20 @@ class PurchaseService extends BaseService
     private function processInventoryForCompletedPurchase(Purchase $purchase): void
     {
         foreach ($purchase->items as $item) {
+            // 使用實際收貨數量，如果沒有記錄則使用訂購數量
+            $quantityToAdd = $item->received_quantity ?? $item->quantity;
+            
+            // 如果實際收貨數量為 0，跳過此項目
+            if ($quantityToAdd <= 0) {
+                Log::warning('進貨項目實際收貨數量為 0，跳過入庫', [
+                    'purchase_id' => $purchase->id,
+                    'item_id' => $item->id,
+                    'sku' => $item->sku,
+                    'product_name' => $item->product_name
+                ]);
+                continue;
+            }
+            
             // 更新或建立對應的庫存記錄
             $inventory = Inventory::firstOrCreate(
                 [
@@ -266,21 +280,33 @@ class PurchaseService extends BaseService
             $userId = $this->requireAuthentication('庫存操作');
             
             $inventory->addStock(
-                $item->quantity, 
+                $quantityToAdd, 
                 $userId, 
-                "進貨單 #{$purchase->order_number}",
-                ['purchase_id' => $purchase->id]
+                "進貨單 #{$purchase->order_number} (實收數量)",
+                [
+                    'purchase_id' => $purchase->id,
+                    'original_quantity' => $item->quantity,
+                    'received_quantity' => $quantityToAdd
+                ]
             );
 
             // 更新商品變體的平均成本
             $productVariant = ProductVariant::find($item->product_variant_id);
             if ($productVariant) {
                 $productVariant->updateAverageCost(
-                    $item->quantity, 
+                    $quantityToAdd, 
                     $item->cost_price, 
                     $item->allocated_shipping_cost
                 );
             }
+            
+            Log::info('進貨項目入庫成功', [
+                'purchase_id' => $purchase->id,
+                'item_id' => $item->id,
+                'sku' => $item->sku,
+                'original_quantity' => $item->quantity,
+                'received_quantity' => $quantityToAdd
+            ]);
         }
         
         // 🎯 新增：更新關聯的訂單項目為已履行
@@ -463,6 +489,14 @@ class PurchaseService extends BaseService
     private function revertInventoryForPurchase(Purchase $purchase): void
     {
         foreach ($purchase->items as $item) {
+            // 使用實際收貨數量來回退，如果沒有記錄則使用訂購數量
+            $quantityToRevert = $item->received_quantity ?? $item->quantity;
+            
+            // 如果實際收貨數量為 0，跳過此項目
+            if ($quantityToRevert <= 0) {
+                continue;
+            }
+            
             $inventory = Inventory::where('store_id', $purchase->store_id)
                 ->where('product_variant_id', $item->product_variant_id)
                 ->first();
@@ -471,18 +505,23 @@ class PurchaseService extends BaseService
                 $userId = $this->requireAuthentication('庫存操作');
                 
                 // 檢查庫存是否足夠回退
-                if ($inventory->quantity < $item->quantity) {
+                if ($inventory->quantity < $quantityToRevert) {
                     throw new \Exception(
                         "庫存不足以回退進貨項目。當前庫存：{$inventory->quantity}，" .
-                        "嘗試回退數量：{$item->quantity}，商品SKU：{$item->sku}"
+                        "嘗試回退數量：{$quantityToRevert}，商品SKU：{$item->sku}"
                     );
                 }
                 
                 $inventory->reduceStock(
-                    $item->quantity,
+                    $quantityToRevert,
                     $userId,
-                    "進貨單 #{$purchase->order_number} 狀態變更回退",
-                    ['purchase_id' => $purchase->id, 'action' => 'revert']
+                    "進貨單 #{$purchase->order_number} 狀態變更回退 (實收數量)",
+                    [
+                        'purchase_id' => $purchase->id, 
+                        'action' => 'revert',
+                        'original_quantity' => $item->quantity,
+                        'received_quantity' => $quantityToRevert
+                    ]
                 );
             }
         }
@@ -914,19 +953,22 @@ class PurchaseService extends BaseService
     {
         switch ($newStatus) {
             case Purchase::STATUS_COMPLETED:
-                // 轉換到完成狀態時，需要確保已經收貨
-                if ($oldStatus !== Purchase::STATUS_RECEIVED) {
-                    throw new \InvalidArgumentException('只有已收貨的進貨單才能標記為完成');
+                // 轉換到完成狀態時，需要確保已經收貨或部分收貨
+                if (!in_array($oldStatus, [Purchase::STATUS_RECEIVED, Purchase::STATUS_PARTIALLY_RECEIVED])) {
+                    throw new \InvalidArgumentException('只有已收貨或部分收貨的進貨單才能標記為完成');
                 }
                 
                 // 檢查是否所有預訂商品都已處理
+                // 注意：部分收貨的情況下，可能有些預訂商品無法履行，這是允許的
                 $pendingBackorders = $purchase->items()
                     ->whereHas('orderItems', function ($query) {
-                        $query->where('is_fulfilled', false);
+                        $query->where('is_fulfilled', false)
+                              ->where('is_backorder', true);
                     })
                     ->exists();
                 
-                if ($pendingBackorders) {
+                // 只在已收貨狀態下才嚴格檢查預訂商品
+                if ($oldStatus === Purchase::STATUS_RECEIVED && $pendingBackorders) {
                     throw new \InvalidArgumentException('存在未履行的預訂商品，無法完成進貨單');
                 }
                 break;

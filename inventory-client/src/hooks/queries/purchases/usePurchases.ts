@@ -150,7 +150,9 @@ export function useUpdatePurchaseStatus() {
         body: { status }
       });
       if (error) {
-        throw new Error('更新進貨單狀態失敗');
+        // 提取具體的錯誤訊息
+        const errorMessage = (error as any)?.message || '更新進貨單狀態失敗';
+        throw new Error(errorMessage);
       }
       return data;
     },
@@ -229,6 +231,29 @@ export function usePartialReceipt() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['purchases'] });
       await queryClient.invalidateQueries({ queryKey: ['purchase'] });
+    },
+  });
+}
+
+/**
+ * 更新進貨單記事
+ */
+export function useUpdatePurchaseNotes() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes: string }) => {
+      const { data, error } = await apiClient.PATCH('/api/purchases/{purchase}/notes', {
+        params: { path: { purchase: id } },
+        body: { notes }
+      });
+      if (error) {
+        throw new Error('更新記事失敗');
+      }
+      return data;
+    },
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ['purchases'] });
+      await queryClient.invalidateQueries({ queryKey: ['purchase', variables.id] });
     },
   });
 }

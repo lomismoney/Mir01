@@ -139,11 +139,13 @@ Route::middleware('auth:sanctum')->group(function () {
      * DELETE /api/purchases/{purchase}           - 刪除指定進貨單
      * PATCH  /api/purchases/{purchase}/status    - 更新進貨單狀態
      * PATCH  /api/purchases/{purchase}/cancel    - 取消進貨單
+     * PATCH  /api/purchases/{purchase}/notes     - 更新進貨單記事
      */
     Route::apiResource('purchases', PurchaseController::class)->parameters(['purchases' => 'purchase']);
     Route::patch('purchases/{purchase}/status', [PurchaseController::class, 'updateStatus']);
     Route::patch('purchases/{purchase}/cancel', [PurchaseController::class, 'cancel']);
     Route::post('purchases/{purchase}/partial-receipt', [PurchaseController::class, 'partialReceipt']);
+    Route::patch('purchases/{purchase}/notes', [PurchaseController::class, 'updateNotes']);
 
     /**
      * 用戶管理路由

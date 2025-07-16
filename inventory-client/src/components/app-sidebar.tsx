@@ -101,6 +101,7 @@ const data = {
       children: [
         { title: "庫存清單", url: "/inventory/management" },
         { title: "進貨管理", url: "/inventory/incoming" },
+        { title: "已完成進貨單", url: "/inventory/incoming/completed" },
         { title: "庫存轉移", url: "/inventory/transfers" },
         { title: "庫存預警", url: "/inventory/alerts" },
         { title: "變動歷史", url: "/inventory/history" },

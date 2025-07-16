@@ -500,4 +500,61 @@ class PurchaseController extends Controller
             return response()->json(['message' => '部分收貨處理失敗，請稍後再試'], 500);
         }
     }
+
+    /**
+     * Update the notes of the specified purchase.
+     * 
+     * @group 進貨管理
+     * @authenticated
+     * @summary 更新進貨單記事
+     * @description 更新指定進貨單的記事內容，用於記錄進貨過程中的特殊情況
+     * 
+     * @bodyParam notes string required 記事內容 Example: 本批貨物有部分破損，已與供應商協調處理
+     * 
+     * @response 200 scenario="成功更新記事" {
+     *   "id": 1,
+     *   "order_number": "PO-20250101-001",
+     *   "notes": "本批貨物有部分破損，已與供應商協調處理",
+     *   "updated_at": "2025-01-15T14:30:00.000000Z"
+     * }
+     * 
+     * @response 422 scenario="驗證失敗" {
+     *   "message": "記事內容不能超過1000個字元"
+     * }
+     * 
+     * @response 403 scenario="無權限" {
+     *   "message": "無權限更新此進貨單"
+     * }
+     * 
+     * @apiResource \App\Http\Resources\Api\PurchaseResource
+     * @apiResourceModel \App\Models\Purchase
+     */
+    public function updateNotes(Purchase $purchase, Request $request)
+    {
+        $this->authorize('update', $purchase);
+
+        $validated = $request->validate([
+            'notes' => 'nullable|string|max:1000'
+        ]);
+
+        try {
+            $purchase->update(['notes' => $validated['notes']]);
+            
+            Log::info('進貨單記事已更新', [
+                'purchase_id' => $purchase->id,
+                'user_id' => auth()->id(),
+                'notes_length' => strlen($validated['notes'] ?? '')
+            ]);
+
+            return new PurchaseResource($purchase->fresh());
+            
+        } catch (\Exception $e) {
+            Log::error('進貨單記事更新失敗', [
+                'purchase_id' => $purchase->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json(['message' => '記事更新失敗，請稍後再試'], 500);
+        }
+    }
 }

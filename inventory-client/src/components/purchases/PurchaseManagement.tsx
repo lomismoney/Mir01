@@ -104,7 +104,11 @@ type PurchaseResponseData = {
   links?: any;
 } | any[];
 
-export function PurchaseManagement() {
+interface PurchaseManagementProps {
+  statusFilter?: string[];
+}
+
+export function PurchaseManagement({ statusFilter }: PurchaseManagementProps = {}) {
   const router = useRouter();
 
   // 🎯 統一的 Modal 管理器和錯誤處理
@@ -141,6 +145,9 @@ export function PurchaseManagement() {
   } = usePurchases({
     ...filters,
     order_number: debouncedOrderNumber || undefined,
+    // 如果沒有選擇特定狀態，且有 statusFilter，則不傳遞狀態參數
+    // 這樣會獲取所有狀態的進貨單，然後在前端過濾
+    status: filters.status || undefined,
   });
 
   // Mutations
@@ -236,9 +243,14 @@ export function PurchaseManagement() {
    */
   const getStatistics = () => {
     // 檢查響應格式並提取購買數據
-    const purchases = Array.isArray(purchasesResponse) 
+    let purchases = Array.isArray(purchasesResponse) 
       ? purchasesResponse 
       : purchasesResponse?.data || [];
+    
+    // 如果有 statusFilter 且沒有選擇特定狀態，則過濾數據
+    if (statusFilter && (!filters.status || filters.status === "all")) {
+      purchases = purchases.filter((p: any) => statusFilter.includes(p.status));
+    }
     
     const meta = Array.isArray(purchasesResponse) 
       ? null 
@@ -307,21 +319,25 @@ export function PurchaseManagement() {
                
               >
                 <Package className="h-7 w-7 text-blue-600" />
-                進貨單管理
+                {statusFilter?.includes("completed") ? "已完成進貨單" : "進貨單管理"}
               </h1>
               <p className="text-muted-foreground mt-1">
-                管理進貨單狀態、追蹤採購進度和庫存入庫流程
+                {statusFilter?.includes("completed") 
+                  ? "查看已完成和已取消的進貨單記錄" 
+                  : "管理進貨單狀態、追蹤採購進度和庫存入庫流程"}
               </p>
             </div>
 
-            <Button
-              onClick={() => modalManager.openModal('create')}
-              className="flex items-center gap-2"
-             
-            >
-              <Plus className="h-4 w-4" />
-              新增進貨單
-            </Button>
+            {!statusFilter?.includes("completed") && (
+              <Button
+                onClick={() => modalManager.openModal('create')}
+                className="flex items-center gap-2"
+               
+              >
+                <Plus className="h-4 w-4" />
+                新增進貨單
+              </Button>
+            )}
           </div>
 
           {/* 統計卡片區 */}
@@ -461,9 +477,11 @@ export function PurchaseManagement() {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 {/* 左側：標題區域 */}
                 <div>
-                  <CardTitle>進貨單列表</CardTitle>
+                  <CardTitle>
+                    {statusFilter?.includes("completed") ? "已完成進貨單" : "進貨單列表"}
+                  </CardTitle>
                   <CardDescription>
-                    共 {stats.total} 筆進貨單
+                    共 {stats.total} 筆{statusFilter?.includes("completed") ? "已完成" : ""}進貨單
                   </CardDescription>
                 </div>
                 
@@ -525,12 +543,13 @@ export function PurchaseManagement() {
                         <SelectItem value="all">
                           所有狀態
                         </SelectItem>
-                        {Object.entries(PURCHASE_STATUS_LABELS).map(
-                          ([value, label]) => (
+                        {Object.entries(PURCHASE_STATUS_LABELS)
+                          .filter(([value]) => !statusFilter || statusFilter.includes(value))
+                          .map(([value, label]) => (
                             <SelectItem key={value} value={value}>
                               {label}
                             </SelectItem>
-                          ),
+                          )
                         )}
                       </SelectContent>
                     </Select>
@@ -587,7 +606,13 @@ export function PurchaseManagement() {
                 </div>
               ) : purchasesResponse?.data && purchasesResponse.data.length > 0 ? (
                 <div className="space-y-6">
-                  {purchasesResponse.data.map((purchase: any, index: number) => {
+                  {purchasesResponse.data
+                    .filter((purchase: any) => 
+                      !statusFilter || 
+                      filters.status || 
+                      statusFilter.includes(purchase.status)
+                    )
+                    .map((purchase: any, index: number) => {
                     const permissions = getPurchasePermissions(
                       purchase.status as PurchaseStatus,
                     );
@@ -840,18 +865,22 @@ export function PurchaseManagement() {
                   />
 
                   <h3 className="text-lg font-semibold mb-2">
-                    沒有進貨單
+                    {statusFilter?.includes("completed") ? "沒有已完成的進貨單" : "沒有進貨單"}
                   </h3>
                   <p className="text-muted-foreground mb-4">
-                    還沒有任何進貨單，點擊上方按鈕創建第一個進貨單。
+                    {statusFilter?.includes("completed") 
+                      ? "目前沒有已完成或已取消的進貨單記錄。" 
+                      : "還沒有任何進貨單，點擊上方按鈕創建第一個進貨單。"}
                   </p>
-                  <Button
-                    onClick={() => modalManager.openModal('create')}
-                   
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    新增進貨單
-                  </Button>
+                  {!statusFilter?.includes("completed") && (
+                    <Button
+                      onClick={() => modalManager.openModal('create')}
+                     
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      新增進貨單
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
