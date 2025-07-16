@@ -135,6 +135,7 @@ export default function EditOrderPage() {
             id: item.id,
             product_variant_id: item.product_variant_id,
             is_stocked_sale: item.is_stocked_sale,
+            is_backorder: item.is_backorder, // 🎯 修復：加入缺失的 is_backorder 欄位
             status: item.status,
             quantity: item.quantity,
             price: item.price,

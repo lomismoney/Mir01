@@ -10,13 +10,13 @@ interface ProductStatusBadgeProps {
  * 商品狀態徽章組件
  * 
  * 統一的徽章顯示邏輯：
- * - 訂製商品 = 訂製
- * - 標準商品-沒庫存 = 顯示預訂  
- * - 標準商品-有庫存 = 庫存商品
+ * - 訂製商品 = 有自訂規格 或 (非現貨且非預訂)
+ * - 預訂商品 = is_backorder 為 true
+ * - 庫存商品 = 其他情況（現貨商品）
  */
 export function ProductStatusBadge({ item, className = "text-xs" }: ProductStatusBadgeProps) {
-  // 訂製商品 = 訂製
-  if (!item.is_stocked_sale || item.custom_specifications) {
+  // 訂製商品 = 有自訂規格 或 (非現貨且非預訂)
+  if (item.custom_specifications || (!item.is_stocked_sale && !item.is_backorder)) {
     return (
       <Badge variant="secondary" className={className}>
         訂製
@@ -24,7 +24,7 @@ export function ProductStatusBadge({ item, className = "text-xs" }: ProductStatu
     );
   }
   
-  // 標準商品-沒庫存 = 顯示預訂
+  // 預訂商品 = is_backorder 為 true
   if (item.is_backorder) {
     return (
       <Badge variant="warning" className={className}>
@@ -33,7 +33,7 @@ export function ProductStatusBadge({ item, className = "text-xs" }: ProductStatu
     );
   }
   
-  // 標準商品-有庫存 = 庫存商品
+  // 庫存商品 = 其他情況（現貨商品）
   return (
     <Badge variant="outline" className={className}>
       庫存商品

@@ -44,7 +44,8 @@ export function useProductManager({ form }: UseProductManagerProps) {
       } else {
         append({
           product_variant_id: Number(variant.id),
-          is_stocked_sale: true,
+          // 🎯 智能判斷：有庫存的商品標記為現貨，無庫存的標記為預訂
+          is_stocked_sale: (variant.stock || 0) > 0,
           status: "pending",
           quantity: 1,
           price: Number(variant.price) || 0,
@@ -54,7 +55,7 @@ export function useProductManager({ form }: UseProductManagerProps) {
           sku: variant.sku || `SKU-${variant.id}`,
           custom_specifications: undefined,
           imageUrl: variant.imageUrl || null,
-          stock: variant.stock || 0, // 🎯 添加庫存信息
+          stock: variant.stock || 0, // 🎯 保存庫存信息供顯示使用
         });
       }
     });

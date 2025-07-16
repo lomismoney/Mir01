@@ -156,20 +156,7 @@ class OrderController extends Controller
                 ->response()
                 ->setStatusCode(201);
         } catch (\Exception $e) {
-            // 🎯 預訂系統：檢查是否為庫存不足的結構化異常
-            if ($e->getMessage() === '庫存不足' && 
-                property_exists($e, 'stockCheckResults') && 
-                property_exists($e, 'insufficientStockItems')) {
-                
-                // 返回結構化的庫存不足錯誤響應
-                return response()->json([
-                    'message' => '庫存不足',
-                    'stockCheckResults' => $e->stockCheckResults,
-                    'insufficientStockItems' => $e->insufficientStockItems
-                ], 422);
-            }
-            
-            // 4. 其他異常則使用標準錯誤處理
+            // 標準錯誤處理
             return response()->json([
                 'message' => $e->getMessage(),
                 'errors' => [

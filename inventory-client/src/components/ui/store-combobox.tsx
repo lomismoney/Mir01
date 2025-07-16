@@ -34,8 +34,8 @@ type Store = {
 };
 
 interface StoreComboboxProps {
-  value?: string;
-  onValueChange: (value: string) => void;
+  value?: string | number; // 🎯 支援數字和字串類型
+  onValueChange: (value: number) => void; // 🎯 改為傳遞數字類型
   placeholder?: string;
   emptyText?: string;
   className?: string;
@@ -55,7 +55,7 @@ export function StoreCombobox({
   const stores = (storesResponse?.data ?? []) as Store[];
 
   const selectedStore = value
-    ? stores.find((store) => store.id?.toString() === value)
+    ? stores.find((store) => store.id === Number(value)) // 🎯 轉換為數字進行比較
     : null;
 
   return (
@@ -91,7 +91,7 @@ export function StoreCombobox({
               <CommandItem
                 value=""
                 onSelect={() => {
-                  onValueChange("");
+                  onValueChange(0); // 🎯 傳遞數字 0 表示未選擇
                   setOpen(false);
                 }}
                
@@ -99,7 +99,7 @@ export function StoreCombobox({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === "" ? "opacity-100" : "opacity-0",
+                    !value || value === 0 ? "opacity-100" : "opacity-0", // 🎯 檢查是否為空或 0
                   )}
                  
                 />
@@ -112,7 +112,7 @@ export function StoreCombobox({
                   key={store.id}
                   value={store.name || ""}
                   onSelect={() => {
-                    onValueChange(store.id?.toString() || "");
+                    onValueChange(store.id || 0); // 🎯 直接傳遞數字 ID
                     setOpen(false);
                   }}
                  
@@ -120,7 +120,7 @@ export function StoreCombobox({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === store.id?.toString()
+                      Number(value) === store.id // 🎯 轉換為數字進行比較
                         ? "opacity-100"
                         : "opacity-0",
                     )}
