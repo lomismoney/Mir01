@@ -27,13 +27,12 @@ interface StockCheckError extends Error {
 /**
  * 新增訂單頁面
  * 
- * 🎯 預訂系統整合：完整支援庫存不足處理流程
+ * 🎯 智能預訂系統：自動處理庫存不足情況
  * 
  * 功能特性：
- * 1. 📦 正常建單：庫存充足時的標準流程
- * 2. ⚠️ 庫存警告：庫存不足時的智能提示
- * 3. 🛒 預訂模式：用戶確認後的強制建單
- * 4. 🎯 用戶體驗：清晰的錯誤處理和狀態回饋
+ * 1. 📦 智能判斷：系統自動根據庫存狀況設定商品類型
+ * 2. 🛒 自動預訂：無庫存商品自動轉為預訂狀態
+ * 3. 🎯 簡化體驗：無需手動確認，直接建立訂單
  */
 export default function NewOrderPage() {
   const router = useRouter();
@@ -100,7 +99,6 @@ export default function NewOrderPage() {
    * 處理訂單提交邏輯
    * 
    * @param values 表單數據
-   * @param forceCreate 是否強制建單（忽略庫存限制）
    */
   const handleSubmit = async (values: OrderFormValues, forceCreate: boolean = false) => {
     // 開始進度追蹤
@@ -113,26 +111,24 @@ export default function NewOrderPage() {
       shipping_status: values.shipping_status || 'pending',
       payment_status: values.payment_status || 'pending',
       shipping_fee: values.shipping_fee || 0,
-      tax: values.tax || 0, // 🎯 對應後端的 'tax' 欄位
+      tax: values.tax || 0,
       discount_amount: values.discount_amount || 0,
-      payment_method: values.payment_method,
-      order_source: values.order_source,
-      shipping_address: values.shipping_address,
-      notes: values.notes || null,
-      // 🎯 預訂系統：添加強制建單參數
-      force_create_despite_stock: forceCreate ? 1 : 0,
+      payment_method: values.payment_method || 'cash',
+      order_source: values.order_source || 'direct',
+      shipping_address: values.shipping_address || '',
+      notes: values.notes || '',
       items: values.items.map((item) => ({
-        product_variant_id: item.product_variant_id || null,
+        product_variant_id: item.product_variant_id,
         is_stocked_sale: item.is_stocked_sale,
         is_backorder: item.is_backorder || false, // 🎯 確保包含預訂標記
         status: item.status || 'pending',
-        custom_specifications: item.custom_specifications
-          ? JSON.stringify(item.custom_specifications) // 🎯 確保 JSON 字串格式
-          : null,
+        quantity: item.quantity,
+        price: item.price,
         product_name: item.product_name,
         sku: item.sku,
-        price: Number(item.price), // 🎯 確保是數字格式
-        quantity: Number(item.quantity), // 🎯 確保是數字格式
+        custom_specifications: item.custom_specifications 
+          ? JSON.stringify(item.custom_specifications) 
+          : null,
       })),
     };
 
@@ -391,16 +387,12 @@ export default function NewOrderPage() {
     });
   };
 
-  // 🎯 預訂系統現在為自動模式，不需要用戶交互函數
-
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">
-          新增訂單
-        </h2>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold">新增訂單</h1>
         <p className="text-muted-foreground">
-          填寫以下資訊以創建一筆新的銷售訂單。
+          建立新的訂單記錄，系統將自動處理庫存狀況。
         </p>
       </div>
       

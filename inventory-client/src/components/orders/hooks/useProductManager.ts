@@ -57,7 +57,7 @@ export function useProductManager({ form }: UseProductManagerProps) {
           sku: variant.sku || `SKU-${variant.id}`,
           custom_specifications: undefined,
           imageUrl: variant.imageUrl || null,
-          stock: variant.stock || 0, // 🎯 添加庫存信息
+          stock: variant.stock || 0, // 🎯 保存庫存信息供顯示使用
         });
       }
     });

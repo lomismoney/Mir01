@@ -19,8 +19,9 @@ interface OrderFormProductBadgeProps {
  * 
  * 根據商品類型和庫存狀況智能顯示狀態：
  * - 訂製商品 = 訂製（灰色）
- * - 標準商品 + 庫存不足 = 預訂（橙色警告）
- * - 標準商品 + 庫存充足 = 庫存商品（藍色邊框）
+ * - 非現貨商品 = 預訂（橙色警告）
+ * - 現貨商品 + 庫存不足 = 預訂（橙色警告）
+ * - 現貨商品 + 庫存充足 = 庫存商品（藍色邊框）
  */
 export function OrderFormProductBadge({ item, className = "text-xs" }: OrderFormProductBadgeProps) {
   // 訂製商品判斷：product_variant_id 為 null 或有自訂規格
@@ -45,7 +46,7 @@ export function OrderFormProductBadge({ item, className = "text-xs" }: OrderForm
     );
   }
   
-  // 標準商品且庫存充足
+  // 現貨商品且庫存充足
   return (
     <Badge variant="outline" className={className}>
       庫存商品
