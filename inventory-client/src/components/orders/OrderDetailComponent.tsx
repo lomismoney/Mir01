@@ -42,12 +42,18 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import RecordPaymentModal from "@/components/orders/RecordPaymentModal";
 
+import { ProcessedOrder } from '@/types/api-helpers';
+
 interface OrderDetailComponentProps {
-  orderId: number;
+  orderId: number | null;
+  order?: ProcessedOrder | null; // 使用正確的類型
 }
 
-export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
-  const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
+export function OrderDetailComponent({ orderId, order: providedOrder }: OrderDetailComponentProps) {
+  // 如果已經提供了 order 數據，就不需要再獲取
+  const shouldFetch = !providedOrder && orderId !== null;
+  const { data: fetchedOrder, isLoading, isError, error } = useOrderDetail(shouldFetch ? orderId : null);
+  const order = providedOrder || fetchedOrder;
   const { mutate: updateItemStatus, isPending } = useUpdateOrderItemStatus();
 
   // 🎯 新增：部分付款 Modal 狀態
@@ -92,7 +98,8 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
     });
   };
 
-  if (isLoading) {
+  // 只有在需要獲取數據且正在載入時才顯示載入狀態
+  if (shouldFetch && isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="md:col-span-2">
@@ -115,7 +122,8 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
     );
   }
 
-  if (isError) {
+  // 只有在需要獲取數據且發生錯誤時才顯示錯誤狀態
+  if (shouldFetch && isError) {
     return (
                       <div className="text-error">
         無法加載訂單詳情: {error?.message}
@@ -130,7 +138,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
   // 🎯 計算總計資訊
   const subtotal =
     order.items?.reduce(
-      (acc: number, item: any) => acc + Number(item.price) * item.quantity,
+      (acc: number, item: any) => acc + (item.price || 0) * (item.quantity || 0),
       0
     ) || 0;
 
@@ -181,8 +189,6 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-medium">{item.product_name}</span>
-                              {/* 🎯 統一的商品狀態徽章 */}
-                              <ProductStatusBadge item={item} />
                             </div>
                           </div>
                         </div>
@@ -211,41 +217,16 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                         {item.sku}
                       </TableCell>
                       <TableCell className="text-right">
-                        ${Number(item.price).toLocaleString()}
+                        ${(item.price || 0).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-center">
-                        {item.quantity}
+                        {item.quantity || 0}
                       </TableCell>
                       <TableCell className="text-right font-medium w-[120px]">
-                        ${(Number(item.price) * item.quantity).toLocaleString()}
+                        ${((item.price || 0) * (item.quantity || 0)).toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Select
-                            value={item.status}
-                            onValueChange={(newStatus) =>
-                              handleStatusChange(item.id, newStatus)
-                            }
-                            disabled={isPending}
-                          >
-                            <SelectTrigger className="w-[120px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {statusOptions.map((option) => (
-                                <SelectItem
-                                  key={option.value}
-                                  value={option.value}
-                                >
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {isPending && (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          )}
-                        </div>
+                        <Badge variant="outline">{item.status_text}</Badge>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -271,7 +252,7 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-lg">
-                              ${payment.amount.toLocaleString()}
+                              ${(payment.amount || 0).toLocaleString()}
                             </span>
                             <Badge variant="outline">
                               {payment.payment_method === "cash"
@@ -292,10 +273,13 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                         <div className="text-right text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {format(
-                              new Date(payment.payment_date),
-                              "yyyy/MM/dd HH:mm"
-                            )}
+                            {payment.payment_date
+                              ? format(
+                                  new Date(payment.payment_date),
+                                  "yyyy/MM/dd HH:mm"
+                                )
+                              : "未知日期"
+                            }
                           </div>
                           {payment.creator && (
                             <div className="flex items-center gap-1 mt-1">
@@ -327,7 +311,12 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">下單時間</span>
-                <span>{new Date(order.created_at).toLocaleString("zh-TW")}</span>
+                <span>
+                  {order.created_at
+                    ? new Date(order.created_at).toLocaleString("zh-TW")
+                    : "未知時間"
+                  }
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">貨物狀態</span>
@@ -431,19 +420,19 @@ export function OrderDetailComponent({ orderId }: OrderDetailComponentProps) {
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">已付金額</span>
                                       <span className="font-medium text-success">
-                    ${order.paid_amount.toLocaleString()}
+                    ${(order.paid_amount || 0).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">未付金額</span>
                                       <span className="font-medium text-error">
-                    ${remainingAmount.toLocaleString()}
+                    ${(remainingAmount || 0).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t">
                   <span className="text-muted-foreground">訂單總額</span>
                   <span className="font-medium">
-                    ${order.grand_total.toLocaleString()}
+                    ${(order.grand_total || 0).toLocaleString()}
                   </span>
                 </div>
               </div>

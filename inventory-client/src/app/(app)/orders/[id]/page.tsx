@@ -27,11 +27,17 @@ import RecordPaymentModal from "@/components/orders/RecordPaymentModal";
 
 export default function OrderDetailPage() {
   const params = useParams();
-  const orderId = Number(params.id);
+  const paramId = String(params.id);
   const { setLabel } = useDynamicBreadcrumb();
 
+  // 直接使用資料庫 ID 作為路由參數
+  const orderId = Number(paramId);
+  
   // 數據獲取邏輯上移到頁面組件
-  const { data: order, isLoading, isError, error } = useOrderDetail(orderId);
+  const { data: order, isLoading: orderLoading, isError, error } = useOrderDetail(orderId);
+  
+  // 載入狀態
+  const isLoading = orderLoading;
   const { mutate: confirmPayment, isPending: isConfirming } =
     useConfirmOrderPayment();
   const { mutate: createShipment, isPending: isShipping } =
@@ -50,12 +56,12 @@ export default function OrderDetailPage() {
   // 🎯 useOrderDetail 的 select 函數已經處理好資料格式，直接使用純淨的訂單物件
 
   const handleConfirmPayment = () => {
-    if (!orderId) return;
+    if (!orderId || orderId === null) return;
     confirmPayment(orderId);
   };
 
   const handleCreateShipment = () => {
-    if (!orderId) return;
+    if (!orderId || orderId === null) return;
     // 實際應用中，這裡會彈出一個表單讓用戶填寫物流單號
     const shipmentData = { tracking_number: "TEMP-TRACKING-12345" };
     createShipment({ orderId, data: shipmentData });
@@ -183,7 +189,7 @@ export default function OrderDetailPage() {
             </p>
           </div>
         </div>
-        <OrderDetailComponent orderId={orderId} />
+        <LoadingFallback type="page" text="載入訂單詳情..." />
       </div>
     );
   }
@@ -204,7 +210,7 @@ export default function OrderDetailPage() {
               訂單詳情
             </h1>
             <p className="text-red-500">
-              載入失敗: {error?.message}
+              載入失敗: {error?.message || '訂單不存在'}
             </p>
           </div>
         </div>
@@ -267,9 +273,11 @@ export default function OrderDetailPage() {
       </div>
 
       {/* 訂單詳情組件 - 現在只負責展示 */}
-      <Suspense fallback={<LoadingFallback type="page" text="載入訂單詳情..." />}>
-        <OrderDetailComponent orderId={orderId} />
-      </Suspense>
+      {order && orderId && (
+        <Suspense fallback={<LoadingFallback type="page" text="載入訂單詳情..." />}>
+          <OrderDetailComponent orderId={orderId} order={order} />
+        </Suspense>
+      )}
 
       {/* 🎯 記錄付款 Modal */}
       <RecordPaymentModal

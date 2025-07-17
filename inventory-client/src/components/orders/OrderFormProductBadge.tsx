@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 interface OrderFormItem {
   product_variant_id: number | null;
   is_stocked_sale: boolean;
+  is_backorder?: boolean;
   custom_specifications?: Record<string, any> | null;
   quantity: number;
   stock?: number;
@@ -31,8 +32,12 @@ export function OrderFormProductBadge({ item, className = "text-xs" }: OrderForm
     );
   }
   
-  // 標準商品但庫存不足的情況
-  if (item.is_stocked_sale && typeof item.stock === 'number' && item.stock < item.quantity) {
+  // 🎯 庫存檢查邏輯優化：確保正確處理 0 和 undefined
+  const stockQuantity = typeof item.stock === 'number' ? item.stock : 0;
+  const requiredQuantity = item.quantity || 1;
+  
+  // 如果庫存不足（包括 0 庫存）
+  if (stockQuantity < requiredQuantity) {
     return (
       <Badge variant="warning" className={className}>
         預訂

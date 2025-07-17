@@ -35,32 +35,6 @@ export function OrderInfoSidebar({
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-6">
-          {/* 門市資訊區塊 */}
-          <div className="space-y-4">
-            <div className="text-sm font-medium text-muted-foreground">
-              門市資訊
-            </div>
-            <FormField
-              control={form.control}
-              name="store_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>選擇門市</FormLabel>
-                  <FormControl>
-                    <StoreCombobox
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      placeholder="請選擇門市..."
-                      emptyText="未找到門市"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="border-t"></div>
 
           {/* 客戶資訊區塊 */}
           <div className="space-y-4">

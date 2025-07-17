@@ -1,103 +1,157 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useCreateOrder } from '@/hooks';
-import { toast } from 'sonner';
 import NewOrderPage from '../page';
+import { useCreateOrder } from '@/hooks';
+import { useCheckStockAvailability } from '@/hooks/queries/orders/useCheckStockAvailability';
+import { useBatchCreateTransfers } from '@/hooks/queries/inventory/useBatchCreateTransfers';
+import { toast } from 'sonner';
 
-// Mock dependencies
+// Mock next/navigation
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
 
+// Mock hooks
 jest.mock('@/hooks', () => ({
   useCreateOrder: jest.fn(),
 }));
 
+jest.mock('@/hooks/queries/orders/useCheckStockAvailability', () => ({
+  useCheckStockAvailability: jest.fn(),
+}));
+
+jest.mock('@/hooks/queries/inventory/useBatchCreateTransfers', () => ({
+  useBatchCreateTransfers: jest.fn(),
+}));
+
+// Mock toast
 jest.mock('sonner', () => ({
   toast: {
     success: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
+    warning: jest.fn(),
   },
 }));
 
-// Create a variable to hold the mock implementation
-let mockFormData = {
+// Mock form data that will be submitted
+const mockFormData = {
   customer_id: 1,
-  shipping_status: 'pending',
-  payment_status: 'pending',
-  shipping_fee: 100,
-  tax: 50,
-  discount_amount: 20,
-  payment_method: 'credit_card',
-  order_source: 'online',
-  shipping_address: '123 Test St',
-  notes: 'Test notes',
+  store_id: 1,
   items: [
     {
       product_variant_id: 1,
-      is_stocked_sale: true,
-      status: 'pending',
-      custom_specifications: { color: 'red' },
       product_name: 'Test Product',
-      sku: 'TEST-SKU',
+      sku: 'TEST-001',
       price: 100,
-      quantity: 2,
+      quantity: 10,
+      is_stocked_sale: true,
     }
-  ]
+  ],
+  shipping_fee: 50,
+  tax: 10,
+  discount_amount: 0,
+  payment_method: 'cash',
+  order_source: 'store',
+  shipping_address: 'Test Address',
+  notes: 'Test notes',
 };
 
+// Mock OrderForm component
 jest.mock('@/components/orders/OrderForm', () => ({
-  OrderForm: ({ onSubmit, isSubmitting }: { onSubmit: (data: typeof mockFormData) => void; isSubmitting: boolean }) => (
-    <div data-testid="order-form">
-      <button 
-        onClick={() => onSubmit(mockFormData)}
-        disabled={isSubmitting}
-      >
-        Submit
-      </button>
-    </div>
-  ),
+  OrderForm: ({ onSubmit, isSubmitting }: any) => {
+    // Simulate lazy loading behavior
+    React.useEffect(() => {
+      // Component is mounted
+    }, []);
+    
+    return (
+      <form data-testid="order-form" onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(mockFormData);
+      }}>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? '提交中...' : '提交訂單'}
+        </button>
+      </form>
+    );
+  },
 }));
 
-const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
-const mockUseCreateOrder = useCreateOrder as jest.MockedFunction<typeof useCreateOrder>;
+// Mock other components
+jest.mock('@/components/orders/StockSuggestionDialog', () => ({
+  StockSuggestionDialog: ({ open, onConfirm, onForceCreate, suggestions }: any) => {
+    if (!open) return null;
+    
+    return (
+      <div data-testid="stock-suggestion-dialog">
+        <h3>庫存不足提醒</h3>
+        <div data-testid="suggestions-count">{suggestions?.length || 0} 項商品庫存不足</div>
+        <button onClick={() => onConfirm([{
+          product_variant_id: 1,
+          action: 'transfer',
+          transfers: [{ from_store_id: 2, quantity: 5 }]
+        }])}>
+          確認處理方案
+        </button>
+        <button onClick={onForceCreate}>
+          忽略並建立預訂單
+        </button>
+      </div>
+    );
+  },
+}));
 
-describe('NewOrderPage', () => {
+jest.mock('@/components/orders/OrderSubmitProgressDialog', () => ({
+  OrderSubmitProgressDialog: ({ open, steps, currentStep }: any) => {
+    if (!open) return null;
+    
+    return (
+      <div data-testid="progress-dialog">
+        <div data-testid="current-step">{currentStep}</div>
+        <div data-testid="steps">
+          {steps?.map((step: any) => (
+            <div key={step.id} data-testid={`step-${step.id}`} data-status={step.status}>
+              {step.label}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  },
+}));
+
+jest.mock('@/components/ui/skeleton', () => ({
+  LoadingFallback: () => <div>Loading...</div>,
+}));
+
+jest.mock('@/components/orders/OrderFormErrorBoundary', () => ({
+  OrderFormErrorBoundary: ({ children }: any) => <>{children}</>,
+}));
+
+describe('NewOrderPage Integration Tests', () => {
+  let queryClient: QueryClient;
   const mockPush = jest.fn();
-  const mockMutate = jest.fn();
+  const mockCreateOrder = jest.fn();
+  const mockCheckStock = jest.fn();
+  const mockCreateTransfers = jest.fn();
 
   beforeEach(() => {
+    // Clear all mocks
     jest.clearAllMocks();
     
-    // Reset form data to default values
-    mockFormData = {
-      customer_id: 1,
-      shipping_status: 'pending',
-      payment_status: 'pending',
-      shipping_fee: 100,
-      tax: 50,
-      discount_amount: 20,
-      payment_method: 'credit_card',
-      order_source: 'online',
-      shipping_address: '123 Test St',
-      notes: 'Test notes',
-      items: [
-        {
-          product_variant_id: 1,
-          is_stocked_sale: true,
-          status: 'pending',
-          custom_specifications: { color: 'red' },
-          product_name: 'Test Product',
-          sku: 'TEST-SKU',
-          price: 100,
-          quantity: 2,
-        }
-      ]
-    };
-    
-    mockUseRouter.mockReturnValue({
+    // Create new query client for each test
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+
+    // Setup router mock
+    (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
       back: jest.fn(),
       forward: jest.fn(),
@@ -106,434 +160,462 @@ describe('NewOrderPage', () => {
       prefetch: jest.fn(),
     });
 
-    mockUseCreateOrder.mockReturnValue({
-      mutate: mockMutate,
+    // Setup default hook mocks
+    (useCreateOrder as jest.Mock).mockReturnValue({
+      mutate: mockCreateOrder,
+      isPending: false,
+    });
+
+    (useCheckStockAvailability as jest.Mock).mockReturnValue({
+      mutate: mockCheckStock,
+      isPending: false,
+    });
+
+    (useBatchCreateTransfers as jest.Mock).mockReturnValue({
+      mutate: mockCreateTransfers,
       isPending: false,
     });
   });
 
-  describe('頁面渲染', () => {
-    it('應該顯示新增訂單標題', () => {
-      render(<NewOrderPage />);
-      
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+
+  describe('Page Rendering', () => {
+    it('should render the page with correct title and description', async () => {
+      render(<NewOrderPage />, { wrapper });
+
       expect(screen.getByText('新增訂單')).toBeInTheDocument();
       expect(screen.getByText('填寫以下資訊以創建一筆新的銷售訂單。')).toBeInTheDocument();
+      
+      // Wait for lazy-loaded form
+      await waitFor(() => {
+        expect(screen.getByTestId('order-form')).toBeInTheDocument();
+      });
     });
 
-    it('應該顯示訂單表單', () => {
-      render(<NewOrderPage />);
-      
-      expect(screen.getByTestId('order-form')).toBeInTheDocument();
-      expect(screen.getByText('Submit')).toBeInTheDocument();
+    it('should render submit button in correct state', async () => {
+      render(<NewOrderPage />, { wrapper });
+
+      await waitFor(() => {
+        const submitButton = screen.getByText('提交訂單');
+        expect(submitButton).toBeInTheDocument();
+        expect(submitButton).not.toBeDisabled();
+      });
     });
   });
 
-  describe('表單提交', () => {
-    it('應該成功提交表單', async () => {
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      fireEvent.click(submitButton);
-      
+  describe('Order Creation Flow - Sufficient Stock', () => {
+    it('should successfully create order when stock is sufficient', async () => {
+      // Mock successful stock check
+      mockCheckStock.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({
+          data: {
+            has_shortage: false,
+            suggestions: []
+          }
+        });
+      });
+
+      // Mock successful order creation
+      mockCreateOrder.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({ 
+          data: { 
+            id: 123, 
+            order_number: 'ORD-001' 
+          } 
+        });
+      });
+
+      render(<NewOrderPage />, { wrapper });
+
+      // Submit form
+      const submitButton = await screen.findByText('提交訂單');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      // Verify stock check was called
       await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith(
+        expect(mockCheckStock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            store_id: 1,
+            items: expect.arrayContaining([
+              expect.objectContaining({
+                product_variant_id: 1,
+                quantity: 10
+              })
+            ])
+          }),
+          expect.any(Object)
+        );
+      });
+
+      // Verify order creation was called
+      await waitFor(() => {
+        expect(mockCreateOrder).toHaveBeenCalledWith(
           expect.objectContaining({
             customer_id: 1,
-            shipping_status: 'pending',
-            payment_status: 'pending',
-            shipping_fee: 100,
-            tax: 50,
-            discount_amount: 20,
-            payment_method: 'credit_card',
-            order_source: 'online',
-            shipping_address: '123 Test St',
-            notes: 'Test notes',
+            store_id: 1,
             force_create_despite_stock: 0,
             items: expect.arrayContaining([
               expect.objectContaining({
                 product_variant_id: 1,
                 is_stocked_sale: true,
-                status: 'pending',
-                custom_specifications: '{"color":"red"}',
-                product_name: 'Test Product',
-                sku: 'TEST-SKU',
                 price: 100,
-                quantity: 2,
+                quantity: 10
               })
             ])
           }),
-          expect.objectContaining({
-            onSuccess: expect.any(Function),
-            onError: expect.any(Function),
-          })
+          expect.any(Object)
         );
       });
-    });
 
-    it('應該處理默認值', async () => {
-      // Update mockFormData to have minimal data
-      mockFormData = {
-        customer_id: 1,
-        payment_method: 'cash',
-        order_source: 'store',
-        shipping_address: '123 Test St',
-        items: [
-          {
-            is_stocked_sale: true,
-            product_name: 'Test Product',
-            sku: 'TEST-SKU',
-            price: '100',
-            quantity: '2',
+      // Verify success toast
+      expect(toast.success).toHaveBeenCalledWith(
+        '訂單建立成功！',
+        expect.objectContaining({
+          description: '訂單編號：ORD-001'
+        })
+      );
+
+      // Verify navigation after delay
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/orders/123');
+      }, { timeout: 2000 });
+    });
+  });
+
+  describe('Order Creation Flow - Insufficient Stock', () => {
+    it('should show stock suggestions dialog when stock is insufficient', async () => {
+      // Mock stock check with shortage
+      mockCheckStock.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({
+          data: {
+            has_shortage: true,
+            suggestions: [{
+              product_variant_id: 1,
+              product_name: 'Test Product',
+              sku: 'TEST-001',
+              type: 'transfer',
+              shortage: 5,
+              current_store_stock: 5,
+              requested_quantity: 10,
+              available_quantity: 5,
+              shortage_quantity: 5,
+              transfers: [{
+                from_store_id: 2,
+                from_store_name: 'Store B',
+                available_quantity: 8,
+                suggested_quantity: 5
+              }]
+            }]
           }
-        ]
-      };
+        });
+      });
 
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
+      render(<NewOrderPage />, { wrapper });
+
+      const submitButton = await screen.findByText('提交訂單');
       fireEvent.click(submitButton);
-      
+
+      // Verify stock suggestion dialog appears
       await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith(
+        expect(screen.getByTestId('stock-suggestion-dialog')).toBeInTheDocument();
+        expect(screen.getByText('庫存不足提醒')).toBeInTheDocument();
+        expect(screen.getByTestId('suggestions-count')).toHaveTextContent('1 項商品庫存不足');
+      });
+    });
+
+    it('should handle stock decision confirmation with transfers', async () => {
+      // Setup mocks
+      mockCheckStock.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({
+          data: {
+            has_shortage: true,
+            suggestions: [{
+              product_variant_id: 1,
+              type: 'transfer',
+              shortage: 5,
+              transfers: [{
+                from_store_id: 2,
+                from_store_name: 'Store B',
+                available_quantity: 8,
+                suggested_quantity: 5
+              }]
+            }]
+          }
+        });
+      });
+
+      mockCreateOrder.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({ 
+          data: { 
+            id: 123, 
+            order_number: 'ORD-001' 
+          } 
+        });
+      });
+
+      mockCreateTransfers.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({});
+      });
+
+      render(<NewOrderPage />, { wrapper });
+
+      // Submit form
+      const submitButton = await screen.findByText('提交訂單');
+      fireEvent.click(submitButton);
+
+      // Wait for suggestion dialog
+      await waitFor(() => {
+        expect(screen.getByTestId('stock-suggestion-dialog')).toBeInTheDocument();
+      });
+
+      // Confirm stock decisions
+      const confirmButton = screen.getByText('確認處理方案');
+      fireEvent.click(confirmButton);
+
+      // Verify order creation
+      await waitFor(() => {
+        expect(mockCreateOrder).toHaveBeenCalled();
+      });
+
+      // Verify transfer creation
+      await waitFor(() => {
+        expect(mockCreateTransfers).toHaveBeenCalledWith(
           expect.objectContaining({
-            customer_id: 1,
-            shipping_status: 'pending',
-            payment_status: 'pending',
-            shipping_fee: 0,
-            tax: 0,
-            discount_amount: 0,
-            payment_method: 'cash',
-            order_source: 'store',
-            shipping_address: '123 Test St',
-            notes: null,
-            force_create_despite_stock: 0,
-            items: expect.arrayContaining([
+            order_id: 123,
+            transfers: expect.arrayContaining([
               expect.objectContaining({
-                product_variant_id: null,
-                is_stocked_sale: true,
-                status: 'pending',
-                custom_specifications: null,
-                product_name: 'Test Product',
-                sku: 'TEST-SKU',
-                price: 100,
-                quantity: 2,
+                from_store_id: 2,
+                to_store_id: 1,
+                product_variant_id: 1,
+                quantity: 5,
+                notes: '訂單庫存調配',
+                status: 'pending'
               })
             ])
           }),
           expect.any(Object)
         );
       });
-    });
-  });
 
-  describe('成功處理', () => {
-    it('應該在成功時顯示成功訊息並重定向到訂單詳情', async () => {
-      mockMutate.mockImplementation((data, options) => {
-        options.onSuccess({ data: { id: 123, order_number: 'ORD-001' } });
-      });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      fireEvent.click(submitButton);
-      
-      await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith('訂單建立成功！', {
-          description: '訂單編號：ORD-001'
+      // Verify success toast
+      expect(toast.success).toHaveBeenCalledWith(
+        '訂單及調貨單建立成功！',
+        expect.any(Object)
+      );
+    });
+
+    it('should handle force create (ignore stock)', async () => {
+      // Setup mocks
+      mockCheckStock.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({
+          data: {
+            has_shortage: true,
+            suggestions: [{
+              product_variant_id: 1,
+              type: 'purchase',
+              shortage: 10
+            }]
+          }
         });
-        expect(mockPush).toHaveBeenCalledWith('/orders/123');
       });
-    });
 
-    it('應該在沒有訂單ID時重定向到訂單列表', async () => {
-      mockMutate.mockImplementation((data, options) => {
-        options.onSuccess({ data: { order_number: 'ORD-001' } });
-      });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      fireEvent.click(submitButton);
-      
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/orders');
-      });
-    });
-
-    it('應該在強制建單模式時顯示預訂成功訊息', async () => {
-      // Test the forceCreate path by triggering it through stock error
-      let secondCall = false;
-      
-      mockMutate.mockImplementation((data, options) => {
-        if (!secondCall) {
-          secondCall = true;
-          // First call fails with stock error
-          options.onError({
-            stockCheckResults: [{ insufficient: true }],
-            message: 'Stock insufficient'
-          });
-        } else {
-          // Second call (force create) succeeds
-          options.onSuccess({ data: { id: 123, order_number: 'ORD-001' } });
-        }
-      });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      fireEvent.click(submitButton);
-      
-      await waitFor(() => {
-        expect(toast.info).toHaveBeenCalledWith('部分商品庫存不足，系統已自動轉為預訂訂單', {
-          description: '商品將於補貨後自動出貨'
+      mockCreateOrder.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({ 
+          data: { 
+            id: 123, 
+            order_number: 'ORD-001' 
+          } 
         });
-        expect(toast.success).toHaveBeenCalledWith('訂單建立成功！', {
-          description: '訂單編號：ORD-001'
-        });
-        expect(mockPush).toHaveBeenCalledWith('/orders/123');
       });
-    });
-  });
 
-  describe('庫存錯誤處理', () => {
-    it('應該在庫存不足時自動轉為預訂模式', async () => {
-      let callCount = 0;
-      
-      mockMutate.mockImplementation((data, options) => {
-        callCount++;
-        if (callCount === 1) {
-          // First call fails with stock error
-          options.onError({
-            stockCheckResults: [{ insufficient: true }],
-            message: 'Stock insufficient'
-          });
-        } else {
-          // Second call (force create) succeeds
-          options.onSuccess({ data: { id: 123, order_number: 'ORD-001' } });
-        }
-      });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
+      render(<NewOrderPage />, { wrapper });
+
+      // Submit form
+      const submitButton = await screen.findByText('提交訂單');
       fireEvent.click(submitButton);
-      
+
+      // Wait for suggestion dialog
       await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledTimes(2);
-        
-        // First call should be normal
-        expect(mockMutate).toHaveBeenNthCalledWith(1, 
-          expect.objectContaining({
-            force_create_despite_stock: 0
-          }),
-          expect.any(Object)
-        );
-        
-        // Second call should be force create
-        expect(mockMutate).toHaveBeenNthCalledWith(2, 
+        expect(screen.getByTestId('stock-suggestion-dialog')).toBeInTheDocument();
+      });
+
+      // Click force create
+      const forceCreateButton = screen.getByText('忽略並建立預訂單');
+      fireEvent.click(forceCreateButton);
+
+      // Verify order creation with force flag
+      await waitFor(() => {
+        expect(mockCreateOrder).toHaveBeenCalledWith(
           expect.objectContaining({
             force_create_despite_stock: 1
           }),
           expect.any(Object)
         );
       });
+
+      // Verify success toast for pre-order
+      expect(toast.success).toHaveBeenCalledWith(
+        '預訂訂單建立成功！',
+        expect.objectContaining({
+          description: expect.stringContaining('ORD-001')
+        })
+      );
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle stock check failure', async () => {
+      const error = new Error('Network error');
+      mockCheckStock.mockImplementation((_data, callbacks) => {
+        callbacks.onError(error);
+      });
+
+      render(<NewOrderPage />, { wrapper });
+
+      const submitButton = await screen.findByText('提交訂單');
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(
+          '庫存檢查失敗',
+          expect.objectContaining({
+            description: '是否要繼續建立訂單？'
+          })
+        );
+      });
     });
 
-    it('應該在庫存不足錯誤使用 insufficientStockItems 屬性', async () => {
+    it('should auto-retry with force create on stock error', async () => {
+      // First call fails with stock error
       let callCount = 0;
-      
-      mockMutate.mockImplementation((data, options) => {
+      mockCreateOrder.mockImplementation((_data, callbacks) => {
         callCount++;
         if (callCount === 1) {
-          // First call fails with stock error using insufficientStockItems
-          options.onError({
-            insufficientStockItems: [{ product_id: 1, available: 0 }],
-            message: 'Stock insufficient'
-          });
+          const stockError: any = new Error('Stock insufficient');
+          stockError.stockCheckResults = [{ insufficient: true }];
+          callbacks.onError(stockError);
         } else {
-          // Second call (force create) succeeds
-          options.onSuccess({ data: { id: 123, order_number: 'ORD-001' } });
+          callbacks.onSuccess({ 
+            data: { 
+              id: 123, 
+              order_number: 'ORD-001' 
+            } 
+          });
         }
       });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
+
+      // Skip stock check (no stock items)
+      mockCheckStock.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({
+          data: { has_shortage: false, suggestions: [] }
+        });
+      });
+
+      render(<NewOrderPage />, { wrapper });
+
+      const submitButton = await screen.findByText('提交訂單');
       fireEvent.click(submitButton);
-      
+
+      // Verify auto-retry with force flag
       await waitFor(() => {
-        expect(toast.info).toHaveBeenCalledWith('部分商品庫存不足，系統已自動轉為預訂訂單', {
+        expect(mockCreateOrder).toHaveBeenCalledTimes(2);
+        expect(mockCreateOrder).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            force_create_despite_stock: 1
+          }),
+          expect.any(Object)
+        );
+      });
+
+      // Verify info toast
+      expect(toast.info).toHaveBeenCalledWith(
+        '部分商品庫存不足，系統已自動轉為預訂訂單',
+        expect.objectContaining({
           description: '商品將於補貨後自動出貨'
-        });
-        expect(mockMutate).toHaveBeenCalledTimes(2);
-      });
+        })
+      );
     });
 
-    it('應該在強制建單仍然失敗時顯示錯誤', async () => {
-      let callCount = 0;
-      
-      mockMutate.mockImplementation((data, options) => {
-        callCount++;
-        if (callCount === 1) {
-          // First call fails with stock error
-          options.onError({
-            stockCheckResults: [{ insufficient: true }],
-            message: 'Stock insufficient'
-          });
-        } else {
-          // Second call (force create) also fails
-          options.onError({ message: 'Force create failed' });
-        }
-      });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      fireEvent.click(submitButton);
-      
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('預訂訂單建立失敗', {
-          description: 'Force create failed'
+    it('should handle general order creation error', async () => {
+      mockCheckStock.mockImplementation((_data, callbacks) => {
+        callbacks.onSuccess({
+          data: { has_shortage: false, suggestions: [] }
         });
       });
-    });
 
-    it('應該在強制建單失敗且沒有錯誤訊息時顯示預設訊息', async () => {
-      let callCount = 0;
-      
-      mockMutate.mockImplementation((data, options) => {
-        callCount++;
-        if (callCount === 1) {
-          // First call fails with stock error
-          options.onError({
-            stockCheckResults: [{ insufficient: true }],
-            message: 'Stock insufficient'
-          });
-        } else {
-          // Second call (force create) fails without message
-          options.onError({});
-        }
+      mockCreateOrder.mockImplementation((_data, callbacks) => {
+        callbacks.onError(new Error('Validation error'));
       });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
+
+      render(<NewOrderPage />, { wrapper });
+
+      const submitButton = await screen.findByText('提交訂單');
       fireEvent.click(submitButton);
-      
+
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('預訂訂單建立失敗', {
-          description: '請稍後再試'
-        });
+        expect(toast.error).toHaveBeenCalledWith(
+          '訂單建立失敗',
+          expect.objectContaining({
+            description: 'Validation error'
+          })
+        );
       });
     });
   });
 
-  describe('一般錯誤處理', () => {
-    it('應該在一般錯誤時顯示錯誤訊息', async () => {
-      mockMutate.mockImplementation((data, options) => {
-        options.onError(new Error('General error'));
-      });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      fireEvent.click(submitButton);
-      
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('訂單建立失敗', {
-          description: 'General error'
-        });
-      });
-    });
-
-    it('應該在沒有錯誤訊息時顯示預設訊息', async () => {
-      mockMutate.mockImplementation((data, options) => {
-        options.onError({});
-      });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      fireEvent.click(submitButton);
-      
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('訂單建立失敗', {
-          description: '請檢查輸入資料並重試。'
-        });
-      });
-    });
-
-    it('應該記錄錯誤到控制台', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      
-      mockMutate.mockImplementation((data, options) => {
-        options.onError(new Error('Test error'));
-      });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      fireEvent.click(submitButton);
-      
-      await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('❌ 訂單創建失敗:', expect.any(Error));
-      });
-      
-      consoleSpy.mockRestore();
-    });
-
-    it('應該記錄強制建單失敗到控制台', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      let callCount = 0;
-      
-      mockMutate.mockImplementation((data, options) => {
-        callCount++;
-        if (callCount === 1) {
-          options.onError({
-            stockCheckResults: [{ insufficient: true }],
-            message: 'Stock insufficient'
+  describe('Progress Tracking', () => {
+    it('should show progress dialog during order submission', async () => {
+      // Mock delayed response
+      mockCheckStock.mockImplementation((_data, callbacks) => {
+        setTimeout(() => {
+          callbacks.onSuccess({
+            data: { has_shortage: false, suggestions: [] }
           });
-        } else {
-          options.onError(new Error('Force create failed'));
-        }
+        }, 100);
       });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
+
+      mockCreateOrder.mockImplementation((_data, callbacks) => {
+        setTimeout(() => {
+          callbacks.onSuccess({ 
+            data: { id: 123 } 
+          });
+        }, 100);
+      });
+
+      render(<NewOrderPage />, { wrapper });
+
+      const submitButton = await screen.findByText('提交訂單');
       fireEvent.click(submitButton);
-      
+
+      // Progress dialog should appear
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('❌ 預訂訂單仍然失敗:', expect.any(Error));
+        expect(screen.getByTestId('progress-dialog')).toBeInTheDocument();
       });
-      
-      consoleSpy.mockRestore();
+
+      // Verify steps are shown
+      expect(screen.getByTestId('step-validate')).toBeInTheDocument();
+      expect(screen.getByTestId('step-check-stock')).toBeInTheDocument();
+      expect(screen.getByTestId('step-create-order')).toBeInTheDocument();
     });
   });
 
-  describe('載入狀態', () => {
-    it('應該在提交時顯示載入狀態', () => {
-      mockUseCreateOrder.mockReturnValue({
-        mutate: mockMutate,
+  describe('Loading States', () => {
+    it('should disable submit button when processing', async () => {
+      (useCreateOrder as jest.Mock).mockReturnValue({
+        mutate: mockCreateOrder,
         isPending: true,
       });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      expect(submitButton).toBeDisabled();
-    });
 
-    it('應該在沒有載入時啟用提交按鈕', () => {
-      mockUseCreateOrder.mockReturnValue({
-        mutate: mockMutate,
-        isPending: false,
+      render(<NewOrderPage />, { wrapper });
+
+      await waitFor(() => {
+        const submitButton = screen.getByText('提交中...');
+        expect(submitButton).toBeDisabled();
       });
-      
-      render(<NewOrderPage />);
-      
-      const submitButton = screen.getByText('Submit');
-      expect(submitButton).not.toBeDisabled();
     });
   });
 });

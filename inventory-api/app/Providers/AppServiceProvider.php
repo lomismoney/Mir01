@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Knuckles\Scribe\Scribe;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Log;
+use App\Models\Store;
+use App\Observers\StoreObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // 註冊 Model Observers
+        Store::observe(StoreObserver::class);
+        
         // 🧪 全局 URL 標準化 Hook - 實驗性解決方案
         if (class_exists(Scribe::class)) {
             Scribe::normalizeEndpointUrlUsing(

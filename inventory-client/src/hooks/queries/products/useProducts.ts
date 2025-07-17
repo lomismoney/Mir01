@@ -26,16 +26,10 @@ class ProductDataProcessor {
   /**
    * 處理原始 API 響應數據
    */
-  static processApiResponse(response: unknown): unknown[] {
+  static processApiResponse(response: unknown, storeId?: number): unknown[] {
     if (!response) return [];
     
-    // 生成緩存鍵
-    const cacheKey = JSON.stringify(response).slice(0, 100);
-    
-    // 檢查緩存
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey);
-    }
+    // 🎯 移除緩存機制 - 庫存數據應該總是即時的
     
     // 解包：處理 Laravel 分頁格式
     const products = response?.data?.data || response?.data || [];
@@ -84,14 +78,7 @@ class ProductDataProcessor {
         : 0,
     }));
     
-    // 緩存處理結果
-    this.cache.set(cacheKey, processedProducts);
-    
-    // 限制緩存大小
-    if (this.cache.size > 20) {
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
-    }
+    // 🎯 不再緩存處理結果 - 庫存數據應該總是即時的
     
     return processedProducts;
   }
@@ -141,11 +128,40 @@ export function useProducts(filters: ProductFilters = {}) {
     // 記憶化查詢參數構建
     const queryParams = useQueryParamsBuilder(filters);
     
-    // 記憶化查詢鍵
-    const queryKey = useMemo(() => [...QUERY_KEYS.PRODUCTS, filters], [filters]);
+    // 記憶化查詢鍵 - 使用具體的值而不是整個 filters 對象，避免引用問題
+    const queryKey = useMemo(() => [
+        ...QUERY_KEYS.PRODUCTS, 
+        {
+            product_name: filters.product_name,
+            store_id: filters.store_id,
+            category_id: filters.category_id,
+            low_stock: filters.low_stock,
+            out_of_stock: filters.out_of_stock,
+            search: filters.search,
+            page: filters.page,
+            per_page: filters.per_page
+        }
+    ], [
+        filters.product_name,
+        filters.store_id,
+        filters.category_id,
+        filters.low_stock,
+        filters.out_of_stock,
+        filters.search,
+        filters.page,
+        filters.per_page
+    ]);
+    
+    // 🎯 調試：只在首次查詢時記錄
+    // 移除過度日誌以避免控制台混亂
+    
+    // 🎯 如果有 store_id，使用較短的緩存時間，平衡即時性和性能
+    const baseConfig = filters.store_id 
+        ? { staleTime: 10 * 1000, gcTime: 30 * 1000 } // 10秒緩存，30秒垃圾回收
+        : createIntelligentQueryConfig(queryKey, 'STABLE', true);
     
     return useQuery({
-        ...createIntelligentQueryConfig(queryKey, 'STABLE', true),
+        ...baseConfig,
         queryKey,
         queryFn: async () => {
             const { data, error } = await apiClient.GET('/api/products', {
@@ -159,24 +175,17 @@ export function useProducts(filters: ProductFilters = {}) {
                 throw new Error(errorMessage || '獲取商品列表失敗');
             }
 
-            // 簡化開發環境日誌，減少性能影響
-            if (process.env.NODE_ENV === 'development' && data) {
-                console.log('useProducts - API Response:', {
-                    itemCount: Array.isArray(data?.data?.data) ? data.data.data.length : 'N/A',
-                    hasData: !!data,
-                    dataType: typeof data
-                });
-            }
+            // 日誌已移除以減少控制台噪音
 
             return data;
         },
         
-        // 🎯 使用優化的數據處理器
-        select: (response: unknown) => ProductDataProcessor.processApiResponse(response),
+        // 🎯 使用優化的數據處理器，傳遞 store_id 以便正確緩存
+        select: (response: unknown) => ProductDataProcessor.processApiResponse(response, filters.store_id),
         
-        // 保留體驗優化配置，但使用智能配置中的值
+        // 🎯 恢復 placeholderData 以提升用戶體驗
         placeholderData: (previousData) => previousData,
-        refetchOnMount: true,
+        refetchOnMount: filters.store_id ? true : false, // 有 store_id 時總是重新獲取
         refetchOnWindowFocus: false,
         retry: 2,
     });

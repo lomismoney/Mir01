@@ -85,3 +85,23 @@ Hook 查詢鍵必須包含完整的篩選參數以實現精確緩存。
 [模式：執行]	嚴格按照計畫進行程式碼的修改與創建。必須遵守所有「第四章」的規範。
 [模式：評審]	對完成的工作進行品質檢查。必須以「第二章」和「第四章」為檢查清單。
 [模式：快速]	處理小型的、明確的 Bug 修復或樣式微調。仍需遵守所有架構原則。
+
+第六章：本地開發環境特殊規範 (Local Development Special Rules)
+6.1 本地契約同步防護機制 (Local Contract Sync Protection):
+
+問題背景: Scribe 在生成 API 文檔時會使用 Factory 創建測試數據，這些數據可能會意外寫入本地數據庫。
+
+解決方案: 
+1. 已創建 `config/scribe.local.php` 配置文件，完全禁用 factoryMake。
+2. 已創建 `sync-api-local.sh` 腳本專門用於本地契約同步。
+
+執行方式:
+```bash
+# 在 inventory-api 目錄下執行
+./sync-api-local.sh
+```
+
+注意事項:
+- 不要直接執行 `php artisan scribe:generate`，避免產生測試數據。
+- CI/CD 環境仍使用原配置，確保文檔生成的完整性。
+- 本地配置文件不應該被提交到版本控制。

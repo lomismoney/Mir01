@@ -192,11 +192,14 @@ export function OrderPreviewModal({
               <div>
                 <h2 className="text-lg font-semibold">{order.order_number}</h2>
                 <p className="text-sm text-muted-foreground">
-                  創建於 {new Date(order.created_at).toLocaleDateString('zh-TW', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  創建於 {order.created_at 
+                    ? new Date(order.created_at).toLocaleDateString('zh-TW', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })
+                    : '未知日期'
+                  }
                 </p>
               </div>
             </div>
@@ -303,13 +306,16 @@ export function OrderPreviewModal({
                         {order.payment_records.map((record: PaymentRecord, index: number) => (
                           <TableRow key={index}>
                             <TableCell className="text-sm">
-                              {new Date(record.payment_date).toLocaleDateString('zh-TW', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                              {record.payment_date
+                                ? new Date(record.payment_date).toLocaleDateString('zh-TW', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })
+                                : '未知日期'
+                              }
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline" className="text-xs">

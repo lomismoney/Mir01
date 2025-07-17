@@ -359,22 +359,20 @@ class TestInventorySeeder extends Seeder
         foreach ($products as $product) {
             foreach ($product->variants as $variant) {
                 foreach ($stores as $store) {
-                    // 隨機決定是否在該門市有庫存
-                    if (rand(0, 100) > 20) { // 80% 機率有庫存
-                        $quantity = rand(0, 100);
-                        // 20% 機率庫存為 0
-                        if (rand(0, 100) < 20) {
-                            $quantity = 0;
-                        }
-                        
-                        Inventory::create([
-                            'product_variant_id' => $variant->id,
-                            'store_id' => $store->id,
-                            'quantity' => $quantity,
-                            'low_stock_threshold' => rand(5, 20),
-                        ]);
-                        $inventoryCount++;
+                    // 🎯 所有產品變體在所有門市都必須有庫存記錄（符合系統設計原則）
+                    $quantity = rand(0, 100);
+                    // 30% 機率庫存為 0，模擬缺貨情況
+                    if (rand(0, 100) < 30) {
+                        $quantity = 0;
                     }
+                    
+                    Inventory::create([
+                        'product_variant_id' => $variant->id,
+                        'store_id' => $store->id,
+                        'quantity' => $quantity,
+                        'low_stock_threshold' => rand(5, 20),
+                    ]);
+                    $inventoryCount++;
                 }
             }
         }

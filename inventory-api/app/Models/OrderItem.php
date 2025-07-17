@@ -88,7 +88,8 @@ class OrderItem extends Model
      */
     protected $appends = [
         'purchase_status',
-        'purchase_status_text'
+        'purchase_status_text',
+        'status_text'
     ];
 
     /**
@@ -164,6 +165,24 @@ class OrderItem extends Model
             'partially_received' => '部分到貨',
             'fully_received' => '已全部到貨',
             'purchase_cancelled' => '進貨單已取消',
+            default => '未知狀態'
+        };
+    }
+
+    /**
+     * 獲取訂單項目狀態的中文說明
+     *
+     * @return string
+     */
+    public function getStatusTextAttribute(): string
+    {
+        return match($this->status) {
+            'pending' => '待處理',
+            'transfer_pending' => '調貨中',
+            'backordered' => '預訂中',
+            'shipped' => '已出貨',
+            'completed' => '已完成',
+            'cancelled' => '已取消',
             default => '未知狀態'
         };
     }

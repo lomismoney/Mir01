@@ -49,6 +49,12 @@ test-*.js
 test-*.ts
 test-*.tsx
 
+# playwright
+/test-results/
+/playwright-report/
+/playwright/.auth/
+/playwright/.cache/
+
 # auto-generated API types
 src/types/api.ts
 openapi.yaml

@@ -26,6 +26,9 @@ class LowStockScenarioSeeder extends Seeder
             return;
         }
 
+        // 🎯 確保所有產品變體在所有門市都有庫存記錄（符合系統設計原則）
+        $this->ensureAllInventoryRecordsExist($stores, $variants);
+
         $scenarios = [
             'critical_low_stock' => 10,      // 極低庫存（0-2件）
             'low_stock_warning' => 15,       // 低庫存警告（3-5件）
@@ -407,5 +410,37 @@ class LowStockScenarioSeeder extends Seeder
         }
         
         return array_key_first($weights);
+    }
+
+    /**
+     * 確保所有產品變體在所有門市都有庫存記錄
+     */
+    private function ensureAllInventoryRecordsExist($stores, $variants): void
+    {
+        $createdCount = 0;
+        
+        foreach ($stores as $store) {
+            foreach ($variants as $variant) {
+                // 使用 firstOrCreate 確保庫存記錄存在
+                $inventory = Inventory::firstOrCreate(
+                    [
+                        'store_id' => $store->id,
+                        'product_variant_id' => $variant->id,
+                    ],
+                    [
+                        'quantity' => rand(20, 100), // 預設給予健康的庫存量
+                        'low_stock_threshold' => rand(10, 20),
+                    ]
+                );
+                
+                if ($inventory->wasRecentlyCreated) {
+                    $createdCount++;
+                }
+            }
+        }
+        
+        if ($createdCount > 0) {
+            echo "🎯 自動創建了 {$createdCount} 筆缺失的庫存記錄，確保系統數據完整性\n";
+        }
     }
 }

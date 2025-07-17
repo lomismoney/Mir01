@@ -113,6 +113,8 @@ interface ProductSelectorProps {
   multiple?: boolean;
   // 已選擇的規格 (Variant) ID 列表，用於顯示已選狀態
   selectedIds?: (string | number)[];
+  // 分店 ID，用於篩選該分店的商品庫存
+  storeId?: number;
 }
 
 /**
@@ -128,6 +130,7 @@ export function ProductSelector({
   onCustomItemAdd,
   multiple = true,
   selectedIds = [],
+  storeId,
 }: ProductSelectorProps) {
   // 統一錯誤處理
   const { handleError } = useErrorHandler();
@@ -178,26 +181,61 @@ export function ProductSelector({
   } = useProducts({
     product_name: debouncedSearchQuery, // 將 debounced 搜尋字串作為 product_name 參數傳遞
     per_page: 50, // 限制每次載入的商品數量，避免過多數據導致崩潰
+    store_id: storeId, // 傳遞分店 ID 以篩選該分店的商品
     // 暫不傳遞 category，詳見戰術註記
   });
+  
+  // 日誌已移除 - 系統現在正常運作
 
   // 類型安全的數據轉換
   const products = useMemo(() => {
     return (rawProducts as unknown[]).map((product: unknown) => {
       const p = product as ProcessedProduct;
+      // 處理圖片：若 image_urls 為物件則取 thumb/original，若為 string[] 則取第一張圖
+      let thumbUrl = '';
+      let originalUrl = '';
+      if (p.image_urls && Array.isArray(p.image_urls)) {
+        // 若為 string[]，取第一張作為主圖
+        thumbUrl = p.image_urls[0] || '';
+        originalUrl = p.image_urls[0] || '';
+      } else if (p.image_urls && typeof p.image_urls === 'object') {
+        // 若為物件，取 thumb/original
+        thumbUrl = (p.image_urls as any).thumb || (p.image_urls as any).original || '';
+        originalUrl = (p.image_urls as any).original || (p.image_urls as any).thumb || '';
+      }
       return {
         ...p,
         categoryName: p.category?.name || "未分類",
-        mainImageUrl: p.image_urls?.thumb || p.image_urls?.original || "",
-        variants: (p.variants || []).map((variant): Variant => ({
-          id: variant.id,
-          sku: variant.sku || "",
-          specifications: variant.sku || `規格-${variant.id}`,
-          price: variant.price || 0,
-          stock: variant.stock_quantity || 0,
-          imageUrl: p.image_urls?.thumb || p.image_urls?.original || "", // 繼承 SPU 的商品圖片
-          productName: p.name
-        }))
+        mainImageUrl: thumbUrl || originalUrl || '',
+        variants: (p.variants || []).map((variant): Variant => {
+          // 計算庫存數量
+          let stockQuantity = 0;
+          
+          // 🎯 如果有 inventory 陣列，優先使用（這會是特定門市的庫存）
+          if (Array.isArray(variant.inventory) && variant.inventory.length > 0) {
+            // 當指定了 storeId，後端只會返回該門市的庫存
+            // 所以這裡的加總應該只會是單一門市的庫存
+            stockQuantity = variant.inventory.reduce((sum: number, inv: any) => 
+              sum + (Number(inv.quantity) || 0), 0);
+          } else if (variant.stock_quantity !== undefined) {
+            // 如果沒有 inventory 資料，使用 stock_quantity（總庫存）
+            stockQuantity = Number(variant.stock_quantity) || 0;
+          } else if (variant.stock !== undefined) {
+            // 🎯 如果後端直接返回了 stock 欄位（ProductVariantResource 計算的結果）
+            stockQuantity = Number(variant.stock) || 0;
+          }
+          
+          // 回傳標準化 Variant 物件
+          return {
+            id: variant.id,
+            sku: variant.sku || "",
+            specifications: variant.sku || `規格-${variant.id}`,
+            price: variant.price || 0,
+            stock: stockQuantity,
+            imageUrl: thumbUrl || originalUrl || '', // 使用主圖
+            productName: p.name
+          };
+        })
       } as Product;
     });
   }, [rawProducts]);
@@ -466,12 +504,11 @@ export function ProductSelector({
                 className="grid grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[50vh]"
                
               >
-                {displayedProducts.map((product) => (
+                {displayedProducts.map((product, index) => (
                   <Card
                     key={product.id}
                     className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
                     onClick={() => setSelectedProduct(product)}
-                   
                   >
                     <CardContent className="p-4">
                       {/* 產品圖片 */}
@@ -895,7 +932,6 @@ export function ProductSelector({
                                 handleVariantToggle(variant.id);
                               }
                             }}
-                           
                           >
                             <TableCell
                               onClick={(e) => e.stopPropagation()}

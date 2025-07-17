@@ -1,7 +1,9 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StoreCombobox } from "@/components/ui/store-combobox";
 import {
   Dialog,
   DialogContent,
@@ -86,6 +88,38 @@ export function OrderForm({
             </Button>
           </div>
 
+          {/* 分店選擇 - 放在最上方 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">門市選擇</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="store_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>選擇下單門市 <span className="text-destructive">*</span></FormLabel>
+                    <FormControl>
+                      <StoreCombobox
+                        value={field.value?.toString() || ""}
+                        onValueChange={(value) => {
+                          field.onChange(value ? Number(value) : 0);
+                        }}
+                        placeholder="請先選擇門市..."
+                        emptyText="未找到門市"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      請先選擇門市，系統將顯示該門市的庫存數量
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
           {/* 雙欄式網格佈局 */}
           <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-3">
@@ -97,6 +131,7 @@ export function OrderForm({
                   fields={fields}
                   remove={remove}
                   onAddItem={() => setIsSelectorOpen(true)}
+                  storeId={form.watch("store_id")}
                 />
 
                 {/* 價格計算摘要卡片 */}
@@ -170,6 +205,7 @@ export function OrderForm({
         onCustomItemAdd={handleAddCustomItem}
         multiple={true}
         selectedIds={selectedVariantIds}
+        storeId={form.watch("store_id")}
       />
     </>
   );

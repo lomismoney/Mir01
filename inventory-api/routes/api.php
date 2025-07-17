@@ -246,6 +246,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/inventory/transfers', [App\Http\Controllers\Api\InventoryTransferController::class, 'index']);
     Route::get('/inventory/transfers/{transfer}', [App\Http\Controllers\Api\InventoryTransferController::class, 'show']);
     Route::post('/inventory/transfers', [App\Http\Controllers\Api\InventoryTransferController::class, 'store']);
+    Route::post('/inventory/transfers/batch', [App\Http\Controllers\Api\InventoryTransferController::class, 'batchStore']);
     Route::patch('/inventory/transfers/{transfer}/status', [App\Http\Controllers\Api\InventoryTransferController::class, 'updateStatus']);
     Route::patch('/inventory/transfers/{transfer}/cancel', [App\Http\Controllers\Api\InventoryTransferController::class, 'cancel']);
     
@@ -289,9 +290,11 @@ Route::middleware('auth:sanctum')->group(function () {
      * 路由列表：
      * POST   /api/orders/batch-delete          - 批量刪除訂單
      * POST   /api/orders/batch-update-status   - 批量更新訂單狀態
+     * POST   /api/orders/check-stock-availability - 檢查庫存並獲取智慧建議
      */
     Route::post('/orders/batch-delete', [App\Http\Controllers\Api\OrderController::class, 'destroyMultiple']);
     Route::post('/orders/batch-update-status', [App\Http\Controllers\Api\OrderController::class, 'updateMultipleStatus']);
+    Route::post('/orders/check-stock-availability', [App\Http\Controllers\Api\OrderController::class, 'checkStockAvailability']);
 
     /**
      * 訂單管理資源路由

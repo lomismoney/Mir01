@@ -110,7 +110,10 @@
       "Bash(./vendor/bin/sail logs:*)",
       "Bash(./vendor/bin/sail exec laravel.test tail:*)",
       "Bash(./test-api.sh:*)",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(./vendor/bin/sail down:*)",
+      "Bash(./sync-api-local.sh:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 // 🎯 使用 Zod 提前定義表單驗證規則
 const orderFormSchema = z.object({
   customer_id: z.number().min(1, "必須選擇一個客戶"),
-  store_id: z.string().min(1, "必須選擇門市"),
+  store_id: z.number().min(1, "必須選擇門市"),
   shipping_address: z.string().min(1, "運送地址為必填"),
   payment_method: z.string().min(1, "必須選擇付款方式"),
   order_source: z.string().min(1, "必須選擇客戶來源"),
@@ -24,6 +24,7 @@ const orderFormSchema = z.object({
         id: z.number().optional(),
         product_variant_id: z.number().nullable(),
         is_stocked_sale: z.boolean(),
+        is_backorder: z.boolean().optional(), // 🎯 添加預訂標記
         status: z.string(),
         quantity: z.number().min(1, "數量至少為 1"),
         price: z.number().min(0, "價格不能為負"),
@@ -48,7 +49,7 @@ export function useOrderForm({ initialData, onSubmit }: UseOrderFormProps) {
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
     defaultValues: initialData || {
-      store_id: "1", // 🎯 暫時設定預設門市ID，後續需要從實際門市選擇器獲取
+      store_id: 1, // 🎯 暫時設定預設門市ID，後續需要從實際門市選擇器獲取
       shipping_status: "pending",
       payment_status: "pending",
       fulfillment_priority: "normal",

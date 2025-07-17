@@ -15,13 +15,15 @@ use App\Http\Requests\Api\BatchDeleteOrdersRequest;
 use App\Http\Requests\Api\BatchUpdateStatusRequest;
 use App\Services\OrderService;
 use App\Services\RefundService;
+use App\Services\InventoryService;
 use Illuminate\Http\Response;
 
 class OrderController extends Controller
 {
     public function __construct(
         protected OrderService $orderService,
-        protected RefundService $refundService
+        protected RefundService $refundService,
+        protected InventoryService $inventoryService
     ) {
         // 🔐 使用 authorizeResource 自動將控制器方法與 OrderPolicy 中的
         // viewAny、view、create、update、delete 方法進行映射
@@ -61,11 +63,19 @@ class OrderController extends Controller
             ->with(['customer', 'creator'])
             // 條件化查詢
             ->when($request->filled('search'), function ($query) use ($request) {
-                $searchTerm = '%' . $request->input('search') . '%';
-                $query->where(function ($q) use ($searchTerm) {
-                    $q->where('order_number', 'like', $searchTerm)
-                      ->orWhereHas('customer', function ($customerQuery) use ($searchTerm) {
-                          $customerQuery->where('name', 'like', $searchTerm);
+                $searchTerm = $request->input('search');
+                $searchLike = '%' . $searchTerm . '%';
+                
+                $query->where(function ($q) use ($searchTerm, $searchLike) {
+                    // 精確匹配訂單編號
+                    $q->where('order_number', $searchTerm)
+                      // 部分匹配訂單編號
+                      ->orWhere('order_number', 'like', $searchLike)
+                      // 匹配數字部分（如 23 匹配 SO-20250716-0023）
+                      ->orWhere('order_number', 'like', '%-' . str_pad($searchTerm, 4, '0', STR_PAD_LEFT))
+                      // 客戶名稱模糊匹配
+                      ->orWhereHas('customer', function ($customerQuery) use ($searchLike) {
+                          $customerQuery->where('name', 'like', $searchLike);
                       });
                 });
             })
@@ -164,6 +174,7 @@ class OrderController extends Controller
                 // 返回結構化的庫存不足錯誤響應
                 return response()->json([
                     'message' => '庫存不足',
+                    'error_type' => 'insufficient_stock', // 🎯 添加錯誤類型標識
                     'stockCheckResults' => $e->stockCheckResults,
                     'insufficientStockItems' => $e->insufficientStockItems
                 ], 422);
@@ -613,6 +624,92 @@ class OrderController extends Controller
                 ]
             ], 422);
         }
+    }
+
+    /**
+     * @group 訂單管理
+     * @authenticated
+     * @summary 檢查庫存並獲取智慧建議
+     * 
+     * 此端點用於在下單前檢查商品庫存狀況，並在庫存不足時提供智慧建議。
+     * 系統會分析其他門市的庫存，提供調貨或進貨的最佳方案。
+     * 
+     * @bodyParam store_id integer required 目標門市 ID。Example: 1
+     * @bodyParam items array required 訂單項目列表。
+     * @bodyParam items.*.product_variant_id integer required 商品變體 ID。Example: 1
+     * @bodyParam items.*.quantity integer required 需求數量。Example: 5
+     * 
+     * @response 200 scenario="庫存建議" {
+     *   "data": {
+     *     "has_shortage": true,
+     *     "suggestions": [
+     *       {
+     *         "product_variant_id": 1,
+     *         "product_name": "標準辦公桌",
+     *         "sku": "DESK-001",
+     *         "requested_quantity": 5,
+     *         "current_store_stock": 2,
+     *         "shortage": 3,
+     *         "type": "transfer",
+     *         "message": "建議從其他門市調貨",
+     *         "transfers": [
+     *           {
+     *             "from_store_id": 2,
+     *             "from_store_name": "台中店",
+     *             "available_quantity": 10,
+     *             "suggested_quantity": 3
+     *           }
+     *         ]
+     *       }
+     *     ],
+     *     "cross_store_availability": {
+     *       "1": {
+     *         "2": {
+     *           "store_name": "台中店",
+     *           "quantity": 10,
+     *           "product_name": "標準辦公桌",
+     *           "sku": "DESK-001"
+     *         }
+     *       }
+     *     }
+     *   }
+     * }
+     */
+    public function checkStockAvailability(Request $request)
+    {
+        // 1. 驗證請求參數
+        $validated = $request->validate([
+            'store_id' => 'required|integer|exists:stores,id',
+            'items' => 'required|array|min:1',
+            'items.*.product_variant_id' => 'required|integer|exists:product_variants,id',
+            'items.*.quantity' => 'required|integer|min:1'
+        ]);
+        
+        // 2. 獲取智慧庫存建議
+        $suggestions = $this->inventoryService->getStockSuggestions(
+            $validated['items'],
+            $validated['store_id']
+        );
+        
+        // 3. 獲取跨店庫存資訊
+        $variantIds = array_column($validated['items'], 'product_variant_id');
+        $crossStoreAvailability = $this->inventoryService->checkCrossStoreAvailability(
+            $variantIds,
+            $validated['store_id']
+        );
+        
+        // 4. 判斷是否有庫存不足
+        $hasShortage = collect($suggestions)->contains(function ($suggestion) {
+            return $suggestion['type'] !== 'sufficient';
+        });
+        
+        return response()->json([
+            'data' => [
+                'has_shortage' => $hasShortage,
+                'suggestions' => $suggestions,
+                'cross_store_availability' => $crossStoreAvailability
+            ]
+        ]);
     }
 
     /**

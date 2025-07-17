@@ -156,6 +156,7 @@ class InventoryTransferController extends Controller
                 'quantity' => $quantity,
                 'status' => $status,
                 'notes' => $notes,
+                'order_id' => $request->order_id ?? null,
             ]);
             
             // 轉移元數據
@@ -271,6 +272,155 @@ class InventoryTransferController extends Controller
             
             return new InventoryTransferResource($transferModel);
         });
+    }
+
+    /**
+     * 批量建立庫存轉移
+     * 
+     * @summary 批量建立庫存轉移單
+     * 
+     * 用於一次建立多筆庫存轉移記錄，主要用於智慧庫存調配。
+     * 所有轉移將在一個事務中執行，確保資料一致性。
+     * 
+     * @bodyParam transfers array required 轉移項目列表
+     * @bodyParam transfers.*.from_store_id integer required 來源門市ID. Example: 1
+     * @bodyParam transfers.*.to_store_id integer required 目標門市ID. Example: 2
+     * @bodyParam transfers.*.product_variant_id integer required 商品變體ID. Example: 5
+     * @bodyParam transfers.*.quantity integer required 轉移數量. Example: 10
+     * @bodyParam transfers.*.notes string 備註. Example: 訂單庫存調配
+     * @bodyParam transfers.*.status string 轉移狀態，預設為 pending. Example: completed
+     * @bodyParam order_id integer 關聯的訂單ID. Example: 123
+     * 
+     * @response 201 scenario="批量建立成功" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "from_store": {"id": 1, "name": "總店"},
+     *       "to_store": {"id": 2, "name": "分店"},
+     *       "product_variant": {...},
+     *       "quantity": 10,
+     *       "status": "pending",
+     *       "notes": "訂單庫存調配"
+     *     }
+     *   ],
+     *   "message": "成功建立 2 筆庫存轉移單"
+     * }
+     * 
+     * @response 422 scenario="驗證失敗" {
+     *   "message": "The given data was invalid.",
+     *   "errors": {
+     *     "transfers.0.quantity": ["來源門市庫存不足"]
+     *   }
+     * }
+     */
+    public function batchStore(Request $request)
+    {
+        $this->authorize('create', InventoryTransfer::class);
+        
+        $validated = $request->validate([
+            'transfers' => 'required|array|min:1',
+            'transfers.*.from_store_id' => 'required|exists:stores,id',
+            'transfers.*.to_store_id' => 'required|exists:stores,id|different:transfers.*.from_store_id',
+            'transfers.*.product_variant_id' => 'required|exists:product_variants,id',
+            'transfers.*.quantity' => 'required|integer|min:1',
+            'transfers.*.notes' => 'nullable|string|max:500',
+            'transfers.*.status' => 'nullable|in:pending,completed',
+            'order_id' => 'nullable|exists:orders,id'
+        ]);
+        
+        $transfers = DB::transaction(function () use ($validated) {
+            $createdTransfers = [];
+            $userId = Auth::id();
+            $orderId = $validated['order_id'] ?? null;
+            
+            foreach ($validated['transfers'] as $transferData) {
+                // 檢查來源庫存
+                $fromInventory = Inventory::where('store_id', $transferData['from_store_id'])
+                    ->where('product_variant_id', $transferData['product_variant_id'])
+                    ->lockForUpdate()
+                    ->first();
+                    
+                if (!$fromInventory || $fromInventory->quantity < $transferData['quantity']) {
+                    $variant = ProductVariant::find($transferData['product_variant_id']);
+                    throw new \Exception("商品 {$variant->sku} 在來源門市的庫存不足");
+                }
+                
+                // 建立轉移記錄
+                $transfer = InventoryTransfer::create([
+                    'from_store_id' => $transferData['from_store_id'],
+                    'to_store_id' => $transferData['to_store_id'],
+                    'user_id' => $userId,
+                    'product_variant_id' => $transferData['product_variant_id'],
+                    'quantity' => $transferData['quantity'],
+                    'status' => $transferData['status'] ?? 'pending',
+                    'notes' => $transferData['notes'] ?? ($orderId ? "訂單 #{$orderId} 庫存調配" : null),
+                    'order_id' => $orderId
+                ]);
+                
+                // 如果狀態是 completed，立即執行轉移
+                if ($transfer->status === 'completed') {
+                    $this->executeTransfer($transfer, $fromInventory);
+                }
+                
+                $createdTransfers[] = $transfer;
+            }
+            
+            return $createdTransfers;
+        });
+        
+        // 載入關聯資料
+        $transfers = InventoryTransfer::with(['fromStore', 'toStore', 'user', 'productVariant.product'])
+            ->whereIn('id', collect($transfers)->pluck('id'))
+            ->get();
+        
+        return response()->json([
+            'data' => InventoryTransferResource::collection($transfers),
+            'message' => sprintf('成功建立 %d 筆庫存轉移單', count($transfers))
+        ], 201);
+    }
+    
+    /**
+     * 執行庫存轉移（內部方法）
+     */
+    private function executeTransfer(InventoryTransfer $transfer, Inventory $fromInventory)
+    {
+        // 扣減來源庫存
+        $fromInventory->decrement('quantity', $transfer->quantity);
+        
+        // 記錄來源交易
+        InventoryTransaction::create([
+            'inventory_id' => $fromInventory->id,
+            'type' => 'transfer_out',
+            'quantity' => -$transfer->quantity,
+            'reference_type' => InventoryTransfer::class,
+            'reference_id' => $transfer->id,
+            'user_id' => $transfer->user_id,
+            'description' => "轉移至 {$transfer->toStore->name}",
+            'metadata' => ['transfer_id' => $transfer->id]
+        ]);
+        
+        // 增加目標庫存
+        $toInventory = Inventory::firstOrCreate(
+            [
+                'store_id' => $transfer->to_store_id,
+                'product_variant_id' => $transfer->product_variant_id
+            ],
+            ['quantity' => 0]
+        );
+        
+        $toInventory->increment('quantity', $transfer->quantity);
+        
+        // 記錄目標交易
+        InventoryTransaction::create([
+            'inventory_id' => $toInventory->id,
+            'type' => 'transfer_in',
+            'quantity' => $transfer->quantity,
+            'reference_type' => InventoryTransfer::class,
+            'reference_id' => $transfer->id,
+            'user_id' => $transfer->user_id,
+            'description' => "從 {$transfer->fromStore->name} 轉入",
+            'metadata' => ['transfer_id' => $transfer->id]
+        ]);
     }
 
     /**

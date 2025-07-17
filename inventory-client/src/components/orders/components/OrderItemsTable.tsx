@@ -31,6 +31,7 @@ interface OrderItemsTableProps {
   fields: any[];
   remove: (index: number) => void;
   onAddItem: () => void;
+  storeId?: number;
 }
 
 export function OrderItemsTable({
@@ -38,6 +39,7 @@ export function OrderItemsTable({
   fields,
   remove,
   onAddItem,
+  storeId,
 }: OrderItemsTableProps) {
   return (
     <Card>
@@ -47,13 +49,14 @@ export function OrderItemsTable({
           type="button"
           variant="outline"
           size="sm"
+          disabled={!storeId}
           onClick={(e) => {
             e.preventDefault();
             onAddItem();
           }}
         >
           <PlusCircle className="h-4 w-4 mr-2" />
-          新增項目
+          {!storeId ? "請先選擇門市" : "新增項目"}
         </Button>
       </CardHeader>
       <CardContent>

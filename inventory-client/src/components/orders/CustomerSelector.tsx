@@ -76,7 +76,6 @@ export function CustomerSelector({
           role="combobox"
           aria-expanded={open}
           className="w-full h-10 px-3 justify-between text-left font-normal hover:bg-accent/50"
-         
         >
           {selectedCustomer ? (
             <div
@@ -202,7 +201,6 @@ export function CustomerSelector({
                         "flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-accent text-left transition-colors relative w-full",
                         selectedCustomerId === customer.id && "bg-accent",
                       )}
-                     
                     >
                       {selectedCustomerId === customer.id && (
                         <div

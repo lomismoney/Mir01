@@ -67,7 +67,6 @@ export function StoreCombobox({
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
           disabled={isLoading}
-         
         >
           {selectedStore ? selectedStore.name : placeholder}
           <ChevronsUpDown
@@ -115,7 +114,6 @@ export function StoreCombobox({
                     onValueChange(store.id?.toString() || "");
                     setOpen(false);
                   }}
-                 
                 >
                   <Check
                     className={cn(

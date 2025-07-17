@@ -9,7 +9,9 @@ use App\Enums\OrderItemType;
 use App\Services\BaseService;
 use App\Services\Traits\HandlesInventoryOperations;
 use App\Services\Traits\HandlesStatusHistory;
+use App\Exceptions\Business\InsufficientStockException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 
@@ -62,35 +64,42 @@ class OrderService extends BaseService
                 FILTER_VALIDATE_BOOLEAN
             );
             
-            // 2. 庫存驗證：只針對現貨商品進行庫存檢查
-            $stockedItems = collect($validatedData['items'])->filter(function ($item) {
-                $itemType = OrderItemType::determineType($item);
-                return $itemType === OrderItemType::STOCK && !empty($item['product_variant_id']);
-            })->values()->all();
-            
-            // 檢查現貨商品是否有足夠庫存
-            if (!empty($stockedItems)) {
-                $stockCheckResults = $this->inventoryService->batchCheckStock(
-                    $stockedItems,
-                    $validatedData['store_id'] ?? null // 使用請求中指定的門市
-                );
+            // 2. 庫存驗證：只針對現貨商品進行庫存檢查（如果不是強制建單模式）
+            if (!$forceCreate) {
+                $stockedItems = collect($validatedData['items'])->filter(function ($item) {
+                    $itemType = OrderItemType::determineType($item);
+                    return $itemType === OrderItemType::STOCK && !empty($item['product_variant_id']);
+                })->values()->all();
                 
-                if (!empty($stockCheckResults)) {
-                    // 現貨商品庫存不足，直接拋出異常
-                    $insufficientItems = collect($stockCheckResults)->map(function ($result) {
-                        return [
-                            'product_name' => $result['product_name'],
-                            'sku' => $result['sku'],
-                            'requested_quantity' => $result['requested_quantity'],
-                            'available_quantity' => $result['available_quantity'],
-                            'shortage' => $result['requested_quantity'] - $result['available_quantity']
-                        ];
-                    })->all();
+                // 檢查現貨商品是否有足夠庫存
+                if (!empty($stockedItems)) {
+                    $stockCheckResults = $this->inventoryService->batchCheckStock(
+                        $stockedItems,
+                        $validatedData['store_id'] ?? null // 使用請求中指定的門市
+                    );
                     
-                    $exception = new \Exception('現貨商品庫存不足');
-                    $exception->stockCheckResults = $stockCheckResults;
-                    $exception->insufficientStockItems = $insufficientItems;
-                    throw $exception;
+                    if (!empty($stockCheckResults)) {
+                        // 現貨商品庫存不足，直接拋出異常
+                        $insufficientItems = collect($stockCheckResults)->map(function ($result) {
+                            return [
+                                'product_name' => $result['product_name'],
+                                'sku' => $result['sku'],
+                                'requested_quantity' => $result['requested_quantity'],
+                                'available_quantity' => $result['available_quantity'],
+                                'shortage' => $result['requested_quantity'] - $result['available_quantity']
+                            ];
+                        })->all();
+                        
+                        // 使用第一個庫存不足的商品資訊建立異常
+                        $firstShortage = $stockCheckResults[0];
+                        throw new InsufficientStockException(
+                            $firstShortage['product_variant_id'],
+                            $firstShortage['requested_quantity'],
+                            $firstShortage['available_quantity'],
+                            $firstShortage['sku'],
+                            $firstShortage['product_name']
+                        );
+                    }
                 }
             }
 
@@ -147,7 +156,15 @@ class OrderService extends BaseService
                     $orderItemData['custom_specifications'] = $itemData['custom_specifications'] ?? null;
                 }
                 
-                $order->items()->create($orderItemData);
+                $orderItem = $order->items()->create($orderItemData);
+
+                // 如果是預訂商品，嘗試自動調貨
+                if ($itemType === OrderItemType::BACKORDER) {
+                    $this->inventoryService->initiateAutomatedTransfer(
+                        $orderItem, 
+                        $order->store_id
+                    );
+                }
             }
             
             // 7. 分類處理庫存扣減：根據商品類型決定處理方式
@@ -628,7 +645,43 @@ class OrderService extends BaseService
         // 使用統一的庫存返還邏輯
         $this->returnInventoryOnCancel($order, '訂單刪除');
         
-        // 3. 刪除訂單（會級聯刪除訂單項目和狀態歷史）
+        // 3. 取消與此訂單相關的待處理調貨單（必須在刪除訂單前執行）
+        $this->cancelPendingTransfersForOrder($order);
+        
+        // 驗證所有待處理的庫存轉移都已被取消
+        $remainingTransfers = \App\Models\InventoryTransfer::where('order_id', $order->id)
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->count();
+            
+        if ($remainingTransfers > 0) {
+            \Log::error('仍有未取消的庫存轉移', [
+                'order_id' => $order->id,
+                'remaining_count' => $remainingTransfers,
+                'remaining_transfers' => \App\Models\InventoryTransfer::where('order_id', $order->id)
+                    ->whereNotIn('status', ['cancelled', 'completed'])
+                    ->get()
+                    ->toArray()
+            ]);
+            
+            // 如果還有未取消的庫存轉移，強制取消它們
+            $uncancelledTransfers = \App\Models\InventoryTransfer::where('order_id', $order->id)
+                ->whereNotIn('status', ['cancelled', 'completed'])
+                ->get();
+                
+            foreach ($uncancelledTransfers as $transfer) {
+                $transfer->update([
+                    'status' => 'cancelled',
+                    'notes' => ($transfer->notes ? $transfer->notes . ' | ' : '') . '強制取消：訂單刪除'
+                ]);
+            }
+        }
+        
+        // 4. 在刪除訂單前，將所有關聯的庫存轉移的 order_id 設為 null
+        // 這樣可以保留歷史記錄，同時允許訂單被刪除
+        \App\Models\InventoryTransfer::where('order_id', $order->id)
+            ->update(['order_id' => null]);
+        
+        // 5. 刪除訂單（會級聯刪除訂單項目和狀態歷史）
         $order->delete();
         
         return true;
@@ -672,6 +725,9 @@ class OrderService extends BaseService
         
         // 4. 智能返還庫存：只返還現貨商品的庫存
         $this->returnInventoryOnCancel($order, $reason);
+
+        // 🎯 新增：取消與此訂單相關的待處理調貨單
+        $this->cancelPendingTransfersForOrder($order);
         
         // 5. 更新訂單項目的履行狀態
         // 取消訂單時，將所有未完成的訂單項目標記為未履行
@@ -1116,6 +1172,46 @@ class OrderService extends BaseService
             'skipped_item_names' => $skippedItems,
             'reason' => $reason ?? '訂單取消'
         ]);
+    }
+
+    /**
+     * 取消與訂單關聯的待處理調貨單
+     *
+     * @param Order $order
+     */
+    protected function cancelPendingTransfersForOrder(Order $order): void
+    {
+        \Log::info('嘗試取消訂單相關的待處理調貨單', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+        ]);
+
+        // 查詢與此訂單關聯的待處理庫存轉移
+        // 注意：InventoryTransfer 只有 pending, in_transit, completed, cancelled 狀態
+        $pendingTransfers = \App\Models\InventoryTransfer::where('order_id', $order->id)
+            ->whereIn('status', ['pending', 'in_transit'])
+            ->get();
+
+        \Log::info('找到待處理調貨單數量', [
+            'order_id' => $order->id,
+            'count' => $pendingTransfers->count(),
+        ]);
+
+        $pendingTransfers->each(function ($transfer) use ($order) {
+            // 更新狀態為已取消，並添加備註
+            $transfer->update([
+                'status' => 'cancelled',
+                'notes' => ($transfer->notes ? $transfer->notes . ' | ' : '') . 
+                          "因訂單 {$order->order_number} 被刪除/取消，此調貨單自動取消"
+            ]);
+            
+            \Log::info('因訂單取消，自動取消調貨單', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'transfer_id' => $transfer->id,
+                'new_status' => 'cancelled',
+            ]);
+        });
     }
 
     // ===== 測試輔助方法 =====

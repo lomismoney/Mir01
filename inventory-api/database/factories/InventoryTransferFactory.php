@@ -27,6 +27,7 @@ class InventoryTransferFactory extends Factory
                 InventoryTransfer::STATUS_CANCELLED,
             ]),
             'notes' => $this->faker->optional()->sentence(),
+            'order_id' => null, // 預設不關聯訂單
         ];
     }
 
@@ -62,6 +63,16 @@ class InventoryTransferFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'status' => InventoryTransfer::STATUS_CANCELLED,
+            ];
+        });
+    }
+    
+    public function forOrder($orderId)
+    {
+        return $this->state(function (array $attributes) use ($orderId) {
+            return [
+                'order_id' => $orderId,
+                'notes' => '訂單 #' . $orderId . ' 庫存調配',
             ];
         });
     }

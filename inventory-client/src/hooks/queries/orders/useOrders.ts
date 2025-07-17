@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { OrderFormData, ProcessedOrder, ProcessedOrderItem } from '@/types/api-helpers';
@@ -92,11 +93,13 @@ export function useOrders(filters: {
         paid_amount: parseFloat(order.paid_amount || '0'),
         
         // 🎯 新增：日期格式化 - 在數據精煉廠中一次性完成
-        formatted_created_date: new Date(order.created_at).toLocaleDateString('zh-TW', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        }).replace(/\//g, '/'), // 確保使用 / 作為分隔符
+        formatted_created_date: order.created_at 
+          ? new Date(order.created_at).toLocaleDateString('zh-TW', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+            }).replace(/\//g, '/') // 確保使用 / 作為分隔符
+          : '未知日期',
       }));
 
       // 3. 返回完整的分頁響應結構
@@ -153,7 +156,10 @@ export function useCreateOrder() {
       // 如果有錯誤，代表 API 請求失敗
       if (error) {
         // 🎯 檢查這個錯誤是否是我們預期的「庫存不足」結構化錯誤
-        if ((error as any).stockCheckResults || (error as any).insufficientStockItems) {
+        // 檢查多種可能的標識：error_type、stockCheckResults、insufficientStockItems
+        if ((error as any).error_type === 'insufficient_stock' || 
+            (error as any).stockCheckResults || 
+            (error as any).insufficientStockItems) {
           // 如果是，直接將這個帶有詳細數據的錯誤物件拋出
           // 讓 onError 回調可以接收到它
           throw error;
@@ -193,9 +199,12 @@ export function useCreateOrder() {
     },
     onError: async (error: any) => {
       // 🎯 在 onError 回調中，我們現在可以更安全地檢查錯誤類型
-      if (error.stockCheckResults || error.insufficientStockItems) {
+      if (error.error_type === 'insufficient_stock' || 
+          error.stockCheckResults || 
+          error.insufficientStockItems) {
         // 這裡是處理庫存不足的邏輯...
         // 前端頁面組件會自行處理這種錯誤，這裡只需要記錄即可
+        console.log('庫存不足錯誤，由頁面組件處理智能建議');
       } else {
         // 這裡是處理其他通用錯誤的邏輯...
         if (typeof window !== 'undefined') {
@@ -207,6 +216,50 @@ export function useCreateOrder() {
       }
     },
   });
+}
+
+/**
+ * 通過訂單編號查找訂單 ID
+ * 
+ * @param orderNumber - 訂單編號（如 "23" 或 "SO-20250716-0003"）
+ * @returns 訂單 ID 或 null
+ */
+export function useOrderIdByNumber(orderNumber: string | null) {
+  // 如果訂單編號為空，直接返回 null
+  if (!orderNumber) return null;
+  
+  const { data: ordersData } = useOrders({ 
+    search: orderNumber || undefined,
+    per_page: 100  // 增加搜索範圍
+  });
+  
+  return useMemo(() => {
+    if (!orderNumber || !ordersData?.data) return null;
+    
+    // 清理輸入的訂單編號（移除 # 符號）
+    const cleanOrderNumber = orderNumber.replace('#', '');
+    
+    // 查找匹配的訂單
+    const order = ordersData.data.find(o => {
+      // 檢查完整訂單編號
+      if (o.order_number === cleanOrderNumber || o.order_number === orderNumber) return true;
+      
+      // 檢查訂單編號的數字部分（如從 SO-20250716-0023 提取 0023 或 23）
+      const orderNum = o.order_number?.split('-').pop();
+      if (!orderNum) return false;
+      
+      // 移除前置零並比較
+      const numericPart = orderNum.replace(/^0+/, '') || '0';
+      const inputNumeric = cleanOrderNumber.replace(/^0+/, '') || '0';
+      
+      return orderNum === cleanOrderNumber || 
+             numericPart === inputNumeric ||
+             orderNum === orderNumber ||
+             numericPart === orderNumber;
+    });
+    
+    return order?.id || null;
+  }, [orderNumber, ordersData]);
 }
 
 /**
@@ -240,30 +293,34 @@ export function useOrderDetail(orderId: number | null) {
     },
     // 🎯 新增 select 選項 - 數據精煉廠，讓元件獲得純淨的數據
     select: (response: any): ProcessedOrder | null => {
-      // 1. 解包：從 API 響應中提取 data 部分
-      const order = response?.data;
-      if (!order) return null;
+      if (!response) return null;
+      
+      // 1. 檢查響應格式 - 可能 response 本身就是 order 對象
+      const order = response?.data || response;
+      if (!order || !order.id) {
+        return null;
+      }
 
       // 2. 進行所有必要的類型轉換和數據清理
       // 明確返回 ProcessedOrder 類型，確保所有消費端都能享受完美的類型推斷
       const processedOrder: ProcessedOrder = {
         ...order,
         // 📊 金額字段的數值化處理 - 絕對保證是 number
-        subtotal: parseFloat(order.subtotal || '0'),
-        shipping_fee: order.shipping_fee ? parseFloat(order.shipping_fee) : null,
-        tax_amount: parseFloat(order.tax_amount || '0'),
-        discount_amount: parseFloat(order.discount_amount || '0'),
-        grand_total: parseFloat(order.grand_total || '0'),
-        paid_amount: parseFloat(order.paid_amount || '0'),
+        subtotal: parseFloat(String(order.subtotal || '0')),
+        shipping_fee: order.shipping_fee ? parseFloat(String(order.shipping_fee)) : null,
+        tax_amount: parseFloat(String(order.tax_amount || '0')),
+        discount_amount: parseFloat(String(order.discount_amount || '0')),
+        grand_total: parseFloat(String(order.grand_total || '0')),
+        paid_amount: parseFloat(String(order.paid_amount || '0')),
         
         // 🛒 訂單項目的數據清理 - 每個項目都是 ProcessedOrderItem
         items: order.items?.map((item: any): ProcessedOrderItem => ({
           ...item,
-          price: parseFloat(item.price || '0'),
-          cost: parseFloat(item.cost || '0'),
-          quantity: parseInt(item.quantity || '0', 10),
-          tax_rate: parseFloat(item.tax_rate || '0'),
-          discount_amount: parseFloat(item.discount_amount || '0'),
+          price: parseFloat(String(item.price || '0')),
+          cost: parseFloat(String(item.cost || '0')),
+          quantity: parseInt(String(item.quantity || '0'), 10),
+          tax_rate: parseFloat(String(item.tax_rate || '0')),
+          discount_amount: parseFloat(String(item.discount_amount || '0')),
           // 🎯 Operation: Precise Tagging - 確保預訂標記正確傳遞
           is_backorder: Boolean(item.is_backorder),
         })) || [],
@@ -275,7 +332,9 @@ export function useOrderDetail(orderId: number | null) {
         // 💰 處理付款記錄 - 確保金額是 number 類型
         payment_records: order.payment_records?.map((payment: any) => ({
           ...payment,
-          amount: parseFloat(payment.amount || '0'),
+          amount: parseFloat(String(payment.amount || '0')),
+          // 🎯 確保日期欄位存在
+          payment_date: payment.payment_date || null,
         })) || undefined,
       };
       

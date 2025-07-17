@@ -426,7 +426,9 @@ export function OrdersPageClient() {
                     <Button
                       variant="link"
                       className="p-0 h-auto font-medium text-primary hover:underline"
-                      onClick={() => setPreviewOrderId(order.id)}
+                      onClick={() => {
+                        router.push(`/orders/${order.id}`);
+                      }}
                     >
                       {order.order_number}
                     </Button>
@@ -444,7 +446,10 @@ export function OrdersPageClient() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {new Date(order.created_at).toLocaleDateString()}
+                    {order.created_at 
+                      ? new Date(order.created_at).toLocaleDateString()
+                      : '未知日期'
+                    }
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

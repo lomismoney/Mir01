@@ -24,6 +24,7 @@ class InventoryTransfer extends Model
         'to_store_id',
         'user_id',
         'product_variant_id',
+        'order_id',
         'quantity',
         'status',
         'notes',
@@ -37,6 +38,7 @@ class InventoryTransfer extends Model
         'to_store_id' => 'integer',
         'user_id' => 'integer',
         'product_variant_id' => 'integer',
+        'order_id' => 'integer',
         'quantity' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -88,6 +90,16 @@ class InventoryTransfer extends Model
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
+    }
+    
+    /**
+     * 獲取關聯的訂單
+     * 
+     * @return BelongsTo<Order, InventoryTransfer>
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
     
     /**

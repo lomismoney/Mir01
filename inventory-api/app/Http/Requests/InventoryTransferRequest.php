@@ -42,6 +42,7 @@ class InventoryTransferRequest extends FormRequest
                 'string', 
                 Rule::in(['pending', 'in_transit', 'completed', 'cancelled']),
             ],
+            'order_id' => ['nullable', 'integer', 'exists:orders,id'],
         ];
     }
     
@@ -104,6 +105,10 @@ class InventoryTransferRequest extends FormRequest
             'status' => [
                 'description' => '轉移狀態（可選，預設為 completed）',
                 'example' => 'completed',
+            ],
+            'order_id' => [
+                'description' => '關聯的訂單ID（可選）',
+                'example' => null,
             ],
         ];
     }

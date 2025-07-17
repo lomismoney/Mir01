@@ -9,6 +9,7 @@ use App\Services\BaseService;
 use App\Services\Traits\HandlesInventoryOperations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 庫存服務類
@@ -22,6 +23,145 @@ use Illuminate\Support\Facades\Auth;
 class InventoryService extends BaseService
 {
     use HandlesInventoryOperations;
+    
+    /**
+     * 跨店庫存查詢
+     * 
+     * 查詢指定商品在所有門市的庫存狀況
+     * 
+     * @param array $productVariantIds 商品變體ID陣列
+     * @param int|null $excludeStoreId 要排除的門市ID（通常是當前門市）
+     * @return array 格式：[variant_id => [store_id => ['store_name' => string, 'quantity' => int]]]
+     */
+    public function checkCrossStoreAvailability(array $productVariantIds, ?int $excludeStoreId = null): array
+    {
+        $query = Inventory::whereIn('product_variant_id', $productVariantIds)
+            ->where('quantity', '>', 0)
+            ->with(['store:id,name', 'productVariant.product']);
+            
+        if ($excludeStoreId) {
+            $query->where('store_id', '!=', $excludeStoreId);
+        }
+        
+        $inventories = $query->get();
+        
+        $result = [];
+        foreach ($inventories as $inventory) {
+            $variantId = $inventory->product_variant_id;
+            $storeId = $inventory->store_id;
+            
+            if (!isset($result[$variantId])) {
+                $result[$variantId] = [];
+            }
+            
+            $result[$variantId][$storeId] = [
+                'store_name' => $inventory->store->name,
+                'quantity' => $inventory->quantity,
+                'product_name' => $inventory->productVariant->product->name ?? '',
+                'sku' => $inventory->productVariant->sku ?? ''
+            ];
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * 智慧庫存建議
+     * 
+     * 根據訂單項目和目標門市，提供最佳的庫存處理建議
+     * 
+     * @param array $orderItems 訂單項目 [['product_variant_id' => int, 'quantity' => int], ...]
+     * @param int $targetStoreId 目標門市ID
+     * @return array 每個商品的建議處理方式
+     */
+    public function getStockSuggestions(array $orderItems, int $targetStoreId): array
+    {
+        $suggestions = [];
+        
+        foreach ($orderItems as $item) {
+            $variantId = $item['product_variant_id'];
+            $requestedQty = $item['quantity'];
+            
+            // 1. 檢查目標門市庫存
+            $targetStock = Inventory::where('product_variant_id', $variantId)
+                ->where('store_id', $targetStoreId)
+                ->value('quantity') ?? 0;
+            
+            // 2. 獲取商品資訊
+            $variant = ProductVariant::with('product')->find($variantId);
+            $productName = $variant ? ($variant->product->name ?? 'Unknown') : 'Unknown';
+            $sku = $variant ? $variant->sku : 'Unknown';
+            
+            $suggestion = [
+                'product_variant_id' => $variantId,
+                'product_name' => $productName,
+                'sku' => $sku,
+                'requested_quantity' => $requestedQty,
+                'current_store_stock' => $targetStock,
+                'shortage' => max(0, $requestedQty - $targetStock)
+            ];
+            
+            // 如果目標門市庫存充足，不需要建議
+            if ($targetStock >= $requestedQty) {
+                $suggestion['type'] = 'sufficient';
+                $suggestion['message'] = '庫存充足';
+                $suggestions[] = $suggestion;
+                continue;
+            }
+            
+            // 3. 查詢其他門市庫存
+            $otherStores = Inventory::where('product_variant_id', $variantId)
+                ->where('store_id', '!=', $targetStoreId)
+                ->where('quantity', '>', 0)
+                ->with('store:id,name')
+                ->orderBy('quantity', 'desc')
+                ->get();
+            
+            $totalAvailable = $targetStock;
+            $transfers = [];
+            $remainingNeeded = $requestedQty - $targetStock;
+            
+            // 4. 計算可調貨數量
+            foreach ($otherStores as $inventory) {
+                if ($remainingNeeded <= 0) break;
+                
+                $availableQty = min($inventory->quantity, $remainingNeeded);
+                $transfers[] = [
+                    'from_store_id' => $inventory->store_id,
+                    'from_store_name' => $inventory->store->name,
+                    'available_quantity' => $inventory->quantity,
+                    'suggested_quantity' => $availableQty
+                ];
+                
+                $totalAvailable += $availableQty;
+                $remainingNeeded -= $availableQty;
+            }
+            
+            // 5. 決定建議類型
+            if ($totalAvailable >= $requestedQty) {
+                // 可完全透過調貨滿足
+                $suggestion['type'] = 'transfer';
+                $suggestion['message'] = '建議從其他門市調貨';
+                $suggestion['transfers'] = $transfers;
+            } elseif ($totalAvailable > $targetStock) {
+                // 需要混合處理（部分調貨+部分進貨）
+                $suggestion['type'] = 'mixed';
+                $suggestion['message'] = '建議部分調貨，部分向供應商進貨';
+                $suggestion['transfers'] = $transfers;
+                $suggestion['purchase_quantity'] = $remainingNeeded;
+            } else {
+                // 只能透過進貨滿足
+                $suggestion['type'] = 'purchase';
+                $suggestion['message'] = '建議向供應商進貨';
+                $suggestion['purchase_quantity'] = $requestedQty - $targetStock;
+            }
+            
+            $suggestions[] = $suggestion;
+        }
+        
+        return $suggestions;
+    }
+    
     /**
      * 獲取預設門市ID
      * 
@@ -219,7 +359,23 @@ class InventoryService extends BaseService
             $inventory = $inventories->get($item['product_variant_id']);
             
             if (!$inventory) {
-                throw new \Exception("商品變體 {$item['product_variant_id']} 在門市 {$effectiveStoreId} 沒有庫存記錄");
+                // 🎯 自動創建缺失的庫存記錄，初始數量為 0
+                $inventory = Inventory::create([
+                    'product_variant_id' => $item['product_variant_id'],
+                    'store_id' => $effectiveStoreId,
+                    'quantity' => 0,
+                    'low_stock_threshold' => 0,
+                ]);
+                
+                // 記錄自動創建的日誌
+                \Log::warning("自動創建庫存記錄", [
+                    'product_variant_id' => $item['product_variant_id'],
+                    'store_id' => $effectiveStoreId,
+                    'context' => '訂單扣減庫存時發現缺失記錄'
+                ]);
+                
+                // 將新創建的記錄加入集合，以便後續使用
+                $inventories->put($item['product_variant_id'], $inventory);
             }
             
             if ($inventory->quantity < $item['quantity']) {
@@ -410,6 +566,23 @@ class InventoryService extends BaseService
             
             $inventory = $inventories->get($item['product_variant_id']);
             $variant = $variants->get($item['product_variant_id']);
+            
+            // 🎯 如果沒有庫存記錄，自動創建
+            if (!$inventory && $variant) {
+                $inventory = Inventory::create([
+                    'product_variant_id' => $item['product_variant_id'],
+                    'store_id' => $effectiveStoreId,
+                    'quantity' => 0,
+                    'low_stock_threshold' => 0,
+                ]);
+                
+                \Log::info("庫存檢查時自動創建庫存記錄", [
+                    'product_variant_id' => $item['product_variant_id'],
+                    'store_id' => $effectiveStoreId,
+                    'sku' => $variant->sku
+                ]);
+            }
+            
             $availableQuantity = $inventory ? $inventory->quantity : 0;
             
             // 如果庫存不足，加入結果列表
@@ -497,5 +670,69 @@ class InventoryService extends BaseService
         }
         
         return $result;
+    }
+
+    /**
+     * 智能化的自動調貨機制
+     *
+     * 當訂單項目庫存不足時，此方法會被觸發，嘗試從其他分店自動調貨
+     *
+     * @param \App\Models\OrderItem $orderItem 庫存不足的訂單項目
+     * @param int $requestingStoreId 發起調貨請求的門市ID
+     * @return bool 是否成功發起調貨
+     */
+    public function initiateAutomatedTransfer(\App\Models\OrderItem $orderItem, int $requestingStoreId): bool
+    {
+        return $this->executeInTransaction(function () use ($orderItem, $requestingStoreId) {
+            // 1. 尋找最佳貨源分店
+            $sourceStore = Inventory::where('product_variant_id', $orderItem->product_variant_id)
+                ->where('store_id', '!=', $requestingStoreId)
+                ->where('quantity', '>=', $orderItem->quantity)
+                ->orderBy('quantity', 'desc') // 優先從庫存最多的門市調貨
+                ->first();
+
+            // 2. 如果找不到貨源，記錄日誌並返回
+            if (!$sourceStore) {
+                Log::info('自動調貨失敗：所有分店庫存均不足', [
+                    'order_item_id' => $orderItem->id,
+                    'product_variant_id' => $orderItem->product_variant_id,
+                    'requested_quantity' => $orderItem->quantity
+                ]);
+                // 將狀態更新為預訂中
+                $orderItem->update(['status' => 'backordered']);
+                return false;
+            }
+
+            // 3. 建立調貨單
+            $transfer = \App\Models\InventoryTransfer::create([
+                'from_store_id' => $sourceStore->store_id,
+                'to_store_id' => $requestingStoreId,
+                'product_variant_id' => $orderItem->product_variant_id,
+                'quantity' => $orderItem->quantity,
+                'order_id' => $orderItem->order_id, // 關聯訂單
+                'status' => 'pending', // 初始狀態為待處理
+                'notes' => '由訂單 ' . $orderItem->order->order_number . ' 自動觸發的庫存調配',
+                'user_id' => $this->requireAuthentication('自動調貨')
+            ]);
+
+            \Log::info('庫存轉移建立成功', [
+                'transfer_id' => $transfer->id,
+                'order_id' => $transfer->order_id,
+                'status' => $transfer->status,
+                'notes' => $transfer->notes,
+            ]);
+
+            // 4. 更新訂單項目狀態為「調貨中」
+            $orderItem->update(['status' => 'transfer_pending']);
+
+            Log::info('自動調貨成功', [
+                'order_item_id' => $orderItem->id,
+                'from_store_id' => $sourceStore->store_id,
+                'to_store_id' => $requestingStoreId,
+                'transfer_id' => $transfer->id
+            ]);
+
+            return true;
+        });
     }
 } 

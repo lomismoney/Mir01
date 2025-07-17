@@ -135,6 +135,7 @@ export {
   useOrders,
   useCreateOrder,
   useOrderDetail,
+  useOrderIdByNumber,
   useConfirmOrderPayment,
   useCreateOrderShipment,
   useAddOrderPayment,

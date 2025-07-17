@@ -75,6 +75,10 @@ class StoreOrderRequest extends FormRequest
                 'description' => '客戶ID',
                 'example' => 1,
             ],
+            'store_id' => [
+                'description' => '門市ID',
+                'example' => 1,
+            ],
             'shipping_status' => [
                 'description' => '貨物狀態',
                 'example' => 'pending',

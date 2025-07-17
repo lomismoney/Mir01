@@ -51,6 +51,7 @@ class OrderItemResource extends JsonResource
             'is_stocked_sale' => $this->is_stocked_sale,
             'is_backorder' => $this->is_backorder, // 🎯 Operation: Precise Tagging - 新增預訂標記欄位
             'status' => $this->status,
+            'status_text' => $this->status_text, // 狀態中文說明
             'product_name' => $this->product_name,
             'sku' => $this->sku,
             'price' => $this->price,

@@ -42,9 +42,12 @@ export function useProductManager({ form }: UseProductManagerProps) {
           imageUrl: variant.imageUrl || null, // 🎯 確保更新時也包含圖片資訊
         });
       } else {
+        // 🎯 正確設置商品類型標記
+        const hasStock = variant.stock > 0;
         append({
           product_variant_id: Number(variant.id),
-          is_stocked_sale: true,
+          is_stocked_sale: hasStock, // 有庫存才是現貨銷售
+          is_backorder: !hasStock, // 無庫存則為預訂商品
           status: "pending",
           quantity: 1,
           price: Number(variant.price) || 0,
@@ -66,7 +69,8 @@ export function useProductManager({ form }: UseProductManagerProps) {
   const handleAddCustomItem = (item: any) => {
     append({
       product_variant_id: item.product_variant_id,
-      is_stocked_sale: false,
+      is_stocked_sale: false, // 🎯 訂製商品永遠不是現貨銷售
+      is_backorder: false, // 🎯 訂製商品也不是預訂（是特殊類型）
       status: "pending",
       quantity: item.quantity,
       price: item.price,

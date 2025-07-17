@@ -80,6 +80,8 @@ class Order extends Model
         return $this->hasMany(OrderStatusHistory::class);
     }
 
+    
+
     /**
      * 一個訂單屬於一個客戶 (Many-to-One / Inverse)
      */
@@ -111,6 +113,15 @@ class Order extends Model
     {
         return $this->hasMany(Installation::class);
     }
+
+    /**
+     * 一個訂單擁有多個庫存轉移記錄 (One-to-Many)
+     */
+    public function inventoryTransfers(): HasMany
+    {
+        return $this->hasMany(InventoryTransfer::class, 'order_id');
+    }
+    
 
     /**
      * 🎯 判斷訂單是否包含訂製商品

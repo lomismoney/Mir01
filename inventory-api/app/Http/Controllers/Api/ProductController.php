@@ -73,15 +73,28 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        // 準備基本的關聯載入陣列
+        $eagerLoads = [
+            'category', // ✅ 預先加載分類關聯，根除 N+1 查詢問題
+            'attributes', // ✅ 預先加載 SPU 的屬性關聯
+            'variants.attributeValues.attribute', // ✅ 預先加載 SKU 變體及其屬性
+            'variants.product.media', // 🎯 預先加載變體回到商品的關聯及其媒體，讓 ProductVariantResource 能夠輸出圖片 URL
+            'media' // 📸 預先加載媒體關聯，讓 ProductResource 能夠輸出圖片 URL
+        ];
+        
+        // 🎯 如果有指定 store_id，只載入該門市的庫存資料
+        if ($request->has('store_id') && !empty($request->store_id)) {
+            $storeId = $request->store_id;
+            $eagerLoads['variants.inventory'] = function ($query) use ($storeId) {
+                $query->where('store_id', $storeId)->with('store');
+            };
+        } else {
+            // 沒有指定門市時，載入所有庫存資料
+            $eagerLoads[] = 'variants.inventory.store';
+        }
+        
         $query = QueryBuilder::for(Product::class)
-            ->with([
-                'category', // ✅ 預先加載分類關聯，根除 N+1 查詢問題
-                'attributes', // ✅ 預先加載 SPU 的屬性關聯
-                'variants.attributeValues.attribute', // ✅ 預先加載 SKU 變體及其屬性
-                'variants.inventory.store', // ✅ 預先加載庫存資訊
-                'variants.product.media', // 🎯 預先加載變體回到商品的關聯及其媒體，讓 ProductVariantResource 能夠輸出圖片 URL
-                'media' // 📸 預先加載媒體關聯，讓 ProductResource 能夠輸出圖片 URL
-            ])
+            ->with($eagerLoads)
             ->allowedFilters([
                 'name', 
                 // 移除 sku 篩選，因為 sku 屬於 variants

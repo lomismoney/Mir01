@@ -199,7 +199,8 @@ return [
         // With API resources and transformers, Scribe tries to generate example models to use in your API responses.
         // By default, Scribe will try the model's factory, and if that fails, try fetching the first from the database.
         // You can reorder or remove strategies here.
-        'models_source' => ['factoryMake'],
+        // 🎯 可通過環境變數 SCRIBE_USE_FACTORY=false 禁用 factory
+        'models_source' => env('SCRIBE_USE_FACTORY') === 'false' ? [] : ['factoryMake'],
     ],
 
     // The strategies Scribe will use to extract information about your routes at each stage.
@@ -245,7 +246,7 @@ return [
     // For response calls, API resource responses and transformer responses,
     // Scribe will try to start database transactions, so no changes are persisted to your database.
     // Tell Scribe which connections should be transacted here. If you only use one db connection, you can leave this as is.
-    'database_connections_to_transact' => [],
+    'database_connections_to_transact' => [config('database.default')],
 
     'fractal' => [
         // If you are using a custom serializer with league/fractal, you can specify it here.
