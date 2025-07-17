@@ -193,8 +193,8 @@ class OrderServiceTest extends TestCase
              ->andReturn($stockCheckResults);
 
          // 預期拋出異常
-         $this->expectException(\Exception::class);
-         $this->expectExceptionMessage('現貨商品庫存不足');
+         $this->expectException(\App\Exceptions\Business\InsufficientStockException::class);
+         $this->expectExceptionMessage('庫存不足：商品 測試商品 (SKU: TEST-SKU-001) 需求 10，可用 0');
 
          $this->orderService->createOrder($orderData);
      }
@@ -232,6 +232,11 @@ class OrderServiceTest extends TestCase
              ->andReturn('ORD-2025-002');
 
          // 預訂商品不需要檢查庫存
+         $this->mockInventoryService
+             ->shouldReceive('initiateAutomatedTransfer')
+             ->once()
+             ->andReturn(true);
+         
          $this->mockInventoryService
              ->shouldNotReceive('batchCheckStock');
 

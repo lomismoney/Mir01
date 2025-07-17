@@ -25,6 +25,7 @@ class PurchaseItem extends Model
         'unit_price' => 'integer',
         'cost_price' => 'integer',
         'allocated_shipping_cost' => 'integer',
+        'order_item_id' => 'integer',     // 新增：關聯的訂單項目ID
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -41,6 +42,7 @@ class PurchaseItem extends Model
         'unit_price',
         'cost_price',
         'allocated_shipping_cost',
+        'order_item_id',      // 新增：關聯的訂單項目ID
     ];
 
     /**
@@ -107,6 +109,15 @@ class PurchaseItem extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class, 'purchase_item_id', 'id');
+    }
+
+    /**
+     * 獲取直接綁定的訂單項目（通過 order_item_id）
+     * 這是建立進貨單時綁定的特定訂單項目
+     */
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItem::class, 'order_item_id');
     }
 
     /**

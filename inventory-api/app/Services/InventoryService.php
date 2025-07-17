@@ -529,9 +529,10 @@ class InventoryService extends BaseService
      * 
      * @param array $items 商品項目陣列
      * @param int|null $storeId 門市ID
+     * @param bool $withLock 是否使用悲觀鎖（默認為 false，保持向後兼容）
      * @return array 庫存檢查結果
      */
-    public function batchCheckStock(array $items, ?int $storeId = null): array
+    public function batchCheckStock(array $items, ?int $storeId = null, bool $withLock = false): array
     {
         $results = [];
         $effectiveStoreId = $this->ensureValidStoreId($storeId);
@@ -541,6 +542,7 @@ class InventoryService extends BaseService
             ->filter(fn($item) => isset($item['product_variant_id']) && $item['is_stocked_sale'])
             ->pluck('product_variant_id')
             ->unique()
+            ->sort() // 🔐 統一排序避免死鎖
             ->values();
         
         if ($variantIds->isEmpty()) {
@@ -548,10 +550,15 @@ class InventoryService extends BaseService
         }
         
         // 批量獲取庫存記錄
-        $inventories = Inventory::whereIn('product_variant_id', $variantIds)
-            ->where('store_id', $effectiveStoreId)
-            ->get()
-            ->keyBy('product_variant_id');
+        $inventoryQuery = Inventory::whereIn('product_variant_id', $variantIds)
+            ->where('store_id', $effectiveStoreId);
+        
+        // 🔐 悲觀鎖強化：在檢查時就鎖定庫存記錄
+        if ($withLock) {
+            $inventoryQuery->lockForUpdate();
+        }
+        
+        $inventories = $inventoryQuery->get()->keyBy('product_variant_id');
         
         // 批量獲取商品變體信息
         $variants = ProductVariant::whereIn('id', $variantIds)
@@ -581,6 +588,11 @@ class InventoryService extends BaseService
                     'store_id' => $effectiveStoreId,
                     'sku' => $variant->sku
                 ]);
+                
+                // 如果使用鎖，需要重新獲取並鎖定新創建的記錄
+                if ($withLock) {
+                    $inventory = Inventory::where('id', $inventory->id)->lockForUpdate()->first();
+                }
             }
             
             $availableQuantity = $inventory ? $inventory->quantity : 0;

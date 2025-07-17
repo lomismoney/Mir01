@@ -3,6 +3,7 @@ import { apiClient } from '@/lib/apiClient';
 
 interface BackorderFilters {
   group_by_variant?: boolean;
+  group_by_order?: number;
   date_from?: string;
   date_to?: string;
   product_variant_id?: number;

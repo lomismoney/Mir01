@@ -786,4 +786,318 @@ class PurchaseControllerTest extends TestCase
         $response = $this->getJson('/api/purchases');
         $response->assertStatus(401);
     }
+
+    // ==================== 新增: 訂單綁定相關測試 ====================
+
+    #[Test]
+    public function admin_can_get_bindable_orders()
+    {
+        // 創建測試訂單和訂單項目
+        $customer = \App\Models\Customer::factory()->create();
+        $order = \App\Models\Order::factory()->create([
+            'customer_id' => $customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending'
+        ]);
+
+        $orderItem = \App\Models\OrderItem::factory()->create([
+            'order_id' => $order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'is_backorder' => true,
+            'quantity' => 10,
+            'fulfilled_quantity' => 0
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/purchases/bindable-orders');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'order_number',
+                        'customer_name',
+                        'items' => [
+                            '*' => [
+                                'id',
+                                'product_variant_id',
+                                'pending_quantity',
+                                'product_variant' => [
+                                    'id',
+                                    'sku',
+                                    'name'
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+    }
+
+    #[Test]
+    public function bindable_orders_can_be_filtered_by_store()
+    {
+        $store2 = Store::factory()->create();
+        $customer = \App\Models\Customer::factory()->create();
+        
+        // 為不同門市創建訂單
+        $order1 = \App\Models\Order::factory()->create([
+            'customer_id' => $customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending'
+        ]);
+
+        $order2 = \App\Models\Order::factory()->create([
+            'customer_id' => $customer->id,
+            'store_id' => $store2->id,
+            'shipping_status' => 'pending'
+        ]);
+
+        \App\Models\OrderItem::factory()->create([
+            'order_id' => $order1->id,
+            'product_variant_id' => $this->productVariant->id,
+            'is_backorder' => true,
+            'quantity' => 5,
+            'fulfilled_quantity' => 0
+        ]);
+
+        \App\Models\OrderItem::factory()->create([
+            'order_id' => $order2->id,
+            'product_variant_id' => $this->productVariant->id,
+            'is_backorder' => true,
+            'quantity' => 3,
+            'fulfilled_quantity' => 0
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/purchases/bindable-orders?store_id=' . $this->store->id);
+
+        $response->assertStatus(200);
+        
+        // 應該只返回指定門市的訂單
+        $responseData = $response->json('data');
+        $this->assertCount(1, $responseData);
+        $this->assertEquals($order1->id, $responseData[0]['id']);
+    }
+
+    #[Test]
+    public function bindable_orders_excludes_fully_fulfilled_items()
+    {
+        $customer = \App\Models\Customer::factory()->create();
+        $order = \App\Models\Order::factory()->create([
+            'customer_id' => $customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending'
+        ]);
+
+        // 創建一個已完全履行的預訂項目
+        \App\Models\OrderItem::factory()->create([
+            'order_id' => $order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'is_backorder' => true,
+            'quantity' => 10,
+            'fulfilled_quantity' => 10 // 已完全履行
+        ]);
+
+        $response = $this->actingAsAdmin()
+            ->getJson('/api/purchases/bindable-orders');
+
+        $response->assertStatus(200);
+        
+        // 不應該包含已完全履行的訂單
+        $responseData = $response->json('data');
+        $this->assertEmpty($responseData);
+    }
+
+    #[Test]
+    public function admin_can_bind_orders_to_purchase()
+    {
+        $customer = \App\Models\Customer::factory()->create();
+        $order = \App\Models\Order::factory()->create([
+            'customer_id' => $customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending'
+        ]);
+
+        $orderItem = \App\Models\OrderItem::factory()->create([
+            'order_id' => $order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'is_backorder' => true,
+            'quantity' => 10,
+            'fulfilled_quantity' => 0
+        ]);
+
+        $purchase = Purchase::factory()->create([
+            'store_id' => $this->store->id,
+            'status' => 'pending'
+        ]);
+
+        $bindingData = [
+            'order_items' => [
+                [
+                    'order_item_id' => $orderItem->id,
+                    'purchase_quantity' => 8
+                ]
+            ]
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/purchases/' . $purchase->id . '/bind-orders', $bindingData);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'data' => [
+                    'purchase_id',
+                    'bound_items_count',
+                    'total_bound_quantity'
+                ]
+            ]);
+
+        // 檢查數據庫中是否創建了綁定記錄
+        $this->assertDatabaseHas('purchase_items', [
+            'purchase_id' => $purchase->id,
+            'product_variant_id' => $this->productVariant->id,
+            'quantity' => 8,
+            'order_item_id' => $orderItem->id
+        ]);
+    }
+
+    #[Test]
+    public function binding_orders_validates_purchase_quantity()
+    {
+        $customer = \App\Models\Customer::factory()->create();
+        $order = \App\Models\Order::factory()->create([
+            'customer_id' => $customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending'
+        ]);
+
+        $orderItem = \App\Models\OrderItem::factory()->create([
+            'order_id' => $order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'is_backorder' => true,
+            'quantity' => 10,
+            'fulfilled_quantity' => 0
+        ]);
+
+        $purchase = Purchase::factory()->create([
+            'store_id' => $this->store->id,
+            'status' => 'pending'
+        ]);
+
+        $bindingData = [
+            'order_items' => [
+                [
+                    'order_item_id' => $orderItem->id,
+                    'purchase_quantity' => 15 // 超過可用數量
+                ]
+            ]
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/purchases/' . $purchase->id . '/bind-orders', $bindingData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['order_items.0.purchase_quantity']);
+    }
+
+    #[Test]
+    public function cannot_bind_orders_to_completed_purchase()
+    {
+        $customer = \App\Models\Customer::factory()->create();
+        $order = \App\Models\Order::factory()->create([
+            'customer_id' => $customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending'
+        ]);
+
+        $orderItem = \App\Models\OrderItem::factory()->create([
+            'order_id' => $order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'is_backorder' => true,
+            'quantity' => 10,
+            'fulfilled_quantity' => 0
+        ]);
+
+        $purchase = Purchase::factory()->create([
+            'store_id' => $this->store->id,
+            'status' => 'completed'
+        ]);
+
+        $bindingData = [
+            'order_items' => [
+                [
+                    'order_item_id' => $orderItem->id,
+                    'purchase_quantity' => 5
+                ]
+            ]
+        ];
+
+        $response = $this->actingAsAdmin()
+            ->postJson('/api/purchases/' . $purchase->id . '/bind-orders', $bindingData);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => '只有待處理或已確認狀態的進貨單可以綁定訂單'
+            ]);
+    }
+
+    #[Test]
+    public function staff_cannot_bind_orders_to_purchase()
+    {
+        $customer = \App\Models\Customer::factory()->create();
+        $order = \App\Models\Order::factory()->create([
+            'customer_id' => $customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending'
+        ]);
+
+        $orderItem = \App\Models\OrderItem::factory()->create([
+            'order_id' => $order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'is_backorder' => true,
+            'quantity' => 10,
+            'fulfilled_quantity' => 0
+        ]);
+
+        $purchase = Purchase::factory()->create([
+            'store_id' => $this->store->id,
+            'status' => 'pending'
+        ]);
+
+        $bindingData = [
+            'order_items' => [
+                [
+                    'order_item_id' => $orderItem->id,
+                    'purchase_quantity' => 5
+                ]
+            ]
+        ];
+
+        $response = $this->actingAsUser()
+            ->postJson('/api/purchases/' . $purchase->id . '/bind-orders', $bindingData);
+
+        $response->assertStatus(403);
+    }
+
+    #[Test]
+    public function unauthenticated_user_cannot_access_bindable_orders()
+    {
+        $response = $this->getJson('/api/purchases/bindable-orders');
+        $response->assertStatus(401);
+    }
+
+    #[Test]
+    public function unauthenticated_user_cannot_bind_orders()
+    {
+        $purchase = Purchase::factory()->create();
+        
+        $response = $this->postJson('/api/purchases/' . $purchase->id . '/bind-orders', [
+            'order_items' => []
+        ]);
+        
+        $response->assertStatus(401);
+    }
 } 

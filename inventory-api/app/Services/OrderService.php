@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
+use App\Models\InventoryTransfer;
 use App\Enums\OrderItemType;
 use App\Services\BaseService;
 use App\Services\Traits\HandlesInventoryOperations;
@@ -73,9 +74,11 @@ class OrderService extends BaseService
                 
                 // 檢查現貨商品是否有足夠庫存
                 if (!empty($stockedItems)) {
+                    // 🔐 悲觀鎖強化：在檢查庫存時就鎖定，確保檢查和扣減在同一事務中
                     $stockCheckResults = $this->inventoryService->batchCheckStock(
                         $stockedItems,
-                        $validatedData['store_id'] ?? null // 使用請求中指定的門市
+                        $validatedData['store_id'] ?? null, // 使用請求中指定的門市
+                        true // 啟用悲觀鎖
                     );
                     
                     if (!empty($stockCheckResults)) {
@@ -1121,6 +1124,217 @@ class OrderService extends BaseService
             return '已建立進貨單';
         }
         return '待建立進貨單';
+    }
+
+    /**
+     * 取得待處理的預訂商品（包含轉移資訊）
+     * 
+     * @param array $filters 篩選條件
+     * @return \Illuminate\Support\Collection
+     */
+    public function getPendingBackordersWithTransfers(array $filters = [])
+    {
+        $query = OrderItem::where(function ($q) {
+                $q->where('is_backorder', true)
+                  ->orWhere(function ($subQ) {
+                      $subQ->where('is_stocked_sale', false)
+                           ->where('is_backorder', false)
+                           ->whereNotNull('product_variant_id');
+                  });
+            })
+            ->whereNull('purchase_item_id')
+            ->where('is_fulfilled', false)
+            ->whereHas('order', function ($q) {
+                $q->where('shipping_status', '!=', 'cancelled');
+            })
+            ->with(['order.customer', 'productVariant.product', 'purchaseItem.purchase']);
+
+        // 套用篩選條件
+        if (!empty($filters['date_from'])) {
+            $query->where('created_at', '>=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $query->where('created_at', '<=', $filters['date_to']);
+        }
+        if (!empty($filters['product_variant_id'])) {
+            $query->where('product_variant_id', $filters['product_variant_id']);
+        }
+
+        $items = $query->orderBy('created_at', 'asc')->get();
+        
+        // 手動載入相關的轉移記錄
+        $orderIds = $items->pluck('order_id')->unique();
+        $transfers = InventoryTransfer::whereIn('order_id', $orderIds)->get();
+        $purchases = \App\Models\PurchaseItem::whereIn('id', $items->pluck('purchase_item_id')->filter())->with('purchase')->get();
+        
+        // 將轉移記錄映射到對應的訂單項目
+        $items->each(function ($item) use ($transfers, $purchases) {
+            // 查找該訂單相關的所有轉移記錄
+            $orderTransfers = $transfers->where('order_id', $item->order_id);
+            
+            // 尋找與此項目產品變體匹配的轉移
+            $matchingTransfer = $orderTransfers
+                ->where('product_variant_id', $item->product_variant_id)
+                ->first();
+            
+            $item->setRelation('transfer', $matchingTransfer);
+            
+            // 設置所有該訂單的轉移記錄（用於按訂單分組時顯示）
+            $item->setRelation('order_transfers', $orderTransfers);
+            
+            // 如果有購買項目ID，載入購買資訊
+            if ($item->purchase_item_id) {
+                $purchaseItem = $purchases->firstWhere('id', $item->purchase_item_id);
+                $item->setRelation('purchaseItem', $purchaseItem);
+            }
+        });
+        
+        // 如果需要按訂單分組
+        if (!empty($filters['group_by_order']) && $filters['group_by_order']) {
+            return $this->groupBackordersByOrder($items);
+        }
+
+        return $items;
+    }
+    
+    /**
+     * 將待進貨項目按訂單分組
+     * 
+     * @param \Illuminate\Support\Collection $items
+     * @return \Illuminate\Support\Collection
+     */
+    protected function groupBackordersByOrder($items)
+    {
+        $grouped = $items->groupBy('order_id');
+        
+        return $grouped->map(function ($orderItems, $orderId) {
+            $firstItem = $orderItems->first();
+            $order = $firstItem->order;
+            
+            // 計算彙總狀態
+            $summaryStatus = $this->calculateSummaryStatus($orderItems);
+            
+            return [
+                'order_id' => $orderId,
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer ? $order->customer->name : '',
+                'total_items' => $orderItems->count(),
+                'total_quantity' => $orderItems->sum('quantity'),
+                'created_at' => $order->created_at->toIso8601String(),
+                'days_pending' => now()->diffInDays($order->created_at),
+                'summary_status' => $summaryStatus['status'],
+                'summary_status_text' => $summaryStatus['text'],
+                'items' => $orderItems->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'product_name' => $item->product_name,
+                        'sku' => $item->sku,
+                        'quantity' => $item->quantity,
+                        'integrated_status' => $item->integrated_status,
+                        'integrated_status_text' => $item->integrated_status_text,
+                        'transfer' => $item->transfer ? [
+                            'id' => $item->transfer->id,
+                            'status' => $item->transfer->status,
+                            'from_store_id' => $item->transfer->from_store_id,
+                            'to_store_id' => $item->transfer->to_store_id,
+                        ] : null,
+                        'purchase_item_id' => $item->purchase_item_id,
+                        'purchase_status' => $item->purchaseItem && $item->purchaseItem->purchase ? 
+                            $item->purchaseItem->purchase->status : null,
+                    ];
+                })->values()
+            ];
+        })->values();
+    }
+    
+    /**
+     * 計算訂單的彙總狀態
+     * 
+     * @param \Illuminate\Support\Collection $items
+     * @return array
+     */
+    protected function calculateSummaryStatus($items)
+    {
+        $hasTransfer = false;
+        $hasPurchase = false;
+        $allCompleted = true;
+        $anyInProgress = false;
+        
+        foreach ($items as $item) {
+            if ($item->transfer) {
+                $hasTransfer = true;
+                if ($item->transfer->status === 'in_transit') {
+                    $anyInProgress = true;
+                }
+                if ($item->transfer->status !== 'completed') {
+                    $allCompleted = false;
+                }
+            } elseif ($item->purchase_item_id) {
+                $hasPurchase = true;
+                if ($item->purchaseItem && $item->purchaseItem->purchase) {
+                    $status = $item->purchaseItem->purchase->status;
+                    if (in_array($status, ['pending', 'ordered'])) {
+                        $anyInProgress = true;
+                    }
+                    if ($status !== 'received') {
+                        $allCompleted = false;
+                    }
+                }
+            } else {
+                // 沒有轉移也沒有進貨
+                $allCompleted = false;
+            }
+        }
+        
+        // 決定彙總狀態
+        if ($allCompleted && ($hasTransfer || $hasPurchase)) {
+            return ['status' => 'completed', 'text' => '全部完成'];
+        } elseif ($anyInProgress) {
+            if ($hasTransfer && $hasPurchase) {
+                return ['status' => 'mixed', 'text' => '部分調撥中/進貨中'];
+            } elseif ($hasTransfer) {
+                return ['status' => 'transfer_in_progress', 'text' => '調撥處理中'];
+            } else {
+                return ['status' => 'purchase_in_progress', 'text' => '進貨處理中'];
+            }
+        } else {
+            return ['status' => 'pending', 'text' => '待處理'];
+        }
+    }
+
+    /**
+     * 更新待進貨商品的轉移狀態
+     * 
+     * @param int $orderItemId 訂單項目ID
+     * @param string $status 新狀態
+     * @param string|null $notes 備註
+     * @return bool
+     * @throws \Exception
+     */
+    public function updateBackorderTransferStatus(int $orderItemId, string $status, ?string $notes = null): bool
+    {
+        $orderItem = OrderItem::with(['order', 'transfer'])->findOrFail($orderItemId);
+        
+        // 檢查是否有相關的轉移記錄
+        if (!$orderItem->transfer) {
+            throw new \Exception('此訂單項目沒有相關的庫存轉移記錄');
+        }
+        
+        $transfer = $orderItem->transfer;
+        
+        // 檢查狀態是否可以更新
+        if ($transfer->status === 'completed' || $transfer->status === 'cancelled') {
+            throw new \Exception('已完成或已取消的轉移記錄不能更改狀態');
+        }
+        
+        // 更新轉移狀態
+        $originalNotes = $transfer->notes;
+        $transfer->status = $status;
+        $transfer->notes = $notes ? 
+            ($originalNotes ? $originalNotes . ' | ' . $notes : $notes) : 
+            $originalNotes;
+        
+        return $transfer->save();
     }
 
     /**

@@ -253,8 +253,8 @@ class PurchaseService extends BaseService
     private function processInventoryForCompletedPurchase(Purchase $purchase): void
     {
         foreach ($purchase->items as $item) {
-            // 使用實際收貨數量，如果沒有記錄則使用訂購數量
-            $quantityToAdd = $item->received_quantity ?? $item->quantity;
+            // 使用實際收貨數量，如果為0或null則使用訂購數量
+            $quantityToAdd = ($item->received_quantity > 0) ? $item->received_quantity : $item->quantity;
             
             // 如果實際收貨數量為 0，跳過此項目
             if ($quantityToAdd <= 0) {
@@ -1294,5 +1294,111 @@ class PurchaseService extends BaseService
             // 部分項目已收貨
             return Purchase::STATUS_PARTIALLY_RECEIVED;
         }
+    }
+
+    /**
+     * 綁定訂單項目到進貨單
+     * 
+     * @param Purchase $purchase 進貨單
+     * @param array $orderItems 要綁定的訂單項目
+     * @return array 綁定結果統計
+     */
+    public function bindOrdersToPurchase(Purchase $purchase, array $orderItems): array
+    {
+        return $this->executeInTransaction(function () use ($purchase, $orderItems) {
+            $boundItemsCount = 0;
+            $totalBoundQuantity = 0;
+
+
+            foreach ($orderItems as $item) {
+                $orderItem = OrderItem::findOrFail($item['order_item_id']);
+                $purchaseQuantity = $item['purchase_quantity'];
+                
+                // 驗證商品變體和門市匹配
+                if ($orderItem->order->store_id !== $purchase->store_id) {
+                    throw new \InvalidArgumentException(
+                        "訂單項目 {$orderItem->id} 的門市與進貨單門市不匹配"
+                    );
+                }
+
+                // 檢查是否已經有相同商品變體的項目
+                $existingPurchaseItem = $purchase->items()
+                    ->where('product_variant_id', $orderItem->product_variant_id)
+                    ->first();
+
+                if ($existingPurchaseItem) {
+                    // 如果已經有項目，但還沒有綁定到訂單項目，則綁定它
+                    if (is_null($existingPurchaseItem->order_item_id)) {
+                        $existingPurchaseItem->update([
+                            'order_item_id' => $orderItem->id,
+                            'quantity' => $existingPurchaseItem->quantity + $purchaseQuantity
+                        ]);
+                        
+                    } else {
+                        // 如果已經綁定到其他訂單項目，則增加數量
+                        $existingPurchaseItem->increment('quantity', $purchaseQuantity);
+                        
+                    }
+                } else {
+                    // 創建新的進貨項目
+                    $createdItem = $purchase->items()->create([
+                        'product_variant_id' => $orderItem->product_variant_id,
+                        'quantity' => $purchaseQuantity,
+                        'unit_price' => $orderItem->productVariant->cost_price ?? 0,
+                        'cost_price' => $orderItem->productVariant->cost_price ?? 0,
+                        'allocated_shipping_cost' => 0,
+                        'order_item_id' => $orderItem->id,
+                    ]);
+
+                }
+
+                $boundItemsCount++;
+                $totalBoundQuantity += $purchaseQuantity;
+
+                Log::info('訂單項目已綁定到進貨單', [
+                    'purchase_id' => $purchase->id,
+                    'order_item_id' => $orderItem->id,
+                    'product_variant_id' => $orderItem->product_variant_id,
+                    'purchase_quantity' => $purchaseQuantity,
+                    'order_number' => $orderItem->order->order_number ?? 'N/A',
+                    'purchase_order_number' => $purchase->order_number ?? 'N/A'
+                ]);
+            }
+
+            // 重新計算進貨單總額
+            $this->recalculatePurchaseTotal($purchase);
+
+            return [
+                'purchase_id' => $purchase->id,
+                'bound_items_count' => $boundItemsCount,
+                'total_bound_quantity' => $totalBoundQuantity,
+            ];
+        });
+    }
+
+    /**
+     * 重新計算進貨單總額
+     * 
+     * @param Purchase $purchase 進貨單
+     */
+    private function recalculatePurchaseTotal(Purchase $purchase): void
+    {
+        $items = $purchase->items()->get();
+        $itemSubtotal = $items->sum(function ($item) {
+            return $item->quantity * $item->cost_price;
+        });
+        
+        $totalAmount = $itemSubtotal + $purchase->shipping_cost;
+        
+        $purchase->update([
+            'total_amount' => $totalAmount
+        ]);
+
+        Log::info('進貨單總額已重新計算', [
+            'purchase_id' => $purchase->id,
+            'item_subtotal' => $itemSubtotal,
+            'shipping_cost' => $purchase->shipping_cost,
+            'total_amount' => $totalAmount
+        ]);
     }
 }

@@ -132,18 +132,22 @@ Route::middleware('auth:sanctum')->group(function () {
      * 提供完整的進貨單 CRUD 操作，包含狀態管理功能
      * 
      * 路由列表：
-     * GET    /api/purchases                      - 獲取進貨單列表（支援篩選和排序）
-     * POST   /api/purchases                      - 創建新的進貨單
-     * GET    /api/purchases/{purchase}           - 獲取指定進貨單
-     * PUT    /api/purchases/{purchase}           - 更新指定進貨單
-     * DELETE /api/purchases/{purchase}           - 刪除指定進貨單
-     * PATCH  /api/purchases/{purchase}/status    - 更新進貨單狀態
-     * PATCH  /api/purchases/{purchase}/cancel    - 取消進貨單
-     * PATCH  /api/purchases/{purchase}/notes     - 更新進貨單記事
+     * GET    /api/purchases                           - 獲取進貨單列表（支援篩選和排序）
+     * POST   /api/purchases                           - 創建新的進貨單
+     * GET    /api/purchases/bindable-orders           - 獲取可綁定的訂單列表
+     * GET    /api/purchases/{purchase}                - 獲取指定進貨單
+     * PUT    /api/purchases/{purchase}                - 更新指定進貨單
+     * DELETE /api/purchases/{purchase}                - 刪除指定進貨單
+     * PATCH  /api/purchases/{purchase}/status         - 更新進貨單狀態
+     * PATCH  /api/purchases/{purchase}/cancel         - 取消進貨單
+     * POST   /api/purchases/{purchase}/bind-orders    - 綁定訂單到進貨單
+     * PATCH  /api/purchases/{purchase}/notes          - 更新進貨單記事
      */
+    Route::get('purchases/bindable-orders', [PurchaseController::class, 'getBindableOrders']);
     Route::apiResource('purchases', PurchaseController::class)->parameters(['purchases' => 'purchase']);
     Route::patch('purchases/{purchase}/status', [PurchaseController::class, 'updateStatus']);
     Route::patch('purchases/{purchase}/cancel', [PurchaseController::class, 'cancel']);
+    Route::post('purchases/{purchase}/bind-orders', [PurchaseController::class, 'bindOrders']);
     Route::post('purchases/{purchase}/partial-receipt', [PurchaseController::class, 'partialReceipt']);
     Route::patch('purchases/{purchase}/notes', [PurchaseController::class, 'updateNotes']);
 
@@ -370,6 +374,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [App\Http\Controllers\Api\BackorderController::class, 'stats'])->name('stats');
         Route::get('/summary', [App\Http\Controllers\Api\BackorderController::class, 'summary'])->name('summary');
         Route::post('/convert', [App\Http\Controllers\Api\BackorderController::class, 'convertToPurchase'])->name('convert');
+        Route::post('/update-transfer-status', [App\Http\Controllers\Api\BackorderController::class, 'updateTransferStatus'])->name('update-transfer-status');
     });
 
     /**

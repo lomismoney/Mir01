@@ -557,4 +557,179 @@ class PurchaseController extends Controller
             return response()->json(['message' => '記事更新失敗，請稍後再試'], 500);
         }
     }
+
+    /**
+     * Get orders that can be bound to purchase orders.
+     * 
+     * @group 進貨管理
+     * @authenticated
+     * @summary 取得可綁定的訂單
+     * @description 取得有預訂商品的訂單列表，用於建立進貨單時綁定訂單。
+     * 
+     * @queryParam store_id integer 門市ID篩選 Example: 1
+     * @queryParam product_variant_id integer 商品變體ID篩選 Example: 1
+     * 
+     * @response 200 scenario="成功取得可綁定訂單" {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "order_number": "ORD-20250101-001",
+     *       "customer_name": "客戶名稱",
+     *       "store_id": 1,
+     *       "items": [
+     *         {
+     *           "id": 1,
+     *           "product_variant_id": 1,
+     *           "pending_quantity": 5,
+     *           "product_variant": {
+     *             "id": 1,
+     *             "sku": "PROD-001",
+     *             "name": "商品名稱"
+     *           }
+     *         }
+     *       ]
+     *     }
+     *   ]
+     * }
+     */
+    public function getBindableOrders(Request $request)
+    {
+        $this->authorize('viewAny', Purchase::class);
+
+        $query = \App\Models\Order::with([
+            'customer',
+            'items' => function ($query) {
+                $query->where('is_backorder', true)
+                    ->whereColumn('fulfilled_quantity', '<', 'quantity')
+                    ->with('productVariant:id,sku,name');
+            }
+        ])
+        ->whereHas('items', function ($query) {
+            $query->where('is_backorder', true)
+                ->whereColumn('fulfilled_quantity', '<', 'quantity');
+        });
+
+        // 依門市篩選
+        if ($request->has('store_id')) {
+            $query->where('store_id', $request->store_id);
+        }
+
+        // 依商品變體篩選
+        if ($request->has('product_variant_id')) {
+            $query->whereHas('items', function ($subQuery) use ($request) {
+                $subQuery->where('product_variant_id', $request->product_variant_id)
+                    ->where('is_backorder', true)
+                    ->whereColumn('fulfilled_quantity', '<', 'quantity');
+            });
+        }
+
+        $orders = $query->get()->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer->name,
+                'store_id' => $order->store_id,
+                'items' => $order->items->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'product_variant_id' => $item->product_variant_id,
+                        'pending_quantity' => $item->quantity - $item->fulfilled_quantity,
+                        'product_variant' => [
+                            'id' => $item->productVariant->id,
+                            'sku' => $item->productVariant->sku,
+                            'name' => $item->productVariant->name,
+                        ]
+                    ];
+                })
+            ];
+        });
+
+        return response()->json(['data' => $orders]);
+    }
+
+    /**
+     * Bind orders to a purchase order.
+     * 
+     * @group 進貨管理
+     * @authenticated
+     * @summary 綁定訂單到進貨單
+     * @description 將指定的訂單項目綁定到進貨單，建立進貨與訂單的關聯。
+     * 
+     * @urlParam purchase integer required 進貨單ID Example: 1
+     * @bodyParam order_items object[] required 要綁定的訂單項目列表
+     * @bodyParam order_items[].order_item_id integer required 訂單項目ID Example: 1
+     * @bodyParam order_items[].purchase_quantity integer required 進貨數量 Example: 5
+     * 
+     * @response 200 scenario="成功綁定訂單" {
+     *   "message": "成功綁定訂單",
+     *   "data": {
+     *     "purchase_id": 1,
+     *     "bound_items_count": 2,
+     *     "total_bound_quantity": 15
+     *   }
+     * }
+     * 
+     * @response 422 scenario="進貨單狀態不允許綁定" {
+     *   "message": "只有待處理或已確認狀態的進貨單可以綁定訂單"
+     * }
+     * 
+     * @response 422 scenario="進貨數量超過待處理數量" {
+     *   "message": "進貨數量不能超過待處理數量"
+     * }
+     */
+    public function bindOrders(Purchase $purchase, Request $request, PurchaseService $purchaseService)
+    {
+        $this->authorize('update', $purchase);
+
+
+        // 檢查進貨單狀態
+        if (!in_array($purchase->status, ['pending', 'confirmed'])) {
+            return response()->json([
+                'message' => '只有待處理或已確認狀態的進貨單可以綁定訂單'
+            ], 422);
+        }
+
+        // 驗證請求數據
+        $validated = $request->validate([
+            'order_items' => 'required|array|min:1',
+            'order_items.*.order_item_id' => 'required|integer|exists:order_items,id',
+            'order_items.*.purchase_quantity' => 'required|integer|min:1',
+        ]);
+
+        // 驗證進貨數量不超過待處理數量
+        foreach ($validated['order_items'] as $index => $item) {
+            $orderItem = \App\Models\OrderItem::find($item['order_item_id']);
+            $pendingQuantity = $orderItem->quantity - $orderItem->fulfilled_quantity;
+            
+            if ($item['purchase_quantity'] > $pendingQuantity) {
+                return response()->json([
+                    'message' => '進貨數量不能超過待處理數量',
+                    'errors' => [
+                        "order_items.{$index}.purchase_quantity" => [
+                            "進貨數量 {$item['purchase_quantity']} 超過待處理數量 {$pendingQuantity}"
+                        ]
+                    ]
+                ], 422);
+            }
+        }
+
+        try {
+            $result = $purchaseService->bindOrdersToPurchase($purchase, $validated['order_items']);
+            
+            return response()->json([
+                'message' => '成功綁定訂單',
+                'data' => $result
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('綁定訂單失敗', [
+                'purchase_id' => $purchase->id,
+                'order_items' => $validated['order_items'],
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['message' => '綁定訂單失敗，請稍後再試'], 500);
+        }
+    }
 }

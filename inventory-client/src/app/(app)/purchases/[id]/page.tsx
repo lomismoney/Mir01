@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePurchase, useUpdatePurchaseNotes } from "@/hooks";
 import {
@@ -12,6 +12,7 @@ import {
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { PartialReceiptDialog } from "@/components/purchases/PartialReceiptDialog";
+import { BindOrdersDialog } from "@/components/purchases/BindOrdersDialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
@@ -41,6 +42,7 @@ import {
   XCircle,
   CheckCircle,
   AlertCircle,
+  Link2,
 } from "lucide-react";
 
 export default function PurchaseDetailPage() {
@@ -48,11 +50,14 @@ export default function PurchaseDetailPage() {
   const router = useRouter();
   const purchaseId = params.id;
 
-  const { data: purchase, isLoading, error } = usePurchase(purchaseId);
+  const { data: purchase, isLoading, error, refetch } = usePurchase(purchaseId);
   const updateNotesMutation = useUpdatePurchaseNotes();
   
   // 部分收貨對話框狀態
   const [partialReceiptOpen, setPartialReceiptOpen] = useState(false);
+  
+  // 綁定訂單對話框狀態
+  const [bindOrdersOpen, setBindOrdersOpen] = useState(false);
   
   // 記事編輯狀態
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -113,6 +118,8 @@ export default function PurchaseDetailPage() {
     created_at?: string;
     updated_at?: string;
     notes?: string;
+    bound_orders_count?: number;
+    bound_items_count?: number;
     items?: {
       id?: number;
       quantity?: number;
@@ -128,8 +135,8 @@ export default function PurchaseDetailPage() {
     purchaseData.status as PurchaseStatus,
   );
   
-  // 處理記事保存
-  const handleSaveNotes = async () => {
+  // 處理記事保存（使用 useCallback 優化）
+  const handleSaveNotes = useCallback(async () => {
     if (!purchase?.id) return;
     
     updateNotesMutation.mutate(
@@ -144,7 +151,7 @@ export default function PurchaseDetailPage() {
         },
       }
     );
-  };
+  }, [purchase?.id, notesInput, updateNotesMutation]);
   
   // 當 purchase 數據加載後，設置 notes
   if (purchase && notesInput === "" && !isEditingNotes) {
@@ -188,6 +195,16 @@ export default function PurchaseDetailPage() {
               >
                 <PackageCheck className="h-4 w-4 mr-2" />
                 部分收貨
+              </Button>
+            )}
+            {(purchaseData.status === "pending" || purchaseData.status === "confirmed") && (
+              <Button
+                variant="outline"
+                onClick={() => setBindOrdersOpen(true)}
+                data-testid="bind-orders-button"
+              >
+                <Link2 className="h-4 w-4 mr-2" />
+                綁定訂單
               </Button>
             )}
             {permissions.canModify && (
@@ -294,6 +311,33 @@ export default function PurchaseDetailPage() {
                 </p>
               </div>
             </div>
+
+            {/* 綁定狀態資訊 */}
+            {(purchaseData.bound_orders_count || 0) > 0 && (
+              <>
+                <Separator className="my-6" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Link2 className="h-4 w-4" />
+                      <span>已綁定訂單</span>
+                    </div>
+                    <p className="font-medium">
+                      {purchaseData.bound_orders_count} 筆訂單
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Package className="h-4 w-4" />
+                      <span>綁定項目</span>
+                    </div>
+                    <p className="font-medium">
+                      {purchaseData.bound_items_count} 個項目
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
 
             <Separator className="my-6" />
 
@@ -510,16 +554,13 @@ export default function PurchaseDetailPage() {
                       >
                         商品總計: NT${" "}
                         {purchaseData.items
-                          .reduce(
-                            (sum: number, item: {
-                              quantity?: number;
-                              cost_price?: number;
-                            }) =>
+                          ?.reduce(
+                            (sum, item) =>
                               sum +
                               (item.quantity || 0) * (item.cost_price || 0),
                             0,
                           )
-                          .toLocaleString()}
+                          .toLocaleString() || "0"}
                       </div>
                       <div
                         className="text-sm text-muted-foreground"
@@ -623,6 +664,20 @@ export default function PurchaseDetailPage() {
           isOpen={partialReceiptOpen}
           onClose={() => setPartialReceiptOpen(false)}
           purchase={purchase}
+        />
+      )}
+
+      {/* 綁定訂單對話框 */}
+      {purchase && (
+        <BindOrdersDialog
+          open={bindOrdersOpen}
+          onOpenChange={setBindOrdersOpen}
+          purchase={purchase}
+          onSuccess={() => {
+            setBindOrdersOpen(false);
+            // 刷新頁面數據 - 通過重新觸發 query
+            refetch();
+          }}
         />
       )}
     </div>

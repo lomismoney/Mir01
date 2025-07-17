@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useBackorders } from '@/hooks/queries/backorders/useBackorders';
-import { SimpleDataTable } from '@/components/simple-data-table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
-import { ColumnDef } from '@tanstack/react-table';
-import { formatDate } from '@/lib/utils';
-import { ArrowUpDown, Calendar, Package } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
+import { Package, ShoppingCart } from 'lucide-react';
+import { BackorderStatusDialog } from './BackorderStatusDialog';
+import { BackorderGroupedList } from './BackorderGroupedList';
+import { CreatePurchaseDialog } from './CreatePurchaseDialog';
+import { useBatchSelection } from '@/hooks/useBatchSelection';
 
 interface BackorderItem {
   id: number;
@@ -24,6 +24,8 @@ interface BackorderItem {
   purchase_item_id: number | null;
   purchase_status: string;
   purchase_status_text: string;
+  integrated_status?: string;
+  integrated_status_text?: string;
   created_at: string;
   order: {
     order_number: string;
@@ -38,115 +40,68 @@ interface BackorderItem {
       name: string;
     };
   };
+  transfer?: {
+    id: number;
+    from_store_id: number;
+    to_store_id: number;
+    quantity: number;
+    status: string;
+    notes: string;
+    created_at: string;
+  };
 }
 
 export function BackorderList() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [selectedItem, setSelectedItem] = useState<BackorderItem | null>(null);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [createPurchaseOpen, setCreatePurchaseOpen] = useState(false);
+  // 固定為按訂單分組模式
+  
   const filters = {
-    date_from: dateRange?.from?.toISOString().split('T')[0],
-    date_to: dateRange?.to?.toISOString().split('T')[0],
+    ...(dateRange?.from && { date_from: dateRange.from.toISOString().split('T')[0] }),
+    ...(dateRange?.to && { date_to: dateRange.to.toISOString().split('T')[0] }),
+    group_by_order: 1, // 固定為按訂單分組
   };
 
-  const { data, isLoading } = useBackorders(filters);
+  const { data, isLoading, error, refetch } = useBackorders(filters);
 
-  const columns: ColumnDef<BackorderItem>[] = [
-    {
-      accessorKey: 'order.order_number',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          訂單編號
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-    },
-    {
-      accessorKey: 'order.customer.name',
-      header: '客戶',
-      cell: ({ row }) => row.original.order.customer?.name || '-',
-    },
-    {
-      accessorKey: 'product_name',
-      header: '商品名稱',
-    },
-    {
-      accessorKey: 'sku',
-      header: 'SKU',
-      cell: ({ row }) => (
-        <code className="text-sm">{row.original.sku}</code>
-      ),
-    },
-    {
-      accessorKey: 'quantity',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          數量
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-    },
-    {
-      accessorKey: 'purchase_status_text',
-      header: '採購狀態',
-      cell: ({ row }) => {
-        const status = row.original.purchase_status;
-        const variant = status === 'pending_purchase' ? 'destructive' : 'secondary';
-        
-        return (
-          <Badge variant={variant}>
-            {row.original.purchase_status_text}
-          </Badge>
-        );
-      },
-    },
-    {
-      accessorKey: 'created_at',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          下單日期
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => formatDate(row.original.created_at),
-    },
-    {
-      id: 'days_pending',
-      header: '等待天數',
-      cell: ({ row }) => {
-        const days = Math.floor(
-          (new Date().getTime() - new Date(row.original.created_at).getTime()) / 
-          (1000 * 60 * 60 * 24)
-        );
-        return (
-          <span className={days > 7 ? 'text-destructive' : ''}>
-            {days} 天
-          </span>
-        );
-      },
-    },
-  ];
+  // 移除清單模式相關代碼
 
-  const filteredData = data?.data?.filter((item) => {
-    if (!searchTerm) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      (item as any).product_name?.toLowerCase().includes(term) ||
-      (item as any).sku?.toLowerCase().includes(term) ||
-      (item as any).order?.order_number?.toLowerCase().includes(term) ||
-      (item as any).order?.customer?.name?.toLowerCase().includes(term) ||
-      (item as any).productVariant?.name?.toLowerCase().includes(term)
+  // 對分組資料進行過濾
+  const filteredGroupedData = data?.data ? 
+    (data.data as any[]).filter(order => {
+      if (!searchTerm) return true;
+      const term = searchTerm.toLowerCase();
+      return (
+        order.order_number?.toLowerCase().includes(term) ||
+        order.customer_name?.toLowerCase().includes(term) ||
+        order.items?.some((item: any) => 
+          item.product_name?.toLowerCase().includes(term) ||
+          item.sku?.toLowerCase().includes(term)
+        )
+      );
+    }) : [];
+
+  // 將分組資料轉換為可選擇的項目
+  const allSelectableItems = useMemo(() => {
+    return filteredGroupedData.flatMap(order => 
+      order.items?.map((item: any) => ({
+        id: item.id,
+        order_id: order.order_id,
+        order_number: order.order_number,
+        product_variant_id: item.product_variant_id || 0,
+        quantity: item.quantity,
+        sku: item.sku,
+        product_name: item.product_name,
+        store_id: 1, // 假設都是門市 1，可以根據實際需求調整
+      })) || []
     );
-  });
+  }, [filteredGroupedData]);
+
+  // 初始化批量選擇 Hook
+  const batchSelection = useBatchSelection(allSelectableItems);
 
   return (
     <div className="space-y-4">
@@ -169,9 +124,61 @@ export function BackorderList() {
         </div>
       </div>
 
-      <SimpleDataTable
-        columns={columns}
-        data={filteredData as any || []}
+      {/* 批量選擇操作欄 */}
+      {batchSelection.selectedCount > 0 && (
+        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium">
+              已選擇 {batchSelection.selectedCount} 個項目
+            </span>
+            <span className="text-sm text-muted-foreground">
+              總數量：{batchSelection.getTotalSelectedQuantity()}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={batchSelection.clearSelection}
+            >
+              清空選擇
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setCreatePurchaseOpen(true)}
+              className="gap-2"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              建立進貨單
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <BackorderGroupedList
+        data={filteredGroupedData}
+        onRefetch={refetch}
+        batchSelection={batchSelection}
+      />
+
+      <BackorderStatusDialog
+        item={selectedItem}
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
+        onSuccess={() => {
+          refetch();
+          setSelectedItem(null);
+        }}
+      />
+
+      <CreatePurchaseDialog
+        open={createPurchaseOpen}
+        onOpenChange={setCreatePurchaseOpen}
+        selectedItems={batchSelection.selectedItems}
+        onSuccess={() => {
+          refetch();
+          batchSelection.clearSelection();
+        }}
       />
     </div>
   );
