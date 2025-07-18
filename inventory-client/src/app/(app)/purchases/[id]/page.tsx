@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { usePurchase, useUpdatePurchaseNotes } from "@/hooks";
+import { usePurchase, useUpdatePurchaseNotes, useUpdateShippingCost } from "@/hooks";
 import {
   PURCHASE_STATUS_LABELS,
   PURCHASE_STATUS_COLORS,
@@ -14,6 +14,7 @@ import { zhTW } from "date-fns/locale";
 import { PartialReceiptDialog } from "@/components/purchases/PartialReceiptDialog";
 import { BindOrdersDialog } from "@/components/purchases/BindOrdersDialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 import {
@@ -52,6 +53,7 @@ export default function PurchaseDetailPage() {
 
   const { data: purchase, isLoading, error, refetch } = usePurchase(purchaseId);
   const updateNotesMutation = useUpdatePurchaseNotes();
+  const updateShippingCostMutation = useUpdateShippingCost();
   
   // 部分收貨對話框狀態
   const [partialReceiptOpen, setPartialReceiptOpen] = useState(false);
@@ -62,6 +64,10 @@ export default function PurchaseDetailPage() {
   // 記事編輯狀態
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesInput, setNotesInput] = useState("");
+  
+  // 運費編輯狀態
+  const [isEditingShippingCost, setIsEditingShippingCost] = useState(false);
+  const [shippingCostInput, setShippingCostInput] = useState("");
 
   if (isLoading) {
     return (
@@ -153,9 +159,36 @@ export default function PurchaseDetailPage() {
     );
   }, [purchase?.id, notesInput, updateNotesMutation]);
   
-  // 當 purchase 數據加載後，設置 notes
+  // 處理運費保存（使用 useCallback 優化）
+  const handleSaveShippingCost = useCallback(async () => {
+    if (!purchase?.id) return;
+    
+    const shippingCost = parseFloat(shippingCostInput);
+    if (isNaN(shippingCost) || shippingCost < 0) {
+      toast.error("請輸入有效的運費金額");
+      return;
+    }
+    
+    updateShippingCostMutation.mutate(
+      { id: purchase.id, shipping_cost: shippingCost }, // 後端會自動轉換
+      {
+        onSuccess: () => {
+          toast.success("運費已更新");
+          setIsEditingShippingCost(false);
+        },
+        onError: () => {
+          toast.error("運費更新失敗");
+        },
+      }
+    );
+  }, [purchase?.id, shippingCostInput, updateShippingCostMutation]);
+  
+  // 當 purchase 數據加載後，設置 notes 和運費
   if (purchase && notesInput === "" && !isEditingNotes) {
     setNotesInput(purchaseData.notes || "");
+  }
+  if (purchase && shippingCostInput === "" && !isEditingShippingCost) {
+    setShippingCostInput(String(purchaseData.shipping_cost || 0));
   }
 
   return (
@@ -292,10 +325,52 @@ export default function PurchaseDetailPage() {
                 >
                   <Truck className="h-4 w-4" />
                   <span>運費</span>
+                  {permissions.canModify && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 ml-2"
+                      onClick={() => setIsEditingShippingCost(true)}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
-                <p className="font-medium">
-                  NT$ {Number(purchaseData.shipping_cost || 0).toLocaleString()}
-                </p>
+                {isEditingShippingCost ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={shippingCostInput}
+                      onChange={(e) => setShippingCostInput(e.target.value)}
+                      className="w-24 h-8 text-sm"
+                      placeholder="運費"
+                      min="0"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-2"
+                      onClick={() => {
+                        setIsEditingShippingCost(false);
+                        setShippingCostInput(String(purchaseData.shipping_cost || 0));
+                      }}
+                    >
+                      取消
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-8 px-2"
+                      onClick={handleSaveShippingCost}
+                      disabled={updateShippingCostMutation.isPending}
+                    >
+                      <Save className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="font-medium">
+                    NT$ {Number(purchaseData.shipping_cost || 0).toLocaleString()}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -477,7 +552,7 @@ export default function PurchaseDetailPage() {
                             進貨價
                           </p>
                           <p className="font-medium">
-                            NT$ {costPrice.toLocaleString()}
+                            NT$ {Number(costPrice).toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -496,7 +571,7 @@ export default function PurchaseDetailPage() {
                             商品小計：
                           </span>
                           <span className="font-medium ml-2">
-                            NT$ {subtotal.toLocaleString()}
+                            NT$ {Number(subtotal).toLocaleString()}
                           </span>
                         </div>
                         <div>
@@ -507,7 +582,7 @@ export default function PurchaseDetailPage() {
                             攤銷運費：
                           </span>
                           <span className="font-medium ml-2">
-                            NT$ {allocatedShippingCost.toLocaleString()}
+                            NT$ {Number(allocatedShippingCost).toLocaleString()}
                           </span>
                         </div>
                         <div>
@@ -518,7 +593,7 @@ export default function PurchaseDetailPage() {
                             總成本：
                           </span>
                           <span className="font-medium ml-2">
-                            NT$ {totalCost.toLocaleString()}
+                            NT$ {Number(totalCost).toLocaleString()}
                           </span>
                         </div>
                         <div>
@@ -533,9 +608,9 @@ export default function PurchaseDetailPage() {
                            
                           >
                             NT${" "}
-                            {averageCostPerUnit.toLocaleString(undefined, {
+                            {Number(averageCostPerUnit).toLocaleString(undefined, {
                               minimumFractionDigits: 0,
-                              maximumFractionDigits: 0,
+                              maximumFractionDigits: 2,
                             })}
                           </span>
                         </div>
@@ -553,29 +628,25 @@ export default function PurchaseDetailPage() {
                        
                       >
                         商品總計: NT${" "}
-                        {purchaseData.items
+                        {Number(purchaseData.items
                           ?.reduce(
                             (sum, item) =>
                               sum +
                               (item.quantity || 0) * (item.cost_price || 0),
                             0,
-                          )
-                          .toLocaleString() || "0"}
+                          ) || 0)
+                          .toLocaleString()}
                       </div>
                       <div
                         className="text-sm text-muted-foreground"
                        
                       >
                         運費: NT${" "}
-                        {Number(
-                          purchaseData.shipping_cost || 0,
-                        ).toLocaleString()}
+                        {Number(purchaseData.shipping_cost || 0).toLocaleString()}
                       </div>
                       <div className="text-lg font-semibold">
                         總金額: NT${" "}
-                        {Number(
-                          purchaseData.total_amount || 0,
-                        ).toLocaleString()}
+                        {Number(purchaseData.total_amount || 0).toLocaleString()}
                       </div>
                     </div>
                   </div>

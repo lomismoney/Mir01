@@ -114,6 +114,7 @@ class PurchaseService extends BaseService
                 'total_amount' => $totalAmount,
                 'shipping_cost' => $purchaseData->shipping_cost,
                 'status' => $purchaseData->status ?? Purchase::STATUS_PENDING,
+                'notes' => $purchaseData->notes,
             ]);
 
             // 3. 遍歷進貨項目，建立項目記錄
@@ -145,15 +146,22 @@ class PurchaseService extends BaseService
                 ]);
             }
 
-            // 4. 如果狀態為已完成，則自動入庫
+            // 4. 如果有待進貨訂單項目，進行綁定
+            if ($purchaseData->order_items && count($purchaseData->order_items) > 0) {
+                $orderItemsArray = $purchaseData->order_items->toArray();
+                $this->bindOrdersToPurchase($purchase, $orderItemsArray);
+            }
+
+            // 5. 如果狀態為已完成，則自動入庫
             if ($purchase->status === Purchase::STATUS_COMPLETED) {
                 $this->processInventoryForCompletedPurchase($purchase);
             }
 
-            // 5. 返回建立的進貨單模型實例
+            // 6. 返回建立的進貨單模型實例
             return $purchase->load(['store', 'items.productVariant.product']);
         });
     }
+
 
     /**
      * 更新進貨單
@@ -1321,36 +1329,21 @@ class PurchaseService extends BaseService
                     );
                 }
 
-                // 檢查是否已經有相同商品變體的項目
-                $existingPurchaseItem = $purchase->items()
-                    ->where('product_variant_id', $orderItem->product_variant_id)
-                    ->first();
-
-                if ($existingPurchaseItem) {
-                    // 如果已經有項目，但還沒有綁定到訂單項目，則綁定它
-                    if (is_null($existingPurchaseItem->order_item_id)) {
-                        $existingPurchaseItem->update([
-                            'order_item_id' => $orderItem->id,
-                            'quantity' => $existingPurchaseItem->quantity + $purchaseQuantity
-                        ]);
-                        
-                    } else {
-                        // 如果已經綁定到其他訂單項目，則增加數量
-                        $existingPurchaseItem->increment('quantity', $purchaseQuantity);
-                        
-                    }
-                } else {
-                    // 創建新的進貨項目
-                    $createdItem = $purchase->items()->create([
-                        'product_variant_id' => $orderItem->product_variant_id,
-                        'quantity' => $purchaseQuantity,
-                        'unit_price' => $orderItem->productVariant->cost_price ?? 0,
-                        'cost_price' => $orderItem->productVariant->cost_price ?? 0,
-                        'allocated_shipping_cost' => 0,
-                        'order_item_id' => $orderItem->id,
-                    ]);
-
-                }
+                // 總是創建新的進貨項目，不合併相同的 product_variant_id
+                // 這樣可以保持不同來源/批次的成本追蹤
+                // 使用前端提供的成本價格，如果沒有則使用產品變體的成本價格
+                $costPrice = isset($item['cost_price']) && $item['cost_price'] !== null 
+                    ? $item['cost_price'] 
+                    : ($orderItem->productVariant->cost_price ?? 0);
+                
+                $createdItem = $purchase->items()->create([
+                    'product_variant_id' => $orderItem->product_variant_id,
+                    'quantity' => $purchaseQuantity,
+                    'unit_price' => $costPrice,
+                    'cost_price' => $costPrice,
+                    'allocated_shipping_cost' => 0,
+                    'order_item_id' => $orderItem->id,
+                ]);
 
                 $boundItemsCount++;
                 $totalBoundQuantity += $purchaseQuantity;
@@ -1400,5 +1393,74 @@ class PurchaseService extends BaseService
             'shipping_cost' => $purchase->shipping_cost,
             'total_amount' => $totalAmount
         ]);
+    }
+
+    /**
+     * 更新進貨單運費
+     * 
+     * @param Purchase $purchase 進貨單
+     * @param float $newShippingCost 新的運費（元為單位）
+     * @return Purchase 更新後的進貨單
+     */
+    public function updateShippingCost(Purchase $purchase, float $newShippingCost): Purchase
+    {
+        return $this->executeInTransaction(function () use ($purchase, $newShippingCost) {
+            $oldShippingCost = $purchase->shipping_cost;
+            
+            // 更新運費（元轉分）
+            $purchase->update([
+                'shipping_cost' => (int) round($newShippingCost * 100) // 元轉分
+            ]);
+            
+            // 重新分攤運費到各項目
+            $this->reallocateShippingCost($purchase);
+            
+            // 重新計算總額
+            $this->recalculatePurchaseTotal($purchase);
+            
+            Log::info('進貨單運費更新完成', [
+                'purchase_id' => $purchase->id,
+                'old_shipping_cost' => $oldShippingCost,
+                'new_shipping_cost' => $newShippingCost,
+                'items_count' => $purchase->items()->count()
+            ]);
+            
+            return $purchase->fresh(['items', 'store']);
+        });
+    }
+
+    /**
+     * 重新分攤運費到各項目
+     * 
+     * @param Purchase $purchase 進貨單
+     */
+    private function reallocateShippingCost(Purchase $purchase): void
+    {
+        $items = $purchase->items()->get();
+        $totalQuantity = $items->sum('quantity');
+        
+        if ($totalQuantity === 0) {
+            return;
+        }
+        
+        $accumulatedShippingCost = 0;
+        $itemCount = $items->count();
+        
+        foreach ($items as $index => $item) {
+            $isLastItem = ($index === $itemCount - 1);
+            
+            if ($isLastItem) {
+                // 最後一項用總運費減去已分配的
+                $allocatedShippingCost = $purchase->shipping_cost - $accumulatedShippingCost;
+            } else {
+                // 按數量比例分攤，使用整數計算（分為單位）
+                $allocatedShippingCost = intval(($purchase->shipping_cost * $item->quantity) / $totalQuantity);
+                $accumulatedShippingCost += $allocatedShippingCost;
+            }
+            
+            $item->update([
+                'allocated_shipping_cost' => $allocatedShippingCost
+            ]);
+        }
     }
 }

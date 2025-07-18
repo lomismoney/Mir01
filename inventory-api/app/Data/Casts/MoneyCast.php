@@ -10,7 +10,7 @@ class MoneyCast implements Cast
 {
     public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): int
     {
-        // 來自前端的可能是浮點數（元），轉換為整數（分）
+        // 來自前端的是浮點數（元），轉換為整數（分）
         return (int) round($value * 100);
     }
 } 

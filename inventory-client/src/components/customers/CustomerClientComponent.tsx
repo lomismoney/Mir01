@@ -10,6 +10,7 @@ import {
   CreditCard,
   Shield
 } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 import { useCustomerManagement } from "@/hooks/useCustomerManagement";
 import { CUSTOMER_MODAL_TYPES } from "@/hooks/useModalManager";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
@@ -220,7 +221,7 @@ export function CustomerClientComponent() {
               未付金額
             </CardDescription>
             <CardTitle className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl">
-              {isLoading ? "..." : `$${stats.unpaidAmount.toLocaleString()}`}
+              {isLoading ? "..." : formatPrice(stats.unpaidAmount, true)}
             </CardTitle>
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
@@ -240,7 +241,7 @@ export function CustomerClientComponent() {
               已收金額
             </CardDescription>
             <CardTitle className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl">
-              {isLoading ? "..." : `$${stats.completedAmount.toLocaleString()}`}
+              {isLoading ? "..." : formatPrice(stats.completedAmount, true)}
             </CardTitle>
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">

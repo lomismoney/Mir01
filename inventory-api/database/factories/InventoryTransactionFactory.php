@@ -41,12 +41,12 @@ class InventoryTransactionFactory extends Factory
         $afterQuantity = $beforeQuantity + $quantity;
         
         return [
-            'inventory_id' => Inventory::factory(),
+            'inventory_id' => fake()->numberBetween(1, 100), // 使用範圍內的 ID 而非 Factory
             'type' => $type,
             'quantity' => $quantity,
             'before_quantity' => $beforeQuantity,
             'after_quantity' => $afterQuantity,
-            'user_id' => User::factory(),
+            'user_id' => fake()->numberBetween(1, 10), // 使用範圍內的 ID 而非 Factory
             'notes' => $this->faker->optional(0.7)->sentence(),
             'metadata' => $this->faker->optional(0.3)->randomElement([
                 ['order_id' => $this->faker->numberBetween(1, 1000)],

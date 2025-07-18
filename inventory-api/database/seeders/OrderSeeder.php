@@ -256,7 +256,7 @@ class OrderSeeder extends Seeder
             'subtotal' => 0, // 稍後計算
             'shipping_fee' => rand(0, 200) * 100, // 0-200元（以分為單位）
             'tax' => 0, // 稍後計算
-            'discount_amount' => rand(0, 500) * 100, // 0-500元折扣
+            'discount_amount' => rand(0, 500) * 100, // 0-500元折扣（以分為單位）
             'grand_total' => 0, // 稍後計算
             'paid_amount' => 0, // 稍後設定
             'payment_method' => ['credit_card', 'cash', 'bank_transfer', 'pay_later'][array_rand(['credit_card', 'cash', 'bank_transfer', 'pay_later'])],
@@ -289,7 +289,7 @@ class OrderSeeder extends Seeder
             'quantity' => $itemData['quantity'],
             'fulfilled_quantity' => $itemData['fulfilled_quantity'],
             'tax_rate' => 5, // 5% 稅率
-            'discount_amount' => rand(0, 100) * 10, // 0-1000分的折扣
+            'discount_amount' => rand(0, 100) * 100, // 0-100元的折扣（以分為單位）
             'is_fulfilled' => $itemData['is_fulfilled'],
             'fulfilled_at' => $itemData['is_fulfilled'] ? now() : null,
         ];
@@ -312,11 +312,11 @@ class OrderSeeder extends Seeder
         switch ($itemType) {
             case OrderItemType::STOCK:
                 // 選擇價格較低的商品作為現貨（如T恤、配件等）
-                return $variants->where('price', '<', 50000)->random();
+                return $variants->where('price', '<', 5000000)->random(); // 500元以下（分為單位）
             
             case OrderItemType::BACKORDER:
                 // 選擇中高價商品作為預訂商品（如手機、筆電等）
-                return $variants->where('price', '>=', 50000)->random();
+                return $variants->where('price', '>=', 5000000)->random(); // 500元以上（分為單位）
             
             case OrderItemType::CUSTOM:
                 // 任何商品都可以訂製
@@ -469,7 +469,7 @@ class OrderSeeder extends Seeder
             return ($item->price * $item->quantity) - $item->discount_amount;
         });
         
-        $tax = $subtotal * 0.05; // 5% 稅率
+        $tax = (int)round($subtotal * 0.05); // 5% 稅率（以分為單位）
         $grandTotal = $subtotal + $tax + $order->shipping_fee - $order->discount_amount;
         
         // 設定已付金額
@@ -477,7 +477,7 @@ class OrderSeeder extends Seeder
         if ($order->payment_status === 'paid') {
             $paidAmount = $grandTotal;
         } elseif ($order->payment_status === 'partially_paid') {
-            $paidAmount = $grandTotal * 0.5; // 付了一半
+            $paidAmount = (int)round($grandTotal * 0.5); // 付了一半（以分為單位）
         }
 
         $order->update([

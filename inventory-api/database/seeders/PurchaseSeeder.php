@@ -69,7 +69,7 @@ class PurchaseSeeder extends Seeder
                 $purchasedAt = now()->subDays(rand(0, 60))->subHours(rand(0, 23));
                 
                 // 計算運費
-                $shippingCost = rand(50, 500); // 50-500元
+                $shippingCost = rand(50, 500) * 100; // 50-500元（以分為單位）
                 
                 // 為進貨單準備項目
                 $itemsCount = rand(2, 6); // 每個進貨單2-6個項目

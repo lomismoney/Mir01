@@ -36,6 +36,7 @@ class BackorderController extends Controller
      * @queryParam date_from string 開始日期. Example: 2024-01-01
      * @queryParam date_to string 結束日期. Example: 2024-12-31
      * @queryParam product_variant_id integer 商品變體ID. Example: 10
+     * @queryParam for_purchase_only boolean 只返回需要進貨處理的項目（排除調貨項目）. Example: true
      * 
      * @response 200 scenario="grouped by order" {
      *   "data": [
@@ -137,6 +138,7 @@ class BackorderController extends Controller
             'date_from' => 'date',
             'date_to' => 'date',
             'product_variant_id' => 'integer|exists:product_variants,id',
+            'for_purchase_only' => 'boolean', // 新增：只返回需要進貨的項目
         ]);
 
         // 如果請求包含轉移資訊，使用新的整合方法

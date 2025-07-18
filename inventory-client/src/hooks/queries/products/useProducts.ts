@@ -635,7 +635,10 @@ export function useDeleteMultipleProducts() {
 }
 
 /**
- * 商品變體查詢 Hook
+ * 商品變體查詢 Hook - 優化版本
+ * 
+ * 由於 /api/products/variants API 有問題，
+ * 我們改為從商品列表中提取變體信息
  * 
  * @param params - 查詢參數
  * @param options - 查詢選項
@@ -648,39 +651,97 @@ export function useProductVariants(params: {
     page?: number;
     per_page?: number;
 } = {}, options?: { enabled?: boolean }) {
+    // 根據是否有 product_id 決定查詢策略
+    const isSpecificProduct = !!params.product_id;
+    
     return useQuery({
         queryKey: [...QUERY_KEYS.PRODUCT_VARIANTS, params],
         queryFn: async () => {
-            // 構建查詢參數
-            const queryParams: Record<string, string | number> = {};
-            
-            if (params.product_id) queryParams.product_id = params.product_id;
-            if (params.product_name) queryParams.product_name = params.product_name;
-            if (params.sku) queryParams.sku = params.sku;
-            if (params.page) queryParams.page = params.page;
-            if (params.per_page) queryParams.per_page = params.per_page;
-
-            const { data, error } = await apiClient.GET('/api/products/variants', {
-                params: { 
-                    query: Object.keys(queryParams).length > 0 ? queryParams : undefined 
+            if (isSpecificProduct) {
+                // 獲取特定商品的詳情
+                const { data, error } = await apiClient.GET('/api/products/{product}', {
+                    params: { path: { product: params.product_id! } }
+                });
+                
+                if (error) {
+                    const errorMessage = parseApiError(error);
+                    throw new Error(errorMessage || '獲取商品詳情失敗');
                 }
-            });
-            
-            if (error) {
-                const errorMessage = parseApiError(error);
-                throw new Error(errorMessage || '獲取商品變體失敗');
+                
+                // 返回該商品的變體，並確保每個變體都包含商品資訊
+                const product = data?.data;
+                const variants = (product?.variants || []).map((variant: any) => ({
+                    ...variant,
+                    product: {
+                        id: product.id,
+                        name: product.name,
+                        description: product.description
+                    }
+                }));
+                
+                return { 
+                    data: variants
+                };
+            } else {
+                // 獲取商品列表
+                const queryParams: Record<string, any> = {};
+                if (params.per_page) queryParams.per_page = params.per_page;
+                if (params.product_name) queryParams['filter[search]'] = params.product_name;
+                
+                const { data, error } = await apiClient.GET('/api/products', {
+                    params: { query: queryParams }
+                });
+                
+                if (error) {
+                    const errorMessage = parseApiError(error);
+                    throw new Error(errorMessage || '獲取商品列表失敗');
+                }
+                
+                // 從商品列表中提取所有變體
+                const products = data?.data?.data || data?.data || [];
+                const allVariants = products.flatMap((product: any) => 
+                    (product.variants || []).map((variant: any) => ({
+                        ...variant,
+                        product_id: product.id,
+                        product: {
+                            id: product.id,
+                            name: product.name,
+                            description: product.description,
+                            category: product.category,
+                            image_url: product.image_url,
+                            thumbnail_url: product.thumbnail_url
+                        }
+                    }))
+                );
+                
+                return { data: allVariants };
             }
-
-            return data;
         },
+        enabled: options?.enabled !== false,
         // 🎯 數據精煉廠 - 確保類型安全和數據一致性
         select: (response: unknown) => {
-            // 解包 API 響應數據，確保返回陣列格式
             const variants = response?.data || [];
             if (!Array.isArray(variants)) return [];
             
+            // 根據搜尋條件過濾
+            let filteredVariants = variants;
+            
+            // SKU 過濾
+            if (params.sku) {
+                filteredVariants = filteredVariants.filter((v: any) => 
+                    v.sku?.toLowerCase().includes(params.sku!.toLowerCase())
+                );
+            }
+            
+            // 商品名稱過濾（只在沒有 product_id 時應用）
+            if (params.product_name && !params.product_id) {
+                filteredVariants = filteredVariants.filter((v: any) => 
+                    v.product?.name?.toLowerCase().includes(params.product_name!.toLowerCase())
+                );
+            }
+            
             // 進行數據清理和類型轉換
-            return variants.map((variant: unknown) => {
+            return filteredVariants.map((variant: unknown) => {
                 const v = variant as Record<string, unknown>;
                 return {
                 id: v.id as number || 0,

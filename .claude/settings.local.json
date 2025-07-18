@@ -113,7 +113,10 @@
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(./vendor/bin/sail down:*)",
       "Bash(./sync-api-local.sh:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(./vendor/bin/sail exec mysql mysql:*)"
     ],
     "deny": []
   }

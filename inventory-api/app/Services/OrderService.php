@@ -1142,7 +1142,7 @@ class OrderService extends BaseService
                            ->whereNotNull('product_variant_id');
                   });
             })
-            ->whereNull('purchase_item_id')
+            ->whereNull('purchase_item_id')  // 尚未關聯進貨單
             ->where('is_fulfilled', false)
             ->whereHas('order', function ($q) {
                 $q->where('shipping_status', '!=', 'cancelled');
@@ -1188,6 +1188,25 @@ class OrderService extends BaseService
                 $item->setRelation('purchaseItem', $purchaseItem);
             }
         });
+
+        // 如果是用於進貨單創建，只返回需要進貨處理的項目
+        if (!empty($filters['for_purchase_only']) && $filters['for_purchase_only']) {
+            $items = $items->filter(function ($item) {
+                // 只保留沒有轉移記錄，或者轉移狀態不是處理中的項目
+                $transfer = $item->transfer;
+                if (!$transfer) {
+                    return true; // 沒有轉移記錄，需要進貨
+                }
+                
+                // 如果轉移狀態是已取消或失敗，則需要進貨
+                if (in_array($transfer->status, ['cancelled', 'failed'])) {
+                    return true;
+                }
+                
+                // 其他轉移狀態（pending, in_transit, completed）不需要進貨
+                return false;
+            });
+        }
         
         // 如果需要按訂單分組
         if (!empty($filters['group_by_order']) && $filters['group_by_order']) {
@@ -1227,6 +1246,7 @@ class OrderService extends BaseService
                 'items' => $orderItems->map(function ($item) {
                     return [
                         'id' => $item->id,
+                        'product_variant_id' => $item->product_variant_id, // 添加 product_variant_id
                         'product_name' => $item->product_name,
                         'sku' => $item->sku,
                         'quantity' => $item->quantity,

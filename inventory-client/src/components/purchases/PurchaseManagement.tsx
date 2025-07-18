@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { formatPrice } from "@/lib/utils";
 import {
   usePurchases,
   useUpdatePurchaseStatus,
@@ -78,7 +79,7 @@ import {
   Store,
 } from "lucide-react";
 
-import { CreatePurchaseDialog } from "./CreatePurchaseDialog";
+import { EnhancedCreatePurchaseDialog } from "./EnhancedCreatePurchaseDialog";
 import { PurchaseProgressTracker } from "./PurchaseProgressTracker";
 import { PartialReceiptDialog } from "./PartialReceiptDialog";
 
@@ -676,7 +677,7 @@ export function PurchaseManagement({ statusFilter }: PurchaseManagementProps = {
                                     <TrendingUp className="h-4 w-4" />
                                     <span className="font-medium">總金額：</span>
                                     <span className="text-green-600 font-semibold">
-                                      NT$ {Number(purchase.total_amount || 0).toLocaleString()}
+                                      {formatPrice(purchase.total_amount, true)}
                                     </span>
                                   </div>
                                 </div>
@@ -892,12 +893,13 @@ export function PurchaseManagement({ statusFilter }: PurchaseManagementProps = {
       </div>
 
       {/* 🎯 創建進貨單對話框 */}
-      <CreatePurchaseDialog
+      <EnhancedCreatePurchaseDialog
         open={modalManager.isModalOpen('create')}
         onOpenChange={(open) => !open && modalManager.closeModal()}
         onSuccess={() => {
           modalManager.handleSuccess();
           handleSuccess("進貨單已成功創建");
+          refetch(); // 刷新列表
         }}
       />
 

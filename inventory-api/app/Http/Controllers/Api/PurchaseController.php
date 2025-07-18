@@ -112,6 +112,10 @@ class PurchaseController extends Controller
      * @bodyParam items[].quantity integer required 數量 Example: 10
      * @bodyParam items[].cost_price number required 成本價格 Example: 150.00
      * @bodyParam notes string 進貨備註
+     * @bodyParam order_items object[] 要綁定的訂單項目（可選）
+     * @bodyParam order_items[].order_item_id integer required 訂單項目ID Example: 1
+     * @bodyParam order_items[].purchase_quantity integer required 進貨數量 Example: 5
+     * @bodyParam order_items[].cost_price number 成本價格（可選，不提供則使用產品預設成本價） Example: 150.00
      * 
      * @response 201 scenario="進貨單創建成功" {
      *   "data": {
@@ -555,6 +559,69 @@ class PurchaseController extends Controller
             ]);
             
             return response()->json(['message' => '記事更新失敗，請稍後再試'], 500);
+        }
+    }
+
+    /**
+     * 更新進貨單運費
+     * 
+     * @group 進貨管理
+     * @authenticated
+     * @summary 更新進貨單運費
+     * @description 更新指定進貨單的運費成本，系統會自動重新計算總金額和運費分攤。
+     * 
+     * @urlParam purchase integer required 進貨單ID。 Example: 1
+     * @bodyParam shipping_cost numeric required 運費成本（元）。 Example: 1200
+     * 
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "order_number": "PO-20240115-001",
+     *     "shipping_cost": 1200,
+     *     "total_amount": 86600,
+     *     "status": "pending",
+     *     "items": [
+     *       {
+     *         "id": 1,
+     *         "allocated_shipping_cost": 600,
+     *         "total_cost_price": 43400
+     *       }
+     *     ]
+     *   }
+     * }
+     * 
+     * @apiResource \App\Http\Resources\Api\PurchaseResource
+     * @apiResourceModel \App\Models\Purchase
+     */
+    public function updateShippingCost(Purchase $purchase, Request $request, PurchaseService $purchaseService)
+    {
+        $this->authorize('update', $purchase);
+
+        $validated = $request->validate([
+            'shipping_cost' => 'required|numeric|min:0'
+        ]);
+
+        try {
+            $updatedPurchase = $purchaseService->updateShippingCost($purchase, $validated['shipping_cost']);
+            
+            Log::info('進貨單運費已更新', [
+                'purchase_id' => $purchase->id,
+                'user_id' => auth()->id(),
+                'old_shipping_cost' => $purchase->shipping_cost,
+                'new_shipping_cost' => $validated['shipping_cost']
+            ]);
+
+            return new PurchaseResource($updatedPurchase);
+            
+        } catch (\Exception $e) {
+            Log::error('進貨單運費更新失敗', [
+                'purchase_id' => $purchase->id,
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['message' => '運費更新失敗，請稍後再試'], 500);
         }
     }
 

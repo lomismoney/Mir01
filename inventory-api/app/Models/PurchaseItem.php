@@ -47,16 +47,16 @@ class PurchaseItem extends Model
 
     /**
      * 獲取此進貨項目的總成本價格（計算屬性）
-     * 直接從原始資料庫值計算，確保一致性
+     * 返回元值
      */
-    public function getTotalCostPriceAttribute(): int
+    public function getTotalCostPriceAttribute(): float
     {
-        $costPriceInCents = $this->getRawOriginal('cost_price') ?? 0;
-        $allocatedShippingCostInCents = $this->getRawOriginal('allocated_shipping_cost') ?? 0;
+        $costPriceInYuan = $this->cost_price ?? 0;
+        $allocatedShippingCostInYuan = $this->allocated_shipping_cost ?? 0;
         
-        $totalCostInCents = ($costPriceInCents * $this->quantity) + $allocatedShippingCostInCents;
+        $totalCostInYuan = ($costPriceInYuan * $this->quantity) + $allocatedShippingCostInYuan;
 
-        return (int) round($totalCostInCents / 100);
+        return $totalCostInYuan; // 返回元值
     }
 
     /**
@@ -84,22 +84,51 @@ class PurchaseItem extends Model
     }
 
     /**
-     * 金額欄位的取值器（Accessor）
-     * 將資料庫中以分為單位的金額轉換為元
+     * 單價 Accessor - 將分轉換為元
      */
-    protected function getUnitPriceAttribute($value)
+    public function getUnitPriceAttribute(): float
     {
-        return (int) round($value / 100);
+        return ($this->attributes['unit_price'] ?? 0) / 100;
     }
 
-    protected function getCostPriceAttribute($value)
+    /**
+     * 單價 Mutator - 將元轉換為分
+     */
+    public function setUnitPriceAttribute($value): void
     {
-        return (int) round($value / 100);
+        $this->attributes['unit_price'] = is_null($value) ? null : (int) round($value * 100);
     }
 
-    protected function getAllocatedShippingCostAttribute($value)
+    /**
+     * 成本價 Accessor - 將分轉換為元
+     */
+    public function getCostPriceAttribute(): float
     {
-        return (int) round($value / 100);
+        return ($this->attributes['cost_price'] ?? 0) / 100;
+    }
+
+    /**
+     * 成本價 Mutator - 將元轉換為分
+     */
+    public function setCostPriceAttribute($value): void
+    {
+        $this->attributes['cost_price'] = is_null($value) ? null : (int) round($value * 100);
+    }
+
+    /**
+     * 攤銷運費 Accessor - 將分轉換為元
+     */
+    public function getAllocatedShippingCostAttribute(): float
+    {
+        return ($this->attributes['allocated_shipping_cost'] ?? 0) / 100;
+    }
+
+    /**
+     * 攤銷運費 Mutator - 將元轉換為分
+     */
+    public function setAllocatedShippingCostAttribute($value): void
+    {
+        $this->attributes['allocated_shipping_cost'] = is_null($value) ? null : (int) round($value * 100);
     }
 
     /**

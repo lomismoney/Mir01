@@ -115,4 +115,40 @@ class PartialReceiptRequest extends FormRequest
             }
         });
     }
+
+    /**
+     * 為 API 文檔提供請求體參數說明
+     * 
+     * @return array
+     */
+    public function bodyParameters()
+    {
+        return [
+            'items' => [
+                'description' => '收貨項目列表',
+                'example' => [
+                    [
+                        'purchase_item_id' => 1,
+                        'received_quantity' => 5
+                    ],
+                    [
+                        'purchase_item_id' => 2,
+                        'received_quantity' => 3
+                    ]
+                ]
+            ],
+            'items.*.purchase_item_id' => [
+                'description' => '進貨項目ID',
+                'example' => 1
+            ],
+            'items.*.received_quantity' => [
+                'description' => '實際收貨數量',
+                'example' => 5
+            ],
+            'notes' => [
+                'description' => '收貨備註（可選）',
+                'example' => '商品狀況良好，已完成驗收'
+            ]
+        ];
+    }
 } 

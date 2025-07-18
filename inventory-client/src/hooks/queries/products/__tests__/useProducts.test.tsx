@@ -816,15 +816,19 @@ describe('useProducts hooks', () => {
 
   describe('useProductVariants', () => {
     it('should fetch product variants successfully', async () => {
-      const mockData = {
-        data: [
-          { id: 1, sku: 'PROD-001', price: 100 },
-          { id: 2, sku: 'PROD-002', price: 150 }
-        ]
+      const mockProductData = {
+        data: {
+          id: 1,
+          name: 'Test Product',
+          variants: [
+            { id: 1, sku: 'PROD-001', price: '100' },
+            { id: 2, sku: 'PROD-002', price: '150' }
+          ]
+        }
       };
 
       mockApiClient.GET.mockResolvedValueOnce({
-        data: mockData,
+        data: mockProductData,
         error: null
       });
 
@@ -861,8 +865,8 @@ describe('useProducts hooks', () => {
           inventory: []
         })
       ]);
-      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/products/variants', {
-        params: { query: { product_id: 1 } }
+      expect(mockApiClient.GET).toHaveBeenCalledWith('/api/products/{product}', {
+        params: { path: { product: 1 } }
       });
     });
 

@@ -58,7 +58,10 @@ class OrderItem extends Model
         'fulfilled_quantity' => 'integer',
         'tax_rate' => 'decimal:2',
         'fulfilled_at' => 'datetime',
-        // 金額欄位使用分為單位
+        // 金額欄位使用整數（分為單位）
+        'price' => 'integer',
+        'cost' => 'integer',
+        'discount_amount' => 'integer',
         'price_cents' => 'integer',
         'cost_cents' => 'integer', 
         'discount_amount_cents' => 'integer',

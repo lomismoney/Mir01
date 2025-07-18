@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { formatPrice } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -613,7 +614,7 @@ export function InventoryNestedTable({
                                                 ? `NT$ ${parseFloat(sku.price).toLocaleString()}`
                                                 : sku.price &&
                                                     Number(sku.price) > 0
-                                                  ? `NT$ ${Number(sku.price).toLocaleString()}`
+                                                  ? formatPrice(sku.price, true)
                                                   : "—"}
                                             </TableCell>
                                             <TableCell

@@ -179,8 +179,8 @@ class TestInventorySeeder extends Seeder
                 $variant = ProductVariant::create([
                     'product_id' => $iphone->id,
                     'sku' => "IPHONE-15-PRO-{$colorName}-{$capacityName}",
-                    'price' => $capacityName === '128GB' ? 32900 : ($capacityName === '256GB' ? 36400 : 43400),
-                    'cost_price' => $capacityName === '128GB' ? 20000 : ($capacityName === '256GB' ? 23000 : 28000),
+                    'price' => $capacityName === '128GB' ? 3290000 : ($capacityName === '256GB' ? 3640000 : 4340000), // 以分為單位
+                    'cost_price' => $capacityName === '128GB' ? 2000000 : ($capacityName === '256GB' ? 2300000 : 2800000), // 以分為單位
                 ]);
                 $variant->attributeValues()->attach([
                     $attributes['colorValues'][$colorName]->id,
@@ -208,8 +208,8 @@ class TestInventorySeeder extends Seeder
                 $variant = ProductVariant::create([
                     'product_id' => $macbook->id,
                     'sku' => "MACBOOK-PRO-14-{$colorName}-{$capacityName}",
-                    'price' => $capacityName === '512GB' ? 64900 : 77900,
-                    'cost_price' => $capacityName === '512GB' ? 45000 : 55000,
+                    'price' => $capacityName === '512GB' ? 6490000 : 7790000, // 以分為單位
+                    'cost_price' => $capacityName === '512GB' ? 4500000 : 5500000, // 以分為單位
                 ]);
                 if ($colorName === '太空灰') {
                     $colorName = '黑色'; // 使用已存在的顏色值
@@ -240,8 +240,8 @@ class TestInventorySeeder extends Seeder
                 $variant = ProductVariant::create([
                     'product_id' => $tshirt->id,
                     'sku' => "TSHIRT-BASIC-{$colorName}-{$sizeName}",
-                    'price' => 299,
-                    'cost_price' => 150,
+                    'price' => 29900, // 以分為單位
+                    'cost_price' => 15000, // 以分為單位
                 ]);
                 $variant->attributeValues()->attach([
                     $attributes['colorValues'][$colorName]->id,
@@ -271,8 +271,8 @@ class TestInventorySeeder extends Seeder
                 $variant = ProductVariant::create([
                     'product_id' => $jeans->id,
                     'sku' => "JEANS-CLASSIC-{$colorName}-W{$waistSize}",
-                    'price' => 1290,
-                    'cost_price' => 600,
+                    'price' => 129000, // 以分為單位
+                    'cost_price' => 60000, // 以分為單位
                 ]);
                 $variant->attributeValues()->attach([
                     $attributes['colorValues'][$colorName]->id,
@@ -302,8 +302,8 @@ class TestInventorySeeder extends Seeder
             $variant = ProductVariant::create([
                 'product_id' => $chair->id,
                 'sku' => "CHAIR-ERGO-{$colorName}",
-                'price' => 8900,
-                'cost_price' => 4500,
+                'price' => 890000, // 以分為單位
+                'cost_price' => 450000, // 以分為單位
             ]);
             $variant->attributeValues()->attach([
                 $attributes['colorValues'][$actualColor]->id,
@@ -329,8 +329,8 @@ class TestInventorySeeder extends Seeder
             $variant = ProductVariant::create([
                 'product_id' => $cushion->id,
                 'sku' => "CUSHION-MEMORY-{$colorName}",
-                'price' => 790,
-                'cost_price' => 350,
+                'price' => 79000, // 以分為單位
+                'cost_price' => 35000, // 以分為單位
             ]);
             $variant->attributeValues()->attach([
                 $attributes['colorValues'][$colorName]->id
@@ -775,7 +775,8 @@ class TestInventorySeeder extends Seeder
                 
                 foreach ($availableVariants as $variant) {
                     $quantity = rand(5, 50);
-                    $costPrice = $variant->cost_price ?: (int)($variant->price * 0.6); // 如果沒有成本價，用售價的60%
+                    // 使用 Accessor 獲取元為單位的價格，然後計算成本價
+                    $costPrice = $variant->cost_price ?: ($variant->price * 0.6); // 如果沒有成本價，用售價的60%
                     $itemTotalCost = $costPrice * $quantity;
                     $totalAmount += $itemTotalCost;
                     
@@ -783,8 +784,8 @@ class TestInventorySeeder extends Seeder
                         'purchase_id' => $purchase->id,
                         'product_variant_id' => $variant->id,
                         'quantity' => $quantity,
-                        'unit_price' => $costPrice, // 進貨單價
-                        'cost_price' => $costPrice, // 成本價
+                        'unit_price' => $costPrice, // 進貨單價（元為單位，Mutator會轉換為分）
+                        'cost_price' => $costPrice, // 成本價（元為單位，Mutator會轉換為分）
                         'allocated_shipping_cost' => 0, // 攤銷的運費成本，先設為0
                         'created_at' => $createdAt,
                         'updated_at' => $createdAt,

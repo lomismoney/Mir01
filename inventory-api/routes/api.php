@@ -141,7 +141,9 @@ Route::middleware('auth:sanctum')->group(function () {
      * PATCH  /api/purchases/{purchase}/status         - 更新進貨單狀態
      * PATCH  /api/purchases/{purchase}/cancel         - 取消進貨單
      * POST   /api/purchases/{purchase}/bind-orders    - 綁定訂單到進貨單
+     * POST   /api/purchases/{purchase}/partial-receipt - 部分收貨處理
      * PATCH  /api/purchases/{purchase}/notes          - 更新進貨單記事
+     * PATCH  /api/purchases/{purchase}/shipping-cost  - 更新進貨單運費
      */
     Route::get('purchases/bindable-orders', [PurchaseController::class, 'getBindableOrders']);
     Route::apiResource('purchases', PurchaseController::class)->parameters(['purchases' => 'purchase']);
@@ -150,6 +152,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('purchases/{purchase}/bind-orders', [PurchaseController::class, 'bindOrders']);
     Route::post('purchases/{purchase}/partial-receipt', [PurchaseController::class, 'partialReceipt']);
     Route::patch('purchases/{purchase}/notes', [PurchaseController::class, 'updateNotes']);
+    Route::patch('purchases/{purchase}/shipping-cost', [PurchaseController::class, 'updateShippingCost']);
 
     /**
      * 用戶管理路由

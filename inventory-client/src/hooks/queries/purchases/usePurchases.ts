@@ -257,3 +257,26 @@ export function useUpdatePurchaseNotes() {
     },
   });
 }
+
+/**
+ * 更新進貨單運費
+ */
+export function useUpdateShippingCost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, shipping_cost }: { id: number; shipping_cost: number }) => {
+      const { data, error } = await apiClient.PATCH('/api/purchases/{purchase}/shipping-cost', {
+        params: { path: { purchase: id } },
+        body: { shipping_cost }
+      });
+      if (error) {
+        throw new Error('更新運費失敗');
+      }
+      return data;
+    },
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ['purchases'] });
+      await queryClient.invalidateQueries({ queryKey: ['purchase', variables.id] });
+    },
+  });
+}

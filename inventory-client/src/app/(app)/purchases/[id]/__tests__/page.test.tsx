@@ -348,7 +348,7 @@ const PurchaseDetailPage = () => {
                             單件平均成本：
                           </span>
                           <span className="font-medium ml-2 text-blue-600">
-                            NT$ {Math.round(averageCostPerUnit).toLocaleString()}
+                            NT$ {Number(averageCostPerUnit).toLocaleString()}
                           </span>
                         </div>
                       </div>

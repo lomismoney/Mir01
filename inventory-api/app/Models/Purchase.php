@@ -233,16 +233,34 @@ class Purchase extends Model
     }
 
     /**
-     * 金額欄位的取值器（Accessor）
-     * 將資料庫中以分為單位的金額轉換為元
+     * 總金額 Accessor - 將分轉換為元
      */
-    protected function getTotalAmountAttribute($value)
+    public function getTotalAmountAttribute(): float
     {
-        return (int) round($value / 100);
+        return ($this->attributes['total_amount'] ?? 0) / 100;
     }
 
-    protected function getShippingCostAttribute($value)
+    /**
+     * 總金額 Mutator - 將元轉換為分
+     */
+    public function setTotalAmountAttribute($value): void
     {
-        return (int) round($value / 100);
+        $this->attributes['total_amount'] = is_null($value) ? null : (int) round($value * 100);
+    }
+
+    /**
+     * 運費 Accessor - 將分轉換為元
+     */
+    public function getShippingCostAttribute(): float
+    {
+        return ($this->attributes['shipping_cost'] ?? 0) / 100;
+    }
+
+    /**
+     * 運費 Mutator - 將元轉換為分
+     */
+    public function setShippingCostAttribute($value): void
+    {
+        $this->attributes['shipping_cost'] = is_null($value) ? null : (int) round($value * 100);
     }
 }

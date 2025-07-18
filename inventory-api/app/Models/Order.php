@@ -49,6 +49,31 @@ class Order extends Model
     ];
 
     /**
+     * 屬性類型轉換
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'shipped_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'estimated_delivery_date' => 'date',
+        'expected_delivery_date' => 'date',
+        // 金額欄位使用整數（分為單位）
+        'subtotal' => 'integer',
+        'shipping_fee' => 'integer',
+        'tax' => 'integer',
+        'discount_amount' => 'integer',
+        'grand_total' => 'integer',
+        'paid_amount' => 'integer',
+        'subtotal_cents' => 'integer',
+        'shipping_fee_cents' => 'integer',
+        'tax_cents' => 'integer',
+        'discount_amount_cents' => 'integer',
+        'grand_total_cents' => 'integer',
+        'paid_amount_cents' => 'integer',
+    ];
+
+    /**
      * 一個訂單包含多個訂單項目 (One-to-Many)
      */
     public function items(): HasMany

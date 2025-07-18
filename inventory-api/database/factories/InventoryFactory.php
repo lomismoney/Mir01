@@ -17,9 +17,14 @@ class InventoryFactory extends Factory
      */
     public function definition(): array
     {
+        // 為了避免在 API 文檔生成時的唯一約束衝突，使用有限的範圍
+        // 這樣可以減少重複的 product_variant_id + store_id 組合
+        $productVariantId = fake()->numberBetween(1, 50);
+        $storeId = fake()->numberBetween(1, 10);
+        
         return [
-            'product_variant_id' => ProductVariant::factory(),
-            'store_id' => \App\Models\Store::factory(),
+            'product_variant_id' => $productVariantId,
+            'store_id' => $storeId,
             'quantity' => fake()->numberBetween(0, 100),
             'low_stock_threshold' => fake()->numberBetween(5, 20),
         ];

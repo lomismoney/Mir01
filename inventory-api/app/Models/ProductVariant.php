@@ -49,7 +49,9 @@ class ProductVariant extends Model
         'total_purchased_quantity' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        // 金額欄位使用分為單位
+        // 金額欄位使用整數（分為單位）
+        'price' => 'integer',
+        'cost_price' => 'integer',
         'price_cents' => 'integer',
         'cost_price_cents' => 'integer',
         'average_cost_cents' => 'integer',

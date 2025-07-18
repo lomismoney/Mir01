@@ -317,11 +317,11 @@ export function ProductSelector({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[400px] p-0"
+          className="w-[400px] p-0 max-h-[calc(100vh-100px)]"
           align="start"
-         
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <Command>
+          <Command shouldFilter={false} disablePointerSelection={false}>
             <CommandInput
               placeholder="搜尋商品名稱..."
               value={searchTerm}
@@ -329,10 +329,15 @@ export function ProductSelector({
              
             />
 
-            <CommandList
-              className="max-h-[400px] overflow-y-auto"
-             
+            <div 
+              className="max-h-[400px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full"
+              tabIndex={0}
+              onWheel={(e) => {
+                e.stopPropagation();
+              }}
+              style={{ WebkitOverflowScrolling: 'touch' }}
             >
+            <CommandList className="max-h-none overflow-visible">
               <CommandEmpty>
                 {isLoadingProducts ? (
                   "載入中..."
@@ -501,6 +506,7 @@ export function ProductSelector({
                 </CommandGroup>
               )}
             </CommandList>
+            </div>
           </Command>
         </PopoverContent>
       </Popover>
