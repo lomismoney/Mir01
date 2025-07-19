@@ -204,6 +204,15 @@ export function useProducts(filters: ProductFilters = {}) {
             });
             
             if (error) {
+                // 詳細記錄 API 錯誤
+                console.error('API 錯誤詳情:', {
+                    error,
+                    status: (error as any)?.status,
+                    message: (error as any)?.message,
+                    detail: (error as any)?.detail,
+                    queryParams
+                });
+                
                 const errorMessage = parseApiError(error);
                 throw new Error(errorMessage || '獲取商品列表失敗');
             }

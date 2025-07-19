@@ -53,7 +53,9 @@ class ProductResource extends JsonResource
             'category_id' => $this->category_id,
             
             // 分類資訊（當已載入時）
-            'category' => new CategoryResource($this->whenLoaded('category')),
+            'category' => $this->whenLoaded('category', function () {
+                return $this->category ? new CategoryResource($this->category) : null;
+            }),
             
             // 🔧 修復：確保屬性和變體數據總是被序列化，解決前端類型不匹配問題
             'attributes' => AttributeResource::collection($this->attributes),

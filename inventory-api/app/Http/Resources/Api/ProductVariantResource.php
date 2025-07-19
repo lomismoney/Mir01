@@ -89,10 +89,10 @@ class ProductVariantResource extends JsonResource
                         'id' => $value->id,
                         'value' => $value->value,
                         'attribute_id' => $value->attribute_id,
-                        'attribute' => [
+                        'attribute' => $value->attribute ? [
                             'id' => $value->attribute->id,
                             'name' => $value->attribute->name,
-                        ],
+                        ] : null,
                     ];
                 });
             }),
@@ -105,11 +105,11 @@ class ProductVariantResource extends JsonResource
                         'store_id' => $inventory->store_id,
                         'quantity' => $inventory->quantity,
                         'low_stock_threshold' => $inventory->low_stock_threshold,
-                        'store' => [
+                        'store' => $inventory->store ? [
                             'id' => $inventory->store->id,
                             'name' => $inventory->store->name,
                             'address' => $inventory->store->address,
-                        ],
+                        ] : null,
                     ];
                 });
             }),
