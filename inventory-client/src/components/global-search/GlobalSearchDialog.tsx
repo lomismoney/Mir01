@@ -17,9 +17,12 @@ import {
   ShoppingCart,
   Users,
   Loader2,
+  Search,
+  ArrowRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface GlobalSearchDialogProps {
   open: boolean;
@@ -34,9 +37,11 @@ export function GlobalSearchDialog({
   const [searchQuery, setSearchQuery] = React.useState("");
   const { data, isLoading } = useGlobalSearch(searchQuery);
 
-  // 處理選擇項目
+  /**
+   * 處理選擇項目導航
+   */
   const handleSelect = React.useCallback(
-    (type: "product" | "order" | "customer", id: number) => {
+    (type: "product" | "order" | "customer", id: string | number) => {
       onOpenChange(false);
       setSearchQuery("");
 
@@ -55,7 +60,9 @@ export function GlobalSearchDialog({
     [router, onOpenChange]
   );
 
-  // 當對話框關閉時清空搜索
+  /**
+   * 當對話框關閉時清空搜索
+   */
   React.useEffect(() => {
     if (!open) {
       setSearchQuery("");
@@ -72,126 +79,148 @@ export function GlobalSearchDialog({
     <CommandDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="全局搜索"
-      description="搜索產品、訂單、客戶"
+      className="mx-4 max-w-2xl"
     >
       <CommandInput
-        placeholder="輸入關鍵詞搜索..."
+        placeholder="搜尋產品、訂單、客戶..."
         value={searchQuery}
         onValueChange={setSearchQuery}
       />
-      <CommandList>
+
+      <CommandList className="max-h-[400px] overflow-y-auto">
+        {/* 載入狀態 */}
         {isLoading && searchQuery.length >= 2 && (
-          <div className="flex items-center justify-center py-6">
-            <Loader2 className="h-6 w-6 animate-spin" />
+          <div className="flex flex-col items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <p className="mt-2 text-sm text-muted-foreground">搜索中...</p>
           </div>
         )}
 
+        {/* 空結果狀態 */}
         {!isLoading && searchQuery.length >= 2 && !hasResults && (
-          <CommandEmpty>找不到相關結果</CommandEmpty>
+          <div className="flex flex-col items-center justify-center py-8">
+            <Search className="h-12 w-12 text-muted-foreground/40" />
+            <CommandEmpty className="mt-4 text-base font-medium">找不到相關結果</CommandEmpty>
+            <p className="mt-2 text-sm text-muted-foreground">
+              嘗試使用不同的關鍵詞搜尋
+            </p>
+          </div>
         )}
 
+        {/* 搜尋結果 */}
         {!isLoading && data && hasResults && (
-          <>
+          <div className="overflow-hidden p-1">
             {/* 產品組 */}
             {data.products.length > 0 && (
-              <CommandGroup heading="產品">
-                {data.products.map((product) => (
-                  <CommandItem
-                    key={`product-${product.id}`}
-                    value={`product-${product.id}-${product.name}-${product.sku}`}
-                    onSelect={() => handleSelect("product", product.id)}
-                    className="flex items-center gap-2"
-                  >
-                    <Package className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{product.name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {product.sku}
-                        </Badge>
+              <>
+                <CommandGroup heading="產品" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-3 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
+                  {data.products.map((product) => (
+                    <CommandItem
+                      key={`product-${product.id}`}
+                      value={`product-${product.id}-${product.name}-${product.sku}`}
+                      onSelect={() => handleSelect("product", product.id)}
+                      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-3 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent/50"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background">
+                        <Package className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{formatCurrency(product.price)}</span>
-                        <span>庫存: {product.stock}</span>
+                      <div className="ml-3 flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium leading-none">{product.name}</span>
+                          <Badge variant="secondary" className="h-5 text-xs">
+                            {product.sku}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="font-medium text-primary">{formatCurrency(Number(product.price))}</span>
+                          <span>庫存 {product.stock}</span>
+                        </div>
                       </div>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+                      <ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                {(data.orders.length > 0 || data.customers.length > 0) && (
+                  <CommandSeparator className="my-1" />
+                )}
+              </>
             )}
-
-            {/* 分隔線 */}
-            {data.products.length > 0 &&
-              (data.orders.length > 0 || data.customers.length > 0) && (
-                <CommandSeparator />
-              )}
 
             {/* 訂單組 */}
             {data.orders.length > 0 && (
-              <CommandGroup heading="訂單">
-                {data.orders.map((order) => (
-                  <CommandItem
-                    key={`order-${order.id}`}
-                    value={`order-${order.id}-${order.order_number}-${order.customer_name}`}
-                    onSelect={() => handleSelect("order", order.id)}
-                    className="flex items-center gap-2"
-                  >
-                    <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {order.order_number}
-                        </span>
-                        <StatusBadge status={order.status} />
+              <>
+                <CommandGroup heading="訂單" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-3 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
+                  {data.orders.map((order) => (
+                    <CommandItem
+                      key={`order-${order.id}`}
+                      value={`order-${order.id}-${order.order_number}-${order.customer_name}`}
+                      onSelect={() => handleSelect("order", order.id)}
+                      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-3 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent/50"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background">
+                        <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{order.customer_name}</span>
-                        <span>{formatCurrency(order.total_amount)}</span>
-                        <span>{formatDate(order.created_at)}</span>
+                      <div className="ml-3 flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium leading-none">{order.order_number}</span>
+                          <StatusBadge status={order.status} />
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>{order.customer_name}</span>
+                          <span className="font-medium text-primary">{formatCurrency(Number(order.total_amount))}</span>
+                          <span>{formatDate(order.created_at)}</span>
+                        </div>
                       </div>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-
-            {/* 分隔線 */}
-            {data.orders.length > 0 && data.customers.length > 0 && (
-              <CommandSeparator />
+                      <ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                {data.customers.length > 0 && (
+                  <CommandSeparator className="my-1" />
+                )}
+              </>
             )}
 
             {/* 客戶組 */}
             {data.customers.length > 0 && (
-              <CommandGroup heading="客戶">
+              <CommandGroup heading="客戶" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-3 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
                 {data.customers.map((customer) => (
                   <CommandItem
                     key={`customer-${customer.id}`}
                     value={`customer-${customer.id}-${customer.name}-${customer.phone || ""}-${customer.email || ""}`}
                     onSelect={() => handleSelect("customer", customer.id)}
-                    className="flex items-center gap-2"
+                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-3 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent/50"
                   >
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <div className="font-medium">{customer.name}</div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="ml-3 flex-1 space-y-1">
+                      <div className="font-medium leading-none">{customer.name}</div>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         {customer.phone && <span>{customer.phone}</span>}
                         {customer.email && <span>{customer.email}</span>}
-                        <span>訂單: {customer.total_orders}</span>
-                        <span>消費: {formatCurrency(customer.total_spent)}</span>
+                        <span>{customer.total_orders} 筆訂單</span>
+                        <span className="font-medium text-primary">{formatCurrency(Number(customer.total_spent))}</span>
                       </div>
                     </div>
+                    <ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />
                   </CommandItem>
                 ))}
               </CommandGroup>
             )}
-          </>
+          </div>
         )}
 
         {/* 提示信息 */}
         {searchQuery.length < 2 && (
-          <div className="py-6 text-center text-sm text-muted-foreground">
-            輸入至少 2 個字符開始搜索
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <Search className="h-12 w-12 text-muted-foreground/40" />
+            <p className="mt-4 text-sm font-medium text-muted-foreground">
+              開始搜尋
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              輸入至少 2 個字符開始搜尋產品、訂單或客戶
+            </p>
           </div>
         )}
       </CommandList>
@@ -199,13 +228,15 @@ export function GlobalSearchDialog({
   );
 }
 
-// 狀態標籤組件
+/**
+ * 狀態標籤組件 - 使用 shadcn/UI 官方色彩規範
+ */
 function StatusBadge({ status }: { status: string }) {
   const statusConfig: Record<
     string,
     { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
   > = {
-    pending: { label: "待處理", variant: "default" },
+    pending: { label: "待處理", variant: "outline" },
     processing: { label: "處理中", variant: "default" },
     completed: { label: "已完成", variant: "secondary" },
     cancelled: { label: "已取消", variant: "destructive" },
@@ -217,13 +248,15 @@ function StatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <Badge variant={config.variant} className="text-xs">
+    <Badge variant={config.variant} className="h-5 text-xs">
       {config.label}
     </Badge>
   );
 }
 
-// 格式化日期
+/**
+ * 格式化日期
+ */
 function formatDate(dateString: string) {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("zh-TW", {
