@@ -45,8 +45,12 @@ class ProductDataProcessor {
       return [];
     }
     
-    // 數據規範化處理
-    const processedProducts = products.map(product => ({
+    // 數據規範化處理 - 先過濾掉 null 值以防止運行時錯誤
+    const processedProducts = products
+      .filter(product => product != null) // 過濾掉 null 和 undefined 的商品
+      .map((product, index) => {
+        try {
+          return {
       ...product,
       // 確保必要欄位存在
       id: product.id || 0,
@@ -57,26 +61,55 @@ class ProductDataProcessor {
       image_url: product.image_urls?.original || null,
       thumbnail_url: product.image_urls?.thumb || product.image_urls?.original || null,
       has_image: Boolean(product.image_urls?.original || product.image_urls?.thumb),
-      // 預處理變體信息
-      variants: Array.isArray(product.variants) ? product.variants : [],
-      variants_count: Array.isArray(product.variants) ? product.variants.length : 0,
-      // 預計算常用統計
-      total_stock: Array.isArray(product.variants) 
-        ? product.variants.reduce((sum: number, variant: Record<string, unknown>) => {
-            // 優先使用 stock 欄位，如果沒有則從 inventory 陣列計算
-            if (variant.stock !== undefined) {
-              return sum + (Number(variant.stock) || 0);
-            }
-            // 如果有 inventory 陣列，計算總和
-            if (Array.isArray(variant.inventory)) {
-              const variantStock = variant.inventory.reduce((invSum: number, inv: any) => 
-                invSum + (Number(inv.quantity) || 0), 0);
-              return sum + variantStock;
-            }
-            return sum;
-          }, 0)
+      // 預處理變體信息 - 過濾掉 null 變體
+      variants: Array.isArray(product.variants) 
+        ? product.variants.filter(variant => variant != null) 
+        : [],
+      variants_count: Array.isArray(product.variants) 
+        ? product.variants.filter(variant => variant != null).length 
         : 0,
-    }));
+      // 預計算常用統計 - 添加 null 值防護
+      total_stock: Array.isArray(product.variants) 
+        ? product.variants
+            .filter(variant => variant != null) // 過濾掉 null 變體
+            .reduce((sum: number, variant: Record<string, unknown>) => {
+              // 優先使用 stock 欄位，如果沒有則從 inventory 陣列計算
+              if (variant.stock !== undefined) {
+                return sum + (Number(variant.stock) || 0);
+              }
+              // 如果有 inventory 陣列，計算總和
+              if (Array.isArray(variant.inventory)) {
+                const variantStock = variant.inventory
+                  .filter(inv => inv != null) // 過濾掉 null 庫存記錄
+                  .reduce((invSum: number, inv: any) => 
+                    invSum + (Number(inv.quantity) || 0), 0);
+                return sum + variantStock;
+              }
+              return sum;
+            }, 0)
+        : 0,
+          };
+        } catch (error) {
+          console.error(`處理商品資料時發生錯誤 (索引: ${index}):`, {
+            error,
+            product,
+            errorMessage: error instanceof Error ? error.message : String(error)
+          });
+          // 返回一個最小有效的商品對象
+          return {
+            id: 0,
+            name: '錯誤商品',
+            description: null,
+            category_id: null,
+            image_url: null,
+            thumbnail_url: null,
+            has_image: false,
+            variants: [],
+            variants_count: 0,
+            total_stock: 0,
+          };
+        }
+      });
     
     // 🎯 不再緩存處理結果 - 庫存數據應該總是即時的
     
@@ -181,7 +214,21 @@ export function useProducts(filters: ProductFilters = {}) {
         },
         
         // 🎯 使用優化的數據處理器，傳遞 store_id 以便正確緩存
-        select: (response: unknown) => ProductDataProcessor.processApiResponse(response, filters.store_id),
+        select: (response: unknown) => {
+            try {
+                return ProductDataProcessor.processApiResponse(response, filters.store_id);
+            } catch (error) {
+                // 詳細錯誤日誌，幫助定位問題
+                console.error('ProductDataProcessor.processApiResponse 錯誤:', {
+                    error,
+                    errorMessage: error instanceof Error ? error.message : String(error),
+                    response: response,
+                    filters: filters
+                });
+                // 返回空數組，避免頁面崩潰
+                return [];
+            }
+        },
         
         // 🎯 恢復 placeholderData 以提升用戶體驗
         placeholderData: (previousData) => previousData,
@@ -343,9 +390,9 @@ export function useProductDetail(productId: number | string | undefined) {
                                     attribute_id: a?.attribute_id || 0,
                                     value: a?.value || '',
                                     attribute: a?.attribute ? {
-                                        id: a.attribute.id || 0,
-                                        name: a.attribute.name || '',
-                                        type: a.attribute.type || 'text',
+                                        id: (a.attribute as any)?.id || 0,
+                                        name: (a.attribute as any)?.name || '',
+                                        type: (a.attribute as any)?.type || 'text',
                                     } : undefined,
                                 };
                             })
@@ -670,14 +717,19 @@ export function useProductVariants(params: {
                 
                 // 返回該商品的變體，並確保每個變體都包含商品資訊
                 const product = data?.data;
-                const variants = (product?.variants || []).map((variant: any) => ({
-                    ...variant,
-                    product: {
-                        id: product.id,
-                        name: product.name,
-                        description: product.description
-                    }
-                }));
+                if (!product || !product.id) {
+                    return { data: [] };
+                }
+                const variants = (product?.variants || [])
+                    .filter((variant: any) => variant != null)
+                    .map((variant: any) => ({
+                        ...variant,
+                        product: {
+                            id: product.id || 0,
+                            name: product.name || '',
+                            description: product.description || null
+                        }
+                    }));
                 
                 return { 
                     data: variants
@@ -697,21 +749,24 @@ export function useProductVariants(params: {
                     throw new Error(errorMessage || '獲取商品列表失敗');
                 }
                 
-                // 從商品列表中提取所有變體
+                // 從商品列表中提取所有變體 - 添加 null 檢查
                 const products = data?.data?.data || data?.data || [];
-                const allVariants = products.flatMap((product: any) => 
-                    (product.variants || []).map((variant: any) => ({
-                        ...variant,
-                        product_id: product.id,
-                        product: {
-                            id: product.id,
-                            name: product.name,
-                            description: product.description,
-                            category: product.category,
-                            image_url: product.image_url,
-                            thumbnail_url: product.thumbnail_url
-                        }
-                    }))
+                const validProducts = products.filter((product: any) => product != null && product.id != null);
+                const allVariants = validProducts.flatMap((product: any) => 
+                    (product.variants || [])
+                        .filter((variant: any) => variant != null)
+                        .map((variant: any) => ({
+                            ...variant,
+                            product_id: product.id,
+                            product: {
+                                id: product.id || 0,
+                                name: product.name || '',
+                                description: product.description || null,
+                                category: product.category || null,
+                                image_url: product.image_url || null,
+                                thumbnail_url: product.thumbnail_url || null
+                            }
+                        }))
                 );
                 
                 return { data: allVariants };
