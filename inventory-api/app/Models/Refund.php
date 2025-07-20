@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\HandlesCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,7 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Refund extends Model
 {
-    use HasFactory, HandlesCurrency;
+    use HasFactory;
 
     /**
      * 資料表名稱
@@ -54,8 +53,6 @@ class Refund extends Model
         'reason',
         'notes',
         'should_restock',
-        // 金額欄位（分為單位）
-        'total_refund_amount_cents',
     ];
 
     /**
@@ -67,8 +64,8 @@ class Refund extends Model
         'should_restock' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        // 金額欄位使用分為單位
-        'total_refund_amount_cents' => 'integer',
+        // 金額欄位使用 decimal
+        'total_refund_amount' => 'decimal:2',
     ];
 
     /**
@@ -262,29 +259,4 @@ class Refund extends Model
         });
     }
 
-    // ===== 金額處理方法 =====
-
-    /**
-     * 定義金額欄位
-     */
-    protected function getCurrencyFields(): array
-    {
-        return ['total_refund_amount'];
-    }
-
-    /**
-     * 退款總金額 Accessor
-     */
-    public function getTotalRefundAmountAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('total_refund_amount'));
-    }
-
-    /**
-     * 退款總金額 Mutator
-     */
-    public function setTotalRefundAmountAttribute($value): void
-    {
-        $this->setCurrencyValue('total_refund_amount', $value);
-    }
 }

@@ -106,6 +106,7 @@ class ProductResource extends JsonResource
                 fn() => [
                     'min' => $this->variants->min('price'),
                     'max' => $this->variants->max('price'),
+                    'count' => $this->variants->count(),
                 ]
             ),
             

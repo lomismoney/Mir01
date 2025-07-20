@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\HandlesCurrency;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Order extends Model
 {
-    use HasFactory, HandlesCurrency;
+    use HasFactory;
     /**
      * 可批量賦值的屬性
      */
@@ -39,13 +38,6 @@ class Order extends Model
         'fulfillment_priority',
         'expected_delivery_date',
         'priority_reason',
-        // 金額欄位（分為單位）
-        'subtotal_cents',
-        'shipping_fee_cents',
-        'tax_cents',
-        'discount_amount_cents',
-        'grand_total_cents',
-        'paid_amount_cents',
     ];
 
     /**
@@ -58,19 +50,13 @@ class Order extends Model
         'paid_at' => 'datetime',
         'estimated_delivery_date' => 'date',
         'expected_delivery_date' => 'date',
-        // 金額欄位使用整數（分為單位）
-        'subtotal' => 'integer',
-        'shipping_fee' => 'integer',
-        'tax' => 'integer',
-        'discount_amount' => 'integer',
-        'grand_total' => 'integer',
-        'paid_amount' => 'integer',
-        'subtotal_cents' => 'integer',
-        'shipping_fee_cents' => 'integer',
-        'tax_cents' => 'integer',
-        'discount_amount_cents' => 'integer',
-        'grand_total_cents' => 'integer',
-        'paid_amount_cents' => 'integer',
+        // 金額欄位使用 decimal
+        'subtotal' => 'decimal:2',
+        'shipping_fee' => 'decimal:2',
+        'tax' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'grand_total' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
     ];
 
     /**
@@ -163,122 +149,6 @@ class Order extends Model
         return $this->items()->whereNull('product_variant_id')->exists();
     }
 
-    /**
-     * 定義金額欄位
-     * 
-     * @return array
-     */
-    protected function getCurrencyFields(): array
-    {
-        return [
-            'subtotal',
-            'shipping_fee',
-            'tax',
-            'discount_amount',
-            'grand_total',
-            'paid_amount',
-        ];
-    }
-
-    // ===== 金額欄位的 Accessor 方法 =====
-
-    /**
-     * 取得小計金額（元）
-     */
-    public function getSubtotalAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('subtotal'));
-    }
-
-    /**
-     * 取得運費（元）
-     */
-    public function getShippingFeeAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('shipping_fee'));
-    }
-
-    /**
-     * 取得稅額（元）
-     */
-    public function getTaxAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('tax'));
-    }
-
-    /**
-     * 取得折扣金額（元）
-     */
-    public function getDiscountAmountAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('discount_amount'));
-    }
-
-    /**
-     * 取得總金額（元）
-     */
-    public function getGrandTotalAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('grand_total'));
-    }
-
-    /**
-     * 取得已付金額（元）
-     */
-    public function getPaidAmountAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('paid_amount'));
-    }
-
-    // ===== 金額欄位的 Mutator 方法 =====
-
-    /**
-     * 設定小計金額
-     */
-    public function setSubtotalAttribute($value): void
-    {
-        $this->setCurrencyValue('subtotal', $value);
-    }
-
-    /**
-     * 設定運費
-     */
-    public function setShippingFeeAttribute($value): void
-    {
-        $this->setCurrencyValue('shipping_fee', $value);
-    }
-
-    /**
-     * 設定稅額
-     */
-    public function setTaxAttribute($value): void
-    {
-        $this->setCurrencyValue('tax', $value);
-    }
-
-    /**
-     * 設定折扣金額
-     */
-    public function setDiscountAmountAttribute($value): void
-    {
-        $this->setCurrencyValue('discount_amount', $value);
-    }
-
-    /**
-     * 設定總金額
-     */
-    public function setGrandTotalAttribute($value): void
-    {
-        $this->setCurrencyValue('grand_total', $value);
-    }
-
-    /**
-     * 設定已付金額
-     */
-    public function setPaidAmountAttribute($value): void
-    {
-        $this->setCurrencyValue('paid_amount', $value);
-    }
 
     // ===== 業務邏輯方法 =====
 
@@ -292,17 +162,6 @@ class Order extends Model
         return max(0, $this->grand_total - $this->paid_amount);
     }
 
-    /**
-     * 計算剩餘應付金額（分為單位）
-     * 
-     * @return int
-     */
-    public function getRemainingAmountCentsAttribute(): int
-    {
-        $grandTotalCents = $this->getCentsValue('grand_total');
-        $paidAmountCents = $this->getCentsValue('paid_amount');
-        return max(0, $grandTotalCents - $paidAmountCents);
-    }
 
     /**
      * 檢查訂單是否已完全付款
@@ -311,7 +170,7 @@ class Order extends Model
      */
     public function isFullyPaidAttribute(): bool
     {
-        return $this->remaining_amount_cents <= 0;
+        return $this->remaining_amount <= 0;
     }
 
     /**
@@ -322,13 +181,13 @@ class Order extends Model
     public function getAmountSummary(): array
     {
         return [
-            'subtotal' => $this->getFormattedCurrency('subtotal'),
-            'shipping_fee' => $this->getFormattedCurrency('shipping_fee'),
-            'tax' => $this->getFormattedCurrency('tax'),
-            'discount_amount' => $this->getFormattedCurrency('discount_amount'),
-            'grand_total' => $this->getFormattedCurrency('grand_total'),
-            'paid_amount' => $this->getFormattedCurrency('paid_amount'),
-            'remaining_amount' => self::formatCurrency($this->remaining_amount_cents),
+            'subtotal' => 'NT$ ' . number_format($this->subtotal, 2),
+            'shipping_fee' => 'NT$ ' . number_format($this->shipping_fee, 2),
+            'tax' => 'NT$ ' . number_format($this->tax, 2),
+            'discount_amount' => 'NT$ ' . number_format($this->discount_amount, 2),
+            'grand_total' => 'NT$ ' . number_format($this->grand_total, 2),
+            'paid_amount' => 'NT$ ' . number_format($this->paid_amount, 2),
+            'remaining_amount' => 'NT$ ' . number_format($this->remaining_amount, 2),
             'is_fully_paid' => $this->is_fully_paid,
         ];
     }

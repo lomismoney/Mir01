@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\HandlesCurrency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class OrderItem extends Model
 {
-    use HasFactory, HandlesCurrency;
+    use HasFactory;
     /**
      * 可批量賦值的屬性
      */
@@ -37,10 +36,6 @@ class OrderItem extends Model
         'purchase_item_id',
         'is_fulfilled',
         'fulfilled_at',
-        // 金額欄位（分為單位）
-        'price_cents',
-        'cost_cents',
-        'discount_amount_cents',
         // 分配優先級欄位
         'allocation_priority_score',
         'allocation_metadata',
@@ -58,13 +53,10 @@ class OrderItem extends Model
         'fulfilled_quantity' => 'integer',
         'tax_rate' => 'decimal:2',
         'fulfilled_at' => 'datetime',
-        // 金額欄位使用整數（分為單位）
-        'price' => 'integer',
-        'cost' => 'integer',
-        'discount_amount' => 'integer',
-        'price_cents' => 'integer',
-        'cost_cents' => 'integer', 
-        'discount_amount_cents' => 'integer',
+        // 金額欄位使用 decimal
+        'price' => 'decimal:2',
+        'cost' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         // 分配優先級欄位
         'allocation_priority_score' => 'integer',
         'allocation_metadata' => 'json',
@@ -364,83 +356,11 @@ class OrderItem extends Model
     // ===== 金額處理方法 =====
 
     /**
-     * 定義金額欄位
-     */
-    protected function getCurrencyFields(): array
-    {
-        return ['price', 'cost', 'discount_amount'];
-    }
-
-    /**
-     * 價格 Accessor
-     */
-    public function getPriceAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('price'));
-    }
-
-    /**
-     * 價格 Mutator
-     */
-    public function setPriceAttribute($value): void
-    {
-        $this->setCurrencyValue('price', $value);
-    }
-
-    /**
-     * 成本 Accessor  
-     */
-    public function getCostAttribute(): ?float
-    {
-        // 如果 cost_cents 是 null，直接返回 null
-        if (is_null($this->cost_cents)) {
-            return null;
-        }
-        return self::centsToYuan($this->getCentsValue('cost'));
-    }
-
-    /**
-     * 成本 Mutator
-     */
-    public function setCostAttribute($value): void
-    {
-        $this->setCurrencyValue('cost', $value);
-    }
-
-    /**
-     * 折扣金額 Accessor
-     */
-    public function getDiscountAmountAttribute(): float
-    {
-        return self::centsToYuan($this->getCentsValue('discount_amount'));
-    }
-
-    /**
-     * 折扣金額 Mutator
-     */
-    public function setDiscountAmountAttribute($value): void
-    {
-        $this->setCurrencyValue('discount_amount', $value);
-    }
-
-    /**
      * 計算小計（單價 × 數量 - 折扣）
      */
     public function getSubtotalAttribute(): float
     {
-        $priceCents = $this->getCentsValue('price');
-        $discountCents = $this->getCentsValue('discount_amount');
-        $subtotalCents = ($priceCents * $this->quantity) - $discountCents;
-        return self::centsToYuan($subtotalCents);
-    }
-
-    /**
-     * 計算小計（分為單位）
-     */
-    public function getSubtotalCentsAttribute(): int
-    {
-        $priceCents = $this->getCentsValue('price');
-        $discountCents = $this->getCentsValue('discount_amount');
-        return ($priceCents * $this->quantity) - $discountCents;
+        $subtotal = ($this->price * $this->quantity) - $this->discount_amount;
+        return round($subtotal, 2);
     }
 }
