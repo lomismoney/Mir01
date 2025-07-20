@@ -114,7 +114,8 @@ export {
   useCancelPurchase,
   useDeletePurchase,
   usePartialReceipt,
-  useUpdatePurchaseNotes
+  useUpdatePurchaseNotes,
+  useUpdateShippingCost
 } from './queries/purchases/usePurchases';
 
 // 安裝管理相關 hooks（已拆分到獨立檔案）

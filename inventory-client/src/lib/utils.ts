@@ -125,24 +125,19 @@ export function getOrderStatusVariant(status: string): "default" | "secondary" |
 }
 
 /**
- * 格式化價格顯示（統一分為單位處理）
+ * 格式化價格顯示
  * 
- * @param priceInCents - 以分為單位的價格（後端統一格式）
- * @param isAlreadyInDollars - 是否已經是元為單位（向後兼容）
+ * @param price - 價格金額（元為單位）
  * @returns 格式化的價格字串
  * 
  * @example
- * formatPrice(100000) // "NT$1,000" (100000分 = 1000元)
- * formatPrice(1000, true) // "NT$1,000" (已經是元為單位)
+ * formatPrice(1000) // "NT$1,000"
+ * formatPrice(null) // "N/A"
  */
-export function formatPrice(priceInCents?: number | null, isAlreadyInDollars?: boolean): string {
-  if (priceInCents === undefined || priceInCents === null) {
+export function formatPrice(price?: number | null): string {
+  if (price === undefined || price === null) {
     return 'N/A';
   }
-
-  // 如果已經是元為單位（向後兼容），則直接使用
-  // 否則將分轉換為元
-  const priceInDollars = isAlreadyInDollars ? priceInCents : priceInCents / 100;
 
   const formatter = new Intl.NumberFormat('zh-TW', { 
     style: 'currency', 
@@ -151,7 +146,7 @@ export function formatPrice(priceInCents?: number | null, isAlreadyInDollars?: b
     maximumFractionDigits: 0
   });
 
-  return formatter.format(priceInDollars);
+  return formatter.format(price);
 }
 
 /**
@@ -162,42 +157,3 @@ export function formatPrice(priceInCents?: number | null, isAlreadyInDollars?: b
  */
 export const formatCurrency = formatPrice;
 
-/**
- * 格式化分為單位的價格顯示（新的標準函數）
- * 
- * @param cents - 以分為單位的價格
- * @returns 格式化的價格字串
- * 
- * @example
- * formatPriceFromCents(100000) // "NT$1,000"
- * formatPriceFromCents(null) // "N/A"
- */
-export function formatPriceFromCents(cents?: number | null): string {
-  return formatPrice(cents, false);
-}
-
-/**
- * 將元轉換為分
- * 
- * @param dollars - 元為單位的金額
- * @returns 分為單位的金額
- * 
- * @example
- * dollarsToCents(10.50) // 1050
- */
-export function dollarsToCents(dollars: number): number {
-  return Math.round(dollars * 100);
-}
-
-/**
- * 將分轉換為元
- * 
- * @param cents - 分為單位的金額
- * @returns 元為單位的金額
- * 
- * @example
- * centsToDollars(1050) // 10.50
- */
-export function centsToDollars(cents: number): number {
-  return cents / 100;
-}

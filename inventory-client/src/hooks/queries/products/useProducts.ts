@@ -937,10 +937,12 @@ export function useUploadProductImage() {
             return await response.json();
         },
         onSuccess: async (data, variables) => {
-            // 失效相關的快取
+            // 失效相關的快取並強制重新獲取
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT(variables.productId) }),
-                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS })
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS }),
+                // 強制重新獲取商品列表，確保圖片立即顯示
+                queryClient.refetchQueries({ queryKey: QUERY_KEYS.PRODUCTS })
             ]);
             
             // 顯示成功訊息

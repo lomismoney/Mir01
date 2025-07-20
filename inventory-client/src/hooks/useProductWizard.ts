@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { 
   useProductDetail, 
   useAttributes, 
@@ -78,6 +79,7 @@ const TOTAL_STEPS = 4;
 
 export function useProductWizard(productId?: string | number): UseProductWizardReturn {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { handleError, handleSuccess } = useErrorHandler();
   
   // 編輯模式判斷
@@ -299,6 +301,10 @@ export function useProductWizard(productId?: string | number): UseProductWizardR
             productId: (productResponse.data as any).id,
             image: formData.imageData.selectedFile,
           });
+          // 圖片上傳成功後，刷新商品列表以顯示新圖片
+          await queryClient.invalidateQueries({ queryKey: ['products'] });
+          // 強制重新獲取商品列表，確保圖片立即顯示
+          await queryClient.refetchQueries({ queryKey: ['products'] });
         } catch (imageError) {
           // 圖片上傳失敗
           // 圖片上傳失敗不應該阻止商品創建成功
