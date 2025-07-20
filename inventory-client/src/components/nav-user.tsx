@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   CreditCard,
   MoreVertical,
@@ -208,9 +209,11 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="flex items-center gap-2">
-                <UserCircle className="h-4 w-4" />
-                <span>個人資料</span>
+              <DropdownMenuItem className="flex items-center gap-2" asChild>
+                <Link href="/profile">
+                  <UserCircle className="h-4 w-4" />
+                  <span>個人資料</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4" />

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -68,7 +69,10 @@ export function SiteHeader() {
               <Skeleton className="h-4 w-16" />
             </div>
           ) : user ? (
-            <div className="flex items-center gap-2">
+            <Link 
+              href="/profile"
+              className="flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md px-2 py-1 transition-colors"
+            >
               <Avatar className="h-6 w-6">
                 <AvatarFallback className="text-xs">
                   {user.name?.charAt(0).toUpperCase() || "U"}
@@ -80,7 +84,7 @@ export function SiteHeader() {
               >
                 {user.name || "未知用戶"}
               </span>
-            </div>
+            </Link>
           ) : null}
 
           <Separator

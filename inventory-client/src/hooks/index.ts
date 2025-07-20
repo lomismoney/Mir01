@@ -157,6 +157,8 @@ export { useCustomerManagement, type CustomerManagementHook } from './useCustome
 // 其他專門的鉤子
 export * from './use-admin-auth';
 export { useDebounce } from './use-debounce';
+export * from './use-profile';
+export * from './use-change-password';
 // useUserStores 已移除 - 包含 URL 參數相關的 as any 臨時補丁，且未被使用
 export * from './use-mobile';
 export * from './useAppFieldArray';

@@ -25,6 +25,7 @@ import {
   IconPlus,
   IconEdit,
   IconEye,
+  IconUser,
   type IconProps
 } from "@tabler/icons-react";
 import { ComponentType } from "react";
@@ -258,6 +259,11 @@ export const routesConfig: RouteConfig[] = [
     path: "/users",
     label: "用戶管理",
     icon: IconUsers,
+  },
+  {
+    path: "/profile",
+    label: "個人資料",
+    icon: IconUser,
   },
   {
     path: "/data",
