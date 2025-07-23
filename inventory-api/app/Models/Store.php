@@ -15,6 +15,17 @@ class Store extends Model
     protected $guarded = [];
 
     /**
+     * 屬性類型轉換
+     */
+    protected $casts = [
+        'business_hours' => 'array',
+        'is_active' => 'boolean',
+        'is_default' => 'boolean',
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
+    ];
+
+    /**
      * 獲取該門市的所有用戶
      */
     public function users()

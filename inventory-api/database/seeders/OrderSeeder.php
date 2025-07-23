@@ -29,7 +29,7 @@ class OrderSeeder extends Seeder
         $orderCount = 0;
         $itemCount = 0;
 
-        // 建立各種狀態的訂單範例
+        // 建立各種狀態的訂單範例（包含稅務測試場景）
         $orderScenarios = [
             // 1. 完全履行的現貨訂單
             [
@@ -169,12 +169,107 @@ class OrderSeeder extends Seeder
                         ]
                     ]
                 ]
+            ],
+
+            // 7. 含稅訂單測試場景（5%稅率）
+            [
+                'type' => 'tax_inclusive_5_percent',
+                'customer' => $customers->random(),
+                'tax_config' => [
+                    'is_tax_inclusive' => true,
+                    'tax_rate' => 5
+                ],
+                'items' => [
+                    [
+                        'type' => OrderItemType::STOCK,
+                        'quantity' => 3,
+                        'fulfilled_quantity' => 3,
+                        'is_fulfilled' => true,
+                    ],
+                    [
+                        'type' => OrderItemType::STOCK,
+                        'quantity' => 2,
+                        'fulfilled_quantity' => 2,
+                        'is_fulfilled' => true,
+                    ]
+                ]
+            ],
+
+            // 8. 不含稅訂單測試場景（5%稅率）
+            [
+                'type' => 'tax_exclusive_5_percent',
+                'customer' => $customers->random(),
+                'tax_config' => [
+                    'is_tax_inclusive' => false,
+                    'tax_rate' => 5
+                ],
+                'items' => [
+                    [
+                        'type' => OrderItemType::STOCK,
+                        'quantity' => 4,
+                        'fulfilled_quantity' => 4,
+                        'is_fulfilled' => true,
+                    ],
+                    [
+                        'type' => OrderItemType::BACKORDER,
+                        'quantity' => 1,
+                        'fulfilled_quantity' => 0,
+                        'is_fulfilled' => false,
+                    ]
+                ]
+            ],
+
+            // 9. 零稅率訂單測試場景
+            [
+                'type' => 'zero_tax_rate',
+                'customer' => $customers->random(),
+                'tax_config' => [
+                    'is_tax_inclusive' => true,
+                    'tax_rate' => 0
+                ],
+                'items' => [
+                    [
+                        'type' => OrderItemType::STOCK,
+                        'quantity' => 5,
+                        'fulfilled_quantity' => 5,
+                        'is_fulfilled' => true,
+                    ]
+                ]
+            ],
+
+            // 10. 高稅率不含稅訂單（10%稅率）
+            [
+                'type' => 'high_tax_rate_exclusive',
+                'customer' => $customers->random(),
+                'tax_config' => [
+                    'is_tax_inclusive' => false,
+                    'tax_rate' => 10
+                ],
+                'items' => [
+                    [
+                        'type' => OrderItemType::STOCK,
+                        'quantity' => 2,
+                        'fulfilled_quantity' => 2,
+                        'is_fulfilled' => true,
+                    ],
+                    [
+                        'type' => OrderItemType::CUSTOM,
+                        'quantity' => 1,
+                        'fulfilled_quantity' => 0,
+                        'is_fulfilled' => false,
+                        'custom_specs' => [
+                            'color' => '特殊配色',
+                            'material' => '高級材質'
+                        ]
+                    ]
+                ]
             ]
         ];
 
         // 建立場景範例訂單
         foreach ($orderScenarios as $scenario) {
-            $order = $this->createOrder($scenario['customer'], $users->random());
+            $taxConfig = $scenario['tax_config'] ?? null;
+            $order = $this->createOrder($scenario['customer'], $users->random(), $taxConfig);
             $orderCount++;
 
             foreach ($scenario['items'] as $itemData) {
@@ -240,12 +335,20 @@ class OrderSeeder extends Seeder
     /**
      * 建立訂單
      */
-    private function createOrder(Customer $customer, User $user): Order
+    private function createOrder(Customer $customer, User $user, array $taxConfig = null): Order
     {
         $createdAt = now()->subDays(rand(0, 30))->subHours(rand(0, 23));
         
         $shippingStatuses = ['pending', 'processing', 'shipped', 'delivered'];
         $paymentStatuses = ['pending', 'paid', 'partially_paid', 'refunded'];
+        
+        // 如果沒有指定稅務配置，則隨機生成
+        if (!$taxConfig) {
+            $taxConfig = [
+                'is_tax_inclusive' => (bool)rand(0, 1),
+                'tax_rate' => [0, 5, 10][array_rand([0, 5, 10])]
+            ];
+        }
         
         return Order::create([
             'order_number' => $this->generateOrderNumber($createdAt),
@@ -253,6 +356,8 @@ class OrderSeeder extends Seeder
             'creator_user_id' => $user->id,
             'shipping_status' => $shippingStatuses[array_rand($shippingStatuses)],
             'payment_status' => $paymentStatuses[array_rand($paymentStatuses)],
+            'is_tax_inclusive' => $taxConfig['is_tax_inclusive'],
+            'tax_rate' => $taxConfig['tax_rate'],
             'subtotal' => 0, // 稍後計算
             'shipping_fee' => rand(0, 200) * 100, // 0-200元（以分為單位）
             'tax' => 0, // 稍後計算
@@ -288,8 +393,6 @@ class OrderSeeder extends Seeder
             'cost' => $variant->cost_price ?: ($variant->price * 0.6),
             'quantity' => $itemData['quantity'],
             'fulfilled_quantity' => $itemData['fulfilled_quantity'],
-            'tax_rate' => 5, // 5% 稅率
-            'discount_amount' => rand(0, 100) * 100, // 0-100元的折扣（以分為單位）
             'is_fulfilled' => $itemData['is_fulfilled'],
             'fulfilled_at' => $itemData['is_fulfilled'] ? now() : null,
         ];
@@ -437,7 +540,7 @@ class OrderSeeder extends Seeder
     /**
      * 生成訂單備註
      */
-    private function generateOrderNotes(): string
+    private function generateOrderNotes(): ?string
     {
         $notes = [
             '客戶要求盡快出貨',
@@ -465,11 +568,29 @@ class OrderSeeder extends Seeder
     {
         $items = $order->items;
         
-        $subtotal = $items->sum(function($item) {
-            return ($item->price * $item->quantity) - $item->discount_amount;
+        // 計算原始小計（不含稅）
+        $rawSubtotal = $items->sum(function($item) {
+            return $item->price * $item->quantity;
         });
         
-        $tax = (int)round($subtotal * 0.05); // 5% 稅率（以分為單位）
+        // 根據是否含稅來計算稅額和小計
+        if ($order->is_tax_inclusive) {
+            // 含稅：從總額反推稅額
+            // 稅額 = 含稅總額 - 含稅總額 / (1 + 稅率)
+            if ($order->tax_rate > 0) {
+                $tax = (int)round($rawSubtotal - ($rawSubtotal / (1 + $order->tax_rate / 100)));
+                $subtotal = $rawSubtotal - $tax; // 小計 = 含稅總額 - 稅額
+            } else {
+                $tax = 0;
+                $subtotal = $rawSubtotal;
+            }
+        } else {
+            // 不含稅：直接計算稅額
+            $subtotal = $rawSubtotal;
+            $tax = (int)round($subtotal * ($order->tax_rate / 100));
+        }
+        
+        // 計算總計
         $grandTotal = $subtotal + $tax + $order->shipping_fee - $order->discount_amount;
         
         // 設定已付金額

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\MoneyHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,8 +59,6 @@ class RefundItem extends Model
         'quantity' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        // 金額欄位使用 decimal
-        'refund_subtotal' => 'decimal:2',
     ];
 
     /**
@@ -125,6 +124,29 @@ class RefundItem extends Model
         return $query;
     }
 
+    // ===== 金額 Accessor/Mutator (分/元轉換) =====
+    
+    /**
+     * Refund Subtotal Accessor - 將分轉換為元
+     * 
+     * @return float
+     */
+    public function getRefundSubtotalAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['refund_subtotal'] ?? 0);
+    }
+    
+    /**
+     * Refund Subtotal Mutator - 將元轉換為分
+     * 
+     * @param float|null $value
+     * @return void
+     */
+    public function setRefundSubtotalAttribute($value): void
+    {
+        $this->attributes['refund_subtotal'] = MoneyHelper::yuanToCents($value);
+    }
+
     /**
      * 存取器：格式化退款小計顯示
      * 
@@ -132,7 +154,7 @@ class RefundItem extends Model
      */
     public function getFormattedSubtotalAttribute(): string
     {
-        return '$' . number_format($this->refund_subtotal, 2);
+        return MoneyHelper::formatWithDecimals($this->attributes['refund_subtotal'] ?? 0);
     }
 
     /**
@@ -240,11 +262,12 @@ class RefundItem extends Model
      * 靜態方法：計算指定訂單品項的總退款金額
      * 
      * @param int $orderItemId
-     * @return float
+     * @return float 返回元為單位的金額
      */
     public static function getTotalRefundedAmount(int $orderItemId): float
     {
-        return self::where('order_item_id', $orderItemId)->sum('refund_subtotal');
+        $totalCents = self::where('order_item_id', $orderItemId)->sum('refund_subtotal');
+        return MoneyHelper::centsToYuan($totalCents);
     }
 
     /**

@@ -14,6 +14,7 @@ use App\Services\PurchaseService;
 use App\Data\PurchaseData;
 use App\Data\PurchaseItemData;
 use Spatie\LaravelData\DataCollection;
+use Illuminate\Support\Facades\Auth;
 
 class PurchaseSeeder extends Seeder
 {
@@ -26,6 +27,11 @@ class PurchaseSeeder extends Seeder
         $user = User::first();
         $variants = ProductVariant::with('product')->get();
         $purchaseService = app(PurchaseService::class);
+        
+        // 設置認證用戶
+        if ($user) {
+            Auth::login($user);
+        }
         
         if ($stores->isEmpty() || !$user || $variants->isEmpty()) {
             echo "警告：需要門市、用戶和商品變體資料才能建立進貨單\n";
@@ -91,6 +97,10 @@ class PurchaseSeeder extends Seeder
                     $itemCount++;
                 }
                 
+                // 隨機生成稅務資訊
+                $isTaxInclusive = (bool) rand(0, 1);
+                $taxRate = collect([0, 5, 10])->random();
+                
                 // 使用PurchaseService創建進貨單（這會自動計算運費攤銷）
                 $purchaseData = new PurchaseData(
                     store_id: $store->id,
@@ -98,7 +108,11 @@ class PurchaseSeeder extends Seeder
                     shipping_cost: $shippingCost,
                     items: new DataCollection(PurchaseItemData::class, $items),
                     status: $status,
-                    purchased_at: $purchasedAt
+                    purchased_at: $purchasedAt,
+                    notes: '測試進貨單 - 包含稅務資訊',
+                    order_items: null,
+                    is_tax_inclusive: $isTaxInclusive,
+                    tax_rate: $taxRate
                 );
                 
                 $purchase = $purchaseService->createPurchase($purchaseData);

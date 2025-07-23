@@ -116,7 +116,12 @@
       "Bash(git commit:*)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
-      "Bash(./vendor/bin/sail exec mysql mysql:*)"
+      "Bash(./vendor/bin/sail exec mysql mysql:*)",
+      "Bash(./vendor/bin/phpunit --testsuite=Unit --filter=OrderService)",
+      "Bash(./vendor/bin/sail ps)",
+      "Bash(./vendor/bin/sail up:*)",
+      "Bash(./vendor/bin/phpunit --testsuite=Unit --filter=OrderServiceTest)",
+      "Bash(./vendor/bin/phpunit:*)"
     ],
     "deny": []
   }

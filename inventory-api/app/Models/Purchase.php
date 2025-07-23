@@ -29,6 +29,9 @@ class Purchase extends Model
     protected $casts = [
         'total_amount' => 'integer',
         'shipping_cost' => 'integer',
+        'is_tax_inclusive' => 'boolean',
+        'tax_rate' => 'integer',
+        'tax_amount' => 'integer',
         'purchased_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -262,5 +265,21 @@ class Purchase extends Model
     public function setShippingCostAttribute($value): void
     {
         $this->attributes['shipping_cost'] = is_null($value) ? null : (int) round($value * 100);
+    }
+
+    /**
+     * 稅額 Accessor - 將分轉換為元
+     */
+    public function getTaxAmountAttribute(): float
+    {
+        return ($this->attributes['tax_amount'] ?? 0) / 100;
+    }
+
+    /**
+     * 稅額 Mutator - 將元轉換為分
+     */
+    public function setTaxAmountAttribute($value): void
+    {
+        $this->attributes['tax_amount'] = is_null($value) ? null : (int) round($value * 100);
     }
 }

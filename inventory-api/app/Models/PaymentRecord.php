@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Helpers\MoneyHelper;
 
 /**
  * 付款記錄模型
@@ -33,8 +34,6 @@ class PaymentRecord extends Model
      */
     protected $casts = [
         'payment_date' => 'datetime',
-        // 金額欄位使用 decimal
-        'amount' => 'decimal:2',
     ];
 
     /**
@@ -51,6 +50,30 @@ class PaymentRecord extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    /**
+     * 取得付款金額（元）
+     * 將資料庫中的分轉換為元
+     *
+     * @param int $value
+     * @return float
+     */
+    public function getAmountAttribute($value): float
+    {
+        return MoneyHelper::centsToYuan($value);
+    }
+
+    /**
+     * 設定付款金額（元）
+     * 將輸入的元轉換為分儲存
+     *
+     * @param float $value
+     * @return void
+     */
+    public function setAmountAttribute($value): void
+    {
+        $this->attributes['amount'] = MoneyHelper::yuanToCents($value);
     }
 
     /**

@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -15,9 +14,6 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 確保角色存在
-        $this->ensureRolesExist();
-        
         // 禁用外鍵檢查以避免 truncate 問題
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         
@@ -27,28 +23,61 @@ class UserSeeder extends Seeder
         // 重新啟用外鍵檢查
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // 建立一個指定的超級管理員
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'username' => 'superadmin',
-            'password' => Hash::make('password'), // 注意：請在生產環境中使用更安全的密碼
-        ]);
-        
-        // 分配管理員角色
-        $superAdmin->assignRole('admin');
+        // 建立測試用戶並分配角色
+        $users = [
+            [
+                'name' => 'Super Admin',
+                'username' => 'superadmin',
+                'password' => Hash::make('password'),
+                'role' => 'super-admin'
+            ],
+            [
+                'name' => 'Admin User',
+                'username' => 'admin',
+                'password' => Hash::make('password'),
+                'role' => 'admin'
+            ],
+            [
+                'name' => 'Manager User',
+                'username' => 'manager',
+                'password' => Hash::make('password'),
+                'role' => 'manager'
+            ],
+            [
+                'name' => 'Staff User',
+                'username' => 'staff',
+                'password' => Hash::make('password'),
+                'role' => 'staff'
+            ],
+            [
+                'name' => 'Viewer User',
+                'username' => 'viewer',
+                'password' => Hash::make('password'),
+                'role' => 'viewer'
+            ],
+            [
+                'name' => 'Installer User',
+                'username' => 'installer',
+                'password' => Hash::make('password'),
+                'role' => 'installer'
+            ],
+        ];
 
-        // 工廠生成的用戶將自動擁有 'viewer' 角色
-        User::factory(10)->create();
-    }
-    
-    /**
-     * 確保所有角色存在
-     */
-    private function ensureRolesExist(): void
-    {
-        foreach (User::getAvailableRoles() as $roleName => $roleConfig) {
-            Role::findOrCreate($roleName, 'web');
-            Role::findOrCreate($roleName, 'sanctum');
+        foreach ($users as $userData) {
+            $role = $userData['role'];
+            unset($userData['role']);
+            
+            $user = User::create($userData);
+            $user->assignRole($role);
+            
+            $this->command->info("建立用戶 {$user->username} 並分配角色 {$role}");
         }
+
+        // 建立額外的測試用戶（都分配 staff 角色）
+        User::factory(5)->create()->each(function ($user) {
+            $user->assignRole('staff');
+        });
+        
+        $this->command->info('建立 5 個額外的員工用戶');
     }
 } 

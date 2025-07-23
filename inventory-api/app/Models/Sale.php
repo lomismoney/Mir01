@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Sale extends Model
 {
@@ -13,6 +14,17 @@ class Sale extends Model
      * 允許大量賦值的屬性設定
      */
     protected $guarded = [];
+
+    /**
+     * 獲取總金額（轉換為元）
+     */
+    protected function totalAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
 
     /**
      * 獲取該銷貨單所屬的門市

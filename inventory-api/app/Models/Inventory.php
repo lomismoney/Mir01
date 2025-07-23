@@ -153,7 +153,7 @@ class Inventory extends Model
      * @param array $metadata 其他元數據
      * @return bool
      */
-    public function addStock(int $amount, int $userId, string $notes = null, array $metadata = []): bool
+    public function addStock(int $amount, int $userId, ?string $notes = null, array $metadata = []): bool
     {
         if ($amount <= 0) {
             return false;
@@ -188,7 +188,7 @@ class Inventory extends Model
      * @param array $metadata 其他元數據
      * @return bool
      */
-    public function reduceStock(int $amount, int $userId, string $notes = null, array $metadata = []): bool
+    public function reduceStock(int $amount, int $userId, ?string $notes = null, array $metadata = []): bool
     {
         if ($amount <= 0 || $this->quantity < $amount) {
             return false; // 庫存不足或數量無效
@@ -223,7 +223,7 @@ class Inventory extends Model
      * @param array $metadata 其他元數據
      * @return bool
      */
-    public function setStock(int $quantity, int $userId, string $notes = null, array $metadata = []): bool
+    public function setStock(int $quantity, int $userId, ?string $notes = null, array $metadata = []): bool
     {
         if ($quantity < 0) {
             return false; // 庫存不能為負數

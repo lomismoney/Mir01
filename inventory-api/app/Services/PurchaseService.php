@@ -96,7 +96,29 @@ class PurchaseService extends BaseService
                 $totalQuantity += $item->quantity;
             }
 
-            $totalAmount = $itemSubtotal + $purchaseData->shipping_cost;
+            // 計算稅務
+            $isTaxInclusive = $purchaseData->is_tax_inclusive ?? false;
+            $taxRate = $purchaseData->tax_rate ?? 0;
+            $taxAmount = 0;
+            
+            if ($taxRate > 0) {
+                if ($isTaxInclusive) {
+                    // 含稅價：從小計中反推稅額
+                    $taxAmount = (int) round($itemSubtotal - ($itemSubtotal / (1 + $taxRate / 100)));
+                } else {
+                    // 未稅價：直接計算稅額
+                    $taxAmount = (int) round($itemSubtotal * ($taxRate / 100));
+                }
+            }
+            
+            // 計算總金額
+            if ($isTaxInclusive) {
+                // 含稅價：總金額 = 小計 + 運費
+                $totalAmount = $itemSubtotal + $purchaseData->shipping_cost;
+            } else {
+                // 未稅價：總金額 = 小計 + 稅額 + 運費
+                $totalAmount = $itemSubtotal + $taxAmount + $purchaseData->shipping_cost;
+            }
 
             // 2. 建立進貨單主記錄 (Purchase)
             // 自動生成進貨單號，基於進貨日期
@@ -113,6 +135,9 @@ class PurchaseService extends BaseService
                 'purchased_at' => $purchasedAt,
                 'total_amount' => $totalAmount,
                 'shipping_cost' => $purchaseData->shipping_cost,
+                'is_tax_inclusive' => $isTaxInclusive,
+                'tax_rate' => $taxRate,
+                'tax_amount' => $taxAmount,
                 'status' => $purchaseData->status ?? Purchase::STATUS_PENDING,
                 'notes' => $purchaseData->notes,
             ]);
@@ -184,7 +209,29 @@ class PurchaseService extends BaseService
                 $totalQuantity += $item->quantity;
             }
 
-            $totalAmount = $itemSubtotal + $purchaseData->shipping_cost;
+            // 計算稅務
+            $isTaxInclusive = $purchaseData->is_tax_inclusive ?? $purchase->is_tax_inclusive;
+            $taxRate = $purchaseData->tax_rate ?? $purchase->tax_rate;
+            $taxAmount = 0;
+            
+            if ($taxRate > 0) {
+                if ($isTaxInclusive) {
+                    // 含稅價：從小計中反推稅額
+                    $taxAmount = (int) round($itemSubtotal - ($itemSubtotal / (1 + $taxRate / 100)));
+                } else {
+                    // 未稅價：直接計算稅額
+                    $taxAmount = (int) round($itemSubtotal * ($taxRate / 100));
+                }
+            }
+            
+            // 計算總金額
+            if ($isTaxInclusive) {
+                // 含稅價：總金額 = 小計 + 運費
+                $totalAmount = $itemSubtotal + $purchaseData->shipping_cost;
+            } else {
+                // 未稅價：總金額 = 小計 + 稅額 + 運費
+                $totalAmount = $itemSubtotal + $taxAmount + $purchaseData->shipping_cost;
+            }
 
             // 2. 如果狀態有變更，先處理庫存回退（如果需要）
             if ($oldStatus !== $newStatus) {
@@ -209,6 +256,9 @@ class PurchaseService extends BaseService
                 'purchased_at' => $purchaseData->purchased_at ?? $purchase->purchased_at,
                 'total_amount' => $totalAmount,
                 'shipping_cost' => $purchaseData->shipping_cost,
+                'is_tax_inclusive' => $isTaxInclusive,
+                'tax_rate' => $taxRate,
+                'tax_amount' => $taxAmount,
                 'status' => $newStatus,
             ]);
 
@@ -298,14 +348,10 @@ class PurchaseService extends BaseService
                 ]
             );
 
-            // 更新商品變體的平均成本
+            // 更新商品變體的累計進貨數量
             $productVariant = ProductVariant::find($item->product_variant_id);
             if ($productVariant) {
-                $productVariant->updateAverageCost(
-                    $quantityToAdd, 
-                    $item->cost_price, 
-                    $item->allocated_shipping_cost
-                );
+                $productVariant->updatePurchasedQuantity($quantityToAdd);
             }
             
             Log::info('進貨項目入庫成功', [
@@ -1256,14 +1302,8 @@ class PurchaseService extends BaseService
         // 更新商品變體的平均成本（按收貨數量計算）
         $productVariant = ProductVariant::find($purchaseItem->product_variant_id);
         if ($productVariant) {
-            $allocatedShippingPerUnit = $purchaseItem->allocated_shipping_cost / $purchaseItem->quantity;
-            $totalAllocatedShipping = $allocatedShippingPerUnit * $quantity;
-            
-            $productVariant->updateAverageCost(
-                $quantity, 
-                $purchaseItem->cost_price, 
-                $totalAllocatedShipping
-            );
+            // 更新商品變體的累計進貨數量
+            $productVariant->updatePurchasedQuantity($quantity);
         }
     }
 
@@ -1381,16 +1421,37 @@ class PurchaseService extends BaseService
             return $item->quantity * $item->cost_price;
         });
         
-        $totalAmount = $itemSubtotal + $purchase->shipping_cost;
+        // 計算稅務
+        $taxAmount = 0;
+        if ($purchase->tax_rate > 0) {
+            if ($purchase->is_tax_inclusive) {
+                // 含稅價：從小計中反推稅額
+                $taxAmount = (int) round($itemSubtotal - ($itemSubtotal / (1 + $purchase->tax_rate / 100)));
+            } else {
+                // 未稅價：直接計算稅額
+                $taxAmount = (int) round($itemSubtotal * ($purchase->tax_rate / 100));
+            }
+        }
+        
+        // 計算總金額
+        if ($purchase->is_tax_inclusive) {
+            // 含稅價：總金額 = 小計 + 運費
+            $totalAmount = $itemSubtotal + $purchase->shipping_cost;
+        } else {
+            // 未稅價：總金額 = 小計 + 稅額 + 運費
+            $totalAmount = $itemSubtotal + $taxAmount + $purchase->shipping_cost;
+        }
         
         $purchase->update([
-            'total_amount' => $totalAmount
+            'total_amount' => $totalAmount,
+            'tax_amount' => $taxAmount
         ]);
 
         Log::info('進貨單總額已重新計算', [
             'purchase_id' => $purchase->id,
             'item_subtotal' => $itemSubtotal,
             'shipping_cost' => $purchase->shipping_cost,
+            'tax_amount' => $taxAmount,
             'total_amount' => $totalAmount
         ]);
     }

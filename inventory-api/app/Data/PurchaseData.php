@@ -45,6 +45,12 @@ class PurchaseData extends Data
         #[Rule(['nullable', 'array'])]
         #[DataCollectionOf(OrderItemBindingData::class)]
         public ?DataCollection $order_items,
+        
+        #[Rule(['nullable', 'boolean'])]
+        public ?bool $is_tax_inclusive,
+        
+        #[Rule(['nullable', 'integer', 'min:0', 'max:100'])]
+        public ?int $tax_rate,
     ) {}
     
     /**

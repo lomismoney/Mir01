@@ -24,11 +24,14 @@ class TestInventorySeeder extends Seeder
      */
     public function run(): void
     {
-        // 建立分類
-        $categories = $this->createCategories();
+        // 執行 CategorySeeder 確保分類已建立
+        $this->call(CategorySeeder::class);
         
-        // 建立屬性和屬性值
-        $attributes = $this->createAttributes();
+        // 取得分類
+        $categories = $this->getCategories();
+        
+        // 取得屬性資料供後續使用
+        $attributes = $this->getAttributes();
         
         // 建立商品和變體
         $products = $this->createProducts($categories, $attributes);
@@ -46,113 +49,162 @@ class TestInventorySeeder extends Seeder
     }
     
     /**
-     * 建立分類
+     * 取得分類
      */
-    private function createCategories(): array
+    private function getCategories(): array
     {
         // 頂層分類
-        $electronics = Category::firstOrCreate(
-            ['name' => '電子產品'],
-            ['description' => '各類電子產品和配件']
-        );
+        $electronics = Category::where('name', '電子產品')->whereNull('parent_id')->first();
+        $clothing = Category::where('name', '服飾配件')->whereNull('parent_id')->first();
+        $office = Category::where('name', '辦公用品')->whereNull('parent_id')->first();
+        $home = Category::where('name', '家居生活')->whereNull('parent_id')->first();
         
-        $clothing = Category::firstOrCreate(
-            ['name' => '服飾配件'],
-            ['description' => '各類服裝和配件']
-        );
+        // 電子產品子分類
+        $phones = Category::where('name', '手機')->where('parent_id', $electronics->id)->first();
+        $laptops = Category::where('name', '筆記型電腦')->where('parent_id', $electronics->id)->first();
         
-        $office = Category::firstOrCreate(
-            ['name' => '辦公用品'],
-            ['description' => '辦公室必備用品']
-        );
+        // 服飾配件子分類 - 取得男裝下的子分類
+        $menswear = Category::where('name', '男裝')->where('parent_id', $clothing->id)->first();
+        $tshirts = Category::where('name', 'T恤')->where('parent_id', $menswear->id)->first();
+        $pants = Category::where('name', '褲子')->where('parent_id', $menswear->id)->first();
         
-        $buttCategory = Category::firstOrCreate(
-            ['name' => '屁股'],
-            ['description' => '屁股相關產品']
-        );
+        // 辦公用品子分類
+        $furniture = Category::where('name', '辦公傢俱')->where('parent_id', $office->id)->first();
+        $chairs = Category::where('name', '辦公椅')->whereNull('parent_id')->first();
+        // 如果找不到獨立的辦公椅分類，創建一個在傢俱下
+        if (!$chairs && $furniture) {
+            $chairs = Category::firstOrCreate(
+                ['name' => '辦公椅', 'parent_id' => $furniture->id],
+                ['description' => '人體工學辦公椅', 'sort_order' => 1]
+            );
+        }
         
-        // 子分類
-        $phones = Category::firstOrCreate(
-            ['name' => '手機', 'parent_id' => $electronics->id],
-            ['description' => '智慧型手機和配件']
-        );
+        // 家居生活子分類 - 坐墊可歸類在這裡
+        $homeAccessories = Category::where('name', '收納傢俱')->where('parent_id', $home->id)->first();
         
-        $laptops = Category::firstOrCreate(
-            ['name' => '筆記型電腦', 'parent_id' => $electronics->id],
-            ['description' => '各品牌筆電']
-        );
+        echo "取得了分類資料\n";
         
-        $tshirts = Category::firstOrCreate(
-            ['name' => 'T恤', 'parent_id' => $clothing->id],
-            ['description' => '各式T恤']
-        );
-        
-        $pants = Category::firstOrCreate(
-            ['name' => '褲子', 'parent_id' => $clothing->id],
-            ['description' => '各式褲子']
-        );
-        
-        $chairs = Category::firstOrCreate(
-            ['name' => '辦公椅', 'parent_id' => $office->id],
-            ['description' => '人體工學辦公椅']
-        );
-        
-        echo "建立了 9 個分類\n";
-        
-        return compact('electronics', 'clothing', 'office', 'buttCategory', 
-                      'phones', 'laptops', 'tshirts', 'pants', 'chairs');
+        return compact('electronics', 'clothing', 'office', 'home', 
+                      'phones', 'laptops', 'tshirts', 'pants', 'chairs', 
+                      'menswear', 'furniture', 'homeAccessories');
     }
     
     /**
-     * 建立屬性和屬性值
+     * 取得屬性資料供商品建立使用
      */
-    private function createAttributes(): array
+    private function getAttributes(): array
     {
-        // 顏色屬性
+        // 建立或取得屬性
         $color = Attribute::firstOrCreate(['name' => '顏色']);
-        $colorValues = [];
-        foreach (['黑色', '白色', '銀色', '金色', '藍色', '紅色', '綠色'] as $colorName) {
-            $colorValues[$colorName] = AttributeValue::firstOrCreate([
+        $size = Attribute::firstOrCreate(['name' => '尺寸']);
+        $capacity = Attribute::firstOrCreate(['name' => '容量']);
+        $material = Attribute::firstOrCreate(['name' => '材質']);
+        $shoeSize = Attribute::firstOrCreate(['name' => '鞋碼']);
+        $waistSize = Attribute::firstOrCreate(['name' => '腰圍']);
+        
+        // 建立顏色屬性值
+        $colorNames = ['黑色', '白色', '銀色', '金色', '藍色', '紅色', '綠色', '灰色'];
+        foreach ($colorNames as $colorName) {
+            AttributeValue::firstOrCreate([
                 'attribute_id' => $color->id,
                 'value' => $colorName
             ]);
         }
         
-        // 尺寸屬性
-        $size = Attribute::firstOrCreate(['name' => '尺寸']);
-        $sizeValues = [];
-        foreach (['XS', 'S', 'M', 'L', 'XL', 'XXL'] as $sizeName) {
-            $sizeValues[$sizeName] = AttributeValue::firstOrCreate([
+        // 建立尺寸屬性值
+        $sizeNames = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+        foreach ($sizeNames as $sizeName) {
+            AttributeValue::firstOrCreate([
                 'attribute_id' => $size->id,
                 'value' => $sizeName
             ]);
         }
-
-        // 容量屬性（用於電子產品）
-        $capacity = Attribute::firstOrCreate(['name' => '容量']);
-        $capacityValues = [];
-        foreach (['64GB', '128GB', '256GB', '512GB', '1TB'] as $capacityName) {
-            $capacityValues[$capacityName] = AttributeValue::firstOrCreate([
+        
+        // 建立容量屬性值
+        $capacityNames = ['64GB', '128GB', '256GB', '512GB', '1TB'];
+        foreach ($capacityNames as $capacityName) {
+            AttributeValue::firstOrCreate([
                 'attribute_id' => $capacity->id,
                 'value' => $capacityName
             ]);
         }
         
-        // 材質屬性
-        $material = Attribute::firstOrCreate(['name' => '材質']);
-        $materialValues = [];
-        foreach (['棉', '聚酯纖維', '羊毛', '皮革', '網布', '塑膠'] as $materialName) {
-            $materialValues[$materialName] = AttributeValue::firstOrCreate([
+        // 建立材質屬性值
+        $materialNames = ['棉', '聚酯纖維', '羊毛', '皮革', '網布', '塑膠'];
+        foreach ($materialNames as $materialName) {
+            AttributeValue::firstOrCreate([
                 'attribute_id' => $material->id,
                 'value' => $materialName
             ]);
         }
         
-        echo "建立了 4 個屬性和 24 個屬性值\n";
+        // 建立鞋碼屬性值（如果使用）
+        $shoeSizeNames = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
+        foreach ($shoeSizeNames as $shoeSizeName) {
+            AttributeValue::firstOrCreate([
+                'attribute_id' => $shoeSize->id,
+                'value' => $shoeSizeName
+            ]);
+        }
+        
+        // 建立腰圍屬性值（如果使用）
+        $waistSizeNames = ['28', '30', '32', '34', '36'];
+        foreach ($waistSizeNames as $waistSizeName) {
+            AttributeValue::firstOrCreate([
+                'attribute_id' => $waistSize->id,
+                'value' => $waistSizeName
+            ]);
+        }
+        
+        // 獲取屬性值
+        $colorValues = [];
+        if ($color) {
+            foreach ($color->values as $value) {
+                $colorValues[$value->value] = $value;
+            }
+        }
+        
+        $sizeValues = [];
+        if ($size) {
+            foreach ($size->values as $value) {
+                $sizeValues[$value->value] = $value;
+            }
+        }
+        
+        $capacityValues = [];
+        if ($capacity) {
+            foreach ($capacity->values as $value) {
+                $capacityValues[$value->value] = $value;
+            }
+        }
+        
+        $materialValues = [];
+        if ($material) {
+            foreach ($material->values as $value) {
+                $materialValues[$value->value] = $value;
+            }
+        }
+        
+        $shoeSizeValues = [];
+        if ($shoeSize) {
+            foreach ($shoeSize->values as $value) {
+                $shoeSizeValues[$value->value] = $value;
+            }
+        }
+        
+        $waistSizeValues = [];
+        if ($waistSize) {
+            foreach ($waistSize->values as $value) {
+                $waistSizeValues[$value->value] = $value;
+            }
+        }
+        
+        echo "載入了 " . Attribute::count() . " 個屬性和 " . AttributeValue::count() . " 個屬性值\n";
         
         return compact('color', 'colorValues', 'size', 'sizeValues', 
-                      'capacity', 'capacityValues', 'material', 'materialValues');
-        }
+                      'capacity', 'capacityValues', 'material', 'materialValues',
+                      'shoeSize', 'shoeSizeValues', 'waistSize', 'waistSizeValues');
+    }
 
     /**
      * 建立商品和變體
@@ -211,11 +263,14 @@ class TestInventorySeeder extends Seeder
                     'price' => $capacityName === '512GB' ? 6490000 : 7790000, // 以分為單位
                     'cost_price' => $capacityName === '512GB' ? 4500000 : 5500000, // 以分為單位
                 ]);
-                if ($colorName === '太空灰') {
-                    $colorName = '黑色'; // 使用已存在的顏色值
+                // 太空灰映射到深灰色或灰色
+                $actualColor = $colorName === '太空灰' ? '深灰色' : $colorName;
+                // 如果深灰色不存在，使用灰色
+                if ($colorName === '太空灰' && !isset($attributes['colorValues']['深灰色'])) {
+                    $actualColor = '灰色';
                 }
                 $variant->attributeValues()->attach([
-                    $attributes['colorValues'][$colorName]->id,
+                    $attributes['colorValues'][$actualColor]->id,
                     $attributes['capacityValues'][$capacityName]->id
                 ]);
             }
@@ -246,7 +301,7 @@ class TestInventorySeeder extends Seeder
                 $variant->attributeValues()->attach([
                     $attributes['colorValues'][$colorName]->id,
                     $attributes['sizeValues'][$sizeName]->id,
-                    $attributes['materialValues']['棉']->id
+                    $attributes['materialValues']['純棉']->id ?? $attributes['materialValues']['棉']->id
                 ]);
             }
         }
@@ -262,22 +317,33 @@ class TestInventorySeeder extends Seeder
                 'description' => '經典版型，百搭款式'
             ]
         );
-        $jeans->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['size']->id]);
+        // 牛仔褲使用腰圍屬性而非一般尺寸
+        $jeans->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['waistSize']->id ?? $attributes['size']->id]);
         
         // 建立牛仔褲變體
         foreach (['藍色', '黑色'] as $colorName) {
-            foreach (['28', '30', '32', '34', '36'] as $waistSize) {
-                $sizeMap = ['28' => 'XS', '30' => 'S', '32' => 'M', '34' => 'L', '36' => 'XL'];
+            foreach (['28', '30', '32', '34', '36'] as $waistSizeValue) {
                 $variant = ProductVariant::create([
                     'product_id' => $jeans->id,
-                    'sku' => "JEANS-CLASSIC-{$colorName}-W{$waistSize}",
+                    'sku' => "JEANS-CLASSIC-{$colorName}-W{$waistSizeValue}",
                     'price' => 129000, // 以分為單位
                     'cost_price' => 60000, // 以分為單位
                 ]);
-                $variant->attributeValues()->attach([
-                    $attributes['colorValues'][$colorName]->id,
-                    $attributes['sizeValues'][$sizeMap[$waistSize]]->id
-                ]);
+                
+                // 優先使用腰圍屬性，如果沒有則使用尺寸映射
+                if (isset($attributes['waistSizeValues'][$waistSizeValue])) {
+                    $variant->attributeValues()->attach([
+                        $attributes['colorValues'][$colorName]->id,
+                        $attributes['waistSizeValues'][$waistSizeValue]->id
+                    ]);
+                } else {
+                    // 回退到原本的尺寸映射
+                    $sizeMap = ['28' => 'XS', '30' => 'S', '32' => 'M', '34' => 'L', '36' => 'XL'];
+                    $variant->attributeValues()->attach([
+                        $attributes['colorValues'][$colorName]->id,
+                        $attributes['sizeValues'][$sizeMap[$waistSizeValue]]->id
+                    ]);
+                }
             }
         }
         $products[] = $jeans;
@@ -296,8 +362,8 @@ class TestInventorySeeder extends Seeder
         
         // 建立辦公椅變體
         foreach (['黑色', '灰色'] as $colorName) {
-            $colorMap = ['灰色' => '銀色']; // 映射到已存在的顏色
-            $actualColor = $colorMap[$colorName] ?? $colorName;
+            // AttributeSeeder 已經包含灰色，不需要映射
+            $actualColor = $colorName;
             
             $variant = ProductVariant::create([
                 'product_id' => $chair->id,
@@ -312,14 +378,14 @@ class TestInventorySeeder extends Seeder
         }
         $products[] = $chair;
         
-        // 屁股相關產品 - 坐墊
+        // 家居生活產品 - 坐墊
         $cushion = Product::firstOrCreate(
             [
                 'name' => '記憶棉坐墊',
-                'category_id' => $categories['buttCategory']->id
+                'category_id' => $categories['homeAccessories']->id ?? $categories['home']->id
             ],
             [
-                'description' => '舒適記憶棉材質，保護您的屁股'
+                'description' => '舒適記憶棉材質，提供絕佳支撐'
             ]
         );
         $cushion->attributes()->syncWithoutDetaching([$attributes['color']->id]);

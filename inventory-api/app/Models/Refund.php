@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\MoneyHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -64,8 +65,6 @@ class Refund extends Model
         'should_restock' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        // 金額欄位使用 decimal
-        'total_refund_amount' => 'decimal:2',
     ];
 
     /**
@@ -157,6 +156,29 @@ class Refund extends Model
         return $query->where('should_restock', $shouldRestock);
     }
 
+    // ===== 金額 Accessor/Mutator (分/元轉換) =====
+    
+    /**
+     * Total Refund Amount Accessor - 將分轉換為元
+     * 
+     * @return float
+     */
+    public function getTotalRefundAmountAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['total_refund_amount'] ?? 0);
+    }
+    
+    /**
+     * Total Refund Amount Mutator - 將元轉換為分
+     * 
+     * @param float|null $value
+     * @return void
+     */
+    public function setTotalRefundAmountAttribute($value): void
+    {
+        $this->attributes['total_refund_amount'] = MoneyHelper::yuanToCents($value);
+    }
+
     /**
      * 存取器：格式化退款金額顯示
      * 
@@ -164,7 +186,7 @@ class Refund extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return '$' . number_format($this->total_refund_amount, 2);
+        return MoneyHelper::formatWithDecimals($this->attributes['total_refund_amount'] ?? 0);
     }
 
     /**
@@ -205,8 +227,14 @@ class Refund extends Model
      */
     public function validateTotalAmount(): bool
     {
-        $calculatedTotal = $this->refundItems()->sum('refund_subtotal');
-        return abs($this->total_refund_amount - $calculatedTotal) < 0.01; // 允許 1 分錢的誤差
+        // 計算所有退款項目的總額（以分為單位）
+        $calculatedTotalCents = $this->refundItems()->sum('refund_subtotal');
+        
+        // 獲取當前退款總額（以分為單位）
+        $currentTotalCents = $this->attributes['total_refund_amount'] ?? 0;
+        
+        // 比較是否相等（允許 1 分錢的誤差）
+        return abs($currentTotalCents - $calculatedTotalCents) <= 1;
     }
 
     /**
@@ -232,10 +260,14 @@ class Refund extends Model
      */
     public function isFullOrderRefund(): bool
     {
-        $orderTotal = $this->order->grand_total;
-        $orderRefunds = self::where('order_id', $this->order_id)->sum('total_refund_amount');
+        // 獲取訂單總金額（以分為單位）
+        $orderTotalCents = $this->order->attributes['grand_total'] ?? 0;
         
-        return abs($orderTotal - $orderRefunds) < 0.01;
+        // 獲取該訂單的所有退款總額（以分為單位）
+        $orderRefundsCents = self::where('order_id', $this->order_id)->sum('total_refund_amount');
+        
+        // 比較是否相等（允許 1 分錢的誤差）
+        return abs($orderTotalCents - $orderRefundsCents) <= 1;
     }
 
     /**

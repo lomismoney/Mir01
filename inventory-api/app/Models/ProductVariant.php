@@ -30,9 +30,7 @@ class ProductVariant extends Model
         'sku',                       // 庫存單位編號，全域唯一
         'price',                     // 商品變體價格
         'cost_price',                // 商品單項成本價格（不含運費）
-        'average_cost',              // 平均成本價格（含運費攤銷）
         'total_purchased_quantity',  // 累計進貨數量
-        'total_cost_amount',         // 累計成本金額（含運費攤銷）
     ];
 
     /**
@@ -43,11 +41,9 @@ class ProductVariant extends Model
         'total_purchased_quantity' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        // 金額欄位使用 decimal
-        'price' => 'decimal:2',
-        'cost_price' => 'decimal:2',
-        'average_cost' => 'decimal:2',
-        'total_cost_amount' => 'decimal:2',
+        // 金額欄位使用 integer（分為單位）
+        'price' => 'integer',
+        'cost_price' => 'integer',
     ];
 
     /**
@@ -139,43 +135,20 @@ class ProductVariant extends Model
     }
 
     /**
-     * 更新平均成本
-     * 根據新的進貨數據重新計算平均成本
+     * 更新累計進貨數量
      * 
      * @param int $newQuantity 新進貨數量
-     * @param float $newCostPrice 新進貨的單項成本
-     * @param float $allocatedShippingCost 攤銷的運費
      * @return void
      */
-    public function updateAverageCost(int $newQuantity, float $newCostPrice, float $allocatedShippingCost = 0): void
+    public function updatePurchasedQuantity(int $newQuantity): void
     {
-        // 確保屬性不是 null
-        $currentTotalPurchased = $this->total_purchased_quantity ?? 0;
-        $currentTotalCost = $this->total_cost_amount ?? 0.0;
-
-        // 新進貨的總成本
-        $newTotalCost = ($newCostPrice + $allocatedShippingCost) * $newQuantity;
-
-        // 累加歷史數據
-        $updatedTotalPurchased = $currentTotalPurchased + $newQuantity;
-        $updatedTotalCost = $currentTotalCost + $newTotalCost;
-
-        $this->total_purchased_quantity = $updatedTotalPurchased;
-        $this->total_cost_amount = $updatedTotalCost;
-
-        // 避免除以零
-        if ($updatedTotalPurchased > 0) {
-            $this->average_cost = $updatedTotalCost / $updatedTotalPurchased;
-        } else {
-            $this->average_cost = 0;
-        }
-
+        $this->total_purchased_quantity = ($this->total_purchased_quantity ?? 0) + $newQuantity;
         $this->save();
     }
 
     /**
      * 獲取利潤率
-     * 計算售價與平均成本之間的利潤率
+     * 計算售價與成本價之間的利潤率
      * 
      * @return float
      */
@@ -186,18 +159,18 @@ class ProductVariant extends Model
             return 0;
         }
         
-        return (($this->price - $this->average_cost) / $this->price) * 100;
+        return (($this->price - $this->cost_price) / $this->price) * 100;
     }
 
     /**
      * 獲取利潤金額
-     * 計算售價與平均成本之間的利潤金額
+     * 計算售價與成本價之間的利潤金額
      * 
-     * @return float
+     * @return int
      */
-    public function getProfitAmountAttribute(): float
+    public function getProfitAmountAttribute(): int
     {
-        return $this->price - $this->average_cost;
+        return $this->price - $this->cost_price;
     }
 
     /**
@@ -220,6 +193,38 @@ class ProductVariant extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * 價格 Accessor - 將分轉換為元
+     */
+    public function getPriceAttribute(): float
+    {
+        return ($this->attributes['price'] ?? 0) / 100;
+    }
+
+    /**
+     * 價格 Mutator - 將元轉換為分
+     */
+    public function setPriceAttribute($value): void
+    {
+        $this->attributes['price'] = is_null($value) ? null : (int) round($value * 100);
+    }
+
+    /**
+     * 成本價 Accessor - 將分轉換為元
+     */
+    public function getCostPriceAttribute(): float
+    {
+        return ($this->attributes['cost_price'] ?? 0) / 100;
+    }
+
+    /**
+     * 成本價 Mutator - 將元轉換為分
+     */
+    public function setCostPriceAttribute($value): void
+    {
+        $this->attributes['cost_price'] = is_null($value) ? null : (int) round($value * 100);
     }
 
 }
