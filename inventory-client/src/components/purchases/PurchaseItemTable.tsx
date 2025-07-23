@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { formatPrice } from '@/lib/utils';
+import { MoneyHelper } from '@/lib/money-helper';
 import { Package, CheckCircle, Clock, AlertCircle, Eye } from 'lucide-react';
 
 interface PurchaseItem {
@@ -126,10 +126,10 @@ export function PurchaseItemTable({ purchase, showOrderItems = true }: PurchaseI
                             <span className="font-medium">進貨數量:</span> {item.quantity}
                           </div>
                           <div>
-                            <span className="font-medium">單價:</span> {formatPrice(item.unit_price)}
+                            <span className="font-medium">單價:</span> {MoneyHelper.format(item.unit_price)}
                           </div>
                           <div>
-                            <span className="font-medium">小計:</span> {formatPrice(item.quantity * item.unit_price)}
+                            <span className="font-medium">小計:</span> {MoneyHelper.format(item.quantity * item.unit_price)}
                           </div>
                         </div>
                       </div>

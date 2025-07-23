@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import {
   Table,
   TableBody,
@@ -611,10 +612,10 @@ export function InventoryNestedTable({
                                             >
                                               {typeof sku.price === "string" &&
                                               parseFloat(sku.price) > 0
-                                                ? `NT$ ${parseFloat(sku.price).toLocaleString()}`
+                                                ? MoneyHelper.format(parseFloat(sku.price))
                                                 : sku.price &&
                                                     Number(sku.price) > 0
-                                                  ? formatPrice(sku.price, true)
+                                                  ? MoneyHelper.format(Number(sku.price))
                                                   : "—"}
                                             </TableCell>
                                             <TableCell
@@ -623,7 +624,7 @@ export function InventoryNestedTable({
                                             >
                                               {(sku as any)?.average_cost &&
                                               (sku as any).average_cost > 0
-                                                ? `NT$ ${(sku as any).average_cost.toLocaleString()}`
+                                                ? MoneyHelper.format(Number((sku as any).average_cost))
                                                 : "—"}
                                             </TableCell>
                                             <TableCell

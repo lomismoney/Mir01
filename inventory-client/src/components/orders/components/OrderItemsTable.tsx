@@ -25,6 +25,7 @@ import { PlusCircle, Trash2, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { OrderFormProductBadge } from "../OrderFormProductBadge";
 import { OrderFormValues } from "../hooks/useOrderForm";
+import { MoneyHelper } from "@/lib/money-helper";
 
 interface OrderItemsTableProps {
   form: UseFormReturn<OrderFormValues>;
@@ -232,7 +233,7 @@ export function OrderItemsTable({
                         />
                       </TableCell>
                       <TableCell className="font-mono text-right w-[120px]">
-                        ${Math.round(subtotal).toLocaleString()}
+                        {MoneyHelper.format(subtotal, '$')}
                       </TableCell>
                       <TableCell>
                         <Button

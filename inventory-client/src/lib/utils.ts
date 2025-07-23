@@ -131,22 +131,19 @@ export function getOrderStatusVariant(status: string): "default" | "secondary" |
  * @returns 格式化的價格字串
  * 
  * @example
- * formatPrice(1000) // "NT$1,000"
+ * formatPrice(1000) // "NT$ 1,000"
  * formatPrice(null) // "N/A"
+ * 
+ * @deprecated 請使用 MoneyHelper.format() 替代以保持格式化一致性
  */
 export function formatPrice(price?: number | null): string {
   if (price === undefined || price === null) {
     return 'N/A';
   }
 
-  const formatter = new Intl.NumberFormat('zh-TW', { 
-    style: 'currency', 
-    currency: 'TWD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
-
-  return formatter.format(price);
+  // 使用 MoneyHelper 以保持格式化一致性
+  const { MoneyHelper } = require('@/lib/money-helper');
+  return MoneyHelper.format(price);
 }
 
 /**
@@ -154,6 +151,8 @@ export function formatPrice(price?: number | null): string {
  * 
  * @param amount - 金額數值
  * @returns 格式化的貨幣字串
+ * 
+ * @deprecated 請使用 MoneyHelper.format() 替代以保持格式化一致性
  */
 export const formatCurrency = formatPrice;
 

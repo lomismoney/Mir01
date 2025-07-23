@@ -19,6 +19,7 @@ import {
   ArrowDownRight,
   Filter
 } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 /**
  * 分析報表頁面
@@ -73,7 +74,7 @@ export default function AnalyticsPage() {
               <DollarSign className="h-5 w-5 text-green-500" />
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">總營收</p>
-                <p className="text-2xl font-bold">NT$ 2,345,678</p>
+                <p className="text-2xl font-bold">{formatPrice(2345678)}</p>
                 <div className="flex items-center gap-1 text-sm">
                   <ArrowUpRight className="h-4 w-4 text-green-500" />
                   <span className="text-green-600">+12.5%</span>
@@ -180,10 +181,10 @@ export default function AnalyticsPage() {
               <CardContent>
                 <div className="space-y-3">
                   {[
-                    { channel: "線上商城", amount: "NT$ 1,234,567", percentage: 52.6, color: "bg-blue-500" },
-                    { channel: "實體門市", amount: "NT$ 789,012", percentage: 33.7, color: "bg-green-500" },
-                    { channel: "電話訂購", amount: "NT$ 234,567", percentage: 10.0, color: "bg-orange-500" },
-                    { channel: "其他", amount: "NT$ 87,532", percentage: 3.7, color: "bg-gray-500" },
+                    { channel: "線上商城", amount: 1234567, percentage: 52.6, color: "bg-blue-500" },
+                    { channel: "實體門市", amount: 789012, percentage: 33.7, color: "bg-green-500" },
+                    { channel: "電話訂購", amount: 234567, percentage: 10.0, color: "bg-orange-500" },
+                    { channel: "其他", amount: 87532, percentage: 3.7, color: "bg-gray-500" },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -191,7 +192,7 @@ export default function AnalyticsPage() {
                         <span className="text-sm">{item.channel}</span>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">{item.amount}</p>
+                        <p className="font-medium">{formatPrice(item.amount)}</p>
                         <p className="text-sm text-muted-foreground">{item.percentage}%</p>
                       </div>
                     </div>
@@ -225,11 +226,11 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { rank: 1, product: "iPhone 15 Pro", sales: "NT$ 234,567", count: "45 件" },
-                  { rank: 2, product: "MacBook Air M3", sales: "NT$ 189,012", count: "23 件" },
-                  { rank: 3, product: "iPad Pro", sales: "NT$ 156,789", count: "34 件" },
-                  { rank: 4, product: "AirPods Pro", sales: "NT$ 98,765", count: "67 件" },
-                  { rank: 5, product: "Apple Watch", sales: "NT$ 87,432", count: "29 件" },
+                  { rank: 1, product: "iPhone 15 Pro", sales: 234567, count: "45 件" },
+                  { rank: 2, product: "MacBook Air M3", sales: 189012, count: "23 件" },
+                  { rank: 3, product: "iPad Pro", sales: 156789, count: "34 件" },
+                  { rank: 4, product: "AirPods Pro", sales: 98765, count: "67 件" },
+                  { rank: 5, product: "Apple Watch", sales: 87432, count: "29 件" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
                     <div className="flex items-center gap-3">
@@ -239,7 +240,7 @@ export default function AnalyticsPage() {
                       <span className="font-medium">{item.product}</span>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{item.sales}</p>
+                      <p className="font-medium">{formatPrice(item.sales)}</p>
                       <p className="text-sm text-muted-foreground">{item.count}</p>
                     </div>
                   </div>
@@ -333,15 +334,15 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { segment: "VIP 客戶", count: 156, percentage: 12.5, value: "NT$ 50,000+" },
-                  { segment: "重要客戶", count: 234, percentage: 18.7, value: "NT$ 20,000+" },
-                  { segment: "一般客戶", count: 567, percentage: 45.3, value: "NT$ 5,000+" },
-                  { segment: "新客戶", count: 289, percentage: 23.5, value: "NT$ 1,000+" },
+                  { segment: "VIP 客戶", count: 156, percentage: 12.5, value: 50000 },
+                  { segment: "重要客戶", count: 234, percentage: 18.7, value: 20000 },
+                  { segment: "一般客戶", count: 567, percentage: 45.3, value: 5000 },
+                  { segment: "新客戶", count: 289, percentage: 23.5, value: 1000 },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{item.segment}</p>
-                      <p className="text-sm text-muted-foreground">平均消費: {item.value}</p>
+                      <p className="text-sm text-muted-foreground">平均消費: {formatPrice(item.value)}+</p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">{item.count} 人</p>
@@ -381,9 +382,9 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { product: "舊款耳機", days: 125, stock: 45, value: "NT$ 67,500" },
-                  { product: "過季配件", days: 98, stock: 23, value: "NT$ 34,500" },
-                  { product: "停產商品", days: 156, stock: 12, value: "NT$ 18,000" },
+                  { product: "舊款耳機", days: 125, stock: 45, value: 67500 },
+                  { product: "過季配件", days: 98, stock: 23, value: 34500 },
+                  { product: "停產商品", days: 156, stock: 12, value: 18000 },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
@@ -392,7 +393,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-medium">{item.stock} 件</p>
-                      <p className="text-sm text-muted-foreground">{item.value}</p>
+                      <p className="text-sm text-muted-foreground">{formatPrice(item.value)}</p>
                     </div>
                   </div>
                 ))}
@@ -428,23 +429,23 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { month: "12月", inflow: "NT$ 2,345,678", outflow: "NT$ 1,876,543", net: "NT$ 469,135" },
-                  { month: "11月", inflow: "NT$ 2,123,456", outflow: "NT$ 1,789,012", net: "NT$ 334,444" },
-                  { month: "10月", inflow: "NT$ 1,987,654", outflow: "NT$ 1,654,321", net: "NT$ 333,333" },
+                  { month: "12月", inflow: 2345678, outflow: 1876543, net: 469135 },
+                  { month: "11月", inflow: 2123456, outflow: 1789012, net: 334444 },
+                  { month: "10月", inflow: 1987654, outflow: 1654321, net: 333333 },
                 ].map((item, i) => (
                   <div key={i} className="space-y-2">
                     <div className="flex justify-between">
                       <span className="font-medium">{item.month}</span>
-                      <span className="text-sm font-medium text-green-600">{item.net}</span>
+                      <span className="text-sm font-medium text-green-600">{formatPrice(item.net)}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">流入:</span>
-                        <span>{item.inflow}</span>
+                        <span>{formatPrice(item.inflow)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">流出:</span>
-                        <span>{item.outflow}</span>
+                        <span>{formatPrice(item.outflow)}</span>
                       </div>
                     </div>
                   </div>

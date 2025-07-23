@@ -87,7 +87,7 @@ export function useOrders(filters: {
         // 📊 金額字段的數值化處理
         subtotal: parseFloat(order.subtotal || '0'),
         shipping_fee: parseFloat(order.shipping_fee || '0'),
-        tax_amount: parseFloat(order.tax_amount || '0'),
+        tax: parseFloat(order.tax || '0'),
         discount_amount: parseFloat(order.discount_amount || '0'),
         grand_total: parseFloat(order.grand_total || '0'),
         paid_amount: parseFloat(order.paid_amount || '0'),
@@ -308,7 +308,7 @@ export function useOrderDetail(orderId: number | null) {
         // 📊 金額字段的數值化處理 - 絕對保證是 number
         subtotal: parseFloat(String(order.subtotal || '0')),
         shipping_fee: order.shipping_fee ? parseFloat(String(order.shipping_fee)) : null,
-        tax_amount: parseFloat(String(order.tax_amount || '0')),
+        tax: parseFloat(String(order.tax || '0')),
         discount_amount: parseFloat(String(order.discount_amount || '0')),
         grand_total: parseFloat(String(order.grand_total || '0')),
         paid_amount: parseFloat(String(order.paid_amount || '0')),
@@ -319,8 +319,6 @@ export function useOrderDetail(orderId: number | null) {
           price: parseFloat(String(item.price || '0')),
           cost: parseFloat(String(item.cost || '0')),
           quantity: parseInt(String(item.quantity || '0'), 10),
-          tax_rate: parseFloat(String(item.tax_rate || '0')),
-          discount_amount: parseFloat(String(item.discount_amount || '0')),
           // 🎯 Operation: Precise Tagging - 確保預訂標記正確傳遞
           is_backorder: Boolean(item.is_backorder),
         })) || [],

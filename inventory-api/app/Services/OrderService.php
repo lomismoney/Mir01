@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\MoneyHelper;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
@@ -111,11 +112,34 @@ class OrderService extends BaseService
                 return $item['price'] * $item['quantity'];
             });
 
-            // 4. 計算最終總金額
-            $grandTotal = $subtotal 
-                        + ($validatedData['shipping_fee'] ?? 0) 
-                        + ($validatedData['tax'] ?? 0) 
-                        - ($validatedData['discount_amount'] ?? 0);
+            // 4. 計算稅金和最終總金額
+            $isTaxInclusive = $validatedData['is_tax_inclusive'] ?? false;
+            $taxRate = $validatedData['tax_rate'] ?? 5; // 預設 5% 營業稅
+            $shippingFee = $validatedData['shipping_fee'] ?? 0;
+            $discountAmount = $validatedData['discount_amount'] ?? 0;
+            
+            // 根據含稅狀態計算稅金
+            if ($isTaxInclusive) {
+                // 含稅訂單：從總價反推稅額
+                // 先計算含稅的小計（商品總價 + 運費 - 折扣）
+                $taxableAmount = $subtotal + $shippingFee - $discountAmount;
+                // 將元轉換為分進行精確計算
+                $taxableAmountCents = MoneyHelper::yuanToCents($taxableAmount);
+                $taxCents = MoneyHelper::calculateTaxFromPriceWithTax($taxableAmountCents, $taxRate);
+                $tax = MoneyHelper::centsToYuan($taxCents);
+                // 總金額就是含稅價
+                $grandTotal = $taxableAmount;
+            } else {
+                // 未稅訂單：計算稅額後加到總價
+                // 計算應稅金額（商品總價 - 折扣，運費通常不課稅）
+                $taxableAmount = $subtotal - $discountAmount;
+                // 將元轉換為分進行精確計算
+                $taxableAmountCents = MoneyHelper::yuanToCents($taxableAmount);
+                $taxCents = MoneyHelper::calculateTaxFromPriceWithoutTax($taxableAmountCents, $taxRate);
+                $tax = MoneyHelper::centsToYuan($taxCents);
+                // 總金額 = 商品總價 + 運費 + 稅金 - 折扣
+                $grandTotal = $subtotal + $shippingFee + $tax - $discountAmount;
+            }
 
             // 5. 創建訂單主記錄
             $order = Order::create([
@@ -126,10 +150,12 @@ class OrderService extends BaseService
                 'shipping_status'   => $validatedData['shipping_status'],
                 'payment_status'    => $validatedData['payment_status'],
                 'subtotal'          => $subtotal,
-                'shipping_fee'      => $validatedData['shipping_fee'] ?? 0,
-                'tax'               => $validatedData['tax'] ?? 0,
-                'discount_amount'   => $validatedData['discount_amount'] ?? 0,
+                'shipping_fee'      => $shippingFee,
+                'tax'               => $tax,
+                'discount_amount'   => $discountAmount,
                 'grand_total'       => $grandTotal,
+                'is_tax_inclusive'  => $isTaxInclusive,
+                'tax_rate'          => $taxRate,
                 'payment_method'    => $validatedData['payment_method'],
                 'order_source'      => $validatedData['order_source'],
                 'shipping_address'  => $validatedData['shipping_address'],
@@ -408,15 +434,31 @@ class OrderService extends BaseService
         // 計算商品小計
         $subtotal = $order->items->sum(fn($item) => $item->price * $item->quantity);
         
-        // 計算總金額
-        $grandTotal = $subtotal 
-                    + $order->shipping_fee
-                    + $order->tax
-                    - $order->discount_amount;
+        // 根據含稅狀態重新計算稅金
+        $shippingFee = $order->shipping_fee;
+        $discountAmount = $order->discount_amount;
+        $taxRate = $order->tax_rate;
+        
+        if ($order->is_tax_inclusive) {
+            // 含稅訂單：從總價反推稅額
+            $taxableAmount = $subtotal + $shippingFee - $discountAmount;
+            $taxableAmountCents = MoneyHelper::yuanToCents($taxableAmount);
+            $taxCents = MoneyHelper::calculateTaxFromPriceWithTax($taxableAmountCents, $taxRate);
+            $tax = MoneyHelper::centsToYuan($taxCents);
+            $grandTotal = $taxableAmount;
+        } else {
+            // 未稅訂單：計算稅額後加到總價
+            $taxableAmount = $subtotal - $discountAmount;
+            $taxableAmountCents = MoneyHelper::yuanToCents($taxableAmount);
+            $taxCents = MoneyHelper::calculateTaxFromPriceWithoutTax($taxableAmountCents, $taxRate);
+            $tax = MoneyHelper::centsToYuan($taxCents);
+            $grandTotal = $subtotal + $shippingFee + $tax - $discountAmount;
+        }
                     
         // 更新訂單金額
         $order->update([
             'subtotal' => $subtotal,
+            'tax' => $tax,
             'grand_total' => $grandTotal,
         ]);
     }

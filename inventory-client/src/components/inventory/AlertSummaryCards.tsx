@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AlertTriangle, Package, TrendingDown, DollarSign, Activity } from 'lucide-react';
 import type { paths } from '@/types/api';
+import { MoneyHelper } from '@/lib/money-helper';
 
 // 使用從 API 生成的類型
 type InventoryAlertSummaryResponse = paths['/api/inventory/alerts/summary']['get']['responses'][200]['content']['application/json'];
@@ -92,7 +93,7 @@ export function AlertSummaryCards({ summary }: AlertSummaryCardsProps) {
         <CardContent>
           <div className="space-y-1">
             <p className="text-2xl font-bold">
-              ${total_inventory_value.toLocaleString()}
+              {MoneyHelper.format(total_inventory_value)}
             </p>
             <p className="text-xs text-muted-foreground">
               {total_products} 個商品

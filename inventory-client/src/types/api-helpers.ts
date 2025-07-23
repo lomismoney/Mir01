@@ -441,8 +441,6 @@ export interface OrderItem {
   price: string;
   cost: string;
   quantity: number;
-  tax_rate: string;
-  discount_amount: string;
   custom_product_name: string | null;
   custom_product_specs: string | null;
   custom_product_image: string | null;
@@ -499,7 +497,7 @@ export interface Order {
   billing_address: string | null;
   notes: string | null;
   subtotal: string;
-  tax_amount: string;
+  tax: string;
   discount_amount: string;
   grand_total: string;
   created_at: string;
@@ -585,8 +583,6 @@ export interface ProcessedOrderItem {
   price: number;        // 已精煉為 number
   cost: number;         // 已精煉為 number
   quantity: number;     // 已精煉為 number
-  tax_rate: number;     // 已精煉為 number
-  discount_amount: number;  // 已精煉為 number
   custom_product_name: string | null;
   custom_product_specs: string | null;
   custom_product_image: string | null;
@@ -646,7 +642,7 @@ export interface ProcessedOrder {
   billing_address: string | null;
   notes: string | null;
   subtotal: number;      // 已精煉為 number
-  tax_amount: number;    // 已精煉為 number
+  tax: number;           // 已精煉為 number
   discount_amount: number;  // 已精煉為 number
   grand_total: number;   // 已精煉為 number
   paid_amount: number;   // 已精煉為 number - 已付金額

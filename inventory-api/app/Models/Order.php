@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\MoneyHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -38,6 +39,8 @@ class Order extends Model
         'fulfillment_priority',
         'expected_delivery_date',
         'priority_reason',
+        'is_tax_inclusive',
+        'tax_rate',
     ];
 
     /**
@@ -50,13 +53,8 @@ class Order extends Model
         'paid_at' => 'datetime',
         'estimated_delivery_date' => 'date',
         'expected_delivery_date' => 'date',
-        // 金額欄位使用 decimal
-        'subtotal' => 'decimal:2',
-        'shipping_fee' => 'decimal:2',
-        'tax' => 'decimal:2',
-        'discount_amount' => 'decimal:2',
-        'grand_total' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
+        'is_tax_inclusive' => 'boolean',
+        'tax_rate' => 'decimal:2',
     ];
 
     /**
@@ -149,6 +147,104 @@ class Order extends Model
         return $this->items()->whereNull('product_variant_id')->exists();
     }
 
+    // ===== 金額 Accessor/Mutator (分/元轉換) =====
+    
+    /**
+     * Subtotal Accessor - 將分轉換為元
+     */
+    public function getSubtotalAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['subtotal'] ?? 0);
+    }
+    
+    /**
+     * Subtotal Mutator - 將元轉換為分
+     */
+    public function setSubtotalAttribute($value): void
+    {
+        $this->attributes['subtotal'] = MoneyHelper::yuanToCents($value);
+    }
+    
+    /**
+     * Shipping Fee Accessor - 將分轉換為元
+     */
+    public function getShippingFeeAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['shipping_fee'] ?? 0);
+    }
+    
+    /**
+     * Shipping Fee Mutator - 將元轉換為分
+     */
+    public function setShippingFeeAttribute($value): void
+    {
+        $this->attributes['shipping_fee'] = MoneyHelper::yuanToCents($value);
+    }
+    
+    /**
+     * Tax Accessor - 將分轉換為元
+     */
+    public function getTaxAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['tax'] ?? 0);
+    }
+    
+    /**
+     * Tax Mutator - 將元轉換為分
+     */
+    public function setTaxAttribute($value): void
+    {
+        $this->attributes['tax'] = MoneyHelper::yuanToCents($value);
+    }
+    
+    /**
+     * Discount Amount Accessor - 將分轉換為元
+     */
+    public function getDiscountAmountAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['discount_amount'] ?? 0);
+    }
+    
+    /**
+     * Discount Amount Mutator - 將元轉換為分
+     */
+    public function setDiscountAmountAttribute($value): void
+    {
+        $this->attributes['discount_amount'] = MoneyHelper::yuanToCents($value);
+    }
+    
+    /**
+     * Grand Total Accessor - 將分轉換為元
+     */
+    public function getGrandTotalAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['grand_total'] ?? 0);
+    }
+    
+    /**
+     * Grand Total Mutator - 將元轉換為分
+     */
+    public function setGrandTotalAttribute($value): void
+    {
+        $this->attributes['grand_total'] = MoneyHelper::yuanToCents($value);
+    }
+    
+    /**
+     * Paid Amount Accessor - 將分轉換為元
+     */
+    public function getPaidAmountAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['paid_amount'] ?? 0);
+    }
+    
+    /**
+     * Paid Amount Mutator - 將元轉換為分
+     */
+    public function setPaidAmountAttribute($value): void
+    {
+        $this->attributes['paid_amount'] = MoneyHelper::yuanToCents($value);
+    }
+
 
     // ===== 業務邏輯方法 =====
 
@@ -159,7 +255,9 @@ class Order extends Model
      */
     public function getRemainingAmountAttribute(): float
     {
-        return max(0, $this->grand_total - $this->paid_amount);
+        $grandTotalYuan = MoneyHelper::centsToYuan($this->grand_total);
+        $paidAmountYuan = MoneyHelper::centsToYuan($this->paid_amount);
+        return max(0, $grandTotalYuan - $paidAmountYuan);
     }
 
 
@@ -181,12 +279,12 @@ class Order extends Model
     public function getAmountSummary(): array
     {
         return [
-            'subtotal' => 'NT$ ' . number_format($this->subtotal, 2),
-            'shipping_fee' => 'NT$ ' . number_format($this->shipping_fee, 2),
-            'tax' => 'NT$ ' . number_format($this->tax, 2),
-            'discount_amount' => 'NT$ ' . number_format($this->discount_amount, 2),
-            'grand_total' => 'NT$ ' . number_format($this->grand_total, 2),
-            'paid_amount' => 'NT$ ' . number_format($this->paid_amount, 2),
+            'subtotal' => MoneyHelper::format($this->subtotal),
+            'shipping_fee' => MoneyHelper::format($this->shipping_fee),
+            'tax' => MoneyHelper::format($this->tax),
+            'discount_amount' => MoneyHelper::format($this->discount_amount),
+            'grand_total' => MoneyHelper::format($this->grand_total),
+            'paid_amount' => MoneyHelper::format($this->paid_amount),
             'remaining_amount' => 'NT$ ' . number_format($this->remaining_amount, 2),
             'is_fully_paid' => $this->is_fully_paid,
         ];

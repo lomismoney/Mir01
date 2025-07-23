@@ -7,7 +7,8 @@ import { SimpleDataTable } from '@/components/simple-data-table';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { MoneyHelper } from '@/lib/money-helper';
 import { ArrowUpDown, Package2, Loader2 } from 'lucide-react';
 import { 
   AlertDialog,
@@ -136,7 +137,7 @@ export function BackorderSummary() {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => formatCurrency(row.original.estimated_cost),
+      cell: ({ row }) => MoneyHelper.format(row.original.estimated_cost),
     },
     {
       accessorKey: 'earliest_date',
@@ -173,7 +174,7 @@ export function BackorderSummary() {
               已選擇 {selectedCount} 個項目
             </p>
             <p className="text-sm text-muted-foreground">
-              總數量: {totalQuantity} | 預估成本: {formatCurrency(totalCost)}
+              總數量: {totalQuantity} | 預估成本: {MoneyHelper.format(totalCost)}
             </p>
           </div>
           <Button 

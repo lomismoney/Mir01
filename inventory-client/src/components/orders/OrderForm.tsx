@@ -75,6 +75,8 @@ export function OrderForm({
     tax,
     discountAmount,
     grandTotal,
+    isTaxInclusive,
+    taxRate,
   } = usePriceCalculator({ form });
 
   return (
@@ -142,6 +144,8 @@ export function OrderForm({
                   tax={tax}
                   discountAmount={discountAmount}
                   grandTotal={grandTotal}
+                  isTaxInclusive={isTaxInclusive}
+                  taxRate={taxRate}
                 />
 
                 {/* 訂單備註卡片 - 移動到價格摘要下方 */}

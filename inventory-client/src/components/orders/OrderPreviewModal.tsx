@@ -27,6 +27,7 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { MoneyHelper } from '@/lib/money-helper';
 import { useOrderDetail } from '@/hooks';
 import { useUpdateOrderItemStatusOptimistic } from '@/hooks/useUpdateOrderItemStatusOptimistic';
 import { ProcessedOrder, ProcessedOrderItem, PaymentRecord } from '@/types/api-helpers';
@@ -114,10 +115,6 @@ const statusConfig = {
   },
 };
 
-// 格式化金額
-const formatCurrency = (amount: number): string => {
-  return `NT$ ${Math.round(amount).toLocaleString('zh-TW')}`;
-};
 
 export function OrderPreviewModal({
   open,
@@ -268,10 +265,10 @@ export function OrderPreviewModal({
                           {item.quantity}
                         </TableCell>
                         <TableCell className="text-right text-sm whitespace-nowrap">
-                          {formatCurrency(item.price)}
+                          {MoneyHelper.format(item.price)}
                         </TableCell>
                         <TableCell className="text-right font-medium text-sm whitespace-nowrap">
-                          {formatCurrency(item.price * item.quantity)}
+                          {MoneyHelper.format(item.price * item.quantity)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -323,7 +320,7 @@ export function OrderPreviewModal({
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right font-medium text-sm whitespace-nowrap">
-                              {formatCurrency(record.amount)}
+                              {MoneyHelper.format(record.amount)}
                             </TableCell>
                             <TableCell className="text-muted-foreground text-sm">
                               {record.notes || '-'}
@@ -351,20 +348,29 @@ export function OrderPreviewModal({
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">商品小計</span>
-                        <span className="whitespace-nowrap text-right min-w-[100px]">{formatCurrency(order.subtotal)}</span>
+                        <span className="whitespace-nowrap text-right min-w-[100px]">{MoneyHelper.format(order.subtotal)}</span>
                       </div>
                       
                       {order.shipping_fee !== null && order.shipping_fee > 0 && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">運費</span>
-                          <span className="whitespace-nowrap text-right min-w-[100px]">{formatCurrency(order.shipping_fee)}</span>
+                          <span className="whitespace-nowrap text-right min-w-[100px]">{MoneyHelper.format(order.shipping_fee)}</span>
                         </div>
                       )}
                       
                       {order.discount_amount && order.discount_amount > 0 && (
                         <div className="flex justify-between text-sm text-success">
                           <span>折扣優惠</span>
-                          <span className="whitespace-nowrap text-right min-w-[100px]">-{formatCurrency(order.discount_amount)}</span>
+                          <span className="whitespace-nowrap text-right min-w-[100px]">-{MoneyHelper.format(order.discount_amount)}</span>
+                        </div>
+                      )}
+                      
+                      {order.tax && order.tax > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            {order.is_tax_inclusive ? "內含稅金" : "稅金"} ({order.tax_rate || 5}%)
+                          </span>
+                          <span className="whitespace-nowrap text-right min-w-[100px]">{MoneyHelper.format(order.tax)}</span>
                         </div>
                       )}
                       
@@ -372,7 +378,7 @@ export function OrderPreviewModal({
                       
                       <div className="flex justify-between font-bold text-base pt-1">
                         <span>總計</span>
-                        <span className="text-primary whitespace-nowrap text-right min-w-[100px]">{formatCurrency(order.grand_total)}</span>
+                        <span className="text-primary whitespace-nowrap text-right min-w-[100px]">{MoneyHelper.format(order.grand_total)}</span>
                       </div>
 
                       {/* 付款進度 */}
@@ -391,14 +397,14 @@ export function OrderPreviewModal({
                           <div>
                             <p className="text-muted-foreground">已付</p>
                             <p className="font-semibold text-success whitespace-nowrap">
-                              {formatCurrency(order.paid_amount)}
+                              {MoneyHelper.format(order.paid_amount)}
                             </p>
                           </div>
                           {remainingAmount > 0 && (
                             <div className="text-right">
                               <p className="text-muted-foreground">待付</p>
                               <p className="font-semibold text-warning whitespace-nowrap">
-                                {formatCurrency(remainingAmount)}
+                                {MoneyHelper.format(remainingAmount)}
                               </p>
                             </div>
                           )}

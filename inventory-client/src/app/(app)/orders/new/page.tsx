@@ -113,6 +113,8 @@ export default function NewOrderPage() {
       shipping_fee: values.shipping_fee || 0,
       tax: values.tax || 0,
       discount_amount: values.discount_amount || 0,
+      is_tax_inclusive: values.is_tax_inclusive ?? true, // 預設含稅
+      tax_rate: values.tax_rate ?? 5, // 預設稅率 5%
       payment_method: values.payment_method || 'cash',
       order_source: values.order_source || 'direct',
       shipping_address: values.shipping_address || '',

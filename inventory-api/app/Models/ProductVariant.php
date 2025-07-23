@@ -181,7 +181,8 @@ class ProductVariant extends Model
      */
     public function getProfitMarginAttribute(): float
     {
-        if ($this->average_cost <= 0) {
+        // 避免除零錯誤
+        if ($this->price <= 0) {
             return 0;
         }
         

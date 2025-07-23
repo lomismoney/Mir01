@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
+import { MoneyHelper } from '@/lib/money-helper';
 import { zhTW } from 'date-fns/locale';
 import { Calendar, Package } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
@@ -348,7 +349,7 @@ export function CreatePurchaseDialog({
                           />
                         </TableCell>
                         <TableCell className="text-right">
-                          ${((watchedItems?.[index]?.cost_price || 0) * selectedItem.quantity).toFixed(2)}
+                          {MoneyHelper.format((watchedItems?.[index]?.cost_price || 0) * selectedItem.quantity)}
                         </TableCell>
                       </TableRow>
                     );
@@ -360,7 +361,7 @@ export function CreatePurchaseDialog({
             {/* 總成本 */}
             <div className="flex justify-end">
               <div className="text-lg font-semibold">
-                總成本：${totalCost.toFixed(2)}
+                總成本：{MoneyHelper.format(totalCost)}
               </div>
             </div>
 

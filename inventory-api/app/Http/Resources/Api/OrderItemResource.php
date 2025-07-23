@@ -24,8 +24,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property int $fulfilled_quantity
  * @property bool $is_fulfilled
  * @property string|null $fulfilled_at
- * @property string $tax_rate
- * @property string $discount_amount
  * @property string|null $custom_product_name
  * @property array|null $custom_specifications
  * @property string|null $custom_product_image
@@ -60,8 +58,6 @@ class OrderItemResource extends JsonResource
             'fulfilled_quantity' => $this->fulfilled_quantity,
             'is_fulfilled' => $this->is_fulfilled,
             'fulfilled_at' => $this->fulfilled_at,
-            'tax_rate' => $this->tax_rate,
-            'discount_amount' => $this->discount_amount,
             // 🎯 訂製商品相關欄位
             'custom_product_name' => $this->custom_product_name,
             'custom_specifications' => $this->custom_specifications ? json_decode($this->custom_specifications, true) : null,

@@ -27,6 +27,8 @@ class OrderResource extends JsonResource
             'discount_amount' => $this->discount_amount,
             'grand_total' => $this->grand_total,
             'paid_amount' => $this->paid_amount,
+            'is_tax_inclusive' => $this->is_tax_inclusive,
+            'tax_rate' => $this->tax_rate,
             'payment_method' => $this->payment_method,
             'order_source' => $this->order_source,
             'shipping_address' => $this->shipping_address,

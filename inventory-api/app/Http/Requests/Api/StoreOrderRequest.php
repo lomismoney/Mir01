@@ -27,8 +27,9 @@ class StoreOrderRequest extends FormRequest
             'shipping_status'      => 'required|string',
             'payment_status'       => 'required|string',
             'shipping_fee'         => 'nullable|numeric|min:0',
-            'tax'                  => 'nullable|numeric|min:0',
             'discount_amount'      => 'nullable|numeric|min:0',
+            'is_tax_inclusive'     => 'required|boolean',
+            'tax_rate'             => 'nullable|numeric|min:0|max:100',
             'payment_method'       => 'required|string',
             'order_source'         => 'required|string',
             'shipping_address'     => 'required|string',
@@ -91,13 +92,17 @@ class StoreOrderRequest extends FormRequest
                 'description' => '運費',
                 'example' => 100.0,
             ],
-            'tax' => [
-                'description' => '稅金',
-                'example' => 50.0,
-            ],
             'discount_amount' => [
                 'description' => '折扣金額',
                 'example' => 0.0,
+            ],
+            'is_tax_inclusive' => [
+                'description' => '是否為含稅價格',
+                'example' => true,
+            ],
+            'tax_rate' => [
+                'description' => '稅率（百分比）',
+                'example' => 5.0,
             ],
             'payment_method' => [
                 'description' => '付款方式',

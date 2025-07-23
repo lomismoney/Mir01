@@ -3,6 +3,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { useCreatePurchase, useStores } from "@/hooks";
 import { useToast } from "@/components/ui/use-toast";
+import { MoneyHelper } from "@/lib/money-helper";
 import { PURCHASE_STATUS_LABELS, PURCHASE_STATUS } from "@/types/purchase";
 import {
   Dialog,
@@ -466,11 +467,7 @@ export function CreatePurchaseDialog({
                           className="text-lg font-semibold"
                          
                         >
-                          NT${" "}
-                          {calculateTotal().toLocaleString("zh-TW", {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                          })}
+                          {MoneyHelper.format(calculateTotal())}
                         </div>
                       </div>
                     </div>

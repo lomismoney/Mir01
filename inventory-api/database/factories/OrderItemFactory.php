@@ -27,11 +27,9 @@ class OrderItemFactory extends Factory
             'status' => '待處理',
             'product_name' => $this->faker->words(3, true),
             'sku' => $this->faker->unique()->numerify('SKU-####'),
-            'price' => $this->faker->randomFloat(2, 10, 1000),
-            'cost' => $this->faker->randomFloat(2, 5, 500),
+            'price' => $this->faker->numberBetween(1000, 100000), // 以分為單位
+            'cost' => $this->faker->numberBetween(500, 50000), // 以分為單位
             'quantity' => $this->faker->numberBetween(1, 10),
-            'tax_rate' => $this->faker->randomFloat(2, 0, 20),
-            'discount_amount' => $this->faker->randomFloat(2, 0, 50),
             'custom_product_name' => null,
             'custom_specifications' => null,
             'custom_product_image' => null,

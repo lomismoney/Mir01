@@ -14,6 +14,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useProducts, ProcessedProduct } from "@/hooks";
 import { useErrorHandler } from "@/hooks";
 import { cn } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 
 /**
  * 訂製商品項目介面
@@ -778,7 +779,7 @@ export function ProductSelector({
                             單價
                           </span>
                           <span>
-                            NT$ {Number(customPrice).toLocaleString()}
+                            {MoneyHelper.format(Number(customPrice))}
                           </span>
                         </div>
                         <div
@@ -802,7 +803,7 @@ export function ProductSelector({
                             NT${" "}
                             {(
                               Number(customPrice) * Number(customQuantity)
-                            ).toLocaleString()}
+                            ), '$')}
                           </span>
                         </div>
                       </div>
@@ -989,7 +990,7 @@ export function ProductSelector({
                               className="text-right font-semibold"
                              
                             >
-                              NT$ {variant.price.toLocaleString()}
+                              {MoneyHelper.format(variant.price)}
                             </TableCell>
                           </TableRow>
                         );

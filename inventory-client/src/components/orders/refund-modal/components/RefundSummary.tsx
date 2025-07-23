@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Calculator, CheckCircle } from "lucide-react";
+import { MoneyHelper } from "@/lib/money-helper";
 
 interface RefundSummaryProps {
   orderTotal: number;
@@ -36,13 +37,13 @@ export function RefundSummary({
           <div className="flex justify-between">
             <span className="text-muted-foreground">訂單總額</span>
             <span className="font-medium">
-              ${Math.round(orderTotal).toLocaleString()}
+              {MoneyHelper.format(orderTotal, '$')}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">已付金額</span>
             <span className="font-medium text-green-600">
-              ${Math.round(paidAmount).toLocaleString()}
+              {MoneyHelper.format(paidAmount, '$')}
             </span>
           </div>
 
@@ -64,7 +65,7 @@ export function RefundSummary({
           <div className="flex justify-between items-center pt-2">
             <span className="font-semibold text-base">預計退款金額</span>
             <span className="text-2xl font-bold text-destructive">
-              ${Math.round(totalRefundAmount).toLocaleString()}
+              {MoneyHelper.format(totalRefundAmount, '$')}
             </span>
           </div>
         </div>

@@ -17,6 +17,7 @@ import { format } from "date-fns";
 
 import { ProcessedOrder } from "@/types/api-helpers";
 import { useAddOrderPayment, useErrorHandler } from "@/hooks";
+import { MoneyHelper } from "@/lib/money-helper";
 
 /**
  * 正確的付款記錄請求類型定義
@@ -100,7 +101,7 @@ const createPaymentSchema = (remainingAmount: number) =>
       notes: z.string().optional(),
     })
     .refine((data) => data.amount <= remainingAmount, {
-      message: `收款金額不能超過剩餘未付金額：${Math.round(remainingAmount).toLocaleString()} 元`,
+      message: `收款金額不能超過剩餘未付金額：${MoneyHelper.format(remainingAmount)} 元`,
       path: ["amount"],
     });
 
@@ -203,7 +204,7 @@ export default function RecordPaymentModal({
         onSuccess: () => {
           // 成功處理
           handleSuccess(
-            `成功記錄 ${Math.round(data.amount).toLocaleString()} 元的${
+            `成功記錄 ${MoneyHelper.format(data.amount)} 元的${
               PAYMENT_METHODS.find((m) => m.value === data.payment_method)?.label
             }收款`
           );
@@ -258,7 +259,7 @@ export default function RecordPaymentModal({
                   訂單總額
               </CardDescription>
               <CardTitle className="text-xl font-semibold tabular-nums @[200px]/card:text-2xl">
-                ${Math.round(order.grand_total).toLocaleString()}
+                {MoneyHelper.format(order.grand_total, '$')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 pb-2">
@@ -276,7 +277,7 @@ export default function RecordPaymentModal({
                   已付金額
               </CardDescription>
               <CardTitle className="text-xl font-semibold tabular-nums @[200px]/card:text-2xl text-success">
-                ${Math.round(order.paid_amount).toLocaleString()}
+                {MoneyHelper.format(order.paid_amount, '$')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 pb-2">
@@ -297,7 +298,7 @@ export default function RecordPaymentModal({
                 "text-xl font-semibold tabular-nums @[200px]/card:text-2xl",
                 remainingAmount > 0 ? "text-destructive" : "text-success"
               )}>
-                ${Math.round(remainingAmount).toLocaleString()}
+                {MoneyHelper.format(remainingAmount, '$')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 pb-2">

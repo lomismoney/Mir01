@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import {
   Table,
   TableBody,
@@ -217,13 +218,13 @@ export function OrderDetailComponent({ orderId, order: providedOrder }: OrderDet
                         {item.sku}
                       </TableCell>
                       <TableCell className="text-right">
-                        ${(item.price || 0).toLocaleString()}
+                        {MoneyHelper.format(item.price || 0, '$')}
                       </TableCell>
                       <TableCell className="text-center">
                         {item.quantity || 0}
                       </TableCell>
                       <TableCell className="text-right font-medium w-[120px]">
-                        ${((item.price || 0) * (item.quantity || 0)).toLocaleString()}
+                        {MoneyHelper.format((item.price || 0) * (item.quantity || 0), '$')}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{item.status_text}</Badge>
@@ -252,7 +253,7 @@ export function OrderDetailComponent({ orderId, order: providedOrder }: OrderDet
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-lg">
-                              ${(payment.amount || 0).toLocaleString()}
+                              {MoneyHelper.format(payment.amount || 0, '$')}
                             </span>
                             <Badge variant="outline">
                               {payment.payment_method === "cash"
@@ -344,14 +345,14 @@ export function OrderDetailComponent({ orderId, order: providedOrder }: OrderDet
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">商品小計</span>
                   <span className="text-right w-[120px]">
-                    ${subtotal.toLocaleString()}
+                    {MoneyHelper.format(subtotal, '$')}
                   </span>
                 </div>
                 {(order.shipping_fee ?? 0) > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">運費</span>
                     <span className="text-right w-[120px]">
-                      ${(order.shipping_fee ?? 0).toLocaleString()}
+                      {MoneyHelper.format(order.shipping_fee ?? 0, '$')}
                     </span>
                   </div>
                 )}
@@ -359,20 +360,24 @@ export function OrderDetailComponent({ orderId, order: providedOrder }: OrderDet
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">折扣</span>
                     <span className="text-success text-right w-[120px]">
-                      -${(order.discount_amount ?? 0).toLocaleString()}
+                      -{MoneyHelper.format(order.discount_amount ?? 0, '$')}
                     </span>
                   </div>
                 )}
-                {(order.tax_amount ?? 0) > 0 && (
+                {(order.tax ?? 0) > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">稅額</span>
+                    <span className="text-muted-foreground">
+                      {order.is_tax_inclusive ? "內含稅金" : "稅金"} ({order.tax_rate || 5}%)
+                    </span>
                     <span className="text-right w-[120px]">
-                      ${(order.tax_amount ?? 0).toLocaleString()}
+                      {MoneyHelper.format(order.tax ?? 0, '$')}
                     </span>
                   </div>
                 )}
                 <div className="flex items-center justify-between font-medium text-base pt-2 border-t">
-                  <span className="text-muted-foreground">訂單總額</span>
+                  <span className="text-muted-foreground">
+                    訂單總額 ({order.is_tax_inclusive ? "含稅" : "未稅"})
+                  </span>
                   <span className="text-right w-[120px]">
                     {formatPrice(order.grand_total)}
                   </span>
@@ -420,19 +425,21 @@ export function OrderDetailComponent({ orderId, order: providedOrder }: OrderDet
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">已付金額</span>
                                       <span className="font-medium text-success">
-                    ${(order.paid_amount || 0).toLocaleString()}
+                    {MoneyHelper.format(order.paid_amount || 0, '$')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">未付金額</span>
                                       <span className="font-medium text-error">
-                    ${(remainingAmount || 0).toLocaleString()}
+                    {MoneyHelper.format(remainingAmount || 0, '$')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t">
-                  <span className="text-muted-foreground">訂單總額</span>
+                  <span className="text-muted-foreground">
+                    訂單總額 ({order.is_tax_inclusive ? "含稅" : "未稅"})
+                  </span>
                   <span className="font-medium">
-                    ${(order.grand_total || 0).toLocaleString()}
+                    {MoneyHelper.format(order.grand_total || 0, '$')}
                   </span>
                 </div>
               </div>

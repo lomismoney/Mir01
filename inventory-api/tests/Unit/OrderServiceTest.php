@@ -75,7 +75,7 @@ class OrderServiceTest extends TestCase
     }
 
     /**
-     * 測試成功創建訂單
+     * 測試成功創建訂單（預設為未稅）
      */
     public function test_create_order_successfully(): void
     {
@@ -127,7 +127,14 @@ class OrderServiceTest extends TestCase
         $this->assertEquals($this->user->id, $order->creator_user_id);
         $this->assertEquals('pending', $order->shipping_status);
         $this->assertEquals('pending', $order->payment_status);
-        $this->assertEquals(200.00, $order->grand_total);
+        
+        // 驗證金額計算（預設為未稅）
+        $this->assertFalse($order->is_tax_inclusive); // 預設為未稅
+        $this->assertEquals(5, $order->tax_rate); // 預設稅率 5%
+        $this->assertEquals(200.00, $order->subtotal); // 商品小計
+        $this->assertEquals(10.00, $order->tax); // 稅金 = 200 * 5%
+        $this->assertEquals(210.00, $order->grand_total); // 總計 = 200 + 10
+        
         $this->assertCount(1, $order->items);
 
         // 驗證訂單項目
@@ -576,7 +583,7 @@ class OrderServiceTest extends TestCase
         $order = $this->orderService->createOrder($orderData);
 
         $this->assertInstanceOf(Order::class, $order);
-        $this->assertEquals(200.00, $order->grand_total);
+        $this->assertEquals(210.00, $order->grand_total); // 200 + 10 (5% tax)
         
         $orderItem = $order->items->first();
         $this->assertNull($orderItem->product_variant_id);
@@ -755,14 +762,14 @@ class OrderServiceTest extends TestCase
 
         // 驗證金額計算精確性
         $orderItem = $order->items->first();
-        $expectedItemSubtotal = (33.33 * 3) - 5.55; // 94.44
-        $expectedOrderTotal = 33.33 * 3; // 99.99 - OrderService 目前不處理項目級別的折扣
+        $expectedOrderTotal = 33.33 * 3; // 99.99
         
         $this->assertEquals(33.33, $orderItem->price);
-        $this->assertEquals(5.55, $orderItem->discount_amount);
-        $this->assertEquals($expectedItemSubtotal, $orderItem->subtotal);
-        // OrderService 計算的 grand_total 是基於原始價格，不包含項目折扣
-        $this->assertEquals($expectedOrderTotal, $order->grand_total);
+        $this->assertEquals(3, $orderItem->quantity);
+        // 商品折扣已經從系統中移除，只計算價格 * 數量
+        $this->assertEquals(99.99, $orderItem->subtotal);
+        // 未稅訂單，加上 5% 稅金
+        $this->assertEqualsWithDelta($expectedOrderTotal * 1.05, $order->grand_total, 0.01);
     }
 
     /**
@@ -811,5 +818,325 @@ class OrderServiceTest extends TestCase
         
         $this->assertInstanceOf(Order::class, $order);
         $this->assertEquals('ORD-2025-006', $order->order_number);
+    }
+
+    /**
+     * 測試創建含稅訂單
+     */
+    public function test_create_order_with_tax_inclusive(): void
+    {
+        $orderData = [
+            'customer_id' => $this->customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
+            'payment_method' => '現金',
+            'order_source' => '現場客戶',
+            'shipping_address' => '測試地址',
+            'is_tax_inclusive' => true, // 含稅
+            'tax_rate' => 5, // 5% 稅率
+            'shipping_fee' => 100.00, // 運費
+            'discount_amount' => 50.00, // 折扣
+            'items' => [
+                [
+                    'product_variant_id' => $this->productVariant->id,
+                    'is_stocked_sale' => true,
+                    'status' => '待處理',
+                    'product_name' => '測試商品',
+                    'sku' => 'TEST-SKU-001',
+                    'price' => 1000.00,
+                    'quantity' => 1,
+                ]
+            ]
+        ];
+
+        $this->mockOrderNumberGenerator
+            ->shouldReceive('generateNextNumber')
+            ->once()
+            ->andReturn('ORD-2025-TAX-001');
+
+        $this->mockInventoryService
+            ->shouldReceive('batchCheckStock')
+            ->once()
+            ->andReturn([]);
+
+        $this->mockInventoryService
+            ->shouldReceive('batchDeductStock')
+            ->once()
+            ->andReturn(true);
+
+        $order = $this->orderService->createOrder($orderData);
+
+        // 驗證含稅計算
+        // 商品小計: 1000
+        // 運費: 100
+        // 折扣: -50
+        // 含稅總額: 1050
+        // 反推稅額: 1050 / 1.05 * 0.05 = 50
+        $this->assertTrue($order->is_tax_inclusive);
+        $this->assertEquals(5, $order->tax_rate);
+        $this->assertEquals(1000.00, $order->subtotal);
+        $this->assertEquals(100.00, $order->shipping_fee);
+        $this->assertEquals(50.00, $order->discount_amount);
+        $this->assertEquals(50.00, $order->tax); // 從含稅總額反推的稅金
+        $this->assertEquals(1050.00, $order->grand_total);
+    }
+
+    /**
+     * 測試創建未稅訂單（明確設定）
+     */
+    public function test_create_order_with_tax_exclusive(): void
+    {
+        $orderData = [
+            'customer_id' => $this->customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
+            'payment_method' => '現金',
+            'order_source' => '現場客戶',
+            'shipping_address' => '測試地址',
+            'is_tax_inclusive' => false, // 未稅
+            'tax_rate' => 5, // 5% 稅率
+            'shipping_fee' => 100.00, // 運費（不課稅）
+            'discount_amount' => 50.00, // 折扣
+            'items' => [
+                [
+                    'product_variant_id' => $this->productVariant->id,
+                    'is_stocked_sale' => true,
+                    'status' => '待處理',
+                    'product_name' => '測試商品',
+                    'sku' => 'TEST-SKU-001',
+                    'price' => 1000.00,
+                    'quantity' => 1,
+                ]
+            ]
+        ];
+
+        $this->mockOrderNumberGenerator
+            ->shouldReceive('generateNextNumber')
+            ->once()
+            ->andReturn('ORD-2025-NOTAX-001');
+
+        $this->mockInventoryService
+            ->shouldReceive('batchCheckStock')
+            ->once()
+            ->andReturn([]);
+
+        $this->mockInventoryService
+            ->shouldReceive('batchDeductStock')
+            ->once()
+            ->andReturn(true);
+
+        $order = $this->orderService->createOrder($orderData);
+
+        // 驗證未稅計算
+        // 商品小計: 1000
+        // 折扣: -50
+        // 應稅金額: 950
+        // 稅金: 950 * 5% = 47.50
+        // 總計: 1000 + 100 - 50 + 47.50 = 1097.50
+        $this->assertFalse($order->is_tax_inclusive);
+        $this->assertEquals(5, $order->tax_rate);
+        $this->assertEquals(1000.00, $order->subtotal);
+        $this->assertEquals(100.00, $order->shipping_fee);
+        $this->assertEquals(50.00, $order->discount_amount);
+        $this->assertEquals(47.50, $order->tax); // 未稅金額的稅金計算
+        $this->assertEquals(1097.50, $order->grand_total);
+    }
+
+    /**
+     * 測試不同稅率的計算
+     */
+    public function test_create_order_with_different_tax_rates(): void
+    {
+        // 測試 10% 稅率
+        $orderData = [
+            'customer_id' => $this->customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
+            'payment_method' => '現金',
+            'order_source' => '現場客戶',
+            'shipping_address' => '測試地址',
+            'is_tax_inclusive' => false,
+            'tax_rate' => 10, // 10% 稅率
+            'items' => [
+                [
+                    'product_variant_id' => $this->productVariant->id,
+                    'is_stocked_sale' => true,
+                    'status' => '待處理',
+                    'product_name' => '測試商品',
+                    'sku' => 'TEST-SKU-001',
+                    'price' => 1000.00,
+                    'quantity' => 1,
+                ]
+            ]
+        ];
+
+        $this->mockOrderNumberGenerator
+            ->shouldReceive('generateNextNumber')
+            ->once()
+            ->andReturn('ORD-2025-TAX10-001');
+
+        $this->mockInventoryService
+            ->shouldReceive('batchCheckStock')
+            ->once()
+            ->andReturn([]);
+
+        $this->mockInventoryService
+            ->shouldReceive('batchDeductStock')
+            ->once()
+            ->andReturn(true);
+
+        $order = $this->orderService->createOrder($orderData);
+
+        // 驗證 10% 稅率計算
+        $this->assertEquals(10, $order->tax_rate);
+        $this->assertEquals(100.00, $order->tax); // 1000 * 10%
+        $this->assertEquals(1100.00, $order->grand_total); // 1000 + 100
+    }
+
+    /**
+     * 測試更新訂單時重新計算稅金
+     */
+    public function test_update_order_recalculates_tax(): void
+    {
+        // 創建訂單資料
+        $orderData = [
+            'customer_id' => $this->customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
+            'payment_method' => '現金',
+            'order_source' => '線上商城',
+            'shipping_address' => '測試地址',
+            'is_tax_inclusive' => false,
+            'tax_rate' => 5,
+            'shipping_fee' => 100.00,
+            'discount_amount' => 50.00,
+            'items' => [
+                [
+                    'product_variant_id' => $this->productVariant->id,
+                    'product_name' => '測試商品',
+                    'sku' => 'TEST-SKU-001',
+                    'price' => 1000.00,
+                    'cost' => 800.00,
+                    'quantity' => 1,
+                    'status' => '待處理',
+                    'is_stocked_sale' => true,
+                    'is_backorder' => false,
+                ]
+            ]
+        ];
+
+        $this->mockOrderNumberGenerator
+            ->shouldReceive('generateNextNumber')
+            ->once()
+            ->andReturn('ORD-2025-006');
+
+        $this->mockInventoryService
+            ->shouldReceive('batchCheckStock')
+            ->once()
+            ->andReturn([]);
+
+        $this->mockInventoryService
+            ->shouldReceive('batchDeductStock')
+            ->once()
+            ->andReturn(true);
+
+        $order = $this->orderService->createOrder($orderData);
+        
+        // 驗證原始計算（未稅）
+        // 應稅金額: 1000 - 50 = 950
+        // 稅金: 950 * 5% = 47.50
+        // 總計: 1000 + 100 + 47.50 - 50 = 1097.50
+        $this->assertFalse($order->is_tax_inclusive);
+        $this->assertEquals(47.50, $order->tax);
+        $this->assertEquals(1097.50, $order->grand_total);
+
+        // 更新為含稅
+        $updateData = [
+            'is_tax_inclusive' => true,
+            'tax_rate' => 5
+        ];
+
+        $updatedOrder = $this->orderService->updateOrder($order, $updateData);
+
+        // 驗證稅金重新計算
+        // 含稅總額: 1000 + 100 - 50 = 1050
+        // 反推稅金: 1050 / 1.05 * 0.05 = 50
+        $this->assertTrue($updatedOrder->is_tax_inclusive);
+        $this->assertEquals(50.00, $updatedOrder->tax);
+        $this->assertEquals(1050.00, $updatedOrder->grand_total);
+    }
+
+    /**
+     * 測試複雜金額計算場景
+     */
+    public function test_complex_amount_calculation_scenario(): void
+    {
+        $orderData = [
+            'customer_id' => $this->customer->id,
+            'store_id' => $this->store->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
+            'payment_method' => '現金',
+            'order_source' => '現場客戶',
+            'shipping_address' => '測試地址',
+            'is_tax_inclusive' => true,
+            'tax_rate' => 5,
+            'shipping_fee' => 123.45,
+            'discount_amount' => 67.89,
+            'items' => [
+                [
+                    'product_variant_id' => $this->productVariant->id,
+                    'is_stocked_sale' => true,
+                    'status' => '待處理',
+                    'product_name' => '測試商品A',
+                    'sku' => 'TEST-SKU-COMPLEX-001',
+                    'price' => 999.99,
+                    'quantity' => 2,
+                ],
+                [
+                    'product_variant_id' => $this->productVariant->id,
+                    'is_stocked_sale' => true,
+                    'status' => '待處理',
+                    'product_name' => '測試商品B',
+                    'sku' => 'TEST-SKU-COMPLEX-002',
+                    'price' => 333.33,
+                    'quantity' => 3,
+                ]
+            ]
+        ];
+
+        $this->mockOrderNumberGenerator
+            ->shouldReceive('generateNextNumber')
+            ->once()
+            ->andReturn('ORD-2025-COMPLEX-001');
+
+        $this->mockInventoryService
+            ->shouldReceive('batchCheckStock')
+            ->once()
+            ->andReturn([]);
+
+        $this->mockInventoryService
+            ->shouldReceive('batchDeductStock')
+            ->once()
+            ->andReturn(true);
+
+        $order = $this->orderService->createOrder($orderData);
+
+        // 驗證複雜計算
+        // 商品小計: (999.99 * 2) + (333.33 * 3) = 1999.98 + 999.99 = 2999.97
+        // 運費: 123.45
+        // 折扣: -67.89
+        // 含稅總額: 2999.97 + 123.45 - 67.89 = 3055.53
+        // 反推稅金: 3055.53 / 1.05 * 0.05 = 145.50
+        
+        $this->assertEquals(2999.97, $order->subtotal);
+        $this->assertEquals(123.45, $order->shipping_fee);
+        $this->assertEquals(67.89, $order->discount_amount);
+        $this->assertEquals(145.50, $order->tax);
+        $this->assertEquals(3055.53, $order->grand_total);
     }
 } 

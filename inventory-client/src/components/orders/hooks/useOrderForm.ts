@@ -17,6 +17,8 @@ const orderFormSchema = z.object({
   shipping_fee: z.number().min(0).optional(),
   tax: z.number().min(0).optional(),
   discount_amount: z.number().min(0).optional(),
+  is_tax_inclusive: z.boolean(),
+  tax_rate: z.number().min(0).max(100).optional(),
   notes: z.string().optional(),
   items: z
     .array(
@@ -57,6 +59,8 @@ export function useOrderForm({ initialData, onSubmit }: UseOrderFormProps) {
       shipping_fee: 0,
       tax: 0,
       discount_amount: 0,
+      is_tax_inclusive: true,
+      tax_rate: 5,
       items: [],
     },
   });

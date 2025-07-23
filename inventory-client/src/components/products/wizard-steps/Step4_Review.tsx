@@ -27,6 +27,7 @@ import { useAttributes } from "@/hooks";
 import { useCategories } from "@/hooks";
 import { Attribute } from "@/types/products";
 import { Category } from "@/types/category";
+import { MoneyHelper } from "@/lib/money-helper";
 
 /**
  * 步驟4組件Props
@@ -361,7 +362,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
                             價格:{" "}
                           </span>
                           <span className="font-semibold">
-                            NT$ {variant.price || "0"}
+                            {MoneyHelper.format(parseFloat(variant.price || "0"))}
                           </span>
                         </div>
                       </div>
@@ -428,11 +429,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
               className="text-3xl font-bold tracking-tighter"
              
             >
-              $
-              {statistics.totalValue.toLocaleString("zh-TW", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}
+              {MoneyHelper.format(statistics.totalValue)}
             </div>
             <p
               className="text-xs text-muted-foreground mt-2"
@@ -462,11 +459,7 @@ export function Step4_Review({ formData, updateFormData }: Step4Props) {
               className="text-3xl font-bold tracking-tighter"
              
             >
-              $
-              {statistics.averagePrice.toLocaleString("zh-TW", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}
+              {MoneyHelper.format(statistics.averagePrice)}
             </div>
             <p
               className="text-xs text-muted-foreground mt-2"

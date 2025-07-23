@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\MoneyHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,8 +27,6 @@ class OrderItem extends Model
         'cost',
         'quantity',
         'fulfilled_quantity',
-        'tax_rate',
-        'discount_amount',
         'custom_product_name',
         'custom_product_specs',
         'custom_product_image',
@@ -51,12 +50,7 @@ class OrderItem extends Model
         'custom_specifications' => 'json',
         'quantity' => 'integer',
         'fulfilled_quantity' => 'integer',
-        'tax_rate' => 'decimal:2',
         'fulfilled_at' => 'datetime',
-        // 金額欄位使用 decimal
-        'price' => 'decimal:2',
-        'cost' => 'decimal:2',
-        'discount_amount' => 'decimal:2',
         // 分配優先級欄位
         'allocation_priority_score' => 'integer',
         'allocation_metadata' => 'json',
@@ -353,14 +347,48 @@ class OrderItem extends Model
         return $this->save();
     }
 
+    // ===== 金額 Accessor/Mutator (分/元轉換) =====
+    
+    /**
+     * Price Accessor - 將分轉換為元
+     */
+    public function getPriceAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['price'] ?? 0);
+    }
+    
+    /**
+     * Price Mutator - 將元轉換為分
+     */
+    public function setPriceAttribute($value): void
+    {
+        $this->attributes['price'] = MoneyHelper::yuanToCents($value);
+    }
+    
+    /**
+     * Cost Accessor - 將分轉換為元
+     */
+    public function getCostAttribute(): float
+    {
+        return MoneyHelper::centsToYuan($this->attributes['cost'] ?? 0);
+    }
+    
+    /**
+     * Cost Mutator - 將元轉換為分
+     */
+    public function setCostAttribute($value): void
+    {
+        $this->attributes['cost'] = MoneyHelper::yuanToCents($value);
+    }
+
     // ===== 金額處理方法 =====
 
     /**
-     * 計算小計（單價 × 數量 - 折扣）
+     * 計算小計（單價 × 數量）
      */
     public function getSubtotalAttribute(): float
     {
-        $subtotal = ($this->price * $this->quantity) - $this->discount_amount;
+        $subtotal = $this->price * $this->quantity;
         return round($subtotal, 2);
     }
 }

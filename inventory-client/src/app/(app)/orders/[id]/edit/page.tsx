@@ -121,14 +121,17 @@ export default function EditOrderPage() {
   const initialData = order
     ? {
         customer_id: order.customer_id,
+        store_id: order.store_id,
         shipping_address: order.shipping_address || "",
         payment_method: order.payment_method,
         order_source: order.order_source,
         shipping_status: order.shipping_status,
         payment_status: order.payment_status,
         shipping_fee: order.shipping_fee || 0,
-        tax: order.tax_amount,
+        tax: order.tax_amount || 0,
         discount_amount: order.discount_amount || 0,
+        is_tax_inclusive: order.is_tax_inclusive ?? true,
+        tax_rate: order.tax_rate || 5,
         notes: order.notes || "",
         items:
           order.items?.map((item: OrderItem) => ({

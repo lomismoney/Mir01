@@ -28,6 +28,7 @@ import { RefundInfoForm } from "./refund-modal/components/RefundInfoForm";
 import { RefundSummary } from "./refund-modal/components/RefundSummary";
 import { RefundModalStates } from "./refund-modal/components/RefundModalStates";
 import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 
 /**
  * RefundModal Props 介面
@@ -179,7 +180,7 @@ export default function RefundModal({
               ) : (
                 <>
                   <DollarSign className="mr-2 h-4 w-4" />
-                  確認退款 ${Math.round(totalRefundAmount).toLocaleString()}
+                  確認退款 {MoneyHelper.format(totalRefundAmount, '$')}
                 </>
               )}
             </Button>

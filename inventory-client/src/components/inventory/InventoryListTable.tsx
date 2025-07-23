@@ -13,6 +13,7 @@ import { ProductItem } from "@/types/api-helpers";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowUpDown } from "lucide-react";
+import { MoneyHelper } from "@/lib/money-helper";
 
 // 扁平化的庫存項目類型
 interface FlatInventoryItem {
@@ -239,11 +240,11 @@ export function InventoryListTable({
                   {item.quantity.toLocaleString()}
                 </TableCell>
                 <TableCell className="text-right font-mono">
-                  {item.price > 0 ? `NT$ ${item.price.toLocaleString()}` : "—"}
+                  {item.price > 0 ? MoneyHelper.format(item.price) : "—"}
                 </TableCell>
                 <TableCell className="text-right font-mono">
                   {item.averageCost && item.averageCost > 0
-                    ? `NT$ ${item.averageCost.toLocaleString()}`
+                    ? MoneyHelper.format(item.averageCost)
                     : "—"}
                 </TableCell>
                 <TableCell className="text-right font-mono">

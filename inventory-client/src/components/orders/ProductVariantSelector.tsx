@@ -24,6 +24,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ProductItem, ProductVariant } from "@/types/api-helpers";
+import { MoneyHelper } from "@/lib/money-helper";
 
 interface ProductVariantSelectorProps {
   open: boolean;
@@ -262,7 +263,7 @@ export function ProductVariantSelector({
                         className="text-right font-medium"
                        
                       >
-                        ${Math.round(parseFloat(variant.price || "0")).toLocaleString()}
+                        {MoneyHelper.format(Math.round(parseFloat(variant.price || "0")))}
                       </TableCell>
                       <TableCell className="text-center">
                         {variant.total_inventory}

@@ -16,6 +16,7 @@ import { BindOrdersDialog } from "@/components/purchases/BindOrdersDialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { MoneyHelper } from "@/lib/money-helper";
 
 import {
   Card,
@@ -368,7 +369,7 @@ export default function PurchaseDetailPage() {
                   </div>
                 ) : (
                   <p className="font-medium">
-                    NT$ {Number(purchaseData.shipping_cost || 0).toLocaleString()}
+                    {MoneyHelper.format(Number(purchaseData.shipping_cost || 0))}
                   </p>
                 )}
               </div>
@@ -382,7 +383,7 @@ export default function PurchaseDetailPage() {
                   <span>總金額</span>
                 </div>
                 <p className="font-medium text-lg">
-                  NT$ {Number(purchaseData.total_amount || 0).toLocaleString()}
+                  {MoneyHelper.format(Number(purchaseData.total_amount || 0))}
                 </p>
               </div>
             </div>
@@ -552,7 +553,7 @@ export default function PurchaseDetailPage() {
                             進貨價
                           </p>
                           <p className="font-medium">
-                            NT$ {Number(costPrice).toLocaleString()}
+                            {MoneyHelper.format(Number(costPrice))}
                           </p>
                         </div>
                       </div>
@@ -571,7 +572,7 @@ export default function PurchaseDetailPage() {
                             商品小計：
                           </span>
                           <span className="font-medium ml-2">
-                            NT$ {Number(subtotal).toLocaleString()}
+                            {MoneyHelper.format(Number(subtotal))}
                           </span>
                         </div>
                         <div>
@@ -582,7 +583,7 @@ export default function PurchaseDetailPage() {
                             攤銷運費：
                           </span>
                           <span className="font-medium ml-2">
-                            NT$ {Number(allocatedShippingCost).toLocaleString()}
+                            {MoneyHelper.format(Number(allocatedShippingCost))}
                           </span>
                         </div>
                         <div>
@@ -593,7 +594,7 @@ export default function PurchaseDetailPage() {
                             總成本：
                           </span>
                           <span className="font-medium ml-2">
-                            NT$ {Number(totalCost).toLocaleString()}
+                            {MoneyHelper.format(Number(totalCost))}
                           </span>
                         </div>
                         <div>
@@ -607,11 +608,7 @@ export default function PurchaseDetailPage() {
                             className="font-medium ml-2 text-blue-600"
                            
                           >
-                            NT${" "}
-                            {Number(averageCostPerUnit).toLocaleString(undefined, {
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 2,
-                            })}
+                            {MoneyHelper.format(Number(averageCostPerUnit))}
                           </span>
                         </div>
                       </div>
@@ -627,26 +624,25 @@ export default function PurchaseDetailPage() {
                         className="text-sm text-muted-foreground"
                        
                       >
-                        商品總計: NT${" "}
-                        {Number(purchaseData.items
+                        商品總計: 
+                        {MoneyHelper.format(Number(purchaseData.items
                           ?.reduce(
                             (sum, item) =>
                               sum +
                               (item.quantity || 0) * (item.cost_price || 0),
                             0,
-                          ) || 0)
-                          .toLocaleString()}
+                          ) || 0))}
                       </div>
                       <div
                         className="text-sm text-muted-foreground"
                        
                       >
-                        運費: NT${" "}
-                        {Number(purchaseData.shipping_cost || 0).toLocaleString()}
+                        運費: 
+                        {MoneyHelper.format(Number(purchaseData.shipping_cost || 0))}
                       </div>
                       <div className="text-lg font-semibold">
-                        總金額: NT${" "}
-                        {Number(purchaseData.total_amount || 0).toLocaleString()}
+                        總金額: 
+                        {MoneyHelper.format(Number(purchaseData.total_amount || 0))}
                       </div>
                     </div>
                   </div>

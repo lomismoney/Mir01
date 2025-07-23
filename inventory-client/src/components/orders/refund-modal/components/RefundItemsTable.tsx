@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Package } from "lucide-react";
 import { RefundFormItem, RefundFormValues } from "../hooks/useRefundForm";
+import { MoneyHelper } from "@/lib/money-helper";
 
 interface RefundItemsTableProps {
   form: UseFormReturn<RefundFormValues>;
@@ -118,10 +119,10 @@ export function RefundItemsTable({
                       />
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      ${Math.round(field.price || 0).toLocaleString()}
+                      {MoneyHelper.format(field.price || 0, '$')}
                     </TableCell>
                     <TableCell className="text-right font-medium text-destructive">
-                      ${Math.round(subtotal).toLocaleString()}
+                      {MoneyHelper.format(subtotal, '$')}
                     </TableCell>
                   </TableRow>
                 );

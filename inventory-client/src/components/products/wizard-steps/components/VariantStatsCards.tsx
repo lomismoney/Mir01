@@ -12,6 +12,7 @@ import {
   CircleDollarSign,
   Wallet,
 } from "lucide-react";
+import { MoneyHelper } from "@/lib/money-helper";
 
 interface VariantStatsCardsProps {
   variantsCount: number;
@@ -142,11 +143,7 @@ export function VariantStatsCards({
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold tracking-tighter">
-            $
-            {totalValue.toLocaleString("zh-TW", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })}
+            {MoneyHelper.format(totalValue)}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
             預估庫存價值
