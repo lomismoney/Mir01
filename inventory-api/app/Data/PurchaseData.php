@@ -28,7 +28,7 @@ class PurchaseData extends Data
         #[Rule(['required', 'numeric', 'min:0'])]
         public int $shipping_cost,
 
-        #[Rule(['required', 'array'])]
+        #[Rule(['required', 'array', 'min:1'])]
         #[DataCollectionOf(PurchaseItemData::class)]
         public DataCollection $items,
 
@@ -60,14 +60,7 @@ class PurchaseData extends Data
     public static function rules(ValidationContext $context): array
     {
         return [
-            'items' => function ($attribute, $value, $fail) use ($context) {
-                $orderItems = $context->payload['order_items'] ?? [];
-                
-                // 如果 items 為空且 order_items 也為空，則驗證失敗
-                if (empty($value) && empty($orderItems)) {
-                    $fail('至少需要一個進貨項目或待進貨訂單項目。');
-                }
-            },
+            // 移除自定義驗證，因為 items 現在是必填的
         ];
     }
 }

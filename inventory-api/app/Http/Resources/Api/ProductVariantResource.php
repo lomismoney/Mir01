@@ -42,12 +42,12 @@ class ProductVariantResource extends JsonResource
         return [
             'id' => $this->id,
             'sku' => $this->sku,
-            'price' => $this->price,
-            'cost_price' => $this->cost_price,
-            'average_cost' => $this->average_cost,
+            'price' => $this->price, // accessor 自動處理分轉元
+            'cost_price' => $this->cost_price, // accessor 自動處理分轉元
+            'average_cost' => $this->average_cost, // accessor 自動處理分轉元
             'total_purchased_quantity' => $this->total_purchased_quantity,
             'profit_margin' => $this->profit_margin,
-            'profit_amount' => $this->profit_amount,
+            'profit_amount' => $this->profit_amount, // accessor 自動處理分轉元
             'product_id' => $this->product_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

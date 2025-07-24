@@ -33,9 +33,9 @@ class RefundFactory extends Factory
             
             /**
              * 退款總金額
-             * 產生介於 10.00 到 500.00 之間的隨機金額
+             * 產生介於 10.00 到 500.00 之間的隨機金額（以分為單位）
              */
-            'total_refund_amount' => $this->faker->randomFloat(2, 10, 500),
+            'total_refund_amount' => $this->faker->numberBetween(1000, 50000), // 10.00 to 500.00 in cents
             
             /**
              * 退款原因

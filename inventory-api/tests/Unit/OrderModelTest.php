@@ -158,13 +158,8 @@ class OrderModelTest extends TestCase
             'fulfillment_priority',
             'expected_delivery_date',
             'priority_reason',
-            // 新增的金額欄位（分為單位）
-            'subtotal_cents',
-            'shipping_fee_cents',
-            'tax_cents',
-            'discount_amount_cents',
-            'grand_total_cents',
-            'paid_amount_cents',
+            'is_tax_inclusive',
+            'tax_rate',
         ];
         
         $order = new Order();
@@ -258,11 +253,11 @@ class OrderModelTest extends TestCase
             'creator_user_id' => $user->id,
             'shipping_status' => 'pending',
             'payment_status' => 'unpaid',
-            'subtotal' => 10000,
-            'shipping_fee' => 100,
-            'tax' => 1000,
-            'discount_amount' => 500,
-            'grand_total' => 10600,
+            'subtotal' => 1000000,
+            'shipping_fee' => 10000,
+            'tax' => 100000,
+            'discount_amount' => 50000,
+            'grand_total' => 1060000,
             'paid_amount' => 0,
             'payment_method' => 'credit_card',
             'order_source' => 'online',
@@ -280,7 +275,7 @@ class OrderModelTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'order_number' => 'ORD-2025-001',
             'customer_id' => $customer->id,
-            'grand_total' => 10600,
+            'grand_total' => 1060000,
         ]);
         
         $this->assertEquals('pending', $order->shipping_status);
@@ -346,7 +341,7 @@ class OrderModelTest extends TestCase
         
         $this->assertEquals($shippedAt->toDateTimeString(), $order->shipped_at);
         $this->assertEquals($paidAt->toDateTimeString(), $order->paid_at);
-        $this->assertEquals($estimatedDelivery->toDateString(), $order->estimated_delivery_date);
+        $this->assertEquals($estimatedDelivery->toDateString(), $order->estimated_delivery_date->toDateString());
     }
     
     /**
@@ -355,16 +350,19 @@ class OrderModelTest extends TestCase
     public function test_order_amount_calculations()
     {
         $order = Order::factory()->create([
-            'subtotal' => 10000,
-            'shipping_fee' => 100,
-            'tax' => 1000,
-            'discount_amount' => 500,
-            'grand_total' => 10600, // 10000 + 100 + 1000 - 500
+            'subtotal' => 1000000,    // 10000元
+            'shipping_fee' => 10000,  // 100元
+            'tax' => 100000,          // 1000元
+            'discount_amount' => 50000, // 500元
+            'grand_total' => 1060000, // 10600元 = 10000 + 100 + 1000 - 500
         ]);
         
-        // 驗證總金額計算正確
-        $calculatedTotal = $order->subtotal + $order->shipping_fee + $order->tax - $order->discount_amount;
-        $this->assertEquals($order->grand_total, $calculatedTotal);
+        // 驗證總金額計算正確（使用原始數據庫值進行計算）
+        $calculatedTotal = $order->getRawOriginal('subtotal') + 
+                          $order->getRawOriginal('shipping_fee') + 
+                          $order->getRawOriginal('tax') - 
+                          $order->getRawOriginal('discount_amount');
+        $this->assertEquals($order->getRawOriginal('grand_total'), $calculatedTotal);
     }
     
     /**
@@ -373,65 +371,40 @@ class OrderModelTest extends TestCase
     public function test_partial_payment()
     {
         $order = Order::factory()->create([
-            'grand_total' => 10000,
-            'paid_amount' => 3000,
+            'grand_total' => 1000000, // 10000元
+            'paid_amount' => 300000,  // 3000元
             'payment_status' => 'partial',
         ]);
         
-        $this->assertEquals(3000, $order->paid_amount);
+        // 測試原始數據庫值（分）
+        $this->assertEquals(300000, $order->getRawOriginal('paid_amount'));
         $this->assertEquals('partial', $order->payment_status);
         
-        // 剩餘應付金額
-        $remainingAmount = $order->grand_total - $order->paid_amount;
-        $this->assertEquals(7000, $remainingAmount);
+        // 剩餘應付金額測試（使用 remaining_amount accessor）
+        $this->assertEquals(7000.00, $order->remaining_amount); // 7000元
     }
 
     /**
-     * 測試 HandlesCurrency trait 功能
+     * 測試金額處理功能
      */
-    public function test_currency_handling()
+    public function test_money_field_handling()
     {
         $order = Order::factory()->create([
-            'subtotal' => 999.99,
-            'shipping_fee' => 50.00,
-            'tax' => 100.00,
-            'discount_amount' => 50.00,
-            'grand_total' => 1099.99,
-            'paid_amount' => 500.00
+            'subtotal' => 99999,      // 999.99元
+            'shipping_fee' => 5000,   // 50元
+            'tax' => 10000,           // 100元
+            'discount_amount' => 5000, // 50元
+            'grand_total' => 109999,  // 1099.99元
+            'paid_amount' => 50000    // 500元
         ]);
         
-        // 驗證金額正確轉換為分並儲存
-        $this->assertEquals(99999, $order->subtotal_cents);
-        $this->assertEquals(5000, $order->shipping_fee_cents);
-        $this->assertEquals(10000, $order->tax_cents);
-        $this->assertEquals(5000, $order->discount_amount_cents);
-        $this->assertEquals(109999, $order->grand_total_cents);
-        $this->assertEquals(50000, $order->paid_amount_cents);
-        
-        // 驗證金額正確從分轉換為元顯示
-        $this->assertEquals(999.99, $order->subtotal);
-        $this->assertEquals(50.00, $order->shipping_fee);
-        $this->assertEquals(100.00, $order->tax);
-        $this->assertEquals(50.00, $order->discount_amount);
-        $this->assertEquals(1099.99, $order->grand_total);
-        $this->assertEquals(500.00, $order->paid_amount);
-    }
-
-    /**
-     * 測試 HandlesCurrency trait 的轉換方法
-     */
-    public function test_currency_conversion_methods()
-    {
-        // 測試 yuanToCents
-        $this->assertEquals(0, Order::yuanToCents(null));
-        $this->assertEquals(0, Order::yuanToCents(0));
-        $this->assertEquals(100, Order::yuanToCents(1));
-        $this->assertEquals(99999, Order::yuanToCents(999.99));
-        
-        // 測試 centsToYuan
-        $this->assertEquals(0.00, Order::centsToYuan(0));
-        $this->assertEquals(1.00, Order::centsToYuan(100));
-        $this->assertEquals(999.99, Order::centsToYuan(99999));
+        // 驗證原始數據庫值（分）- 遵循 CLAUDE.md 1.3 節規範
+        $this->assertEquals(99999, $order->getRawOriginal('subtotal'));
+        $this->assertEquals(5000, $order->getRawOriginal('shipping_fee'));
+        $this->assertEquals(10000, $order->getRawOriginal('tax'));
+        $this->assertEquals(5000, $order->getRawOriginal('discount_amount'));
+        $this->assertEquals(109999, $order->getRawOriginal('grand_total'));
+        $this->assertEquals(50000, $order->getRawOriginal('paid_amount'));
     }
 
     /**
@@ -440,32 +413,26 @@ class OrderModelTest extends TestCase
     public function test_update_order_amounts()
     {
         $order = Order::factory()->create([
-            'subtotal' => 100.00,
-            'grand_total' => 100.00
+            'subtotal' => 10000,    // 100元
+            'grand_total' => 10000  // 100元
         ]);
         
         // 更新金額
         $order->update([
-            'subtotal' => 200.00,
-            'shipping_fee' => 20.00,
-            'tax' => 22.00,
-            'discount_amount' => 10.00,
-            'grand_total' => 232.00
+            'subtotal' => 20000,      // 200元
+            'shipping_fee' => 2000,   // 20元
+            'tax' => 2200,            // 22元
+            'discount_amount' => 1000, // 10元
+            'grand_total' => 23200    // 232元
         ]);
         
-        // 驗證更新後的值
+        // 驗證更新後的原始數據庫值（分）- 遵循 CLAUDE.md 1.3 節規範
         $order->refresh();
-        $this->assertEquals(20000, $order->subtotal_cents);
-        $this->assertEquals(2000, $order->shipping_fee_cents);
-        $this->assertEquals(2200, $order->tax_cents);
-        $this->assertEquals(1000, $order->discount_amount_cents);
-        $this->assertEquals(23200, $order->grand_total_cents);
-        
-        $this->assertEquals(200.00, $order->subtotal);
-        $this->assertEquals(20.00, $order->shipping_fee);
-        $this->assertEquals(22.00, $order->tax);
-        $this->assertEquals(10.00, $order->discount_amount);
-        $this->assertEquals(232.00, $order->grand_total);
+        $this->assertEquals(20000, $order->getRawOriginal('subtotal'));
+        $this->assertEquals(2000, $order->getRawOriginal('shipping_fee'));
+        $this->assertEquals(2200, $order->getRawOriginal('tax'));
+        $this->assertEquals(1000, $order->getRawOriginal('discount_amount'));
+        $this->assertEquals(23200, $order->getRawOriginal('grand_total'));
     }
 
     /**
@@ -499,27 +466,21 @@ class OrderModelTest extends TestCase
      */
     public function test_order_has_correct_casts()
     {
-        $order = Order::factory()->create();
+        $order = new Order();
+        $expectedCasts = [
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'shipped_at' => 'datetime',
+            'paid_at' => 'datetime',
+            'estimated_delivery_date' => 'date',
+            'expected_delivery_date' => 'date',
+            'is_tax_inclusive' => 'boolean',
+            'tax_rate' => 'decimal:2',
+        ];
         
-        // 測試日期欄位的類型
-        if ($order->shipped_at) {
-            $this->assertInstanceOf(\Carbon\Carbon::class, $order->shipped_at);
+        foreach ($expectedCasts as $key => $expectedType) {
+            $this->assertArrayHasKey($key, $order->getCasts());
+            $this->assertEquals($expectedType, $order->getCasts()[$key]);
         }
-        
-        if ($order->paid_at) {
-            $this->assertInstanceOf(\Carbon\Carbon::class, $order->paid_at);
-        }
-        
-        if ($order->estimated_delivery_date) {
-            $this->assertInstanceOf(\Carbon\Carbon::class, $order->estimated_delivery_date);
-        }
-        
-        // 測試金額欄位（整數類型）
-        $this->assertIsInt($order->subtotal_cents);
-        $this->assertIsInt($order->shipping_fee_cents);
-        $this->assertIsInt($order->tax_cents);
-        $this->assertIsInt($order->discount_amount_cents);
-        $this->assertIsInt($order->grand_total_cents);
-        $this->assertIsInt($order->paid_amount_cents);
     }
 }

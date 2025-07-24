@@ -32,7 +32,7 @@ class InventoryTransactionModelTest extends TestCase
         $product = Product::factory()->create();
         $variant = $product->variants()->create([
             'sku' => 'TEST-SKU-001',
-            'price' => 100.00
+            'price' => 10000
         ]);
         
         $this->inventory = Inventory::create([

@@ -4,7 +4,7 @@
  * 提供完整的用戶 CRUD 操作功能
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { QUERY_KEYS } from '../shared/queryKeys';
@@ -109,7 +109,7 @@ export function useUsers(filters?: UserQueryParams) {
     },
     
     // 🚀 體驗優化配置（第二階段淨化行動）
-    placeholderData: (previousData) => previousData, // 分頁時保持舊資料，避免載入閃爍
+    placeholderData: keepPreviousData, // 分頁時保持舊資料，避免載入閃爍
     refetchOnMount: false,       // 依賴全域 staleTime
     refetchOnWindowFocus: false, // 後台管理系統不需要窗口聚焦刷新
   });

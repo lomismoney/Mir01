@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\MoneyHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -65,6 +64,7 @@ class Refund extends Model
         'should_restock' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'total_refund_amount' => 'integer',
     ];
 
     /**
@@ -159,24 +159,13 @@ class Refund extends Model
     // ===== 金額 Accessor/Mutator (分/元轉換) =====
     
     /**
-     * Total Refund Amount Accessor - 將分轉換為元
+     * 存取器：取得以分為單位的退款金額
      * 
-     * @return float
+     * @return int
      */
-    public function getTotalRefundAmountAttribute(): float
+    public function getTotalRefundAmountCentsAttribute(): int
     {
-        return MoneyHelper::centsToYuan($this->attributes['total_refund_amount'] ?? 0);
-    }
-    
-    /**
-     * Total Refund Amount Mutator - 將元轉換為分
-     * 
-     * @param float|null $value
-     * @return void
-     */
-    public function setTotalRefundAmountAttribute($value): void
-    {
-        $this->attributes['total_refund_amount'] = MoneyHelper::yuanToCents($value);
+        return $this->total_refund_amount;
     }
 
     /**
@@ -186,7 +175,31 @@ class Refund extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return MoneyHelper::formatWithDecimals($this->attributes['total_refund_amount'] ?? 0);
+        // 將分轉換為元顯示
+        $amountInYuan = $this->total_refund_amount / 100;
+        return '$' . number_format($amountInYuan, 2);
+    }
+
+    /**
+     * 靜態方法：元轉分
+     * 
+     * @param float|null $yuan
+     * @return int
+     */
+    public static function yuanToCents(?float $yuan): int
+    {
+        return $yuan !== null ? (int) round($yuan * 100) : 0;
+    }
+
+    /**
+     * 靜態方法：分轉元
+     * 
+     * @param int $cents
+     * @return float
+     */
+    public static function centsToYuan(int $cents): float
+    {
+        return round($cents / 100, 2);
     }
 
     /**

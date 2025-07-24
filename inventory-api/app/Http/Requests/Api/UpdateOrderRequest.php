@@ -76,6 +76,56 @@ class UpdateOrderRequest extends FormRequest
             'items.*.status.in' => '訂單項目狀態必須是：pending、confirmed、processing、completed 或 cancelled',
         ];
     }
+
+    /**
+     * 準備驗證資料
+     * 
+     * 將金額欄位從元轉換為分
+     */
+    protected function prepareForValidation(): void
+    {
+        $data = [];
+
+        // 轉換主要金額欄位（元轉分）
+        if ($this->has('shipping_fee') && $this->input('shipping_fee') !== null && is_numeric($this->input('shipping_fee'))) {
+            $data['shipping_fee'] = round($this->input('shipping_fee') * 100);
+        }
+
+        if ($this->has('tax') && $this->input('tax') !== null && is_numeric($this->input('tax'))) {
+            $data['tax'] = round($this->input('tax') * 100);
+        }
+
+        if ($this->has('discount_amount') && $this->input('discount_amount') !== null && is_numeric($this->input('discount_amount'))) {
+            $data['discount_amount'] = round($this->input('discount_amount') * 100);
+        }
+
+        if ($this->has('subtotal') && $this->input('subtotal') !== null && is_numeric($this->input('subtotal'))) {
+            $data['subtotal'] = round($this->input('subtotal') * 100);
+        }
+
+        if ($this->has('grand_total') && $this->input('grand_total') !== null && is_numeric($this->input('grand_total'))) {
+            $data['grand_total'] = round($this->input('grand_total') * 100);
+        }
+
+        // 轉換訂單項目中的金額欄位
+        if ($this->has('items') && is_array($this->input('items'))) {
+            $items = $this->input('items');
+            foreach ($items as $index => $item) {
+                if (isset($item['price']) && $item['price'] !== null && is_numeric($item['price'])) {
+                    $items[$index]['price'] = round($item['price'] * 100);
+                }
+                if (isset($item['cost']) && $item['cost'] !== null && is_numeric($item['cost'])) {
+                    $items[$index]['cost'] = round($item['cost'] * 100);
+                }
+                if (isset($item['discount_amount']) && $item['discount_amount'] !== null && is_numeric($item['discount_amount'])) {
+                    $items[$index]['discount_amount'] = round($item['discount_amount'] * 100);
+                }
+            }
+            $data['items'] = $items;
+        }
+
+        $this->merge($data);
+    }
     
     /**
      * 取得請求體參數的文檔

@@ -15,13 +15,21 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 禁用外鍵檢查以避免 truncate 問題
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF');
+        }
         
         // 為了避免重複執行 seeder 時出錯，先清空資料表是個好習慣
         User::truncate();
         
         // 重新啟用外鍵檢查
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON');
+        }
 
         // 建立測試用戶並分配角色
         $users = [
@@ -29,7 +37,7 @@ class UserSeeder extends Seeder
                 'name' => 'Super Admin',
                 'username' => 'superadmin',
                 'password' => Hash::make('password'),
-                'role' => 'super-admin'
+                'role' => 'admin'
             ],
             [
                 'name' => 'Admin User',
@@ -41,7 +49,7 @@ class UserSeeder extends Seeder
                 'name' => 'Manager User',
                 'username' => 'manager',
                 'password' => Hash::make('password'),
-                'role' => 'manager'
+                'role' => 'staff'
             ],
             [
                 'name' => 'Staff User',

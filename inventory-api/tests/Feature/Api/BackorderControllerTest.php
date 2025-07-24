@@ -38,7 +38,7 @@ class BackorderControllerTest extends TestCase
         $this->product = Product::factory()->create();
         $this->variant = ProductVariant::factory()
             ->for($this->product)
-            ->create(['cost_price' => 100.00]); // 100.00 in yuan
+            ->create(['cost_price' => 10000]); // 100.00 * 100 = 10000 分
         
         $this->customer = Customer::factory()->create();
     }
@@ -98,7 +98,7 @@ class BackorderControllerTest extends TestCase
             ->for($this->variant, 'productVariant')
             ->create(['is_backorder' => true, 'quantity' => 2]);
 
-        $response = $this->getJson('/api/backorders?group_by_variant=true');
+        $response = $this->getJson('/api/backorders?group_by_variant=1&include_transfers=0');
 
         $response->assertOk()
             ->assertJsonStructure([
@@ -261,7 +261,9 @@ class BackorderControllerTest extends TestCase
     public function test_summary_requires_create_purchase_permission()
     {
         $user = User::factory()->create();
-        $user->assignRole('user'); // 沒有創建權限的角色
+        // 創建角色並指派給用戶
+        $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'user']);
+        $user->assignRole($role);
         Sanctum::actingAs($user);
 
         $response = $this->getJson('/api/backorders/summary');
@@ -290,7 +292,7 @@ class BackorderControllerTest extends TestCase
             'store_id' => $this->store->id
         ];
 
-        $response = $this->postJson('/api/backorders/convert-to-purchase', $data);
+        $response = $this->postJson('/api/backorders/convert', $data);
 
         $response->assertCreated()
             ->assertJsonStructure([
@@ -311,9 +313,9 @@ class BackorderControllerTest extends TestCase
     {
         Sanctum::actingAs($this->admin);
 
-        $response = $this->postJson('/api/backorders/convert-to-purchase', []);
+        $response = $this->postJson('/api/backorders/convert', []);
 
-        $response->assertUnprocessableEntity()
+        $response->assertStatus(422)
             ->assertJsonValidationErrors(['item_ids']);
     }
 
@@ -325,9 +327,9 @@ class BackorderControllerTest extends TestCase
             'item_ids' => [999999] // 不存在的 ID
         ];
 
-        $response = $this->postJson('/api/backorders/convert-to-purchase', $data);
+        $response = $this->postJson('/api/backorders/convert', $data);
 
-        $response->assertUnprocessableEntity()
+        $response->assertStatus(422)
             ->assertJsonValidationErrors(['item_ids.0']);
     }
 
@@ -339,9 +341,9 @@ class BackorderControllerTest extends TestCase
             'item_ids' => []
         ];
 
-        $response = $this->postJson('/api/backorders/convert-to-purchase', $data);
+        $response = $this->postJson('/api/backorders/convert', $data);
 
-        $response->assertUnprocessableEntity()
+        $response->assertStatus(422)
             ->assertJsonValidationErrors(['item_ids']);
     }
 
@@ -361,9 +363,9 @@ class BackorderControllerTest extends TestCase
             'store_id' => 999999 // 不存在的門市 ID
         ];
 
-        $response = $this->postJson('/api/backorders/convert-to-purchase', $data);
+        $response = $this->postJson('/api/backorders/convert', $data);
 
-        $response->assertUnprocessableEntity()
+        $response->assertStatus(422)
             ->assertJsonValidationErrors(['store_id']);
     }
 
@@ -388,9 +390,9 @@ class BackorderControllerTest extends TestCase
             'item_ids' => [$backorderItem->id]
         ];
 
-        $response = $this->postJson('/api/backorders/convert-to-purchase', $data);
+        $response = $this->postJson('/api/backorders/convert', $data);
 
-        $response->assertUnprocessableEntity()
+        $response->assertStatus(422)
             ->assertJson([
                 'message' => '轉換失敗',
                 'error' => '測試異常'
@@ -400,7 +402,9 @@ class BackorderControllerTest extends TestCase
     public function test_convert_to_purchase_requires_create_purchase_permission()
     {
         $user = User::factory()->create();
-        $user->assignRole('viewer'); // 沒有創建權限的角色
+        // 創建角色並指派給用戶
+        $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'viewer']);
+        $user->assignRole($role);
         Sanctum::actingAs($user);
         
         $order = Order::factory()->for($this->customer)->for($this->store)->create();
@@ -414,7 +418,7 @@ class BackorderControllerTest extends TestCase
             'item_ids' => [$backorderItem->id]
         ];
 
-        $response = $this->postJson('/api/backorders/convert-to-purchase', $data);
+        $response = $this->postJson('/api/backorders/convert', $data);
 
         // 根據 Policy 可能回傳 403
         $this->assertTrue(in_array($response->status(), [201, 403]));
@@ -436,7 +440,7 @@ class BackorderControllerTest extends TestCase
             // 不提供 store_id
         ];
 
-        $response = $this->postJson('/api/backorders/convert-to-purchase', $data);
+        $response = $this->postJson('/api/backorders/convert', $data);
 
         $response->assertCreated();
     }
@@ -447,7 +451,7 @@ class BackorderControllerTest extends TestCase
             ['GET', '/api/backorders'],
             ['GET', '/api/backorders/stats'],
             ['GET', '/api/backorders/summary'],
-            ['POST', '/api/backorders/convert-to-purchase']
+            ['POST', '/api/backorders/convert']
         ];
 
         foreach ($endpoints as [$method, $url]) {
@@ -462,7 +466,7 @@ class BackorderControllerTest extends TestCase
 
         $response = $this->getJson('/api/backorders?date_from=invalid-date');
 
-        $response->assertUnprocessableEntity();
+        $response->assertStatus(422);
     }
 
     public function test_index_validation_handles_invalid_product_variant_id()
@@ -471,7 +475,7 @@ class BackorderControllerTest extends TestCase
 
         $response = $this->getJson('/api/backorders?product_variant_id=999999');
 
-        $response->assertUnprocessableEntity();
+        $response->assertStatus(422);
     }
 
     public function test_summary_validation_handles_invalid_store_id()
@@ -480,6 +484,6 @@ class BackorderControllerTest extends TestCase
 
         $response = $this->getJson('/api/backorders/summary?store_id=999999');
 
-        $response->assertUnprocessableEntity();
+        $response->assertStatus(422);
     }
 }

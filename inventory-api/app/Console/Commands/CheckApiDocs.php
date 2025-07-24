@@ -144,6 +144,9 @@ class CheckApiDocs extends Command
         } catch (\ReflectionException $e) {
             $issues[] = "無法檢查方法：{$e->getMessage()}";
             $this->error("  ❌ 無法檢查方法：{$e->getMessage()}");
+        } catch (\Exception $e) {
+            $issues[] = "檢查過程發生錯誤：{$e->getMessage()}";
+            $this->error("  ❌ 檢查過程發生錯誤：{$e->getMessage()}");
         }
 
         return ['issues' => $issues, 'warnings' => $warnings];

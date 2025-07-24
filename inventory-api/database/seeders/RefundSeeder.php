@@ -155,7 +155,7 @@ class RefundSeeder extends Seeder
                 $items[] = [
                     'order_item_id' => $orderItem->id,
                     'quantity' => $availableQuantity,
-                    'refund_amount' => $orderItem->price * $availableQuantity, // 元為單位
+                    'refund_subtotal' => $orderItem->price * $availableQuantity, // 元為單位，RefundItem 模型會透過 MoneyCast 處理
                 ];
             }
         }
@@ -204,7 +204,7 @@ class RefundSeeder extends Seeder
             $items[] = [
                 'order_item_id' => $item['order_item']->id,
                 'quantity' => $refundQuantity,
-                'refund_amount' => $item['order_item']->price * $refundQuantity,
+                'refund_subtotal' => $item['order_item']->price * $refundQuantity,
             ];
         }
         
@@ -232,7 +232,7 @@ class RefundSeeder extends Seeder
                 $items[] = [
                     'order_item_id' => $orderItem->id,
                     'quantity' => min(1, $availableQuantity),
-                    'refund_amount' => $orderItem->price * min(1, $availableQuantity),
+                    'refund_subtotal' => $orderItem->price * min(1, $availableQuantity), // 元為單位，RefundItem 模型會透過 MoneyCast 處理
                 ];
                 break; // 只退一個項目
             }
@@ -267,7 +267,7 @@ class RefundSeeder extends Seeder
                 $items[] = [
                     'order_item_id' => $orderItem->id,
                     'quantity' => $refundQuantity,
-                    'refund_amount' => $orderItem->price * $refundQuantity,
+                    'refund_subtotal' => $orderItem->price * $refundQuantity, // 元為單位，RefundItem 模型會透過 MoneyCast 處理
                 ];
                 $count++;
             }
@@ -298,7 +298,7 @@ class RefundSeeder extends Seeder
                 $items[] = [
                     'order_item_id' => $orderItem->id,
                     'quantity' => $availableQuantity,
-                    'refund_amount' => $orderItem->price * $availableQuantity,
+                    'refund_subtotal' => $orderItem->price * $availableQuantity,
                 ];
                 break; // 只處理一個錯誤項目
             }

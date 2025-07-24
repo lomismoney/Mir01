@@ -35,7 +35,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ProductItem } from "@/types/api-helpers";
-import { cn, formatPrice as formatPriceUtil } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import { addImageCacheBuster } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -129,7 +130,7 @@ const formatPrice = (price?: number | string) => {
     );
   }
 
-  return formatPriceUtil(numericPrice);
+  return MoneyHelper.format(numericPrice, 'NT$');
 };
 
 /**
@@ -155,7 +156,7 @@ const formatPriceRange = (priceRange?: {
   if (priceRange.min === priceRange.max) {
     return (
       <span className="font-medium">
-        {formatPriceUtil(priceRange.min)}
+        {MoneyHelper.format(priceRange.min, 'NT$')}
       </span>
     );
   }
@@ -163,7 +164,7 @@ const formatPriceRange = (priceRange?: {
   // 顯示最低價格（不加"從"字）
   return (
     <span className="font-medium">
-      {formatPriceUtil(priceRange.min)}
+      {MoneyHelper.format(priceRange.min, 'NT$')}
     </span>
   );
 };
@@ -444,7 +445,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
         // SKU 變體行顯示具體價格
         return (
           <div className="text-sm">
-            {formatPrice(item.variantInfo.price)}
+            {item.variantInfo.price ? MoneyHelper.format(parseFloat(item.variantInfo.price) || 0, 'NT$') : <span className="text-muted-foreground">N/A</span>}
           </div>
         );
       }

@@ -29,7 +29,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Image from "next/image";
-import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import {
   Table,
   TableHeader,
@@ -303,11 +303,11 @@ export default function ProductDetailPage({
                 >
                   {priceRange && priceRange.min !== undefined ? (
                     priceRange.min === priceRange.max ? (
-                      formatPrice(priceRange.min)
+MoneyHelper.format(priceRange.min, 'NT$')
                     ) : (
                       <>
-                        {formatPrice(priceRange.min)} -{" "}
-                        {formatPrice(priceRange.max)}
+                        {MoneyHelper.format(priceRange.min, 'NT$')} -{" "}
+                        {MoneyHelper.format(priceRange.max, 'NT$')}
                       </>
                     )
                   ) : (
@@ -483,7 +483,7 @@ export default function ProductDetailPage({
                               )}
                             </TableCell>
                             <TableCell>
-                              {formatPrice(variant.price)}
+                              {variant.price !== undefined ? MoneyHelper.format(variant.price, 'NT$') : 'N/A'}
                             </TableCell>
                             <TableCell>
                               <div

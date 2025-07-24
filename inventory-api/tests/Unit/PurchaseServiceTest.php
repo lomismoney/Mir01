@@ -83,14 +83,14 @@ class PurchaseServiceTest extends TestCase
         $purchaseData = PurchaseData::from([
             'store_id' => $this->store->id,
             'order_number' => null, // 系統會自動生成
-            'shipping_cost' => 5000, // 50.00 元 = 5000 分
+            'shipping_cost' => 50.00, // 50.00 元（MoneyCast 會轉換為 5000 分）
             'status' => 'pending',
             'purchased_at' => now(),
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'quantity' => 10,
-                    'cost_price' => 8000, // 80.00 元 = 8000 分
+                    'cost_price' => 80.00, // 80.00 元（MoneyCast 會轉換為 8000 分）
                 ]
             ]
         ]);
@@ -102,14 +102,14 @@ class PurchaseServiceTest extends TestCase
         $this->assertStringStartsWith('PO-', $purchase->order_number);
         $this->assertEquals($this->store->id, $purchase->store_id);
         $this->assertEquals('pending', $purchase->status);
-        $this->assertEquals(5000, $purchase->shipping_cost); // 值仍為分
+        $this->assertEquals(5000, $purchase->shipping_cost); // 5000分 = 50元
         $this->assertCount(1, $purchase->items);
 
         // 驗證進貨項目
         $purchaseItem = $purchase->items->first();
         $this->assertEquals($this->productVariant->id, $purchaseItem->product_variant_id);
         $this->assertEquals(10, $purchaseItem->quantity);
-        $this->assertEquals(8000, $purchaseItem->cost_price); // 值仍為分
+        $this->assertEquals(8000, $purchaseItem->cost_price); // 8000分 = 80元
     }
 
     /**
@@ -147,10 +147,21 @@ class PurchaseServiceTest extends TestCase
             'purchase_id' => $purchase->id,
             'product_variant_id' => $this->productVariant->id,
             'quantity' => 20,
-            'cost_price' => 7500
+            'cost_price' => 7500 // 資料庫中存儲的值（分）
         ]);
 
-        // 不需要 Mock 庫存服務，因為 PurchaseService 直接使用 Inventory 模型
+        // Mock 庫存服務 - 當進貨單完成時會調用 returnStock
+        $this->mockInventoryService
+            ->shouldReceive('returnStock')
+            ->once()
+            ->with(
+                $this->productVariant->id,
+                20, // 數量
+                $this->store->id,
+                Mockery::type('string'), // 描述
+                Mockery::type('array') // 元數據
+            )
+            ->andReturn(true);
 
         // Mock 預訂分配服務 (可能不會在這個測試場景中被調用)
         $this->mockBackorderAllocationService
@@ -183,7 +194,7 @@ class PurchaseServiceTest extends TestCase
             'purchase_id' => $purchase->id,
             'product_variant_id' => $this->productVariant->id,
             'quantity' => 100,
-            'cost_price' => 7000
+            'cost_price' => 7000 // 資料庫中存儲的值（分）
         ]);
 
         // 更新部分收貨狀態
@@ -215,14 +226,14 @@ class PurchaseServiceTest extends TestCase
         $purchaseData = PurchaseData::from([
             'store_id' => $this->store->id,
             'order_number' => null,
-            'shipping_cost' => 10000, // 100.00 元 = 10000 分
+            'shipping_cost' => 100.00, // 100.00 元（MoneyCast 會轉換為 10000 分）
             'status' => 'pending',
             'purchased_at' => now(),
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'quantity' => 50,
-                    'cost_price' => 6050, // 60.50 元 = 6050 分
+                    'cost_price' => 60.50, // 60.50 元（MoneyCast 會轉換為 6050 分）
                 ]
             ]
         ]);
@@ -235,7 +246,7 @@ class PurchaseServiceTest extends TestCase
         $expectedItemTotal = 6050 * 50; // 302500 分
         $expectedTotalCost = $expectedItemTotal + 10000; // 312500 分
         
-        $this->assertEquals(6050, $purchaseItem->cost_price); // 值為分
+        $this->assertEquals(6050, $purchaseItem->cost_price); // 6050分 = 60.50元
         $this->assertEquals(50, $purchaseItem->quantity);
         $this->assertEquals($expectedTotalCost, $purchase->total_amount);
     }
@@ -255,7 +266,7 @@ class PurchaseServiceTest extends TestCase
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'quantity' => 10,
-                    'cost_price' => 5000, // 50.00 元 = 5000 分
+                    'cost_price' => 50.00, // 50.00 元（MoneyCast 會轉換為 5000 分）
                 ]
             ]
         ]);
@@ -296,7 +307,7 @@ class PurchaseServiceTest extends TestCase
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'quantity' => 1,
-                    'cost_price' => 1000,
+                    'cost_price' => 10.00, // 10.00 元（MoneyCast 會轉換為 1000 分）
                 ]
             ]
         ]);

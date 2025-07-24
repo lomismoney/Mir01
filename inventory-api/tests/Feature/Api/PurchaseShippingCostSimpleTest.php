@@ -95,7 +95,6 @@ class PurchaseShippingCostSimpleTest extends TestCase
         
         // 檢查實際的 API 響應
         $responseData = $response->json();
-        dump("API 響應內容:", $responseData);
         
         // 驗證回應結構
         $response->assertJsonStructure([
@@ -115,11 +114,9 @@ class PurchaseShippingCostSimpleTest extends TestCase
 
         // 重新載入資料並驗證
         $this->purchase->refresh();
-        dump("資料庫中的 shipping_cost:", $this->purchase->shipping_cost);
-        dump("資料庫中的 total_amount:", $this->purchase->total_amount);
         
-        $this->assertEquals(100000, $this->purchase->shipping_cost); // 1000元 = 100000分
-        $this->assertEquals(400000, $this->purchase->total_amount); // 3000元商品 + 1000元運費 = 400000分
+        $this->assertEquals(1000, $this->purchase->shipping_cost); // 1000元（MoneyCast 已轉換為元）
+        $this->assertEquals(4000, $this->purchase->total_amount); // 3000元商品 + 1000元運費（MoneyCast 已轉換為元）
         
         // 驗證運費重新分配
         $item1->refresh();
@@ -131,7 +128,7 @@ class PurchaseShippingCostSimpleTest extends TestCase
         
         // 驗證總運費分配正確
         $this->assertEquals(
-            $this->purchase->shipping_cost,
+            100000, // 1000元 = 100000分（資料庫值）
             $item1->allocated_shipping_cost + $item2->allocated_shipping_cost
         );
     }
@@ -181,7 +178,7 @@ class PurchaseShippingCostSimpleTest extends TestCase
         $item2->refresh();
         
         $this->assertEquals(0, $this->purchase->shipping_cost);
-        $this->assertEquals(300000, $this->purchase->total_amount); // 只有商品成本 3000元 = 300000分
+        $this->assertEquals(3000, $this->purchase->total_amount); // 只有商品成本 3000元（MoneyCast 已轉換為元）
         $this->assertEquals(0, $item1->allocated_shipping_cost);
         $this->assertEquals(0, $item2->allocated_shipping_cost);
     }
@@ -274,8 +271,8 @@ class PurchaseShippingCostSimpleTest extends TestCase
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 500,
-            'total_amount' => 3500,
+            'shipping_cost' => 50000, // 500元 = 50000分
+            'total_amount' => 350000, // 3500元 = 350000分
             'status' => 'completed',
         ]);
 
@@ -298,7 +295,7 @@ class PurchaseShippingCostSimpleTest extends TestCase
         
         // 驗證運費已更新
         $this->purchase->refresh();
-        $this->assertEquals(80000, $this->purchase->shipping_cost); // 800元 = 80000分
+        $this->assertEquals(800, $this->purchase->shipping_cost); // 800元（MoneyCast 已轉換為元）
     }
 
     /**

@@ -48,7 +48,7 @@ class NewBusinessLogicTest extends TestCase
         $this->productVariant = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'sku' => 'TEST-SKU-001',
-            'price' => 100.00
+            'price' => 10000
         ]);
     }
 
@@ -65,12 +65,13 @@ class NewBusinessLogicTest extends TestCase
             'payment_method' => 'transfer',
             'order_source' => 'manual',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => true,
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 100.00,
+                    'price' => 10000,
                     'quantity' => 2,
                     'is_stocked_sale' => false,  // 非現貨
                     'is_backorder' => true,      // 預訂商品
@@ -114,12 +115,13 @@ class NewBusinessLogicTest extends TestCase
             'payment_method' => 'transfer',
             'order_source' => 'manual',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => true,
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 100.00,
+                    'price' => 10000,
                     'quantity' => 2,
                     'is_stocked_sale' => true,   // 現貨
                     'is_backorder' => false,     // 非預訂商品
@@ -162,12 +164,13 @@ class NewBusinessLogicTest extends TestCase
             'payment_method' => 'transfer',
             'order_source' => 'manual',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => true,
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 100.00,
+                    'price' => 10000,
                     'quantity' => 2, // 需要2件但只有1件庫存
                     'is_stocked_sale' => true,   // 現貨
                     'is_backorder' => false,     // 非預訂商品
@@ -177,7 +180,7 @@ class NewBusinessLogicTest extends TestCase
 
         // 驗證會拋出庫存不足異常
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('現貨商品庫存不足');
+        $this->expectExceptionMessage('庫存不足');
         
         $this->orderService->createOrder($orderData);
     }
@@ -195,12 +198,13 @@ class NewBusinessLogicTest extends TestCase
             'payment_method' => 'transfer',
             'order_source' => 'manual',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => true,
             'items' => [
                 [
                     'product_variant_id' => null, // 訂製商品沒有 variant
                     'product_name' => '訂製櫃子',
                     'sku' => 'CUSTOM-001',
-                    'price' => 5000.00,
+                    'price' => 500000,
                     'quantity' => 1,
                     'custom_product_name' => '客戶訂製櫃子',
                     'custom_specifications' => ['材質' => '實木', '顏色' => '胡桃木色'],
@@ -239,7 +243,7 @@ class NewBusinessLogicTest extends TestCase
             'product_variant_id' => $this->productVariant->id,
             'product_name' => '測試商品',
             'sku' => 'TEST-SKU-001',
-            'price' => 100.00,
+            'price' => 10000,
             'quantity' => 2,
             'is_stocked_sale' => false,  // 非現貨
             'is_backorder' => true,      // 預訂商品
@@ -277,12 +281,13 @@ class NewBusinessLogicTest extends TestCase
             'payment_method' => '現金',
             'order_source' => '現場客戶',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => true,
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 100.00,
+                    'price' => 10000,
                     'quantity' => 2,
                     'is_stocked_sale' => true,   // 現貨
                     'is_backorder' => false,     // 非預訂商品

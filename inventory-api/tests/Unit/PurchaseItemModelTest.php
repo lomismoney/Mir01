@@ -83,7 +83,7 @@ class PurchaseItemModelTest extends TestCase
     }
     
     /**
-     * 測試單價的取值器（分轉元）
+     * 測試單價儲存（分為單位）
      */
     public function test_unit_price_accessor()
     {
@@ -95,12 +95,12 @@ class PurchaseItemModelTest extends TestCase
         // 重新載入以確保從資料庫讀取
         $purchaseItem->refresh();
         
-        // 應該回傳 100 元（四捨五入）
-        $this->assertEquals(100, $purchaseItem->unit_price);
+        // 現在應該回傳 9999 分（不轉換）
+        $this->assertEquals(9999, $purchaseItem->unit_price);
     }
     
     /**
-     * 測試成本價的取值器（分轉元）
+     * 測試成本價儲存（分為單位）
      */
     public function test_cost_price_accessor()
     {
@@ -112,12 +112,12 @@ class PurchaseItemModelTest extends TestCase
         // 重新載入以確保從資料庫讀取
         $purchaseItem->refresh();
         
-        // 應該回傳 89 元（四捨五入）
-        $this->assertEquals(89, $purchaseItem->cost_price);
+        // 現在應該回傳 8888 分（不轉換）
+        $this->assertEquals(8888, $purchaseItem->cost_price);
     }
     
     /**
-     * 測試攤銷運費的取值器（分轉元）
+     * 測試攤銷運費儲存（分為單位）
      */
     public function test_allocated_shipping_cost_accessor()
     {
@@ -129,8 +129,8 @@ class PurchaseItemModelTest extends TestCase
         // 重新載入以確保從資料庫讀取
         $purchaseItem->refresh();
         
-        // 應該回傳 16 元（四捨五入）
-        $this->assertEquals(16, $purchaseItem->allocated_shipping_cost);
+        // 現在應該回傳 1550 分（不轉換）
+        $this->assertEquals(1550, $purchaseItem->allocated_shipping_cost);
         
         // 測試為零的情況
         $purchaseItem->setRawAttributes(['allocated_shipping_cost' => 0]);
@@ -145,12 +145,12 @@ class PurchaseItemModelTest extends TestCase
         // 設定原始資料庫值（以分為單位）
         $purchaseItem = PurchaseItem::factory()->create([
             'quantity' => 10,
-            'cost_price' => 5000,  // 50元
-            'allocated_shipping_cost' => 2000  // 20元
+            'cost_price' => 5000,  // 5000分
+            'allocated_shipping_cost' => 2000  // 2000分
         ]);
         
-        // 總成本 = (5000 * 10 + 2000) / 100 = 520元
-        $this->assertEquals(520, $purchaseItem->total_cost_price);
+        // 總成本 = (5000 * 10 + 2000) = 52000分
+        $this->assertEquals(52000, $purchaseItem->total_cost_price);
     }
     
     /**
@@ -161,29 +161,29 @@ class PurchaseItemModelTest extends TestCase
         // 場景1：沒有運費攤銷
         $item1 = PurchaseItem::factory()->create([
             'quantity' => 5,
-            'cost_price' => 10000,  // 100元
+            'cost_price' => 10000,  // 10000分
             'allocated_shipping_cost' => 0
         ]);
-        // 總成本 = (10000 * 5 + 0) / 100 = 500元
-        $this->assertEquals(500, $item1->total_cost_price);
+        // 總成本 = (10000 * 5 + 0) = 50000分
+        $this->assertEquals(50000, $item1->total_cost_price);
         
         // 場景2：大量商品與運費
         $item2 = PurchaseItem::factory()->create([
             'quantity' => 100,
-            'cost_price' => 2000,  // 20元
-            'allocated_shipping_cost' => 50000  // 500元
+            'cost_price' => 2000,  // 2000分
+            'allocated_shipping_cost' => 50000  // 50000分
         ]);
-        // 總成本 = (2000 * 100 + 50000) / 100 = 2500元
-        $this->assertEquals(2500, $item2->total_cost_price);
+        // 總成本 = (2000 * 100 + 50000) = 250000分
+        $this->assertEquals(250000, $item2->total_cost_price);
         
         // 場景3：單一商品
         $item3 = PurchaseItem::factory()->create([
             'quantity' => 1,
-            'cost_price' => 15000,  // 150元
-            'allocated_shipping_cost' => 1000  // 10元
+            'cost_price' => 15000,  // 15000分
+            'allocated_shipping_cost' => 1000  // 1000分
         ]);
-        // 總成本 = (15000 * 1 + 1000) / 100 = 160元
-        $this->assertEquals(160, $item3->total_cost_price);
+        // 總成本 = (15000 * 1 + 1000) = 16000分
+        $this->assertEquals(16000, $item3->total_cost_price);
     }
     
     /**
@@ -224,10 +224,10 @@ class PurchaseItemModelTest extends TestCase
             'quantity' => 50,
         ]);
         
-        // 驗證金額（注意 accessor 會轉換）
-        $this->assertEquals(200, $purchaseItem->unit_price);
-        $this->assertEquals(180, $purchaseItem->cost_price);
-        $this->assertEquals(50, $purchaseItem->allocated_shipping_cost);
+        // 驗證金額（現在以分為單位存儲）
+        $this->assertEquals(20000, $purchaseItem->unit_price);
+        $this->assertEquals(18000, $purchaseItem->cost_price);
+        $this->assertEquals(5000, $purchaseItem->allocated_shipping_cost);
     }
     
     /**
@@ -311,14 +311,14 @@ class PurchaseItemModelTest extends TestCase
      */
     public function test_amount_calculation_precision()
     {
-        // 測試四捨五入的邊界情況
+        // 測試精確的分位計算
         $purchaseItem = PurchaseItem::factory()->create([
             'quantity' => 3,
-            'cost_price' => 3333,  // 33.33元
-            'allocated_shipping_cost' => 1667  // 16.67元
+            'cost_price' => 3333,  // 3333分
+            'allocated_shipping_cost' => 1667  // 1667分
         ]);
         
-        // 總成本 = (3333 * 3 + 1667) / 100 = 116.66，四捨五入為 117
-        $this->assertEquals(117, $purchaseItem->total_cost_price);
+        // 總成本 = (3333 * 3 + 1667) = 11666分
+        $this->assertEquals(11666, $purchaseItem->total_cost_price);
     }
 }

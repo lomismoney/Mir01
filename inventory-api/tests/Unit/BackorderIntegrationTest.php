@@ -53,6 +53,8 @@ class BackorderIntegrationTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'store_id' => $this->storeA->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
         ]);
 
         $orderItem = OrderItem::factory()->create([
@@ -80,6 +82,8 @@ class BackorderIntegrationTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'store_id' => $this->storeA->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
         ]);
 
         $orderItem = OrderItem::factory()->create([
@@ -130,6 +134,8 @@ class BackorderIntegrationTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'store_id' => $this->storeA->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
         ]);
 
         $orderItem = OrderItem::factory()->create([
@@ -195,6 +201,8 @@ class BackorderIntegrationTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'store_id' => $this->storeA->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
         ]);
 
         $orderItem = OrderItem::factory()->create([
@@ -493,6 +501,8 @@ class BackorderIntegrationTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'store_id' => $this->storeA->id,
+            'shipping_status' => 'pending',
+            'payment_status' => 'pending',
         ]);
         
         // 商品1：調撥中

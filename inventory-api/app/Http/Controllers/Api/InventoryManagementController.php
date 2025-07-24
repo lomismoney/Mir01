@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\InventoryService;
 
 /**
  * @group 庫存管理
@@ -26,6 +27,12 @@ use Illuminate\Support\Facades\DB;
  */
 class InventoryManagementController extends Controller
 {
+    protected InventoryService $inventoryService;
+    
+    public function __construct(InventoryService $inventoryService)
+    {
+        $this->inventoryService = $inventoryService;
+    }
     /**
      * 獲取庫存列表
      * 
@@ -157,13 +164,24 @@ class InventoryManagementController extends Controller
             // 根據操作類型執行庫存調整
             switch ($action) {
                 case 'add':
-                    $result = $inventory->addStock($quantity, $user->id, $notes, $metadata);
+                    $this->inventoryService->returnStock($productVariantId, $quantity, $storeId, $notes, $metadata);
+                    $result = true;
                     break;
                 case 'reduce':
-                    $result = $inventory->reduceStock($quantity, $user->id, $notes, $metadata);
+                    $this->inventoryService->deductStock($productVariantId, $quantity, $storeId, $notes, $metadata);
+                    $result = true;
                     break;
                 case 'set':
-                    $result = $inventory->setStock($quantity, $user->id, $notes, $metadata);
+                    // 設置庫存需要先計算差異
+                    $currentQuantity = $inventory->quantity;
+                    if ($quantity > $currentQuantity) {
+                        // 需要增加庫存
+                        $this->inventoryService->returnStock($productVariantId, $quantity - $currentQuantity, $storeId, $notes, $metadata);
+                    } elseif ($quantity < $currentQuantity) {
+                        // 需要減少庫存
+                        $this->inventoryService->deductStock($productVariantId, $currentQuantity - $quantity, $storeId, $notes, $metadata);
+                    }
+                    $result = true;
                     break;
             }
             

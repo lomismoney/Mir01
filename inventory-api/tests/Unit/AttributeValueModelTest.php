@@ -51,7 +51,6 @@ class AttributeValueModelTest extends TestCase
     {
         $attributeValue = new AttributeValue();
         $expectedCasts = [
-            'id' => 'int',
             'attribute_id' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

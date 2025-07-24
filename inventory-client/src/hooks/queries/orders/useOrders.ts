@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
@@ -109,7 +109,7 @@ export function useOrders(filters: {
         links: links
       };
     },
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
     staleTime: 1 * 60 * 1000, // 設置 1 分鐘的數據保鮮期
   });
 }
@@ -144,6 +144,7 @@ export function useCreateOrder() {
         shipping_address: orderData.shipping_address,
         notes: orderData.notes || null,
         items: orderData.items,
+        is_tax_inclusive: orderData.is_tax_inclusive ?? true, // 預設為含稅
         ...(orderData.hasOwnProperty('force_create_despite_stock') && {
           force_create_despite_stock: (orderData as any).force_create_despite_stock,
         }),

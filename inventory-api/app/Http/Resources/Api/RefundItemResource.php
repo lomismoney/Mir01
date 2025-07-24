@@ -43,7 +43,7 @@ class RefundItemResource extends JsonResource
             /**
              * 退款小計
              */
-            'refund_subtotal' => $this->refund_subtotal,
+            'refund_subtotal' => $this->getRawOriginal('refund_subtotal') / 100, // 分轉元
             
             /**
              * 商品名稱（從關聯獲取）
@@ -58,7 +58,7 @@ class RefundItemResource extends JsonResource
             /**
              * 單價（從關聯獲取）
              */
-            'unit_price' => $this->unit_price,
+            'unit_price' => $this->orderItem ? $this->orderItem->getRawOriginal('price') / 100 : 0, // 分轉元
             
             /**
              * 創建時間

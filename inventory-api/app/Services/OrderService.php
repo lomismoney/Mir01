@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Helpers\MoneyHelper;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
@@ -67,7 +66,10 @@ class OrderService extends BaseService
             );
             
             // 2. 庫存驗證：只針對現貨商品進行庫存檢查（如果不是強制建單模式）
-            if (!$forceCreate) {
+            // 🎯 修復：如果用戶提供了庫存決策，則跳過庫存檢查
+            $hasStockDecisions = !empty($validatedData['stock_decisions']);
+            
+            if (!$forceCreate && !$hasStockDecisions) {
                 $stockedItems = collect($validatedData['items'])->filter(function ($item) {
                     $itemType = OrderItemType::determineType($item);
                     return $itemType === OrderItemType::STOCK && !empty($item['product_variant_id']);
@@ -118,27 +120,33 @@ class OrderService extends BaseService
             $shippingFee = $validatedData['shipping_fee'] ?? 0;
             $discountAmount = $validatedData['discount_amount'] ?? 0;
             
-            // 根據含稅狀態計算稅金
-            if ($isTaxInclusive) {
-                // 含稅訂單：從總價反推稅額
-                // 先計算含稅的小計（商品總價 + 運費 - 折扣）
-                $taxableAmount = $subtotal + $shippingFee - $discountAmount;
-                // 將元轉換為分進行精確計算
-                $taxableAmountCents = MoneyHelper::yuanToCents($taxableAmount);
-                $taxCents = MoneyHelper::calculateTaxFromPriceWithTax($taxableAmountCents, $taxRate);
-                $tax = MoneyHelper::centsToYuan($taxCents);
-                // 總金額就是含稅價
-                $grandTotal = $taxableAmount;
-            } else {
-                // 未稅訂單：計算稅額後加到總價
-                // 計算應稅金額（商品總價 - 折扣，運費通常不課稅）
-                $taxableAmount = $subtotal - $discountAmount;
-                // 將元轉換為分進行精確計算
-                $taxableAmountCents = MoneyHelper::yuanToCents($taxableAmount);
-                $taxCents = MoneyHelper::calculateTaxFromPriceWithoutTax($taxableAmountCents, $taxRate);
-                $tax = MoneyHelper::centsToYuan($taxCents);
+            // 檢查是否直接提供了稅金金額
+            if (isset($validatedData['tax'])) {
+                // 直接使用提供的稅金金額
+                $tax = $validatedData['tax'];
                 // 總金額 = 商品總價 + 運費 + 稅金 - 折扣
                 $grandTotal = $subtotal + $shippingFee + $tax - $discountAmount;
+            } else {
+                // 根據含稅狀態計算稅金
+                if ($isTaxInclusive) {
+                    // 含稅訂單：從總價反推稅額
+                    // 先計算含稅的小計（商品總價 + 運費 - 折扣）
+                    $taxableAmount = $subtotal + $shippingFee - $discountAmount;
+                    // 含稅計算：從含稅總額中計算稅額
+                    // 稅額 = 含稅金額 × 稅率 / (100 + 稅率)
+                    $tax = $taxRate > 0 ? (int) round($taxableAmount * $taxRate / (100 + $taxRate)) : 0;
+                    // 總金額就是含稅價
+                    $grandTotal = $taxableAmount;
+                } else {
+                    // 未稅訂單：計算稅額後加到總價
+                    // 計算應稅金額（商品總價 - 折扣，運費通常不課稅）
+                    $taxableAmount = $subtotal - $discountAmount;
+                    // 不含稅計算：直接計算稅額
+                    // 稅額 = 應稅金額 × 稅率 / 100
+                    $tax = $taxRate > 0 ? (int) round($taxableAmount * $taxRate / 100) : 0;
+                    // 總金額 = 商品總價 + 運費 + 稅金 - 折扣
+                    $grandTotal = $subtotal + $shippingFee + $tax - $discountAmount;
+                }
             }
 
             // 5. 創建訂單主記錄
@@ -161,6 +169,10 @@ class OrderService extends BaseService
                 'shipping_address'  => $validatedData['shipping_address'],
                 'notes'             => $validatedData['notes'] ?? null,
             ]);
+
+            // 6. 解析用戶的庫存處理決策
+            $stockDecisions = collect($validatedData['stock_decisions'] ?? [])
+                ->keyBy('product_variant_id');
 
             // 6. 創建訂單項目
             foreach ($validatedData['items'] as $itemData) {
@@ -187,12 +199,27 @@ class OrderService extends BaseService
                 
                 $orderItem = $order->items()->create($orderItemData);
 
-                // 如果是預訂商品，嘗試自動調貨
-                if ($itemType === OrderItemType::BACKORDER) {
-                    $this->inventoryService->initiateAutomatedTransfer(
-                        $orderItem, 
-                        $order->store_id
-                    );
+                // 🎯 修復：根據用戶決策處理所有有 product_variant_id 的商品
+                // 不再限制只處理 BACKORDER 類型，而是處理所有有用戶決策的商品
+                if ($orderItem->product_variant_id && $stockDecisions->has($orderItem->product_variant_id)) {
+                    $decision = $stockDecisions->get($orderItem->product_variant_id);
+                    
+                    if ($decision['action'] === 'transfer') {
+                        // 用戶選擇調貨：執行調貨操作
+                        $this->inventoryService->initiateAutomatedTransfer(
+                            $orderItem, 
+                            $order->store_id
+                        );
+                    } elseif ($decision['action'] === 'mixed') {
+                        // 用戶選擇混合方案：執行調貨 + 記錄進貨需求
+                        $this->inventoryService->initiateAutomatedTransfer(
+                            $orderItem, 
+                            $order->store_id
+                        );
+                        // 進貨需求將在後續的進貨模組中處理
+                    }
+                    // 用戶選擇純進貨（purchase）：不執行調貨，僅記錄進貨需求
+                    // 不執行任何立即的庫存操作，等待採購部門建立進貨單
                 }
             }
             
@@ -218,7 +245,9 @@ class OrderService extends BaseService
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
                 'customer_id' => $order->customer_id,
-                'grand_total' => $order->grand_total
+                'grand_total' => $order->grand_total,
+                'has_stock_decisions' => !empty($validatedData['stock_decisions']),
+                'stock_decisions_count' => count($validatedData['stock_decisions'] ?? [])
             ]);
 
             return $order->load(['items.productVariant', 'customer', 'creator']);
@@ -431,27 +460,30 @@ class OrderService extends BaseService
         // 重新從資料庫加載最新的 items 關聯，確保計算準確
         $order->refresh()->load('items');
         
-        // 計算商品小計
-        $subtotal = $order->items->sum(fn($item) => $item->price * $item->quantity);
+        // 計算商品小計（使用原始資料庫值 - 分）
+        $subtotal = $order->items->sum(function($item) {
+            $price = $item->getRawOriginal('price');
+            return $price * $item->quantity;
+        });
         
-        // 根據含稅狀態重新計算稅金
-        $shippingFee = $order->shipping_fee;
-        $discountAmount = $order->discount_amount;
+        // 根據含稅狀態重新計算稅金（使用原始資料庫值 - 分）
+        $shippingFee = $order->getRawOriginal('shipping_fee');
+        $discountAmount = $order->getRawOriginal('discount_amount');
         $taxRate = $order->tax_rate;
         
         if ($order->is_tax_inclusive) {
             // 含稅訂單：從總價反推稅額
             $taxableAmount = $subtotal + $shippingFee - $discountAmount;
-            $taxableAmountCents = MoneyHelper::yuanToCents($taxableAmount);
-            $taxCents = MoneyHelper::calculateTaxFromPriceWithTax($taxableAmountCents, $taxRate);
-            $tax = MoneyHelper::centsToYuan($taxCents);
+            // 含稅計算：從含稅總額中計算稅額
+            // 稅額 = 含稅金額 × 稅率 / (100 + 稅率)
+            $tax = $taxRate > 0 ? (int) round($taxableAmount * $taxRate / (100 + $taxRate)) : 0;
             $grandTotal = $taxableAmount;
         } else {
             // 未稅訂單：計算稅額後加到總價
             $taxableAmount = $subtotal - $discountAmount;
-            $taxableAmountCents = MoneyHelper::yuanToCents($taxableAmount);
-            $taxCents = MoneyHelper::calculateTaxFromPriceWithoutTax($taxableAmountCents, $taxRate);
-            $tax = MoneyHelper::centsToYuan($taxCents);
+            // 不含稅計算：直接計算稅額
+            // 稅額 = 應稅金額 × 稅率 / 100
+            $tax = $taxRate > 0 ? (int) round($taxableAmount * $taxRate / 100) : 0;
             $grandTotal = $subtotal + $shippingFee + $tax - $discountAmount;
         }
                     
@@ -532,9 +564,14 @@ class OrderService extends BaseService
     private function processAddPartialPayment(Order $order, array $paymentData): Order
     {
         // 1. 驗證金額：確認傳入的 amount 不大於剩餘未付金額
-        $remainingAmount = $order->grand_total - $order->paid_amount;
-        if ($paymentData['amount'] > $remainingAmount) {
-            throw new \Exception("收款金額不能超過剩餘未付金額：{$remainingAmount}");
+        // 使用原始資料庫值（分）進行計算
+        $grandTotalInCents = $order->getRawOriginal('grand_total');
+        $paidAmountInCents = $order->getRawOriginal('paid_amount');
+        $remainingAmountInCents = $grandTotalInCents - $paidAmountInCents;
+        
+        if ($paymentData['amount'] > $remainingAmountInCents) {
+            $remainingAmountInYuan = $remainingAmountInCents / 100;
+            throw new \Exception("收款金額不能超過剩餘未付金額：{$remainingAmountInYuan}");
         }
         
         // 2. 建立收款記錄：在 payment_records 資料表中創建新紀錄
@@ -547,14 +584,15 @@ class OrderService extends BaseService
         ]);
         
         // 3. 更新訂單主體：重新計算並更新已付金額和付款狀態
-        $newPaidAmount = $order->paid_amount + $paymentData['amount'];
+        // 使用原始資料庫值（分）進行計算
+        $newPaidAmount = $paidAmountInCents + $paymentData['amount'];
         
         // 記錄原始付款狀態（用於歷史記錄）
         $originalPaymentStatus = $order->payment_status;
         
         // 根據新的已付金額更新付款狀態
         $newPaymentStatus = 'partial'; // 預設為部分付款
-        if ($newPaidAmount >= $order->grand_total) {
+        if ($newPaidAmount >= $grandTotalInCents) {
             $newPaymentStatus = 'paid';
             $paidAt = now(); // 全額付清時設定付清時間
         } else {

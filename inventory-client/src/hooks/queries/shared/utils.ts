@@ -3,7 +3,7 @@
  * 統一處理快取失效、錯誤處理等重複邏輯
  */
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, keepPreviousData } from '@tanstack/react-query';
 import { parseApiError } from '@/lib/errorHandler';
 
 /**
@@ -248,6 +248,6 @@ export const DEFAULT_QUERY_OPTIONS = {
  */
 export const PAGINATED_QUERY_OPTIONS = {
   ...DEFAULT_QUERY_OPTIONS,
-  placeholderData: (previousData: any) => previousData,
+  placeholderData: keepPreviousData,
   staleTime: 2 * 60 * 1000, // 分頁數據2分鐘過期
 };

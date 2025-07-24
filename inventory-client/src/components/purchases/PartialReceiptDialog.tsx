@@ -37,7 +37,7 @@ import {
   Minus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 
 // 定義表單驗證 schema
 const partialReceiptSchema = z.object({

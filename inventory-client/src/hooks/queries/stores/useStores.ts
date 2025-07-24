@@ -45,8 +45,10 @@ export function useStores(params: {
       const stores = Array.isArray(data) ? data.map((store: any) => ({
         id: store.id || 0,
         name: store.name || '未命名門市',
+        code: store.code || null,
         address: store.address || null,
         phone: store.phone || null,
+        is_active: store.is_active ?? true,
         status: store.status || 'active',
         created_at: store.created_at || '',
         updated_at: store.updated_at || '',
@@ -93,8 +95,10 @@ export function useStore(id: number) {
  */
 type CreateStorePayload = {
   name: string;           // 門市名稱（必填）
+  code?: string;          // 門市代碼
   address?: string;       // 門市地址
   phone?: string;         // 聯絡電話
+  is_active?: boolean;    // 營運狀態
   status?: 'active' | 'inactive';  // 門市狀態
   description?: string;   // 門市描述
   // 可根據實際業務需求擴展其他欄位
@@ -155,7 +159,7 @@ export function useCreateStore() {
 export function useUpdateStore() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, body }: { id: number; body: { name: string; address?: string | null } }) => {
+    mutationFn: async ({ id, body }: { id: number; body: { name: string; code?: string | null; address?: string | null; phone?: string | null; is_active?: boolean } }) => {
       const { data, error } = await apiClient.PUT('/api/stores/{store}', {
         params: { path: { store: id } },
         body,

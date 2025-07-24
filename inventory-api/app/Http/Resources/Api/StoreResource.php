@@ -16,7 +16,14 @@ use App\Http\Resources\Api\InventoryTransferResource;
  * 
  * @property int $id
  * @property string $name
+ * @property string $code
  * @property string $address
+ * @property string|null $phone
+ * @property array|null $business_hours
+ * @property float|null $latitude
+ * @property float|null $longitude
+ * @property bool $is_active
+ * @property bool $is_default
  * @property string $created_at
  * @property string $updated_at
  * @property \App\Http\Resources\Api\UserResource[]|null $users
@@ -37,7 +44,14 @@ class StoreResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'code' => $this->code,
             'address' => $this->address,
+            'phone' => $this->phone,
+            'business_hours' => $this->business_hours,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'is_active' => $this->is_active,
+            'is_default' => $this->is_default,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             

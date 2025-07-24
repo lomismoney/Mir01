@@ -90,19 +90,19 @@ class TestPartialPayment extends Command
         }
             $customer = Customer::first() ?? Customer::factory()->create();
             
-            // 創建測試訂單 (總金額 1000 元)
+            // 創建測試訂單 (總金額 1000 元 = 100000 分)
             $order = Order::create([
                 'order_number' => 'TEST-' . now()->format('YmdHis'),
                 'customer_id' => $customer->id,
                 'creator_user_id' => $user->id,
                 'shipping_status' => 'pending',
                 'payment_status' => 'pending',
-                'subtotal' => 1000.00,
-                'shipping_fee' => 0.00,
-                'tax' => 0.00,
-                'discount_amount' => 0.00,
-                'grand_total' => 1000.00,
-                'paid_amount' => 0.00,
+                'subtotal' => 100000,  // 1000.00 * 100 = 100000 分
+                'shipping_fee' => 0,
+                'tax' => 0,
+                'discount_amount' => 0,
+                'grand_total' => 100000,  // 1000.00 * 100 = 100000 分
+                'paid_amount' => 0,
                 'payment_method' => 'cash',
                 'order_source' => 'test',
                 'shipping_address' => '測試地址',
@@ -113,7 +113,7 @@ class TestPartialPayment extends Command
             auth()->login($user);
             
             $this->line("  ✓ 創建測試訂單: {$order->order_number}");
-            $this->line("  ✓ 訂單總金額: {$order->grand_total} 元");
+            $this->line("  ✓ 訂單總金額: " . ($order->grand_total / 100) . " 元");
             
             return compact('user', 'customer', 'order');
         });
@@ -125,24 +125,24 @@ class TestPartialPayment extends Command
     private function testFirstPartialPayment(Order $order)
     {
         $paymentData = [
-            'amount' => 300.00,
+            'amount' => 30000,  // 300.00 * 100 = 30000 分
             'payment_method' => 'cash',
             'notes' => '第一筆現金收款',
         ];
         
         $updatedOrder = $this->orderService->addPartialPayment($order, $paymentData);
         
-        // 驗證結果
-        $this->assertEquals(300.00, $updatedOrder->paid_amount, '已付金額應為 300');
+        // 驗證結果 (以分為單位)
+        $this->assertEquals(30000, $updatedOrder->paid_amount, '已付金額應為 30000 分');
         $this->assertEquals('partial', $updatedOrder->payment_status, '付款狀態應為 partial');
         
         // 驗證付款記錄
         $paymentRecord = $updatedOrder->paymentRecords->first();
         $this->assertNotNull($paymentRecord, '應該創建付款記錄');
-        $this->assertEquals(300.00, $paymentRecord->amount, '付款記錄金額正確');
+        $this->assertEquals(30000, $paymentRecord->amount, '付款記錄金額正確（分為單位）');
         $this->assertEquals('cash', $paymentRecord->payment_method, '付款方式正確');
         
-        $this->line("  ✓ 已付金額: {$updatedOrder->paid_amount} 元");
+        $this->line("  ✓ 已付金額: " . ($updatedOrder->paid_amount / 100) . " 元");
         $this->line("  ✓ 付款狀態: {$updatedOrder->payment_status}");
         $this->line("  ✓ 付款記錄已創建");
     }
@@ -155,21 +155,21 @@ class TestPartialPayment extends Command
         $order->refresh(); // 重新載入最新狀態
         
         $paymentData = [
-            'amount' => 500.00,
+            'amount' => 50000,  // 500.00 * 100 = 50000 分
             'payment_method' => 'transfer',
             'notes' => '第二筆轉帳收款',
         ];
         
         $updatedOrder = $this->orderService->addPartialPayment($order, $paymentData);
         
-        // 驗證結果
-        $this->assertEquals(800.00, $updatedOrder->paid_amount, '已付金額應為 800');
+        // 驗證結果 (以分為單位)
+        $this->assertEquals(80000, $updatedOrder->paid_amount, '已付金額應為 80000 分');
         $this->assertEquals('partial', $updatedOrder->payment_status, '付款狀態仍為 partial');
         
         // 驗證付款記錄總數
         $this->assertEquals(2, $updatedOrder->paymentRecords->count(), '應該有 2 筆付款記錄');
         
-        $this->line("  ✓ 已付金額: {$updatedOrder->paid_amount} 元");
+        $this->line("  ✓ 已付金額: " . ($updatedOrder->paid_amount / 100) . " 元");
         $this->line("  ✓ 付款狀態: {$updatedOrder->payment_status}");
         $this->line("  ✓ 付款記錄總數: " . $updatedOrder->paymentRecords->count());
     }
@@ -182,22 +182,22 @@ class TestPartialPayment extends Command
         $order->refresh(); // 重新載入最新狀態
         
         $paymentData = [
-            'amount' => 200.00, // 最後 200 元付清
+            'amount' => 20000,  // 200.00 * 100 = 20000 分
             'payment_method' => 'credit_card',
             'notes' => '最後付清尾款',
         ];
         
         $updatedOrder = $this->orderService->addPartialPayment($order, $paymentData);
         
-        // 驗證結果
-        $this->assertEquals(1000.00, $updatedOrder->paid_amount, '已付金額應為 1000 (全額)');
+        // 驗證結果 (以分為單位)
+        $this->assertEquals(100000, $updatedOrder->paid_amount, '已付金額應為 100000 分 (全額)');
         $this->assertEquals('paid', $updatedOrder->payment_status, '付款狀態應為 paid');
         $this->assertNotNull($updatedOrder->paid_at, '應設定付清時間');
         
         // 驗證付款記錄總數
         $this->assertEquals(3, $updatedOrder->paymentRecords->count(), '應該有 3 筆付款記錄');
         
-        $this->line("  ✓ 已付金額: {$updatedOrder->paid_amount} 元 (全額付清)");
+        $this->line("  ✓ 已付金額: " . ($updatedOrder->paid_amount / 100) . " 元 (全額付清)");
         $this->line("  ✓ 付款狀態: {$updatedOrder->payment_status}");
         $this->line("  ✓ 付清時間: {$updatedOrder->paid_at}");
         $this->line("  ✓ 付款記錄總數: " . $updatedOrder->paymentRecords->count());
@@ -211,7 +211,7 @@ class TestPartialPayment extends Command
         $order->refresh(); // 重新載入最新狀態
         
         $paymentData = [
-            'amount' => 100.00, // 嘗試再付 100 元 (超額)
+            'amount' => 10000,  // 100.00 * 100 = 10000 分 (超額)
             'payment_method' => 'cash',
             'notes' => '超額付款測試',
         ];
@@ -225,7 +225,7 @@ class TestPartialPayment extends Command
         
         // 驗證訂單狀態未變
         $order->refresh();
-        $this->assertEquals(1000.00, $order->paid_amount, '已付金額不應變更');
+        $this->assertEquals(100000, $order->paid_amount, '已付金額不應變更（分為單位）');
         $this->assertEquals('paid', $order->payment_status, '付款狀態不應變更');
         $this->assertEquals(3, $order->paymentRecords->count(), '付款記錄數不應變更');
     }

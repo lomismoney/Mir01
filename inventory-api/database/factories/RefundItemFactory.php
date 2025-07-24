@@ -21,7 +21,7 @@ class RefundItemFactory extends Factory
     {
         $orderItem = OrderItem::factory()->create();
         $quantity = $this->faker->numberBetween(1, $orderItem->quantity);
-        $refundSubtotal = round($orderItem->price * $quantity, 2);
+        $refundSubtotal = $orderItem->price * $quantity; // Already in cents
 
         return [
             'refund_id' => Refund::factory(),
@@ -49,7 +49,7 @@ class RefundItemFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'order_item_id' => $orderItem->id,
             'quantity' => min($attributes['quantity'], $orderItem->quantity),
-            'refund_subtotal' => round($orderItem->price * min($attributes['quantity'], $orderItem->quantity), 2),
+            'refund_subtotal' => $orderItem->price * min($attributes['quantity'], $orderItem->quantity), // Already in cents
         ]);
     }
 
@@ -63,7 +63,7 @@ class RefundItemFactory extends Factory
             return [
                 'order_item_id' => $orderItem->id,
                 'quantity' => $orderItem->quantity,
-                'refund_subtotal' => round($orderItem->price * $orderItem->quantity, 2),
+                'refund_subtotal' => $orderItem->price * $orderItem->quantity, // Already in cents
             ];
         });
     }
@@ -79,7 +79,7 @@ class RefundItemFactory extends Factory
             return [
                 'order_item_id' => $orderItem->id,
                 'quantity' => min($refundQuantity, $orderItem->quantity),
-                'refund_subtotal' => round($orderItem->price * min($refundQuantity, $orderItem->quantity), 2),
+                'refund_subtotal' => $orderItem->price * min($refundQuantity, $orderItem->quantity), // Already in cents
             ];
         });
     }

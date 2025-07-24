@@ -121,7 +121,19 @@
       "Bash(./vendor/bin/sail ps)",
       "Bash(./vendor/bin/sail up:*)",
       "Bash(./vendor/bin/phpunit --testsuite=Unit --filter=OrderServiceTest)",
-      "Bash(./vendor/bin/phpunit:*)"
+      "Bash(./vendor/bin/phpunit:*)",
+      "Bash(./vendor/bin/sail:*)",
+      "Bash(do:*)",
+      "Bash(./test-sqlite.sh:*)",
+      "Bash(timeout:*)",
+      "Bash(export APP_ENV=testing)",
+      "Bash(export DB_CONNECTION=sqlite)",
+      "Bash(export DB_DATABASE=\":memory:\")",
+      "Bash(gcloud auth:*)",
+      "Bash(gcloud config get-value:*)",
+      "Bash(gcloud config set:*)",
+      "Bash(gcloud storage buckets list:*)",
+      "Bash(./vendor/bin/pint:*)"
     ],
     "deny": []
   }

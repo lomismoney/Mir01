@@ -39,8 +39,8 @@ class Customer extends Model
     protected $casts = [
         'is_company' => 'boolean',
         'is_priority_customer' => 'boolean',
-        'total_unpaid_amount' => 'decimal:2',
-        'total_completed_amount' => 'decimal:2',
+        'total_unpaid_amount' => 'integer',
+        'total_completed_amount' => 'integer',
     ];
 
     /**
@@ -65,6 +65,41 @@ class Customer extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * 獲取未付金額（分為單位）
+     */
+    public function getTotalUnpaidAmountCentsAttribute(): ?int
+    {
+        return $this->total_unpaid_amount;
+    }
+
+    /**
+     * 獲取已完成金額（分為單位）
+     */
+    public function getTotalCompletedAmountCentsAttribute(): ?int
+    {
+        return $this->total_completed_amount;
+    }
+
+    /**
+     * 將元轉換為分
+     */
+    public static function yuanToCents(?float $yuan): int
+    {
+        if ($yuan === null) {
+            return 0;
+        }
+        return (int) round($yuan * 100);
+    }
+
+    /**
+     * 將分轉換為元
+     */
+    public static function centsToYuan(int $cents): float
+    {
+        return round($cents / 100, 2);
     }
 
 }

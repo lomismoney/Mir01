@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -85,7 +86,7 @@ class Product extends Model implements HasMedia
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Inventory>
      */
-    public function inventories()
+    public function inventories(): HasManyThrough
     {
         return $this->hasManyThrough(Inventory::class, ProductVariant::class);
     }
@@ -143,11 +144,20 @@ class Product extends Model implements HasMedia
      */
     public function getPriceRangeAttribute(): array
     {
-        $variants = $this->variants();
+        $variants = $this->variants;
+        
+        if ($variants->isEmpty()) {
+            return ['min' => null, 'max' => null];
+        }
+        
+        // 使用原始數據庫值（分）進行計算，避免 accessor 轉換
+        $prices = $variants->map(function ($variant) {
+            return $variant->getRawOriginal('price');
+        })->filter();
         
         return [
-            'min' => $variants->min('price'),
-            'max' => $variants->max('price'),
+            'min' => $prices->min(),
+            'max' => $prices->max(),
         ];
     }
 

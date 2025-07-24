@@ -29,21 +29,22 @@ class InventoryTransferModelTest extends TestCase
         parent::setUp();
         
         // 建立測試門市
-        $this->fromStore = Store::create([
+        $this->fromStore = Store::factory()->create([
             'name' => '來源門市',
             'address' => '來源地址'
         ]);
         
-        $this->toStore = Store::create([
+        $this->toStore = Store::factory()->create([
             'name' => '目標門市',
             'address' => '目標地址'
         ]);
         
         // 建立測試商品結構
         $product = Product::factory()->create();
-        $this->variant = $product->variants()->create([
+        $this->variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
             'sku' => 'TRANSFER-TEST-001',
-            'price' => 150.00
+            'price' => 15000  // 使用分為單位
         ]);
         
         // 建立測試用戶
@@ -102,6 +103,7 @@ class InventoryTransferModelTest extends TestCase
             'to_store_id',
             'user_id',
             'product_variant_id',
+            'order_id',
             'quantity',
             'status',
             'notes'
@@ -158,7 +160,7 @@ class InventoryTransferModelTest extends TestCase
     #[Test]
     public function from_store_scope_filters_correctly()
     {
-        $otherStore = Store::create(['name' => '其他門市', 'address' => '其他地址']);
+        $otherStore = Store::factory()->create(['name' => '其他門市', 'address' => '其他地址']);
         
         $otherTransfer = InventoryTransfer::create([
             'from_store_id' => $otherStore->id,
@@ -177,7 +179,7 @@ class InventoryTransferModelTest extends TestCase
     #[Test]
     public function to_store_scope_filters_correctly()
     {
-        $otherToStore = Store::create(['name' => '另一個目標門市', 'address' => '另一個目標地址']);
+        $otherToStore = Store::factory()->create(['name' => '另一個目標門市', 'address' => '另一個目標地址']);
         
         $otherTransfer = InventoryTransfer::create([
             'from_store_id' => $this->fromStore->id,

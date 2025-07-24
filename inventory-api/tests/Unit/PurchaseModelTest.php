@@ -196,48 +196,102 @@ class PurchaseModelTest extends TestCase
     }
     
     /**
-     * 測試總金額的取值器（分轉元）
+     * 測試總金額的 MoneyCast 轉換（元/分轉換）
      */
     public function test_total_amount_accessor()
     {
-        // 資料庫儲存 123456 分
+        // 使用 MoneyCast 後，傳入元值，讀取時也返回元值
         $purchase = Purchase::factory()->create([
-            'total_amount' => 123456
+            'total_amount' => 1234.56  // 傳入 1234.56 元
         ]);
         
         // 重新載入以確保從資料庫讀取
         $purchase->refresh();
         
-        // 應該回傳 1235 元（四捨五入）
-        $this->assertEquals(1235, $purchase->total_amount);
+        // 使用 MoneyCast 後，返回元值
+        $this->assertEquals(1234.56, $purchase->total_amount);
         
-        // 測試四捨五入
-        $purchase->setRawAttributes(['total_amount' => 123449]); // 1234.49 應該捨去為 1234
-        $this->assertEquals(1234, $purchase->total_amount);
+        // 測試不同金額
+        $purchase->total_amount = 1234.49;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(1234.49, $purchase->total_amount);
         
-        $purchase->setRawAttributes(['total_amount' => 123450]); // 1234.50 應該進位為 1235
-        $this->assertEquals(1235, $purchase->total_amount);
+        $purchase->total_amount = 1234.50;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(1234.50, $purchase->total_amount);
+        
+        // 測試零值
+        $purchase->total_amount = 0;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(0.00, $purchase->total_amount);
+        
+        // 測試小額金額
+        $purchase->total_amount = 0.99;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(0.99, $purchase->total_amount);
+        
+        // 測試大額金額
+        $purchase->total_amount = 99999.99;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(99999.99, $purchase->total_amount);
+        
+        // 驗證資料庫中實際儲存的是分值
+        $this->assertDatabaseHas('purchases', [
+            'id' => $purchase->id,
+            'total_amount' => 9999999, // 99999.99 元 = 9999999 分
+        ]);
     }
     
     /**
-     * 測試運費的取值器（分轉元）
+     * 測試運費的 MoneyCast 轉換（元/分轉換）
      */
     public function test_shipping_cost_accessor()
     {
-        // 資料庫儲存 5000 分
+        // 使用 MoneyCast 後，傳入元值，讀取時也返回元值
         $purchase = Purchase::factory()->create([
-            'shipping_cost' => 5000
+            'shipping_cost' => 50.00  // 傳入 50.00 元
         ]);
         
         // 重新載入以確保從資料庫讀取
         $purchase->refresh();
         
-        // 應該回傳 50 元
-        $this->assertEquals(50, $purchase->shipping_cost);
+        // 使用 MoneyCast 後，返回元值
+        $this->assertEquals(50.00, $purchase->shipping_cost);
         
-        // 測試零運費
-        $purchase->setRawAttributes(['shipping_cost' => 0]);
-        $this->assertEquals(0, $purchase->shipping_cost);
+        // 測試零值
+        $purchase->shipping_cost = 0;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(0.00, $purchase->shipping_cost);
+        
+        // 測試其他運費金額
+        $purchase->shipping_cost = 123.45;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(123.45, $purchase->shipping_cost);
+        
+        // 測試小額運費
+        $purchase->shipping_cost = 1.50;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(1.50, $purchase->shipping_cost);
+        
+        // 測試含小數的運費
+        $purchase->shipping_cost = 99.99;
+        $purchase->save();
+        $purchase->refresh();
+        $this->assertEquals(99.99, $purchase->shipping_cost);
+        
+        // 驗證資料庫中實際儲存的是分值
+        $this->assertDatabaseHas('purchases', [
+            'id' => $purchase->id,
+            'shipping_cost' => 9999, // 99.99 元 = 9999 分
+        ]);
     }
     
     /**
@@ -248,8 +302,9 @@ class PurchaseModelTest extends TestCase
         $purchase = new Purchase();
         $casts = $purchase->getCasts();
         
-        $this->assertEquals('integer', $casts['total_amount']);
-        $this->assertEquals('integer', $casts['shipping_cost']);
+        $this->assertEquals('App\Casts\MoneyCast', $casts['total_amount']);
+        $this->assertEquals('App\Casts\MoneyCast', $casts['shipping_cost']);
+        $this->assertEquals('App\Casts\MoneyCast', $casts['tax_amount']);
         $this->assertEquals('datetime', $casts['purchased_at']);
         $this->assertEquals('datetime', $casts['created_at']);
         $this->assertEquals('datetime', $casts['updated_at']);
@@ -268,8 +323,8 @@ class PurchaseModelTest extends TestCase
             'store_id' => $store->id,
             'user_id' => $user->id,
             'order_number' => 'PO-20250709001',
-            'total_amount' => 500000, // 5000元
-            'shipping_cost' => 10000, // 100元
+            'total_amount' => 5000.00, // 5000元（MoneyCast 期望元值）
+            'shipping_cost' => 100.00, // 100元（MoneyCast 期望元值）
             'status' => 'pending',
             'purchased_at' => $purchasedAt,
             'notes' => '測試進貨單',
@@ -284,9 +339,16 @@ class PurchaseModelTest extends TestCase
             'status' => 'pending',
         ]);
         
-        // 驗證金額（注意 accessor 會轉換）
-        $this->assertEquals(5000, $purchase->total_amount);
-        $this->assertEquals(100, $purchase->shipping_cost);
+        // 驗證金額（MoneyCast 會將元轉換為分存入資料庫，讀取時再轉回元）
+        $this->assertEquals(5000.00, $purchase->total_amount);
+        $this->assertEquals(100.00, $purchase->shipping_cost);
+        
+        // 驗證資料庫中實際儲存的是分
+        $this->assertDatabaseHas('purchases', [
+            'order_number' => 'PO-20250709001',
+            'total_amount' => 500000,  // 資料庫中儲存的是分
+            'shipping_cost' => 10000,  // 資料庫中儲存的是分
+        ]);
     }
     
     /**

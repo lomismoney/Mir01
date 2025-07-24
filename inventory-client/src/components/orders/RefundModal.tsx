@@ -27,7 +27,6 @@ import { RefundItemsTable } from "./refund-modal/components/RefundItemsTable";
 import { RefundInfoForm } from "./refund-modal/components/RefundInfoForm";
 import { RefundSummary } from "./refund-modal/components/RefundSummary";
 import { RefundModalStates } from "./refund-modal/components/RefundModalStates";
-import { formatPrice } from "@/lib/utils";
 import { MoneyHelper } from "@/lib/money-helper";
 
 /**
@@ -192,8 +191,8 @@ export default function RefundModal({
 }
 
 /**
- * 工具函數：格式化金額顯示 - 使用統一的 formatPrice 函式
+ * 工具函數：格式化金額顯示 - 使用統一的 MoneyHelper.format 函式
  */
 export function formatCurrency(amount: number): string {
-  return formatPrice(amount);
+  return amount != null ? MoneyHelper.format(amount, 'NT$') : 'N/A';
 }

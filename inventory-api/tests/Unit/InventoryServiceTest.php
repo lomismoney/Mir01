@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Services\InventoryService;
+use App\Services\StockTransferService;
 use App\Models\Store;
 use App\Models\ProductVariant;
 use App\Models\Inventory;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use Mockery;
 
 /**
  * InventoryService 測試
@@ -24,6 +26,7 @@ class InventoryServiceTest extends TestCase
     use RefreshDatabase;
 
     protected InventoryService $inventoryService;
+    protected $mockStockTransferService;
     protected User $testUser;
     protected Store $defaultStore;
     protected ProductVariant $productVariant;
@@ -40,7 +43,10 @@ class InventoryServiceTest extends TestCase
             Role::create(['name' => 'admin']);
         }
         
-        $this->inventoryService = new InventoryService();
+        $this->mockStockTransferService = Mockery::mock(StockTransferService::class);
+        
+        // 使用依賴注入容器來創建 InventoryService
+        $this->inventoryService = app(InventoryService::class);
         
         // 創建測試用戶
         $this->testUser = User::factory()->create();
@@ -52,6 +58,12 @@ class InventoryServiceTest extends TestCase
         
         // 創建測試商品變體
         $this->productVariant = ProductVariant::factory()->create();
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
     }
 
     /**

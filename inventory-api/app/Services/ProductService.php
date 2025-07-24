@@ -141,7 +141,7 @@ class ProductService
         // 更新變體基本資訊
         $variant->update([
             'sku' => $variantData['sku'],
-            'price' => $variantData['price'],
+            'price' => $variantData['price'], // mutator 自動處理元到分的轉換
         ]);
 
         // 更新屬性值關聯
@@ -163,13 +163,11 @@ class ProductService
             }
         }
         
-        // 同步屬性值
+        // 同步屬性值（只有在明確提供屬性值時才進行同步）
         if (!empty($attributeValueIds)) {
             $variant->attributeValues()->sync($attributeValueIds);
-        } else {
-            // 如果沒有屬性值，清空關聯
-            $variant->attributeValues()->detach();
         }
+        // 如果沒有提供屬性值資料，保持現有的屬性值關聯不變
     }
 
     /**
@@ -184,7 +182,7 @@ class ProductService
         // 創建新變體
         $variant = $product->variants()->create([
             'sku' => $variantData['sku'],
-            'price' => $variantData['price'],
+            'price' => $variantData['price'], // mutator 自動處理元到分的轉換
         ]);
 
         // 關聯屬性值
@@ -214,9 +212,10 @@ class ProductService
         // 為所有門市創建初始庫存記錄
         $stores = Store::all();
         foreach ($stores as $store) {
-            Inventory::create([
+            Inventory::firstOrCreate([
                 'product_variant_id' => $variant->id,
                 'store_id' => $store->id,
+            ], [
                 'quantity' => 0, // 初始庫存為 0
                 'low_stock_threshold' => 0,
             ]);

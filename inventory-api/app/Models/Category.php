@@ -30,6 +30,16 @@ class Category extends Model
     ];
 
     /**
+     * 屬性類型轉換
+     */
+    protected $casts = [
+        'parent_id' => 'integer',
+        'sort_order' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
      * 獲取此分類的父分類
      * 
      * @return BelongsTo<Category, Category>

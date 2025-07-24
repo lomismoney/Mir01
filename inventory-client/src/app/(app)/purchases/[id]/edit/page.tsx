@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/form";
 import { ArrowLeft, Save, Package, Trash2, Plus, Loader2 } from "lucide-react";
 import { ProductSelector } from "@/components/inventory/ProductSelector";
+import { Switch } from "@/components/ui/switch";
 
 interface PurchaseEditFormData {
   store_id: string;
@@ -53,6 +54,8 @@ interface PurchaseEditFormData {
   purchased_at: string;
   shipping_cost: string;
   status: string;
+  is_tax_inclusive: boolean;
+  tax_rate: string;
   items: {
     id?: number;
     product_variant_id: number;
@@ -78,6 +81,8 @@ export default function PurchaseEditPage() {
       purchased_at: "",
       shipping_cost: "0",
       status: PURCHASE_STATUS.PENDING,
+      is_tax_inclusive: false,
+      tax_rate: "5",
       items: [],
     },
   });
@@ -96,6 +101,8 @@ export default function PurchaseEditPage() {
         purchased_at?: string;
         shipping_cost?: number;
         status?: string;
+        is_tax_inclusive?: boolean;
+        tax_rate?: number;
         items?: {
           id?: number;
           product_variant_id?: number;
@@ -111,6 +118,8 @@ export default function PurchaseEditPage() {
           : "",
         shipping_cost: purchaseData.shipping_cost?.toString() || "0",
         status: purchaseData.status || PURCHASE_STATUS.PENDING,
+        is_tax_inclusive: purchaseData.is_tax_inclusive || false,
+        tax_rate: purchaseData.tax_rate?.toString() || "5",
         items:
           purchaseData.items?.map((item: {
             id?: number;
@@ -228,6 +237,8 @@ export default function PurchaseEditPage() {
         : undefined,
       shipping_cost: parseFloat(data.shipping_cost) || 0,
       status: data.status,
+      is_tax_inclusive: data.is_tax_inclusive,
+      tax_rate: parseFloat(data.tax_rate) || 0,
       items: data.items.map((item) => ({
         product_variant_id: item.product_variant_id,
         quantity: parseInt(item.quantity),
@@ -264,7 +275,22 @@ export default function PurchaseEditPage() {
       const costPrice = parseFloat(item.cost_price) || 0;
       return total + quantity * costPrice;
     }, 0);
-    return itemsTotal + shippingCost;
+    const subtotal = itemsTotal + shippingCost;
+    
+    // 稅務計算
+    const isTaxInclusive = form.watch("is_tax_inclusive");
+    const taxRate = parseFloat(form.watch("tax_rate")) || 0;
+    
+    if (isTaxInclusive) {
+      // 含稅價：稅額 = 總額 × 稅率 / (100 + 稅率)
+      const taxAmount = subtotal * taxRate / (100 + taxRate);
+      return { subtotal, taxAmount, finalAmount: subtotal };
+    } else {
+      // 未含稅：稅額 = 總額 × 稅率 / 100，最終金額 = 總額 + 稅額
+      const taxAmount = subtotal * taxRate / 100;
+      const finalAmount = subtotal + taxAmount;
+      return { subtotal, taxAmount, finalAmount };
+    }
   };
 
   return (
@@ -465,6 +491,48 @@ export default function PurchaseEditPage() {
                     )}
                    
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="is_tax_inclusive"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>含稅價</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            商品價格是否包含稅額
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="tax_rate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>稅率 (%)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="5.00"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -599,19 +667,18 @@ export default function PurchaseEditPage() {
                 {/* 總計顯示 */}
                 <div className="border-t pt-4">
                   <div className="flex justify-end">
-                    <div className="text-right">
-                      <div
-                        className="text-sm text-muted-foreground"
-                       
-                      >
-                        預估總金額
+                    <div className="text-right space-y-1">
+                      <div className="text-sm text-muted-foreground flex justify-between gap-4">
+                        <span>商品小計：</span>
+                        <span>NT$ {calculateTotal().subtotal.toLocaleString("zh-TW", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                       </div>
-                      <div className="text-lg font-semibold">
-                        NT${" "}
-                        {calculateTotal().toLocaleString("zh-TW", {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        })}
+                      <div className="text-sm text-muted-foreground flex justify-between gap-4">
+                        <span>稅額：</span>
+                        <span>NT$ {calculateTotal().taxAmount.toLocaleString("zh-TW", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                      </div>
+                      <div className="text-lg font-semibold flex justify-between gap-4">
+                        <span>總金額：</span>
+                        <span>NT$ {calculateTotal().finalAmount.toLocaleString("zh-TW", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                       </div>
                     </div>
                   </div>

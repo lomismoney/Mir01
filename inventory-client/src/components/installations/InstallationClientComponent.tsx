@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import {
@@ -80,6 +81,8 @@ import { EmptyTable, EmptySearch, EmptyError } from "@/components/ui/empty-state
  * 提供安裝單的列表檢視、篩選、操作等功能
  */
 export function InstallationClientComponent() {
+  const router = useRouter();
+  
   // 分頁狀態管理
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -223,7 +226,10 @@ export function InstallationClientComponent() {
         onUpdateStatus: (installation, status) => 
           setUpdatingStatus({ installation, status }),
         onEdit: (id: number) => {
-          window.location.href = `/installations/${id}/edit`;
+          router.push(`/installations/${id}/edit`);
+        },
+        onNavigate: (path: string) => {
+          router.push(path);
         },
         onDelete: (id: number) => {
           // 找到要刪除的安裝單並設置到狀態中
@@ -277,8 +283,8 @@ export function InstallationClientComponent() {
 
   return (
     <div className="space-y-6">
-      {/* 🔍 篩選與操作工具欄 - 現代化設計 */}
-      <div className="bg-gradient-to-r from-card to-card/95 border border-border/40 rounded-xl p-6 shadow-lg backdrop-blur-sm">
+      {/* 🔍 篩選與操作工具欄 - 簡潔設計 */}
+      <div className="bg-card border rounded-lg p-4">
         <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
           {/* 左側篩選區域 */}
           <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-4">
@@ -290,7 +296,7 @@ export function InstallationClientComponent() {
                 onChange={(e) =>
                   setFilters((prev) => ({ ...prev, search: e.target.value }))
                 }
-                className="w-full lg:w-80 bg-background/60 border-border/50 placeholder:text-muted-foreground/70 focus:bg-background focus:border-primary/60 transition-all duration-300 shadow-sm hover:shadow-md"
+                className="w-full lg:w-80"
                 disabled={isLoading}
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50">
@@ -309,7 +315,7 @@ export function InstallationClientComponent() {
               }}
               disabled={isLoading}
             >
-              <SelectTrigger className="w-full lg:w-48 bg-background/60 border-border/50 hover:bg-background transition-all duration-300 shadow-sm hover:shadow-md">
+              <SelectTrigger className="w-full lg:w-48">
                 <SelectValue placeholder="篩選狀態" />
               </SelectTrigger>
               <SelectContent>
@@ -361,7 +367,7 @@ export function InstallationClientComponent() {
               }}
               disabled={isLoadingUsers || isLoading}
             >
-              <SelectTrigger className="w-full lg:w-48 bg-background/60 border-border/50 hover:bg-background transition-all duration-300 shadow-sm hover:shadow-md">
+              <SelectTrigger className="w-full lg:w-48">
                 <SelectValue placeholder={isLoadingUsers ? "載入中..." : "篩選師傅"} />
               </SelectTrigger>
               <SelectContent>
@@ -472,20 +478,20 @@ export function InstallationClientComponent() {
         </div>
       </div>
 
-      {/* 📋 資料表格區域 - 現代化設計 */}
-      <div className="rounded-xl border border-border/40 bg-gradient-to-b from-card to-card/95 shadow-xl overflow-hidden backdrop-blur-sm">
+      {/* 📋 資料表格區域 */}
+      <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow 
                 key={headerGroup.id} 
-                className="border-b border-border/50 bg-gradient-to-r from-muted/60 via-muted/40 to-muted/60 hover:from-muted/70 hover:via-muted/50 hover:to-muted/70 transition-all duration-300"
+                className="border-b"
               >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
-                      className="h-14 px-6 text-left align-middle font-semibold text-foreground/90 tracking-wide text-sm"
+                      className="h-12 px-4 text-left align-middle font-medium text-sm"
                     >
                       {header.isPlaceholder
                         ? null
@@ -509,15 +515,10 @@ export function InstallationClientComponent() {
                     {/* 主要資料行 */}
                     <TableRow
                       data-state={row.getIsSelected() && "selected"}
-                      className={`
-                        border-b-0 transition-all duration-300 group cursor-pointer
-                        ${index % 2 === 0 ? 'bg-background/70' : 'bg-muted/25'}
-                        hover:bg-accent/60 hover:shadow-sm hover:scale-[1.005]
-                        data-[state=selected]:bg-accent/80 data-[state=selected]:shadow-md
-                      `}
+                      className="border-b-0 group cursor-pointer hover:bg-muted/50"
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="px-6 py-4 border-b-0 text-sm">
+                        <TableCell key={cell.id} className="px-4 py-3 border-b-0 text-sm">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
@@ -525,15 +526,11 @@ export function InstallationClientComponent() {
                     
                     {/* 進度條行 */}
                     <TableRow
-                      className={`
-                        border-b border-border/30 transition-all duration-300
-                        ${index % 2 === 0 ? 'bg-background/70' : 'bg-muted/25'}
-                        hover:bg-accent/60 group-hover:bg-accent/60
-                      `}
+                      className="border-b hover:bg-muted/50 group-hover:bg-muted/50"
                     >
                       <TableCell 
                         colSpan={columns.length} 
-                        className="px-6 py-3 border-b border-border/30"
+                        className="px-4 py-3"
                       >
                         <div className="flex justify-center">
                           <div className="w-full max-w-6xl">

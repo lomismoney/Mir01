@@ -352,11 +352,11 @@ class OrderItemResourceTest extends TestCase
 
         $orderItem = OrderItem::factory()->create([
             'order_id' => $order->id,
-            'price' => 123.46,
-            'cost' => 98.77,
+            'price' => 12346, // 123.46元 = 12346分
+            'cost' => 9877,   // 98.77元 = 9877分
             'quantity' => 5,
-            'tax_rate' => 0.125,
-            'discount_amount' => 12.34,
+            'tax_rate' => 1250, // 0.125 = 1250/10000
+            'discount_amount' => 1234, // 12.34元 = 1234分
         ]);
 
         $resource = new OrderItemResource($orderItem);
@@ -366,7 +366,7 @@ class OrderItemResourceTest extends TestCase
         $this->assertEquals(123.46, $output['price']);
         $this->assertEquals(98.77, $output['cost']);
         $this->assertEquals(5, $output['quantity']);
-        $this->assertEquals(0.13, $output['tax_rate']); // decimal:2 cast 會截斷為兩位小數
+        $this->assertEquals(0.125, $output['tax_rate']); // 1250/10000 = 0.125
         $this->assertEquals(12.34, $output['discount_amount']);
     }
 

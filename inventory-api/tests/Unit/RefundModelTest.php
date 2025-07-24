@@ -59,14 +59,14 @@ class RefundModelTest extends TestCase
         $this->order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'creator_user_id' => $this->user->id,
-            'grand_total' => 2000.00
+            'grand_total' => 200000 // 2000元 = 200000分
         ]);
         
         // 創建測試訂單項目
         $this->orderItem = OrderItem::factory()->create([
             'order_id' => $this->order->id,
             'product_variant_id' => $this->productVariant->id,
-            'price' => 500.00,
+            'price' => 50000, // 500元 = 50000分
             'quantity' => 2
         ]);
         
@@ -74,7 +74,7 @@ class RefundModelTest extends TestCase
         $this->refund = Refund::factory()->create([
             'order_id' => $this->order->id,
             'creator_id' => $this->user->id,
-            'total_refund_amount' => 1000.00,
+            'total_refund_amount' => 100000, // 1000元 = 100000分
             'reason' => '商品有瑕疵',
             'should_restock' => true
         ]);
@@ -133,7 +133,7 @@ class RefundModelTest extends TestCase
         $data = [
             'order_id' => $this->order->id,
             'creator_id' => $this->user->id,
-            'total_refund_amount' => 500.00,
+            'total_refund_amount' => 50000, // 500元 = 50000分
             'reason' => '客戶不滿意',
             'notes' => '處理退款',
             'should_restock' => false
@@ -143,7 +143,7 @@ class RefundModelTest extends TestCase
         
         $this->assertEquals($this->order->id, $refund->order_id);
         $this->assertEquals($this->user->id, $refund->creator_id);
-        $this->assertEquals(500.00, $refund->total_refund_amount);
+        $this->assertEquals(50000, $refund->total_refund_amount); // 期望分為單位
         $this->assertEquals('客戶不滿意', $refund->reason);
         $this->assertEquals('處理退款', $refund->notes);
         $this->assertFalse($refund->should_restock);
@@ -264,7 +264,7 @@ class RefundModelTest extends TestCase
         $this->assertEquals('$1,000.00', $this->refund->formatted_amount);
         
         // 測試不同金額
-        $this->refund->total_refund_amount = 1234.56;
+        $this->refund->total_refund_amount = 123456; // 1234.56元 = 123456分
         $this->assertEquals('$1,234.56', $this->refund->formatted_amount);
     }
 
@@ -322,17 +322,30 @@ class RefundModelTest extends TestCase
         // 創建與退款總額匹配的退款項目
         RefundItem::factory()->create([
             'refund_id' => $this->refund->id,
-            'refund_subtotal' => 600.00
+            'order_item_id' => $this->orderItem->id,
+            'quantity' => 1,
+            'refund_subtotal' => 60000 // 600元 = 60000分
         ]);
+        
+        // 創建另一個訂單項目用於第二個退款項目
+        $orderItem2 = OrderItem::factory()->create([
+            'order_id' => $this->order->id,
+            'product_variant_id' => $this->productVariant->id,
+            'price' => 40000, // 400元 = 40000分
+            'quantity' => 1
+        ]);
+        
         RefundItem::factory()->create([
             'refund_id' => $this->refund->id,
-            'refund_subtotal' => 400.00
+            'order_item_id' => $orderItem2->id,
+            'quantity' => 1,
+            'refund_subtotal' => 40000 // 400元 = 40000分
         ]);
         
         $this->assertTrue($this->refund->validateTotalAmount());
         
         // 測試不匹配的情況
-        $this->refund->total_refund_amount = 500.00;
+        $this->refund->total_refund_amount = 50000; // 500元 = 50000分
         $this->assertFalse($this->refund->validateTotalAmount());
     }
 
@@ -387,14 +400,14 @@ class RefundModelTest extends TestCase
         $this->assertFalse($this->refund->isFullOrderRefund());
         
         // 測試完整退款 - 先保存退款再檢查
-        $this->refund->update(['total_refund_amount' => 2000.00]); // 等於訂單總額
+        $this->refund->update(['total_refund_amount' => 200000]); // 等於訂單總額（分）
         $this->assertTrue($this->refund->isFullOrderRefund());
         
         // 測試多次退款達到完整退款
-        $this->refund->update(['total_refund_amount' => 1000.00]);
+        $this->refund->update(['total_refund_amount' => 100000]); // 1000元 = 100000分
         Refund::factory()->create([
             'order_id' => $this->order->id,
-            'total_refund_amount' => 1000.00
+            'total_refund_amount' => 100000 // 1000元 = 100000分
         ]);
         $this->assertTrue($this->refund->isFullOrderRefund());
     }
@@ -409,7 +422,7 @@ class RefundModelTest extends TestCase
         
         $refund = Refund::create([
             'order_id' => $this->order->id,
-            'total_refund_amount' => 500.00,
+            'total_refund_amount' => 50000, // 500元 = 50000分
             'reason' => '測試退款'
         ]);
         
@@ -487,7 +500,7 @@ class RefundModelTest extends TestCase
         $refund = Refund::factory()->create([
             'order_id' => $this->order->id,
             'creator_id' => $this->user->id,
-            'total_refund_amount' => 125.75,
+            'total_refund_amount' => 12575, // 125.75元 = 12575分
             'reason' => '測試金額處理'
         ]);
         
@@ -495,7 +508,7 @@ class RefundModelTest extends TestCase
         $this->assertEquals(12575, $refund->total_refund_amount_cents);
         
         // 驗證金額正確從分轉換為元顯示
-        $this->assertEquals(125.75, $refund->total_refund_amount);
+        $this->assertEquals(12575, $refund->total_refund_amount); // 直接存儲為分
     }
 
     /**

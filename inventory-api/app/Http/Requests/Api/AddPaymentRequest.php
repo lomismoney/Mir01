@@ -30,14 +30,21 @@ class AddPaymentRequest extends FormRequest
             'amount' => [
                 'required',
                 'numeric',
-                'min:0.01',
+                'min:1',  // 最小 1 分
                 function ($attribute, $value, $fail) {
                     // 自定義驗證：檢查收款金額不超過剩餘未付金額
+                    // 注意：經過 prepareForValidation 後，$value 已經是分為單位
                     $order = $this->route('order');
                     if ($order) {
-                        $remainingAmount = $order->grand_total - $order->paid_amount;
+                        // 使用 getRawOriginal 獲取資料庫原始值（分）
+                        $grandTotalInCents = $order->getRawOriginal('grand_total');
+                        $paidAmountInCents = $order->getRawOriginal('paid_amount');
+                        $remainingAmount = $grandTotalInCents - $paidAmountInCents; // 分
+                        
                         if ($value > $remainingAmount) {
-                            $fail("收款金額不能超過剩餘未付金額：$remainingAmount");
+                            // 將剩餘金額轉換為元顯示給用戶
+                            $remainingAmountInYuan = $remainingAmount / 100;
+                            $fail("收款金額不能超過剩餘未付金額：{$remainingAmountInYuan}");
                         }
                     }
                 },
@@ -78,18 +85,27 @@ class AddPaymentRequest extends FormRequest
     }
 
     /**
-     * 準備驗證的資料
+     * 在驗證前準備資料
      * 
-     * 如果沒有提供付款日期，則設定為當前時間
+     * 1. 如果沒有提供付款日期，則設定為當前時間
+     * 2. 將金額從元轉換為分
      */
     protected function prepareForValidation(): void
     {
+        $data = [];
+        
         if (!$this->has('payment_date')) {
-            $this->merge([
-                'payment_date' => now(),
-            ]);
+            $data['payment_date'] = now();
         }
+        
+        // 處理金額轉換：元 -> 分
+        if ($this->has('amount') && $this->input('amount') !== null) {
+            $data['amount'] = round($this->input('amount') * 100);
+        }
+        
+        $this->merge($data);
     }
+    
     
     /**
      * 取得請求體參數的文檔

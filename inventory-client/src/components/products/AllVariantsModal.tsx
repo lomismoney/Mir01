@@ -19,7 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Package, Box, Palette, DollarSign, Archive } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import type { ExpandedProductItem } from "./columns";
 
 interface AllVariantsModalProps {
@@ -151,7 +151,7 @@ export function AllVariantsModal({
                         <div className="flex items-center gap-1.5">
                           <DollarSign className="h-4 w-4 text-green-600 flex-shrink-0" />
                           <span className="text-base font-semibold text-green-600 truncate">
-                            {formatPrice(parseFloat(variantInfo.price))}
+                            {MoneyHelper.format(parseFloat(variantInfo.price) || 0, 'NT$')}
                           </span>
                         </div>
                       </div>

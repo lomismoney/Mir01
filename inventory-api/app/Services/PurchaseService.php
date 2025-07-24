@@ -25,6 +25,17 @@ use Illuminate\Support\Carbon;
 class PurchaseService extends BaseService
 {
     use HandlesInventoryOperations, HandlesStatusHistory;
+    
+    protected InventoryService $inventoryService;
+    protected ProductVariantService $productVariantService;
+    
+    public function __construct(
+        InventoryService $inventoryService,
+        ProductVariantService $productVariantService
+    ) {
+        $this->inventoryService = $inventoryService;
+        $this->productVariantService = $productVariantService;
+    }
     /**
      * 自動生成進貨單號（黃金標準實現）
      * 
@@ -154,7 +165,7 @@ class PurchaseService extends BaseService
                     // 最後一項用總運費減去已分配的，避免因四捨五入產生誤差
                     $allocatedShippingCost = $purchaseData->shipping_cost - $accumulatedShippingCost;
                 } else {
-                    // 保持原有邏輯，已經是整數計算（以分為單位）
+                    // 按數量比例分攤，以分為單位進行整數運算
                     $allocatedShippingCost = $totalQuantity > 0
                         ? (int) round(($purchaseData->shipping_cost * $itemData->quantity) / $totalQuantity)
                         : 0;
@@ -334,12 +345,11 @@ class PurchaseService extends BaseService
                 ['quantity' => 0, 'low_stock_threshold' => 5]
             );
 
-            // 使用庫存模型的方法來增加庫存
-            $userId = $this->requireAuthentication('庫存操作');
-            
-            $inventory->addStock(
-                $quantityToAdd, 
-                $userId, 
+            // 使用 InventoryService 來增加庫存
+            $this->inventoryService->returnStock(
+                $item->product_variant_id,
+                $quantityToAdd,
+                $inventory->store_id,
                 "進貨單 #{$purchase->order_number} (實收數量)",
                 [
                     'purchase_id' => $purchase->id,
@@ -348,10 +358,12 @@ class PurchaseService extends BaseService
                 ]
             );
 
-            // 更新商品變體的累計進貨數量
+            // 更新商品變體的累計進貨數量和平均成本
             $productVariant = ProductVariant::find($item->product_variant_id);
             if ($productVariant) {
-                $productVariant->updatePurchasedQuantity($quantityToAdd);
+                // 計算包含運費攤銷的單位成本（保持分為單位）
+                $unitCostWithShippingCents = $item->cost_price + $item->allocated_shipping_cost;
+                $this->productVariantService->updatePurchasedQuantity($productVariant, $quantityToAdd, $unitCostWithShippingCents);
             }
             
             Log::info('進貨項目入庫成功', [
@@ -566,9 +578,10 @@ class PurchaseService extends BaseService
                     );
                 }
                 
-                $inventory->reduceStock(
+                $this->inventoryService->deductStock(
+                    $item->product_variant_id,
                     $quantityToRevert,
-                    $userId,
+                    $inventory->store_id,
                     "進貨單 #{$purchase->order_number} 狀態變更回退 (實收數量)",
                     [
                         'purchase_id' => $purchase->id, 
@@ -1288,9 +1301,10 @@ class PurchaseService extends BaseService
         );
 
         // 增加庫存
-        $inventory->addStock(
-            $quantity, 
-            $userId, 
+        $this->inventoryService->returnStock(
+            $purchaseItem->product_variant_id,
+            $quantity,
+            $inventory->store_id,
             "部分收貨 - 進貨單 #{$purchase->order_number}" . ($notes ? " ($notes)" : ""),
             [
                 'purchase_id' => $purchase->id,
@@ -1302,8 +1316,9 @@ class PurchaseService extends BaseService
         // 更新商品變體的平均成本（按收貨數量計算）
         $productVariant = ProductVariant::find($purchaseItem->product_variant_id);
         if ($productVariant) {
-            // 更新商品變體的累計進貨數量
-            $productVariant->updatePurchasedQuantity($quantity);
+            // 計算包含運費攤銷的單位成本（保持分為單位）
+            $unitCostWithShippingCents = $purchaseItem->cost_price + $purchaseItem->allocated_shipping_cost;
+            $this->productVariantService->updatePurchasedQuantity($productVariant, $quantity, $unitCostWithShippingCents);
         }
     }
 
@@ -1470,7 +1485,7 @@ class PurchaseService extends BaseService
             
             // 更新運費（元轉分）
             $purchase->update([
-                'shipping_cost' => (int) round($newShippingCost * 100) // 元轉分
+                'shipping_cost' => (int) round($newShippingCost * 100) // 手動轉換元為分
             ]);
             
             // 重新分攤運費到各項目
@@ -1482,7 +1497,7 @@ class PurchaseService extends BaseService
             Log::info('進貨單運費更新完成', [
                 'purchase_id' => $purchase->id,
                 'old_shipping_cost' => $oldShippingCost,
-                'new_shipping_cost' => $newShippingCost,
+                'new_shipping_cost' => (int) round($newShippingCost * 100), // 日誌記錄分值
                 'items_count' => $purchase->items()->count()
             ]);
             
@@ -1511,11 +1526,11 @@ class PurchaseService extends BaseService
             $isLastItem = ($index === $itemCount - 1);
             
             if ($isLastItem) {
-                // 最後一項用總運費減去已分配的
+                // 最後一項用總運費減去已分配的，避免四捨五入誤差
                 $allocatedShippingCost = $purchase->shipping_cost - $accumulatedShippingCost;
             } else {
-                // 按數量比例分攤，使用整數計算（分為單位）
-                $allocatedShippingCost = intval(($purchase->shipping_cost * $item->quantity) / $totalQuantity);
+                // 按數量比例分攤，以分為單位進行整數運算
+                $allocatedShippingCost = (int) round(($purchase->shipping_cost * $item->quantity) / $totalQuantity);
                 $accumulatedShippingCost += $allocatedShippingCost;
             }
             

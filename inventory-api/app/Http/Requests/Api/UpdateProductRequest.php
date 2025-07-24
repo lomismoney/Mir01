@@ -89,6 +89,29 @@ class UpdateProductRequest extends FormRequest
     }
 
     /**
+     * 準備驗證資料
+     * 
+     * 將金額欄位從元轉換為分
+     */
+    protected function prepareForValidation(): void
+    {
+        $data = [];
+
+        // 轉換商品變體中的價格欄位
+        if ($this->has('variants') && is_array($this->input('variants'))) {
+            $variants = $this->input('variants');
+            foreach ($variants as $index => $variant) {
+                if (isset($variant['price']) && $variant['price'] !== null && is_numeric($variant['price'])) {
+                    $variants[$index]['price'] = round($variant['price'] * 100);
+                }
+            }
+            $data['variants'] = $variants;
+        }
+
+        $this->merge($data);
+    }
+
+    /**
      * 取得請求主體參數的描述，用於 API 文件生成
      *
      * @return array<string, \Knuckles\Scribe\Extracting\Strategies\BodyParameters\BodyParameter|string>

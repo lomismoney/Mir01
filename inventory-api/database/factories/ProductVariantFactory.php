@@ -17,14 +17,14 @@ class ProductVariantFactory extends Factory
      */
     public function definition(): array
     {
-        $priceInYuan = fake()->randomFloat(2, 10, 1000);
-        $costPriceInYuan = fake()->randomFloat(2, 5, $priceInYuan * 0.8); // 成本價通常低於售價
+        $price = fake()->numberBetween(1000, 100000); // 10.00 to 1000.00 in cents
+        $costPrice = fake()->numberBetween(500, (int) ($price * 0.8)); // Cost usually lower than price
         
         return [
             'product_id' => Product::factory(),
             'sku' => fake()->unique()->bothify('SKU-###??##'),
-            'price' => (int) round($priceInYuan * 100), // 轉換為分
-            'cost_price' => (int) round($costPriceInYuan * 100), // 轉換為分
+            'price' => $price,
+            'cost_price' => $costPrice,
         ];
     }
 
@@ -49,12 +49,12 @@ class ProductVariantFactory extends Factory
     public function expensive(): static
     {
         return $this->state(function (array $attributes) {
-            $priceInYuan = fake()->randomFloat(2, 500, 2000);
-            $costPriceInYuan = fake()->randomFloat(2, 250, $priceInYuan * 0.8);
+            $price = fake()->numberBetween(50000, 200000); // 500.00 to 2000.00 in cents
+            $costPrice = fake()->numberBetween(25000, (int) ($price * 0.8));
             
             return [
-                'price' => (int) round($priceInYuan * 100),
-                'cost_price' => (int) round($costPriceInYuan * 100),
+                'price' => $price,
+                'cost_price' => $costPrice,
             ];
         });
     }

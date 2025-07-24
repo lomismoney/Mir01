@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Helpers\MoneyHelper;
 
 /**
  * 付款記錄模型
@@ -31,9 +30,12 @@ class PaymentRecord extends Model
 
     /**
      * 屬性類型轉換
+     * 
+     * amount 欄位存儲分為單位的整數值
      */
     protected $casts = [
         'payment_date' => 'datetime',
+        'amount' => 'integer',
     ];
 
     /**
@@ -51,30 +53,53 @@ class PaymentRecord extends Model
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
-
+    
     /**
-     * 取得付款金額（元）
-     * 將資料庫中的分轉換為元
-     *
-     * @param int $value
+     * 獲取以分為單位的金額（用於測試和內部計算）
+     * 
+     * @return int|null
+     */
+    public function getAmountCentsAttribute(): ?int
+    {
+        return $this->attributes['amount'] ?? null;
+    }
+    
+    // ❌ 已移除金額 accessor - 遵循 CLAUDE.md 1.3 節規範
+    // 分→元轉換僅在 Resource 層進行，Model 層不得修改金額顯示
+    
+    /**
+     * 獲取以元為單位的金額（用於前端顯示）
+     * 
+     * @return float|null
+     */
+    public function getAmountInYuanAttribute(): ?float
+    {
+        $amount = $this->attributes['amount'] ?? null;
+        return $amount !== null ? round($amount / 100, 2) : null;
+    }
+    
+    /**
+     * 將元轉換為分
+     * 
+     * @param float|null $yuan
+     * @return int
+     */
+    public static function yuanToCents(?float $yuan): int
+    {
+        return $yuan !== null ? (int) round($yuan * 100) : 0;
+    }
+    
+    /**
+     * 將分轉換為元
+     * 
+     * @param int $cents
      * @return float
      */
-    public function getAmountAttribute($value): float
+    public static function centsToYuan(int $cents): float
     {
-        return MoneyHelper::centsToYuan($value);
+        return round($cents / 100, 2);
     }
 
-    /**
-     * 設定付款金額（元）
-     * 將輸入的元轉換為分儲存
-     *
-     * @param float $value
-     * @return void
-     */
-    public function setAmountAttribute($value): void
-    {
-        $this->attributes['amount'] = MoneyHelper::yuanToCents($value);
-    }
 
     /**
      * 付款方式的選項列表

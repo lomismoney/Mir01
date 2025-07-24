@@ -27,10 +27,10 @@ class OrderFactory extends Factory
      */
     public function definition(): array
     {
-        $subtotal = $this->faker->randomFloat(2, 100, 5000);
-        $shippingFee = $this->faker->randomFloat(2, 0, 200);
-        $tax = $subtotal * 0.05; // 5% 稅金
-        $discountAmount = $this->faker->boolean(30) ? $this->faker->randomFloat(2, 0, $subtotal * 0.2) : 0;
+        $subtotal = $this->faker->numberBetween(10000, 500000); // 100.00 to 5000.00 in cents
+        $shippingFee = $this->faker->numberBetween(0, 20000); // 0.00 to 200.00 in cents
+        $tax = (int) ($subtotal * 0.05); // 5% 稅金
+        $discountAmount = $this->faker->boolean(30) ? $this->faker->numberBetween(0, (int) ($subtotal * 0.2)) : 0;
         $grandTotal = $subtotal + $shippingFee + $tax - $discountAmount;
         
         // 預設為待付款狀態
@@ -59,6 +59,7 @@ class OrderFactory extends Factory
             'shipped_at' => null,
             'paid_at' => null,
             'estimated_delivery_date' => null,
+            'is_tax_inclusive' => $this->faker->boolean(80), // 80% 機率為含稅價
         ];
     }
 
@@ -97,7 +98,7 @@ class OrderFactory extends Factory
     public function partiallyPaid(): static
     {
         return $this->state(function (array $attributes) {
-            $partialAmount = $this->faker->randomFloat(2, 10, $attributes['grand_total'] * 0.8);
+            $partialAmount = $this->faker->numberBetween(1000, (int) ($attributes['grand_total'] * 0.8)); // 10.00 minimum in cents
             return [
                 'payment_status' => 'partial',
                 'paid_amount' => $partialAmount,
@@ -173,14 +174,14 @@ class OrderFactory extends Factory
     }
 
     /**
-     * 設定特定的金額
+     * 設定特定的金額（以分為單位）
      */
-    public function withAmount(float $grandTotal): static
+    public function withAmount(int $grandTotal): static
     {
         return $this->state(function (array $attributes) use ($grandTotal) {
-            $subtotal = $grandTotal * 0.9; // 假設稅金和運費佔 10%
-            $shippingFee = $grandTotal * 0.05;
-            $tax = $grandTotal * 0.05;
+            $subtotal = (int) ($grandTotal * 0.9); // 假設稅金和運費佔 10%
+            $shippingFee = (int) ($grandTotal * 0.05);
+            $tax = (int) ($grandTotal * 0.05);
             
             return [
                 'subtotal' => $subtotal,

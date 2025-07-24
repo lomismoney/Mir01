@@ -113,9 +113,9 @@ class PurchaseIntegrationTest extends TestCase
         
         // 不再合併相同的 product_variant_id
         // 總成本: 43400 + 42000 + 1200 = 86600
-        // 返回時除以 100 = 866 元
+        // API 返回時已經是元為單位
         
-        $this->assertEquals(866, $responseData['total_amount']);
+        $this->assertEquals(86600, $responseData['total_amount']);
         $this->assertEquals(1200, $responseData['shipping_cost']);
         $this->assertEquals('測試進貨單備註', $responseData['notes']);
         $this->assertCount(2, $responseData['items']); // 現在有兩個獨立的項目
@@ -279,8 +279,8 @@ class PurchaseIntegrationTest extends TestCase
         // variant2: 13 * 20000 = 260000
         // 運費: 2000
         // 總計: 332000
-        // 返回時除以 100 = 3320
+        // API 返回時已經是元為單位
         $responseData = $response->json('data');
-        $this->assertEquals(3320, $responseData['total_amount']);
+        $this->assertEquals(332000, $responseData['total_amount']);
     }
 }

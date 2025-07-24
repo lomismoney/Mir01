@@ -30,6 +30,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -92,6 +93,8 @@ const createPurchaseSchema = z.object({
   shipping_cost: z.number().min(0, '運費不能為負數'),
   notes: z.string().optional(),
   store_id: z.number().min(1, '請選擇門市'),
+  is_tax_inclusive: z.boolean(),
+  tax_rate: z.number().min(0, '稅率不能為負數'),
   items: z.array(z.object({
     product_variant_id: z.number(),
     quantity: z.number().min(1),
@@ -141,6 +144,8 @@ export function EnhancedCreatePurchaseDialog({
       shipping_cost: 0,
       notes: '',
       store_id: 0,
+      is_tax_inclusive: false,
+      tax_rate: 5,
       items: [],
     },
   });
@@ -416,6 +421,8 @@ export function EnhancedCreatePurchaseDialog({
         purchased_at: data.purchased_at.toISOString(),
         shipping_cost: data.shipping_cost,
         notes: data.notes || '',
+        is_tax_inclusive: data.is_tax_inclusive,
+        tax_rate: data.tax_rate,
         items: cleanedManualItems, // 可以是空陣列
         // 如果有待進貨項目，一起提交
         ...(backorderItems.length > 0 && {
@@ -495,18 +502,49 @@ export function EnhancedCreatePurchaseDialog({
     name: 'shipping_cost',
   });
   
+  const watchedIsTaxInclusive = useWatch({
+    control: form.control,
+    name: 'is_tax_inclusive',
+  });
+  
+  const watchedTaxRate = useWatch({
+    control: form.control,
+    name: 'tax_rate',
+  });
+  
   const totalCost = useMemo(() => {
     const items = watchedItems || [];
     const shippingCost = watchedShippingCost || 0;
+    const isTaxInclusive = watchedIsTaxInclusive || false;
+    const taxRate = watchedTaxRate || 0;
     
     const itemsTotal = items.reduce((total, item) => {
       const cost = parseFloat(String(item?.cost_price || 0));
       const quantity = parseInt(String(item?.quantity || 0), 10);
       return total + (cost * quantity);
     }, 0);
-
-    return itemsTotal + shippingCost;
-  }, [watchedItems, watchedShippingCost]);
+    
+    // 被選擇的待進貨項目成本
+    const backorderItemsTotal = purchaseItems
+      .filter(item => item.source === 'backorder')
+      .reduce((total, item) => {
+        return total + (item.quantity * item.cost_price);
+      }, 0);
+    
+    const subtotal = itemsTotal + backorderItemsTotal + shippingCost;
+    
+    // 稅務計算
+    if (isTaxInclusive) {
+      // 含稅價：稅額 = 總額 × 稅率 / (100 + 稅率)
+      const taxAmount = subtotal * taxRate / (100 + taxRate);
+      return { subtotal, taxAmount, finalAmount: subtotal };
+    } else {
+      // 未含稅：稅額 = 總額 × 稅率 / 100，最終金額 = 總額 + 稅額
+      const taxAmount = subtotal * taxRate / 100;
+      const finalAmount = subtotal + taxAmount;
+      return { subtotal, taxAmount, finalAmount };
+    }
+  }, [watchedItems, watchedShippingCost, watchedIsTaxInclusive, watchedTaxRate, purchaseItems]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -609,6 +647,52 @@ export function EnhancedCreatePurchaseDialog({
                         type="number"
                         min="0"
                         step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {/* 稅務資訊 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="is_tax_inclusive"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel>含稅價</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        商品價格是否包含稅額
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="tax_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>稅率 (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="5.00"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
@@ -910,8 +994,19 @@ export function EnhancedCreatePurchaseDialog({
 
             {/* 總成本 */}
             <div className="flex justify-end">
-              <div className="text-lg font-semibold">
-                總成本：{MoneyHelper.format(totalCost, 'NT$', true)}
+              <div className="text-right space-y-1">
+                <div className="text-sm text-muted-foreground flex justify-between gap-4">
+                  <span>商品小計：</span>
+                  <span>{MoneyHelper.format(totalCost.subtotal, 'NT$', true)}</span>
+                </div>
+                <div className="text-sm text-muted-foreground flex justify-between gap-4">
+                  <span>稅額：</span>
+                  <span>{MoneyHelper.format(totalCost.taxAmount, 'NT$', true)}</span>
+                </div>
+                <div className="text-lg font-semibold flex justify-between gap-4">
+                  <span>總金額：</span>
+                  <span>{MoneyHelper.format(totalCost.finalAmount, 'NT$', true)}</span>
+                </div>
               </div>
             </div>
 

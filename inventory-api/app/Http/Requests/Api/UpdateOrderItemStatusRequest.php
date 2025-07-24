@@ -12,9 +12,17 @@ class UpdateOrderItemStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // TODO: 實現權限驗證邏輯
-        // 例如：檢查用戶是否有權限修改此訂單項目
-        return true; // 暫時允許所有已認證用戶
+        // 獲取訂單項目實例
+        $orderItem = $this->route('order_item');
+        
+        // 如果找不到訂單項目，返回 false
+        if (!$orderItem) {
+            return false;
+        }
+        
+        // 使用 OrderPolicy 的 update 方法檢查用戶是否有權限更新訂單
+        // 因為訂單項目的權限應該與其所屬訂單的權限一致
+        return $this->user()->can('update', $orderItem->order);
     }
 
     /**

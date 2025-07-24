@@ -58,12 +58,14 @@ export const createInstallationColumns = ({
   onUpdateStatus,
   onEdit,
   onDelete,
+  onNavigate,
 }: {
   onPreview: (id: number) => void;
   onAssignInstaller: (installation: InstallationWithRelations) => void;
   onUpdateStatus: (installation: InstallationWithRelations, status: InstallationStatus) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  onNavigate: (path: string) => void;
 }): ColumnDef<InstallationWithRelations>[] => [
   // 選擇欄 - 現代化設計
   {
@@ -77,7 +79,7 @@ export const createInstallationColumns = ({
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="全選"
-          className="rounded border-border/60 hover:border-primary/60 transition-colors duration-200"
+          className="transition-colors"
         />
       </div>
     ),
@@ -87,7 +89,7 @@ export const createInstallationColumns = ({
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="選擇安裝單"
-          className="rounded border-border/60 hover:border-primary/60 transition-colors duration-200"
+          className="transition-colors"
         />
       </div>
     ),
@@ -115,7 +117,7 @@ export const createInstallationColumns = ({
           <div className="flex items-center gap-3">
             <button
               onClick={() => onPreview(installation.id)}
-              className="group flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-all duration-200 font-mono bg-gradient-to-r from-primary/10 to-primary/5 px-3 py-2 rounded-lg hover:from-primary/15 hover:to-primary/10 border border-primary/20 hover:border-primary/30"
+              className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 font-mono bg-secondary/50 px-2 py-1 rounded border hover:bg-secondary"
             >
               <svg className="h-3 w-3 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -301,36 +303,31 @@ export const createInstallationColumns = ({
     cell: ({ row }) => {
       const installer = row.original.installer;
       return (
-        <div className="py-3">
+        <div className="py-1">
           {installer ? (
-            <div className="flex items-center gap-3 bg-gradient-to-r from-green-50 to-green-25 p-3 rounded-lg border border-green-200 hover:border-green-300 transition-all duration-200">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white shadow-sm">
-                <span className="text-sm font-semibold">
+            <div className="flex items-center gap-2 bg-secondary/50 p-2 rounded border">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                <span className="text-xs font-medium">
                   {(installer.name || installer.username || '師').charAt(0)?.toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-green-800">
+                <div className="text-sm font-medium text-foreground">
                   {installer.name || installer.username || `用戶 ${installer.id}`}
                 </div>
-                <div className="flex items-center gap-1 mt-1">
-                  <svg className="h-3 w-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span className="text-xs text-green-600 font-medium">
-                    @{installer.username}
-                  </span>
+                <div className="text-xs text-muted-foreground">
+                  @{installer.username}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3 bg-muted/20 p-3 rounded-lg border border-dashed border-border/50">
-              <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
-                <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2 bg-muted/30 p-2 rounded border border-dashed">
+              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                <svg className="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <span className="text-sm text-muted-foreground font-medium">未分配師傅</span>
+              <span className="text-sm text-muted-foreground">未分配師傅</span>
             </div>
           )}
         </div>
@@ -392,7 +389,7 @@ export const createInstallationColumns = ({
                   <span>快速預覽</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onSelect={() => window.location.href = `/installations/${installation.id}`}
+                  onSelect={() => onNavigate(`/installations/${installation.id}`)}
                   className="flex items-center gap-3 py-2"
                 >
                   <div className="w-6 h-6 rounded bg-purple-100 flex items-center justify-center">
@@ -402,7 +399,7 @@ export const createInstallationColumns = ({
                 </DropdownMenuItem>
                 {installation.order_id && (
                   <DropdownMenuItem
-                    onSelect={() => window.location.href = `/orders/${installation.order_id}`}
+                    onSelect={() => onNavigate(`/orders/${installation.order_id}`)}
                     className="flex items-center gap-3 py-2"
                   >
                     <div className="w-6 h-6 rounded bg-indigo-100 flex items-center justify-center">

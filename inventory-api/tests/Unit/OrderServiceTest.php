@@ -54,7 +54,7 @@ class OrderServiceTest extends TestCase
         $this->productVariant = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'sku' => 'TEST-SKU-001',
-            'price' => 100.00
+            'price' => 10000
         ]);
 
         // Mock 依賴服務
@@ -95,7 +95,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 100.00,
+                    'price' => 10000, // 100元 = 10000分
                     'quantity' => 2,
                 ]
             ]
@@ -173,7 +173,7 @@ class OrderServiceTest extends TestCase
                      'status' => '待處理',
                      'product_name' => '測試商品',
                      'sku' => 'TEST-SKU-001',
-                     'price' => 100.00,
+                     'price' => 10000,
                      'quantity' => 10,
                  ]
              ]
@@ -219,6 +219,13 @@ class OrderServiceTest extends TestCase
              'payment_method' => '現金',
              'order_source' => '現場客戶',
              'shipping_address' => '測試地址',
+             'stock_decisions' => [
+                 [
+                     'product_variant_id' => $this->productVariant->id,
+                     'action' => 'transfer',
+                     'quantity' => 10
+                 ]
+             ],
              'items' => [
                  [
                      'product_variant_id' => $this->productVariant->id,
@@ -227,7 +234,7 @@ class OrderServiceTest extends TestCase
                      'status' => '待處理',
                      'product_name' => '預訂商品',
                      'sku' => 'TEST-SKU-001',
-                     'price' => 100.00,
+                     'price' => 10000,
                      'quantity' => 10,
                  ]
              ]
@@ -242,6 +249,10 @@ class OrderServiceTest extends TestCase
          $this->mockInventoryService
              ->shouldReceive('initiateAutomatedTransfer')
              ->once()
+             ->with(
+                 Mockery::type(\App\Models\OrderItem::class),
+                 Mockery::type('int')
+             )
              ->andReturn(true);
          
          $this->mockInventoryService
@@ -332,13 +343,13 @@ class OrderServiceTest extends TestCase
     {
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 0.00,
+            'grand_total' => 100000, // 1000元 = 100000分
+            'paid_amount' => 0, // 0元 = 0分
             'payment_status' => 'pending'
         ]);
 
         $paymentData = [
-            'amount' => 500.00,
+            'amount' => 50000, // 500元 = 50000分
             'payment_method' => 'cash',
             'notes' => '第一筆付款'
         ];
@@ -364,13 +375,13 @@ class OrderServiceTest extends TestCase
     {
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 700.00,
+            'grand_total' => 100000, // 1000元 = 100000分
+            'paid_amount' => 70000, // 700元 = 70000分
             'payment_status' => 'partial'
         ]);
 
         $paymentData = [
-            'amount' => 300.00,
+            'amount' => 30000, // 300元 = 30000分
             'payment_method' => 'transfer',
             'notes' => '尾款付清'
         ];
@@ -389,18 +400,18 @@ class OrderServiceTest extends TestCase
     {
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 800.00,
+            'grand_total' => 100000, // 1000元 = 100000分
+            'paid_amount' => 80000, // 800元 = 80000分
             'payment_status' => 'partial'
         ]);
 
         $paymentData = [
-            'amount' => 300.00, // 超過剩餘金額 200
+            'amount' => 30000, // 300元 = 30000分 // 超過剩餘金額 200
             'payment_method' => 'cash'
         ];
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('收款金額不能超過剩餘未付金額：200');
+        $this->expectExceptionMessage('收款金額不能超過剩餘未付金額：2');
 
         $this->orderService->addPartialPayment($order, $paymentData);
     }
@@ -567,7 +578,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '自訂商品',
                     'sku' => 'CUSTOM-001',
-                    'price' => 200.00,
+                    'price' => 20000, // 200元 = 20000分
                     'quantity' => 1,
                     'custom_product_name' => '客戶訂製商品',
                     'custom_specifications' => json_encode(['顏色' => '紅色', '尺寸' => 'XL'])
@@ -628,7 +639,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001', 
-                    'price' => 100.00,
+                    'price' => 10000,
                     'quantity' => 1,
                 ]
             ]
@@ -736,7 +747,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 33.33, // 會產生小數的價格
+                    'price' => 3333, // 33.33元 = 3333分
                     'quantity' => 3,
                     'discount_amount' => 5.55
                 ]
@@ -792,7 +803,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 100.00,
+                    'price' => 10000,
                     'quantity' => 1,
                 ]
             ]
@@ -835,8 +846,8 @@ class OrderServiceTest extends TestCase
             'shipping_address' => '測試地址',
             'is_tax_inclusive' => true, // 含稅
             'tax_rate' => 5, // 5% 稅率
-            'shipping_fee' => 100.00, // 運費
-            'discount_amount' => 50.00, // 折扣
+            'shipping_fee' => 10000, // 100元 = 10000分
+            'discount_amount' => 5000, // 50元 = 5000分
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
@@ -844,7 +855,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 1000.00,
+                    'price' => 100000, // 1000元 = 100000分
                     'quantity' => 1,
                 ]
             ]
@@ -897,8 +908,8 @@ class OrderServiceTest extends TestCase
             'shipping_address' => '測試地址',
             'is_tax_inclusive' => false, // 未稅
             'tax_rate' => 5, // 5% 稅率
-            'shipping_fee' => 100.00, // 運費（不課稅）
-            'discount_amount' => 50.00, // 折扣
+            'shipping_fee' => 10000, // 100元 = 10000分（不課稅）
+            'discount_amount' => 5000, // 50元 = 5000分
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
@@ -906,7 +917,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 1000.00,
+                    'price' => 100000, // 1000元 = 100000分
                     'quantity' => 1,
                 ]
             ]
@@ -967,7 +978,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 1000.00,
+                    'price' => 100000, // 1000元 = 100000分
                     'quantity' => 1,
                 ]
             ]
@@ -1012,15 +1023,15 @@ class OrderServiceTest extends TestCase
             'shipping_address' => '測試地址',
             'is_tax_inclusive' => false,
             'tax_rate' => 5,
-            'shipping_fee' => 100.00,
-            'discount_amount' => 50.00,
+            'shipping_fee' => 10000, // 100元 = 10000分
+            'discount_amount' => 5000, // 50元 = 5000分
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
                     'product_name' => '測試商品',
                     'sku' => 'TEST-SKU-001',
-                    'price' => 1000.00,
-                    'cost' => 800.00,
+                    'price' => 100000, // 1000元 = 100000分
+                    'cost' => 80000, // 800元 = 80000分
                     'quantity' => 1,
                     'status' => '待處理',
                     'is_stocked_sale' => true,
@@ -1085,8 +1096,8 @@ class OrderServiceTest extends TestCase
             'shipping_address' => '測試地址',
             'is_tax_inclusive' => true,
             'tax_rate' => 5,
-            'shipping_fee' => 123.45,
-            'discount_amount' => 67.89,
+            'shipping_fee' => 12345, // 123.45元 = 12345分
+            'discount_amount' => 6789, // 67.89元 = 6789分
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
@@ -1094,7 +1105,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品A',
                     'sku' => 'TEST-SKU-COMPLEX-001',
-                    'price' => 999.99,
+                    'price' => 99999, // 999.99元 = 99999分
                     'quantity' => 2,
                 ],
                 [
@@ -1103,7 +1114,7 @@ class OrderServiceTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品B',
                     'sku' => 'TEST-SKU-COMPLEX-002',
-                    'price' => 333.33,
+                    'price' => 33333, // 333.33元 = 33333分
                     'quantity' => 3,
                 ]
             ]

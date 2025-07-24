@@ -23,8 +23,8 @@ class PurchaseFactory extends Factory
             'store_id' => Store::factory(),
             'user_id' => User::factory(),
             'order_number' => 'PO-' . $this->faker->unique()->numerify('########'),
-            'total_amount' => $this->faker->numberBetween(100000, 1000000), // 1000.00 ~ 10000.00
-            'shipping_cost' => $this->faker->numberBetween(0, 50000), // 0 ~ 500.00
+            'total_amount' => $this->faker->randomFloat(2, 1000.00, 10000.00), // 1000.00 ~ 10000.00 元
+            'shipping_cost' => $this->faker->randomFloat(2, 0, 500.00), // 0 ~ 500.00 元
             'status' => $this->faker->randomElement(['pending', 'confirmed', 'in_transit', 'received', 'completed', 'cancelled']),
             'purchased_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
         ];

@@ -24,9 +24,9 @@ class AttributePolicyTest extends TestCase
         parent::setUp();
         $this->policy = new AttributePolicy();
         
-        // 創建角色
-        Role::firstOrCreate(['name' => 'admin']);
-        Role::firstOrCreate(['name' => 'staff']);
+        // 確保角色存在 - 使用 guard_name
+        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
         
         // 創建用戶
         $this->adminUser = User::factory()->create();

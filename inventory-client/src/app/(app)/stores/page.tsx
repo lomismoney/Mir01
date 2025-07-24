@@ -43,6 +43,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,8 +65,10 @@ import { formatDate } from "@/lib/dateHelpers";
 type Store = {
   id: number;
   name: string;
+  code?: string | null;
   address: string | null;
   phone?: string | null;
+  is_active?: boolean;
   status?: string;
   created_at: string;
   updated_at: string;
@@ -98,9 +101,15 @@ export default function StoresPage() {
 
   // 表單狀態
   const [newStoreName, setNewStoreName] = useState("");
+  const [newStoreCode, setNewStoreCode] = useState("");
   const [newStoreAddress, setNewStoreAddress] = useState("");
+  const [newStorePhone, setNewStorePhone] = useState("");
+  const [newStoreIsActive, setNewStoreIsActive] = useState(true);
   const [editStoreName, setEditStoreName] = useState("");
+  const [editStoreCode, setEditStoreCode] = useState("");
   const [editStoreAddress, setEditStoreAddress] = useState("");
+  const [editStorePhone, setEditStorePhone] = useState("");
+  const [editStoreIsActive, setEditStoreIsActive] = useState(true);
 
   /**
    * 處理新增分店按鈕點擊
@@ -121,7 +130,10 @@ export default function StoresPage() {
     createStoreMutation.mutate(
       {
         name: newStoreName.trim(),
+        code: newStoreCode.trim() || undefined,
         address: newStoreAddress.trim() || undefined,
+        phone: newStorePhone.trim() || undefined,
+        is_active: newStoreIsActive,
       },
       {
         onSuccess: () => {
@@ -139,7 +151,10 @@ export default function StoresPage() {
    */
   const handleEditStore = (store: Store) => {
     setEditStoreName(store.name);
+    setEditStoreCode(store.code || "");
     setEditStoreAddress(store.address || "");
+    setEditStorePhone(store.phone || "");
+    setEditStoreIsActive(store.is_active ?? true);
     modalManager.openModal('edit', store);
   };
 
@@ -158,7 +173,10 @@ export default function StoresPage() {
         id: editingStore.id,
         body: {
           name: editStoreName.trim(),
+          code: editStoreCode.trim() || undefined,
           address: editStoreAddress.trim() || undefined,
+          phone: editStorePhone.trim() || undefined,
+          is_active: editStoreIsActive,
         },
       },
       {
@@ -200,7 +218,10 @@ export default function StoresPage() {
    */
   const resetCreateForm = () => {
     setNewStoreName("");
+    setNewStoreCode("");
     setNewStoreAddress("");
+    setNewStorePhone("");
+    setNewStoreIsActive(true);
   };
 
   /**
@@ -208,7 +229,10 @@ export default function StoresPage() {
    */
   const resetEditForm = () => {
     setEditStoreName("");
+    setEditStoreCode("");
     setEditStoreAddress("");
+    setEditStorePhone("");
+    setEditStoreIsActive(true);
   };
 
   // 從響應中提取 stores 數據
@@ -224,6 +248,7 @@ export default function StoresPage() {
     return allStores.filter((store: Store) => {
       return (
         store.name?.toLowerCase().includes(query) ||
+        store.code?.toLowerCase().includes(query) ||
         store.address?.toLowerCase().includes(query) ||
         store.phone?.toLowerCase().includes(query)
       );
@@ -233,7 +258,7 @@ export default function StoresPage() {
   // 計算分店統計數據（使用真實 API 數據）
   const getStoreStats = () => {
     const totalStores = allStores.length;
-    const activeStores = allStores.filter(store => store.status !== 'inactive').length;
+    const activeStores = allStores.filter(store => store.is_active !== false).length;
     const totalInventory = allStores.reduce((sum, store) => sum + (store.inventory_count || 0), 0);
     const totalUsers = allStores.reduce((sum, store) => sum + (store.users_count || 0), 0);
 
@@ -447,6 +472,34 @@ export default function StoresPage() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="store-code" className="text-sm font-medium">
+                    門市代碼
+                  </Label>
+                  <Input
+                    id="store-code"
+                    placeholder="例如：ST001"
+                    value={newStoreCode}
+                    onChange={(e) => setNewStoreCode(e.target.value)}
+                    disabled={createStoreMutation.isPending}
+                    className="h-10"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="store-phone" className="text-sm font-medium">
+                    聯絡電話
+                  </Label>
+                  <Input
+                    id="store-phone"
+                    placeholder="例如：02-12345678"
+                    value={newStorePhone}
+                    onChange={(e) => setNewStorePhone(e.target.value)}
+                    disabled={createStoreMutation.isPending}
+                    className="h-10"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="store-address" className="text-sm font-medium">
                     分店地址
                   </Label>
@@ -457,6 +510,18 @@ export default function StoresPage() {
                     onChange={(e) => setNewStoreAddress(e.target.value)}
                     disabled={createStoreMutation.isPending}
                     className="h-10"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="store-is-active" className="text-sm font-medium">
+                    營運中
+                  </Label>
+                  <Switch
+                    id="store-is-active"
+                    checked={newStoreIsActive}
+                    onCheckedChange={setNewStoreIsActive}
+                    disabled={createStoreMutation.isPending}
                   />
                 </div>
               </div>
@@ -542,6 +607,34 @@ export default function StoresPage() {
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="edit-store-code" className="text-sm font-medium">
+                      門市代碼
+                    </Label>
+                    <Input
+                      id="edit-store-code"
+                      placeholder="例如：ST001"
+                      value={editStoreCode}
+                      onChange={(e) => setEditStoreCode(e.target.value)}
+                      disabled={updateStoreMutation.isPending}
+                      className="h-10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-store-phone" className="text-sm font-medium">
+                      聯絡電話
+                    </Label>
+                    <Input
+                      id="edit-store-phone"
+                      placeholder="例如：02-12345678"
+                      value={editStorePhone}
+                      onChange={(e) => setEditStorePhone(e.target.value)}
+                      disabled={updateStoreMutation.isPending}
+                      className="h-10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="edit-store-address" className="text-sm font-medium">
                       分店地址
                     </Label>
@@ -552,6 +645,18 @@ export default function StoresPage() {
                       onChange={(e) => setEditStoreAddress(e.target.value)}
                       disabled={updateStoreMutation.isPending}
                       className="h-10"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="edit-store-is-active" className="text-sm font-medium">
+                      營運中
+                    </Label>
+                    <Switch
+                      id="edit-store-is-active"
+                      checked={editStoreIsActive}
+                      onCheckedChange={setEditStoreIsActive}
+                      disabled={updateStoreMutation.isPending}
                     />
                   </div>
                 </div>
@@ -673,6 +778,12 @@ export default function StoresPage() {
                     <p className="text-sm font-medium font-mono">#{modalManager.currentData.id}</p>
                   </div>
                 </div>
+                {modalManager.currentData.code && (
+                  <div className="space-y-1 mt-4">
+                    <Label className="text-xs text-muted-foreground">門市代碼</Label>
+                    <p className="text-sm font-medium font-mono">{modalManager.currentData.code}</p>
+                  </div>
+                )}
                 {modalManager.currentData.address && (
                   <div className="space-y-1 mt-4">
                     <Label className="text-xs text-muted-foreground">分店地址</Label>
@@ -721,9 +832,8 @@ export default function StoresPage() {
                 <h3 className="text-sm font-semibold text-muted-foreground">狀態資訊</h3>
                 <div className="flex items-center gap-2">
                   <Label className="text-xs text-muted-foreground">營運狀態</Label>
-                  <Badge variant={modalManager.currentData.status === 'active' ? 'default' : 'secondary'}>
-                    {modalManager.currentData.status === 'active' ? '營運中' : 
-                     modalManager.currentData.status === 'inactive' ? '暫停營運' : '未知狀態'}
+                  <Badge variant={modalManager.currentData.is_active ? 'default' : 'secondary'}>
+                    {modalManager.currentData.is_active ? '營運中' : '暫停營運'}
                   </Badge>
                 </div>
               </div>

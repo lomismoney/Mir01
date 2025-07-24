@@ -54,7 +54,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import type { PaginationState } from "@tanstack/react-table";
@@ -434,7 +434,7 @@ export function OrdersPageClient() {
                     </Button>
                   </TableCell>
                   <TableCell>{order.customer?.name || "未知客戶"}</TableCell>
-                  <TableCell>{formatPrice(order.grand_total)}</TableCell>
+                  <TableCell>{order.grand_total != null ? MoneyHelper.format(order.grand_total, 'NT$') : 'N/A'}</TableCell>
                   <TableCell>
                     <Badge variant={getPaymentStatusVariant(order.payment_status)}>
                       {paymentStatusText[order.payment_status] || order.payment_status}

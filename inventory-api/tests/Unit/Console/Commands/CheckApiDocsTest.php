@@ -508,35 +508,35 @@ class CheckApiDocsTest extends TestCase
      */
     public function test_handle_reflection_exception()
     {
-        // 使用 Artisan 測試來處理無效控制器的情況
-        // 先創建一個測試命令類來替換 criticalApis
-        $this->app->bind(CheckApiDocs::class, function () {
-            $command = new class extends CheckApiDocs {
-                public function __construct()
-                {
-                    parent::__construct();
-                    // 重寫 criticalApis 屬性
-                    $reflection = new \ReflectionClass($this);
-                    $property = $reflection->getParentClass()->getProperty('criticalApis');
-                    $property->setAccessible(true);
-                    $property->setValue($this, [
-                        [
-                            'controller' => 'App\\Http\\Controllers\\NonExistentController',
-                            'method' => 'nonExistentMethod',
-                            'description' => '測試無效控制器',
-                            'requires' => ['business_logic' => '業務邏輯副作用']
-                        ]
-                    ]);
-                }
-            };
-            return $command;
-        });
+        $command = new CheckApiDocs();
         
-        // 執行命令並檢查退出碼
-        $this->artisan('api:check-docs')
-            ->expectsOutput('🔍 檢查 API 文檔品質...')
-            ->expectsOutput('📋 檢查：測試無效控制器 (nonExistentMethod)')
-            ->assertExitCode(1); // FAILURE
+        // 使用反射來修改 criticalApis 屬性
+        $reflection = new \ReflectionClass($command);
+        $property = $reflection->getProperty('criticalApis');
+        $property->setAccessible(true);
+        $property->setValue($command, [
+            [
+                'controller' => 'App\\Http\\Controllers\\NonExistentController',
+                'method' => 'nonExistentMethod', 
+                'description' => '測試無效控制器',
+                'requires' => ['business_logic' => '業務邏輯副作用']
+            ]
+        ]);
+        
+        // 設置輸入和輸出模擬
+        $input = $this->createMock(\Symfony\Component\Console\Input\InputInterface::class);
+        $input->method('getOption')->willReturn(false);
+        
+        $output = $this->createMock(\Illuminate\Console\OutputStyle::class);
+        
+        $command->setInput($input);
+        $command->setOutput($output);
+        
+        // 執行命令
+        $exitCode = $command->handle();
+        
+        // 驗證退出碼
+        $this->assertEquals(\Illuminate\Console\Command::FAILURE, $exitCode);
     }
 
     /**

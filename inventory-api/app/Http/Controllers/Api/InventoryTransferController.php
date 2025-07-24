@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\InventoryService;
 
 /**
  * @group 庫存轉移
@@ -22,8 +23,11 @@ use Illuminate\Support\Facades\DB;
  */
 class InventoryTransferController extends Controller
 {
-    public function __construct()
+    protected InventoryService $inventoryService;
+    
+    public function __construct(InventoryService $inventoryService)
     {
+        $this->inventoryService = $inventoryService;
         // 授權中間件已在 api.php 路由中定義
     }
 
@@ -165,15 +169,37 @@ class InventoryTransferController extends Controller
             // 執行庫存轉移
             if ($status === InventoryTransfer::STATUS_COMPLETED) {
                 // 減少來源門市庫存
-                if (!$fromInventory->reduceStock($quantity, $user->id, "轉出至門市 #{$toStoreId}: {$notes}", $transferMetadata)) {
-                    abort(500, '減少來源門市庫存失敗');
+                try {
+                    $this->inventoryService->deductStock(
+                        $productVariantId,
+                        $quantity,
+                        $fromStoreId,
+                        "轉出至門市 #{$toStoreId}: {$notes}",
+                        $transferMetadata
+                    );
+                } catch (\Exception $e) {
+                    abort(500, '減少來源門市庫存失敗: ' . $e->getMessage());
                 }
                 
                 // 增加目標門市庫存
-                if (!$toInventory->addStock($quantity, $user->id, "轉入自門市 #{$fromStoreId}: {$notes}", $transferMetadata)) {
+                try {
+                    $this->inventoryService->returnStock(
+                        $productVariantId,
+                        $quantity,
+                        $toStoreId,
+                        "轉入自門市 #{$fromStoreId}: {$notes}",
+                        $transferMetadata
+                    );
+                } catch (\Exception $e) {
                     // 如果增加目標門市庫存失敗，需要恢復來源門市庫存
-                    $fromInventory->addStock($quantity, $user->id, "庫存轉移失敗後回滾", $transferMetadata);
-                    abort(500, '增加目標門市庫存失敗');
+                    $this->inventoryService->returnStock(
+                        $productVariantId,
+                        $quantity,
+                        $fromStoreId,
+                        "庫存轉移失敗後回滾",
+                        $transferMetadata
+                    );
+                    abort(500, '增加目標門市庫存失敗: ' . $e->getMessage());
                 }
                 
                 // 將庫存交易記錄更新為轉移類型
@@ -496,13 +522,20 @@ class InventoryTransferController extends Controller
         $transferMetadata = ['transfer_id' => $transfer->id];
         
         // 減少來源門市庫存
-        if (!$fromInventory->reduceStock($transfer->quantity, $user->id, "轉移至門市 #{$transfer->to_store_id} - 運輸中", $transferMetadata)) {
-            throw new \Exception('減少來源門市庫存失敗');
+        try {
+            $this->inventoryService->deductStock(
+                $transfer->product_variant_id,
+                $transfer->quantity,
+                $transfer->from_store_id,
+                "轉移至門市 #{$transfer->to_store_id} - 運輸中",
+                $transferMetadata
+            );
+        } catch (\Exception $e) {
+            throw new \Exception('減少來源門市庫存失敗: ' . $e->getMessage());
         }
         
-        // 將庫存交易記錄更新為轉移類型
-        $fromTransaction = $fromInventory->transactions()->latest()->first();
-        $fromTransaction->update(['type' => InventoryTransaction::TYPE_TRANSFER_OUT]);
+        // 庫存交易記錄已由 InventoryService 處理
+        // 如需更新交易類型，可通過 metadata 在 service 層處理
     }
     
     /**
@@ -529,23 +562,46 @@ class InventoryTransferController extends Controller
         $transferMetadata = ['transfer_id' => $transfer->id];
         
         // 減少來源門市庫存
-        if (!$fromInventory->reduceStock($transfer->quantity, $user->id, "轉出至門市 #{$transfer->to_store_id}", $transferMetadata)) {
-            throw new \Exception('減少來源門市庫存失敗');
+        try {
+            $this->inventoryService->deductStock(
+                $transfer->product_variant_id,
+                $transfer->quantity,
+                $transfer->from_store_id,
+                "轉出至門市 #{$transfer->to_store_id}",
+                $transferMetadata
+            );
+        } catch (\Exception $e) {
+            throw new \Exception('減少來源門市庫存失敗: ' . $e->getMessage());
         }
         
         // 增加目標門市庫存
-        if (!$toInventory->addStock($transfer->quantity, $user->id, "轉入自門市 #{$transfer->from_store_id}", $transferMetadata)) {
+        try {
+            $this->inventoryService->returnStock(
+                $transfer->product_variant_id,
+                $transfer->quantity,
+                $transfer->to_store_id,
+                "轉入自門市 #{$transfer->from_store_id}",
+                $transferMetadata
+            );
+        } catch (\Exception $e) {
             // 如果增加目標門市庫存失敗，需要恢復來源門市庫存
-            $fromInventory->addStock($transfer->quantity, $user->id, "庫存轉移失敗後回滾", $transferMetadata);
-            throw new \Exception('增加目標門市庫存失敗');
+            try {
+                $this->inventoryService->returnStock(
+                    $transfer->product_variant_id,
+                    $transfer->quantity,
+                    $transfer->from_store_id,
+                    "庫存轉移失敗後回滾",
+                    $transferMetadata
+                );
+            } catch (\Exception $rollbackException) {
+                // 記錄回滾失敗但不中斷流程
+                \Log::error('庫存回滾失敗', ['exception' => $rollbackException->getMessage()]);
+            }
+            throw new \Exception('增加目標門市庫存失敗: ' . $e->getMessage());
         }
         
-        // 將庫存交易記錄更新為轉移類型
-        $fromTransaction = $fromInventory->transactions()->latest()->first();
-        $fromTransaction->update(['type' => InventoryTransaction::TYPE_TRANSFER_OUT]);
-        
-        $toTransaction = $toInventory->transactions()->latest()->first();
-        $toTransaction->update(['type' => InventoryTransaction::TYPE_TRANSFER_IN]);
+        // 庫存交易記錄已由 InventoryService 處理
+        // 如需更新交易類型，可通過 metadata 在 service 層處理
     }
     
     /**
@@ -562,13 +618,20 @@ class InventoryTransferController extends Controller
         $transferMetadata = ['transfer_id' => $transfer->id];
         
         // 增加目標門市庫存（來源門市在 in_transit 時已扣減）
-        if (!$toInventory->addStock($transfer->quantity, $user->id, "轉入自門市 #{$transfer->from_store_id}", $transferMetadata)) {
-            throw new \Exception('增加目標門市庫存失敗');
+        try {
+            $this->inventoryService->returnStock(
+                $transfer->product_variant_id,
+                $transfer->quantity,
+                $transfer->to_store_id,
+                "轉入自門市 #{$transfer->from_store_id}",
+                $transferMetadata
+            );
+        } catch (\Exception $e) {
+            throw new \Exception('增加目標門市庫存失敗: ' . $e->getMessage());
         }
         
-        // 將庫存交易記錄更新為轉移類型
-        $toTransaction = $toInventory->transactions()->latest()->first();
-        $toTransaction->update(['type' => InventoryTransaction::TYPE_TRANSFER_IN]);
+        // 庫存交易記錄已由 InventoryService 處理
+        // 如需更新交易類型，可通過 metadata 在 service 層處理
     }
     
     /**
@@ -585,12 +648,19 @@ class InventoryTransferController extends Controller
         $transferMetadata = ['transfer_id' => $transfer->id];
         
         // 恢復來源門市庫存
-        if (!$fromInventory->addStock($transfer->quantity, $user->id, "取消轉移恢復庫存：{$reason}", $transferMetadata)) {
-            throw new \Exception('恢復來源門市庫存失敗');
+        try {
+            $this->inventoryService->returnStock(
+                $transfer->product_variant_id,
+                $transfer->quantity,
+                $transfer->from_store_id,
+                "取消轉移恢復庫存：{$reason}",
+                $transferMetadata
+            );
+        } catch (\Exception $e) {
+            throw new \Exception('恢復來源門市庫存失敗: ' . $e->getMessage());
         }
         
-        // 建立取消轉移的交易記錄
-        $transaction = $fromInventory->transactions()->latest()->first();
-        $transaction->update(['type' => InventoryTransaction::TYPE_TRANSFER_CANCEL]);
+        // 庫存交易記錄已由 InventoryService 處理
+        // 取消轉移的交易類型可通過 metadata 在 service 層處理
     }
 }

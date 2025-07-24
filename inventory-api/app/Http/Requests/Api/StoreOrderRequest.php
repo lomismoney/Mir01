@@ -37,6 +37,15 @@ class StoreOrderRequest extends FormRequest
             
             'force_create_despite_stock' => 'sometimes|boolean',
             
+            // 🎯 修復：新增庫存決策驗證規則
+            'stock_decisions'      => 'sometimes|array',
+            'stock_decisions.*.product_variant_id' => 'required|integer|exists:product_variants,id',
+            'stock_decisions.*.action' => 'required|string|in:transfer,purchase,mixed',
+            'stock_decisions.*.transfers' => 'sometimes|array',
+            'stock_decisions.*.transfers.*.from_store_id' => 'required|integer|exists:stores,id',
+            'stock_decisions.*.transfers.*.quantity' => 'required|integer|min:1',
+            'stock_decisions.*.purchase_quantity' => 'sometimes|integer|min:1',
+            
             'items'                => 'required|array|min:1',
             'items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'items.*.is_stocked_sale'    => 'required|boolean',
@@ -50,18 +59,43 @@ class StoreOrderRequest extends FormRequest
     }
 
     /**
-     * 在驗證前強制布林值轉換，確保多端一致
+     * 在驗證前進行數據預處理
+     * 1. 強制布林值轉換，確保多端一致
+     * 2. 將金額從元轉換為分（前端傳元，後端處理分）
      */
     protected function prepareForValidation(): void
     {
+        $data = [];
+        
+        // 處理布林值轉換
         if ($this->has('force_create_despite_stock')) {
-            $this->merge([
-                'force_create_despite_stock' => filter_var(
-                    $this->input('force_create_despite_stock'),
-                    FILTER_VALIDATE_BOOLEAN
-                ),
-            ]);
+            $data['force_create_despite_stock'] = filter_var(
+                $this->input('force_create_despite_stock'),
+                FILTER_VALIDATE_BOOLEAN
+            );
         }
+        
+        // 處理金額轉換：元 -> 分
+        if ($this->has('shipping_fee') && $this->input('shipping_fee') !== null) {
+            $data['shipping_fee'] = round($this->input('shipping_fee') * 100);
+        }
+        
+        if ($this->has('discount_amount') && $this->input('discount_amount') !== null) {
+            $data['discount_amount'] = round($this->input('discount_amount') * 100);
+        }
+        
+        // 處理訂單項目中的價格轉換
+        if ($this->has('items') && is_array($this->input('items'))) {
+            $items = $this->input('items');
+            foreach ($items as $index => $item) {
+                if (isset($item['price'])) {
+                    $items[$index]['price'] = round($item['price'] * 100);
+                }
+            }
+            $data['items'] = $items;
+        }
+        
+        $this->merge($data);
     }
 
     /**

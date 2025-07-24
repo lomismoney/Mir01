@@ -62,7 +62,7 @@ class ProductControllerTest extends TestCase
             'variants' => [
                 [
                     'sku' => 'TEST001-VAR1',
-                    'price' => 100.00,
+                    'price' => 100.00,  // API 接受元為單位  // API 接受元為單位
                     'attribute_value_ids' => [$redValue->id] // 使用 attribute_value_ids 而不是 attribute_values
                 ]
             ]
@@ -88,7 +88,7 @@ class ProductControllerTest extends TestCase
         
         $this->assertDatabaseHas('product_variants', [
             'sku' => $productData['variants'][0]['sku'],
-            'price' => $productData['variants'][0]['price'],
+            'price' => $productData['variants'][0]['price'] * 100,  // 數據庫以分為單位存儲
         ]);
     }
     
@@ -130,22 +130,22 @@ class ProductControllerTest extends TestCase
             'variants' => [
                 [
                     'sku' => 'TESTVAR001-RED-S',
-                    'price' => 100.00,
+                    'price' => 100.00,  // API 接受元為單位  // API 接受元為單位
                     'attribute_value_ids' => [$redValue->id, $smallValue->id]
                 ],
                 [
                     'sku' => 'TESTVAR001-RED-M',
-                    'price' => 110.00,
+                    'price' => 110.00,  // API 接受元為單位
                     'attribute_value_ids' => [$redValue->id, $mediumValue->id]
                 ],
                 [
                     'sku' => 'TESTVAR001-BLUE-S',
-                    'price' => 100.00,
+                    'price' => 100.00,  // API 接受元為單位  // API 接受元為單位
                     'attribute_value_ids' => [$blueValue->id, $smallValue->id]
                 ],
                 [
                     'sku' => 'TESTVAR001-BLUE-M',
-                    'price' => 110.00,
+                    'price' => 110.00,  // API 接受元為單位
                     'attribute_value_ids' => [$blueValue->id, $mediumValue->id]
                 ]
             ]
@@ -165,7 +165,7 @@ class ProductControllerTest extends TestCase
         foreach ($productData['variants'] as $variant) {
             $this->assertDatabaseHas('product_variants', [
                 'sku' => $variant['sku'],
-                'price' => $variant['price'],
+                'price' => $variant['price'] * 100,  // 數據庫以分為單位存儲
             ]);
         }
         
@@ -203,17 +203,18 @@ class ProductControllerTest extends TestCase
         // 創建產品變體
         $variant = $product->variants()->create([
             'sku' => $this->faker->unique()->regexify('[A-Z0-9]{8}'),
-            'price' => 100.00,
+            'price' => 10000,  // 100.00 * 100 = 10000 分，數據庫以分為單位存儲
         ]);
         
         // 關聯變體與屬性值
         $variant->attributeValues()->attach($redValue->id);
         
-        // 為變體創建庫存記錄（需要指定門市）
+        // 為變體創建或更新庫存記錄（需要指定門市）
         $store = \App\Models\Store::factory()->create();
-        \App\Models\Inventory::create([
+        \App\Models\Inventory::firstOrCreate([
             'product_variant_id' => $variant->id,
             'store_id' => $store->id,
+        ], [
             'quantity' => 25,
             'low_stock_threshold' => 5,
         ]);
@@ -269,7 +270,7 @@ class ProductControllerTest extends TestCase
         // 創建變體
         $variant = $product->variants()->create([
             'sku' => 'ORIGINAL-RED-S',
-            'price' => 100.00,
+            'price' => 10000,  // 100.00 * 100 = 10000 分，數據庫以分為單位存儲
         ]);
         $variant->attributeValues()->attach([$redValue->id, $smallValue->id]);
         
@@ -283,7 +284,7 @@ class ProductControllerTest extends TestCase
                 [
                     'id' => $variant->id,
                     'sku' => 'UPDATED-RED-S',
-                    'price' => 120.00,
+                    'price' => 120.00,  // API 接受元為單位
                     'attribute_value_ids' => [$redValue->id, $smallValue->id]
                 ]
             ]
@@ -353,7 +354,7 @@ class ProductControllerTest extends TestCase
         // 創建原始變體
         $originalVariant = $product->variants()->create([
             'sku' => 'ORIGINAL-RED-S',
-            'price' => 100.00,
+            'price' => 10000,  // 100.00 * 100 = 10000 分，數據庫以分為單位存儲
         ]);
         $originalVariant->attributeValues()->attach([$redValue->id, $smallValue->id]);
         
@@ -368,13 +369,13 @@ class ProductControllerTest extends TestCase
                 [
                     'id' => $originalVariant->id,
                     'sku' => 'UPDATED-RED-S',
-                    'price' => 120.00,
+                    'price' => 120.00,  // API 接受元為單位
                     'attribute_value_ids' => [$redValue->id, $smallValue->id]
                 ],
                 // 新增一個變體
                 [
                     'sku' => 'NEW-BLUE-M',
-                    'price' => 130.00,
+                    'price' => 130.00,  // API 接受元為單位
                     'attribute_value_ids' => [$blueValue->id, $mediumValue->id]
                 ]
             ]
@@ -407,14 +408,14 @@ class ProductControllerTest extends TestCase
         $this->assertDatabaseHas('product_variants', [
             'id' => $originalVariant->id,
             'sku' => 'UPDATED-RED-S',
-            'price' => 120.00,
+            'price' => 12000,  // 120.00 * 100 = 12000 分
         ]);
         
         // 檢查新變體創建
         $this->assertDatabaseHas('product_variants', [
             'product_id' => $product->id,
             'sku' => 'NEW-BLUE-M',
-            'price' => 130.00,
+            'price' => 13000,  // 130.00 * 100 = 13000 分
         ]);
         
         // 確認變體總數
@@ -494,7 +495,7 @@ class ProductControllerTest extends TestCase
             'variants' => [
                 [
                     'sku' => 'STAFF001',
-                    'price' => 100.00,
+                    'price' => 100.00,  // API 接受元為單位  // API 接受元為單位
                     'attribute_value_ids' => [$redValue->id]
                 ]
             ]
@@ -547,7 +548,7 @@ class ProductControllerTest extends TestCase
         // 創建變體
         $variant = $product->variants()->create([
             'sku' => 'ORIGINAL-RED-S',
-            'price' => 100.00,
+            'price' => 10000,  // 100.00 * 100 = 10000 分，數據庫以分為單位存儲
         ]);
         $variant->attributeValues()->attach([$redValue->id, $smallValue->id]);
         
@@ -559,7 +560,7 @@ class ProductControllerTest extends TestCase
                 [
                     'id' => $variant->id,
                     'sku' => 'STAFF-UPDATED-RED-S',
-                    'price' => 120.00,
+                    'price' => 120.00,  // API 接受元為單位
                     'attribute_value_ids' => [$redValue->id, $smallValue->id]
                 ]
             ]
@@ -855,21 +856,21 @@ class ProductControllerTest extends TestCase
         $variantA = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'sku' => 'ORIGINAL-RED-S',
-            'price' => 100.00
+            'price' => 10000  // 100.00 * 100 = 10000 分
         ]);
         $variantA->attributeValues()->attach([$redValue->id, $smallValue->id]);
         
         $variantB = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'sku' => 'ORIGINAL-BLUE-S',
-            'price' => 110.00
+            'price' => 11000  // 110.00 * 100 = 11000 分
         ]);
         $variantB->attributeValues()->attach([$blueValue->id, $smallValue->id]);
         
         $variantC = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'sku' => 'ORIGINAL-RED-M',
-            'price' => 120.00
+            'price' => 12000  // 120.00 * 100 = 12000 分
         ]);
         $variantC->attributeValues()->attach([$redValue->id, $mediumValue->id]);
         
@@ -898,13 +899,13 @@ class ProductControllerTest extends TestCase
                 [
                     'id' => $variantA->id,
                     'sku' => 'UPDATED-RED-S',
-                    'price' => 150.00,
+                    'price' => 150.00,  // API 接受元為單位
                     'attribute_value_ids' => [$redValue->id, $smallValue->id]
                 ],
                 // 新增變體 D（不帶 id）
                 [
                     'sku' => 'NEW-GREEN-M',
-                    'price' => 200.00,
+                    'price' => 200.00,  // API 接受元為單位
                     'attribute_value_ids' => [$greenValue->id, $mediumValue->id]
                 ]
                 // 注意：B 和 C 不在此陣列中，所以會被刪除
@@ -932,13 +933,13 @@ class ProductControllerTest extends TestCase
         $this->assertDatabaseHas('product_variants', [
             'id' => $variantA->id,
             'sku' => 'UPDATED-RED-S',
-            'price' => 150.00
+            'price' => 15000  // 150.00 * 100 = 15000 分
         ]);
         
         // 5.3 驗證新變體 D 已創建
         $this->assertDatabaseHas('product_variants', [
             'sku' => 'NEW-GREEN-M',
-            'price' => 200.00,
+            'price' => 20000,  // 200.00 * 100 = 20000 分
             'product_id' => $product->id
         ]);
         
@@ -1216,7 +1217,7 @@ class ProductControllerTest extends TestCase
             'variants' => [
                 [
                     'sku' => 'TEST001',
-                    'price' => 100.00,
+                    'price' => 100.00,  // API 接受元為單位  // API 接受元為單位
                     'attribute_value_ids' => [99999] // 不存在的屬性值ID
                 ]
             ]
@@ -1246,7 +1247,7 @@ class ProductControllerTest extends TestCase
             'variants' => [
                 [
                     'sku' => 'INVALID-UPDATE',
-                    'price' => 100.00,
+                    'price' => 100.00,  // API 接受元為單位  // API 接受元為單位
                     'attribute_value_ids' => [99999] // 不存在的屬性值ID
                 ]
             ]
@@ -1318,14 +1319,15 @@ class ProductControllerTest extends TestCase
         
         $variant = $product->variants()->create([
             'sku' => 'TEST-SKU-001',
-            'price' => 100.00,
+            'price' => 10000,  // 100.00 * 100 = 10000 分，數據庫以分為單位存儲
         ]);
         $variant->attributeValues()->attach($redValue->id);
         
         $store = \App\Models\Store::factory()->create();
-        \App\Models\Inventory::create([
+        \App\Models\Inventory::firstOrCreate([
             'product_variant_id' => $variant->id,
             'store_id' => $store->id,
+        ], [
             'quantity' => 10,
             'low_stock_threshold' => 5,
         ]);

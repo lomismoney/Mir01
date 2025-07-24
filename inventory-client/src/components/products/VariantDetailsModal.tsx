@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Package, Search } from "lucide-react";
 import { ProductItem, ProductVariant } from "@/types/api-helpers";
-import { formatPrice as formatPriceUtil } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 
 /**
  * 商品規格詳細資訊模態框元件
@@ -80,7 +80,7 @@ const formatPrice = (price?: number) => {
     );
   }
 
-  return formatPriceUtil(price);
+  return MoneyHelper.format(price, 'NT$');
 };
 
 /**
@@ -366,7 +366,7 @@ const VariantDetailsModal = ({
                   </span>
                   <p className="font-medium">
                     {product.price_range
-                      ? `${formatPrice(product.price_range.min)} - ${formatPrice(product.price_range.max)}`
+                      ? `${MoneyHelper.format(product.price_range.min || 0, 'NT$')} - ${MoneyHelper.format(product.price_range.max || 0, 'NT$')}`
                       : "N/A"}
                   </p>
                 </div>

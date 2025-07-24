@@ -124,11 +124,11 @@ class CustomerFactory extends Factory
     /**
      * 設定有總金額
      */
-    public function withAmounts(float $unpaid = null, float $completed = null): static
+    public function withAmounts(int $unpaid = null, int $completed = null): static
     {
         return $this->state(fn (array $attributes) => [
-            'total_unpaid_amount' => $unpaid ?? $this->faker->randomFloat(2, 0, 50000),
-            'total_completed_amount' => $completed ?? $this->faker->randomFloat(2, 0, 100000),
+            'total_unpaid_amount' => $unpaid ?? $this->faker->numberBetween(0, 5000000), // 0 到 50000 元（以分為單位）
+            'total_completed_amount' => $completed ?? $this->faker->numberBetween(0, 10000000), // 0 到 100000 元（以分為單位）
         ]);
     }
 } 

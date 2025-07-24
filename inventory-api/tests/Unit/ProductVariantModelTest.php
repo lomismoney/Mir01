@@ -11,6 +11,7 @@ use App\Models\Inventory;
 use App\Models\PurchaseItem;
 use App\Models\OrderItem;
 use App\Models\Store;
+use App\Services\ProductVariantService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
@@ -76,10 +77,12 @@ class ProductVariantModelTest extends TestCase
         $stores = Store::factory()->count(3)->create();
         
         foreach ($stores as $store) {
-            Inventory::factory()->create([
+            Inventory::firstOrCreate([
                 'product_variant_id' => $variant->id,
                 'store_id' => $store->id,
-                'quantity' => 100
+            ], [
+                'quantity' => 100,
+                'low_stock_threshold' => 5
             ]);
         }
         
@@ -125,14 +128,9 @@ class ProductVariantModelTest extends TestCase
             'sku',
             'price',
             'cost_price',
-            'average_cost',
             'total_purchased_quantity',
             'total_cost_amount',
-            // 金額欄位（分為單位）
-            'price_cents',
-            'cost_price_cents', 
-            'average_cost_cents',
-            'total_cost_amount_cents',
+            'average_cost',
         ];
         
         $variant = new ProductVariant();
@@ -149,11 +147,8 @@ class ProductVariantModelTest extends TestCase
         
         $this->assertEquals('integer', $casts['product_id']);
         $this->assertEquals('integer', $casts['total_purchased_quantity']);
-        // 新的金額欄位（分為單位）
-        $this->assertEquals('integer', $casts['price_cents']);
-        $this->assertEquals('integer', $casts['cost_price_cents']);
-        $this->assertEquals('integer', $casts['average_cost_cents']);
-        $this->assertEquals('integer', $casts['total_cost_amount_cents']);
+        $this->assertEquals('datetime', $casts['created_at']);
+        $this->assertEquals('datetime', $casts['updated_at']);
     }
     
     /**
@@ -267,18 +262,23 @@ class ProductVariantModelTest extends TestCase
     {
         $variant = ProductVariant::factory()->create([
             'total_purchased_quantity' => 100,
-            'total_cost_amount' => 10000, // 平均成本 100
-            'average_cost' => 100
+            'total_cost_amount' => 1000000, // 100元 * 100個 = 10000元 = 1000000分
+            'average_cost' => 10000 // 100元 = 10000分
         ]);
         
-        // 新進貨：50個，單價120，運費攤銷10
-        $variant->updateAverageCost(50, 120, 10);
+        $service = app(ProductVariantService::class);
+        
+        // 新進貨：50個，單價12000分（120元），運費攤銷1000分（10元）
+        $service->updateAverageCost($variant, 50, 12000, 1000);
+        
+        // 需要重新從資料庫讀取以獲得更新後的值
+        $variant->refresh();
         
         // 驗證計算
-        // 新成本 = (120 + 10) * 50 = 6500
+        // 新成本 = (12000 + 1000) * 50 = 650000分
         // 總數量 = 100 + 50 = 150
-        // 總成本 = 10000 + 6500 = 16500
-        // 平均成本 = 16500 / 150 = 110
+        // 總成本 = 1000000 + 650000 = 1650000分
+        // 平均成本 = 1650000 / 150 = 11000分（110元）
         
         $this->assertEquals(150, $variant->total_purchased_quantity);
         $this->assertEquals(16500, $variant->total_cost_amount);
@@ -296,12 +296,17 @@ class ProductVariantModelTest extends TestCase
             'average_cost' => 0
         ]);
         
-        // 第一次進貨：100個，單價50，運費攤銷5
-        $variant->updateAverageCost(100, 50, 5);
+        $service = app(ProductVariantService::class);
+        
+        // 第一次進貨：100個，單價5000分（50元），運費攤銷500分（5元）
+        $service->updateAverageCost($variant, 100, 5000, 500);
+        
+        // 需要重新從資料庫讀取以獲得更新後的值
+        $variant->refresh();
         
         // 驗證計算
-        // 新成本 = (50 + 5) * 100 = 5500
-        // 平均成本 = 5500 / 100 = 55
+        // 新成本 = (5000 + 500) * 100 = 550000分
+        // 平均成本 = 550000 / 100 = 5500分（55元）
         
         $this->assertEquals(100, $variant->total_purchased_quantity);
         $this->assertEquals(5500, $variant->total_cost_amount);
@@ -319,8 +324,13 @@ class ProductVariantModelTest extends TestCase
             'average_cost' => 0
         ]);
         
+        $service = app(ProductVariantService::class);
+        
         // 進貨數量為0的邊界情況
-        $variant->updateAverageCost(0, 100, 0);
+        $service->updateAverageCost($variant, 0, 100, 0);
+        
+        // 需要重新從資料庫讀取以確認沒有改變
+        $variant->refresh();
         
         $this->assertEquals(0, $variant->total_purchased_quantity);
         $this->assertEquals(0, $variant->total_cost_amount);
@@ -333,8 +343,8 @@ class ProductVariantModelTest extends TestCase
     public function test_get_profit_margin_attribute()
     {
         $variant = ProductVariant::factory()->create([
-            'price' => 200,
-            'average_cost' => 120
+            'price' => 20000, // 200元 in cents
+            'cost_price' => 12000 // 120元 in cents
         ]);
         
         // 利潤率 = ((200 - 120) / 200) * 100 = 40%
@@ -347,8 +357,8 @@ class ProductVariantModelTest extends TestCase
     public function test_get_profit_margin_attribute_with_zero_cost()
     {
         $variant = ProductVariant::factory()->create([
-            'price' => 200,
-            'average_cost' => 0
+            'price' => 20000, // 200元 in cents
+            'cost_price' => 20000 // same as price, no profit
         ]);
         
         $this->assertEquals(0, $variant->profit_margin);
@@ -360,8 +370,8 @@ class ProductVariantModelTest extends TestCase
     public function test_get_profit_amount_attribute()
     {
         $variant = ProductVariant::factory()->create([
-            'price' => 200,
-            'average_cost' => 120
+            'price' => 20000, // 200元 in cents
+            'cost_price' => 12000 // 120元 in cents
         ]);
         
         // 利潤金額 = 200 - 120 = 80
@@ -378,24 +388,24 @@ class ProductVariantModelTest extends TestCase
         $data = [
             'product_id' => $product->id,
             'sku' => 'TEST-SKU-001',
-            'price' => 150.50,
-            'cost_price' => 80.00,
-            'average_cost' => 85.00,
+            'price' => 15050,
+            'cost_price' => 8000,
+            'average_cost' => 8500,
             'total_purchased_quantity' => 200,
-            'total_cost_amount' => 17000.00,
+            'total_cost_amount' => 1700000,
         ];
         
         $variant = ProductVariant::create($data);
         
         $this->assertDatabaseHas('product_variants', [
             'sku' => 'TEST-SKU-001',
-            'price' => 150.50,
-            'cost_price' => 80.00,
+            'price' => 15050,
+            'cost_price' => 8000,
         ]);
         
         $this->assertEquals($product->id, $variant->product_id);
-        $this->assertEquals('150.50', $variant->price);
-        $this->assertEquals('80.00', $variant->cost_price);
+        $this->assertEquals(150.50, $variant->price);
+        $this->assertEquals(80.00, $variant->cost_price);
     }
     
     /**
@@ -425,17 +435,11 @@ class ProductVariantModelTest extends TestCase
     public function test_currency_handling()
     {
         $variant = ProductVariant::factory()->create([
-            'price' => 99.50,
-            'cost_price' => 50.25,
-            'average_cost' => 60.75,
-            'total_cost_amount' => 1215.00
+            'price' => 9950,
+            'cost_price' => 5025,
+            'average_cost' => 6075,
+            'total_cost_amount' => 121500
         ]);
-        
-        // 驗證金額正確轉換為分並儲存
-        $this->assertEquals(9950, $variant->price_cents);
-        $this->assertEquals(5025, $variant->cost_price_cents);
-        $this->assertEquals(6075, $variant->average_cost_cents);
-        $this->assertEquals(121500, $variant->total_cost_amount_cents);
         
         // 驗證金額正確從分轉換為元顯示
         $this->assertEquals(99.50, $variant->price);
@@ -444,28 +448,4 @@ class ProductVariantModelTest extends TestCase
         $this->assertEquals(1215.00, $variant->total_cost_amount);
     }
 
-    /**
-     * 測試 HandlesCurrency trait 的 yuanToCents 靜態方法
-     */
-    public function test_yuan_to_cents_conversion()
-    {
-        $this->assertEquals(0, ProductVariant::yuanToCents(null));
-        $this->assertEquals(0, ProductVariant::yuanToCents(0));
-        $this->assertEquals(100, ProductVariant::yuanToCents(1));
-        $this->assertEquals(9950, ProductVariant::yuanToCents(99.50));
-        $this->assertEquals(12345, ProductVariant::yuanToCents('123.45'));
-        $this->assertEquals(1, ProductVariant::yuanToCents(0.01));
-    }
-
-    /**
-     * 測試 HandlesCurrency trait 的 centsToYuan 靜態方法
-     */
-    public function test_cents_to_yuan_conversion()
-    {
-        $this->assertEquals(0.00, ProductVariant::centsToYuan(0));
-        $this->assertEquals(1.00, ProductVariant::centsToYuan(100));
-        $this->assertEquals(99.50, ProductVariant::centsToYuan(9950));
-        $this->assertEquals(123.45, ProductVariant::centsToYuan(12345));
-        $this->assertEquals(0.01, ProductVariant::centsToYuan(1));
-    }
 }

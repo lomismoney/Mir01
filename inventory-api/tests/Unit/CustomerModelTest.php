@@ -95,9 +95,6 @@ class CustomerModelTest extends TestCase
             'total_completed_amount',
             'priority_level',
             'is_priority_customer',
-            // 新增的金額欄位（分為單位）
-            'total_unpaid_amount_cents',
-            'total_completed_amount_cents',
         ];
         
         $customer = new Customer();
@@ -115,12 +112,12 @@ class CustomerModelTest extends TestCase
         $this->assertArrayHasKey('is_company', $casts);
         $this->assertEquals('boolean', $casts['is_company']);
         
-        // 新的金額欄位使用整數（分為單位）
-        $this->assertArrayHasKey('total_unpaid_amount_cents', $casts);
-        $this->assertEquals('integer', $casts['total_unpaid_amount_cents']);
+        // 現在金額欄位使用整數（分為單位）
+        $this->assertArrayHasKey('total_unpaid_amount', $casts);
+        $this->assertEquals('integer', $casts['total_unpaid_amount']);
         
-        $this->assertArrayHasKey('total_completed_amount_cents', $casts);
-        $this->assertEquals('integer', $casts['total_completed_amount_cents']);
+        $this->assertArrayHasKey('total_completed_amount', $casts);
+        $this->assertEquals('integer', $casts['total_completed_amount']);
     }
     
     /**
@@ -137,8 +134,8 @@ class CustomerModelTest extends TestCase
             'industry_type' => '科技業',
             'payment_type' => 'monthly',
             'contact_address' => '台北市信義區',
-            'total_unpaid_amount' => 10000.50,
-            'total_completed_amount' => 50000.00,
+            'total_unpaid_amount' => 1000050, // 10000.50 元 = 1000050 分
+            'total_completed_amount' => 5000000, // 50000.00 元 = 5000000 分
         ];
         
         $customer = Customer::create($data);
@@ -150,8 +147,8 @@ class CustomerModelTest extends TestCase
         ]);
         
         $this->assertTrue($customer->is_company);
-        $this->assertEquals('10000.50', $customer->total_unpaid_amount);
-        $this->assertEquals('50000.00', $customer->total_completed_amount);
+        $this->assertEquals(1000050, $customer->total_unpaid_amount);
+        $this->assertEquals(5000000, $customer->total_completed_amount);
     }
     
     /**
@@ -245,16 +242,16 @@ class CustomerModelTest extends TestCase
     public function test_amount_fields_precision()
     {
         $customer = Customer::factory()->create([
-            'total_unpaid_amount' => 12345.6789,
-            'total_completed_amount' => 98765.4321,
+            'total_unpaid_amount' => 1234568, // 12345.68 元 = 1234568 分
+            'total_completed_amount' => 9876543, // 98765.43 元 = 9876543 分
         ]);
         
         // 重新載入以確保從資料庫讀取
         $customer->refresh();
         
-        // 驗證小數點後只保留2位
-        $this->assertEquals('12345.68', $customer->total_unpaid_amount);
-        $this->assertEquals('98765.43', $customer->total_completed_amount);
+        // 驗證金額以分為單位存儲
+        $this->assertEquals(1234568, $customer->total_unpaid_amount);
+        $this->assertEquals(9876543, $customer->total_completed_amount);
     }
     
     /**
@@ -324,17 +321,17 @@ class CustomerModelTest extends TestCase
     public function test_currency_handling()
     {
         $customer = Customer::factory()->create([
-            'total_unpaid_amount' => 999.99,
-            'total_completed_amount' => 5000.50
+            'total_unpaid_amount' => 99999, // 999.99 元 = 99999 分
+            'total_completed_amount' => 500050 // 5000.50 元 = 500050 分
         ]);
         
-        // 驗證金額正確轉換為分並儲存
+        // 驗證金額正確儲存為分
         $this->assertEquals(99999, $customer->total_unpaid_amount_cents);
         $this->assertEquals(500050, $customer->total_completed_amount_cents);
         
-        // 驗證金額正確從分轉換為元顯示
-        $this->assertEquals(999.99, $customer->total_unpaid_amount);
-        $this->assertEquals(5000.50, $customer->total_completed_amount);
+        // 驗證原始金額值（現在以分為單位）
+        $this->assertEquals(99999, $customer->total_unpaid_amount);
+        $this->assertEquals(500050, $customer->total_completed_amount);
     }
 
     /**
@@ -360,21 +357,21 @@ class CustomerModelTest extends TestCase
     public function test_update_customer_amounts()
     {
         $customer = Customer::factory()->create([
-            'total_unpaid_amount' => 100.00,
-            'total_completed_amount' => 200.00
+            'total_unpaid_amount' => 10000, // 100.00 元 = 10000 分
+            'total_completed_amount' => 20000 // 200.00 元 = 20000 分
         ]);
         
-        // 更新金額
+        // 更新金額（以分為單位）
         $customer->update([
-            'total_unpaid_amount' => 150.50,
-            'total_completed_amount' => 350.75
+            'total_unpaid_amount' => 15050, // 150.50 元 = 15050 分
+            'total_completed_amount' => 35075 // 350.75 元 = 35075 分
         ]);
         
         // 驗證更新後的值
         $customer->refresh();
         $this->assertEquals(15050, $customer->total_unpaid_amount_cents);
         $this->assertEquals(35075, $customer->total_completed_amount_cents);
-        $this->assertEquals(150.50, $customer->total_unpaid_amount);
-        $this->assertEquals(350.75, $customer->total_completed_amount);
+        $this->assertEquals(15050, $customer->total_unpaid_amount);
+        $this->assertEquals(35075, $customer->total_completed_amount);
     }
 }

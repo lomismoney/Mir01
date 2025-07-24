@@ -359,9 +359,9 @@ class OrderSeeder extends Seeder
             'is_tax_inclusive' => $taxConfig['is_tax_inclusive'],
             'tax_rate' => $taxConfig['tax_rate'],
             'subtotal' => 0, // 稍後計算
-            'shipping_fee' => rand(0, 200) * 100, // 0-200元（以分為單位）
+            'shipping_fee' => rand(0, 200), // 0-200元（MoneyCast會自動轉換為分儲存）
             'tax' => 0, // 稍後計算
-            'discount_amount' => rand(0, 500) * 100, // 0-500元折扣（以分為單位）
+            'discount_amount' => rand(0, 500), // 0-500元折扣（MoneyCast會自動轉換為分儲存）
             'grand_total' => 0, // 稍後計算
             'paid_amount' => 0, // 稍後設定
             'payment_method' => ['credit_card', 'cash', 'bank_transfer', 'pay_later'][array_rand(['credit_card', 'cash', 'bank_transfer', 'pay_later'])],
@@ -414,16 +414,36 @@ class OrderSeeder extends Seeder
     {
         switch ($itemType) {
             case OrderItemType::STOCK:
-                // 選擇價格較低的商品作為現貨（如T恤、配件等）
-                return $variants->where('price', '<', 5000000)->random(); // 500元以下（分為單位）
+                // 選擇辦公椅等中低價商品作為現貨
+                $stockVariants = $variants->filter(function($variant) {
+                    $productName = $variant->product->name;
+                    return str_contains($productName, '椅') || 
+                           str_contains($productName, '滑鼠') ||
+                           str_contains($productName, '鍵盤') ||
+                           $variant->price < 10000000; // 1000元以下（分為單位）
+                });
+                return $stockVariants->isNotEmpty() ? $stockVariants->random() : $variants->random();
             
             case OrderItemType::BACKORDER:
-                // 選擇中高價商品作為預訂商品（如手機、筆電等）
-                return $variants->where('price', '>=', 5000000)->random(); // 500元以上（分為單位）
+                // 選擇高價商品作為預訂商品（如iPhone、MacBook等）
+                $backorderVariants = $variants->filter(function($variant) {
+                    $productName = $variant->product->name;
+                    return str_contains($productName, 'iPhone') || 
+                           str_contains($productName, 'MacBook') ||
+                           str_contains($productName, '桌') ||
+                           $variant->price >= 10000000; // 1000元以上（分為單位）
+                });
+                return $backorderVariants->isNotEmpty() ? $backorderVariants->random() : $variants->random();
             
             case OrderItemType::CUSTOM:
-                // 任何商品都可以訂製
-                return $variants->random();
+                // 任何商品都可以訂製，但偏好家具類
+                $customVariants = $variants->filter(function($variant) {
+                    $productName = $variant->product->name;
+                    return str_contains($productName, '椅') || 
+                           str_contains($productName, '桌') ||
+                           str_contains($productName, '櫃');
+                });
+                return $customVariants->isNotEmpty() ? $customVariants->random() : $variants->random();
             
             default:
                 return $variants->random();

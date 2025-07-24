@@ -71,23 +71,34 @@ class GlobalSearchController extends Controller
         $products = Product::query()
             ->where(function ($q) use ($query) {
                 $q->where('name', 'LIKE', "%{$query}%")
-                  ->orWhere('sku', 'LIKE', "%{$query}%")
-                  ->orWhere('description', 'LIKE', "%{$query}%");
+                  ->orWhere('description', 'LIKE', "%{$query}%")
+                  // 搜尋 SKU 需要透過 variants 關聯
+                  ->orWhereHas('variants', function ($q) use ($query) {
+                      $q->where('sku', 'LIKE', "%{$query}%");
+                  });
             })
             ->with(['variants' => function ($q) {
-                $q->select('id', 'product_id', 'sku', 'price', 'stock');
+                $q->select('id', 'product_id', 'sku', 'price')
+                  ->with(['inventories' => function ($q) {
+                      $q->select('id', 'product_variant_id', 'quantity');
+                  }]);
             }])
-            ->select('id', 'name', 'sku', 'price', 'image_url')
+            ->select('id', 'name', 'description')
             ->limit($limit)
             ->get()
             ->map(function ($product) {
+                // 使用第一個變體的資訊作為預設值
+                $firstVariant = $product->variants->first();
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
-                    'sku' => $product->sku,
-                    'price' => $product->price,
-                    'stock' => $product->variants->sum('stock'),
-                    'image_url' => $product->image_url,
+                    'sku' => $firstVariant ? $firstVariant->sku : null,
+                    'price' => $firstVariant ? $firstVariant->price : null,
+                    'stock' => $product->variants->sum(function ($variant) {
+                        // 需要加載庫存關聯才能計算總庫存
+                        return $variant->inventories->sum('quantity');
+                    }),
+                    'image_url' => $product->getImageUrl(),
                 ];
             });
 

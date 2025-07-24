@@ -548,11 +548,20 @@ class OrderServiceAdditionalTest extends TestCase
         try {
             $this->orderService->createOrder($orderData);
             $this->fail('應該拋出異常');
-        } catch (\Exception $e) {
-            $this->assertEquals('現貨商品庫存不足', $e->getMessage());
-            $this->assertNotEmpty($e->stockCheckResults);
-            $this->assertNotEmpty($e->insufficientStockItems);
-            $this->assertEquals(5, $e->insufficientStockItems[0]['shortage']);
+        } catch (\App\Exceptions\Business\InsufficientStockException $e) {
+            $this->assertStringContainsString('庫存不足', $e->getMessage());
+            $this->assertStringContainsString('測試商品', $e->getMessage());
+            $this->assertStringContainsString('ORDER-MAIN-SKU-001', $e->getMessage());
+            $this->assertStringContainsString('需求 10，可用 5', $e->getMessage());
+            
+            // 驗證異常的詳細資訊
+            $stockInfo = $e->getStockInfo();
+            $this->assertEquals($this->productVariant->id, $stockInfo['product_variant_id']);
+            $this->assertEquals('測試商品', $stockInfo['product_name']);
+            $this->assertEquals('ORDER-MAIN-SKU-001', $stockInfo['sku']);
+            $this->assertEquals(10, $stockInfo['requested_quantity']);
+            $this->assertEquals(5, $stockInfo['available_quantity']);
+            $this->assertEquals(5, $stockInfo['shortage']);
         }
     }
 

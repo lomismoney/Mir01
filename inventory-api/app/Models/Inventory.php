@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * Inventory 模型 - 庫存管理
@@ -65,7 +67,7 @@ class Inventory extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function transactions()
+    public function transactions(): HasMany
     {
         return $this->hasMany(InventoryTransaction::class);
     }
@@ -76,7 +78,7 @@ class Inventory extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough<Product>
      */
-    public function product()
+    public function product(): HasOneThrough
     {
         return $this->hasOneThrough(
             Product::class,
@@ -144,113 +146,4 @@ class Inventory extends Model
         return $this->quantity === 0;
     }
 
-    /**
-     * 增加庫存並記錄交易
-     * 
-     * @param int $amount 增加數量
-     * @param int $userId 操作用戶ID
-     * @param string $notes 備註
-     * @param array $metadata 其他元數據
-     * @return bool
-     */
-    public function addStock(int $amount, int $userId, ?string $notes = null, array $metadata = []): bool
-    {
-        if ($amount <= 0) {
-            return false;
-        }
-        
-        $beforeQuantity = $this->quantity;
-        $this->quantity += $amount;
-        $result = $this->save();
-        
-        if ($result) {
-            // 記錄交易
-            $this->transactions()->create([
-                'user_id' => $userId,
-                'type' => 'addition',
-                'quantity' => $amount,
-                'before_quantity' => $beforeQuantity,
-                'after_quantity' => $this->quantity,
-                'notes' => $notes,
-                'metadata' => !empty($metadata) ? json_encode($metadata) : null
-            ]);
-        }
-        
-        return $result;
-    }
-
-    /**
-     * 減少庫存並記錄交易
-     * 
-     * @param int $amount 減少數量
-     * @param int $userId 操作用戶ID
-     * @param string $notes 備註
-     * @param array $metadata 其他元數據
-     * @return bool
-     */
-    public function reduceStock(int $amount, int $userId, ?string $notes = null, array $metadata = []): bool
-    {
-        if ($amount <= 0 || $this->quantity < $amount) {
-            return false; // 庫存不足或數量無效
-        }
-        
-        $beforeQuantity = $this->quantity;
-        $this->quantity -= $amount;
-        $result = $this->save();
-        
-        if ($result) {
-            // 記錄交易
-            $this->transactions()->create([
-                'user_id' => $userId,
-                'type' => 'reduction',
-                'quantity' => -$amount, // 負數表示減少
-                'before_quantity' => $beforeQuantity,
-                'after_quantity' => $this->quantity,
-                'notes' => $notes,
-                'metadata' => !empty($metadata) ? json_encode($metadata) : null
-            ]);
-        }
-        
-        return $result;
-    }
-
-    /**
-     * 設定庫存數量並記錄交易
-     * 
-     * @param int $quantity 新的庫存數量
-     * @param int $userId 操作用戶ID
-     * @param string $notes 備註
-     * @param array $metadata 其他元數據
-     * @return bool
-     */
-    public function setStock(int $quantity, int $userId, ?string $notes = null, array $metadata = []): bool
-    {
-        if ($quantity < 0) {
-            return false; // 庫存不能為負數
-        }
-        
-        if ($quantity === $this->quantity) {
-            return true; // 數量沒有變化，無需操作
-        }
-        
-        $beforeQuantity = $this->quantity;
-        $change = $quantity - $beforeQuantity;
-        $this->quantity = $quantity;
-        $result = $this->save();
-        
-        if ($result) {
-            // 記錄交易
-            $this->transactions()->create([
-                'user_id' => $userId,
-                'type' => 'adjustment',
-                'quantity' => $change,
-                'before_quantity' => $beforeQuantity,
-                'after_quantity' => $this->quantity,
-                'notes' => $notes,
-                'metadata' => !empty($metadata) ? json_encode($metadata) : null
-            ]);
-        }
-        
-        return $result;
-    }
 }

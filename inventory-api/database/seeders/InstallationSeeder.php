@@ -85,6 +85,11 @@ class InstallationSeeder extends Seeder
                 ]
             );
             
+            // 分配 installer 角色
+            if (!$installer->hasRole('installer')) {
+                $installer->assignRole('installer');
+            }
+            
             // 分配到隨機門市
             if ($stores->isNotEmpty()) {
                 $installer->stores()->syncWithoutDetaching([$stores->random()->id]);

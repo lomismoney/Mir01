@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Helpers\MoneyHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class OrderItem extends Model
@@ -27,6 +27,8 @@ class OrderItem extends Model
         'cost',
         'quantity',
         'fulfilled_quantity',
+        'tax_rate',
+        'discount_amount',
         'custom_product_name',
         'custom_product_specs',
         'custom_product_image',
@@ -54,6 +56,7 @@ class OrderItem extends Model
         // 分配優先級欄位
         'allocation_priority_score' => 'integer',
         'allocation_metadata' => 'json',
+        // 金額欄位通過 accessor/mutator 處理，不需要額外轉換
     ];
 
     /**
@@ -97,13 +100,6 @@ class OrderItem extends Model
         return $this->belongsTo(ProductVariant::class);
     }
 
-    /**
-     * 關聯的進貨項目（用於追蹤預訂商品的採購狀態）
-     */
-    public function linkedPurchaseItem(): BelongsTo
-    {
-        return $this->belongsTo(PurchaseItem::class, 'purchase_item_id');
-    }
 
     /**
      * 獲取採購狀態
@@ -123,7 +119,7 @@ class OrderItem extends Model
         }
 
         // 返回關聯進貨單的狀態
-        $purchase = $this->linkedPurchaseItem?->purchase;
+        $purchase = $this->purchaseItem?->purchase;
         if (!$purchase) {
             return 'unknown';
         }
@@ -200,7 +196,7 @@ class OrderItem extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function transfer()
+    public function transfer(): HasOne
     {
         return $this->hasOne(InventoryTransfer::class, 'order_id', 'order_id');
     }
@@ -210,7 +206,7 @@ class OrderItem extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function purchaseItem()
+    public function purchaseItem(): BelongsTo
     {
         return $this->belongsTo(PurchaseItem::class, 'purchase_item_id');
     }
@@ -347,48 +343,107 @@ class OrderItem extends Model
         return $this->save();
     }
 
-    // ===== 金額 Accessor/Mutator (分/元轉換) =====
-    
-    /**
-     * Price Accessor - 將分轉換為元
-     */
-    public function getPriceAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['price'] ?? 0);
-    }
-    
-    /**
-     * Price Mutator - 將元轉換為分
-     */
-    public function setPriceAttribute($value): void
-    {
-        $this->attributes['price'] = MoneyHelper::yuanToCents($value);
-    }
-    
-    /**
-     * Cost Accessor - 將分轉換為元
-     */
-    public function getCostAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['cost'] ?? 0);
-    }
-    
-    /**
-     * Cost Mutator - 將元轉換為分
-     */
-    public function setCostAttribute($value): void
-    {
-        $this->attributes['cost'] = MoneyHelper::yuanToCents($value);
-    }
 
     // ===== 金額處理方法 =====
+    // 遵循 CLAUDE.md 標準：「資料庫存分，API 傳元」
+    // 📍 Accessor: 分→元轉換點（顯示層）
+    // ❌ 禁止使用 Mutator：不在 Model 層進行元→分轉換
 
     /**
-     * 計算小計（單價 × 數量）
+     * 價格 accessor - 將分轉換為元
+     */
+    public function getPriceAttribute($value): float
+    {
+        return $value ? round($value / 100, 2) : 0.00;
+    }
+
+    /**
+     * 成本 accessor - 將分轉換為元
+     */
+    public function getCostAttribute($value): ?float
+    {
+        return $value !== null ? round($value / 100, 2) : null;
+    }
+
+    /**
+     * 折扣金額 accessor - 將分轉換為元
+     */
+    public function getDiscountAmountAttribute($value): float
+    {
+        return $value ? round($value / 100, 2) : 0.00;
+    }
+
+    /**
+     * 稅率 accessor - 將整數轉換為小數
+     */
+    public function getTaxRateAttribute($value): float
+    {
+        return $value ? round($value / 10000, 4) : 0.0000;
+    }
+
+    /**
+     * 取得價格（分為單位）- 直接存取資料庫原始值
+     */
+    public function getPriceCentsAttribute(): ?int
+    {
+        return $this->attributes['price'] ?? null;
+    }
+
+    /**
+     * 取得成本（分為單位）- 直接存取資料庫原始值
+     */
+    public function getCostCentsAttribute(): ?int
+    {
+        return $this->attributes['cost'] ?? null;
+    }
+
+    /**
+     * 取得折扣金額（分為單位）- 直接存取資料庫原始值
+     */
+    public function getDiscountAmountCentsAttribute(): ?int
+    {
+        return $this->attributes['discount_amount'] ?? null;
+    }
+
+    /**
+     * 計算小計（單價 × 數量）- 以元為單位顯示
      */
     public function getSubtotalAttribute(): float
     {
         $subtotal = $this->price * $this->quantity;
         return round($subtotal, 2);
+    }
+
+    /**
+     * 計算小計（分為單位）- 資料庫層級計算
+     */
+    public function getSubtotalCentsAttribute(): int
+    {
+        $priceCents = $this->attributes['price'] ?? 0;
+        return $priceCents * $this->quantity;
+    }
+    
+    /**
+     * 取得原始金額值（分為單位）- 用於業務邏輯計算
+     * 遵循 CLAUDE.md 標準：Service 層使用分進行計算
+     * 
+     * @param string $field 欄位名稱 (price, cost, discount_amount)
+     * @return int|null
+     */
+    public function getRawMoneyAttribute(string $field): ?int
+    {
+        return $this->getRawOriginal($field);
+    }
+    
+    /**
+     * 格式化金額顯示（包含貨幣符號）
+     * 
+     * @param string $field 欄位名稱
+     * @return string
+     */
+    public function getFormattedMoneyAttribute(string $field): string
+    {
+        $amount = $this->getAttribute($field); // 使用 accessor 獲取元為單位的值
+        return '$' . number_format($amount, 2);
     }
 }

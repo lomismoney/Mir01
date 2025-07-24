@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Casts\MoneyCast;
 
 class Purchase extends Model
 {
@@ -27,11 +30,11 @@ class Purchase extends Model
      * 屬性類型轉換
      */
     protected $casts = [
-        'total_amount' => 'integer',
-        'shipping_cost' => 'integer',
+        'total_amount' => MoneyCast::class,
+        'shipping_cost' => MoneyCast::class,
         'is_tax_inclusive' => 'boolean',
         'tax_rate' => 'integer',
-        'tax_amount' => 'integer',
+        'tax_amount' => MoneyCast::class,
         'purchased_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -40,7 +43,7 @@ class Purchase extends Model
     /**
      * 獲取該進貨單所屬的門市
      */
-    public function store()
+    public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
@@ -48,7 +51,7 @@ class Purchase extends Model
     /**
      * 獲取創建該進貨單的用戶
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -56,7 +59,7 @@ class Purchase extends Model
     /**
      * 獲取該進貨單的所有項目
      */
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(PurchaseItem::class);
     }
@@ -235,51 +238,4 @@ class Purchase extends Model
         ]);
     }
 
-    /**
-     * 總金額 Accessor - 將分轉換為元
-     */
-    public function getTotalAmountAttribute(): float
-    {
-        return ($this->attributes['total_amount'] ?? 0) / 100;
-    }
-
-    /**
-     * 總金額 Mutator - 將元轉換為分
-     */
-    public function setTotalAmountAttribute($value): void
-    {
-        $this->attributes['total_amount'] = is_null($value) ? null : (int) round($value * 100);
-    }
-
-    /**
-     * 運費 Accessor - 將分轉換為元
-     */
-    public function getShippingCostAttribute(): float
-    {
-        return ($this->attributes['shipping_cost'] ?? 0) / 100;
-    }
-
-    /**
-     * 運費 Mutator - 將元轉換為分
-     */
-    public function setShippingCostAttribute($value): void
-    {
-        $this->attributes['shipping_cost'] = is_null($value) ? null : (int) round($value * 100);
-    }
-
-    /**
-     * 稅額 Accessor - 將分轉換為元
-     */
-    public function getTaxAmountAttribute(): float
-    {
-        return ($this->attributes['tax_amount'] ?? 0) / 100;
-    }
-
-    /**
-     * 稅額 Mutator - 將元轉換為分
-     */
-    public function setTaxAmountAttribute($value): void
-    {
-        $this->attributes['tax_amount'] = is_null($value) ? null : (int) round($value * 100);
-    }
 }

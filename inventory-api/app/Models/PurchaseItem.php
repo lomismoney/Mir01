@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class PurchaseItem extends Model
 {
@@ -47,22 +50,22 @@ class PurchaseItem extends Model
 
     /**
      * 獲取此進貨項目的總成本價格（計算屬性）
-     * 返回元值
+     * 返回元值（MoneyCast已處理分元轉換）
      */
     public function getTotalCostPriceAttribute(): float
     {
-        $costPriceInYuan = $this->cost_price ?? 0;
-        $allocatedShippingCostInYuan = $this->allocated_shipping_cost ?? 0;
+        $costPrice = $this->cost_price ?? 0;
+        $allocatedShippingCost = $this->allocated_shipping_cost ?? 0;
         
-        $totalCostInYuan = ($costPriceInYuan * $this->quantity) + $allocatedShippingCostInYuan;
+        $totalCost = ($costPrice * $this->quantity) + $allocatedShippingCost;
 
-        return $totalCostInYuan; // 返回元值
+        return $totalCost; // 返回元值
     }
 
     /**
      * 獲取該項目所屬的進貨單
      */
-    public function purchase()
+    public function purchase(): BelongsTo
     {
         return $this->belongsTo(Purchase::class);
     }
@@ -70,7 +73,7 @@ class PurchaseItem extends Model
     /**
      * 獲取該項目對應的商品變體
      */
-    public function productVariant()
+    public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
     }
@@ -78,64 +81,17 @@ class PurchaseItem extends Model
     /**
      * 獲取該項目對應的商品（通過變體）
      */
-    public function product()
+    public function product(): HasOneThrough
     {
         return $this->hasOneThrough(Product::class, ProductVariant::class, 'id', 'id', 'product_variant_id', 'product_id');
     }
 
-    /**
-     * 單價 Accessor - 將分轉換為元
-     */
-    public function getUnitPriceAttribute(): float
-    {
-        return ($this->attributes['unit_price'] ?? 0) / 100;
-    }
-
-    /**
-     * 單價 Mutator - 將元轉換為分
-     */
-    public function setUnitPriceAttribute($value): void
-    {
-        $this->attributes['unit_price'] = is_null($value) ? null : (int) round($value * 100);
-    }
-
-    /**
-     * 成本價 Accessor - 將分轉換為元
-     */
-    public function getCostPriceAttribute(): float
-    {
-        return ($this->attributes['cost_price'] ?? 0) / 100;
-    }
-
-    /**
-     * 成本價 Mutator - 將元轉換為分
-     */
-    public function setCostPriceAttribute($value): void
-    {
-        $this->attributes['cost_price'] = is_null($value) ? null : (int) round($value * 100);
-    }
-
-    /**
-     * 攤銷運費 Accessor - 將分轉換為元
-     */
-    public function getAllocatedShippingCostAttribute(): float
-    {
-        return ($this->attributes['allocated_shipping_cost'] ?? 0) / 100;
-    }
-
-    /**
-     * 攤銷運費 Mutator - 將元轉換為分
-     */
-    public function setAllocatedShippingCostAttribute($value): void
-    {
-        $this->attributes['allocated_shipping_cost'] = is_null($value) ? null : (int) round($value * 100);
-    }
 
     /**
      * 獲取關聯的訂單項目（通過 purchase_item_id）
      * 這些是與此進貨項目相關聯的預訂商品
      */
-    public function orderItems()
+    public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class, 'purchase_item_id', 'id');
     }
@@ -144,7 +100,7 @@ class PurchaseItem extends Model
      * 獲取直接綁定的訂單項目（通過 order_item_id）
      * 這是建立進貨單時綁定的特定訂單項目
      */
-    public function orderItem()
+    public function orderItem(): BelongsTo
     {
         return $this->belongsTo(OrderItem::class, 'order_item_id');
     }

@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { cn, formatDate, addImageCacheBuster, getOrderStatusText, getOrderStatusVariant, formatPrice } from '../utils';
+import { cn, formatDate, addImageCacheBuster, getOrderStatusText, getOrderStatusVariant } from '../utils';
 
 /**
  * Utils 模組測試套件
@@ -12,7 +12,6 @@ import { cn, formatDate, addImageCacheBuster, getOrderStatusText, getOrderStatus
  * 3. addImageCacheBuster 函數（圖片緩存破壞）
  * 4. getOrderStatusText 函數（訂單狀態翻譯）
  * 5. getOrderStatusVariant 函數（訂單狀態樣式）
- * 6. formatPrice 函數（價格格式化）
  */
 describe('Utils', () => {
   
@@ -204,42 +203,4 @@ describe('Utils', () => {
     });
   });
 
-  /**
-   * formatPrice 函數測試
-   */
-  describe('formatPrice', () => {
-    it('應該格式化正數價格', () => {
-      expect(formatPrice(1000)).toBe('$1,000');
-      expect(formatPrice(1500)).toBe('$1,500');
-      expect(formatPrice(999)).toBe('$999');
-    });
-
-    it('應該格式化含小數的價格並四捨五入', () => {
-      expect(formatPrice(1000.5)).toBe('$1,001');
-      expect(formatPrice(1000.4)).toBe('$1,000');
-      expect(formatPrice(1500.7)).toBe('$1,501');
-    });
-
-    it('應該格式化零價格', () => {
-      expect(formatPrice(0)).toBe('$0');
-    });
-
-    it('應該格式化負數價格', () => {
-      expect(formatPrice(-100)).toBe('-$100');
-      expect(formatPrice(-1500)).toBe('-$1,500');
-    });
-
-    it('應該處理大數值', () => {
-      expect(formatPrice(1000000)).toBe('$1,000,000');
-      expect(formatPrice(9999999)).toBe('$9,999,999');
-    });
-
-    it('應該處理 null 值', () => {
-      expect(formatPrice(null)).toBe('N/A');
-    });
-
-    it('應該處理 undefined 值', () => {
-      expect(formatPrice(undefined)).toBe('N/A');
-    });
-  });
 });

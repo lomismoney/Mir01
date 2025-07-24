@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import {
   usePurchases,
   useUpdatePurchaseStatus,
@@ -677,7 +677,7 @@ export function PurchaseManagement({ statusFilter }: PurchaseManagementProps = {
                                     <TrendingUp className="h-4 w-4" />
                                     <span className="font-medium">總金額：</span>
                                     <span className="text-green-600 font-semibold">
-                                      {formatPrice(purchase.total_amount, true)}
+                                      {purchase.total_amount !== undefined ? MoneyHelper.format(purchase.total_amount, 'NT$') : 'N/A'}
                                     </span>
                                   </div>
                                 </div>

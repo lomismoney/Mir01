@@ -15,13 +15,21 @@ class StoreSeeder extends Seeder
     public function run(): void
     {
         // 禁用外鍵檢查以避免 truncate 問題
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF');
+        }
         
         // 清除現有資料以避免重複
         Store::truncate();
         
         // 重新啟用外鍵檢查
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON');
+        }
         
         // 建立台北總店（預設門市）
         Store::create([

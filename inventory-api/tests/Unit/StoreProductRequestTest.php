@@ -75,8 +75,13 @@ class StoreProductRequestTest extends TestCase
             'variants'      => 'required|array|min:1',
             'variants.*.sku' => 'required|string|unique:product_variants,sku|max:255',
             'variants.*.price' => 'required|numeric|min:0',
+            // 支援舊格式
             'variants.*.attribute_value_ids' => 'array', // 🎯 允許空陣列，支援單規格商品
             'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
+            // 支援新格式
+            'variants.*.attribute_values' => 'array',
+            'variants.*.attribute_values.*.attribute_id' => 'integer|exists:attributes,id',
+            'variants.*.attribute_values.*.value' => 'required|string|max:255',
         ];
 
         $this->assertEquals($expectedRules, $rules);

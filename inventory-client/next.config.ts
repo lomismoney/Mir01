@@ -27,10 +27,22 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '',
+        pathname: '/storage/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
         port: '8000',
         pathname: '/storage/**',
       },
       // --- 🎯 IPv4 地址支援 ---
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '',
+        pathname: '/storage/**',
+      },
       {
         protocol: 'http',
         hostname: '127.0.0.1',

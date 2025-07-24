@@ -55,37 +55,18 @@ class RolePermissionSeeder extends Seeder
 
         // 建立角色並分配權限
         $roles = [
-            'super-admin' => [
-                'display_name' => '超級管理員',
-                'permissions' => Permission::all()->pluck('name')->toArray(),
-            ],
             'admin' => [
                 'display_name' => '管理員',
-                'permissions' => [
-                    'products.view', 'products.create', 'products.edit', 'products.delete',
-                    'inventory.view', 'inventory.adjust', 'inventory.transfer',
-                    'orders.view', 'orders.create', 'orders.edit', 'orders.cancel',
-                    'customers.view', 'customers.create', 'customers.edit',
-                    'reports.view',
-                ],
+                'permissions' => Permission::all()->pluck('name')->toArray(),
             ],
-            'manager' => [
-                'display_name' => '經理',
+            'staff' => [
+                'display_name' => '員工',
                 'permissions' => [
                     'products.view', 'products.create', 'products.edit',
                     'inventory.view', 'inventory.adjust',
                     'orders.view', 'orders.create', 'orders.edit',
                     'customers.view', 'customers.create', 'customers.edit',
                     'reports.view',
-                ],
-            ],
-            'staff' => [
-                'display_name' => '員工',
-                'permissions' => [
-                    'products.view',
-                    'inventory.view',
-                    'orders.view', 'orders.create',
-                    'customers.view', 'customers.create',
                 ],
             ],
             'viewer' => [

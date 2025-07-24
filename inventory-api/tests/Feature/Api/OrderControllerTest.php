@@ -238,14 +238,15 @@ class OrderControllerTest extends TestCase
             'store_id' => $this->store->id,
             'shipping_status' => 'pending',
             'payment_status' => 'pending',
-            'shipping_fee' => 100.00,
-            'tax' => 50.00,
+            'shipping_fee' => 100.00,  // API 接受元為單位
+            'tax' => 50.00,            // API 接受元為單位
             'discount_amount' => 0,
             'payment_method' => '轉帳',
             'order_source' => '現場客戶',
             'shipping_address' => '台北市信義區信義路五段7號',
             'notes' => '請小心輕放',
             'force_create_despite_stock' => false,
+            'is_tax_inclusive' => false,  // 新增必要欄位
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
@@ -253,7 +254,7 @@ class OrderControllerTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-001',
-                    'price' => 1000.00,
+                    'price' => 1000.00,  // API 接受元為單位
                     'quantity' => 2,
                 ]
             ]
@@ -276,8 +277,8 @@ class OrderControllerTest extends TestCase
             'customer_id' => $this->customer->id,
             'shipping_status' => 'pending',
             'payment_status' => 'pending',
-            'shipping_fee' => 100.00,  // API 接受並儲存為小數
-            'tax' => 50.00             // API 接受並儲存為小數
+            'shipping_fee' => 10000,   // 100.00 * 100 = 10000 分
+            'tax' => 10000             // 2000 * 5% = 100.00 元 = 10000 分 (系統自動計算)
         ]);
     }
 
@@ -312,6 +313,7 @@ class OrderControllerTest extends TestCase
             'payment_method' => '轉帳',
             'order_source' => '現場客戶',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => false,  // 新增必要欄位
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
@@ -319,7 +321,7 @@ class OrderControllerTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-001',
-                    'price' => 1000.00,
+                    'price' => 1000.00,  // API 接受元為單位
                     'quantity' => 5,
                 ]
             ]
@@ -358,6 +360,7 @@ class OrderControllerTest extends TestCase
             'payment_method' => '轉帳',
             'order_source' => '現場客戶',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => false,  // 新增必要欄位
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
@@ -365,7 +368,7 @@ class OrderControllerTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-001',
-                    'price' => 1000.00,
+                    'price' => 1000.00,  // API 接受元為單位
                     'quantity' => 1,
                 ]
             ]
@@ -539,11 +542,20 @@ class OrderControllerTest extends TestCase
     {
         $this->actingAs($this->admin, 'sanctum');
         
+        // 先創建訂單基本資料
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'payment_status' => 'pending',
-            'grand_total' => 1000000  // 10000.00 * 100 = 1000000 分
         ]);
+        
+        // 直接更新資料庫以確保金額正確（避免任何 accessor/mutator 問題）
+        \DB::table('orders')->where('id', $order->id)->update([
+            'grand_total' => 1000000,  // 10000.00 * 100 = 1000000 分
+            'paid_amount' => 0         // 確保沒有已付金額
+        ]);
+        
+        // 重新載入 Model
+        $order->refresh();
         
         $paymentData = [
             'amount' => 5000.00,  // API 接受元為單位
@@ -557,7 +569,7 @@ class OrderControllerTest extends TestCase
         
         $this->assertDatabaseHas('payment_records', [
             'order_id' => $order->id,
-            'amount' => 5000.00,  // API 接受並儲存為小數
+            'amount' => 500000,   // 5000.00 * 100 = 500000 分
             'payment_method' => 'cash'
         ]);
     }
@@ -572,8 +584,8 @@ class OrderControllerTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->customer->id,
             'payment_status' => 'paid',
-            'grand_total' => 500000,   // 5000.00 * 100
-            'paid_amount' => 500000     // 5000.00 * 100，確保訂單已付清
+            'grand_total' => 500000,   // 5000.00 * 100 = 500000 分
+            'paid_amount' => 500000    // 5000.00 * 100 = 500000 分，確保訂單已付清
         ]);
         
         $response = $this->postJson("/api/orders/{$order->id}/add-payment", [
@@ -663,13 +675,13 @@ class OrderControllerTest extends TestCase
             'customer_id' => $this->customer->id,
             'payment_status' => 'paid',
             'shipping_status' => 'delivered',  // 設置為已交付狀態，允許退款
-            'grand_total' => 500000,  // 5000.00 * 100
-            'paid_amount' => 500000   // 5000.00 * 100
+            'grand_total' => 500000,  // 5000.00 * 100 = 500000 分
+            'paid_amount' => 500000   // 5000.00 * 100 = 500000 分
         ]);
         
         $orderItem = OrderItem::factory()->create([
             'order_id' => $order->id,
-            'price' => 500000,  // 5000.00 * 100
+            'price' => 500000,  // 5000.00 * 100 = 500000 分
             'quantity' => 1
         ]);
         
@@ -886,6 +898,7 @@ class OrderControllerTest extends TestCase
             'payment_method' => '轉帳',
             'order_source' => '現場客戶',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => false,  // 新增必要欄位
             'items' => [
                 [
                     'product_variant_id' => $this->productVariant->id,
@@ -893,7 +906,7 @@ class OrderControllerTest extends TestCase
                     'status' => '待處理',
                     'product_name' => '測試商品',
                     'sku' => 'TEST-001',
-                    'price' => 1000.00,
+                    'price' => 1000.00,  // API 接受元為單位
                     'quantity' => 1,
                 ]
             ]

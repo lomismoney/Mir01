@@ -95,27 +95,27 @@ class ProductVariantControllerTest extends TestCase
         $this->variant1 = ProductVariant::factory()->create([
             'product_id' => $this->product1->id,
             'sku' => 'TSHIRT-RED-M',
-            'price' => 299.00,
-            'cost_price' => 150.00,
-            'average_cost' => 165.50,
+            'price' => 29900, // 299.00 元 = 29900 分
+            'cost_price' => 15000, // 150.00 元 = 15000 分
+            'average_cost' => 16550, // 165.50 元 = 16550 分
             'created_at' => $baseTime,
         ]);
         
         $this->variant2 = ProductVariant::factory()->create([
             'product_id' => $this->product1->id,
             'sku' => 'TSHIRT-BLUE-L',
-            'price' => 299.00,
-            'cost_price' => 150.00,
-            'average_cost' => 165.50,
+            'price' => 29900, // 299.00 元 = 29900 分
+            'cost_price' => 15000, // 150.00 元 = 15000 分
+            'average_cost' => 16550, // 165.50 元 = 16550 分
             'created_at' => $baseTime->addMinute(),
         ]);
         
         $this->variant3 = ProductVariant::factory()->create([
             'product_id' => $this->product2->id,
             'sku' => 'LONGSLEEVE-RED-M',
-            'price' => 399.00,
-            'cost_price' => 200.00,
-            'average_cost' => 220.00,
+            'price' => 39900, // 399.00 元 = 39900 分
+            'cost_price' => 20000, // 200.00 元 = 20000 分
+            'average_cost' => 22000, // 220.00 元 = 22000 分
             'created_at' => $baseTime->addMinutes(2),
         ]);
         
@@ -128,19 +128,27 @@ class ProductVariantControllerTest extends TestCase
         $this->store1 = Store::factory()->create(['name' => '主門市']);
         $this->store2 = Store::factory()->create(['name' => '分店']);
         
-        // 創建庫存記錄
-        Inventory::factory()->create([
-            'product_variant_id' => $this->variant1->id,
-            'store_id' => $this->store1->id,
-            'quantity' => 50,
-            'low_stock_threshold' => 10
-        ]);
-        Inventory::factory()->create([
-            'product_variant_id' => $this->variant2->id,
-            'store_id' => $this->store1->id,
-            'quantity' => 30,
-            'low_stock_threshold' => 10
-        ]);
+        // 更新庫存記錄（使用 updateOrCreate 避免重複創建）
+        Inventory::updateOrCreate(
+            [
+                'product_variant_id' => $this->variant1->id,
+                'store_id' => $this->store1->id,
+            ],
+            [
+                'quantity' => 50,
+                'low_stock_threshold' => 10
+            ]
+        );
+        Inventory::updateOrCreate(
+            [
+                'product_variant_id' => $this->variant2->id,
+                'store_id' => $this->store1->id,
+            ],
+            [
+                'quantity' => 30,
+                'low_stock_threshold' => 10
+            ]
+        );
     }
 
     #[Test]

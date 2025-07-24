@@ -99,7 +99,9 @@ class PurchaseOrderLinkSeeder extends Seeder
             'purchase_id' => $purchase->id,
             'product_variant_id' => $variant->id,
             'quantity' => $purchaseQuantity,
+            'unit_price' => $variant->cost_price ?: ($variant->price * 0.6),
             'cost_price' => $variant->cost_price ?: ($variant->price * 0.6),
+            'allocated_shipping_cost' => 0, // 運費會在後續分攤
         ]);
 
         // 關聯所有相關的訂單項目
@@ -137,7 +139,9 @@ class PurchaseOrderLinkSeeder extends Seeder
                     'purchase_id' => $purchase->id,
                     'product_variant_id' => null, // 訂製商品沒有標準變體
                     'quantity' => $quantity,
+                    'unit_price' => $orderItem->cost,
                     'cost_price' => $orderItem->cost,
+                    'allocated_shipping_cost' => 0, // 運費會在後續分攤
                     'custom_product_name' => $orderItem->custom_product_name ?: ('客製化 ' . $orderItem->product_name),
                     'custom_specifications' => $orderItem->custom_specifications,
                 ]);

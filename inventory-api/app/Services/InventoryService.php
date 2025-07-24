@@ -6,7 +6,13 @@ use App\Models\Inventory;
 use App\Models\ProductVariant;
 use App\Models\Store;
 use App\Services\BaseService;
+use App\Services\StockTransferService;
+use App\Services\InventoryTransactionService;
 use App\Services\Traits\HandlesInventoryOperations;
+use App\Repositories\Contracts\InventoryRepositoryInterface;
+use App\Exceptions\Business\InsufficientStockException;
+use App\Exceptions\Inventory\InvalidQuantityException;
+use App\Exceptions\Inventory\InventoryOperationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +29,16 @@ use Illuminate\Support\Facades\Log;
 class InventoryService extends BaseService
 {
     use HandlesInventoryOperations;
+
+    public function __construct(
+        protected InventoryRepositoryInterface $inventoryRepository,
+        protected InventoryTransactionService $transactionService,
+        protected ?StockTransferService $stockTransferService = null
+    ) {
+        if ($this->stockTransferService === null) {
+            $this->stockTransferService = app(StockTransferService::class);
+        }
+    }
     
     /**
      * 跨店庫存查詢
@@ -92,68 +108,86 @@ class InventoryService extends BaseService
             $productName = $variant ? ($variant->product->name ?? 'Unknown') : 'Unknown';
             $sku = $variant ? $variant->sku : 'Unknown';
             
+            // 3. 計算基本數據
+            $shortageQty = max(0, $requestedQty - $targetStock);
+            
             $suggestion = [
                 'product_variant_id' => $variantId,
                 'product_name' => $productName,
                 'sku' => $sku,
                 'requested_quantity' => $requestedQty,
-                'current_store_stock' => $targetStock,
-                'shortage' => max(0, $requestedQty - $targetStock)
+                'available_quantity' => $targetStock,
+                'shortage_quantity' => $shortageQty,
+                'current_store_stock' => $targetStock, // 前端期望的欄位名稱
+                'shortage' => $shortageQty, // 前端期望的欄位名稱
+                'type' => 'sufficient', // 預設為充足，後續會根據實際情況調整
+                'transfers' => [], // 前端期望的欄位名稱
+                'transfer_options' => [],
+                'purchase_suggestion' => null,
+                'purchase_quantity' => 0, // 前端期望的欄位名稱
+                'mixed_solution' => null
             ];
             
             // 如果目標門市庫存充足，不需要建議
             if ($targetStock >= $requestedQty) {
                 $suggestion['type'] = 'sufficient';
-                $suggestion['message'] = '庫存充足';
                 $suggestions[] = $suggestion;
                 continue;
             }
             
-            // 3. 查詢其他門市庫存
-            $otherStores = Inventory::where('product_variant_id', $variantId)
-                ->where('store_id', '!=', $targetStoreId)
-                ->where('quantity', '>', 0)
-                ->with('store:id,name')
-                ->orderBy('quantity', 'desc')
-                ->get();
+            // 4. 使用 StockTransferService 獲取基於距離的調貨建議
+            $transferOptions = $this->stockTransferService->getTransferOptionsForStockSuggestion(
+                $variantId, 
+                $targetStoreId, 
+                $shortageQty
+            );
             
             $totalAvailable = $targetStock;
-            $transfers = [];
-            $remainingNeeded = $requestedQty - $targetStock;
+            $transfers = []; // 前端期望的格式
             
-            // 4. 計算可調貨數量
-            foreach ($otherStores as $inventory) {
-                if ($remainingNeeded <= 0) break;
-                
-                $availableQty = min($inventory->quantity, $remainingNeeded);
+            // 5. 處理調貨選項
+            foreach ($transferOptions as $option) {
                 $transfers[] = [
-                    'from_store_id' => $inventory->store_id,
-                    'from_store_name' => $inventory->store->name,
-                    'available_quantity' => $inventory->quantity,
-                    'suggested_quantity' => $availableQty
+                    'from_store_id' => $option['store_id'],
+                    'from_store_name' => $option['store_name'],
+                    'available_quantity' => $option['available_quantity'],
+                    'suggested_quantity' => $option['suggested_quantity'],
+                    'distance' => $option['distance'] // 新增距離資訊
                 ];
                 
-                $totalAvailable += $availableQty;
-                $remainingNeeded -= $availableQty;
+                $totalAvailable += $option['suggested_quantity'];
             }
             
-            // 5. 決定建議類型
+            $suggestion['transfer_options'] = $transferOptions;
+            $suggestion['transfers'] = $transfers;
+            
+            // 6. 決定建議類型和具體解決方案
+            $remainingNeeded = $requestedQty - $totalAvailable;
+            
             if ($totalAvailable >= $requestedQty) {
                 // 可完全透過調貨滿足
                 $suggestion['type'] = 'transfer';
-                $suggestion['message'] = '建議從其他門市調貨';
-                $suggestion['transfers'] = $transfers;
-            } elseif ($totalAvailable > $targetStock) {
+            } elseif ($totalAvailable > $targetStock && count($transfers) > 0) {
                 // 需要混合處理（部分調貨+部分進貨）
+                $transferQuantity = $totalAvailable - $targetStock;
+                $purchaseQuantity = $remainingNeeded;
+                
                 $suggestion['type'] = 'mixed';
-                $suggestion['message'] = '建議部分調貨，部分向供應商進貨';
-                $suggestion['transfers'] = $transfers;
-                $suggestion['purchase_quantity'] = $remainingNeeded;
+                $suggestion['purchase_quantity'] = $purchaseQuantity;
+                $suggestion['mixed_solution'] = [
+                    'transfer_quantity' => $transferQuantity,
+                    'purchase_quantity' => $purchaseQuantity
+                ];
+                $suggestion['purchase_suggestion'] = [
+                    'suggested_quantity' => $purchaseQuantity
+                ];
             } else {
                 // 只能透過進貨滿足
                 $suggestion['type'] = 'purchase';
-                $suggestion['message'] = '建議向供應商進貨';
-                $suggestion['purchase_quantity'] = $requestedQty - $targetStock;
+                $suggestion['purchase_quantity'] = $shortageQty;
+                $suggestion['purchase_suggestion'] = [
+                    'suggested_quantity' => $shortageQty
+                ];
             }
             
             $suggestions[] = $suggestion;
@@ -220,39 +254,74 @@ class InventoryService extends BaseService
      */
     public function deductStock(int $productVariantId, int $quantity, ?int $storeId = null, ?string $notes = null, array $metadata = []): bool
     {
+        // 驗證用戶認證
+        if (!Auth::check()) {
+            throw new \InvalidArgumentException('用戶必須經過認證才能執行庫存操作');
+        }
+        
+        // 驗證數量
+        if ($quantity <= 0) {
+            throw new InvalidQuantityException($quantity, '扣減');
+        }
+
         return $this->executeInTransaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
-            // 🎯 使用預設門市邏輯，確保門市ID有效
+            // 使用預設門市邏輯，確保門市ID有效
             $effectiveStoreId = $this->ensureValidStoreId($storeId);
 
-            // 獲取或創建庫存記錄
-            $inventory = Inventory::lockForUpdate()
-                ->firstOrCreate(
-                    [
-                        'product_variant_id' => $productVariantId,
-                        'store_id' => $effectiveStoreId
-                    ],
-                    [
-                        'quantity' => 0,
-                        'low_stock_threshold' => 5 // 預設低庫存警戒值
-                    ]
+            // 獲取或創建庫存記錄（使用 Repository）
+            $inventory = $this->inventoryRepository->lockByVariantAndStore($productVariantId, $effectiveStoreId);
+            
+            if (!$inventory) {
+                $inventory = $this->inventoryRepository->firstOrCreate(
+                    $productVariantId,
+                    $effectiveStoreId,
+                    ['low_stock_threshold' => 5]
                 );
+                // 重新鎖定新創建的記錄
+                $inventory = $this->inventoryRepository->lockForUpdate($inventory->id);
+            }
 
             // 檢查庫存是否足夠
             if ($inventory->quantity < $quantity) {
-                $variant = ProductVariant::find($productVariantId);
-                throw new \Exception("庫存不足：商品 {$variant->sku} 當前庫存 {$inventory->quantity}，需求數量 {$quantity}");
+                $variant = ProductVariant::with('product')->find($productVariantId);
+                throw new InsufficientStockException(
+                    $productVariantId,
+                    $quantity,
+                    $inventory->quantity,
+                    $variant->sku ?? 'Unknown',
+                    $variant->product->name ?? 'Unknown'
+                );
             }
 
-            // 扣減庫存
-            $userId = $this->requireAuthentication('庫存操作');
+            // 執行扣減
+            $beforeQuantity = $inventory->quantity;
+            $afterQuantity = $beforeQuantity - $quantity;
             
-            $notes = $notes ?? '訂單扣減庫存';
+            $success = $this->inventoryRepository->updateQuantity($inventory, $afterQuantity);
             
-            $result = $inventory->reduceStock($quantity, $userId, $notes, $metadata);
-            
-            if (!$result) {
-                throw new \Exception("庫存扣減失敗");
+            if (!$success) {
+                throw new InventoryOperationException('deduct', '更新庫存數量失敗', [
+                    'product_variant_id' => $productVariantId,
+                    'quantity' => $quantity
+                ]);
             }
+
+            // 記錄交易
+            $this->transactionService->recordDeduction(
+                $inventory->id,
+                $quantity,
+                $beforeQuantity,
+                $afterQuantity,
+                array_merge($metadata, ['notes' => $notes ?? '訂單扣減庫存'])
+            );
+
+            Log::info('庫存扣減成功', [
+                'product_variant_id' => $productVariantId,
+                'store_id' => $effectiveStoreId,
+                'quantity' => $quantity,
+                'before' => $beforeQuantity,
+                'after' => $afterQuantity
+            ]);
 
             return true;
         });
@@ -271,33 +340,62 @@ class InventoryService extends BaseService
      */
     public function returnStock(int $productVariantId, int $quantity, ?int $storeId = null, ?string $notes = null, array $metadata = []): bool
     {
+        // 驗證用戶認證
+        if (!Auth::check()) {
+            throw new \InvalidArgumentException('用戶必須經過認證才能執行庫存操作');
+        }
+        
+        // 驗證數量
+        if ($quantity <= 0) {
+            throw new InvalidQuantityException($quantity, '返還');
+        }
+
         return $this->executeInTransaction(function () use ($productVariantId, $quantity, $storeId, $notes, $metadata) {
-            // 🎯 使用預設門市邏輯，確保門市ID有效
+            // 使用預設門市邏輯，確保門市ID有效
             $effectiveStoreId = $this->ensureValidStoreId($storeId);
 
-            // 獲取或創建庫存記錄
-            $inventory = Inventory::lockForUpdate()
-                ->firstOrCreate(
-                    [
-                        'product_variant_id' => $productVariantId,
-                        'store_id' => $effectiveStoreId
-                    ],
-                    [
-                        'quantity' => 0,
-                        'low_stock_threshold' => 5
-                    ]
+            // 獲取或創建庫存記錄（使用 Repository）
+            $inventory = $this->inventoryRepository->lockByVariantAndStore($productVariantId, $effectiveStoreId);
+            
+            if (!$inventory) {
+                $inventory = $this->inventoryRepository->firstOrCreate(
+                    $productVariantId,
+                    $effectiveStoreId,
+                    ['low_stock_threshold' => 5]
                 );
-
-            // 返還庫存
-            $userId = $this->requireAuthentication('庫存操作');
-            
-            $notes = $notes ?? '訂單取消/退款返還庫存';
-            
-            $result = $inventory->addStock($quantity, $userId, $notes, $metadata);
-            
-            if (!$result) {
-                throw new \Exception("庫存返還失敗");
+                // 重新鎖定新創建的記錄
+                $inventory = $this->inventoryRepository->lockForUpdate($inventory->id);
             }
+
+            // 執行返還
+            $beforeQuantity = $inventory->quantity;
+            $afterQuantity = $beforeQuantity + $quantity;
+            
+            $success = $this->inventoryRepository->updateQuantity($inventory, $afterQuantity);
+            
+            if (!$success) {
+                throw new InventoryOperationException('return', '更新庫存數量失敗', [
+                    'product_variant_id' => $productVariantId,
+                    'quantity' => $quantity
+                ]);
+            }
+
+            // 記錄交易
+            $this->transactionService->recordAddition(
+                $inventory->id,
+                $quantity,
+                $beforeQuantity,
+                $afterQuantity,
+                array_merge($metadata, ['notes' => $notes ?? '訂單取消/退款返還庫存'])
+            );
+
+            Log::info('庫存返還成功', [
+                'product_variant_id' => $productVariantId,
+                'store_id' => $effectiveStoreId,
+                'quantity' => $quantity,
+                'before' => $beforeQuantity,
+                'after' => $afterQuantity
+            ]);
 
             return true;
         });
@@ -328,7 +426,7 @@ class InventoryService extends BaseService
         $userId = auth()->id();
         
         if (!$userId) {
-            throw new \InvalidArgumentException('用戶必須經過認證才能扣減庫存');
+            throw new InvalidQuantityException(0, '批量扣減');
         }
         
         // 收集需要處理的商品變體ID
@@ -343,12 +441,28 @@ class InventoryService extends BaseService
             return true;
         }
         
-        // 批量獲取並鎖定庫存記錄
-        $inventories = Inventory::whereIn('product_variant_id', $variantIds)
-            ->where('store_id', $effectiveStoreId)
-            ->lockForUpdate()
-            ->get()
-            ->keyBy('product_variant_id');
+        // 使用 Repository 批量獲取並鎖定庫存記錄
+        $inventories = collect();
+        foreach ($variantIds as $variantId) {
+            $inventory = $this->inventoryRepository->lockByVariantAndStore($variantId, $effectiveStoreId);
+            if (!$inventory) {
+                // 自動創建缺失的庫存記錄
+                $inventory = $this->inventoryRepository->firstOrCreate(
+                    $variantId,
+                    $effectiveStoreId,
+                    ['low_stock_threshold' => 0]
+                );
+                // 重新鎖定新創建的記錄
+                $inventory = $this->inventoryRepository->lockForUpdate($inventory->id);
+                
+                Log::warning("自動創建庫存記錄", [
+                    'product_variant_id' => $variantId,
+                    'store_id' => $effectiveStoreId,
+                    'context' => '訂單扣減庫存時發現缺失記錄'
+                ]);
+            }
+            $inventories->put($variantId, $inventory);
+        }
         
         // 處理每個項目
         foreach ($items as $item) {
@@ -358,47 +472,43 @@ class InventoryService extends BaseService
             
             $inventory = $inventories->get($item['product_variant_id']);
             
-            if (!$inventory) {
-                // 🎯 自動創建缺失的庫存記錄，初始數量為 0
-                $inventory = Inventory::create([
-                    'product_variant_id' => $item['product_variant_id'],
-                    'store_id' => $effectiveStoreId,
-                    'quantity' => 0,
-                    'low_stock_threshold' => 0,
-                ]);
-                
-                // 記錄自動創建的日誌
-                \Log::warning("自動創建庫存記錄", [
-                    'product_variant_id' => $item['product_variant_id'],
-                    'store_id' => $effectiveStoreId,
-                    'context' => '訂單扣減庫存時發現缺失記錄'
-                ]);
-                
-                // 將新創建的記錄加入集合，以便後續使用
-                $inventories->put($item['product_variant_id'], $inventory);
-            }
-            
             if ($inventory->quantity < $item['quantity']) {
-                $productVariant = ProductVariant::find($item['product_variant_id']);
-                throw new \Exception(
-                    "庫存不足：商品 {$productVariant->sku} 需求 {$item['quantity']}，可用 {$inventory->quantity}"
+                $productVariant = ProductVariant::with('product')->find($item['product_variant_id']);
+                throw new InsufficientStockException(
+                    $item['product_variant_id'],
+                    $item['quantity'],
+                    $inventory->quantity,
+                    $productVariant->sku ?? 'Unknown',
+                    $productVariant->product->name ?? 'Unknown'
                 );
             }
             
             // 扣減庫存
-            $inventory->quantity -= $item['quantity'];
-            $inventory->save();
+            $beforeQuantity = $inventory->quantity;
+            $afterQuantity = $beforeQuantity - $item['quantity'];
+            
+            $success = $this->inventoryRepository->updateQuantity($inventory, $afterQuantity);
+            
+            if (!$success) {
+                throw new InventoryOperationException('batch_deduct', '更新庫存數量失敗', [
+                    'product_variant_id' => $item['product_variant_id'],
+                    'quantity' => $item['quantity']
+                ]);
+            }
             
             // 記錄交易
-            $inventory->transactions()->create([
-                'quantity' => -$item['quantity'],
-                'before_quantity' => $inventory->quantity + $item['quantity'],
-                'after_quantity' => $inventory->quantity,
-                'user_id' => $userId,
-                'type' => 'deduct',
-                'notes' => "訂單商品：{$item['product_name']}",
-                'metadata' => json_encode($metadata),
-            ]);
+            $this->transactionService->recordDeduction(
+                $inventory->id,
+                $item['quantity'],
+                $beforeQuantity,
+                $afterQuantity,
+                array_merge($metadata, [
+                    'notes' => "訂單商品：{$item['product_name']}",
+                    'batch_operation' => true,
+                    'product_variant_id' => $item['product_variant_id'],
+                    'sku' => $item['sku'] ?? null,
+                ])
+            );
         }
         
         return true;
@@ -429,7 +539,7 @@ class InventoryService extends BaseService
         $userId = auth()->id();
         
         if (!$userId) {
-            throw new \InvalidArgumentException('用戶必須經過認證才能返還庫存');
+            throw new InvalidQuantityException(0, '批量返還');
         }
         
         // 統一轉換為陣列格式並收集需要處理的商品變體ID
@@ -460,41 +570,51 @@ class InventoryService extends BaseService
             ->sort()
             ->values();
         
-        // 批量獲取並鎖定庫存記錄
-        $inventories = Inventory::whereIn('product_variant_id', $variantIds)
-            ->where('store_id', $effectiveStoreId)
-            ->lockForUpdate()
-            ->get()
-            ->keyBy('product_variant_id');
+        // 使用 Repository 批量獲取庫存
+        $inventories = $this->inventoryRepository->findByVariantIds($variantIds->toArray(), $effectiveStoreId);
+        
+        // 獲取所有需要鎖定的庫存ID
+        $inventoryIds = [];
+        foreach ($processItems as $item) {
+            $inventory = $inventories->get($item['product_variant_id']);
+            if (!$inventory) {
+                // 創建新庫存記錄
+                $inventory = $this->inventoryRepository->firstOrCreate(
+                    $item['product_variant_id'],
+                    $effectiveStoreId,
+                    ['low_stock_threshold' => 5]
+                );
+                $inventories->put($item['product_variant_id'], $inventory);
+            }
+            $inventoryIds[] = $inventory->id;
+        }
+        
+        // 批量鎖定所有庫存記錄
+        $lockedInventories = $this->inventoryRepository->lockMultipleForUpdate($inventoryIds);
+        $lockedInventories = $lockedInventories->keyBy('product_variant_id');
         
         // 處理每個項目
         foreach ($processItems as $item) {
-            $inventory = $inventories->get($item['product_variant_id']);
-            
-            if (!$inventory) {
-                // 如果庫存記錄不存在，創建新的
-                $inventory = Inventory::create([
-                    'product_variant_id' => $item['product_variant_id'],
-                    'store_id' => $effectiveStoreId,
-                    'quantity' => 0,
-                    'low_stock_threshold' => 5
-                ]);
-            }
+            $inventory = $lockedInventories->get($item['product_variant_id']);
             
             // 返還庫存
-            $inventory->quantity += $item['quantity'];
-            $inventory->save();
+            $beforeQuantity = $inventory->quantity;
+            $afterQuantity = $beforeQuantity + $item['quantity'];
+            
+            $this->inventoryRepository->updateQuantity($inventory, $afterQuantity);
             
             // 記錄交易
-            $inventory->transactions()->create([
-                'quantity' => $item['quantity'],
-                'before_quantity' => $inventory->quantity - $item['quantity'],
-                'after_quantity' => $inventory->quantity,
-                'user_id' => $userId,
-                'type' => 'return',
-                'notes' => "訂單取消返還：{$item['product_name']}",
-                'metadata' => json_encode($metadata),
-            ]);
+            $this->transactionService->recordAddition(
+                $inventory->id,
+                $item['quantity'],
+                $beforeQuantity,
+                $afterQuantity,
+                array_merge($metadata, [
+                    'notes' => "訂單取消返還：{$item['product_name']}",
+                    'batch_operation' => true,
+                    'product_variant_id' => $item['product_variant_id'],
+                ])
+            );
         }
         
         return true;
@@ -510,12 +630,10 @@ class InventoryService extends BaseService
      */
     public function checkStock(int $productVariantId, int $quantity, ?int $storeId = null): bool
     {
-        // 🎯 使用預設門市邏輯，確保門市ID有效
+        // 使用預設門市邏輯，確保門市ID有效
         $effectiveStoreId = $this->ensureValidStoreId($storeId);
 
-        $inventory = Inventory::where('product_variant_id', $productVariantId)
-            ->where('store_id', $effectiveStoreId)
-            ->first();
+        $inventory = $this->inventoryRepository->findByVariantAndStore($productVariantId, $effectiveStoreId);
 
         if (!$inventory) {
             return false;
@@ -542,23 +660,26 @@ class InventoryService extends BaseService
             ->filter(fn($item) => isset($item['product_variant_id']) && $item['is_stocked_sale'])
             ->pluck('product_variant_id')
             ->unique()
-            ->sort() // 🔐 統一排序避免死鎖
+            ->sort() // 統一排序避免死鎖
             ->values();
         
         if ($variantIds->isEmpty()) {
             return $results;
         }
         
-        // 批量獲取庫存記錄
-        $inventoryQuery = Inventory::whereIn('product_variant_id', $variantIds)
-            ->where('store_id', $effectiveStoreId);
-        
-        // 🔐 悲觀鎖強化：在檢查時就鎖定庫存記錄
+        // 使用 Repository 批量獲取庫存
         if ($withLock) {
-            $inventoryQuery->lockForUpdate();
+            $inventories = collect();
+            // 批量鎖定記錄
+            foreach ($variantIds as $variantId) {
+                $inventory = $this->inventoryRepository->lockByVariantAndStore($variantId, $effectiveStoreId);
+                if ($inventory) {
+                    $inventories->put($variantId, $inventory);
+                }
+            }
+        } else {
+            $inventories = $this->inventoryRepository->findByVariantIds($variantIds->toArray(), $effectiveStoreId);
         }
-        
-        $inventories = $inventoryQuery->get()->keyBy('product_variant_id');
         
         // 批量獲取商品變體信息
         $variants = ProductVariant::whereIn('id', $variantIds)
@@ -574,25 +695,26 @@ class InventoryService extends BaseService
             $inventory = $inventories->get($item['product_variant_id']);
             $variant = $variants->get($item['product_variant_id']);
             
-            // 🎯 如果沒有庫存記錄，自動創建
+            // 如果沒有庫存記錄，自動創建
             if (!$inventory && $variant) {
-                $inventory = Inventory::create([
-                    'product_variant_id' => $item['product_variant_id'],
-                    'store_id' => $effectiveStoreId,
-                    'quantity' => 0,
-                    'low_stock_threshold' => 0,
-                ]);
+                $inventory = $this->inventoryRepository->firstOrCreate(
+                    $item['product_variant_id'],
+                    $effectiveStoreId,
+                    ['low_stock_threshold' => 0]
+                );
                 
-                \Log::info("庫存檢查時自動創建庫存記錄", [
+                Log::info("庫存檢查時自動創建庫存記錄", [
                     'product_variant_id' => $item['product_variant_id'],
                     'store_id' => $effectiveStoreId,
                     'sku' => $variant->sku
                 ]);
                 
-                // 如果使用鎖，需要重新獲取並鎖定新創建的記錄
+                // 如果使用鎖，需要重新鎖定新創建的記錄
                 if ($withLock) {
-                    $inventory = Inventory::where('id', $inventory->id)->lockForUpdate()->first();
+                    $inventory = $this->inventoryRepository->lockForUpdate($inventory->id);
                 }
+                
+                $inventories->put($item['product_variant_id'], $inventory);
             }
             
             $availableQuantity = $inventory ? $inventory->quantity : 0;
@@ -688,6 +810,7 @@ class InventoryService extends BaseService
      * 智能化的自動調貨機制
      *
      * 當訂單項目庫存不足時，此方法會被觸發，嘗試從其他分店自動調貨
+     * 使用基於距離的智能調貨策略
      *
      * @param \App\Models\OrderItem $orderItem 庫存不足的訂單項目
      * @param int $requestingStoreId 發起調貨請求的門市ID
@@ -696,15 +819,15 @@ class InventoryService extends BaseService
     public function initiateAutomatedTransfer(\App\Models\OrderItem $orderItem, int $requestingStoreId): bool
     {
         return $this->executeInTransaction(function () use ($orderItem, $requestingStoreId) {
-            // 1. 尋找最佳貨源分店
-            $sourceStore = Inventory::where('product_variant_id', $orderItem->product_variant_id)
-                ->where('store_id', '!=', $requestingStoreId)
-                ->where('quantity', '>=', $orderItem->quantity)
-                ->orderBy('quantity', 'desc') // 優先從庫存最多的門市調貨
-                ->first();
+            // 1. 使用 StockTransferService 尋找最佳調貨來源
+            $transferOptions = $this->stockTransferService->findOptimalTransferStores(
+                $requestingStoreId,
+                $orderItem->product_variant_id,
+                $orderItem->quantity
+            );
 
-            // 2. 如果找不到貨源，記錄日誌並返回
-            if (!$sourceStore) {
+            // 2. 如果找不到任何調貨選項，記錄日誌並返回
+            if (empty($transferOptions)) {
                 Log::info('自動調貨失敗：所有分店庫存均不足', [
                     'order_item_id' => $orderItem->id,
                     'product_variant_id' => $orderItem->product_variant_id,
@@ -715,34 +838,49 @@ class InventoryService extends BaseService
                 return false;
             }
 
-            // 3. 建立調貨單
+            // 3. 選擇第一個（最佳）調貨選項
+            $bestOption = $transferOptions[0];
+            
+            // 檢查是否有足夠的庫存
+            if ($bestOption['available_quantity'] < $orderItem->quantity) {
+                Log::info('自動調貨失敗：最佳選項庫存不足', [
+                    'order_item_id' => $orderItem->id,
+                    'best_store_id' => $bestOption['store_id'],
+                    'available_quantity' => $bestOption['available_quantity'],
+                    'requested_quantity' => $orderItem->quantity
+                ]);
+                $orderItem->update(['status' => 'backordered']);
+                return false;
+            }
+
+            // 4. 建立調貨單
             $transfer = \App\Models\InventoryTransfer::create([
-                'from_store_id' => $sourceStore->store_id,
+                'from_store_id' => $bestOption['store_id'],
                 'to_store_id' => $requestingStoreId,
                 'product_variant_id' => $orderItem->product_variant_id,
                 'quantity' => $orderItem->quantity,
                 'order_id' => $orderItem->order_id, // 關聯訂單
                 'status' => 'pending', // 初始狀態為待處理
-                'notes' => '由訂單 ' . $orderItem->order->order_number . ' 自動觸發的庫存調配',
+                'notes' => sprintf(
+                    '由訂單 %s 自動觸發的智能調配（距離: %s）',
+                    $orderItem->order->order_number,
+                    $bestOption['distance'] ? $bestOption['distance'] . 'km' : '基於庫存量'
+                ),
                 'user_id' => $this->requireAuthentication('自動調貨')
             ]);
 
-            \Log::info('庫存轉移建立成功', [
+            Log::info('智能調貨成功', [
                 'transfer_id' => $transfer->id,
-                'order_id' => $transfer->order_id,
-                'status' => $transfer->status,
-                'notes' => $transfer->notes,
-            ]);
-
-            // 4. 更新訂單項目狀態為「調貨中」
-            $orderItem->update(['status' => 'transfer_pending']);
-
-            Log::info('自動調貨成功', [
                 'order_item_id' => $orderItem->id,
-                'from_store_id' => $sourceStore->store_id,
+                'from_store_id' => $bestOption['store_id'],
+                'from_store_name' => $bestOption['store_name'],
                 'to_store_id' => $requestingStoreId,
-                'transfer_id' => $transfer->id
+                'distance' => $bestOption['distance'],
+                'selection_reason' => $bestOption['distance'] ? 'distance_based' : 'stock_based'
             ]);
+
+            // 5. 更新訂單項目狀態為「調貨中」
+            $orderItem->update(['status' => 'transfer_pending']);
 
             return true;
         });

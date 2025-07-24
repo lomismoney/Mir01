@@ -84,25 +84,25 @@ class PurchaseMultiSourceTest extends TestCase
         $data = [
             'store_id' => $store->id,
             'purchased_at' => now()->toISOString(),
-            'shipping_cost' => 3000, // 統一運費
+            'shipping_cost' => 30, // 統一運費（元）
             'notes' => '多來源進貨：供應商A(手動3台@380)、供應商B(客戶A訂單2台@390)、供應商C(客戶B訂單1台@400)',
             'items' => [
                 [
                     'product_variant_id' => $variant->id,
                     'quantity' => 3,
-                    'cost_price' => 38000 // 供應商A的價格
+                    'cost_price' => 380 // 供應商A的價格（元）
                 ]
             ],
             'order_items' => [
                 [
                     'order_item_id' => $orderItem1->id,
                     'purchase_quantity' => 2,
-                    'cost_price' => 39000 // 供應商B的價格
+                    'cost_price' => 390 // 供應商B的價格（元）
                 ],
                 [
                     'order_item_id' => $orderItem2->id,
                     'purchase_quantity' => 1,
-                    'cost_price' => 40000 // 供應商C的價格
+                    'cost_price' => 400 // 供應商C的價格（元）
                 ]
             ]
         ];
@@ -116,36 +116,36 @@ class PurchaseMultiSourceTest extends TestCase
         // 驗證有3個獨立的進貨項目
         $this->assertCount(3, $responseData['items']);
         
-        // 總成本計算：
-        // 供應商A: 3 * 38000 = 114000
-        // 供應商B: 2 * 39000 = 78000
-        // 供應商C: 1 * 40000 = 40000
-        // 運費: 3000
-        // 總計: 235000 / 100 = 2350
+        // 總成本計算（API 接收元，內部轉為分計算，回傳時轉回元）：
+        // 供應商A: 3 * 380 = 1140 元
+        // 供應商B: 2 * 390 = 780 元
+        // 供應商C: 1 * 400 = 400 元
+        // 運費: 30 元
+        // 總計: 2350 元
         $this->assertEquals(2350, $responseData['total_amount']);
         
         // 驗證資料庫中有3個獨立的進貨項目
         $this->assertDatabaseCount('purchase_items', 3);
         
-        // 驗證每個項目保持獨立的成本價格
+        // 驗證每個項目保持獨立的成本價格（資料庫儲存分為單位）
         $this->assertDatabaseHas('purchase_items', [
             'product_variant_id' => $variant->id,
             'quantity' => 3,
-            'cost_price' => 3800000, // 38000 * 100
+            'cost_price' => 38000, // 380 * 100
             'order_item_id' => null
         ]);
         
         $this->assertDatabaseHas('purchase_items', [
             'product_variant_id' => $variant->id,
             'quantity' => 2,
-            'cost_price' => 3900000, // 39000 * 100
+            'cost_price' => 39000, // 390 * 100
             'order_item_id' => $orderItem1->id
         ]);
         
         $this->assertDatabaseHas('purchase_items', [
             'product_variant_id' => $variant->id,
             'quantity' => 1,
-            'cost_price' => 4000000, // 40000 * 100
+            'cost_price' => 40000, // 400 * 100
             'order_item_id' => $orderItem2->id
         ]);
     }
@@ -168,26 +168,26 @@ class PurchaseMultiSourceTest extends TestCase
         $product2 = Product::factory()->create();
         $variant2 = ProductVariant::factory()->create(['product_id' => $product2->id]);
         
-        // 創建進貨單：總數量10個，運費1000元
+        // 創建進貨單：總數量10個，運費10.00元
         $data = [
             'store_id' => $store->id,
             'purchased_at' => now()->toISOString(),
-            'shipping_cost' => 1000,
+            'shipping_cost' => 10,
             'items' => [
                 [
                     'product_variant_id' => $variant1->id,
                     'quantity' => 6, // 60% 的數量
-                    'cost_price' => 10000
+                    'cost_price' => 100 // 100元
                 ],
                 [
                     'product_variant_id' => $variant1->id, // 相同產品，不同批次
                     'quantity' => 2, // 20% 的數量
-                    'cost_price' => 11000
+                    'cost_price' => 110 // 110元
                 ],
                 [
                     'product_variant_id' => $variant2->id,
                     'quantity' => 2, // 20% 的數量
-                    'cost_price' => 20000
+                    'cost_price' => 200 // 200元
                 ]
             ],
             'order_items' => []
@@ -198,9 +198,9 @@ class PurchaseMultiSourceTest extends TestCase
         $response->assertStatus(201);
         
         // 驗證運費分攤（按數量比例）
-        // 第一個項目應該分攤 60% = 600
-        // 第二個項目應該分攤 20% = 200
-        // 第三個項目應該分攤 20% = 200
+        // 第一個項目應該分攤 60% = 6元
+        // 第二個項目應該分攤 20% = 2元
+        // 第三個項目應該分攤 20% = 2元
         
         $items = $response->json('data.items');
         $this->assertCount(3, $items);
@@ -211,19 +211,19 @@ class PurchaseMultiSourceTest extends TestCase
         $this->assertDatabaseHas('purchase_items', [
             'product_variant_id' => $variant1->id,
             'quantity' => 6,
-            'allocated_shipping_cost' => 60000 // 600 * 100
+            'allocated_shipping_cost' => 600 // 6 * 100
         ]);
         
         $this->assertDatabaseHas('purchase_items', [
             'product_variant_id' => $variant1->id,
             'quantity' => 2,
-            'allocated_shipping_cost' => 20000 // 200 * 100
+            'allocated_shipping_cost' => 200 // 2 * 100
         ]);
         
         $this->assertDatabaseHas('purchase_items', [
             'product_variant_id' => $variant2->id,
             'quantity' => 2,
-            'allocated_shipping_cost' => 20000 // 200 * 100
+            'allocated_shipping_cost' => 200 // 2 * 100
         ]);
     }
 
@@ -255,17 +255,17 @@ class PurchaseMultiSourceTest extends TestCase
                 [
                     'product_variant_id' => $variant->id,
                     'quantity' => 2,
-                    'cost_price' => 75000 // 促銷價
+                    'cost_price' => 750 // 促銷價（元）
                 ],
                 [
                     'product_variant_id' => $variant->id,
                     'quantity' => 3,
-                    'cost_price' => 80000 // 正常價
+                    'cost_price' => 800 // 正常價（元）
                 ],
                 [
                     'product_variant_id' => $variant->id,
                     'quantity' => 1,
-                    'cost_price' => 85000 // 緊急採購價
+                    'cost_price' => 850 // 緊急採購價（元）
                 ]
             ],
             'order_items' => []
@@ -280,19 +280,19 @@ class PurchaseMultiSourceTest extends TestCase
         // 驗證所有項目都被獨立記錄
         $this->assertCount(3, $items);
         
-        // 驗證可以追蹤不同的成本價格
+        // 驗證可以追蹤不同的成本價格（API 回傳元為單位）
         $costs = array_column($items, 'cost_price');
-        $this->assertContains(75000, $costs);
-        $this->assertContains(80000, $costs);
-        $this->assertContains(85000, $costs);
+        $this->assertContains(750, $costs);
+        $this->assertContains(800, $costs);
+        $this->assertContains(850, $costs);
         
-        // 計算平均成本：(2*75000 + 3*80000 + 1*85000) / 6 = 79166.67
-        $totalCost = (2 * 75000) + (3 * 80000) + (1 * 85000);
+        // 計算平均成本：(2*750 + 3*800 + 1*850) / 6 = 791.67
+        $totalCost = (2 * 750) + (3 * 800) + (1 * 850);
         $totalQuantity = 6;
         $averageCost = $totalCost / $totalQuantity;
         
         // 這個平均成本資訊對於財務分析很重要
-        $this->assertEquals(475000, $totalCost);
-        $this->assertEqualsWithDelta(79166.67, $averageCost, 0.01);
+        $this->assertEquals(4750, $totalCost);
+        $this->assertEqualsWithDelta(791.67, $averageCost, 0.01);
     }
 }

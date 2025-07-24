@@ -52,8 +52,10 @@ class OrderItemResource extends JsonResource
             'status_text' => $this->status_text, // 狀態中文說明
             'product_name' => $this->product_name,
             'sku' => $this->sku,
-            'price' => $this->price,
-            'cost' => $this->cost,
+            'price' => $this->price, // 使用已轉換的accessor值（分→元）
+            'cost' => $this->cost, // 使用已轉換的accessor值（可能為null）
+            'tax_rate' => $this->tax_rate, // 使用已轉換的accessor值
+            'discount_amount' => $this->discount_amount, // 使用已轉換的accessor值
             'quantity' => $this->quantity,
             'fulfilled_quantity' => $this->fulfilled_quantity,
             'is_fulfilled' => $this->is_fulfilled,

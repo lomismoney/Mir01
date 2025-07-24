@@ -98,8 +98,8 @@ export default function InstallationsPage() {
         </p>
       </div>
 
-      {/* 🎯 統計卡片區域 - 採用與用戶頁面相同的現代化設計 */}
-      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:grid-cols-4">
+      {/* 🎯 統計卡片區域 - 採用簡潔的現代化設計 */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card className="@container/card">
           <CardHeader className="space-y-1">
             <CardDescription className="text-xs">

@@ -28,7 +28,7 @@ import {
   CheckCircle,
   Clock
 } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 
 /**
  * 系統報表頁面
@@ -152,7 +152,7 @@ export default function SystemReportsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">本月營收</span>
-                    <Badge variant="secondary">{formatPrice(2450000)}</Badge>
+                    <Badge variant="secondary">{MoneyHelper.format(2450000, 'NT$')}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">訂單成長率</span>
@@ -188,7 +188,7 @@ export default function SystemReportsPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">庫存總值</span>
-                    <Badge className="bg-purple-100 text-purple-800">{formatPrice(1850000)}</Badge>
+                    <Badge className="bg-purple-100 text-purple-800">{MoneyHelper.format(1850000, 'NT$')}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">預警商品</span>
@@ -224,7 +224,7 @@ export default function SystemReportsPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">平均客單價</span>
-                    <Badge className="bg-blue-100 text-blue-800">{formatPrice(3420)}</Badge>
+                    <Badge className="bg-blue-100 text-blue-800">{MoneyHelper.format(3420, 'NT$')}</Badge>
                   </div>
                   <Button variant="outline" size="sm" className="w-full">
                     <Users className="h-4 w-4 mr-2" />
@@ -252,7 +252,7 @@ export default function SystemReportsPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">營運成本</span>
-                    <Badge variant="secondary">{formatPrice(1400000)}</Badge>
+                    <Badge variant="secondary">{MoneyHelper.format(1400000, 'NT$')}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">投資回報率</span>

@@ -91,10 +91,9 @@ class OrderItemModelTest extends TestCase
             'purchase_item_id',
             'is_fulfilled',
             'fulfilled_at',
-            // 金額欄位（分為單位）
-            'price_cents',
-            'cost_cents',
-            'discount_amount_cents',
+            // 分配優先級欄位
+            'allocation_priority_score',
+            'allocation_metadata',
         ];
 
         $this->assertEquals($expectedFillable, $orderItem->getFillable());
@@ -115,12 +114,9 @@ class OrderItemModelTest extends TestCase
             'custom_specifications' => 'json',
             'quantity' => 'integer',
             'fulfilled_quantity' => 'integer',
-            'tax_rate' => 'decimal:2',
             'fulfilled_at' => 'datetime',
-            // 金額欄位使用分為單位
-            'price_cents' => 'integer',
-            'cost_cents' => 'integer',
-            'discount_amount_cents' => 'integer',
+            'allocation_priority_score' => 'integer',
+            'allocation_metadata' => 'json',
         ];
 
         $this->assertEquals($expectedCasts, $orderItem->getCasts());
@@ -152,11 +148,11 @@ class OrderItemModelTest extends TestCase
             'product_variant_id' => $productVariant->id,
             'product_name' => '測試商品',
             'sku' => 'TEST-001',
-            'price' => 100.50,
-            'cost' => 50.25,
+            'price' => 10050, // 100.50元 = 10050分
+            'cost' => 5025,   // 50.25元 = 5025分
             'quantity' => 2,
-            'tax_rate' => 0.05,
-            'discount_amount' => 10.00,
+            'tax_rate' => 500, // 0.05 = 500/10000
+            'discount_amount' => 1000, // 10.00元 = 1000分
             'is_stocked_sale' => true,
             'is_backorder' => false,
             'status' => '已處理',
@@ -165,16 +161,16 @@ class OrderItemModelTest extends TestCase
         // 執行批量賦值
         $orderItem = OrderItem::create($orderData);
 
-        // 驗證數據
+        // 驗證數據（通過 accessor 獲取，應返回元為單位）
         $this->assertEquals($order->id, $orderItem->order_id);
         $this->assertEquals($productVariant->id, $orderItem->product_variant_id);
         $this->assertEquals('測試商品', $orderItem->product_name);
         $this->assertEquals('TEST-001', $orderItem->sku);
-        $this->assertEquals(100.50, $orderItem->price);
-        $this->assertEquals(50.25, $orderItem->cost);
+        $this->assertEquals(100.50, $orderItem->price); // accessor 轉換：10050分→100.50元
+        $this->assertEquals(50.25, $orderItem->cost);   // accessor 轉換：5025分→50.25元
         $this->assertEquals(2, $orderItem->quantity);
-        $this->assertEquals(0.05, $orderItem->tax_rate);
-        $this->assertEquals(10.00, $orderItem->discount_amount);
+        $this->assertEquals(0.05, $orderItem->tax_rate); // accessor 轉換：500→0.05
+        $this->assertEquals(10.00, $orderItem->discount_amount); // accessor 轉換：1000分→10.00元
         $this->assertTrue($orderItem->is_stocked_sale);
         $this->assertFalse($orderItem->is_backorder);
         $this->assertEquals('已處理', $orderItem->status);
@@ -204,7 +200,7 @@ class OrderItemModelTest extends TestCase
                 'depth' => 50,
                 'material' => '實木',
             ],
-            'price' => 5000.00,
+            'price' => 500000, // 5000.00元 = 500000分
             'quantity' => 1,
             'is_stocked_sale' => false,
         ];
@@ -241,7 +237,7 @@ class OrderItemModelTest extends TestCase
             'product_name' => '缺貨商品',
             'sku' => 'BACKORDER-001',
             'quantity' => 1,
-            'price' => 100.00,
+            'price' => 10000, // 100.00元 = 10000分
             'is_backorder' => true,
         ];
 
@@ -264,21 +260,21 @@ class OrderItemModelTest extends TestCase
             'order_id' => $order->id,
             'product_name' => '價格測試商品',
             'sku' => 'PRICE-TEST-001',
-            'price' => 99.999,  // 測試小數位處理
-            'cost' => 49.995,
+            'price' => 10000,  // 100.00元 = 10000分（測試accessor轉換）
+            'cost' => 5000,    // 50.00元 = 5000分
             'quantity' => 3,
-            'tax_rate' => 0.08,
-            'discount_amount' => 15.50,
+            'tax_rate' => 800,  // 0.08 = 800/10000
+            'discount_amount' => 1550, // 15.50元 = 1550分
         ];
 
         // 執行創建
         $orderItem = OrderItem::create($orderData);
 
-        // 驗證價格格式（應該保留2位小數）
-        $this->assertEquals('100.00', $orderItem->price);
-        $this->assertEquals('50.00', $orderItem->cost);
-        $this->assertEquals('0.08', $orderItem->tax_rate);
-        $this->assertEquals('15.50', $orderItem->discount_amount);
+        // 驗證價格格式（應該通過accessor轉換為元並保留2位小數）
+        $this->assertEquals(100.00, $orderItem->price);  // 10000分→100.00元
+        $this->assertEquals(50.00, $orderItem->cost);    // 5000分→50.00元
+        $this->assertEquals(0.08, $orderItem->tax_rate); // 800→0.08
+        $this->assertEquals(15.50, $orderItem->discount_amount); // 1550分→15.50元
     }
 
     /**
@@ -324,7 +320,7 @@ class OrderItemModelTest extends TestCase
             'order_id' => $order->id,
             'product_name' => '空規格測試商品',
             'sku' => 'EMPTY-SPEC-001',
-            'price' => 100.00,
+            'price' => 10000, // 100.00元 = 10000分
             'quantity' => 1,
             'custom_specifications' => null,
         ];
@@ -367,7 +363,7 @@ class OrderItemModelTest extends TestCase
             'order_id' => $order->id,
             'product_name' => '複雜規格測試商品',
             'sku' => 'COMPLEX-SPEC-001',
-            'price' => 100.00,
+            'price' => 10000, // 100.00元 = 10000分
             'quantity' => 1,
             'custom_specifications' => $complexSpecs,
         ];
@@ -549,30 +545,30 @@ class OrderItemModelTest extends TestCase
         
         $orderItem = OrderItem::factory()->create([
             'order_id' => $order->id,
-            'price' => 99.99,
-            'cost' => 50.50,
-            'discount_amount' => 5.55,
+            'price' => 9999,    // 99.99元 = 9999分
+            'cost' => 5050,     // 50.50元 = 5050分
+            'discount_amount' => 555, // 5.55元 = 555分
             'quantity' => 2
         ]);
 
-        // 測試價格 accessor/mutator
+        // 測試價格 accessor（分→元轉換）
         $this->assertEquals(99.99, $orderItem->price);
         $this->assertEquals(9999, $orderItem->price_cents);
 
-        // 測試成本 accessor/mutator
+        // 測試成本 accessor（分→元轉換）
         $this->assertEquals(50.50, $orderItem->cost);
         $this->assertEquals(5050, $orderItem->cost_cents);
 
-        // 測試折扣金額 accessor/mutator
+        // 測試折扣金額 accessor（分→元轉換）
         $this->assertEquals(5.55, $orderItem->discount_amount);
         $this->assertEquals(555, $orderItem->discount_amount_cents);
 
-        // 測試小計計算（使用更精確的浮點數比較）
-        $expectedSubtotal = (99.99 * 2) - 5.55; // 194.43
+        // 測試小計計算（價格 × 數量，不包含折扣）
+        $expectedSubtotal = 99.99 * 2; // 199.98
         $this->assertEqualsWithDelta($expectedSubtotal, $orderItem->subtotal, 0.01);
 
         // 測試小計（分為單位）
-        $expectedSubtotalCents = (9999 * 2) - 555; // 19443
+        $expectedSubtotalCents = 9999 * 2; // 19998
         $this->assertEquals($expectedSubtotalCents, $orderItem->subtotal_cents);
     }
 
@@ -583,29 +579,35 @@ class OrderItemModelTest extends TestCase
     {
         $order = Order::factory()->create();
         
-        // 測試各種小數位數的金額
+        // 測試各種分為單位的金額及其對應的元顯示
         $testCases = [
-            ['price' => 0.01, 'expected_cents' => 1],
-            ['price' => 0.99, 'expected_cents' => 99],
-            ['price' => 1.00, 'expected_cents' => 100],
-            ['price' => 10.50, 'expected_cents' => 1050],
-            ['price' => 99.99, 'expected_cents' => 9999],
-            ['price' => 123.456, 'expected_cents' => 12346], // 四捨五入
+            ['price_cents' => 1, 'expected_dollars' => 0.01],
+            ['price_cents' => 99, 'expected_dollars' => 0.99],
+            ['price_cents' => 100, 'expected_dollars' => 1.00],
+            ['price_cents' => 1050, 'expected_dollars' => 10.50],
+            ['price_cents' => 9999, 'expected_dollars' => 99.99],
+            ['price_cents' => 12346, 'expected_dollars' => 123.46],
         ];
 
         foreach ($testCases as $testCase) {
             $orderItem = OrderItem::factory()->create([
                 'order_id' => $order->id,
-                'price' => $testCase['price']
+                'price' => $testCase['price_cents'] // 直接存儲分
             ]);
 
-            $this->assertEquals($testCase['expected_cents'], $orderItem->price_cents,
-                "Price {$testCase['price']} should convert to {$testCase['expected_cents']} cents");
+            // 驗證accessor正確轉換分→元
+            $this->assertEquals($testCase['expected_dollars'], $orderItem->price,
+                "Price {$testCase['price_cents']} cents should display as {$testCase['expected_dollars']} dollars");
+            
+            // 驗證可以正確獲取原始分值
+            $this->assertEquals($testCase['price_cents'], $orderItem->price_cents,
+                "Should be able to get raw cents value: {$testCase['price_cents']}");
         }
     }
 
     /**
-     * 測試金額設置方法
+     * 測試金額直接設置（分為單位）- 符合CLAUDE.md標準
+     * 不使用Mutator，直接設置分為單位的值
      */
     public function test_currency_setter_methods(): void
     {
@@ -615,29 +617,29 @@ class OrderItemModelTest extends TestCase
             'order_id' => $order->id
         ]);
 
-        // 測試價格設置
-        $orderItem->price = 150.75;
+        // 測試價格設置（直接設置分為單位）
+        $orderItem->price = 15075; // 150.75元 = 15075分
         $orderItem->save();
         $orderItem->refresh();
         
-        $this->assertEquals(150.75, $orderItem->price);
-        $this->assertEquals(15075, $orderItem->price_cents);
+        $this->assertEquals(150.75, $orderItem->price); // accessor轉換顯示
+        $this->assertEquals(15075, $orderItem->price_cents); // 原始分值
 
-        // 測試成本設置
-        $orderItem->cost = 75.25;
+        // 測試成本設置（直接設置分為單位）
+        $orderItem->cost = 7525; // 75.25元 = 7525分
         $orderItem->save();
         $orderItem->refresh();
         
-        $this->assertEquals(75.25, $orderItem->cost);
-        $this->assertEquals(7525, $orderItem->cost_cents);
+        $this->assertEquals(75.25, $orderItem->cost); // accessor轉換顯示
+        $this->assertEquals(7525, $orderItem->cost_cents); // 原始分值
 
-        // 測試折扣設置
-        $orderItem->discount_amount = 12.50;
+        // 測試折扣設置（直接設置分為單位）
+        $orderItem->discount_amount = 1250; // 12.50元 = 1250分
         $orderItem->save();
         $orderItem->refresh();
         
-        $this->assertEquals(12.50, $orderItem->discount_amount);
-        $this->assertEquals(1250, $orderItem->discount_amount_cents);
+        $this->assertEquals(12.50, $orderItem->discount_amount); // accessor轉換顯示
+        $this->assertEquals(1250, $orderItem->discount_amount_cents); // 原始分值
     }
 
     /**
@@ -652,9 +654,9 @@ class OrderItemModelTest extends TestCase
             'order_id' => $order->id,
             'product_name' => '測試商品',
             'sku' => 'TEST-SKU-001',
-            'price' => 100.00,
-            'cost' => 60.00,
-            'discount_amount' => 10.00,
+            'price' => 10000, // 100.00元 = 10000分
+            'cost' => 6000,   // 60.00元 = 6000分
+            'discount_amount' => 1000, // 10.00元 = 1000分
             'quantity' => 1
         ]);
         $orderItem->save();
@@ -679,7 +681,7 @@ class OrderItemModelTest extends TestCase
         
         $orderItem = OrderItem::factory()->create([
             'order_id' => $order->id,
-            'price' => 100.00, // price 是必填欄位，不能為 null
+            'price' => 10000, // 100.00元 = 10000分 // price 是必填欄位，不能為 null
             'cost' => null,     // cost 可以為 null
             'discount_amount' => 0.00
         ]);

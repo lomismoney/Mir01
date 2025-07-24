@@ -16,6 +16,7 @@ use App\Models\InventoryTransfer;
 use App\Models\InventoryTransaction;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
+use App\Services\InventoryService;
 
 class TestInventorySeeder extends Seeder
 {
@@ -130,7 +131,7 @@ class TestInventorySeeder extends Seeder
         }
         
         // 建立材質屬性值
-        $materialNames = ['棉', '聚酯纖維', '羊毛', '皮革', '網布', '塑膠'];
+        $materialNames = ['棉', '聚酯纖維', '羊毛', '皮革', '網布', '塑膠', '木材', '金屬', '玻璃'];
         foreach ($materialNames as $materialName) {
             AttributeValue::firstOrCreate([
                 'attribute_id' => $material->id,
@@ -231,8 +232,8 @@ class TestInventorySeeder extends Seeder
                 $variant = ProductVariant::create([
                     'product_id' => $iphone->id,
                     'sku' => "IPHONE-15-PRO-{$colorName}-{$capacityName}",
-                    'price' => $capacityName === '128GB' ? 3290000 : ($capacityName === '256GB' ? 3640000 : 4340000), // 以分為單位
-                    'cost_price' => $capacityName === '128GB' ? 2000000 : ($capacityName === '256GB' ? 2300000 : 2800000), // 以分為單位
+                    'price' => $capacityName === '128GB' ? 32900 : ($capacityName === '256GB' ? 36400 : 43400), // 元為單位，MoneyCast會自動轉換為分
+                    'cost_price' => $capacityName === '128GB' ? 20000 : ($capacityName === '256GB' ? 23000 : 28000), // 元為單位，MoneyCast會自動轉換為分
                 ]);
                 $variant->attributeValues()->attach([
                     $attributes['colorValues'][$colorName]->id,
@@ -260,8 +261,8 @@ class TestInventorySeeder extends Seeder
                 $variant = ProductVariant::create([
                     'product_id' => $macbook->id,
                     'sku' => "MACBOOK-PRO-14-{$colorName}-{$capacityName}",
-                    'price' => $capacityName === '512GB' ? 6490000 : 7790000, // 以分為單位
-                    'cost_price' => $capacityName === '512GB' ? 4500000 : 5500000, // 以分為單位
+                    'price' => $capacityName === '512GB' ? 64900 : 77900, // 元為單位，MoneyCast會自動轉換為分
+                    'cost_price' => $capacityName === '512GB' ? 45000 : 55000, // 元為單位，MoneyCast會自動轉換為分
                 ]);
                 // 太空灰映射到深灰色或灰色
                 $actualColor = $colorName === '太空灰' ? '深灰色' : $colorName;
@@ -295,8 +296,8 @@ class TestInventorySeeder extends Seeder
                 $variant = ProductVariant::create([
                     'product_id' => $tshirt->id,
                     'sku' => "TSHIRT-BASIC-{$colorName}-{$sizeName}",
-                    'price' => 29900, // 以分為單位
-                    'cost_price' => 15000, // 以分為單位
+                    'price' => 299, // 元為單位，MoneyCast會自動轉換為分
+                    'cost_price' => 150, // 元為單位，MoneyCast會自動轉換為分
                 ]);
                 $variant->attributeValues()->attach([
                     $attributes['colorValues'][$colorName]->id,
@@ -326,8 +327,8 @@ class TestInventorySeeder extends Seeder
                 $variant = ProductVariant::create([
                     'product_id' => $jeans->id,
                     'sku' => "JEANS-CLASSIC-{$colorName}-W{$waistSizeValue}",
-                    'price' => 129000, // 以分為單位
-                    'cost_price' => 60000, // 以分為單位
+                    'price' => 1290, // 元為單位，MoneyCast會自動轉換為分
+                    'cost_price' => 600, // 元為單位，MoneyCast會自動轉換為分
                 ]);
                 
                 // 優先使用腰圍屬性，如果沒有則使用尺寸映射
@@ -368,8 +369,8 @@ class TestInventorySeeder extends Seeder
             $variant = ProductVariant::create([
                 'product_id' => $chair->id,
                 'sku' => "CHAIR-ERGO-{$colorName}",
-                'price' => 890000, // 以分為單位
-                'cost_price' => 450000, // 以分為單位
+                'price' => 8900, // 元為單位，MoneyCast會自動轉換為分
+                'cost_price' => 4500, // 元為單位，MoneyCast會自動轉換為分
             ]);
             $variant->attributeValues()->attach([
                 $attributes['colorValues'][$actualColor]->id,
@@ -395,8 +396,8 @@ class TestInventorySeeder extends Seeder
             $variant = ProductVariant::create([
                 'product_id' => $cushion->id,
                 'sku' => "CUSHION-MEMORY-{$colorName}",
-                'price' => 79000, // 以分為單位
-                'cost_price' => 35000, // 以分為單位
+                'price' => 790, // 元為單位，MoneyCast會自動轉換為分
+                'cost_price' => 350, // 元為單位，MoneyCast會自動轉換為分
             ]);
             $variant->attributeValues()->attach([
                 $attributes['colorValues'][$colorName]->id
@@ -404,7 +405,88 @@ class TestInventorySeeder extends Seeder
         }
         $products[] = $cushion;
         
-        echo "建立了 6 個商品和 " . ProductVariant::count() . " 個商品變體\n";
+        // 辦公桌系列
+        $desk = Product::firstOrCreate(
+            [
+                'name' => '現代辦公桌',
+                'category_id' => $categories['chairs']->id // 使用辦公椅分類，因為它是辦公家具
+            ],
+            [
+                'description' => '簡約現代設計，適合辦公室使用'
+            ]
+        );
+        $desk->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['material']->id]);
+        
+        // 建立辦公桌變體
+        foreach (['白色', '黑色'] as $colorName) {
+            $variant = ProductVariant::create([
+                'product_id' => $desk->id,
+                'sku' => "DESK-MODERN-{$colorName}",
+                'price' => 12000, // 元為單位，MoneyCast會自動轉換為分
+                'cost_price' => 6000, // 元為單位，MoneyCast會自動轉換為分
+            ]);
+            $variant->attributeValues()->attach([
+                $attributes['colorValues'][$colorName]->id,
+                $attributes['materialValues']['木材']->id
+            ]);
+        }
+        $products[] = $desk;
+        
+        // 辦公櫃系列
+        $cabinet = Product::firstOrCreate(
+            [
+                'name' => '辦公儲物櫃',
+                'category_id' => $categories['chairs']->id // 使用辦公椅分類，因為它是辦公家具
+            ],
+            [
+                'description' => '多層收納，辦公室必備'
+            ]
+        );
+        $cabinet->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['material']->id]);
+        
+        // 建立辦公櫃變體
+        foreach (['灰色', '白色'] as $colorName) {
+            $variant = ProductVariant::create([
+                'product_id' => $cabinet->id,
+                'sku' => "CABINET-OFFICE-{$colorName}",
+                'price' => 8900, // 元為單位，MoneyCast會自動轉換為分
+                'cost_price' => 4500, // 元為單位，MoneyCast會自動轉換為分
+            ]);
+            $variant->attributeValues()->attach([
+                $attributes['colorValues'][$colorName]->id,
+                $attributes['materialValues']['金屬']->id
+            ]);
+        }
+        $products[] = $cabinet;
+        
+        // 會議桌
+        $meetingTable = Product::firstOrCreate(
+            [
+                'name' => '會議桌',
+                'category_id' => $categories['chairs']->id // 使用辦公椅分類，因為它是辦公家具
+            ],
+            [
+                'description' => '大型會議桌，適合團隊討論'
+            ]
+        );
+        $meetingTable->attributes()->syncWithoutDetaching([$attributes['color']->id, $attributes['material']->id]);
+        
+        // 建立會議桌變體
+        foreach (['黑色', '白色'] as $colorName) {
+            $variant = ProductVariant::create([
+                'product_id' => $meetingTable->id,
+                'sku' => "TABLE-MEETING-{$colorName}",
+                'price' => 25000, // 元為單位，MoneyCast會自動轉換為分
+                'cost_price' => 12000, // 元為單位，MoneyCast會自動轉換為分
+            ]);
+            $variant->attributeValues()->attach([
+                $attributes['colorValues'][$colorName]->id,
+                $attributes['materialValues']['木材']->id
+            ]);
+        }
+        $products[] = $meetingTable;
+        
+        echo "建立了 " . count($products) . " 個商品和 " . ProductVariant::count() . " 個商品變體\n";
         
         return $products;
     }
@@ -544,16 +626,20 @@ class TestInventorySeeder extends Seeder
                 ];
                 
                 // 執行庫存轉移
-                $fromInventory->reduceStock(
-                    $quantity, 
-                    $user->id, 
+                $inventoryService = app(InventoryService::class);
+                
+                $inventoryService->deductStock(
+                    $fromInventory->product_variant_id,
+                    $quantity,
+                    $fromInventory->store_id,
                     "轉移到{$toStore->name}",
                     $transferMetadata
                 );
                 
-                $toInventory->addStock(
-                    $quantity, 
-                    $user->id, 
+                $inventoryService->returnStock(
+                    $toInventory->product_variant_id,
+                    $quantity,
+                    $toInventory->store_id,
                     "從{$fromStore->name}轉入",
                     $transferMetadata
                 );
@@ -841,7 +927,7 @@ class TestInventorySeeder extends Seeder
                 
                 foreach ($availableVariants as $variant) {
                     $quantity = rand(5, 50);
-                    // 使用 Accessor 獲取元為單位的價格，然後計算成本價
+                    // 通過 MoneyCast 獲取元為單位的價格，然後計算成本價
                     $costPrice = $variant->cost_price ?: ($variant->price * 0.6); // 如果沒有成本價，用售價的60%
                     $itemTotalCost = $costPrice * $quantity;
                     $totalAmount += $itemTotalCost;
@@ -850,8 +936,8 @@ class TestInventorySeeder extends Seeder
                         'purchase_id' => $purchase->id,
                         'product_variant_id' => $variant->id,
                         'quantity' => $quantity,
-                        'unit_price' => $costPrice, // 進貨單價（元為單位，Mutator會轉換為分）
-                        'cost_price' => $costPrice, // 成本價（元為單位，Mutator會轉換為分）
+                        'unit_price' => $costPrice, // 進貨單價（元為單位，MoneyCast會自動轉換為分儲存）
+                        'cost_price' => $costPrice, // 成本價（元為單位，MoneyCast會自動轉換為分儲存）
                         'allocated_shipping_cost' => 0, // 攤銷的運費成本，先設為0
                         'created_at' => $createdAt,
                         'updated_at' => $createdAt,
@@ -873,9 +959,11 @@ class TestInventorySeeder extends Seeder
                         );
                         
                         // 增加庫存
-                        $inventory->addStock(
+                        $inventoryService = app(InventoryService::class);
+                        $inventoryService->returnStock(
+                            $variant->id,
                             $quantity,
-                            $user->id,
+                            $inventory->store_id,
                             "進貨入庫 - {$purchase->order_number}",
                             [
                                 'purchase_id' => $purchase->id,

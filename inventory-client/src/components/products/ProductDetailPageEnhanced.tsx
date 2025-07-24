@@ -19,7 +19,7 @@ import {
 // 導入懶加載圖片畫廊
 import { LazyImageGallery } from '@/components/ui/lazy-image';
 import { ProductItem } from '@/types/api-helpers';
-import { formatPrice } from '@/lib/utils';
+import { MoneyHelper } from '@/lib/money-helper';
 
 interface ProductDetailPageEnhancedProps {
   product: ProductItem;
@@ -163,12 +163,12 @@ export function ProductDetailPageEnhanced({
             <div className="space-y-2">
               {priceRange.min === priceRange.max ? (
                 <div className="text-3xl font-bold text-primary">
-                  {formatPrice(priceRange.min)}
+                  {MoneyHelper.format(parseFloat(priceRange.min) || 0, 'NT$')}
                 </div>
               ) : (
                 <div className="space-y-1">
                   <div className="text-3xl font-bold text-primary">
-                    {formatPrice(priceRange.min)} - {formatPrice(priceRange.max)}
+                    {MoneyHelper.format(parseFloat(priceRange.min) || 0, 'NT$')} - {MoneyHelper.format(parseFloat(priceRange.max) || 0, 'NT$')}
                   </div>
                   <p className="text-sm text-muted-foreground">價格範圍</p>
                 </div>
@@ -222,7 +222,7 @@ export function ProductDetailPageEnhanced({
                       <div className="text-left">
                         <div className="font-medium">{specText}</div>
                         <div className="text-sm text-muted-foreground">
-                          {formatPrice(variant.price)}
+                          {MoneyHelper.format(parseFloat(variant.price) || 0, 'NT$')}
                         </div>
                       </div>
                     </Button>
@@ -240,7 +240,7 @@ export function ProductDetailPageEnhanced({
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">價格</span>
-                        <span className="font-semibold">{formatPrice(selectedVariant.price)}</span>
+                        <span className="font-semibold">{MoneyHelper.format(parseFloat(selectedVariant.price) || 0, 'NT$')}</span>
                       </div>
                       {selectedVariant.inventory && selectedVariant.inventory.length > 0 && (
                         <div className="flex items-center justify-between">
@@ -356,7 +356,7 @@ export function ProductDetailPageEnhanced({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">價格範圍</span>
-                      <span>{formatPrice(priceRange.min)} - {formatPrice(priceRange.max)}</span>
+                      <span>{MoneyHelper.format(parseFloat(priceRange.min) || 0, 'NT$')} - {MoneyHelper.format(parseFloat(priceRange.max) || 0, 'NT$')}</span>
                     </div>
                   </div>
                 </div>

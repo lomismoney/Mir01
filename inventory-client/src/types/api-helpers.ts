@@ -167,24 +167,42 @@ export type ProductItem = {
 // 由於 OpenAPI 規範問題，暫時使用手動類型定義
 export type CreateStoreRequest = {
   name: string;
+  code: string;
   description?: string;
   address?: string;
   phone?: string;
+  business_hours?: Record<string, unknown>;
+  latitude?: number;
+  longitude?: number;
+  is_active?: boolean;
+  is_default?: boolean;
 };
 
 export type UpdateStoreRequest = {
   name?: string;
+  code?: string;
   description?: string;
   address?: string;
   phone?: string;
+  business_hours?: Record<string, unknown>;
+  latitude?: number;
+  longitude?: number;
+  is_active?: boolean;
+  is_default?: boolean;
 };
 
 export type StoreResponse = {
   id: number;
   name: string;
+  code: string;
   description?: string;
   address?: string;
   phone?: string;
+  business_hours?: Record<string, unknown>;
+  latitude?: number;
+  longitude?: number;
+  is_active: boolean;
+  is_default: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -491,6 +509,8 @@ export interface Order {
   creator: User;      // 嵌套的創建者對象
   shipping_status: string;
   payment_status: string;
+  is_tax_inclusive: boolean; // 是否含稅
+  tax_rate: number; // 稅率百分比
   shipping_fee: string | null;
   shipping_address: string | null;
   shipping_phone: string | null;
@@ -549,6 +569,7 @@ export interface OrderFormData {
   shipping_address: string;
   notes?: string | null;
   items: OrderItemData[];
+  is_tax_inclusive?: boolean;
 }
 
 /**
@@ -634,6 +655,8 @@ export interface ProcessedOrder {
   creator: User;      // 嵌套的創建者對象
   shipping_status: string;
   payment_status: string;
+  is_tax_inclusive: boolean; // 是否含稅
+  tax_rate: number; // 稅率百分比
   payment_method: string;     // 付款方式
   order_source: string;       // 訂單來源
   shipping_fee: number | null;  // 已精煉為 number

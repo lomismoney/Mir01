@@ -21,7 +21,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import { cn } from "@/lib/utils";
 
 interface GlobalSearchDialogProps {
@@ -132,7 +132,7 @@ export function GlobalSearchDialog({
                           </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span className="font-medium text-primary">{formatCurrency(Number(product.price))}</span>
+                          <span className="font-medium text-primary">{MoneyHelper.format(Number(product.price), 'NT$')}</span>
                           <span>庫存 {product.stock}</span>
                         </div>
                       </div>
@@ -167,7 +167,7 @@ export function GlobalSearchDialog({
                         </div>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span>{order.customer_name}</span>
-                          <span className="font-medium text-primary">{formatCurrency(Number(order.total_amount))}</span>
+                          <span className="font-medium text-primary">{MoneyHelper.format(Number(order.total_amount), 'NT$')}</span>
                           <span>{formatDate(order.created_at)}</span>
                         </div>
                       </div>
@@ -200,7 +200,7 @@ export function GlobalSearchDialog({
                         {customer.phone && <span>{customer.phone}</span>}
                         {customer.email && <span>{customer.email}</span>}
                         <span>{customer.total_orders} 筆訂單</span>
-                        <span className="font-medium text-primary">{formatCurrency(Number(customer.total_spent))}</span>
+                        <span className="font-medium text-primary">{MoneyHelper.format(Number(customer.total_spent), 'NT$')}</span>
                       </div>
                     </div>
                     <ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />

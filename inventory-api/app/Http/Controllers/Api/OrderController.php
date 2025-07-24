@@ -700,7 +700,7 @@ class OrderController extends Controller
         
         // 4. 判斷是否有庫存不足
         $hasShortage = collect($suggestions)->contains(function ($suggestion) {
-            return $suggestion['type'] !== 'sufficient';
+            return $suggestion['shortage_quantity'] > 0;
         });
         
         return response()->json([

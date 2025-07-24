@@ -46,11 +46,6 @@ export default function NewOrderPage() {
   const [pendingOrderData, setPendingOrderData] = useState<OrderFormValues | null>(null);
   const [stockDecisions, setStockDecisions] = useState<StockDecision[]>([]);
   
-  // 添加 useEffect 來監控狀態變化
-  React.useEffect(() => {
-    console.log('showStockSuggestions 狀態變化:', showStockSuggestions);
-    console.log('stockSuggestions 長度:', stockSuggestions.length);
-  }, [showStockSuggestions, stockSuggestions]);
 
   /**
    * 處理智慧庫存建議確認
@@ -158,22 +153,16 @@ export default function NewOrderPage() {
         onSuccess: (response) => {
           progress.updateStep('check-stock', 'completed');
           
-          console.log('庫存檢查響應:', response);
-          console.log('has_shortage:', response.has_shortage);
-          console.log('suggestions:', response.suggestions);
           
           if (response.has_shortage) {
             // 🎯 確保篩選出真正有庫存不足的商品
             const shortageItems = response.suggestions.filter(s => s.type !== 'sufficient');
-            console.log('過濾後的 shortageItems:', shortageItems);
             
             if (shortageItems.length > 0) {
               // 保存待處理的訂單數據
               setPendingOrderData(values);
               
               // 顯示智慧建議對話框
-              console.log('設置 stockSuggestions:', shortageItems);
-              console.log('設置 showStockSuggestions: true');
               setStockSuggestions(shortageItems);
               setShowStockSuggestions(true);
               progress.reset(); // 暫停進度，等待用戶決定
@@ -192,7 +181,6 @@ export default function NewOrderPage() {
           progress.fail('庫存檢查失敗');
           
           // 庫存檢查失敗，讓用戶選擇是否繼續
-          console.error('庫存檢查失敗:', error);
           toast.error('庫存檢查失敗', {
             description: '是否要繼續建立訂單？',
             action: {
@@ -253,6 +241,8 @@ export default function NewOrderPage() {
       ...orderData,
       items: processedItems,
       force_create_despite_stock: forceCreate ? 1 : 0,
+      // 🎯 修復：傳遞用戶的庫存處理決策到後端
+      stock_decisions: orderData.stock_decisions || [],
     };
 
     createOrder(finalOrderData, {
@@ -291,14 +281,6 @@ export default function NewOrderPage() {
         }, 1500);
       },
       onError: (error) => {
-        console.error('❌ 訂單創建失敗:', error);
-        console.log('錯誤詳細結構:', {
-          message: error.message,
-          error_type: (error as any).error_type,
-          stockCheckResults: (error as any).stockCheckResults,
-          insufficientStockItems: (error as any).insufficientStockItems,
-          fullError: error
-        });
         progress.updateStep('create-order', 'error', error.message || '訂單建立失敗');
         
         // 🎯 預訂系統：智能錯誤處理 - 自動預訂模式
@@ -361,7 +343,6 @@ export default function NewOrderPage() {
             },
             onError: (checkError) => {
               // 如果獲取建議失敗，顯示選項讓用戶決定
-              console.error('獲取庫存建議失敗:', checkError);
               toast.error('庫存不足', {
                 description: '部分商品庫存不足，是否要繼續建立預訂訂單？',
                 duration: 10000,
@@ -410,10 +391,7 @@ export default function NewOrderPage() {
       {/* 智慧庫存建議對話框 */}
       <StockSuggestionDialog
         open={showStockSuggestions}
-        onOpenChange={(open) => {
-          console.log('StockSuggestionDialog onOpenChange:', open);
-          setShowStockSuggestions(open);
-        }}
+        onOpenChange={setShowStockSuggestions}
         suggestions={stockSuggestions}
         onConfirm={handleStockDecisionConfirm}
         onForceCreate={handleForceCreate}

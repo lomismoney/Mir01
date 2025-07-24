@@ -25,6 +25,7 @@ export interface StockSuggestion {
     from_store_name: string;
     available_quantity: number;
     suggested_quantity: number;
+    distance?: number; // 距離（公里）
   }>;
   purchase_quantity?: number;
   transfer_options?: Array<{
@@ -32,6 +33,7 @@ export interface StockSuggestion {
     store_name: string;
     available_quantity: number;
     can_fulfill: boolean;
+    distance?: number; // 距離（公里）
   }>;
   purchase_suggestion?: {
     suggested_quantity: number;
@@ -44,6 +46,7 @@ export interface StockSuggestion {
       store_id: number;
       store_name: string;
       quantity: number;
+      distance?: number; // 距離（公里）
     }>;
   };
 }
@@ -73,16 +76,13 @@ export function useCheckStockAvailability() {
         throw new Error("Failed to check stock availability");
       }
 
-      console.log('useCheckStockAvailability - API 原始回應:', response);
       
       // API 回傳的是 { data: { data: {...} } } 結構
       // 需要檢查實際的資料結構
       const actualData = response.data as any;
-      console.log('useCheckStockAvailability - response.data:', actualData);
       
       // 如果資料在 data.data 中
       if (actualData.data && typeof actualData.data === 'object') {
-        console.log('useCheckStockAvailability - 使用 response.data.data:', actualData.data);
         return actualData.data as CheckStockResponse;
       }
       
@@ -90,7 +90,6 @@ export function useCheckStockAvailability() {
       return actualData as CheckStockResponse;
     },
     onError: (error) => {
-      console.error("❌ Stock check failed:", error);
       toast.error("無法檢查庫存", {
         description: error.message || "請稍後再試",
       });

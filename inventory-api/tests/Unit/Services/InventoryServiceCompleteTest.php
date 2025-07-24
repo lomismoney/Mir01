@@ -8,10 +8,12 @@ use App\Models\Store;
 use App\Models\User;
 use App\Models\Product;
 use App\Services\InventoryService;
+use App\Services\StockTransferService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use Mockery;
 
 /**
  * InventoryService 完整測試
@@ -23,6 +25,7 @@ class InventoryServiceCompleteTest extends TestCase
     use RefreshDatabase;
 
     private InventoryService $inventoryService;
+    private $mockStockTransferService;
     private User $user;
     private Store $store;
     private ProductVariant $productVariant;
@@ -31,6 +34,7 @@ class InventoryServiceCompleteTest extends TestCase
     {
         parent::setUp();
         
+        $this->mockStockTransferService = Mockery::mock(StockTransferService::class);
         $this->inventoryService = new InventoryService();
         $this->user = User::factory()->create();
         $this->store = Store::factory()->create();
@@ -42,6 +46,12 @@ class InventoryServiceCompleteTest extends TestCase
         ]);
         
         Auth::login($this->user);
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
     }
 
     /**

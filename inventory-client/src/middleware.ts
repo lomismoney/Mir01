@@ -32,7 +32,7 @@ function isValidHost(host: string): boolean {
         return true;
       }
     } catch {
-      console.warn('無法解析 NEXTAUTH_URL:', nextAuthUrl);
+      // 無法解析 NEXTAUTH_URL
     }
   }
 
@@ -55,10 +55,6 @@ function isValidHost(host: string): boolean {
 
   const isValidCloudRunHost = cloudRunPatterns.some(pattern => pattern.test(host));
   
-  // 記錄允許的 Cloud Run hosts（用於監控）
-  if (isValidCloudRunHost) {
-    console.log(`✅ 允許 Cloud Run host: ${host}`);
-  }
 
   return isValidCloudRunHost;
 }
@@ -82,13 +78,8 @@ export default auth((req) => {
   const host = req.headers.get('host') || '';
   const forwardedProto = req.headers.get('x-forwarded-proto');
   
-  console.log(`🔍 中介軟體 Host 檢查: ${host}, 協議: ${forwardedProto || 'unknown'}`);
-  
   // 第一層：Host 安全驗證
   if (!isValidHost(host)) {
-    console.warn(`🚫 拒絕不信任的 host: ${host}`);
-    console.warn(`   環境: NODE_ENV=${process.env.NODE_ENV}`);
-    console.warn(`   NEXTAUTH_URL: ${process.env.NEXTAUTH_URL}`);
     return new NextResponse('Forbidden: Invalid host', { status: 403 });
   }
 
@@ -97,13 +88,11 @@ export default auth((req) => {
     // 在生產環境中，如果請求是 HTTP，重定向到 HTTPS
     const httpsUrl = new URL(req.url);
     httpsUrl.protocol = 'https:';
-    console.log(`🔒 HTTP 重定向到 HTTPS: ${httpsUrl.toString()}`);
     return NextResponse.redirect(httpsUrl);
   }
 
   // 第三層：🔐 身份驗證由 Auth.js 的 authorized 回調處理
   // 這裡不需要額外的身份驗證邏輯，完全交由 auth.ts 處理
-  console.log(`✅ Host 驗證通過，身份驗證交由 Auth.js 處理`);
   
   // 如果到達這裡，表示 host 有效，繼續執行 Auth.js 的身份驗證邏輯
   return NextResponse.next();

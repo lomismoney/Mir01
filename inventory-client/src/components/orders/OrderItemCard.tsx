@@ -12,7 +12,7 @@ import {
   getFulfillmentStatusText,
   getItemTypeBadgeVariant
 } from '@/types/order';
-import { formatPrice } from '@/lib/utils';
+import { MoneyHelper } from '@/lib/money-helper';
 
 interface OrderItemCardProps {
   item: OrderItem;
@@ -48,7 +48,7 @@ export function OrderItemCard({ item, showFulfillmentDetails = true }: OrderItem
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span>SKU: {item.sku}</span>
                 <span>數量: {item.quantity}</span>
-                <span>單價: {formatPrice(item.price)}</span>
+                <span>單價: {item.price != null ? MoneyHelper.format(item.price, 'NT$') : 'N/A'}</span>
               </div>
             </div>
             
@@ -118,7 +118,10 @@ export function OrderItemCard({ item, showFulfillmentDetails = true }: OrderItem
           <div className="flex justify-between items-center border-t pt-2">
             <span className="text-sm text-muted-foreground">小計:</span>
             <span className="font-medium">
-              {formatPrice((item.price * item.quantity) - (item.discount_amount || 0))}
+              {(() => {
+                const subtotal = (item.price * item.quantity) - (item.discount_amount || 0);
+                return subtotal != null ? MoneyHelper.format(subtotal, 'NT$') : 'N/A';
+              })()}
             </span>
           </div>
         </div>

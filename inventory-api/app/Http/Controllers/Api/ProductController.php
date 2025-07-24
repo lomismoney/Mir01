@@ -188,7 +188,7 @@ class ProductController extends Controller
                 foreach ($validatedData['variants'] as $variantData) {
                     $variant = $product->variants()->create([
                         'sku' => $variantData['sku'],
-                        'price' => $variantData['price'],
+                        'price' => $variantData['price'], // mutator 自動處理元到分的轉換
                     ]);
 
                     // 4. 處理屬性值關聯 - 支援兩種格式
@@ -218,9 +218,10 @@ class ProductController extends Controller
                     // 5. 為每一個 SKU 在所有門市建立初始庫存記錄
                     $stores = \App\Models\Store::all();
                     foreach ($stores as $store) {
-                        \App\Models\Inventory::create([
+                        \App\Models\Inventory::firstOrCreate([
                             'product_variant_id' => $variant->id,
                             'store_id' => $store->id,
+                        ], [
                             'quantity' => 0, // 初始庫存預設為 0
                             'low_stock_threshold' => 0,
                         ]);

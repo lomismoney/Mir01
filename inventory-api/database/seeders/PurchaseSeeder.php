@@ -75,7 +75,7 @@ class PurchaseSeeder extends Seeder
                 $purchasedAt = now()->subDays(rand(0, 60))->subHours(rand(0, 23));
                 
                 // 計算運費
-                $shippingCost = rand(50, 500) * 100; // 50-500元（以分為單位）
+                $shippingCost = rand(50, 500); // 50-500元（Data MoneyCast會轉換為分然後儲存）
                 
                 // 為進貨單準備項目
                 $itemsCount = rand(2, 6); // 每個進貨單2-6個項目
@@ -86,7 +86,7 @@ class PurchaseSeeder extends Seeder
                 $items = [];
                 foreach ($selectedVariants as $variant) {
                     $quantity = rand(10, 100);
-                    $costPrice = $variant->cost_price ?: (int)($variant->price * 0.6); // 如果沒有成本價，用售價的60%
+                    $costPrice = $variant->cost_price ?: ($variant->price * 0.6); // 如果沒有成本價，用售價的60%（元為單位，Data MoneyCast會轉換為分）
                     
                     $items[] = new PurchaseItemData(
                         product_variant_id: $variant->id,

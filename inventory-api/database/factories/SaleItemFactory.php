@@ -15,7 +15,7 @@ class SaleItemFactory extends Factory
     public function definition()
     {
         $quantity = $this->faker->numberBetween(1, 10);
-        $unitPrice = $this->faker->numberBetween(50, 500);
+        $unitPrice = $this->faker->numberBetween(5000, 50000); // 50 到 500 元（以分為單位）
         
         return [
             'sale_id' => Sale::factory(),

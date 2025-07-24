@@ -63,8 +63,8 @@ class PurchaseShippingCostTest extends TestCase
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 500, // 500元
-            'total_amount' => 3500, // 3500元
+            'shipping_cost' => 50000, // 500元 (50000分)
+            'total_amount' => 350000, // 3500元 (350000分)
             'status' => 'pending',
         ]);
 
@@ -73,22 +73,22 @@ class PurchaseShippingCostTest extends TestCase
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant1->id,
             'quantity' => 10,
-            'cost_price' => 100, // 100元
-            'allocated_shipping_cost' => 166.67, // 166.67元 (原運費按比例分配)
+            'cost_price' => 10000, // 100元 (10000分)
+            'allocated_shipping_cost' => 16667, // 166.67元 (16667分，原運費按比例分配)
         ]);
 
         $item2 = PurchaseItem::factory()->create([
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant2->id,
             'quantity' => 10,
-            'cost_price' => 200, // 200元
-            'allocated_shipping_cost' => 333.33, // 333.33元 (原運費按比例分配)
+            'cost_price' => 20000, // 200元 (20000分)
+            'allocated_shipping_cost' => 33333, // 333.33元 (33333分，原運費按比例分配)
         ]);
 
         // 測試更新運費
         $response = $this->actingAs($this->user)
             ->patchJson("/api/purchases/{$this->purchase->id}/shipping-cost", [
-                'shipping_cost' => 1000, // 更新為1000元
+                'shipping_cost' => 1000, // 更新為1000元 (API 以元為單位)
             ]);
 
         $response->assertStatus(200);
@@ -111,16 +111,16 @@ class PurchaseShippingCostTest extends TestCase
 
         // 重新載入資料並驗證
         $this->purchase->refresh();
-        $this->assertEquals(1000, $this->purchase->shipping_cost); // 1000元
-        $this->assertEquals(4000, $this->purchase->total_amount); // 3000元商品 + 1000元運費
+        $this->assertEquals(100000, $this->purchase->shipping_cost); // 1000元 (100000分)
+        $this->assertEquals(400000, $this->purchase->total_amount); // 3000元商品 + 1000元運費 (400000分)
         
         // 驗證運費重新分配
         $item1->refresh();
         $item2->refresh();
         
         // 驗證運費分配 (按數量比例：10:10 = 1:1)
-        $this->assertEquals(500, $item1->allocated_shipping_cost); // 500元
-        $this->assertEquals(500, $item2->allocated_shipping_cost); // 500元
+        $this->assertEquals(50000, $item1->allocated_shipping_cost); // 500元 (50000分)
+        $this->assertEquals(50000, $item2->allocated_shipping_cost); // 500元 (50000分)
         
         // 驗證總運費分配正確
         $this->assertEquals(
@@ -138,8 +138,8 @@ class PurchaseShippingCostTest extends TestCase
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 30000, // 300元
-            'total_amount' => 330000, // 3300元
+            'shipping_cost' => 30000, // 300元 (30000分)
+            'total_amount' => 330000, // 3300元 (330000分)
             'status' => 'pending',
         ]);
 
@@ -148,16 +148,16 @@ class PurchaseShippingCostTest extends TestCase
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant1->id,
             'quantity' => 5, // 5個
-            'cost_price' => 10000,
-            'allocated_shipping_cost' => 10000, // 原分配
+            'cost_price' => 10000, // 100元 (10000分)
+            'allocated_shipping_cost' => 10000, // 原分配 (10000分)
         ]);
 
         $item2 = PurchaseItem::factory()->create([
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant2->id,
             'quantity' => 25, // 25個
-            'cost_price' => 20000,
-            'allocated_shipping_cost' => 20000, // 原分配
+            'cost_price' => 20000, // 200元 (20000分)
+            'allocated_shipping_cost' => 20000, // 原分配 (20000分)
         ]);
 
         // 更新運費為900元
@@ -174,14 +174,14 @@ class PurchaseShippingCostTest extends TestCase
         
         // 總數量：5 + 25 = 30
         // 運費分配比例：5:25 = 1:5
-        // item1: 900 * (5/30) = 150元 = 15000分
-        // item2: 900 * (25/30) = 750元 = 75000分
-        $this->assertEquals(15000, $item1->allocated_shipping_cost); // 150元 = 15000分
-        $this->assertEquals(75000, $item2->allocated_shipping_cost); // 750元 = 75000分
+        // item1: 900 * (5/30) = 150元 (15000分)
+        // item2: 900 * (25/30) = 750元 (75000分)
+        $this->assertEquals(15000, $item1->allocated_shipping_cost); // 150元 (15000分)
+        $this->assertEquals(75000, $item2->allocated_shipping_cost); // 750元 (75000分)
         
         // 驗證總運費分配正確
         $this->assertEquals(
-            90000, // 900元 = 90000分
+            90000, // 900元 (90000分)
             $item1->allocated_shipping_cost + $item2->allocated_shipping_cost
         );
     }
@@ -195,8 +195,8 @@ class PurchaseShippingCostTest extends TestCase
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 50000, // 500元
-            'total_amount' => 350000, // 3500元
+            'shipping_cost' => 50000, // 500元 (50000分)
+            'total_amount' => 350000, // 3500元 (350000分)
             'status' => 'pending',
         ]);
 
@@ -205,16 +205,16 @@ class PurchaseShippingCostTest extends TestCase
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant1->id,
             'quantity' => 10,
-            'cost_price' => 10000,
-            'allocated_shipping_cost' => 25000,
+            'cost_price' => 10000, // 100元 (10000分)
+            'allocated_shipping_cost' => 25000, // 250元 (25000分)
         ]);
 
         $item2 = PurchaseItem::factory()->create([
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant2->id,
             'quantity' => 10,
-            'cost_price' => 20000,
-            'allocated_shipping_cost' => 25000,
+            'cost_price' => 20000, // 200元 (20000分)
+            'allocated_shipping_cost' => 25000, // 250元 (25000分)
         ]);
 
         // 更新運費為0
@@ -231,7 +231,7 @@ class PurchaseShippingCostTest extends TestCase
         $item2->refresh();
         
         $this->assertEquals(0, $this->purchase->shipping_cost);
-        $this->assertEquals(300000, $this->purchase->total_amount); // 只有商品成本 = 300000分
+        $this->assertEquals(300000, $this->purchase->total_amount); // 只有商品成本 = 3000元 (300000分)
         $this->assertEquals(0, $item1->allocated_shipping_cost);
         $this->assertEquals(0, $item2->allocated_shipping_cost);
     }
@@ -246,15 +246,15 @@ class PurchaseShippingCostTest extends TestCase
         $productVariant3 = ProductVariant::factory()->create([
             'product_id' => $product3->id,
             'sku' => 'TEST-003',
-            'cost_price' => 15000,
+            'cost_price' => 1500000, // 15000元 (1500000分)
         ]);
 
         // 創建進貨單
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 10000,
-            'total_amount' => 100000,
+            'shipping_cost' => 10000, // 100元 (10000分)
+            'total_amount' => 100000, // 1000元 (100000分)
             'status' => 'pending',
         ]);
 
@@ -263,24 +263,24 @@ class PurchaseShippingCostTest extends TestCase
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant1->id,
             'quantity' => 1,
-            'cost_price' => 10000,
-            'allocated_shipping_cost' => 3333,
+            'cost_price' => 10000, // 100元 (10000分)
+            'allocated_shipping_cost' => 3333, // 33.33元 (3333分)
         ]);
 
         $item2 = PurchaseItem::factory()->create([
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant2->id,
             'quantity' => 1,
-            'cost_price' => 20000,
-            'allocated_shipping_cost' => 3333,
+            'cost_price' => 20000, // 200元 (20000分)
+            'allocated_shipping_cost' => 3333, // 33.33元 (3333分)
         ]);
 
         $item3 = PurchaseItem::factory()->create([
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $productVariant3->id,
             'quantity' => 1,
-            'cost_price' => 15000,
-            'allocated_shipping_cost' => 3334,
+            'cost_price' => 15000, // 150元 (15000分)
+            'allocated_shipping_cost' => 3334, // 33.34元 (3334分)
         ]);
 
         // 更新運費為1000元 (應該會有四捨五入調整)
@@ -298,15 +298,15 @@ class PurchaseShippingCostTest extends TestCase
         
         // 驗證每個項目的運費分配
         // 總數量：3, 每個項目數量：1
-        // 理論分配：1000 / 3 = 333.33... = 33333分
-        // 實際分配：前兩個 33333 (333.33元)，最後一個調整為 33334 (333.34元)
-        $this->assertEquals(33333, $item1->allocated_shipping_cost);
-        $this->assertEquals(33333, $item2->allocated_shipping_cost);
-        $this->assertEquals(33334, $item3->allocated_shipping_cost); // 最後一個調整誤差
+        // 理論分配：1000元 / 3 = 333.33...
+        // 實際分配（以分為單位）：前兩個 33333分，最後一個調整為 33334分
+        $this->assertEquals(33333, $item1->allocated_shipping_cost); // 333.33元 (33333分)
+        $this->assertEquals(33333, $item2->allocated_shipping_cost); // 333.33元 (33333分)
+        $this->assertEquals(33334, $item3->allocated_shipping_cost); // 333.34元 (33334分，最後一個調整誤差)
         
         // 驗證總運費分配正確
         $this->assertEquals(
-            100000, // 1000元 = 100000分
+            100000, // 1000元 (100000分)
             $item1->allocated_shipping_cost + $item2->allocated_shipping_cost + $item3->allocated_shipping_cost
         );
     }
@@ -320,8 +320,8 @@ class PurchaseShippingCostTest extends TestCase
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 50000,
-            'total_amount' => 350000,
+            'shipping_cost' => 50000, // 500元 (50000分)
+            'total_amount' => 350000, // 3500元 (350000分)
             'status' => 'pending',
         ]);
 
@@ -360,8 +360,8 @@ class PurchaseShippingCostTest extends TestCase
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 50000,
-            'total_amount' => 350000,
+            'shipping_cost' => 50000, // 500元 (50000分)
+            'total_amount' => 350000, // 3500元 (350000分)
             'status' => 'pending',
         ]);
 
@@ -399,8 +399,8 @@ class PurchaseShippingCostTest extends TestCase
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 50000,
-            'total_amount' => 350000,
+            'shipping_cost' => 50000, // 500元 (50000分)
+            'total_amount' => 350000, // 3500元 (350000分)
             'status' => 'completed',
         ]);
 
@@ -409,8 +409,8 @@ class PurchaseShippingCostTest extends TestCase
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant1->id,
             'quantity' => 10,
-            'cost_price' => 10000,
-            'allocated_shipping_cost' => 25000,
+            'cost_price' => 10000, // 100元 (10000分)
+            'allocated_shipping_cost' => 25000, // 250元 (25000分)
         ]);
 
         // 應該能夠更新已完成進貨單的運費
@@ -423,7 +423,7 @@ class PurchaseShippingCostTest extends TestCase
         
         // 驗證運費已更新
         $this->purchase->refresh();
-        $this->assertEquals(80000, $this->purchase->shipping_cost); // 800元 = 80000分
+        $this->assertEquals(80000, $this->purchase->shipping_cost); // 800元 (80000分)
     }
 
     /**
@@ -435,8 +435,8 @@ class PurchaseShippingCostTest extends TestCase
         $this->purchase = Purchase::factory()->create([
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
-            'shipping_cost' => 50000,
-            'total_amount' => 350000,
+            'shipping_cost' => 50000, // 500元 (50000分)
+            'total_amount' => 350000, // 3500元 (350000分)
             'status' => 'pending',
         ]);
 
@@ -445,8 +445,8 @@ class PurchaseShippingCostTest extends TestCase
             'purchase_id' => $this->purchase->id,
             'product_variant_id' => $this->productVariant1->id,
             'quantity' => 10,
-            'cost_price' => 10000,
-            'allocated_shipping_cost' => 25000,
+            'cost_price' => 10000, // 100元 (10000分)
+            'allocated_shipping_cost' => 25000, // 250元 (25000分)
         ]);
 
         // 清除之前的日誌
@@ -460,12 +460,12 @@ class PurchaseShippingCostTest extends TestCase
 
         $response->assertStatus(200);
         
-        // 驗證日誌記錄
+        // 驗證日誌記錄 (日誌中使用的是數據庫實際存儲的分值)
         \Illuminate\Support\Facades\Log::shouldHaveReceived('info')
             ->with('進貨單運費更新完成', \Mockery::subset([
                 'purchase_id' => $this->purchase->id,
-                'old_shipping_cost' => 50000, // 原 500元 = 50000分
-                'new_shipping_cost' => 120000, // 新 1200元 = 120000分
+                'old_shipping_cost' => 50000, // 原 500元 (50000分)
+                'new_shipping_cost' => 120000, // 新 1200元 (120000分)
             ]));
     }
 
@@ -479,7 +479,7 @@ class PurchaseShippingCostTest extends TestCase
             'store_id' => $this->store->id,
             'user_id' => $this->user->id,
             'shipping_cost' => 0,
-            'total_amount' => 300000,
+            'total_amount' => 300000, // 3000元 (300000分)
             'status' => 'pending',
         ]);
 
@@ -492,7 +492,7 @@ class PurchaseShippingCostTest extends TestCase
                 'purchase_id' => $this->purchase->id,
                 'product_variant_id' => $this->productVariant1->id,
                 'quantity' => $quantity,
-                'cost_price' => 10000,
+                'cost_price' => 10000, // 100元 (10000分)
                 'allocated_shipping_cost' => 0,
             ]);
         }
@@ -523,6 +523,6 @@ class PurchaseShippingCostTest extends TestCase
             return $item->fresh()->allocated_shipping_cost;
         });
         
-        $this->assertEquals(250000, $finalTotal); // 2500元 = 250000分
+        $this->assertEquals(250000, $finalTotal); // 2500元 (250000分)
     }
 }

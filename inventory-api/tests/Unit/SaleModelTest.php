@@ -49,7 +49,7 @@ class SaleModelTest extends TestCase
         $data = [
             'store_id' => $store->id,
             'transaction_number' => 'S20250101-001',
-            'total_amount' => 1000,
+            'total_amount' => 100000, // 1000 元（以分為單位）
             'sold_at' => now(),
             'payment_method' => 'cash',
         ];
@@ -70,19 +70,19 @@ class SaleModelTest extends TestCase
         SaleItem::factory()->create([
             'sale_id' => $sale->id,
             'quantity' => 2,
-            'unit_price' => 100,
+            'unit_price' => 10000, // 100 元（以分為單位）
         ]);
         
         SaleItem::factory()->create([
             'sale_id' => $sale->id,
             'quantity' => 1,
-            'unit_price' => 300,
+            'unit_price' => 30000, // 300 元（以分為單位）
         ]);
 
         // 由於沒有 subtotal 欄位，我們計算總金額
         $totalFromItems = $sale->items->sum(function($item) {
             return $item->quantity * $item->unit_price;
         });
-        $this->assertEquals(500, $totalFromItems); // (2 * 100) + (1 * 300)
+        $this->assertEquals(50000, $totalFromItems); // (2 * 10000) + (1 * 30000) = 50000 分
     }
 } 

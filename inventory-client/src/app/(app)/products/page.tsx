@@ -34,20 +34,6 @@ export default function ProductsPage() {
   const { data: session, status } = useSession();
   const { data: products, isLoading, error, isError } = useProducts();
 
-  // 開發環境調試資訊
-  if (process.env.NODE_ENV === 'development') {
-    console.log('ProductsPage - Query Status:', {
-      sessionStatus: status,
-      hasAccessToken: !!session?.accessToken,
-      isLoading,
-      isError,
-      error: error?.message,
-      productsCount: Array.isArray(products) ? products.length : 'Not an array',
-      productsType: typeof products,
-      productsIsObject: products && typeof products === 'object' && !Array.isArray(products),
-      products: Array.isArray(products) ? products.slice(0, 3) : null // 只顯示前3個商品
-    });
-  }
 
   // 計算統計數據
   const productsArray = Array.isArray(products) ? products : [];

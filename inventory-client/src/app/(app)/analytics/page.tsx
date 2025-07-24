@@ -19,7 +19,7 @@ import {
   ArrowDownRight,
   Filter
 } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 
 /**
  * 分析報表頁面
@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
               <DollarSign className="h-5 w-5 text-green-500" />
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">總營收</p>
-                <p className="text-2xl font-bold">{formatPrice(2345678)}</p>
+                <p className="text-2xl font-bold">{MoneyHelper.format(2345678, 'NT$')}</p>
                 <div className="flex items-center gap-1 text-sm">
                   <ArrowUpRight className="h-4 w-4 text-green-500" />
                   <span className="text-green-600">+12.5%</span>
@@ -192,7 +192,7 @@ export default function AnalyticsPage() {
                         <span className="text-sm">{item.channel}</span>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">{formatPrice(item.amount)}</p>
+                        <p className="font-medium">{MoneyHelper.format(item.amount, 'NT$')}</p>
                         <p className="text-sm text-muted-foreground">{item.percentage}%</p>
                       </div>
                     </div>
@@ -240,7 +240,7 @@ export default function AnalyticsPage() {
                       <span className="font-medium">{item.product}</span>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{formatPrice(item.sales)}</p>
+                      <p className="font-medium">{MoneyHelper.format(item.sales, 'NT$')}</p>
                       <p className="text-sm text-muted-foreground">{item.count}</p>
                     </div>
                   </div>
@@ -342,7 +342,7 @@ export default function AnalyticsPage() {
                   <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{item.segment}</p>
-                      <p className="text-sm text-muted-foreground">平均消費: {formatPrice(item.value)}+</p>
+                      <p className="text-sm text-muted-foreground">平均消費: {MoneyHelper.format(item.value, 'NT$')}+</p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">{item.count} 人</p>
@@ -393,7 +393,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-medium">{item.stock} 件</p>
-                      <p className="text-sm text-muted-foreground">{formatPrice(item.value)}</p>
+                      <p className="text-sm text-muted-foreground">{MoneyHelper.format(item.value, 'NT$')}</p>
                     </div>
                   </div>
                 ))}
@@ -436,16 +436,16 @@ export default function AnalyticsPage() {
                   <div key={i} className="space-y-2">
                     <div className="flex justify-between">
                       <span className="font-medium">{item.month}</span>
-                      <span className="text-sm font-medium text-green-600">{formatPrice(item.net)}</span>
+                      <span className="text-sm font-medium text-green-600">{MoneyHelper.format(item.net, 'NT$')}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">流入:</span>
-                        <span>{formatPrice(item.inflow)}</span>
+                        <span>{MoneyHelper.format(item.inflow, 'NT$')}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">流出:</span>
-                        <span>{formatPrice(item.outflow)}</span>
+                        <span>{MoneyHelper.format(item.outflow, 'NT$')}</span>
                       </div>
                     </div>
                   </div>

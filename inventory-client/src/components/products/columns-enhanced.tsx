@@ -33,7 +33,8 @@ import {
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ProductItem } from "@/types/api-helpers";
-import { cn, formatPrice as formatPriceUtil } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 import { addImageCacheBuster } from "@/lib/utils";
 
 // 導入懶加載圖片組件
@@ -300,7 +301,7 @@ export const columnsEnhanced: ColumnDef<ExpandedProductItem>[] = [
       if (item.isVariantRow && item.variantInfo) {
         return (
           <div className="font-medium">
-            {formatPriceUtil(item.variantInfo.price)}
+            {MoneyHelper.format(parseFloat(item.variantInfo.price) || 0, 'NT$')}
           </div>
         );
       }
@@ -314,7 +315,7 @@ export const columnsEnhanced: ColumnDef<ExpandedProductItem>[] = [
         if (minPrice === maxPrice) {
           return (
             <div className="font-medium">
-              {formatPriceUtil(minPrice.toString())}
+              {MoneyHelper.format(minPrice || 0, 'NT$')}
             </div>
           );
         }
@@ -322,8 +323,8 @@ export const columnsEnhanced: ColumnDef<ExpandedProductItem>[] = [
         return (
           <div className="space-y-1">
             <div className="text-sm">
-              {formatPriceUtil(minPrice.toString())} -{" "}
-              {formatPriceUtil(maxPrice.toString())}
+              {MoneyHelper.format(minPrice || 0, 'NT$')} -{" "}
+              {MoneyHelper.format(maxPrice || 0, 'NT$')}
             </div>
             <div className="text-xs text-muted-foreground">
               價格範圍
@@ -335,7 +336,7 @@ export const columnsEnhanced: ColumnDef<ExpandedProductItem>[] = [
       // 單一商品顯示單一價格
       return (
         <div className="font-medium">
-          {formatPriceUtil(item.price)}
+          {MoneyHelper.format(parseFloat(item.price) || 0, 'NT$')}
         </div>
       );
     },

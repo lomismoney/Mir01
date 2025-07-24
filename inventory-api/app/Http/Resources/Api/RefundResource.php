@@ -28,7 +28,7 @@ class RefundResource extends JsonResource
             /**
              * 退款總金額
              */
-            'total_refund_amount' => $this->total_refund_amount,
+            'total_refund_amount' => $this->total_refund_amount / 100, // 分轉元
             
             /**
              * 退款原因

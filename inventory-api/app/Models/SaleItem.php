@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SaleItem extends Model
 {
@@ -16,20 +17,16 @@ class SaleItem extends Model
     protected $guarded = [];
 
     /**
-     * 獲取單價（轉換為元）
+     * 屬性類型轉換
      */
-    protected function unitPrice(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => $value * 100,
-        );
-    }
+    protected $casts = [
+        'unit_price' => 'integer',
+    ];
 
     /**
      * 獲取該項目所屬的銷貨單
      */
-    public function sale()
+    public function sale(): BelongsTo
     {
         return $this->belongsTo(Sale::class);
     }
@@ -37,7 +34,7 @@ class SaleItem extends Model
     /**
      * 獲取該項目對應的商品
      */
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }

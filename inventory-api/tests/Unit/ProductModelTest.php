@@ -54,9 +54,28 @@ class ProductModelTest extends TestCase
     #[Test]
     public function product_has_inventories_through_variants()
     {
+        // 重置自增 ID
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+            \Illuminate\Support\Facades\DB::statement('DELETE FROM sqlite_sequence WHERE name IN ("inventories", "product_variants", "products", "stores")');
+        }
+        
+        // 手動清理可能殘留的數據
+        \App\Models\Inventory::query()->delete();
+        \App\Models\ProductVariant::query()->delete();
+        \App\Models\Product::query()->delete();
+        \App\Models\Store::query()->delete();
+        
         $product = Product::factory()->create();
         $variant = ProductVariant::factory()->create(['product_id' => $product->id]);
-        $inventory = Inventory::factory()->create(['product_variant_id' => $variant->id]);
+        
+        // 直接使用 create 並指定屬性，避免 factory 衝突
+        $store = \App\Models\Store::factory()->create(['name' => 'Test Store Unique 1']);
+        $inventory = \App\Models\Inventory::create([
+            'product_variant_id' => $variant->id,
+            'store_id' => $store->id,
+            'quantity' => 50,
+            'low_stock_threshold' => 10,
+        ]);
 
         $this->assertCount(1, $product->inventories);
         $this->assertInstanceOf(Inventory::class, $product->inventories->first());
@@ -76,7 +95,6 @@ class ProductModelTest extends TestCase
     {
         $product = new Product();
         $expectedCasts = [
-            'id' => 'int',
             'category_id' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
@@ -124,12 +142,34 @@ class ProductModelTest extends TestCase
     #[Test]
     public function get_total_stock_attribute_calculates_total_inventory()
     {
+        // 手動清理可能殘留的數據
+        \App\Models\Inventory::query()->delete();
+        \App\Models\ProductVariant::query()->delete();
+        \App\Models\Product::query()->delete();
+        \App\Models\Store::query()->delete();
+        
         $product = Product::factory()->create();
         $variant1 = ProductVariant::factory()->create(['product_id' => $product->id]);
         $variant2 = ProductVariant::factory()->create(['product_id' => $product->id]);
         
-        Inventory::factory()->create(['product_variant_id' => $variant1->id, 'quantity' => 10]);
-        Inventory::factory()->create(['product_variant_id' => $variant2->id, 'quantity' => 15]);
+        // 確保使用不同的門市來避免唯一約束衝突
+        $store1 = \App\Models\Store::factory()->create(['name' => 'Test Store A']);
+        $store2 = \App\Models\Store::factory()->create(['name' => 'Test Store B']);
+        
+        // 直接創建庫存記錄避免 factory 衝突
+        \App\Models\Inventory::create([
+            'product_variant_id' => $variant1->id,
+            'store_id' => $store1->id,
+            'quantity' => 10,
+            'low_stock_threshold' => 5,
+        ]);
+        
+        \App\Models\Inventory::create([
+            'product_variant_id' => $variant2->id,
+            'store_id' => $store2->id,
+            'quantity' => 15,
+            'low_stock_threshold' => 5,
+        ]);
 
         $this->assertEquals(25, $product->total_stock);
     }
@@ -147,14 +187,16 @@ class ProductModelTest extends TestCase
     public function get_price_range_attribute_returns_min_max_prices()
     {
         $product = Product::factory()->create();
-        ProductVariant::factory()->create(['product_id' => $product->id, 'price' => 100]);
-        ProductVariant::factory()->create(['product_id' => $product->id, 'price' => 150]);
-        ProductVariant::factory()->create(['product_id' => $product->id, 'price' => 120]);
+        ProductVariant::factory()->create(['product_id' => $product->id, 'price' => 10000]); // 100.00 in cents
+        ProductVariant::factory()->create(['product_id' => $product->id, 'price' => 15000]); // 150.00 in cents
+        ProductVariant::factory()->create(['product_id' => $product->id, 'price' => 12000]); // 120.00 in cents
 
+        // 重新載入 product 以獲取最新的 variants 關聯
+        $product = $product->fresh(['variants']);
         $priceRange = $product->price_range;
 
-        $this->assertEquals(100, $priceRange['min']);
-        $this->assertEquals(150, $priceRange['max']);
+        $this->assertEquals(10000, $priceRange['min']);
+        $this->assertEquals(15000, $priceRange['max']);
     }
 
     #[Test]

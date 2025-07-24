@@ -69,7 +69,7 @@ class RefundItemModelTest extends TestCase
         $this->orderItem = OrderItem::factory()->create([
             'order_id' => $this->order->id,
             'product_variant_id' => $this->productVariant->id,
-            'price' => 500.00,
+            'price' => 50000, // 500元 = 50000分
             'quantity' => 4
         ]);
         
@@ -84,7 +84,7 @@ class RefundItemModelTest extends TestCase
             'refund_id' => $this->refund->id,
             'order_item_id' => $this->orderItem->id,
             'quantity' => 2,
-            'refund_subtotal' => 1000.00
+            'refund_subtotal' => 100000 // 1000元 = 100000分
         ]);
     }
 
@@ -121,7 +121,7 @@ class RefundItemModelTest extends TestCase
             'refund_id' => $this->refund->id,
             'order_item_id' => $orderItem2->id,
             'quantity' => 3,
-            'refund_subtotal' => 1500.00
+            'refund_subtotal' => 150000 // 1500元 = 150000分
         ];
         
         $refundItem = RefundItem::create($data);
@@ -129,7 +129,7 @@ class RefundItemModelTest extends TestCase
         $this->assertEquals($this->refund->id, $refundItem->refund_id);
         $this->assertEquals($orderItem2->id, $refundItem->order_item_id);
         $this->assertEquals(3, $refundItem->quantity);
-        $this->assertEquals(1500.00, $refundItem->refund_subtotal);
+        $this->assertEquals(150000, $refundItem->getRawOriginal('refund_subtotal')); // 資料庫原始值為分
     }
 
     /**
@@ -138,8 +138,8 @@ class RefundItemModelTest extends TestCase
     public function test_refund_item_casts(): void
     {
         $this->assertIsInt($this->refundItem->quantity);
-        // 在 SQLite 中，decimal 類型會返回字符串，需要手動轉換
-        $this->assertIsNumeric($this->refundItem->refund_subtotal);
+        // 檢查金額欄位為整數（分）
+        $this->assertIsInt($this->refundItem->getRawOriginal('refund_subtotal'));
         $this->assertInstanceOf(\Carbon\Carbon::class, $this->refundItem->created_at);
         $this->assertInstanceOf(\Carbon\Carbon::class, $this->refundItem->updated_at);
     }
@@ -220,9 +220,12 @@ class RefundItemModelTest extends TestCase
     {
         $this->assertEquals('$1,000.00', $this->refundItem->formatted_subtotal);
         
-        // 測試不同金額
-        $this->refundItem->refund_subtotal = 1234.56;
-        $this->assertEquals('$1,234.56', $this->refundItem->formatted_subtotal);
+        // 測試不同金額 - 創建新的 RefundItem 來測試
+        $testRefundItem = RefundItem::factory()->create([
+            'refund_id' => $this->refund->id,
+            'refund_subtotal' => 123456 // 1234.56元 = 123456分
+        ]);
+        $this->assertEquals('$1,234.56', $testRefundItem->formatted_subtotal);
     }
 
     /**
@@ -273,13 +276,13 @@ class RefundItemModelTest extends TestCase
         // 測試正確的小計 (500 * 2 = 1000)
         $this->assertTrue($this->refundItem->validateSubtotal());
         
-        // 測試錯誤的小計
-        $this->refundItem->refund_subtotal = 800.00; // 應該是 1000
+        // 測試錯誤的小計（使用分為單位）
+        $this->refundItem->refund_subtotal = 80000; // 應該是 100000分
         $this->assertFalse($this->refundItem->validateSubtotal());
         
-        // 測試允許的誤差範圍
-        $this->refundItem->refund_subtotal = 1000.005; // 誤差 < 0.01
-        $this->assertTrue($this->refundItem->validateSubtotal());
+        // 測試允許的誤差範圍（1分誤差）
+        $this->refundItem->refund_subtotal = 100001; // 誤差 1分
+        $this->assertFalse($this->refundItem->validateSubtotal());
     }
 
     /**
@@ -357,12 +360,12 @@ class RefundItemModelTest extends TestCase
         // 創建同一訂單項目的另一個退款項目
         RefundItem::factory()->create([
             'order_item_id' => $this->orderItem->id,
-            'refund_subtotal' => 500.00
+            'refund_subtotal' => 50000 // 500元 = 50000分
         ]);
         
         $totalAmount = RefundItem::getTotalRefundedAmount($this->orderItem->id);
         
-        // 總退款金額應為 1000 + 500 = 1500
+        // 總退款金額應為 1000 + 500 = 1500 元
         $this->assertEquals(1500.00, $totalAmount);
     }
 
@@ -394,7 +397,7 @@ class RefundItemModelTest extends TestCase
         $orderItem3 = OrderItem::factory()->create([
             'order_id' => $this->order->id,
             'product_variant_id' => $this->productVariant->id,
-            'price' => 500.00
+            'price' => 50000 // 500元 = 50000分
         ]);
         
         $refundItem = RefundItem::create([
@@ -404,8 +407,8 @@ class RefundItemModelTest extends TestCase
             // 沒有設定 refund_subtotal
         ]);
         
-        // 應該自動計算為 500 * 3 = 1500
-        $this->assertEquals(1500.00, $refundItem->refund_subtotal);
+        // 應該自動計算為 50000分 * 3 = 150000分
+        $this->assertEquals(150000, $refundItem->getRawOriginal('refund_subtotal')); // 資料庫原始值為分
     }
 
     /**
@@ -416,8 +419,8 @@ class RefundItemModelTest extends TestCase
         // 更新數量
         $this->refundItem->update(['quantity' => 3]);
         
-        // 小計應該重新計算為 500 * 3 = 1500
-        $this->assertEquals(1500.00, $this->refundItem->refund_subtotal);
+        // 小計應該重新計算為 50000分 * 3 = 150000分
+        $this->assertEquals(150000, $this->refundItem->getRawOriginal('refund_subtotal'));
     }
 
     /**
@@ -523,21 +526,21 @@ class RefundItemModelTest extends TestCase
             'order_id' => $this->order->id,
             'product_variant_id' => $this->productVariant->id,
             'quantity' => 5,
-            'price' => 50.00
+            'price' => 5000 // 50元 = 5000分
         ]);
         
         $refundItem = RefundItem::factory()->create([
             'refund_id' => $this->refund->id,
             'order_item_id' => $newOrderItem->id,
             'quantity' => 2,
-            'refund_subtotal' => 89.99
+            'refund_subtotal' => 8999 // 89.99元 = 8999分
         ]);
         
         // 驗證金額正確轉換為分並儲存
         $this->assertEquals(8999, $refundItem->refund_subtotal_cents);
         
-        // 驗證金額正確從分轉換為元顯示
-        $this->assertEquals(89.99, $refundItem->refund_subtotal);
+        // 驗證資料庫原始值正確（分）
+        $this->assertEquals(8999, $refundItem->getRawOriginal('refund_subtotal'));
     }
 
     /**
@@ -567,7 +570,7 @@ class RefundItemModelTest extends TestCase
             'order_id' => $this->order->id,
             'product_variant_id' => $this->productVariant->id,
             'quantity' => 10,
-            'price' => 100.00
+            'price' => 10000 // 100元 = 10000分
         ]);
         
         // 創建時自動計算小計
@@ -578,8 +581,8 @@ class RefundItemModelTest extends TestCase
             // 不設定 refund_subtotal，應該自動計算
         ]);
         
-        $expectedSubtotal = $newOrderItem2->price * 3;
-        $this->assertEquals($expectedSubtotal, $refundItem->refund_subtotal);
+        // 自動計算：10000分 * 3 = 30000分
+        $this->assertEquals(30000, $refundItem->getRawOriginal('refund_subtotal'));
     }
 
     /**
@@ -592,20 +595,20 @@ class RefundItemModelTest extends TestCase
             'order_id' => $this->order->id,
             'product_variant_id' => $this->productVariant->id,
             'quantity' => 8,
-            'price' => 75.00
+            'price' => 7500 // 75元 = 7500分
         ]);
         
         $refundItem = RefundItem::factory()->create([
             'refund_id' => $this->refund->id,
             'order_item_id' => $newOrderItem3->id,
             'quantity' => 1,
-            'refund_subtotal' => 100.00
+            'refund_subtotal' => 10000 // 100元 = 10000分
         ]);
         
         // 更新數量，小計應該重新計算
         $refundItem->update(['quantity' => 2]);
         
-        $expectedSubtotal = $newOrderItem3->price * 2;
-        $this->assertEquals($expectedSubtotal, $refundItem->fresh()->refund_subtotal);
+        // 重新計算：7500分 * 2 = 15000分
+        $this->assertEquals(15000, $refundItem->fresh()->getRawOriginal('refund_subtotal'));
     }
 } 

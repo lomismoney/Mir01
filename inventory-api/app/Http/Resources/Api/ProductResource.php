@@ -104,8 +104,8 @@ class ProductResource extends JsonResource
             'price_range' => $this->when(
                 $this->relationLoaded('variants'),
                 fn() => [
-                    'min' => $this->variants->min('price'),
-                    'max' => $this->variants->max('price'),
+                    'min' => $this->variants->min('price'), // accessor 自動處理分轉元
+                    'max' => $this->variants->max('price'), // accessor 自動處理分轉元
                     'count' => $this->variants->count(),
                 ]
             ),

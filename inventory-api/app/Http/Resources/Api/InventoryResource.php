@@ -35,11 +35,11 @@ class InventoryResource extends JsonResource
                 return [
                     'id' => $this->productVariant->id,
                     'sku' => $this->productVariant->sku,
-                    'price' => $this->productVariant->price,
-                    'cost_price' => $this->productVariant->cost_price,
-                    'average_cost' => $this->productVariant->average_cost,
+                    'price' => $this->productVariant->price, // accessor 自動處理分轉元
+                    'cost_price' => $this->productVariant->cost_price, // accessor 自動處理分轉元
+                    'average_cost' => $this->productVariant->average_cost, // accessor 自動處理分轉元
                     'profit_margin' => $this->productVariant->profit_margin,
-                    'profit_amount' => $this->productVariant->profit_amount,
+                    'profit_amount' => $this->productVariant->profit_amount, // accessor 自動處理分轉元
                     'product' => $this->whenLoaded('productVariant', function () {
                         return $this->productVariant->product ? [
                             'id' => $this->productVariant->product->id,

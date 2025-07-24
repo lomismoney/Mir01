@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; // 1. 確保已導入
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -56,7 +57,7 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function stores()
+    public function stores(): BelongsToMany
     {
         return $this->belongsToMany(Store::class);
     }
@@ -73,12 +74,13 @@ class User extends Authenticatable
 
     /**
      * 檢查用戶是否為員工
+     * 注意：管理員也具有員工權限
      *
      * @return bool
      */
     public function isStaff(): bool
     {
-        return $this->hasRole(self::ROLE_STAFF);
+        return $this->hasAnyRole([self::ROLE_STAFF, self::ROLE_ADMIN]);
     }
 
     /**

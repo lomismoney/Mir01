@@ -45,14 +45,14 @@ class PartialPaymentTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $customer->id,
             'creator_user_id' => $this->user->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 0.00,
+            'grand_total' => 100000,  // 1000.00 * 100 = 100000 分
+            'paid_amount' => 0,
             'payment_status' => 'pending',
         ]);
 
         // 執行：新增 300 元的部分付款
         $paymentData = [
-            'amount' => 300.00,
+            'amount' => 300.00,  // API 接受元為單位
             'payment_method' => 'cash',
             'notes' => '收到現金付款 300 元',
         ];
@@ -64,13 +64,13 @@ class PartialPaymentTest extends TestCase
 
         // 驗證：訂單已付金額和狀態正確更新
         $order->refresh();
-        $this->assertEquals(300.00, $order->paid_amount);
+        $this->assertEquals(30000, $order->paid_amount);  // 300.00 * 100 = 30000 分
         $this->assertEquals('partial', $order->payment_status);
 
         // 驗證：付款記錄已創建
         $this->assertDatabaseHas('payment_records', [
             'order_id' => $order->id,
-            'amount' => 300.00,
+            'amount' => 30000,  // 300.00 * 100 = 30000 分
             'payment_method' => 'cash',
             'notes' => '收到現金付款 300 元',
             'creator_id' => $this->user->id,
@@ -94,14 +94,14 @@ class PartialPaymentTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $customer->id,
             'creator_user_id' => $this->user->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 700.00,
+            'grand_total' => 100000,  // 1000.00 * 100 = 100000 分
+            'paid_amount' => 70000,   // 700.00 * 100 = 70000 分
             'payment_status' => 'partial',
         ]);
 
         // 執行：新增最後 300 元的付款（達到全額付清）
         $paymentData = [
-            'amount' => 300.00,
+            'amount' => 300.00,  // API 接受元為單位
             'payment_method' => 'transfer',
             'notes' => '轉帳付清尾款',
         ];
@@ -113,7 +113,7 @@ class PartialPaymentTest extends TestCase
 
         // 驗證：訂單狀態更新為已付款
         $order->refresh();
-        $this->assertEquals(1000.00, $order->paid_amount);
+        $this->assertEquals(100000, $order->paid_amount);  // 1000.00 * 100 = 100000 分
         $this->assertEquals('paid', $order->payment_status);
         $this->assertNotNull($order->paid_at);
     }
@@ -126,14 +126,14 @@ class PartialPaymentTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $customer->id,
             'creator_user_id' => $this->user->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 700.00,
+            'grand_total' => 100000,  // 1000.00 * 100 = 100000 分
+            'paid_amount' => 70000,   // 700.00 * 100 = 70000 分
             'payment_status' => 'partial',
         ]);
 
         // 執行：嘗試新增 400 元的付款（超過剩餘 300 元）
         $paymentData = [
-            'amount' => 400.00,
+            'amount' => 400.00,  // API 接受元為單位
             'payment_method' => 'cash',
         ];
 
@@ -145,13 +145,13 @@ class PartialPaymentTest extends TestCase
 
         // 驗證：訂單狀態未變更
         $order->refresh();
-        $this->assertEquals(700.00, $order->paid_amount);
+        $this->assertEquals(70000, $order->paid_amount);  // 700.00 * 100 = 70000 分
         $this->assertEquals('partial', $order->payment_status);
 
         // 驗證：未創建付款記錄
         $this->assertDatabaseMissing('payment_records', [
             'order_id' => $order->id,
-            'amount' => 400.00,
+            'amount' => 40000,  // 400.00 * 100 = 40000 分
         ]);
     }
 
@@ -163,14 +163,14 @@ class PartialPaymentTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $customer->id,
             'creator_user_id' => $this->user->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 1000.00,
+            'grand_total' => 100000,  // 1000.00 * 100 = 100000 分
+            'paid_amount' => 100000,  // 1000.00 * 100 = 100000 分
             'payment_status' => 'paid',
         ]);
 
         // 執行：嘗試再次新增付款
         $paymentData = [
-            'amount' => 100.00,
+            'amount' => 100.00,  // API 接受元為單位
             'payment_method' => 'cash',
         ];
 
@@ -189,8 +189,8 @@ class PartialPaymentTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $customer->id,
             'creator_user_id' => $this->user->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 0.00,
+            'grand_total' => 100000,  // 1000.00 * 100 = 100000 分
+            'paid_amount' => 0,
             'payment_status' => 'pending',
         ]);
 
@@ -210,14 +210,14 @@ class PartialPaymentTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $customer->id,
             'creator_user_id' => $this->user->id,
-            'grand_total' => 1000.00,
-            'paid_amount' => 0.00,
+            'grand_total' => 100000,  // 1000.00 * 100 = 100000 分
+            'paid_amount' => 0,
             'payment_status' => 'pending',
         ]);
 
         // 執行：使用無效的付款方式
         $paymentData = [
-            'amount' => 300.00,
+            'amount' => 300.00,  // API 接受元為單位
             'payment_method' => 'invalid_method',
         ];
 

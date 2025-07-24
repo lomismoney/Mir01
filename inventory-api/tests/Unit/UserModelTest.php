@@ -38,6 +38,7 @@ class UserModelTest extends TestCase
         $expectedFillable = [
             'name',
             'username',
+            'email',
             'password',
         ];
 

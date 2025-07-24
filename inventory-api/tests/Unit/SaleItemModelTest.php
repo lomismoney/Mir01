@@ -53,7 +53,7 @@ class SaleItemModelTest extends TestCase
             'sale_id' => $sale->id,
             'product_id' => $product->id,
             'quantity' => 5,
-            'unit_price' => 100,
+            'unit_price' => 10000, // 100元 = 10000分
         ];
 
         $saleItem = SaleItem::create($data);
@@ -62,7 +62,7 @@ class SaleItemModelTest extends TestCase
             'sale_id' => $sale->id,
             'product_id' => $product->id,
             'quantity' => 5,
-            'unit_price' => 100,
+            'unit_price' => 10000, // 期望值也是分
         ]);
     }
 
@@ -70,23 +70,23 @@ class SaleItemModelTest extends TestCase
     public function sale_item_calculates_subtotal()
     {
         $saleItem = SaleItem::factory()->create([
-            'unit_price' => 100,
+            'unit_price' => 10000, // 100元 = 10000分
             'quantity' => 2,
         ]);
 
         $subtotal = $saleItem->unit_price * $saleItem->quantity;
 
-        $this->assertEquals(200, $subtotal); // 100 * 2
+        $this->assertEquals(20000, $subtotal); // 10000 * 2 = 20000分
     }
 
     #[Test]
     public function sale_item_subtotal_equals_unit_price_times_quantity()
     {
         $saleItem = SaleItem::factory()->create([
-            'unit_price' => 150,
+            'unit_price' => 15000, // 150元 = 15000分
             'quantity' => 3,
         ]);
 
-        $this->assertEquals(450, $saleItem->unit_price * $saleItem->quantity);
+        $this->assertEquals(45000, $saleItem->unit_price * $saleItem->quantity); // 15000 * 3 = 45000分
     }
 } 

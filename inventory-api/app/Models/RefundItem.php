@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\MoneyHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -57,9 +56,23 @@ class RefundItem extends Model
      */
     protected $casts = [
         'quantity' => 'integer',
+        'refund_subtotal' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    // ❌ 已移除 refund_subtotal accessor - 遵循 CLAUDE.md 1.3 節規範
+    // 分→元轉換僅在 Resource 層進行，Model 層不得修改金額顯示
+
+    /**
+     * Accessor: 獲取 refund_subtotal 的分值（原始數據庫值）
+     * 
+     * @return int
+     */
+    public function getRefundSubtotalCentsAttribute(): int
+    {
+        return isset($this->attributes['refund_subtotal']) ? $this->attributes['refund_subtotal'] : 0;
+    }
 
     /**
      * 關聯：退款品項所屬的退款單
@@ -124,28 +137,6 @@ class RefundItem extends Model
         return $query;
     }
 
-    // ===== 金額 Accessor/Mutator (分/元轉換) =====
-    
-    /**
-     * Refund Subtotal Accessor - 將分轉換為元
-     * 
-     * @return float
-     */
-    public function getRefundSubtotalAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['refund_subtotal'] ?? 0);
-    }
-    
-    /**
-     * Refund Subtotal Mutator - 將元轉換為分
-     * 
-     * @param float|null $value
-     * @return void
-     */
-    public function setRefundSubtotalAttribute($value): void
-    {
-        $this->attributes['refund_subtotal'] = MoneyHelper::yuanToCents($value);
-    }
 
     /**
      * 存取器：格式化退款小計顯示
@@ -154,7 +145,9 @@ class RefundItem extends Model
      */
     public function getFormattedSubtotalAttribute(): string
     {
-        return MoneyHelper::formatWithDecimals($this->attributes['refund_subtotal'] ?? 0);
+        // 將分轉換為元並格式化，加上貨幣符號
+        $amount = $this->refund_subtotal / 100;
+        return '$' . number_format($amount, 2);
     }
 
     /**
@@ -175,6 +168,7 @@ class RefundItem extends Model
      */
     public function getUnitPriceAttribute(): float
     {
+        // 返回元為單位的單價
         return $this->orderItem ? $this->orderItem->price : 0;
     }
 
@@ -205,8 +199,9 @@ class RefundItem extends Model
      */
     public function validateSubtotal(): bool
     {
-        $expectedSubtotal = $this->unit_price * $this->quantity;
-        return abs($this->refund_subtotal - $expectedSubtotal) < 0.01; // 允許 1 分錢的誤差
+        // 使用分為單位進行計算，避免浮點誤差
+        $expectedSubtotalCents = $this->orderItem ? $this->orderItem->price_cents * $this->quantity : 0;
+        return abs($this->refund_subtotal_cents - $expectedSubtotalCents) < 1; // 允許 1 分的誤差
     }
 
     /**
@@ -266,8 +261,9 @@ class RefundItem extends Model
      */
     public static function getTotalRefundedAmount(int $orderItemId): float
     {
+        // 從數據庫獲取分為單位的總和，然後轉換為元
         $totalCents = self::where('order_item_id', $orderItemId)->sum('refund_subtotal');
-        return MoneyHelper::centsToYuan($totalCents);
+        return $totalCents / 100;
     }
 
     /**
@@ -291,6 +287,31 @@ class RefundItem extends Model
     }
 
     /**
+     * 靜態方法：將元轉換為分
+     * 
+     * @param float|int|null $yuan
+     * @return int
+     */
+    public static function yuanToCents($yuan): int
+    {
+        if ($yuan === null || $yuan === 0) {
+            return 0;
+        }
+        return (int)round($yuan * 100);
+    }
+
+    /**
+     * 靜態方法：將分轉換為元
+     * 
+     * @param int $cents
+     * @return float
+     */
+    public static function centsToYuan(int $cents): float
+    {
+        return round($cents / 100, 2);
+    }
+
+    /**
      * 啟動事件
      * 
      * @return void
@@ -299,15 +320,17 @@ class RefundItem extends Model
     {
         // 創建退款品項時自動計算小計
         static::creating(function (RefundItem $refundItem) {
-            if (!$refundItem->refund_subtotal && $refundItem->orderItem) {
-                $refundItem->refund_subtotal = $refundItem->orderItem->price * $refundItem->quantity;
+            if (!isset($refundItem->attributes['refund_subtotal']) && $refundItem->orderItem) {
+                // 使用原始的分值進行計算
+                $refundItem->attributes['refund_subtotal'] = $refundItem->orderItem->getRawOriginal('price') * $refundItem->quantity;
             }
         });
 
         // 更新退款品項時重新計算小計
         static::updating(function (RefundItem $refundItem) {
             if ($refundItem->isDirty(['quantity']) && $refundItem->orderItem) {
-                $refundItem->refund_subtotal = $refundItem->orderItem->price * $refundItem->quantity;
+                // 使用原始的分值進行計算
+                $refundItem->attributes['refund_subtotal'] = $refundItem->orderItem->getRawOriginal('price') * $refundItem->quantity;
             }
         });
     }

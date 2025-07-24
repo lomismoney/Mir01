@@ -98,9 +98,9 @@ class PurchaseEndToEndTest extends TestCase
         // 手動: 1 * 43400 = 43400
         // 待進貨: 1 * 42000 = 42000
         // 運費: 1200
-        // 總計: 86600 / 100 = 866
-        $this->assertEquals(866, $responseData['total_amount']);
-        $this->assertEquals(1200, $responseData['shipping_cost']);
+        // 總計: 86600（API 返回時已經是元為單位）
+        $this->assertEquals(86600.00, $responseData['total_amount']);
+        $this->assertEquals(1200.00, $responseData['shipping_cost']);
         
         // 驗證有兩個獨立的項目
         $this->assertCount(2, $responseData['items']);

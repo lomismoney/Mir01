@@ -11,7 +11,6 @@ import {
 } from "@/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatPrice } from "@/lib/utils";
 import { MoneyHelper } from "@/lib/money-helper";
 import {
   Table,
@@ -379,7 +378,7 @@ export function OrderDetailComponent({ orderId, order: providedOrder }: OrderDet
                     訂單總額 ({order.is_tax_inclusive ? "含稅" : "未稅"})
                   </span>
                   <span className="text-right w-[120px]">
-                    {formatPrice(order.grand_total)}
+                    {MoneyHelper.format(order.grand_total || 0, '$')}
                   </span>
                 </div>
               </div>
@@ -471,12 +470,49 @@ export function OrderDetailComponent({ orderId, order: providedOrder }: OrderDet
                 <span className="text-muted-foreground">聯絡電話</span>
                 <span>{order.customer?.phone || "未提供"}</span>
               </div>
-              {order.shipping_address && (
-                <div className="pt-2 mt-2 border-t">
-                  <p className="text-muted-foreground mb-1">運送地址</p>
-                  <p className="text-sm">{order.shipping_address}</p>
-                </div>
-              )}
+              {(() => {
+                let shippingAddressText = '';
+                let isDefaultAddress = false;
+                
+                if (order.shipping_address) {
+                  // 檢查是否為 JSON 字串
+                  try {
+                    const addressObj = typeof order.shipping_address === 'string' && order.shipping_address.startsWith('{') 
+                      ? JSON.parse(order.shipping_address) 
+                      : order.shipping_address;
+                    
+                    if (typeof addressObj === 'object') {
+                      // 處理地址物件，組合成完整地址字串
+                      const parts = [];
+                      if (addressObj.postal_code) parts.push(addressObj.postal_code);
+                      if (addressObj.city) parts.push(addressObj.city);
+                      if (addressObj.district) parts.push(addressObj.district);
+                      if (addressObj.address) parts.push(addressObj.address);
+                      shippingAddressText = parts.join(' ') || addressObj.address || '';
+                    } else {
+                      shippingAddressText = order.shipping_address;
+                    }
+                  } catch (e) {
+                    // 如果解析失敗，直接使用原始字串
+                    shippingAddressText = order.shipping_address;
+                  }
+                } else if (order.customer?.default_address?.address) {
+                  shippingAddressText = order.customer.default_address.address;
+                  isDefaultAddress = true;
+                }
+                
+                if (!shippingAddressText) return null;
+                
+                return (
+                  <div className="pt-2 mt-2 border-t">
+                    <p className="text-muted-foreground mb-1">運送地址</p>
+                    <p className="text-sm">{shippingAddressText}</p>
+                    {isDefaultAddress && (
+                      <p className="text-xs text-muted-foreground mt-1">(使用客戶預設地址)</p>
+                    )}
+                  </div>
+                );
+              })()}
               {order.billing_address && (
                 <div className="pt-2 mt-2 border-t">
                   <p className="text-muted-foreground mb-1">帳單地址</p>

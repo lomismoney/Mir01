@@ -83,9 +83,8 @@ jest.mock('lucide-react', () => ({
   MapPin: () => <span>MapPin</span>,
 }))
 
-// Mock formatPrice utility
+// Mock utils
 jest.mock('@/lib/utils', () => ({
-  formatPrice: (price: number) => `NT$${price.toLocaleString()}`,
   cn: (...classes: (string | undefined | null | false)[]) => classes.filter(Boolean).join(' '),
 }))
 

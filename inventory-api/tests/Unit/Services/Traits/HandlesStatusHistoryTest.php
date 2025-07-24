@@ -296,19 +296,24 @@ class HandlesStatusHistoryTest extends TestCase
 
     public function test_get_status_history_returns_history_collection()
     {
-        // 創建一些狀態歷史
-        $this->order->statusHistories()->create([
+        // 創建一些狀態歷史 (使用固定的時間戳確保排序正確)
+        $olderTime = '2025-01-01 10:00:00';
+        $newerTime = '2025-01-01 11:00:00';
+        
+        $firstHistory = $this->order->statusHistories()->create([
             'from_status' => 'pending',
             'to_status' => 'processing',
             'status_type' => 'shipping_status',
             'user_id' => $this->user->id,
+            'created_at' => $olderTime,
         ]);
         
-        $this->order->statusHistories()->create([
+        $secondHistory = $this->order->statusHistories()->create([
             'from_status' => 'processing',
             'to_status' => 'shipped',
             'status_type' => 'shipping_status',
             'user_id' => $this->user->id,
+            'created_at' => $newerTime,
         ]);
         
         $history = $this->callProtectedMethod($this->testService, 'getStatusHistory', [$this->order]);
@@ -316,6 +321,7 @@ class HandlesStatusHistoryTest extends TestCase
         $this->assertInstanceOf(Collection::class, $history);
         $this->assertCount(2, $history);
         $this->assertEquals('shipped', $history->first()->to_status); // 最新的在前
+        $this->assertEquals('processing', $history->last()->to_status); // 較舊的在後
     }
 
     public function test_get_status_history_with_status_type_filter()

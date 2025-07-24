@@ -57,10 +57,12 @@ export function InstallationProgressTracker({
   // 取消狀態特殊處理
   if (installation.status === 'cancelled') {
     return (
-      <div className="flex items-center gap-2 p-2 bg-destructive/10 rounded-lg border border-destructive/20">
-        <span className="text-lg">❌</span>
+      <div className="flex items-center gap-2 p-2 bg-destructive/10 rounded border border-destructive/20">
+        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-destructive text-destructive-foreground text-xs">
+          ✕
+        </div>
         <div className="flex-1">
-          <div className="font-medium text-destructive text-sm">已取消</div>
+          <div className="text-sm font-medium text-destructive">已取消</div>
           <div className="text-xs text-muted-foreground">
             {formatDate.shortDateTime(installation.created_at)}
           </div>
@@ -74,9 +76,9 @@ export function InstallationProgressTracker({
 
   if (variant === "compact") {
     return (
-      <div className="w-full space-y-3">
-        {/* 第一行：主要進度條 */}
-        <div className="flex items-center">
+      <div className="w-full space-y-2">
+        {/* 進度條 */}
+        <div className="flex items-center gap-2">
           {stages.map((stage, index) => {
             const isActive = index <= currentStageIndex;
             const isCurrent = index === currentStageIndex;
@@ -86,41 +88,29 @@ export function InstallationProgressTracker({
               <React.Fragment key={stage.key}>
                 {/* 階段圓點 */}
                 <div className={cn(
-                  "relative flex items-center justify-center w-8 h-8 rounded-full border-2 text-xs transition-all duration-300 z-10",
+                  "flex items-center justify-center w-6 h-6 rounded-full border text-xs transition-colors",
                   isCompleted
-                    ? "bg-green-500 border-green-500 text-white shadow-md"
-                    : isActive 
-                    ? "bg-primary border-primary text-primary-foreground shadow-md" 
-                    : "bg-background border-muted-foreground/30 text-muted-foreground",
-                  isCurrent && "ring-2 ring-primary/30 ring-offset-1"
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : isCurrent 
+                    ? "bg-secondary border-primary text-secondary-foreground" 
+                    : "bg-muted border-border text-muted-foreground"
                 )}>
-                  <span className="text-xs">
-                    {isCompleted ? '✓' : stage.icon}
-                  </span>
-                  
-                  {/* 脈動效果 - 當前階段 */}
-                  {isCurrent && (
-                    <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
-                  )}
+                  {isCompleted ? '✓' : stage.icon}
                 </div>
                 
                 {/* 連接線 */}
                 {index < stages.length - 1 && (
-                  <div className="flex-1 h-0.5 mx-2 relative">
-                    <div className={cn(
-                      "absolute inset-0 transition-all duration-500",
-                      isActive && index < currentStageIndex
-                        ? "bg-primary"
-                        : "bg-muted-foreground/20"
-                    )} />
-                  </div>
+                  <div className={cn(
+                    "flex-1 h-px transition-colors",
+                    isCompleted ? "bg-primary" : "bg-border"
+                  )} />
                 )}
               </React.Fragment>
             );
           })}
         </div>
         
-        {/* 第二行：階段標籤 */}
+        {/* 階段標籤 */}
         <div className="flex items-start">
           {stages.map((stage, index) => {
             const isActive = index <= currentStageIndex;
@@ -129,21 +119,14 @@ export function InstallationProgressTracker({
             
             return (
               <React.Fragment key={`label-${stage.key}`}>
-                <div className="flex flex-col items-center space-y-0.5 w-10">
+                <div className="flex flex-col items-center space-y-1 min-w-0 flex-1">
                   <div className={cn(
-                    "font-medium transition-colors duration-300 text-xs text-center",
-                    isCompleted
-                      ? "text-green-600"
-                      : isCurrent 
-                      ? "text-primary" 
-                      : isActive 
-                      ? "text-foreground" 
-                      : "text-muted-foreground"
+                    "text-xs font-medium text-center",
+                    isCompleted || isCurrent ? "text-foreground" : "text-muted-foreground"
                   )}>
                     {stage.label}
                   </div>
-                  {/* 顯示對應階段的時間 */}
-                  <div className="text-xs text-muted-foreground/70 min-h-[14px] text-center">
+                  <div className="text-xs text-muted-foreground text-center">
                     {stage.time && isActive ? (
                       formatDate.monthDay(stage.time)
                     ) : (
@@ -151,11 +134,6 @@ export function InstallationProgressTracker({
                     )}
                   </div>
                 </div>
-                
-                {/* 標籤間的空間佔位 */}
-                {index < stages.length - 1 && (
-                  <div className="flex-1" />
-                )}
               </React.Fragment>
             );
           })}
@@ -178,13 +156,12 @@ export function InstallationProgressTracker({
               {/* 時間軸線條 */}
               <div className="flex flex-col items-center">
                 <div className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm transition-all duration-300",
-                  isCompleted 
-                    ? "bg-green-500 border-green-500 text-white shadow-md" 
-                    : isActive 
-                    ? "bg-primary border-primary text-primary-foreground shadow-md" 
-                    : "bg-background border-muted-foreground/30 text-muted-foreground",
-                  isCurrent && "ring-2 ring-primary/30 ring-offset-2"
+                  "flex items-center justify-center w-8 h-8 rounded-full border text-sm transition-colors",
+                  isCompleted
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : isCurrent 
+                    ? "bg-secondary border-primary text-secondary-foreground" 
+                    : "bg-muted border-border text-muted-foreground"
                 )}>
                   {isCompleted ? '✓' : stage.icon}
                 </div>
@@ -192,8 +169,8 @@ export function InstallationProgressTracker({
                 {/* 垂直連接線 */}
                 {index < stages.length - 1 && (
                   <div className={cn(
-                    "w-0.5 h-8 mt-2 transition-all duration-500",
-                    isActive ? "bg-primary" : "bg-muted-foreground/20"
+                    "w-px h-6 mt-2 transition-colors",
+                    isCompleted ? "bg-primary" : "bg-border"
                   )} />
                 )}
               </div>
@@ -202,8 +179,8 @@ export function InstallationProgressTracker({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <h4 className={cn(
-                    "font-medium text-sm transition-colors duration-300",
-                    isActive ? "text-foreground" : "text-muted-foreground"
+                    "font-medium text-sm transition-colors",
+                    isCompleted || isCurrent ? "text-foreground" : "text-muted-foreground"
                   )}>
                     {stage.label}
                   </h4>

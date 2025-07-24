@@ -31,6 +31,8 @@ class ProductVariant extends Model
         'price',                     // 商品變體價格
         'cost_price',                // 商品單項成本價格（不含運費）
         'total_purchased_quantity',  // 累計進貨數量
+        'total_cost_amount',         // 累計成本金額（含運費攤銷）
+        'average_cost',              // 平均成本價格（含運費攤銷）
     ];
 
     /**
@@ -41,9 +43,7 @@ class ProductVariant extends Model
         'total_purchased_quantity' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        // 金額欄位使用 integer（分為單位）
-        'price' => 'integer',
-        'cost_price' => 'integer',
+        // 金額欄位通過 accessor/mutator 處理，不需要額外轉換
     ];
 
     /**
@@ -134,17 +134,44 @@ class ProductVariant extends Model
         return $combination ? "{$productName} - {$combination}" : $productName;
     }
 
+
+    // ===== 金額處理方法 =====
+
     /**
-     * 更新累計進貨數量
-     * 
-     * @param int $newQuantity 新進貨數量
-     * @return void
+     * 價格 accessor - 將分轉換為元
      */
-    public function updatePurchasedQuantity(int $newQuantity): void
+    public function getPriceAttribute($value): float
     {
-        $this->total_purchased_quantity = ($this->total_purchased_quantity ?? 0) + $newQuantity;
-        $this->save();
+        return $value ? round($value / 100, 2) : 0.00;
     }
+
+
+    /**
+     * 成本價格 accessor - 將分轉換為元
+     */
+    public function getCostPriceAttribute($value): float
+    {
+        return $value ? round($value / 100, 2) : 0.00;
+    }
+
+
+    /**
+     * 平均成本 accessor - 將分轉換為元
+     */
+    public function getAverageCostAttribute($value): float
+    {
+        return $value ? round($value / 100, 2) : 0.00;
+    }
+
+
+    /**
+     * 總成本金額 accessor - 將分轉換為元
+     */
+    public function getTotalCostAmountAttribute($value): float
+    {
+        return $value ? round($value / 100, 2) : 0.00;
+    }
+
 
     /**
      * 獲取利潤率
@@ -166,9 +193,9 @@ class ProductVariant extends Model
      * 獲取利潤金額
      * 計算售價與成本價之間的利潤金額
      * 
-     * @return int
+     * @return float
      */
-    public function getProfitAmountAttribute(): int
+    public function getProfitAmountAttribute(): float
     {
         return $this->price - $this->cost_price;
     }
@@ -195,36 +222,6 @@ class ProductVariant extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    /**
-     * 價格 Accessor - 將分轉換為元
-     */
-    public function getPriceAttribute(): float
-    {
-        return ($this->attributes['price'] ?? 0) / 100;
-    }
 
-    /**
-     * 價格 Mutator - 將元轉換為分
-     */
-    public function setPriceAttribute($value): void
-    {
-        $this->attributes['price'] = is_null($value) ? null : (int) round($value * 100);
-    }
-
-    /**
-     * 成本價 Accessor - 將分轉換為元
-     */
-    public function getCostPriceAttribute(): float
-    {
-        return ($this->attributes['cost_price'] ?? 0) / 100;
-    }
-
-    /**
-     * 成本價 Mutator - 將元轉換為分
-     */
-    public function setCostPriceAttribute($value): void
-    {
-        $this->attributes['cost_price'] = is_null($value) ? null : (int) round($value * 100);
-    }
 
 }

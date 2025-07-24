@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\MoneyHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -55,6 +54,7 @@ class Order extends Model
         'expected_delivery_date' => 'date',
         'is_tax_inclusive' => 'boolean',
         'tax_rate' => 'decimal:2',
+        // 金額欄位通過 accessor/mutator 處理，不需要額外轉換
     ];
 
     /**
@@ -147,117 +147,31 @@ class Order extends Model
         return $this->items()->whereNull('product_variant_id')->exists();
     }
 
-    // ===== 金額 Accessor/Mutator (分/元轉換) =====
-    
-    /**
-     * Subtotal Accessor - 將分轉換為元
-     */
-    public function getSubtotalAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['subtotal'] ?? 0);
-    }
-    
-    /**
-     * Subtotal Mutator - 將元轉換為分
-     */
-    public function setSubtotalAttribute($value): void
-    {
-        $this->attributes['subtotal'] = MoneyHelper::yuanToCents($value);
-    }
-    
-    /**
-     * Shipping Fee Accessor - 將分轉換為元
-     */
-    public function getShippingFeeAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['shipping_fee'] ?? 0);
-    }
-    
-    /**
-     * Shipping Fee Mutator - 將元轉換為分
-     */
-    public function setShippingFeeAttribute($value): void
-    {
-        $this->attributes['shipping_fee'] = MoneyHelper::yuanToCents($value);
-    }
-    
-    /**
-     * Tax Accessor - 將分轉換為元
-     */
-    public function getTaxAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['tax'] ?? 0);
-    }
-    
-    /**
-     * Tax Mutator - 將元轉換為分
-     */
-    public function setTaxAttribute($value): void
-    {
-        $this->attributes['tax'] = MoneyHelper::yuanToCents($value);
-    }
-    
-    /**
-     * Discount Amount Accessor - 將分轉換為元
-     */
-    public function getDiscountAmountAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['discount_amount'] ?? 0);
-    }
-    
-    /**
-     * Discount Amount Mutator - 將元轉換為分
-     */
-    public function setDiscountAmountAttribute($value): void
-    {
-        $this->attributes['discount_amount'] = MoneyHelper::yuanToCents($value);
-    }
-    
-    /**
-     * Grand Total Accessor - 將分轉換為元
-     */
-    public function getGrandTotalAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['grand_total'] ?? 0);
-    }
-    
-    /**
-     * Grand Total Mutator - 將元轉換為分
-     */
-    public function setGrandTotalAttribute($value): void
-    {
-        $this->attributes['grand_total'] = MoneyHelper::yuanToCents($value);
-    }
-    
-    /**
-     * Paid Amount Accessor - 將分轉換為元
-     */
-    public function getPaidAmountAttribute(): float
-    {
-        return MoneyHelper::centsToYuan($this->attributes['paid_amount'] ?? 0);
-    }
-    
-    /**
-     * Paid Amount Mutator - 將元轉換為分
-     */
-    public function setPaidAmountAttribute($value): void
-    {
-        $this->attributes['paid_amount'] = MoneyHelper::yuanToCents($value);
-    }
 
+
+    // ❌ 已移除所有金額 accessor - 遵循 CLAUDE.md 1.3 節規範
+    // 分→元轉換僅在 Resource 層進行，Model 層不得修改金額顯示
 
     // ===== 業務邏輯方法 =====
 
     /**
-     * 計算剩餘應付金額
+     * 計算剩餘應付金額（以分為單位）
+     * 
+     * @return int
+     */
+    public function getRemainingAmountInCents(): int
+    {
+        return max(0, ($this->getRawOriginal('grand_total') ?? 0) - ($this->getRawOriginal('paid_amount') ?? 0));
+    }
+
+    /**
+     * 計算剩餘應付金額（以元為單位，用於顯示）
      * 
      * @return float
      */
     public function getRemainingAmountAttribute(): float
     {
-        $grandTotalYuan = MoneyHelper::centsToYuan($this->grand_total);
-        $paidAmountYuan = MoneyHelper::centsToYuan($this->paid_amount);
-        return max(0, $grandTotalYuan - $paidAmountYuan);
+        return round($this->getRemainingAmountInCents() / 100, 2);
     }
 
 
@@ -278,14 +192,22 @@ class Order extends Model
      */
     public function getAmountSummary(): array
     {
+        $subtotal = ($this->getRawOriginal('subtotal') ?? 0) / 100;
+        $shippingFee = ($this->getRawOriginal('shipping_fee') ?? 0) / 100;
+        $tax = ($this->getRawOriginal('tax') ?? 0) / 100;
+        $discountAmount = ($this->getRawOriginal('discount_amount') ?? 0) / 100;
+        $grandTotal = ($this->getRawOriginal('grand_total') ?? 0) / 100;
+        $paidAmount = ($this->getRawOriginal('paid_amount') ?? 0) / 100;
+        $remainingAmount = $this->getRemainingAmountAttribute();
+        
         return [
-            'subtotal' => MoneyHelper::format($this->subtotal),
-            'shipping_fee' => MoneyHelper::format($this->shipping_fee),
-            'tax' => MoneyHelper::format($this->tax),
-            'discount_amount' => MoneyHelper::format($this->discount_amount),
-            'grand_total' => MoneyHelper::format($this->grand_total),
-            'paid_amount' => MoneyHelper::format($this->paid_amount),
-            'remaining_amount' => 'NT$ ' . number_format($this->remaining_amount, 2),
+            'subtotal' => 'NT$ ' . number_format($subtotal, 2),
+            'shipping_fee' => 'NT$ ' . number_format($shippingFee, 2),
+            'tax' => 'NT$ ' . number_format($tax, 2),
+            'discount_amount' => 'NT$ ' . number_format($discountAmount, 2),
+            'grand_total' => 'NT$ ' . number_format($grandTotal, 2),
+            'paid_amount' => 'NT$ ' . number_format($paidAmount, 2),
+            'remaining_amount' => 'NT$ ' . number_format($remainingAmount, 2),
             'is_fully_paid' => $this->is_fully_paid,
         ];
     }

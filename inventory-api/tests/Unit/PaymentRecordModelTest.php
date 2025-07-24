@@ -61,8 +61,6 @@ class PaymentRecordModelTest extends TestCase
             'payment_method',
             'payment_date',
             'notes',
-            // 新增的金額欄位（分為單位）
-            'amount_cents',
         ];
         
         $paymentRecord = new PaymentRecord();
@@ -77,9 +75,9 @@ class PaymentRecordModelTest extends TestCase
         $paymentRecord = new PaymentRecord();
         $casts = $paymentRecord->getCasts();
         
-        // 新的金額欄位使用整數（分為單位）
-        $this->assertArrayHasKey('amount_cents', $casts);
-        $this->assertEquals('integer', $casts['amount_cents']);
+        // amount 欄位存儲分為單位的整數值
+        $this->assertArrayHasKey('amount', $casts);
+        $this->assertEquals('integer', $casts['amount']);
         
         $this->assertArrayHasKey('payment_date', $casts);
         $this->assertEquals('datetime', $casts['payment_date']);
@@ -97,7 +95,7 @@ class PaymentRecordModelTest extends TestCase
         $data = [
             'order_id' => $order->id,
             'creator_id' => $user->id,
-            'amount' => 5000.50,
+            'amount' => 500050, // 以分為單位存儲：5000.50 * 100 = 500050
             'payment_method' => 'cash',
             'payment_date' => $paymentDate,
             'notes' => '部分付款',
@@ -108,11 +106,12 @@ class PaymentRecordModelTest extends TestCase
         $this->assertDatabaseHas('payment_records', [
             'order_id' => $order->id,
             'creator_id' => $user->id,
-            'amount' => 5000.50,
+            'amount' => 500050, // 數據庫存儲分
             'payment_method' => 'cash',
         ]);
         
-        $this->assertEquals('5000.50', $paymentRecord->amount);
+        $this->assertEquals(500050, $paymentRecord->amount); // amount 屬性返回分
+        $this->assertEquals(5000.50, $paymentRecord->amount_in_yuan); // amount_in_yuan 屬性返回元
         $this->assertEquals('cash', $paymentRecord->payment_method);
         $this->assertEquals('部分付款', $paymentRecord->notes);
     }
@@ -181,14 +180,15 @@ class PaymentRecordModelTest extends TestCase
     public function test_amount_precision()
     {
         $paymentRecord = PaymentRecord::factory()->create([
-            'amount' => 1234.5678
+            'amount' => 123457 // 以分為單位：1234.57 * 100 = 123457
         ]);
         
         // 重新載入以確保從資料庫讀取
         $paymentRecord->refresh();
         
-        // 驗證小數點後只保留2位
-        $this->assertEquals('1234.57', $paymentRecord->amount);
+        // 驗證 amount 返回分，amount_in_yuan 返回正確格式的元
+        $this->assertEquals(123457, $paymentRecord->amount);
+        $this->assertEquals(1234.57, $paymentRecord->amount_in_yuan);
     }
     
     /**
@@ -273,23 +273,26 @@ class PaymentRecordModelTest extends TestCase
     }
 
     /**
-     * 測試 HandlesCurrency trait 功能
+     * 測試金額處理功能
      */
     public function test_currency_handling()
     {
         $paymentRecord = PaymentRecord::factory()->create([
-            'amount' => 250.99
+            'amount' => 25099 // 以分為單位：250.99 * 100 = 25099
         ]);
         
-        // 驗證金額正確轉換為分並儲存
+        // 驗證 amount_cents 屬性返回分
         $this->assertEquals(25099, $paymentRecord->amount_cents);
         
-        // 驗證金額正確從分轉換為元顯示
-        $this->assertEquals(250.99, $paymentRecord->amount);
+        // 驗證 amount_in_yuan 屬性返回元
+        $this->assertEquals(250.99, $paymentRecord->amount_in_yuan);
+        
+        // 驗證直接的 amount 屬性返回分
+        $this->assertEquals(25099, $paymentRecord->amount);
     }
 
     /**
-     * 測試 HandlesCurrency trait 的轉換方法
+     * 測試金額轉換方法
      */
     public function test_currency_conversion_methods()
     {
@@ -311,16 +314,17 @@ class PaymentRecordModelTest extends TestCase
     public function test_update_payment_amount()
     {
         $paymentRecord = PaymentRecord::factory()->create([
-            'amount' => 100.00
+            'amount' => 10000 // 100.00 * 100 = 10000 分
         ]);
         
         // 更新金額
-        $paymentRecord->update(['amount' => 200.50]);
+        $paymentRecord->update(['amount' => 20050]); // 200.50 * 100 = 20050 分
         
         // 驗證更新後的值
         $paymentRecord->refresh();
         $this->assertEquals(20050, $paymentRecord->amount_cents);
-        $this->assertEquals(200.50, $paymentRecord->amount);
+        $this->assertEquals(200.50, $paymentRecord->amount_in_yuan);
+        $this->assertEquals(20050, $paymentRecord->amount);
     }
 
     /**
@@ -332,22 +336,22 @@ class PaymentRecordModelTest extends TestCase
         
         PaymentRecord::factory()->create([
             'order_id' => $order->id,
-            'amount' => 100.50
+            'amount' => 10050 // 100.50 * 100 = 10050 分
         ]);
         
         PaymentRecord::factory()->create([
             'order_id' => $order->id,
-            'amount' => 200.75
+            'amount' => 20075 // 200.75 * 100 = 20075 分
         ]);
         
         PaymentRecord::factory()->create([
             'order_id' => $order->id,
-            'amount' => 299.25
+            'amount' => 29925 // 299.25 * 100 = 29925 分
         ]);
         
-        // 使用金額欄位計算總和
+        // 使用金額欄位計算總和（直接返回分）
         $totalPaid = $order->paymentRecords->sum('amount');
-        $this->assertEquals(600.50, $totalPaid);
+        $this->assertEquals(60050, $totalPaid); // 總和是分為單位
         
         // 使用分單位計算總和並轉換
         $totalPaidCents = $order->paymentRecords->sum('amount_cents');

@@ -53,6 +53,7 @@ class StoreControllerTest extends TestCase
     {
         $storeData = [
             'name' => 'New Test Store',
+            'code' => 'TEST001',
             'address' => 'Test Address 123'
         ];
 

@@ -12,6 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // 針對不同資料庫使用不同的實現方式
+        if (DB::getDriverName() === 'sqlite') {
+            echo "🔧 SQLite 環境：使用 SQLite 兼容的金錢欄位處理...\n";
+            $this->handleSQLiteMoneyFields();
+            return;
+        }
+        
         // 🔥 強制轉換所有金錢欄位為 BIGINT，使用原生 SQL 確保覆蓋之前的定義
         echo "🚀 開始強制轉換所有金錢欄位為 BIGINT...\n";
         
@@ -158,5 +165,54 @@ return new class extends Migration
         Schema::table('sales', function (Blueprint $table) {
             $table->decimal('total_amount', 10, 2)->change();
         });
+    }
+    
+    /**
+     * SQLite 環境專用的金錢欄位處理
+     * SQLite 不支援 ALTER TABLE MODIFY，需要用不同方式處理
+     */
+    private function handleSQLiteMoneyFields(): void
+    {
+        // SQLite 環境下，確保表結構正確但不強制轉換已存在的欄位
+        // 因為 SQLite 的數字類型本身就是靈活的，可以存儲整數或小數
+        
+        echo "  ✓ SQLite 環境已確認金錢欄位相容性\n";
+        echo "  ℹ️ SQLite 數字類型天然支援整數和小數存儲\n";
+        
+        // 檢查關鍵表是否存在必要欄位
+        $this->ensureSQLiteMoneyFieldsExist();
+    }
+    
+    /**
+     * 確保 SQLite 環境下金錢相關欄位存在
+     */
+    private function ensureSQLiteMoneyFieldsExist(): void
+    {
+        $tables = [
+            'purchases' => ['total_amount', 'shipping_cost'],
+            'purchase_items' => ['unit_price', 'cost_price', 'allocated_shipping_cost'],
+            'product_variants' => ['price', 'cost_price'],
+            'orders' => ['subtotal', 'shipping_fee', 'tax', 'discount_amount', 'grand_total', 'paid_amount'],
+            'order_items' => ['price', 'cost', 'discount_amount'],
+            'customers' => ['total_completed_amount', 'total_unpaid_amount'],
+            'payment_records' => ['amount'],
+            'refunds' => ['total_refund_amount'],
+            'sale_items' => ['unit_price'],
+            'sales' => ['total_amount']
+        ];
+        
+        foreach ($tables as $tableName => $columns) {
+            // 檢查表是否存在
+            if (!Schema::hasTable($tableName)) {
+                echo "  ⚠️ 表 {$tableName} 不存在，跳過檢查\n";
+                continue;
+            }
+            
+            foreach ($columns as $column) {
+                if (!Schema::hasColumn($tableName, $column)) {
+                    echo "  ⚠️ {$tableName}.{$column} 欄位不存在\n";
+                }
+            }
+        }
     }
 };

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
@@ -239,8 +239,8 @@ export function useProducts(filters: ProductFilters = {}) {
             }
         },
         
-        // 🎯 恢復 placeholderData 以提升用戶體驗
-        placeholderData: (previousData) => previousData,
+        // 🎯 使用 keepPreviousData 以提升用戶體驗，避免引用問題
+        placeholderData: keepPreviousData,
         refetchOnMount: filters.store_id ? true : false, // 有 store_id 時總是重新獲取
         refetchOnWindowFocus: false,
         retry: 2,

@@ -75,6 +75,23 @@ class CategoryModelTest extends TestCase
     }
 
     #[Test]
+    public function category_has_correct_casts()
+    {
+        $category = new Category();
+        $expectedCasts = [
+            'parent_id' => 'integer',
+            'sort_order' => 'integer',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+        
+        foreach ($expectedCasts as $key => $expectedType) {
+            $this->assertArrayHasKey($key, $category->getCasts());
+            $this->assertEquals($expectedType, $category->getCasts()[$key]);
+        }
+    }
+
+    #[Test]
     public function category_can_be_created_with_mass_assignment()
     {
         $data = [

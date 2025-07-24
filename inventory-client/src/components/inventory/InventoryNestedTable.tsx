@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatPrice } from "@/lib/utils";
+// formatPrice removed - using MoneyHelper instead
 import { MoneyHelper } from "@/lib/money-helper";
 import {
   Table,

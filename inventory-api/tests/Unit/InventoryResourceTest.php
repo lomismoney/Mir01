@@ -22,7 +22,13 @@ class InventoryResourceTest extends TestCase
 
     public function test_inventory_resource_without_relations()
     {
+        // 使用測試獨立數據，避免 ID 衝突
+        $store = Store::factory()->create();
+        $productVariant = ProductVariant::factory()->create();
+        
         $inventory = Inventory::factory()->create([
+            'product_variant_id' => $productVariant->id,
+            'store_id' => $store->id,
             'quantity' => 100,
             'low_stock_threshold' => 10,
         ]);
@@ -70,6 +76,8 @@ class InventoryResourceTest extends TestCase
 
     public function test_inventory_resource_with_product_variant_relation()
     {
+        // 各測試使用獨立的數據
+        $store = Store::factory()->create();
         $product = Product::factory()->create([
             'name' => 'Test Product',
             'description' => 'Test Description',
@@ -78,12 +86,15 @@ class InventoryResourceTest extends TestCase
         $productVariant = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'sku' => 'TEST-SKU-001',
-            'price' => 99.99,
-            'cost_price' => 50.00,
-            'average_cost' => 55.00,
+            'price' => 9999,
+            'cost_price' => 5000,
+            'average_cost' => 5500,
         ]);
 
-        $inventory = Inventory::factory()->create(['product_variant_id' => $productVariant->id]);
+        $inventory = Inventory::factory()->create([
+            'product_variant_id' => $productVariant->id,
+            'store_id' => $store->id
+        ]);
         $inventory->load(['productVariant.product']);
 
         $resource = new InventoryResource($inventory);
@@ -109,6 +120,7 @@ class InventoryResourceTest extends TestCase
     public function test_inventory_resource_with_product_variant_includes_product_data()
     {
         // 建立一個有 product 的變體，測試巢狀關聯的行為
+        $store = Store::factory()->create();
         $product = Product::factory()->create([
             'name' => 'Test Product',
             'description' => 'Test Description'
@@ -116,10 +128,13 @@ class InventoryResourceTest extends TestCase
         $productVariant = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'sku' => 'TEST-SKU',
-            'price' => 19.99,
+            'price' => 1999,
         ]);
 
-        $inventory = Inventory::factory()->create(['product_variant_id' => $productVariant->id]);
+        $inventory = Inventory::factory()->create([
+            'product_variant_id' => $productVariant->id,
+            'store_id' => $store->id
+        ]);
         
         // 載入 productVariant（通常會自動載入關聯的 product）
         $inventory->load('productVariant');
@@ -142,6 +157,8 @@ class InventoryResourceTest extends TestCase
 
     public function test_inventory_resource_with_attribute_values()
     {
+        // 確保測試數據獨立性
+        $store = Store::factory()->create();
         $attribute1 = Attribute::factory()->create(['name' => 'Color']);
         $attribute2 = Attribute::factory()->create(['name' => 'Size']);
         
@@ -160,7 +177,10 @@ class InventoryResourceTest extends TestCase
         // 關聯屬性值
         $productVariant->attributeValues()->attach([$attributeValue1->id, $attributeValue2->id]);
 
-        $inventory = Inventory::factory()->create(['product_variant_id' => $productVariant->id]);
+        $inventory = Inventory::factory()->create([
+            'product_variant_id' => $productVariant->id,
+            'store_id' => $store->id
+        ]);
         $inventory->load(['productVariant.product', 'productVariant.attributeValues.attribute']);
 
         $resource = new InventoryResource($inventory);
@@ -204,7 +224,7 @@ class InventoryResourceTest extends TestCase
         $productVariant = ProductVariant::factory()->create([
             'product_id' => $product->id,
             'sku' => 'COMPLETE-SKU',
-            'price' => 199.99,
+            'price' => 19999,
         ]);
         $productVariant->attributeValues()->attach($attributeValue->id);
 
@@ -251,13 +271,17 @@ class InventoryResourceTest extends TestCase
 
     public function test_inventory_resource_profit_calculations()
     {
+        $store = Store::factory()->create();
         $productVariant = ProductVariant::factory()->create([
-            'price' => 100.00,
-            'cost_price' => 60.00,
-            'average_cost' => 65.00,
+            'price' => 10000,
+            'cost_price' => 6000,
+            'average_cost' => 6500,
         ]);
 
-        $inventory = Inventory::factory()->create(['product_variant_id' => $productVariant->id]);
+        $inventory = Inventory::factory()->create([
+            'product_variant_id' => $productVariant->id,
+            'store_id' => $store->id
+        ]);
         $inventory->load('productVariant');
 
         $resource = new InventoryResource($inventory);
@@ -278,7 +302,12 @@ class InventoryResourceTest extends TestCase
 
     public function test_inventory_resource_handles_default_values()
     {
+        $store = Store::factory()->create();
+        $productVariant = ProductVariant::factory()->create();
+        
         $inventory = Inventory::factory()->create([
+            'product_variant_id' => $productVariant->id,
+            'store_id' => $store->id,
             'low_stock_threshold' => 0, // 使用預設值 0 而不是 null
         ]);
 
@@ -294,10 +323,14 @@ class InventoryResourceTest extends TestCase
 
     public function test_inventory_resource_with_empty_attribute_values()
     {
+        $store = Store::factory()->create();
         $product = Product::factory()->create();
         $productVariant = ProductVariant::factory()->create(['product_id' => $product->id]);
         
-        $inventory = Inventory::factory()->create(['product_variant_id' => $productVariant->id]);
+        $inventory = Inventory::factory()->create([
+            'product_variant_id' => $productVariant->id,
+            'store_id' => $store->id
+        ]);
         $inventory->load(['productVariant.product', 'productVariant.attributeValues.attribute']);
 
         $resource = new InventoryResource($inventory);

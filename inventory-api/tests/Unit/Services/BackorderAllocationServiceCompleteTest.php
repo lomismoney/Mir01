@@ -47,12 +47,16 @@ class BackorderAllocationServiceCompleteTest extends TestCase
         // 創建不同等級的客戶
         $this->vipCustomer = Customer::factory()->create([
             'name' => 'VIP客戶',
-            'email' => 'vip@test.com'
+            'email' => 'vip@test.com',
+            'priority_level' => 'vip',
+            'is_priority_customer' => true
         ]);
         
         $this->normalCustomer = Customer::factory()->create([
             'name' => '普通客戶',
-            'email' => 'normal@test.com'
+            'email' => 'normal@test.com',
+            'priority_level' => 'normal',
+            'is_priority_customer' => false
         ]);
         
         // 創建服務實例
@@ -103,7 +107,7 @@ class BackorderAllocationServiceCompleteTest extends TestCase
         $order = Order::factory()
             ->for($this->normalCustomer)
             ->for($this->store)
-            ->create(['priority' => 'normal']);
+            ->create(['fulfillment_priority' => 'normal']);
         
         $backorderItem = OrderItem::factory()
             ->for($order)
@@ -134,7 +138,7 @@ class BackorderAllocationServiceCompleteTest extends TestCase
         $allocatedItem = $result['allocated_items'][0];
         $this->assertEquals($backorderItem->id, $allocatedItem['order_item_id']);
         $this->assertEquals(5, $allocatedItem['allocated_quantity']);
-        $this->assertEquals('fully_allocated', $allocatedItem['allocation_status']);
+        $this->assertEquals('fully_fulfilled', $allocatedItem['fulfillment_status']);
     }
 
     public function test_allocate_to_backorders_with_priority_sorting()
@@ -144,7 +148,7 @@ class BackorderAllocationServiceCompleteTest extends TestCase
             ->for($this->vipCustomer)
             ->for($this->store)
             ->create([
-                'priority' => 'urgent',
+                'fulfillment_priority' => 'urgent',
                 'created_at' => now()->subDays(5) // 等待5天
             ]);
         
@@ -162,7 +166,7 @@ class BackorderAllocationServiceCompleteTest extends TestCase
             ->for($this->normalCustomer)
             ->for($this->store)
             ->create([
-                'priority' => 'normal',
+                'fulfillment_priority' => 'normal',
                 'created_at' => now()->subDays(1) // 等待1天
             ]);
         
@@ -227,10 +231,13 @@ class BackorderAllocationServiceCompleteTest extends TestCase
         $allocatedItem = $result['allocated_items'][0];
         $this->assertEquals($backorderItem->id, $allocatedItem['order_item_id']);
         $this->assertEquals(15, $allocatedItem['allocated_quantity']);
-        $this->assertEquals('partially_allocated', $allocatedItem['allocation_status']);
+        $this->assertEquals('partially_fulfilled', $allocatedItem['fulfillment_status']);
         
         // 驗證還有5個未分配
-        $this->assertEquals(5, $allocatedItem['remaining_quantity']);
+        // 驗證訂單項目已部分履行
+        $backorderItem->refresh();
+        $this->assertEquals(15, $backorderItem->fulfilled_quantity);
+        $this->assertEquals(5, $backorderItem->quantity - $backorderItem->fulfilled_quantity);
     }
 
     public function test_allocate_to_backorders_with_multiple_orders()
@@ -244,7 +251,7 @@ class BackorderAllocationServiceCompleteTest extends TestCase
             $order = Order::factory()
                 ->for($customer)
                 ->for($this->store)
-                ->create(['priority' => 'normal']);
+                ->create(['fulfillment_priority' => 'normal']);
             
             $backorder = OrderItem::factory()
                 ->for($order)
@@ -333,35 +340,31 @@ class BackorderAllocationServiceCompleteTest extends TestCase
 
     public function test_allocate_to_backorders_skips_already_allocated_items()
     {
-        // 創建已分配的預訂項目
+        // 創建已完全履行的預訂項目
         $purchase = Purchase::factory()->for($this->store)->create();
-        $existingPurchaseItem = PurchaseItem::factory()
-            ->for($purchase)
-            ->for($this->variant, 'productVariant')
-            ->create();
         
         $order = Order::factory()
             ->for($this->normalCustomer)
             ->for($this->store)
             ->create();
         
-        $alreadyAllocated = OrderItem::factory()
+        $fullyFulfilledBackorder = OrderItem::factory()
             ->for($order)
             ->for($this->variant, 'productVariant')
             ->create([
                 'quantity' => 5,
+                'fulfilled_quantity' => 5, // 已完全履行
                 'is_backorder' => true,
-                'purchase_item_id' => $existingPurchaseItem->id // 已分配
             ]);
         
-        // 創建未分配的預訂項目
-        $newBackorder = OrderItem::factory()
+        // 創建部分履行的預訂項目
+        $partiallyFulfilledBackorder = OrderItem::factory()
             ->for($order)
             ->for($this->variant, 'productVariant')
             ->create([
-                'quantity' => 3,
+                'quantity' => 10,
+                'fulfilled_quantity' => 7, // 已履行7個，還需要3個
                 'is_backorder' => true,
-                'purchase_item_id' => null // 未分配
             ]);
         
         // 創建新的進貨項目
@@ -372,11 +375,11 @@ class BackorderAllocationServiceCompleteTest extends TestCase
         
         $result = $this->allocationService->allocateToBackorders($newPurchaseItem);
         
-        // 應該只分配給未分配的項目
+        // 應該只分配給部分履行的項目（還需要3個）
         $this->assertCount(1, $result['allocated_items']);
         $allocatedItem = $result['allocated_items'][0];
-        $this->assertEquals($newBackorder->id, $allocatedItem['order_item_id']);
-        $this->assertEquals(3, $allocatedItem['allocated_quantity']);
+        $this->assertEquals($partiallyFulfilledBackorder->id, $allocatedItem['order_item_id']);
+        $this->assertEquals(3, $allocatedItem['allocated_quantity']); // 只分配剩餘需要的3個
     }
 
     public function test_allocate_to_backorders_with_different_priorities()
@@ -385,17 +388,29 @@ class BackorderAllocationServiceCompleteTest extends TestCase
         $lowOrder = Order::factory()
             ->for($this->normalCustomer)
             ->for($this->store)
-            ->create(['priority' => 'low']);
+            ->create([
+                'fulfillment_priority' => 'low',
+                'shipping_status' => 'pending',
+                'payment_status' => 'pending'
+            ]);
         
         $highOrder = Order::factory()
             ->for($this->vipCustomer)
             ->for($this->store)
-            ->create(['priority' => 'high']);
+            ->create([
+                'fulfillment_priority' => 'high',
+                'shipping_status' => 'pending',
+                'payment_status' => 'pending'
+            ]);
         
         $urgentOrder = Order::factory()
             ->for($this->vipCustomer)
             ->for($this->store)
-            ->create(['priority' => 'urgent']);
+            ->create([
+                'fulfillment_priority' => 'urgent',
+                'shipping_status' => 'pending',
+                'payment_status' => 'pending'
+            ]);
         
         // 創建預訂項目
         $lowBackorder = OrderItem::factory()
@@ -484,21 +499,24 @@ class BackorderAllocationServiceCompleteTest extends TestCase
         $backorders = [];
         
         // 第一個訂單：完全分配
-        $order1 = Order::factory()->for($this->normalCustomer)->for($this->store)->create();
+        $order1 = Order::factory()->for($this->normalCustomer)->for($this->store)
+            ->create(['shipping_status' => 'pending', 'payment_status' => 'pending']);
         $backorder1 = OrderItem::factory()
             ->for($order1)
             ->for($this->variant, 'productVariant')
             ->create(['quantity' => 3, 'is_backorder' => true, 'purchase_item_id' => null]);
         
         // 第二個訂單：部分分配
-        $order2 = Order::factory()->for($this->normalCustomer)->for($this->store)->create();
+        $order2 = Order::factory()->for($this->normalCustomer)->for($this->store)
+            ->create(['shipping_status' => 'pending', 'payment_status' => 'pending']);
         $backorder2 = OrderItem::factory()
             ->for($order2)
             ->for($this->variant, 'productVariant')
             ->create(['quantity' => 10, 'is_backorder' => true, 'purchase_item_id' => null]);
         
         // 第三個訂單：無法分配
-        $order3 = Order::factory()->for($this->normalCustomer)->for($this->store)->create();
+        $order3 = Order::factory()->for($this->normalCustomer)->for($this->store)
+            ->create(['shipping_status' => 'pending', 'payment_status' => 'pending']);
         $backorder3 = OrderItem::factory()
             ->for($order3)
             ->for($this->variant, 'productVariant')

@@ -800,10 +800,9 @@ export function ProductSelector({
                         >
                           <span>小計</span>
                           <span className="text-primary">
-                            NT${" "}
-                            {(
+                            {MoneyHelper.format(
                               Number(customPrice) * Number(customQuantity)
-                            ), '$')}
+                            )}
                           </span>
                         </div>
                       </div>
@@ -1054,3 +1053,6 @@ export function ProductSelector({
     </Dialog>
   );
 }
+
+// 確保導出所有必要的類型和組件
+export type { CustomItem, Variant, Product };

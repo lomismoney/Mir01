@@ -124,35 +124,4 @@ export function getOrderStatusVariant(status: string): "default" | "secondary" |
   }
 }
 
-/**
- * 格式化價格顯示
- * 
- * @param price - 價格金額（元為單位）
- * @returns 格式化的價格字串
- * 
- * @example
- * formatPrice(1000) // "NT$ 1,000"
- * formatPrice(null) // "N/A"
- * 
- * @deprecated 請使用 MoneyHelper.format() 替代以保持格式化一致性
- */
-export function formatPrice(price?: number | null): string {
-  if (price === undefined || price === null) {
-    return 'N/A';
-  }
-
-  // 使用 MoneyHelper 以保持格式化一致性
-  const { MoneyHelper } = require('@/lib/money-helper');
-  return MoneyHelper.format(price);
-}
-
-/**
- * 格式化貨幣顯示（別名）
- * 
- * @param amount - 金額數值
- * @returns 格式化的貨幣字串
- * 
- * @deprecated 請使用 MoneyHelper.format() 替代以保持格式化一致性
- */
-export const formatCurrency = formatPrice;
 

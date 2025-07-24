@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model
 {
@@ -16,20 +18,16 @@ class Sale extends Model
     protected $guarded = [];
 
     /**
-     * 獲取總金額（轉換為元）
+     * 屬性類型轉換
      */
-    protected function totalAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => $value * 100,
-        );
-    }
+    protected $casts = [
+        'total_amount' => 'integer',
+    ];
 
     /**
      * 獲取該銷貨單所屬的門市
      */
-    public function store()
+    public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
@@ -37,7 +35,7 @@ class Sale extends Model
     /**
      * 獲取該銷貨單的所有項目
      */
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(SaleItem::class);
     }

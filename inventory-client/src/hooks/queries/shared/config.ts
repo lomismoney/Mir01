@@ -3,7 +3,7 @@
  * 統一的 React Query 配置選項
  */
 
-import { UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
+import { UseQueryOptions, UseMutationOptions, keepPreviousData } from '@tanstack/react-query';
 
 /**
  * 緩存時間配置
@@ -105,7 +105,7 @@ export const PAGINATED_QUERY_CONFIG = {
    */
   DYNAMIC: {
     ...QUERY_CONFIG.DYNAMIC,
-    placeholderData: (previousData: any) => previousData,
+    placeholderData: keepPreviousData,
   },
 
   /**
@@ -113,7 +113,7 @@ export const PAGINATED_QUERY_CONFIG = {
    */
   STABLE: {
     ...QUERY_CONFIG.STABLE,
-    placeholderData: (previousData: any) => previousData,
+    placeholderData: keepPreviousData,
   },
 
   /**
@@ -121,7 +121,7 @@ export const PAGINATED_QUERY_CONFIG = {
    */
   REALTIME: {
     ...QUERY_CONFIG.REALTIME,
-    placeholderData: (previousData: any) => previousData,
+    placeholderData: keepPreviousData,
   },
 
   /**
@@ -129,7 +129,7 @@ export const PAGINATED_QUERY_CONFIG = {
    */
   STATIC: {
     ...QUERY_CONFIG.STATIC,
-    placeholderData: (previousData: any) => previousData,
+    placeholderData: keepPreviousData,
   },
 } as const;
 

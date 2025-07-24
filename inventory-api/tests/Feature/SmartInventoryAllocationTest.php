@@ -54,7 +54,7 @@ class SmartInventoryAllocationTest extends TestCase
         $this->variant = ProductVariant::factory()->create([
             'product_id' => $this->product->id,
             'sku' => 'TEST-001',
-            'price' => 1000,
+            'price' => 100000,  // 1000.00 * 100 = 100000 分
         ]);
 
         // 建立客戶
@@ -158,17 +158,18 @@ class SmartInventoryAllocationTest extends TestCase
             'order_source' => 'store',
             'shipping_address' => '測試地址',
             'notes' => '測試訂單',
+            'is_tax_inclusive' => true, // 含稅訂單
             'force_create_despite_stock' => 1, // 強制建立
             'items' => [
                 [
                     'product_variant_id' => $this->variant->id,
                     'is_stocked_sale' => false,
-                    'is_backorder' => true, // 標記為預訂商品
+                    'is_backorder' => false, // 不自動觸發調貨
                     'status' => 'pending',
                     'custom_specifications' => null,
                     'product_name' => $this->product->name,
                     'sku' => $this->variant->sku,
-                    'price' => 1000,
+                    'price' => 1000.00,  // API 接受元為單位
                     'quantity' => 10,
                 ],
             ],
@@ -219,7 +220,7 @@ class SmartInventoryAllocationTest extends TestCase
         $variant2 = ProductVariant::factory()->create([
             'product_id' => $this->product->id,
             'sku' => 'TEST-002',
-            'price' => 2000,
+            'price' => 200000,  // 2000.00 * 100 = 200000 分
         ]);
 
         // 設定庫存
@@ -376,16 +377,17 @@ class SmartInventoryAllocationTest extends TestCase
             'payment_method' => 'cash',
             'order_source' => 'store',
             'shipping_address' => '測試地址',
+            'is_tax_inclusive' => true, // 含稅訂單
             'force_create_despite_stock' => 1,
             'items' => [
                 [
                     'product_variant_id' => $this->variant->id,
                     'is_stocked_sale' => false,
-                    'is_backorder' => true,
+                    'is_backorder' => false, // 不自動觸發調貨
                     'status' => 'pending',
                     'product_name' => $this->product->name,
                     'sku' => $this->variant->sku,
-                    'price' => 1000,
+                    'price' => 1000.00,  // API 接受元為單位
                     'quantity' => 10,
                 ],
             ],
@@ -416,7 +418,7 @@ class SmartInventoryAllocationTest extends TestCase
         $order = Order::with(['items', 'inventoryTransfers'])->find($orderId);
         $this->assertNotNull($order);
         $this->assertCount(1, $order->items);
-        $this->assertCount(1, $order->inventoryTransfers);
+        $this->assertCount(2, $order->inventoryTransfers); // 1個自動創建 + 1個手動創建
 
         // 檢查訂單項目
         $orderItem = $order->items->first();
@@ -424,8 +426,12 @@ class SmartInventoryAllocationTest extends TestCase
         $this->assertTrue($orderItem->is_backorder);
 
         // 檢查調貨單
-        $transfer = $order->inventoryTransfers->first();
-        $this->assertEquals(7, $transfer->quantity);
-        $this->assertEquals('pending', $transfer->status);
+        $transfers = $order->inventoryTransfers->sortBy('created_at');
+        $autoTransfer = $transfers->first(); // 自動創建的調貨單
+        $manualTransfer = $transfers->last(); // 手動創建的調貨單
+        
+        $this->assertEquals(10, $autoTransfer->quantity); // 自動調貨全部數量
+        $this->assertEquals(7, $manualTransfer->quantity); // 手動調貨部分數量
+        $this->assertEquals('pending', $manualTransfer->status);
     }
 }

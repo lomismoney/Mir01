@@ -26,9 +26,9 @@ class CustomerPolicyTest extends TestCase
         $this->policy = new CustomerPolicy();
         
         // 創建角色
-        Role::firstOrCreate(['name' => 'admin']);
-        Role::firstOrCreate(['name' => 'staff']);
-        Role::firstOrCreate(['name' => 'viewer']);
+        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'viewer', 'guard_name' => 'web']);
         
         // 創建用戶
         $this->adminUser = User::factory()->create();

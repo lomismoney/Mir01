@@ -21,10 +21,10 @@ class PurchaseItemResource extends JsonResource
             'quantity' => $this->quantity,
             'received_quantity' => $this->received_quantity ?? 0,
             'receipt_status' => $this->receipt_status ?? 'pending',
-            'unit_price' => $this->unit_price,
-            'cost_price' => $this->cost_price,
-            'allocated_shipping_cost' => $this->allocated_shipping_cost,
-            'total_cost_price' => $this->total_cost_price,
+            'unit_price' => $this->unit_price / 100,
+            'cost_price' => $this->cost_price / 100,
+            'allocated_shipping_cost' => $this->allocated_shipping_cost / 100,
+            'total_cost_price' => $this->total_cost_price / 100,
             
             // 🎯 返回嵌套的 product_variant 結構以符合前端期待
             'product_variant' => $this->whenLoaded('productVariant', function () {

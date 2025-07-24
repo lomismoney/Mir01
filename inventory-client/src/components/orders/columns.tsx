@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { Order, ProcessedOrder } from "@/types/api-helpers";
-import { formatPrice } from "@/lib/utils";
+import { MoneyHelper } from "@/lib/money-helper";
 
 // 創建 columns 函數，接受預覽、出貨、收款、退款、取消和刪除回調
 export const createColumns = ({
@@ -215,7 +215,7 @@ export const createColumns = ({
             className="font-medium tabular-nums text-sm"
            
           >
-            {formatPrice(amount)}
+            {amount != null ? MoneyHelper.format(amount, 'NT$') : 'N/A'}
           </span>
         </div>
       );

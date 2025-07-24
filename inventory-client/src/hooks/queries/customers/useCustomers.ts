@@ -2,7 +2,7 @@
  * 客戶管理相關的 React Query Hooks
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import apiClient from '@/lib/apiClient';
 import { parseApiError } from '@/lib/errorHandler';
 import { QUERY_KEYS } from '../shared/queryKeys';
@@ -244,7 +244,7 @@ export function useCustomers(filters?: CustomerFilters) {
         meta: meta 
       };
     },
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: 1 * 60 * 1000,

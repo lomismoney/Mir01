@@ -122,6 +122,9 @@ export default function PurchaseDetailPage() {
     purchased_at?: string;
     shipping_cost?: number;
     total_amount?: number;
+    is_tax_inclusive?: boolean;
+    tax_rate?: number;
+    tax_amount?: number;
     created_at?: string;
     updated_at?: string;
     notes?: string;
@@ -386,6 +389,26 @@ export default function PurchaseDetailPage() {
                   {MoneyHelper.format(Number(purchaseData.total_amount || 0))}
                 </p>
               </div>
+
+              {/* 稅務資訊 */}
+              <div className="space-y-2">
+                <div
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
+                >
+                  <span>稅務資訊</span>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm">
+                    稅率：{purchaseData.tax_rate || 0}%
+                  </p>
+                  <p className="text-sm">
+                    稅額：{MoneyHelper.format(Number(purchaseData.tax_amount || 0))}
+                  </p>
+                  <p className="text-sm">
+                    含稅價：{purchaseData.is_tax_inclusive ? '是' : '否'}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* 綁定狀態資訊 */}
@@ -624,7 +647,7 @@ export default function PurchaseDetailPage() {
                         className="text-sm text-muted-foreground"
                        
                       >
-                        商品總計: 
+                        商品小計: 
                         {MoneyHelper.format(Number(purchaseData.items
                           ?.reduce(
                             (sum, item) =>
@@ -639,6 +662,13 @@ export default function PurchaseDetailPage() {
                       >
                         運費: 
                         {MoneyHelper.format(Number(purchaseData.shipping_cost || 0))}
+                      </div>
+                      <div
+                        className="text-sm text-muted-foreground"
+                       
+                      >
+                        稅額: 
+                        {MoneyHelper.format(Number(purchaseData.tax_amount || 0))}
                       </div>
                       <div className="text-lg font-semibold">
                         總金額: 
