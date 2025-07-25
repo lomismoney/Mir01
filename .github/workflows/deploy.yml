@@ -261,7 +261,7 @@ jobs:
           
           # 執行 migration
           echo "🗄️ 執行資料庫 migration..."
-          php artisan migrate:status --env=testing
+          # 跳過 migrate:status，因為 :memory: 資料庫是全新的
           php artisan migrate:fresh --force --env=testing
           
           # 使用本地腳本生成 OpenAPI 規格（避免 Factory 數據污染）
