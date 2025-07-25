@@ -325,10 +325,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       // 由於不再展開變體，移除變體行顯示邏輯
 
       // SPU 主行顯示
-      let imageUrl = item.image_urls?.thumb || item.image_urls?.original;
-      if (imageUrl) {
-        imageUrl = imageUrl.replace("localhost", "127.0.0.1");
-      }
+      const imageUrl = item.image_urls?.thumb || item.image_urls?.original;
 
       return (
         <div className="flex items-center gap-4">
