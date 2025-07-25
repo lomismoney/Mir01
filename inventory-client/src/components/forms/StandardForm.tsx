@@ -142,6 +142,13 @@ export interface StandardFormInlineProps<TSchema extends z.ZodType = z.ZodType>
   className?: string;
 }
 
+/**
+ * Dialog 版表單組件（適用於對話框）
+ */
+export interface StandardFormDialogProps<TSchema extends z.ZodType = z.ZodType> 
+  extends StandardFormProps<TSchema> {
+}
+
 export function StandardFormInline<TSchema extends z.ZodType = z.ZodType>({
   form,
   isSubmitting,
@@ -209,6 +216,113 @@ export function StandardFormInline<TSchema extends z.ZodType = z.ZodType>({
           </Button>
         </div>
       </form>
+    </div>
+  );
+}
+
+/**
+ * Dialog 版表單組件（適用於對話框）
+ */
+export function StandardFormDialog<TSchema extends z.ZodType = z.ZodType>({
+  title,
+  description,
+  form,
+  isSubmitting,
+  onSubmit,
+  onCancel,
+  submitText = "提交",
+  cancelText = "取消",
+  children,
+  className = "",
+  showSuccessMessage = false,
+  successMessage,
+  errorMessage,
+}: StandardFormDialogProps<TSchema>) {
+  const { formState } = form;
+  const hasErrors = Object.keys(formState.errors).length > 0;
+
+  return (
+    <div className={`w-full ${className}`}>
+      {/* Dialog Header */}
+      <div className="px-6 py-4 border-b">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        {description && (
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        )}
+      </div>
+
+      {/* Dialog Content */}
+      <div className="px-6 py-4 space-y-6">
+        {/* 成功訊息 */}
+        {showSuccessMessage && successMessage && (
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              {successMessage}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* 錯誤訊息 */}
+        {errorMessage && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* 表單驗證錯誤摘要 */}
+        {hasErrors && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              請檢查以下欄位：
+              <ul className="mt-2 space-y-1">
+                {Object.entries(formState.errors).map(([field, error]) => (
+                  <li key={field} className="text-sm">
+                    • {typeof error?.message === 'string' ? error.message : `${field} 有誤`}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* 表單內容 */}
+        <form onSubmit={onSubmit} className="space-y-6">
+          {children}
+        </form>
+      </div>
+
+      {/* Dialog Footer */}
+      <div className="px-6 py-4 border-t flex items-center justify-end space-x-4">
+        {onCancel && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            {cancelText}
+          </Button>
+        )}
+        
+        <Button
+          type="submit"
+          disabled={isSubmitting || hasErrors}
+          className="min-w-[100px]"
+          onClick={onSubmit}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center space-x-2">
+              <LoadingSpinner size="sm" />
+              <span>處理中...</span>
+            </div>
+          ) : (
+            submitText
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

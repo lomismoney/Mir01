@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   useCategories,
   useCreateCategory,
@@ -87,26 +88,21 @@ export function CreateCategoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] p-0 gap-0" aria-describedby={undefined}>
+        <VisuallyHidden>
           <DialogTitle>
-            {parentCategory
-              ? `新增子分類 - ${parentCategory.name}`
-              : "新增分類"}
+            {parentCategory ? `新增子分類 - ${parentCategory.name}` : "新增分類"}
           </DialogTitle>
-          <DialogDescription>
-            {parentCategory
-              ? `在「${parentCategory.name}」下新增子分類`
-              : "建立新的商品分類"}
-          </DialogDescription>
-        </DialogHeader>
-
+        </VisuallyHidden>
         <CategoryForm
           mode="create"
           categories={flatCategories}
           parentId={parentCategory?.id}
+          title={parentCategory ? `新增子分類 - ${parentCategory.name}` : "新增分類"}
+          description={parentCategory ? `在「${parentCategory.name}」下新增子分類` : "建立新的商品分類"}
           onSuccess={handleSubmit}
           onCancel={() => onOpenChange(false)}
+          inDialog={true}
         />
       </DialogContent>
     </Dialog>

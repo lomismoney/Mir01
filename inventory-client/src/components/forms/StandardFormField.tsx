@@ -40,7 +40,7 @@ import { zhTW } from "date-fns/locale";
 import { useState } from "react";
 
 export interface SelectOption {
-  value: string;
+  value: string | number;
   label: string;
   disabled?: boolean;
 }
@@ -229,7 +229,19 @@ export function StandardSelectField<TFieldValues extends FieldValues>({
           <FormLabel className={required ? "after:content-['*'] after:text-red-500 after:ml-1" : ""}>
             {label}
           </FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
+          <Select 
+            onValueChange={(value) => {
+              // 檢查原始選項是否為數字類型
+              const originalOption = options.find(opt => opt.value.toString() === value);
+              if (originalOption && typeof originalOption.value === 'number') {
+                field.onChange(parseInt(value, 10));
+              } else {
+                field.onChange(value);
+              }
+            }} 
+            defaultValue={field.value?.toString()} 
+            disabled={disabled}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder={placeholder} />
@@ -239,7 +251,7 @@ export function StandardSelectField<TFieldValues extends FieldValues>({
               {options.map((option) => (
                 <SelectItem
                   key={option.value}
-                  value={option.value}
+                  value={option.value.toString()}
                   disabled={option.disabled}
                 >
                   {option.label}

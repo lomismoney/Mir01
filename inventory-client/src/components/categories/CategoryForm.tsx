@@ -22,7 +22,7 @@ import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useStandardForm } from "@/hooks/useStandardForm";
 import { createCategorySchema, updateCategorySchema, type CreateCategoryData, type UpdateCategoryData } from "@/lib/validations/category";
-import { StandardForm } from "@/components/forms/StandardForm";
+import { StandardForm, StandardFormDialog } from "@/components/forms/StandardForm";
 import { StandardInputField, StandardTextareaField, StandardSelectField } from "@/components/forms/StandardFormField";
 import { Form } from "@/components/ui/form";
 
@@ -48,6 +48,8 @@ interface CategoryFormProps {
   onCancel?: () => void;
   /** 成功回調 */
   onSuccess?: (data: CreateCategoryData | UpdateCategoryData) => void;
+  /** 是否在 Dialog 中使用 */
+  inDialog?: boolean;
 }
 
 /**
@@ -196,6 +198,7 @@ export function CategoryForm({
   description,
   onCancel,
   onSuccess,
+  inDialog = false,
 }: CategoryFormProps) {
   // 確定使用的驗證schema和默認值
   const isEditMode = mode === 'edit';
@@ -245,16 +248,19 @@ export function CategoryForm({
       return true;
     })
     .map(cat => ({
-      value: cat.id.toString(),
+      value: cat.id,
       label: cat.name,
       disabled: false,
     }));
   // 載入狀態
   const isLoading = isSubmitting;
 
+  // 選擇適當的表單組件
+  const FormComponent = inDialog ? StandardFormDialog : StandardForm;
+
   return (
     <Form {...form}>
-      <StandardForm
+      <FormComponent
         title={defaultTitle}
         description={defaultDescription}
         form={form}
@@ -278,10 +284,8 @@ export function CategoryForm({
             control={form.control}
             name="parent_id"
             label="父分類"
-            options={[
-              { value: '', label: '設為頂層分類' },
-              ...parentCategoryOptions
-            ]}
+            placeholder="選擇父分類（留空為頂層分類）"
+            options={parentCategoryOptions}
             disabled={isLoading || !!parentId}
           />
         </div>
@@ -306,7 +310,7 @@ export function CategoryForm({
             description="數字越小排序越前"
           />
         </div>
-      </StandardForm>
+      </FormComponent>
     </Form>
   );
 }
