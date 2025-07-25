@@ -75,6 +75,29 @@ export function addImageCacheBuster(
 }
 
 /**
+ * 處理圖片 URL，確保使用正確的 API 基礎 URL
+ * 
+ * 將相對路徑的圖片 URL 轉換為完整的 API URL
+ * 
+ * @param imageUrl - 原始圖片 URL
+ * @returns 處理後的圖片 URL
+ */
+export function processImageUrl(imageUrl: string | null | undefined): string | null {
+  if (!imageUrl) {
+    return null;
+  }
+
+  // 如果是相對路徑（以 /storage/ 開頭），則加上 API 基礎 URL
+  if (imageUrl.startsWith('/storage/')) {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    return `${apiBaseUrl}${imageUrl}`;
+  }
+
+  // 如果已經是完整 URL，直接返回
+  return imageUrl;
+}
+
+/**
  * 🎯 訂單狀態中文翻譯函數
  * 提供統一的狀態翻譯，確保整個系統的一致性
  */

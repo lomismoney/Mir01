@@ -37,7 +37,7 @@ import Image from "next/image";
 import { ProductItem } from "@/types/api-helpers";
 import { cn } from "@/lib/utils";
 import { MoneyHelper } from "@/lib/money-helper";
-import { addImageCacheBuster } from "@/lib/utils";
+import { addImageCacheBuster, processImageUrl } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 /**
@@ -325,7 +325,7 @@ export const columns: ColumnDef<ExpandedProductItem>[] = [
       // 由於不再展開變體，移除變體行顯示邏輯
 
       // SPU 主行顯示
-      const imageUrl = item.image_urls?.thumb || item.image_urls?.original;
+      const imageUrl = processImageUrl(item.image_urls?.thumb || item.image_urls?.original);
 
       return (
         <div className="flex items-center gap-4">
